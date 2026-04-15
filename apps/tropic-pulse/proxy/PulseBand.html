@@ -10,15 +10,15 @@
                user-scalable=no">
   <title>PulseBand Control Center</title>
 
-  <!-- Pulse OS Core -->
-<script type="module" src="https://tropicpulse.bz/proxy/PulseUpdate.js?v8"></script>
-<script type="module" src="https://tropicpulse.bz/proxy/PulseBand.js?v8"></script>
-<script type="module" src="https://tropicpulse.bz/proxy/PulseClient.js?v8"></script>
-<script type="module" src="https://tropicpulse.bz/proxy/PulseNet.js?v8"></script>
+ <!-- Pulse OS Core -->
+<script type="module" src="https://tropicpulse.bz/proxy/PulseUpdate.js"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseBand.js"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseClient.js"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseNet.js"></script>
 
 <!-- Backend Connector Layer -->
 <script type="module">
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/router.js";
+  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageRouter.js";
 </script>
 
   <style>
@@ -35,7 +35,7 @@
       justify-content: center;
       color: white;
       background: #000;
-      background-image: url('https://tropicpulse.bz/Mysterious.png?v8');
+      background-image: url('https://tropicpulse.bz/Mysterious.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;

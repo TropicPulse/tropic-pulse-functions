@@ -40,8 +40,6 @@
 // D  = BACKEND LOGIC FILES
 //      • Firestore Admin, Stripe, Email, etc.
 // ============================================================================
-
-
 // ------------------------------------------------------------
 // ⭐ GLOBAL ERROR INTERCEPTOR (A → A2)
 // Catches missing-field errors and forwards them to Router.js.
@@ -81,8 +79,6 @@ window.addEventListener("error", async (event) => {
   // Prevent page crash
   event.preventDefault();
 }, true);
-
-
 // ------------------------------------------------------------
 // ⭐ PARSER: Extract Firestore table + field from JS error
 // This file assumes:

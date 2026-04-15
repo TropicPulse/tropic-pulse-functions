@@ -27,32 +27,21 @@
 // 2. Call the backend function file (C)
 // 3. Return clean results back to the frontend
 // ------------------------------------------------------------
-async function callBackend(endpoint, payload = {}) {
-  const url = `/.netlify/functions/${endpoint}`;
+a// ============================================================================
+// FILE: apps/tropic-pulse/lib/Connectors/getAuth.js
+// LAYER: B‑LAYER (FRONTEND CONNECTOR)
+//
+// PURPOSE:
+// This connector is a PATHWAY. It does NOT call backend endpoints directly.
+// It ONLY forwards { type, payload } to router.js, which handles routing.
+// ============================================================================
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+import { route } from "./router.js";
 
-  return res.json();
-}
-
-
-// ------------------------------------------------------------
-// ⭐ AUTH CONNECTOR FUNCTIONS (B LAYER)
-// These are the ONLY functions the frontend is allowed to call.
-// ------------------------------------------------------------
-
-// A → B → C: Issue Firebase Auth Token
-export async function getFirebaseAuthToken(uid, resendToken) {
-  return callBackend("getFirebaseAuthToken", {
-    uid,
-    token: resendToken
-  });
-}
-
+// ⭐ REAL getAuth — forwards to routing system
+export const getAuth = (payload = {}) => {
+  return route("getAuth", payload);
+};
 
 // ------------------------------------------------------------
 // Add more AUTH connector functions here as needed.

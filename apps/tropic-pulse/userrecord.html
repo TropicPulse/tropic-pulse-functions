@@ -16,10 +16,10 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSX89KS63P"></script>
 
 <!-- Pulse OS Core -->
-<script type="module" src="https://tropicpulse.bz/proxy/PulseUpdate.js?v8"></script>
-<script type="module" src="https://tropicpulse.bz/proxy/PulseBand.js?v8"></script>
-<script type="module" src="https://tropicpulse.bz/proxy/PulseClient.js?v8"></script>
-<script type="module" src="https://tropicpulse.bz/proxy/PulseNet.js?v8"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseUpdate.js"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseBand.js"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseClient.js"></script>
+<script type="module" src="https://tropicpulse.bz/proxy/PulseNet.js"></script>
 
 <!-- Backend Connector Layer -->
 <script type="module">
@@ -79,7 +79,7 @@ document.addEventListener("contextmenu", function(e) {
   justify-content: center;
 
   background: #000;
-  background-image: url('https://tropicpulse.bz/Mysterious.png?v8');
+  background-image: url('https://tropicpulse.bz/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -867,7 +867,7 @@ body::before {
 </head>
 <body>
   <div id="t-loading">
-    <img src="https://tropicpulse.bz/ToucanLogo-Mini.png?v8" id="t-loading-logo" />
+    <img src="https://tropicpulse.bz/ToucanLogo-Mini.png" id="t-loading-logo" />
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -949,10 +949,10 @@ body::before {
   <div id="hero-backdrop-bottom"></div>
   <div class="profile-container">
     <div class="profile-header">
-      <img src="https://tropicpulse.bz/ToucanLogo-Mini.png?v8" class="auth-logo"/>
+      <img src="https://tropicpulse.bz/ToucanLogo-Mini.png" class="auth-logo"/>
     </div>
     <div class="profile">
-      <!-- <img src="https://tropicpulse.bz/ToucanLogo-Mini.png?v8" class="auth-logo" /> -->
+      <!-- <img src="https://tropicpulse.bz/ToucanLogo-Mini.png" class="auth-logo" /> -->
       <h1 class="title" id="pageTitle">User Profile</h1>
       <p class="subtitle" id="pageSubtitle">Create or Update your Tropic Pulse Account.</p>
 
@@ -1393,7 +1393,7 @@ photoInput.onchange = async (e) => {
     };
 
     img.onerror = () => {
-      img.src = "https://tropicpulse.bz/Frustrated.png?v8";
+      img.src = "https://tropicpulse.bz/Frustrated.png";
       img.style.display = "block";
     };
 
@@ -2003,7 +2003,7 @@ function loadFallbackPhoto() {
   // Determine the correct photo in priority order
   const photo =
     identity?.photoURL?.trim() ||
-    "https://tropicpulse.bz/Frustrated.png?v8";
+    "https://tropicpulse.bz/Frustrated.png";
     mark("USERRECORD: GRABBING PHOTO URL");
 
   if (photo) {

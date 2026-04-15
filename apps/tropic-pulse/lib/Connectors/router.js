@@ -37,8 +37,6 @@
 //     • Contain actual backend logic.
 //     • Connector NEVER contains business logic.
 // ============================================================================
-
-
 // ------------------------------------------------------------
 // ⭐ UNIVERSAL SYS‑CALL FUNCTION (A → B → C)
 // ------------------------------------------------------------
@@ -51,8 +49,6 @@ async function route(type, payload = {}) {
 
   return res.json();
 }
-
-
 // ------------------------------------------------------------
 // ⭐ CONNECTOR FUNCTIONS (B‑LAYER)
 // These are the ONLY functions frontend pages are allowed to call.
