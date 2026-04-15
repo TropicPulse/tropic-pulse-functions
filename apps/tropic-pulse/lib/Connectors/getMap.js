@@ -69,14 +69,28 @@
 // This connector is a PATHWAY. It does NOT call backend endpoints directly.
 // It ONLY forwards { type, payload } to router.js, which handles routing.
 // ============================================================================
+// ============================================================================
+// FILE: apps/tropic-pulse/lib/Connectors/getMap.js
+// LAYER: B‑LAYER (FRONTEND CONNECTOR)
+//
+// PURPOSE:
+// A clean, deterministic syscall from the frontend (A/A2 layer)
+// to the backend router (C layer). This file contains ZERO routing
+// logic. It ONLY forwards { hook, payload } to the backend router
+// located in /.netlify/functions/router.
+//
+// This file MUST remain browser-safe and contain no secrets.
+// ============================================================================
 
-import { route } from "./router.js";
-
-// ⭐ REAL getMap — forwards to routing system
-export const generateMap = (venue, businessID = null, eventID = null) => {
-  return route("getMap", {
-    venue,
-    businessID,
-    eventID
+export async function generateMap(venue, businessID = null, eventID = null) {
+  const res = await fetch("/.netlify/functions/router", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      hook: "getMap",
+      payload: { venue, businessID, eventID }
+    })
   });
-};
+
+  return await res.json();
+}

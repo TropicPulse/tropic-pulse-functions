@@ -35,15 +35,28 @@ a// ============================================================================
 // This connector is a PATHWAY. It does NOT call backend endpoints directly.
 // It ONLY forwards { type, payload } to router.js, which handles routing.
 // ============================================================================
+// ============================================================================
+// FILE: apps/tropic-pulse/lib/Connectors/getAuth.js
+// LAYER: B‑LAYER (FRONTEND CONNECTOR)
+//
+// PURPOSE:
+// A clean, deterministic syscall from the frontend (A/A2 layer)
+// to the backend router (C layer). This file contains ZERO routing
+// logic. It ONLY forwards { hook, payload } to the backend router
+// located in /.netlify/functions/router.
+//
+// This file MUST remain browser-safe and contain no secrets.
+// ============================================================================
 
-import { route } from "./router.js";
+export async function getAuth(payload = {}) {
+  const res = await fetch("/.netlify/functions/router", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      hook: "getAuth",
+      payload
+    })
+  });
 
-// ⭐ REAL getAuth — forwards to routing system
-export const getAuth = (payload = {}) => {
-  return route("getAuth", payload);
-};
-
-// ------------------------------------------------------------
-// Add more AUTH connector functions here as needed.
-// Each one maps to a backend file in /netlify/functions.
-// ------------------------------------------------------------
+  return await res.json();
+}

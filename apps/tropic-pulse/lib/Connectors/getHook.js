@@ -63,18 +63,23 @@
 // ------------------------------------------------------
 // getHook — Connector for Mass Email Webhook (B Layer)
 // ------------------------------------------------------
-// ============================================================================
 // FILE: apps/tropic-pulse/lib/Connectors/getHook.js
-// LAYER: B‑LAYER (FRONTEND CONNECTOR)
+// LAYER: B-LAYER (FRONTEND CONNECTOR)
 //
 // PURPOSE:
-// This connector is a PATHWAY. It does NOT call backend endpoints directly.
-// It ONLY forwards { type, payload } to router.js, which handles routing.
-// ============================================================================
+// A clean, deterministic syscall from the frontend (A/A2 layer)
+// to the backend router (C layer). This file contains ZERO routing
+// logic. It ONLY forwards { hook, payload } to the backend router
+// located in /.netlify/functions/router.
+//
+// This file MUST remain browser-safe and contain no secrets.
 
-import { route } from "./router.js";
+export async function getHook(hook, payload = {}) {
+  const res = await fetch("/.netlify/functions/router", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ hook, payload })
+  });
 
-// ⭐ REAL getHook — forwards to routing system
-export const getHook = (payload = {}) => {
-  return route("getHook", payload);
-};
+  return await res.json();
+}
