@@ -1,138 +1,118 @@
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPURuntime.js
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT.
+//
 // 📘 PAGE INDEX — Source of Truth for This File
 //
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as functions, responsibilities, and logic evolve.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Its responsibilities
-//   • Its exported classes/functions
-//   • Its internal logic summary
-//   • Allowed imports
-//   • Forbidden imports
-//   • Deployment rules
-//   • Safety constraints
-//
-// The PAGE INDEX + SUB‑COMMENTS allow full reconstruction of the file
-// without needing to paste the entire codebase. Keep summaries accurate.
-// The comments are the source of truth — if code and comments disagree,
-// the comments win.
-//
 // ROLE:
-//   The Pulse GPU Runtime — loads GPU‑ready packages from PulseGPUBrainExport,
-//   initializes GPU memory, creates buffers and shader modules, and exposes
-//   runtime‑level GPU operations for PulseGPUEngine.
+//   PulseGPURuntime — the GPU memory initializer + package loader for the
+//   Pulse GPU subsystem. It loads CPU‑side packages from PulseGPUBrainExport,
+//   initializes GPU buffers, creates shader modules, and exposes a clean,
+//   deterministic runtime API for PulseGPUEngine.
+//
+//   Conceptually, PulseGPURuntime is API‑agnostic (full GPU layer).
+//   This file is the WebGPU‑specific runtime backend.
 //
 //   This file IS:
 //     • A GPU memory initializer
 //     • A loader for Brain‑generated packages
-//     • A WebGPU context manager
+//     • A WebGPU context manager (one backend of the full GPU runtime)
 //     • The bridge between CPU‑side precompute (Brain) and GPU‑side execution (Engine)
 //
 //   This file IS NOT:
-//     • A renderer (that’s PulseGPUEngine)
-//     • A CPU‑side optimizer (that’s PulseGPUBrain)
+//     • A renderer (PulseGPUEngine handles that)
+//     • A CPU optimizer (PulseGPUBrain handles that)
 //     • A shader compiler (Brain handles compilation)
 //     • A backend module
 //     • A business logic module
 //
 // DEPLOYMENT:
-//   Lives in /apps/pulse-gpu as part of the GPU subsystem.
+//   Lives in /apps/pulse-gpu.
 //   Must run ONLY in browser environments with WebGPU support.
 //   Must remain ESM‑only and side‑effect‑free until init() is called.
 //
-// SYNTAX RULES:
-//   ESM JavaScript ONLY — no TypeScript, no CommonJS, no require().
-//   Named exports ONLY — no default exports.
+// SAFETY RULES:
+//   • NO backend APIs
+//   • NO DOM manipulation outside WebGPU canvas/context
+//   • NO Node.js APIs
+//   • NO randomness or timestamps in GPU initialization
+//   • NO mutation of Brain packages
+//   • ALWAYS check navigator.gpu before initializing
+//   • FAIL‑OPEN: if GPU or packages are unavailable, do not crash — just expose empty buffers/context
 //
-// IMPORT RULES:
-//   Allowed:
-//     • BrainInput, package classes, and PulseGPUBrainExport from PulseGPUBrain.js
-//
-//   Forbidden:
-//     • Node.js APIs
-//     • Firebase, Stripe, Twilio, or any backend modules
-//     • DOM manipulation outside WebGPU context
-//     • Any environment‑specific dependencies
-//
-// INTERNAL LOGIC SUMMARY:
-//   • PulseGPUContext:
-//       - Requests WebGPU adapter + device
-//       - Tracks readiness
-//
-//   • createGPUBuffer():
-//       - Creates mapped GPU buffers
-//       - Uploads raw binary data
-//
-//   • PulseGPURuntimeLoader:
-//       - Loads Brain packages
-//       - Initializes textures → GPU buffers
-//       - Initializes meshes → vertex + index buffers
-//       - Initializes shaders → GPU shader modules
-//       - Runs full initialization pipeline
-//
-//   • PulseGPURuntime:
-//       - Owns context + loader
-//       - Exposes runtime API to Engine:
-//           getTextures(), getMeshes(), getShaders(), getPackages()
-//
-// SAFETY NOTES:
-//   • Must NEVER run on backend — WebGPU is browser‑only
-//   • Must NEVER assume GPU availability — always check navigator.gpu
-//   • Must NEVER mutate Brain packages
-//   • Must ALWAYS initialize GPU before creating buffers
-//   • Must remain deterministic and side‑effect‑free outside init()
 // ------------------------------------------------------
-// Loads Brain packages → initializes GPU memory →
-// exposes runtime-level GPU operations for the Engine.
+// IMPORTS
 // ------------------------------------------------------
 
-import {
-  BrainInput,
-  PulseTexturePackage,
-  PulseMeshPackage,
-  PulseLightingPackage,
-  PulseAnimationPackage,
-  PulseShaderPackage,
-  PulseRenderPlanPackage,
-  PulseGPUBrainExport
-} from "./PulseGPUBrain.js";
+import { PulseGPUBrainExport } from "./PulseGPUBrain.js";
 
 // ------------------------------------------------------
-// GPU CONTEXT (placeholder for WebGPU / WebGL2 / native)
+// GPU CONTEXT WRAPPER (WEBGPU BACKEND)
 // ------------------------------------------------------
 
 class PulseGPUContext {
   constructor() {
-    this.device = null;
     this.adapter = null;
+    this.device = null;
+    this.context = null;
+    this.format = "bgra8unorm";
     this.ready = false;
   }
 
-  async init() {
+  async init(canvas) {
+    if (!canvas) {
+      console.warn("PulseGPUContext: canvas not provided; runtime will not initialize (fail-open).");
+      this.ready = false;
+      return;
+    }
+
     if (!navigator.gpu) {
-      console.warn("WebGPU not available.");
+      console.warn("PulseGPUContext: WebGPU not available in this environment (fail-open).");
+      this.ready = false;
       return;
     }
 
     this.adapter = await navigator.gpu.requestAdapter();
+    if (!this.adapter) {
+      console.warn("PulseGPUContext: WebGPU adapter unavailable (fail-open).");
+      this.ready = false;
+      return;
+    }
+
     this.device = await this.adapter.requestDevice();
+    if (!this.device) {
+      console.warn("PulseGPUContext: WebGPU device unavailable (fail-open).");
+      this.ready = false;
+      return;
+    }
+
+    const context = canvas.getContext("webgpu");
+    if (!context) {
+      console.warn("PulseGPUContext: unable to acquire WebGPU context from canvas (fail-open).");
+      this.ready = false;
+      return;
+    }
+
+    this.context = context;
+    this.format = navigator.gpu.getPreferredCanvasFormat();
+
+    this.context.configure({
+      device: this.device,
+      format: this.format,
+      alphaMode: "opaque"
+    });
+
     this.ready = true;
   }
 }
 
 // ------------------------------------------------------
-// BUFFER HELPERS
+// GPU BUFFER CREATION (DETERMINISTIC)
 // ------------------------------------------------------
 
 function createGPUBuffer(device, data, usage) {
+  if (!device || !data) return null;
+
   const buffer = device.createBuffer({
     size: data.byteLength,
     usage,
@@ -141,26 +121,33 @@ function createGPUBuffer(device, data, usage) {
 
   new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data));
   buffer.unmap();
+
   return buffer;
 }
 
 // ------------------------------------------------------
-// RUNTIME PACKAGE LOADER
+// RUNTIME LOADER — loads Brain packages → GPU buffers
 // ------------------------------------------------------
 
 class PulseGPURuntimeLoader {
   constructor(gpuContext) {
     this.gpu = gpuContext;
+
     this.packages = null;
 
     this.textureBuffers = [];
     this.meshBuffers = [];
-    this.animationBuffers = [];
     this.shaderModules = [];
   }
 
   loadPackages() {
-    this.packages = PulseGPUBrainExport.exportToRuntime();
+    const pkg = PulseGPUBrainExport.exportToRuntime();
+    if (!pkg) {
+      console.warn("PulseGPURuntimeLoader: no packageSet available from PulseGPUBrainExport (fail-open).");
+      this.packages = null;
+      return null;
+    }
+    this.packages = pkg;
     return this.packages;
   }
 
@@ -168,17 +155,20 @@ class PulseGPURuntimeLoader {
   // TEXTURES → GPU BUFFERS
   // ----------------------------------------------------
   initTextures() {
-    if (!this.packages?.textures) return;
+    if (!this.gpu.device) return;
+    const pkg = this.packages?.textures;
+    if (!pkg || !Array.isArray(pkg.optimizedTextures)) return;
 
-    const { optimizedTextures } = this.packages.textures;
-
-    optimizedTextures.forEach((tex) => {
+    pkg.optimizedTextures.forEach((tex) => {
+      if (!tex || !tex.data) return;
       const buffer = createGPUBuffer(
         this.gpu.device,
         tex.data,
         GPUBufferUsage.COPY_DST | GPUBufferUsage.TEXTURE_BINDING
       );
-      this.textureBuffers.push(buffer);
+      if (buffer) {
+        this.textureBuffers.push(buffer);
+      }
     });
   }
 
@@ -186,11 +176,13 @@ class PulseGPURuntimeLoader {
   // MESHES → GPU BUFFERS
   // ----------------------------------------------------
   initMeshes() {
-    if (!this.packages?.meshes) return;
+    if (!this.gpu.device) return;
+    const pkg = this.packages?.meshes;
+    if (!pkg || !Array.isArray(pkg.simplifiedMeshes)) return;
 
-    const { simplifiedMeshes } = this.packages.meshes;
+    pkg.simplifiedMeshes.forEach((mesh) => {
+      if (!mesh || !mesh.vertices || !mesh.indices) return;
 
-    simplifiedMeshes.forEach((mesh) => {
       const vertexBuffer = createGPUBuffer(
         this.gpu.device,
         mesh.vertices,
@@ -203,7 +195,13 @@ class PulseGPURuntimeLoader {
         GPUBufferUsage.INDEX
       );
 
-      this.meshBuffers.push({ vertexBuffer, indexBuffer });
+      if (vertexBuffer && indexBuffer) {
+        this.meshBuffers.push({
+          vertexBuffer,
+          indexBuffer,
+          indexCount: mesh.indices.byteLength / 4
+        });
+      }
     });
   }
 
@@ -211,11 +209,12 @@ class PulseGPURuntimeLoader {
   // SHADERS → GPU MODULES
   // ----------------------------------------------------
   initShaders() {
-    if (!this.packages?.shaders) return;
+    if (!this.gpu.device) return;
+    const pkg = this.packages?.shaders;
+    if (!pkg || !Array.isArray(pkg.compiledVariants)) return;
 
-    const { compiledVariants } = this.packages.shaders;
-
-    compiledVariants.forEach((shader) => {
+    pkg.compiledVariants.forEach((shader) => {
+      if (!shader || !shader.code) return;
       const module = this.gpu.device.createShaderModule({
         code: shader.code
       });
@@ -224,14 +223,24 @@ class PulseGPURuntimeLoader {
   }
 
   // ----------------------------------------------------
-  // FULL INITIALIZATION PIPELINE
-  // ----------------------------------------------------
-  async initialize() {
+  // FULL INITIALIZATION PIPELINE (FAIL-OPEN)
+// ----------------------------------------------------
+  async initialize(canvas) {
     if (!this.gpu.ready) {
-      await this.gpu.init();
+      await this.gpu.init(canvas);
+    }
+
+    if (!this.gpu.ready) {
+      // GPU not available; fail-open: no buffers, no crash.
+      return false;
     }
 
     this.loadPackages();
+    if (!this.packages) {
+      // No packages; still considered initialized, but with empty buffers.
+      return true;
+    }
+
     this.initTextures();
     this.initMeshes();
     this.initShaders();
@@ -241,7 +250,7 @@ class PulseGPURuntimeLoader {
 }
 
 // ------------------------------------------------------
-// RUNTIME API (what Engine uses)
+// RUNTIME API — used by PulseGPUEngine (WebGPU backend)
 // ------------------------------------------------------
 
 class PulseGPURuntime {
@@ -250,10 +259,22 @@ class PulseGPURuntime {
     this.loader = new PulseGPURuntimeLoader(this.context);
   }
 
-  async init() {
-    await this.loader.initialize();
+  async init(canvas) {
+    await this.loader.initialize(canvas);
   }
 
+  // v4-friendly GPU context accessor
+  getGPUContext() {
+    return {
+      adapter: this.context.adapter,
+      device: this.context.device,
+      context: this.context.context,
+      format: this.context.format,
+      ready: this.context.ready
+    };
+  }
+
+  // Legacy-style accessors
   getTextures() {
     return this.loader.textureBuffers;
   }
@@ -268,6 +289,15 @@ class PulseGPURuntime {
 
   getPackages() {
     return this.loader.packages;
+  }
+
+  // v4-style explicit package-based accessors
+  getMeshesFromPackages() {
+    return this.loader.meshBuffers;
+  }
+
+  getShadersFromPackages() {
+    return this.loader.shaderModules;
   }
 }
 

@@ -1,96 +1,54 @@
 // FILE: apps/pulse-proxy/PulseInstanceOrchestrator.js
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// PulseInstanceOrchestrator v5.1 — Deterministic, Drift‑Proof, Device‑Aware Scaling
+// WITH PERFORMANCE LOGGING + USER INSTANCE SNAPSHOTS
+// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
+//
+// ------------------------------------------------------
 // 📘 PAGE INDEX — Source of Truth for This File
-//
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as logic evolves.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Responsibilities
-//   • Exported functions
-//   • Internal logic summary
-//   • Allowed operations
-//   • Forbidden operations
-//   • Safety constraints
+// ------------------------------------------------------
 //
 // ROLE:
-//   PulseInstanceOrchestrator — the proxy-side supervisor that manages
-//   per-user worker instances based on UserScores.
+//   Proxy-side supervisor that manages per-user worker instances.
 //
-//   This module is responsible for:
-//     • Reading UserScores from Firestore
-//     • Determining how many workers each user should have
-//     • Launching workers (placeholder logic)
-//     • Killing workers when scaling down
-//     • Ensuring no duplicate workers
-//     • Maintaining lifecycle in memory
+// RESPONSIBILITIES:
+//   • Read UserScores
+//   • Apply device-aware + mode-aware scaling rules
+//   • Launch workers
+//   • Kill workers
+//   • Prevent duplicates
+//   • Maintain lifecycle
+//   • Log performance snapshots for admin dashboards
 //
-//   REAL‑WORLD CONTEXT (for future Aldwyn):
-//     • This file does NOT run compute.
-//     • This file does NOT run MinerRuntime.
-//     • This file does NOT run MinerEngine.
-//     • This file does NOT execute jobs.
-//     • This file does NOT talk to marketplaces.
-//     • This file ONLY manages proxy-side worker processes.
-//     • These workers are NOT compute workers — they are proxy workers.
-//     • This file is part of the Pulse Proxy, NOT Pulse Miner.
-//
-//   This file IS:
-//     • A supervisor
-//     • A lifecycle manager
-//     • A scaling controller
-//     • A duplicate-prevention system
-//
-//   This file IS NOT:
-//     • A compute engine
-//     • A job executor
-//     • A scheduler
-//     • A marketplace adapter
-//     • A reputation engine
-//     • A blockchain client
-//     • A wallet or token handler
-//
-// DEPLOYMENT:
-//   Lives in apps/pulse-proxy as part of the Pulse Proxy subsystem.
-//   Must run in Node.js (uses Firestore + timers).
-//   Must remain ESM-only and side-effect-free except for worker intervals.
-//
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO user-provided logic
-//   • NO compute execution
-//   • NO GPU work
+// SAFETY RULES:
+//   • NO compute
+//   • NO miner logic
 //   • NO marketplace calls
-//
-// INTERNAL LOGIC SUMMARY:
-//   • runInstanceOrchestrator():
-//       - Reads UserScores
-//       - For each user:
-//           - Ensures worker array exists
-//           - Scales up if needed
-//           - Scales down if needed
-//       - Returns true
-//
-//   • launchWorker():
-//       - Creates placeholder worker object
-//       - Starts heartbeat interval
-//
-//   • killWorker():
-//       - Clears interval
-//       - Removes worker
+//   • NO eval / dynamic imports
+//   • NO user-provided logic
 //
 // ------------------------------------------------------
-// PulseInstanceOrchestrator — Proxy Worker Supervisor
+// 🔧 CONFIGURABLE INSTANCE FORMULA VARIABLES (EDIT FREELY)
 // ------------------------------------------------------
 
+// Hard caps
+export const NORMAL_MAX = 4;
+export const UPGRADED_MAX = 8;
+export const HIGHEND_MAX = 8;
+export const TEST_EARN_MAX = 16;
+
+// Multipliers
+export const UPGRADED_MULT = 2;
+export const HIGHEND_MULT = 2;
+export const EARN_MODE_MULT = 1.5;
+
+// Logging controls
+export const ENABLE_INSTANCE_LOGGING = true;
+export const INSTANCE_LOG_COLLECTION = "UserInstanceLogs";
+
+// ------------------------------------------------------
+// Imports
+// ------------------------------------------------------
 import { getFirestore } from "firebase-admin/firestore";
 const db = getFirestore();
 
@@ -98,15 +56,63 @@ const db = getFirestore();
 const activeWorkers = new Map();
 
 // ------------------------------------------------------
-// Launch a worker (placeholder for your real worker logic)
+// Device tier → max instances
+// ------------------------------------------------------
+function getDeviceMax(deviceTier, testEarnActive) {
+  if (testEarnActive) return TEST_EARN_MAX;
+
+  switch (deviceTier) {
+    case "upgraded":
+      return UPGRADED_MAX;
+    case "highend":
+      return HIGHEND_MAX;
+    default:
+      return NORMAL_MAX;
+  }
+}
+
+// ------------------------------------------------------
+// Compute final instance count (FULLY DETERMINISTIC)
+// ------------------------------------------------------
+function computeFinalInstances(base, deviceTier, earnMode, testEarnActive) {
+  let final = base;
+
+  if (deviceTier === "upgraded") final *= UPGRADED_MULT;
+  if (deviceTier === "highend") final *= HIGHEND_MULT;
+
+  if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
+
+  if (testEarnActive) final = TEST_EARN_MAX;
+
+  const max = getDeviceMax(deviceTier, testEarnActive);
+  return Math.max(1, Math.min(final, max));
+}
+
+// ------------------------------------------------------
+// Log user instance performance snapshot
+// ------------------------------------------------------
+async function logUserInstanceSnapshot(userId, snapshot) {
+  if (!ENABLE_INSTANCE_LOGGING) return;
+
+  try {
+    await db.collection(INSTANCE_LOG_COLLECTION).add({
+      userId,
+      ts: Date.now(),
+      ...snapshot
+    });
+  } catch (err) {
+    console.error("[InstanceOrchestrator] Failed to log snapshot:", err);
+  }
+}
+
+// ------------------------------------------------------
+// Launch a worker
 // ------------------------------------------------------
 function launchWorker(userId, workerIndex) {
   const workerName = `${userId}-instance-${workerIndex}`;
-
   console.log(`Launching worker: ${workerName}`);
 
-  // Placeholder worker object
-  const worker = {
+  return {
     name: workerName,
     userId,
     index: workerIndex,
@@ -115,8 +121,6 @@ function launchWorker(userId, workerIndex) {
       console.log(`Worker ${workerName} heartbeat`);
     }, 5000)
   };
-
-  return worker;
 }
 
 // ------------------------------------------------------
@@ -135,7 +139,19 @@ export async function runInstanceOrchestrator() {
 
   for (const doc of snap.docs) {
     const userId = doc.id;
-    const { instances } = doc.data();
+    const data = doc.data();
+
+    const baseInstances = data.instances ?? 1;
+    const deviceTier = data.deviceTier ?? "normal";
+    const earnMode = data.earnMode ?? false;
+    const testEarnActive = data.testEarnActive ?? false;
+
+    const finalInstances = computeFinalInstances(
+      baseInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive
+    );
 
     if (!activeWorkers.has(userId)) {
       activeWorkers.set(userId, []);
@@ -143,11 +159,9 @@ export async function runInstanceOrchestrator() {
 
     const currentWorkers = activeWorkers.get(userId);
 
-    // ------------------------------------------------------
     // SCALE UP
-    // ------------------------------------------------------
-    if (currentWorkers.length < instances) {
-      const needed = instances - currentWorkers.length;
+    if (currentWorkers.length < finalInstances) {
+      const needed = finalInstances - currentWorkers.length;
 
       for (let i = 0; i < needed; i++) {
         const workerIndex = currentWorkers.length;
@@ -156,17 +170,28 @@ export async function runInstanceOrchestrator() {
       }
     }
 
-    // ------------------------------------------------------
     // SCALE DOWN
-    // ------------------------------------------------------
-    if (currentWorkers.length > instances) {
-      const extra = currentWorkers.length - instances;
+    if (currentWorkers.length > finalInstances) {
+      const extra = currentWorkers.length - finalInstances;
 
       for (let i = 0; i < extra; i++) {
         const worker = currentWorkers.pop();
         killWorker(worker);
       }
     }
+
+    // ------------------------------------------------------
+    // PERFORMANCE SNAPSHOT LOGGING
+    // ------------------------------------------------------
+    await logUserInstanceSnapshot(userId, {
+      baseInstances,
+      finalInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      currentWorkers: currentWorkers.length,
+      lastUpdated: Date.now()
+    });
   }
 
   return true;

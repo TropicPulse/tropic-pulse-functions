@@ -1,99 +1,55 @@
 // FILE: apps/pulse-proxy/PulseUserMetrics.js
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// PulseUserMetrics v5.2 — Deterministic, Drift‑Proof, Performance‑Aware Metrics Engine
+// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
+//
+// ------------------------------------------------------
 // 📘 PAGE INDEX — Source of Truth for This File
-//
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as metrics evolve.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Responsibilities
-//   • Exported functions
-//   • Internal logic summary
-//   • Allowed operations
-//   • Forbidden operations
-//   • Safety constraints
+// ------------------------------------------------------
 //
 // ROLE:
-//   PulseUserMetrics — the centralized metrics engine for Tropic Pulse.
-//   This module is responsible for:
-//     • Tracking user activity (requests, bytes, latency)
-//     • Tracking mesh behavior (relays, pings)
-//     • Tracking hub signals
-//     • Tracking stability
-//     • Producing trustScore, phase, hubFlag, instance allocation
+//   Centralized metrics engine for Tropic Pulse.
 //
-//   REAL‑WORLD CONTEXT (for future Aldwyn):
-//     • This file does NOT run compute.
-//     • This file does NOT select jobs.
-//     • This file does NOT supervise workers.
-//     • This file does NOT talk to marketplaces.
-//     • This file does NOT execute arbitrary code.
-//     • This file ONLY tracks behavior + computes trust.
+// RESPONSIBILITIES:
+//   • Track user activity (requests, bytes, latency)
+//   • Track mesh behavior (relays, pings)
+//   • Track hub signals
+//   • Track stability
+//   • Compute trustScore
+//   • Compute phase
+//   • Detect hub behavior
+//   • Allocate base instances
+//   • Log performance snapshots for admin dashboards
 //
-//   This file IS:
-//     • A metrics aggregator
-//     • A trust engine
-//     • A phase classifier
-//     • A hub detector
-//     • An instance allocator
-//
-//   This file IS NOT:
-//     • A scheduler
-//     • A compute engine
-//     • A runtime
-//     • A marketplace adapter
-//     • A blockchain client
-//     • A wallet or token handler
-//
-// DEPLOYMENT:
-//   Lives in apps/pulse-proxy as part of the Tropic Pulse proxy subsystem.
-//   Must run in Node.js (uses Firestore).
-//   Must remain ESM-only and side-effect-free.
-//
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO user-provided logic
-//   • NO compute execution
-//   • NO GPU work
+// SAFETY RULES:
+//   • NO compute
+//   • NO miner logic
 //   • NO marketplace calls
-//
-// INTERNAL LOGIC SUMMARY:
-//   • updateUserMetrics(userId, data):
-//       - Increments counters
-//       - Updates latency average
-//       - Tracks mesh + hub signals
-//       - Updates stability + timestamps
-//
-//   • calculateTrustScore(metrics):
-//       - Activity
-//       - Mesh contribution
-//       - Hub signals
-//       - Latency quality
-//       - Stability
-//
-//   • calculatePhase(trustScore):
-//       - 1 → 4 based on trust
-//
-//   • isHub(metrics):
-//       - Detects hub-like behavior
-//
-//   • allocateInstances(phase, hubFlag):
-//       - Normal users: 1 → 2
-//       - Hub users: 2 → 4
-//       - Hard cap: 4
+//   • NO eval / dynamic imports
+//   • NO user-provided logic
 //
 // ------------------------------------------------------
-// PulseUserMetrics — Centralized User Metrics Engine
+// 🔧 CONFIGURABLE INSTANCE FORMULA VARIABLES (EDIT FREELY)
 // ------------------------------------------------------
 
+// Hard caps
+export const NORMAL_MAX = 4;
+export const UPGRADED_MAX = 8;
+export const HIGHEND_MAX = 8;
+export const TEST_EARN_MAX = 16;
+
+// Multipliers
+export const UPGRADED_MULT = 2;
+export const HIGHEND_MULT = 2;
+export const EARN_MODE_MULT = 1.5;
+
+// Logging controls
+export const ENABLE_PERFORMANCE_LOGGING = true;
+export const PERFORMANCE_LOG_COLLECTION = "UserPerformanceLogs";
+
+// ------------------------------------------------------
+// Imports
+// ------------------------------------------------------
 import { getFirestore } from "firebase-admin/firestore";
 const db = getFirestore();
 
@@ -153,6 +109,25 @@ export async function updateUserMetrics(userId, data = {}) {
       { merge: true }
     );
   });
+
+  // ------------------------------------------------------
+  // PERFORMANCE SNAPSHOT LOGGING
+  // ------------------------------------------------------
+  if (ENABLE_PERFORMANCE_LOGGING) {
+    try {
+      await db.collection(PERFORMANCE_LOG_COLLECTION).add({
+        userId,
+        ts: Date.now(),
+        bytes: data.bytes ?? null,
+        durationMs: data.durationMs ?? null,
+        meshRelay: data.meshRelay ?? false,
+        meshPing: data.meshPing ?? false,
+        hubFlag: data.hubFlag ?? false
+      });
+    } catch (err) {
+      console.error("[PulseUserMetrics] Failed to log performance:", err);
+    }
+  }
 }
 
 // ------------------------------------------------------
@@ -205,17 +180,28 @@ export function isHub(metrics) {
 }
 
 // ------------------------------------------------------
-// allocateInstances() — NEW MODEL
+// allocateInstances() — v5 Device‑Aware Model
 // ------------------------------------------------------
-export function allocateInstances(phase, hubFlag) {
-  // Base allocation: 1 or 2
+export function allocateInstances(phase, hubFlag, deviceTier, earnMode, testEarnActive) {
   let base = phase >= 2 ? 2 : 1;
 
-  // Hub doubles allocation
-  if (hubFlag) {
-    base = base * 2;
-  }
+  if (hubFlag) base = base * 2;
 
-  // Hard cap
-  return Math.min(base, 4);
+  if (deviceTier === "upgraded") base *= UPGRADED_MULT;
+  if (deviceTier === "highend") base *= HIGHEND_MULT;
+
+  if (earnMode) base = Math.floor(base * EARN_MODE_MULT);
+
+  if (testEarnActive) base = TEST_EARN_MAX;
+
+  const max =
+    testEarnActive
+      ? TEST_EARN_MAX
+      : deviceTier === "upgraded"
+      ? UPGRADED_MAX
+      : deviceTier === "highend"
+      ? HIGHEND_MAX
+      : NORMAL_MAX;
+
+  return Math.max(1, Math.min(base, max));
 }

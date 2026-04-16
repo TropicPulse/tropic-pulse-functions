@@ -54,7 +54,7 @@
 // It is the law.
 //
 //
-⭐ The Pulse Miner Dependency Chain (Founder‑Level Summary)
+⭐ The Pulse Earn Dependency Chain (Founder‑Level Summary)
 1. Adapters → provide jobs
 If adapters break → no jobs enter the system.
 2. Orchestrator → selects jobs
@@ -78,7 +78,7 @@ If packet engine breaks → distributed packet compute collapses.
 Add this to your master rules exactly as written:
 If any subsystem in the chain fails, the proxy must fail open.
 The proxy must never block, stall, or degrade the user’s device.
-The proxy must always pass traffic through even if the entire miner stack is offline.
+The proxy must always pass traffic through even if the entire Earn stack is offline.
 
 This is the rule that protects:
 - user trust
@@ -104,7 +104,7 @@ Tropic-Pulse-Functions/
     ├── netlify/
     │   └── functions/
     │       ├── index.js                     ← Main backend entrypoint (being modularized)
-    │       ├── alerts-system-miner-failure.js
+    │       ├── alerts-system-Earn-failure.js
     │       ├── config.js
     │       ├── create-order-payment.js
     │       ├── create-payment.js
@@ -116,6 +116,7 @@ Tropic-Pulse-Functions/
     │       ├── helper.js
     │       ├── http.js
     │       ├── marketplaces.js
+                ENDPOINT.JS -----<<<<<
     │       ├── payout.js
     │       ├── resend-link.js
     │       ├── root-redirect.js
@@ -138,16 +139,16 @@ Tropic-Pulse-Functions/
     │   └── PulseGPURuntime.js
     │
     │
-    ├── pulse-miner/
+    ├── pulse-earn/
     │   ├── PacketEngine.js
     │   ├── WorkerExecution.js
     │   ├── ResultSubmission.js
     │   ├── PulseDeviceProfile.js
     │   ├── PulseJobSchema.js
     │   ├── PulseJobScoring.js
-    │   ├── MinerCompute.js
-    │   ├── MinerEngine.js
-    │   ├── MinerRuntime.js
+    │   ├── EarnCompute.js
+    │   ├── EarnEngine.js
+    │   ├── EarnRuntime.js
     │   ├── MarketplaceConnector.js
     │   ├── MarketplaceOrchestrator.js
     │   ├── MarketplaceReputation.js
@@ -172,15 +173,42 @@ Tropic-Pulse-Functions/
     │   └── server.js
     │
     │
-    └── tropic-pulse/                     ← FRONTEND (pure JS, browser-based)
-        ├── index.html
-        ├── styles.css
-        ├── admin/
-        ├── proxy/
-        ├── delivery/
-        ├── redirect/
-        └── (all other browser-only frontend pages)
+    │
+    ├── index.html
+    ├── styles.css
+    ├── admin/
+    ├── proxy/
+    ├── delivery/
+    ├── redirect/
+    └── (all other browser-only frontend pages)
 //
+
+// UPDATED
+/apps                     ← THIS IS THE TRUE ROOT
+   package.json           ← FRONTEND ROOT PACKAGE
+   index.html             ← FRONTEND ENTRY
+   src/                   ← FRONTEND CODE
+   dist/                  ← FRONTEND BUILD OUTPUT
+
+   /lib                   ← FRONTEND SYSTEM LIBRARIES
+      /Connectors
+         router.js        ← FRONTEND CONNECTOR (B‑Layer)
+         PageScanner.js   ← FRONTEND SCANNER (A2‑Layer)
+
+   /netlify
+      /functions          ← BACKEND ROOT
+         endpoint.js      ← BACKEND ROUTER (C‑Layer)
+         getMap.js        ← BACKEND LOGIC (D‑Layer)
+         getAuth.js       ← BACKEND LOGIC (D‑Layer)
+         getHook.js       ← BACKEND LOGIC (D‑Layer)
+         timer.js         ← BACKEND TIMER (OS ENGINE)
+1. PAGE
+2. PAGESCANNER
+3. ROUTER
+4. GETHOOK / GETAUTH / GETMAP
+5. ENDPOINT
+6. BACKEND PAGES (backend logic files)
+
 //
 //
 // ⭐ FULL SYSTEM INTENT (Proxy + Pulse‑GPU + Compute + Directory App)

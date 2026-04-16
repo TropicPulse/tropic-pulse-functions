@@ -1,163 +1,107 @@
-// PulseClient.js — PulseBand v3 Architecture
+/* ============================================================
+   PulseClient.js — PulseClient v6
+   Purpose: Thin fetch wrapper → PulseBand + PulseNet
+   Notes:
+     - No Earn / No Marketplace / No compute loop
+     - No physics polling (PulseBand handles warmup)
+     - No system info bloat
+     - No remember-me logic
+     - Just: fetch → measure → report → return
+   ============================================================ */
 
 const PULSE_PROXY_URL = "https://tropicpulse.bz";
 
-/* ---------------- System Info ---------------- */
-
-function getSystemInfo() {
-  const ua = navigator.userAgent || "";
+/* ------------------------------------------------------------
+   Basic metadata helpers
+------------------------------------------------------------ */
+function getDeviceInfo() {
   return {
-    ua,
+    ua: navigator.userAgent || "",
     platform: navigator.platform || "",
-    language: navigator.language || "",
-    deviceModel: detectDeviceModel(ua),
-    osVersion: detectOSVersion(ua),
-    appVersion: window.__APP_VERSION__ || "Unknown"
+    language: navigator.language || ""
   };
 }
 
-function detectDeviceModel(ua) {
-  if (ua.includes("S27")) return "Galaxy S27";
-  if (ua.includes("S26+")) return "Galaxy S26+";
-  if (ua.includes("S26 ")) return "Galaxy S26";
-  return "Unknown Device";
-}
-
-function detectOSVersion(ua) {
-  const m = ua.match(/Android\s([\d.]+)/i);
-  return m ? `Android ${m[1]}` : "Unknown OS";
-}
-
-/* ---------------- Remember Me ---------------- */
-
-function getRememberMeFlag() {
-  return localStorage.getItem("tp_stay_signed_v4") === "1";
-}
-
-/* ---------------- Logging ---------------- */
-
-window.__pulseLogs = window.__pulseLogs || [];
-
-function pushLog(evt) {
-  window.__pulseLogs.push(evt);
-  if (window.__pulseLogs.length > 200) window.__pulseLogs.shift();
-}
-
-/* ---------------- Proxy Fetch (v3) ---------------- */
-
-async function getViaProxy(url) {
-  const sys = getSystemInfo();
-  const rememberMe = getRememberMeFlag();
+/* ------------------------------------------------------------
+   Core fetch wrapper (v6)
+------------------------------------------------------------ */
+async function pulseFetch(url) {
+  const device = getDeviceInfo();
   const start = performance.now();
 
   try {
+    // Try Pulse route first
     const res = await fetch(
       `${PULSE_PROXY_URL}/TPProxy?url=${encodeURIComponent(url)}`,
       {
         method: "GET",
         headers: {
-          "x-pulse-device": JSON.stringify(sys),
-          "x-pulse-remember": rememberMe ? "1" : "0",
-          "x-pulse-user": window.identity?.uid || "anonymous"
+          "x-pulse-device": JSON.stringify(device)
         }
       }
     );
+
+    const durationMs = performance.now() - start;
 
     if (!res.ok) throw new Error("Pulse route failed: " + res.status);
 
     const contentType = res.headers.get("content-type") || "";
     const bytes = Number(res.headers.get("x-pulse-bytes") ?? "0");
-    const chunks = Number(res.headers.get("x-pulse-chunks") ?? "1");
-    const durationMs = performance.now() - start;
 
     let data;
     if (contentType.includes("application/json")) data = await res.json();
     else if (contentType.startsWith("text/")) data = await res.text();
     else data = await res.arrayBuffer();
 
-    const evt = {
-      ts: Date.now(),
-      type: "generic",
-      path: url,
-      route: "pulse",
-      bytes,
-      durationMs,
-      chunks,
-      system: sys,
-      rememberMe
-    };
+    // Report to PulseBand
+    window.pulseband?.setStatus({
+      snapshot: {
+        advantage: 1.0, // placeholder until v6.1 fetch metrics
+        timeSaved: 0
+      },
+      live: {
+        route: "Pulse",
+        lastSyncTimestamp: Date.now()
+      }
+    });
 
-    pushLog(evt);
-    return { data, meta: evt };
+    // Report to PulseNet
+    window.pulsenet?.updateSignalFromPulseBand(window.pulseband.getStatus());
+
+    return { data, meta: { route: "Pulse", bytes, durationMs } };
 
   } catch (err) {
-    // fallback
+    // Fallback to direct fetch
     const fbStart = performance.now();
     const fbRes = await fetch(url);
+    const fbDuration = performance.now() - fbStart;
+
     const contentType = fbRes.headers.get("content-type") || "";
+    const bytes = Number(fbRes.headers.get("content-length") ?? "0");
 
     let data;
     if (contentType.includes("application/json")) data = await fbRes.json();
     else if (contentType.startsWith("text/")) data = await fbRes.text();
     else data = await fbRes.arrayBuffer();
 
-    const durationMs = performance.now() - fbStart;
-    const bytes = Number(fbRes.headers.get("content-length") ?? "0");
-
-    const evt = {
-      ts: Date.now(),
-      type: "generic",
-      path: url,
-      route: "phone",
-      bytes,
-      durationMs,
-      chunks: 1,
-      system: sys,
-      rememberMe,
-      error: String(err?.message || err)
-    };
-
-    pushLog(evt);
-    return { data, meta: evt };
-  }
-}
-
-/* ---------------- LIVE PHYSICS ENGINE (v3) ---------------- */
-
-async function pollPulsePhysics() {
-  try {
-    const res = await fetch(`${PULSE_PROXY_URL}/ping`);
-    if (!res.ok) return;
-
-    const data = await res.json();
-
-    window.pulseband.setStatus({
+    // Report fallback to PulseBand
+    window.pulseband?.setStatus({
       live: {
-        latency: data.latency,
-        pulsebandBars: data.bars,
-        phoneBars: data.phoneBars,
-        route: data.route,
-        state: data.state,
-        microWindowActive: data.microWindowActive,
+        route: "Phone",
         lastSyncTimestamp: Date.now()
       }
     });
 
-    if (window.pulsenet) {
-      window.pulsenet.updateSignalFromPulseBand(
-        window.pulseband.getStatus().live
-      );
-    }
+    // Report to PulseNet
+    window.pulsenet?.updateSignalFromPulseBand(window.pulseband.getStatus());
 
-  } catch (err) {
-    console.log(err);
+    return { data, meta: { route: "Phone", bytes, durationMs: fbDuration } };
   }
 }
 
-setInterval(pollPulsePhysics, 1500);
-
-/* ---------------- Public API ---------------- */
-
+/* ------------------------------------------------------------
+   Public API
+------------------------------------------------------------ */
 window.PulseClient = {
-  get: getViaProxy
+  get: pulseFetch
 };

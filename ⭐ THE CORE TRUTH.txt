@@ -154,7 +154,7 @@ Because they’re already paying $80–$100 for worse service.
 And every one of these is cheaper than what they pay today —
 while giving them 10× more.
 
-⭐ The Pulse Miner Dependency Chain (Founder‑Level Summary)
+⭐ The Pulse Earn Dependency Chain (Founder‑Level Summary)
 1. Adapters → provide jobs
 If adapters break → no jobs enter the system.
 2. Orchestrator → selects jobs
@@ -178,7 +178,7 @@ If packet engine breaks → distributed packet compute collapses.
 Add this to your master rules exactly as written:
 If any subsystem in the chain fails, the proxy must fail open.
 The proxy must never block, stall, or degrade the user’s device.
-The proxy must always pass traffic through even if the entire miner stack is offline.
+The proxy must always pass traffic through even if the entire Earn stack is offline.
 
 This is the rule that protects:
 - user trust

@@ -1,6 +1,8 @@
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUBrain.js
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT;
+// if I am unsure of intent, I will ask you for the full INTENT paragraph.
+//
 // 📘 PAGE INDEX — Source of Truth for This File
 //
 // This PAGE INDEX defines the identity, purpose, boundaries, and allowed
@@ -12,39 +14,41 @@
 // CONTENTS TO MAINTAIN:
 //   • What this file IS
 //   • What this file IS NOT
-//   • Its responsibilities
-//   • Its exported classes/functions
-//   • Its internal logic summary
+//   • Responsibilities
+//   • Exported classes/functions
+//   • Internal logic summary
 //   • Allowed imports
 //   • Forbidden imports
 //   • Deployment rules
 //   • Safety constraints
 //
 // The PAGE INDEX + SUB‑COMMENTS allow full reconstruction of the file
-// without needing to paste the entire codebase. Keep summaries accurate.
-// The comments are the source of truth — if code and comments disagree,
-// the comments win.
+// without needing to paste the entire codebase. The comments are the source
+// of truth — if code and comments disagree, the comments win.
 //
 // ROLE:
-//   CPU‑side precomputation engine for the Pulse GPU subsystem.
+//   PulseGPUBrain — CPU‑side precomputation engine for the Pulse GPU subsystem.
 //   Responsible for transforming raw textures, meshes, animations, shaders,
-//   and scene data into optimized GPU‑ready packages.
+//   and scene data into optimized, GPU‑ready packages for the full PulseGPURuntime
+//   (API‑agnostic: DX/Vulkan/Metal/WebGPU/etc.).
 //
 //   This file IS:
 //     • A pure logic module
 //     • A deterministic precompute engine
-//     • The “Brain” that prepares optimized data for PulseGPURuntime
+//     • The “Brain” that prepares optimized data for PulseGPURuntime (full GPU, v4+)
+//     • A package builder for GPU‑ready assets, independent of any graphics API
 //
 //   This file IS NOT:
 //     • A renderer
 //     • A GPU runtime
 //     • A WebGPU/WebGL interface
 //     • A backend route or server function
-//     • Allowed to perform I/O, fetch(), or environment‑specific operations
+//     • A network client
+//     • A filesystem client
 //
 // DEPLOYMENT:
 //   Lives in /apps/pulse-gpu as part of the GPU subsystem.
-//   Must remain ESM‑only and side‑effect‑free.
+//   Must remain ESM‑only and side‑effect‑free (no global side effects).
 //   Must remain deterministic — same input → same output.
 //   Must remain compatible with both browser and server environments.
 //
@@ -63,8 +67,8 @@
 //     • Firebase, Stripe, Twilio, or any backend modules
 //     • Any environment‑specific dependencies
 //
-// INTERNAL LOGIC SUMMARY:
-//   • Defines package classes:
+// INTERNAL LOGIC SUMMARY (v4 schema):
+//   • Package classes:
 //       - PulseTexturePackage
 //       - PulseMeshPackage
 //       - PulseLightingPackage
@@ -72,42 +76,53 @@
 //       - PulseShaderPackage
 //       - PulseRenderPlanPackage
 //
-//   • Defines BrainInput — the raw asset container.
+//   • BrainInput — raw asset container:
+//       - schemaVersion (4)
+//       - rawTextures, rawMeshes, rawAnimations, rawShaders, rawScenes
+//       - usagePatterns, predictionHints
 //
-//   • Defines optimization pipelines:
-//       - TextureOptimizer
-//       - MeshOptimizer
-//       - LightingBaker
-//       - AnimationBaker
-//       - ShaderCompiler
-//       - RenderPlanner
+//   • Optimization pipelines (pure, synchronous):
+//       - TextureOptimizer.process(rawTextures)
+//       - MeshOptimizer.process(rawMeshes)
+//       - LightingBaker.process(rawScenes)
+//       - AnimationBaker.process(rawAnimations)
+//       - ShaderCompiler.process(rawShaders)
+//       - RenderPlanner.process(rawScenes, usagePatterns)
 //
-//   • Defines PulseGPUBrainController:
+//   • PulseGPUBrainController:
 //       - buildPackages(brainInput)
 //       - Runs all optimizers and returns a package set
 //
-//   • Defines PulseGPUBrainExport:
-//       - Stores the packageSet
-//       - Exports it to PulseGPURuntime
+//   • PulseGPUBrainExport:
+//       - Stores the packageSet in a static field
+//       - Exposes exportToRuntime() for PulseGPURuntime (full GPU)
 //
 // SAFETY NOTES:
-//   • Must NEVER mutate global state outside PulseGPUBrainExport.packageSet
 //   • Must NEVER perform async operations
-//   • Must NEVER depend on browser or GPU availability
+//   • Must NEVER mutate global state outside PulseGPUBrainExport.packageSet
+//   • Must NEVER depend on browser, GPU, or environment availability
 //   • Must ALWAYS return stable, predictable package structures
+//   • Must NOT use randomness or time‑based values inside optimizers
+//
 // ------------------------------------------------------
 // Precomputes textures, meshes, lighting, animation,
-// shaders, and render plans for Pulse GPU Runtime.
+// shaders, and render plans for the full Pulse GPU Runtime.
 // ------------------------------------------------------
 
 // ------------------------------------------------------
-// PACKAGE DEFINITIONS
+// GLOBAL SCHEMA VERSION (v4)
+// ------------------------------------------------------
+
+const PULSE_GPU_BRAIN_SCHEMA_VERSION = 4;
+
+// ------------------------------------------------------
+// PACKAGE DEFINITIONS (STRUCTURAL ONLY, NO SIDE EFFECTS)
 // ------------------------------------------------------
 
 class PulseTexturePackage {
   constructor({
-    id,
-    version,
+    id = "textures",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     optimizedTextures = [],
     mipmaps = [],
     atlasMaps = [],
@@ -118,14 +133,20 @@ class PulseTexturePackage {
     this.optimizedTextures = optimizedTextures;
     this.mipmaps = mipmaps;
     this.atlasMaps = atlasMaps;
-    this.metadata = metadata;
+    this.metadata = {
+    // v4: explicitly mark this as API‑agnostic, full‑GPU ready
+      layer: "PulseGPUBrain",
+      kind: "texture-package",
+      target: "full-gpu",
+      ...metadata
+    };
   }
 }
 
 class PulseMeshPackage {
   constructor({
-    id,
-    version,
+    id = "meshes",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     lods = [],
     simplifiedMeshes = [],
     clusters = [],
@@ -138,14 +159,19 @@ class PulseMeshPackage {
     this.simplifiedMeshes = simplifiedMeshes;
     this.clusters = clusters;
     this.indices = indices;
-    this.metadata = metadata;
+    this.metadata = {
+      layer: "PulseGPUBrain",
+      kind: "mesh-package",
+      target: "full-gpu",
+      ...metadata
+    };
   }
 }
 
 class PulseLightingPackage {
   constructor({
-    id,
-    version,
+    id = "lighting",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     bakedGI = null,
     bakedAO = null,
     shadowData = null,
@@ -158,14 +184,19 @@ class PulseLightingPackage {
     this.bakedAO = bakedAO;
     this.shadowData = shadowData;
     this.reflectionProbes = reflectionProbes;
-    this.metadata = metadata;
+    this.metadata = {
+      layer: "PulseGPUBrain",
+      kind: "lighting-package",
+      target: "full-gpu",
+      ...metadata
+    };
   }
 }
 
 class PulseAnimationPackage {
   constructor({
-    id,
-    version,
+    id = "animation",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     bakedFrames = [],
     transitions = [],
     skeletonData = null,
@@ -176,14 +207,19 @@ class PulseAnimationPackage {
     this.bakedFrames = bakedFrames;
     this.transitions = transitions;
     this.skeletonData = skeletonData;
-    this.metadata = metadata;
+    this.metadata = {
+      layer: "PulseGPUBrain",
+      kind: "animation-package",
+      target: "full-gpu",
+      ...metadata
+    };
   }
 }
 
 class PulseShaderPackage {
   constructor({
-    id,
-    version,
+    id = "shaders",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     compiledVariants = [],
     pipelineStates = [],
     metadata = {}
@@ -192,14 +228,19 @@ class PulseShaderPackage {
     this.version = version;
     this.compiledVariants = compiledVariants;
     this.pipelineStates = pipelineStates;
-    this.metadata = metadata;
+    this.metadata = {
+      layer: "PulseGPUBrain",
+      kind: "shader-package",
+      target: "full-gpu",
+      ...metadata
+    };
   }
 }
 
 class PulseRenderPlanPackage {
   constructor({
-    id,
-    version,
+    id = "render-plan",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     renderPasses = [],
     drawLists = [],
     materialBatches = [],
@@ -212,16 +253,22 @@ class PulseRenderPlanPackage {
     this.drawLists = drawLists;
     this.materialBatches = materialBatches;
     this.frameGraph = frameGraph;
-    this.metadata = metadata;
+    this.metadata = {
+      layer: "PulseGPUBrain",
+      kind: "render-plan-package",
+      target: "full-gpu",
+      ...metadata
+    };
   }
 }
 
 // ------------------------------------------------------
-// BRAIN INPUT
+// BRAIN INPUT (RAW ASSET CONTAINER)
 // ------------------------------------------------------
 
 class BrainInput {
   constructor({
+    schemaVersion = PULSE_GPU_BRAIN_SCHEMA_VERSION,
     rawTextures = [],
     rawMeshes = [],
     rawAnimations = [],
@@ -230,6 +277,7 @@ class BrainInput {
     usagePatterns = {},
     predictionHints = {}
   } = {}) {
+    this.schemaVersion = schemaVersion;
     this.rawTextures = rawTextures;
     this.rawMeshes = rawMeshes;
     this.rawAnimations = rawAnimations;
@@ -241,69 +289,89 @@ class BrainInput {
 }
 
 // ------------------------------------------------------
-// OPTIMIZATION PIPELINES
+// OPTIMIZATION PIPELINES (PURE, DETERMINISTIC)
 // ------------------------------------------------------
 
 class TextureOptimizer {
   static process(rawTextures) {
+    // Placeholder: pass-through; future: compression, atlas, mipmap planning.
     return new PulseTexturePackage({
-      id: "textures",
-      version: 1,
-      optimizedTextures: rawTextures
+      optimizedTextures: rawTextures,
+      metadata: {
+        schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+        sourceCount: rawTextures.length
+      }
     });
   }
 }
 
 class MeshOptimizer {
   static process(rawMeshes) {
+    // Placeholder: pass-through; future: LOD generation, clustering, index optimization.
     return new PulseMeshPackage({
-      id: "meshes",
-      version: 1,
-      simplifiedMeshes: rawMeshes
+      simplifiedMeshes: rawMeshes,
+      metadata: {
+        schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+        sourceCount: rawMeshes.length
+      }
     });
   }
 }
 
 class LightingBaker {
   static process(rawScenes) {
+    // Placeholder: no baked data yet; future: GI, AO, shadow maps, probes.
     return new PulseLightingPackage({
-      id: "lighting",
-      version: 1
+      metadata: {
+        schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+        sceneCount: rawScenes.length
+      }
     });
   }
 }
 
 class AnimationBaker {
   static process(rawAnimations) {
+    // Placeholder: pass-through; future: keyframe reduction, compression, retargeting.
     return new PulseAnimationPackage({
-      id: "animation",
-      version: 1,
-      bakedFrames: rawAnimations
+      bakedFrames: rawAnimations,
+      metadata: {
+        schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+        clipCount: rawAnimations.length
+      }
     });
   }
 }
 
 class ShaderCompiler {
   static process(rawShaders) {
+    // Placeholder: pass-through; future: variant compilation, pipeline layout planning.
     return new PulseShaderPackage({
-      id: "shaders",
-      version: 1,
-      compiledVariants: rawShaders
+      compiledVariants: rawShaders,
+      metadata: {
+        schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+        shaderCount: rawShaders.length
+      }
     });
   }
 }
 
 class RenderPlanner {
   static process(rawScenes, usagePatterns) {
+    // Placeholder: empty plan; future: frame graph, pass ordering, material batching.
     return new PulseRenderPlanPackage({
-      id: "render-plan",
-      version: 1
+      metadata: {
+        schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+        sceneCount: rawScenes.length,
+        hasUsagePatterns:
+          !!usagePatterns && Object.keys(usagePatterns).length > 0
+      }
     });
   }
 }
 
 // ------------------------------------------------------
-// BRAIN ORCHESTRATOR
+// BRAIN ORCHESTRATOR (PURE, SYNCHRONOUS)
 // ------------------------------------------------------
 
 class PulseGPUBrainController {
@@ -319,6 +387,8 @@ class PulseGPUBrainController {
     );
 
     return {
+      schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+      target: "full-gpu",
       textures,
       meshes,
       lighting,
@@ -330,7 +400,7 @@ class PulseGPUBrainController {
 }
 
 // ------------------------------------------------------
-// EXPORT CONTRACT
+// EXPORT CONTRACT (SINGLE PACKAGE SET HOLDER)
 // ------------------------------------------------------
 
 class PulseGPUBrainExport {
@@ -351,6 +421,7 @@ class PulseGPUBrainExport {
 // ------------------------------------------------------
 
 export {
+  PULSE_GPU_BRAIN_SCHEMA_VERSION,
   BrainInput,
   PulseTexturePackage,
   PulseMeshPackage,

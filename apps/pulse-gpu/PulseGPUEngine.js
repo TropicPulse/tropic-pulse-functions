@@ -1,44 +1,29 @@
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUEngine.js
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT;
+// if I am unsure of intent, I will ask you for the full INTENT paragraph.
+//
 // 📘 PAGE INDEX — Source of Truth for This File
 //
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as functions, responsibilities, and logic evolve.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Its responsibilities
-//   • Its exported classes/functions
-//   • Its internal logic summary
-//   • Allowed imports
-//   • Forbidden imports
-//   • Deployment rules
-//   • Safety constraints
-//
-// The PAGE INDEX + SUB‑COMMENTS allow full reconstruction of the file
-// without needing to paste the entire codebase. Keep summaries accurate.
-// The comments are the source of truth — if code and comments disagree,
-// the comments win.
-//
 // ROLE:
-//   The Pulse GPU Engine — consumes PulseGPURuntime, builds GPU pipelines,
-//   constructs render passes, and executes draw calls. This is the final
-//   stage of the Pulse GPU subsystem.
+//   PulseGPUEngine — final GPU execution layer for the Pulse GPU subsystem (v4).
+//   This file is the **WebGPU backend implementation** of the full Pulse‑GPU
+//   execution layer. It consumes PulseGPURuntime (full‑GPU, API‑agnostic),
+//   uses GPU‑ready packages (from PulseGPUBrain), builds WebGPU pipelines,
+//   constructs render passes, and issues draw calls.
+//
+//   Conceptually, PulseGPUEngine is API‑agnostic (DX/Vulkan/Metal/WebGPU/etc.).
+//   This file is the WebGPU‑specific engine implementation.
 //
 //   This file IS:
-//     • A frontend‑only WebGPU execution layer
+//     • A frontend‑only WebGPU execution layer (one backend of the full GPU engine)
 //     • A renderer that issues draw calls
-//     • A consumer of GPU‑ready packages from PulseGPURuntime
+//     • A consumer of GPU‑ready packages from PulseGPURuntime (full GPU)
 //
 //   This file IS NOT:
 //     • A backend module
 //     • A CPU‑side optimizer (that’s PulseGPUBrain)
-//     • A GPU memory manager (that’s PulseGPURuntime)
+//     • A GPU memory/logic orchestrator (that’s PulseGPURuntime)
 //     • A shader compiler (that’s PulseGPUBrain)
 //     • A business logic module
 //
@@ -58,56 +43,60 @@
 //   Forbidden:
 //     • Node.js APIs
 //     • Firebase, Stripe, Twilio, or any backend modules
-//     • DOM manipulation outside WebGPU context
-//     • Any environment‑specific dependencies
+//     • DOM manipulation outside WebGPU canvas/context
+//     • Any environment‑specific dependencies beyond WebGPU canvas/context
 //
-// INTERNAL LOGIC SUMMARY:
+// INTERNAL LOGIC SUMMARY (v4, WebGPU backend):
 //   • PulseRenderPassBuilder:
-//       - Builds basic render pass descriptors
+//       - Builds basic render pass descriptors using the current swapchain texture
 //
 //   • PulsePipelineBuilder:
 //       - Creates WebGPU render pipelines from shader modules
 //
 //   • PulseDrawExecutor:
-//       - Issues draw calls for meshes
-//       - Creates temporary render targets
+//       - Issues draw calls for meshes using provided pipelines
 //
-//   • PulseGPUEngine:
-//       - Initializes PulseGPURuntime
+//   • PulseGPUEngine (WebGPU):
+//       - Initializes PulseGPURuntime with a canvas
+//       - Asks runtime for GPU context + GPU‑ready mesh/shader packages
 //       - Builds pipelines from shader modules
 //       - Iterates meshes and draws them
 //       - Submits command buffers to GPU queue
+//       - Fails open: if anything is missing, it simply does not render, but never bricks the app
 //
 // SAFETY NOTES:
 //   • Must NEVER run on backend — WebGPU is browser‑only
-//   • Must NEVER assume device size — hardcoded textures are temporary
 //   • Must NEVER mutate runtime internals directly
 //   • Must ALWAYS check readiness before rendering
-//   • Must remain deterministic and side‑effect‑free outside init()
+//   • Must remain deterministic and side‑effect‑free outside init()/renderFrame()
+//   • On failure (no GPU, no context, no shaders/meshes), must fail open: no rendering, but no crash
+//
 // ------------------------------------------------------
-// Consumes PulseGPURuntime → builds pipelines →
-// executes render passes and draw calls.
+// Consumes PulseGPURuntime (full GPU) → builds WebGPU pipelines →
+// executes render passes and draw calls (WebGPU backend).
 // ------------------------------------------------------
 
-import {
-  PulseGPURuntime
-} from "./PulseGPURuntime.js";
+import { PulseGPURuntime } from "./PulseGPURuntime.js";
 
 // ------------------------------------------------------
 // RENDER PASS BUILDER
 // ------------------------------------------------------
 
 class PulseRenderPassBuilder {
-  constructor(device, context) {
+  constructor(device, context, format = "bgra8unorm") {
     this.device = device;
     this.context = context;
+    this.format = format;
   }
 
-  createBasicPass(colorTextureView) {
+  createBasicPassDescriptor() {
+    const currentTexture = this.context.getCurrentTexture();
+    const view = currentTexture.createView();
+
     return {
       colorAttachments: [
         {
-          view: colorTextureView,
+          view,
           clearValue: { r: 0, g: 0, b: 0, a: 1 },
           loadOp: "clear",
           storeOp: "store"
@@ -122,8 +111,9 @@ class PulseRenderPassBuilder {
 // ------------------------------------------------------
 
 class PulsePipelineBuilder {
-  constructor(device) {
+  constructor(device, colorFormat = "bgra8unorm") {
     this.device = device;
+    this.colorFormat = colorFormat;
   }
 
   createPipeline(shaderModule, vertexLayout) {
@@ -137,7 +127,7 @@ class PulsePipelineBuilder {
       fragment: {
         module: shaderModule,
         entryPoint: "fs_main",
-        targets: [{ format: "bgra8unorm" }]
+        targets: [{ format: this.colorFormat }]
       },
       primitive: {
         topology: "triangle-list"
@@ -151,44 +141,40 @@ class PulsePipelineBuilder {
 // ------------------------------------------------------
 
 class PulseDrawExecutor {
-  constructor(device) {
+  constructor(device, passBuilder) {
     this.device = device;
+    this.passBuilder = passBuilder;
   }
 
   drawMesh(encoder, pipeline, meshBuffers) {
-    const pass = encoder.beginRenderPass({
-      colorAttachments: [
-        {
-          view: this.device
-            .createTexture({
-              size: [800, 600],
-              format: "bgra8unorm",
-              usage: GPUTextureUsage.RENDER_ATTACHMENT
-            })
-            .createView(),
-          clearValue: { r: 0, g: 0, b: 0, a: 1 },
-          loadOp: "clear",
-          storeOp: "store"
-        }
-      ]
-    });
+    const passDesc = this.passBuilder.createBasicPassDescriptor();
+    const pass = encoder.beginRenderPass(passDesc);
 
     pass.setPipeline(pipeline);
     pass.setVertexBuffer(0, meshBuffers.vertexBuffer);
     pass.setIndexBuffer(meshBuffers.indexBuffer, "uint32");
-    pass.drawIndexed(meshBuffers.indexBuffer.size / 4);
+
+    const indexCount =
+      typeof meshBuffers.indexCount === "number"
+        ? meshBuffers.indexCount
+        : meshBuffers.indexBuffer.size / 4;
+
+    pass.drawIndexed(indexCount);
     pass.end();
   }
 }
 
 // ------------------------------------------------------
-// MAIN ENGINE
+// MAIN ENGINE (v4, WebGPU backend)
 // ------------------------------------------------------
 
 class PulseGPUEngine {
   constructor() {
     this.runtime = new PulseGPURuntime();
+
     this.device = null;
+    this.context = null;
+    this.colorFormat = "bgra8unorm";
 
     this.pipelineBuilder = null;
     this.passBuilder = null;
@@ -197,33 +183,77 @@ class PulseGPUEngine {
     this.ready = false;
   }
 
-  async init() {
-    await this.runtime.init();
+  // ----------------------------------------------------
+  // INITIALIZE RUNTIME + ENGINE (FAIL-OPEN)
+// ----------------------------------------------------
+  async init(canvas) {
+    // Canvas is required for WebGPU; if missing, fail open (no render, no crash).
+    if (!canvas) {
+      console.warn("PulseGPUEngine: canvas not provided; engine will not render (fail-open).");
+      this.ready = false;
+      return;
+    }
 
-    this.device = this.runtime.context.device;
+    // Runtime is responsible for:
+    //   - acquiring adapter/device
+    //   - configuring the canvas/context
+    //   - preparing GPU-ready packages from PulseGPUBrain
+    try {
+      await this.runtime.init(canvas);
+    } catch (err) {
+      console.warn("PulseGPUEngine: runtime init failed (fail-open).", err);
+      this.ready = false;
+      return;
+    }
 
-    this.pipelineBuilder = new PulsePipelineBuilder(this.device);
+    const gpuContext = this.runtime.getGPUContext
+      ? this.runtime.getGPUContext()
+      : this.runtime.context; // fallback for older shape
+
+    if (!gpuContext || !gpuContext.device || !gpuContext.context) {
+      console.warn("PulseGPUEngine: GPU context is not available (fail-open).");
+      this.ready = false;
+      return;
+    }
+
+    this.device = gpuContext.device;
+    this.context = gpuContext.context;
+    this.colorFormat = gpuContext.format || "bgra8unorm";
+
+    this.pipelineBuilder = new PulsePipelineBuilder(
+      this.device,
+      this.colorFormat
+    );
     this.passBuilder = new PulseRenderPassBuilder(
       this.device,
-      this.runtime.context
+      this.context,
+      this.colorFormat
     );
-    this.drawExecutor = new PulseDrawExecutor(this.device);
+    this.drawExecutor = new PulseDrawExecutor(this.device, this.passBuilder);
 
     this.ready = true;
   }
 
   // ----------------------------------------------------
-  // BUILD PIPELINES FROM SHADERS
-  // ----------------------------------------------------
+  // BUILD PIPELINES FROM SHADERS (GPU-ready packages)
+// ----------------------------------------------------
   buildPipelines() {
-    const shaders = this.runtime.getShaders();
+    const shaders =
+      this.runtime.getShadersFromPackages?.() || this.runtime.getShaders?.() || [];
+
+    if (!Array.isArray(shaders) || shaders.length === 0) {
+      return [];
+    }
+
     const pipelines = [];
 
     shaders.forEach((shaderModule) => {
       const pipeline = this.pipelineBuilder.createPipeline(shaderModule, [
         {
           arrayStride: 12,
-          attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }]
+          attributes: [
+            { shaderLocation: 0, offset: 0, format: "float32x3" }
+          ]
         }
       ]);
 
@@ -234,17 +264,20 @@ class PulseGPUEngine {
   }
 
   // ----------------------------------------------------
-  // RENDER A FRAME
-  // ----------------------------------------------------
+  // RENDER A FRAME (FAIL-OPEN)
+// ----------------------------------------------------
   renderFrame() {
     if (!this.ready) return;
 
-    const meshes = this.runtime.getMeshes();
-    const shaders = this.runtime.getShaders();
+    const meshes =
+      this.runtime.getMeshesFromPackages?.() || this.runtime.getMeshes?.() || [];
+    const shaders =
+      this.runtime.getShadersFromPackages?.() || this.runtime.getShaders?.() || [];
 
     if (!meshes.length || !shaders.length) return;
 
     const pipelines = this.buildPipelines();
+    if (!pipelines.length) return;
 
     const encoder = this.device.createCommandEncoder();
 

@@ -1,94 +1,118 @@
-// FILE: tropic-pulse-functions/netlify/lib/env.js
-//
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
-// 📘 PAGE INDEX — Source of Truth for This File
-//
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as functions, responsibilities, and logic evolve.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Its responsibilities
-//   • Its exported functions
-//   • Its internal logic summary
-//   • Allowed imports
-//   • Forbidden imports
-//   • Deployment rules
-//   • Safety constraints
-//
-// The PAGE INDEX + SUB‑COMMENTS allow full reconstruction of the file
-// without needing to paste the entire codebase. Keep summaries accurate.
-// The comments are the source of truth — if code and comments disagree,
-// the comments win.
-//
-// ROLE:
-//   Centralized environment variable loader for Tropic Pulse.
-//   Provides access to both secrets (private) and public configuration
-//   values used across Netlify functions. This file is LOGIC‑ONLY —
-//   it must NOT contain Netlify handlers. Safe to import anywhere.
-//
-// DEPLOYMENT:
-//   PRIMARY HOST: Netlify (all backend execution runs here)
-//   BACKUP HOSTS: Cloudflare + Firebase Hosting (static/CDN only)
-//   Firebase Functions = deprecated — do NOT add new Firebase Functions code
-//
-// ENVIRONMENT RULES:
-//   - All secrets MUST be stored in Netlify Environment Variables
-//   - All public config values MUST be stored as non‑secret env vars
-//   - No hard‑coded secrets allowed
-//   - No default fallbacks for secrets (must fail loudly if missing)
-//
-// SYNTAX RULES:
-//   ESM JavaScript ONLY — no TypeScript, no CommonJS, no require()
-//   ALWAYS use named exports (`export const ...`)
-//   NEVER use default exports
-//
-// IMPORT RULES:
-//   Only import modules that ALREADY exist in the repo
-//   This module must remain dependency‑free (no imports allowed)
-//   Do NOT assume new files or dependencies unless Aldwyn explicitly approves
-//
-// STRUCTURE:
-//   Lives in /netlify/lib (shared logic folder)
-//   This file is a pure environment loader — no initialization, no handlers
-//
-// DEPENDENCY RULES:
-//   Must remain deterministic and side‑effect‑free
-//   Must NOT mutate environment variables
-//   Must NOT introduce runtime logic beyond simple exports
-//
-// SAFETY NOTES:
-//   Secrets must NEVER be logged
-//   Public env vars are safe for frontend consumption
-//   VAULT_PATCH_TWILIGHT is a static metadata object — do not modify
+import { onRequest, onCall } from "firebase-functions/v2/https";
+import { onDocumentWritten, onDocumentWrittenWithAuthContext } from "firebase-functions/v2/firestore";
+import nodemailer from "nodemailer";
+import { defineSecret } from "firebase-functions/params";
+import admin from "firebase-admin";
+import Stripe from "stripe";
+import * as logger from "firebase-functions/logger";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import fetch from "node-fetch";
+//import { Readable } from "node:stream";
+import cors from "cors";
+import express from "express";
+import twilio from "twilio";
+import jwt from "jsonwebtoken";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import sharp from "sharp";
+import { fileURLToPath } from "url";
+// Marketplace adapters (inside /pulse-earn/marketplaces/)
+// import { marketplaceA } from "../pulse-earn/marketplaces/marketplaceA.js";
+// import { marketplaceB } from "../pulse-earn/marketplaces/marketplaceB.js";
+// import { marketplaceC } from "../pulse-earn/marketplaces/marketplaceC.js";
 
-// 🔐 Secrets (formerly defineSecret)
-export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
-export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-export const JWT_SECRET = process.env.JWT_SECRET;
+// // Remote scoring (ESM only)
+// import { runUserScoring } from "../pulse-proxy/PulseUserScoring.js";
 
-export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_SECRET_WEBHOOK;
-export const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID;
-export const ACCOUNT_SID = process.env.ACCOUNT_SID;
-export const AUTH_TOKEN = process.env.AUTH_TOKEN;
+// // Reputation loader (inside /pulse-earn/)
+// import { loadMarketplaceReputation } from "../pulse-earn/MarketplaceReputation.js";
 
-// 🌐 Cloud Run / Public env vars
-export const TP_API_KEY = process.env.TP_API_KEY;
-export const BASE_PAYMENT_URL = process.env.BASE_PAYMENT_URL;
-export const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_KEY;
-export const PLACEHOLDER_IMAGE_URL = process.env.PLACEHOLDER_IMAGE_URL;
+// // Connector (inside /pulse-earn/)
+// import { getNextJob } from "../pulse-earn/MarketplaceConnector.js";
 
-// 🛡️ Vault Patch (unchanged)
+// // Example: capacity for ONE worker instance
+// const capacity = {
+//   cpuAvailable: 2,
+//   memoryAvailable: 2048
+// };
+
+// // Example: your marketplace clients (you will implement these)
+// const marketplaces = [
+//   marketplaceA,
+//   marketplaceB,
+//   marketplaceC
+// ];
+
+// async function schedulerTick() {
+//   const job = await getNextJob(marketplaces, capacity);
+
+//   if (!job) {
+//     console.log("No jobs available right now.");
+//     return;
+//   }
+
+//   console.log("Selected job:", job);
+
+//   // TODO: hand this job to your worker execution layer
+// }
+
+// schedulerTick();
+
+// loadMarketplaceReputation();
+
 export const VAULT_PATCH_TWILIGHT = {
   signature: "Twilight",
-  invoked: "2026-04-07T04:00:00-07:00",
+  invoked: "2026-04-07T04:00:00-07:00", // 4 AM MST
   version: 2,
   type: "security-data-integrity",
   glyph: "🌒",
   description: "The first protective veil cast by the Vault Spirit during a 4 AM development session.",
   note: "Named 'Twilight' because it was created in the quiet hours before dawn."
 };
+
+function pulseCors(req, res, next) {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Pulse-Device, X-Pulse-Remember");
+  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
+
+  next();
+}
+const EMAIL_PASSWORD = defineSecret("EMAIL_PASSWORD");
+const STRIPE_PASSWORD = defineSecret("STRIPE_SECRET_KEY");
+const JWT_SECRET = defineSecret("JWT_SECRET");
+// CLOUD RUN ENVIRONMENTS
+const TP_API_KEY = process.env.TP_API_KEY;
+const BASE_PAYMENT_URL = process.env.BASE_PAYMENT_URL;
+const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_KEY;
+const PLACEHOLDER_IMAGE_URL = process.env.PLACEHOLDER_IMAGE_URL;
+
+const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_SECRET_WEBHOOK");
+const MESSAGING_SERVICE_SID = defineSecret("MESSAGING_SERVICE_SID");
+const ACCOUNT_SID = defineSecret("ACCOUNT_SID");
+const AUTH_TOKEN = defineSecret("AUTH_TOKEN");
+
+// CONFIG
+const PIN_COLLECTION = "Users";
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 5;
+const PIN_TTL_MS = MAX_REQUESTS_PER_WINDOW * RATE_LIMIT_WINDOW_MS; // 5 minutes
+
+const corsHandler = pulseCors;
+
+
+
+// Initialize Firebase ONCE
+admin.initializeApp();
+const db = admin.firestore();
+const storage = admin.storage().bucket();
+const app = express();
+
+let stripeInstance = null;
+
+const __filename = fileURLToPath(import.meta.url);

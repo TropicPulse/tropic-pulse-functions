@@ -1,106 +1,52 @@
 // FILE: apps/pulse-proxy/PulseUserScoring.js
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// PulseUserScoring v5.3 — Deterministic, Drift‑Proof, Device‑Aware Batch Scoring
+// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
+//
+// ------------------------------------------------------
 // 📘 PAGE INDEX — Source of Truth for This File
-//
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as scoring logic evolves.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Responsibilities
-//   • Exported functions
-//   • Internal logic summary
-//   • Allowed operations
-//   • Forbidden operations
-//   • Safety constraints
+// ------------------------------------------------------
 //
 // ROLE:
-//   PulseUserScoring — the batch scoring engine that reads UserMetrics and
-//   produces UserScores. This is the authoritative scoring pipeline for:
+//   Batch scoring engine that transforms UserMetrics → UserScores.
 //
-//     • trustScore
-//     • meshScore
-//     • phase
-//     • hubFlag
-//     • instance allocation
+// RESPONSIBILITIES:
+//   • Compute trustScore
+//   • Compute meshScore
+//   • Compute phase
+//   • Detect hub behavior
+//   • Allocate instances (device-aware, earn-mode-aware, test-earn-aware)
+//   • Log scoring snapshots (optional)
 //
-//   REAL‑WORLD CONTEXT (for future Aldwyn):
-//     • This file does NOT track metrics (PulseUserMetrics does).
-//     • This file does NOT run compute.
-//     • This file does NOT supervise workers.
-//     • This file does NOT talk to marketplaces.
-//     • This file does NOT execute arbitrary code.
-//     • This file ONLY transforms metrics → scores.
-//
-//   This file IS:
-//     • A batch scoring engine
-//     • A trust calculator
-//     • A mesh calculator
-//     • A phase classifier
-//     • A hub detector
-//     • An instance allocator
-//
-//   This file IS NOT:
-//     • A scheduler
-//     • A compute engine
-//     • A runtime
-//     • A marketplace adapter
-//     • A blockchain client
-//     • A wallet or token handler
-//
-// DEPLOYMENT:
-//   Lives in apps/pulse-proxy as part of the Tropic Pulse proxy subsystem.
-//   Must run in Node.js (uses Firestore).
-//   Must remain ESM-only and side-effect-free.
-//
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO user-provided logic
-//   • NO compute execution
-//   • NO GPU work
+// SAFETY RULES:
+//   • NO compute
+//   • NO miner logic
 //   • NO marketplace calls
-//
-// INTERNAL LOGIC SUMMARY:
-//   • calculateTrustScore(m):
-//       - Activity
-//       - Mesh contribution
-//       - Hub signals
-//       - Latency quality
-//       - Stability
-//
-//   • calculateMeshScore(m):
-//       - Relays
-//       - Pings
-//       - Hub signals
-//       - Latency quality
-//
-//   • calculatePhase(trustScore):
-//       - 1 → 4 based on trust
-//
-//   • isHub(m):
-//       - Detects hub-like behavior
-//
-//   • allocateInstances(phase, hubFlag):
-//       - Normal users: 1 → 2
-//       - Hub users: 2 → 4
-//       - Hard cap: 4
-//
-//   • runUserScoring():
-//       - Reads UserMetrics
-//       - Computes all scores
-//       - Writes UserScores in batch
+//   • NO eval / dynamic imports
+//   • NO user-provided logic
 //
 // ------------------------------------------------------
-// PulseUserScoring — Batch Scoring Engine
+// 🔧 CONFIGURABLE INSTANCE FORMULA VARIABLES (EDIT FREELY)
 // ------------------------------------------------------
 
+// Hard caps
+export const NORMAL_MAX = 4;
+export const UPGRADED_MAX = 8;
+export const HIGHEND_MAX = 8;
+export const TEST_EARN_MAX = 16;
+
+// Multipliers
+export const UPGRADED_MULT = 2;
+export const HIGHEND_MULT = 2;
+export const EARN_MODE_MULT = 1.5;
+
+// Logging controls
+export const ENABLE_SCORING_LOGGING = true;
+export const SCORING_LOG_COLLECTION = "UserScoringLogs";
+
+// ------------------------------------------------------
+// Imports
+// ------------------------------------------------------
 import { getFirestore } from "firebase-admin/firestore";
 const db = getFirestore();
 
@@ -177,19 +123,47 @@ function isHub(m) {
 }
 
 // ------------------------------------------------------
-// allocateInstances() — NEW MODEL
+// allocateInstances() — v5 Unified Device‑Aware Model
 // ------------------------------------------------------
-function allocateInstances(phase, hubFlag) {
-  // Base allocation: 1 or 2
+function allocateInstances(phase, hubFlag, deviceTier, earnMode, testEarnActive) {
   let base = phase >= 2 ? 2 : 1;
 
-  // Hub doubles allocation
-  if (hubFlag) {
-    base = base * 2;
-  }
+  if (hubFlag) base = base * 2;
 
-  // Hard cap
-  return Math.min(base, 4);
+  if (deviceTier === "upgraded") base *= UPGRADED_MULT;
+  if (deviceTier === "highend") base *= HIGHEND_MULT;
+
+  if (earnMode) base = Math.floor(base * EARN_MODE_MULT);
+
+  if (testEarnActive) base = TEST_EARN_MAX;
+
+  const max =
+    testEarnActive
+      ? TEST_EARN_MAX
+      : deviceTier === "upgraded"
+      ? UPGRADED_MAX
+      : deviceTier === "highend"
+      ? HIGHEND_MAX
+      : NORMAL_MAX;
+
+  return Math.max(1, Math.min(base, max));
+}
+
+// ------------------------------------------------------
+// logScoringSnapshot()
+// ------------------------------------------------------
+async function logScoringSnapshot(userId, snapshot) {
+  if (!ENABLE_SCORING_LOGGING) return;
+
+  try {
+    await db.collection(SCORING_LOG_COLLECTION).add({
+      userId,
+      ts: Date.now(),
+      ...snapshot
+    });
+  } catch (err) {
+    console.error("[PulseUserScoring] Failed to log scoring snapshot:", err);
+  }
 }
 
 // ------------------------------------------------------
@@ -199,14 +173,26 @@ export async function runUserScoring() {
   const snap = await db.collection("UserMetrics").get();
   const batch = db.batch();
 
-  snap.forEach((doc) => {
+  for (const doc of snap.docs) {
     const m = doc.data();
 
     const trustScore = calculateTrustScore(m);
     const meshScore = calculateMeshScore(m);
     const phase = calculatePhase(trustScore);
     const hubFlag = isHub(m);
-    const instances = allocateInstances(phase, hubFlag);
+
+    // NEW v5 fields
+    const deviceTier = m.deviceTier ?? "normal";
+    const earnMode = m.earnMode ?? false;
+    const testEarnActive = m.testEarnActive ?? false;
+
+    const instances = allocateInstances(
+      phase,
+      hubFlag,
+      deviceTier,
+      earnMode,
+      testEarnActive
+    );
 
     const ref = db.collection("UserScores").doc(doc.id);
 
@@ -218,12 +204,29 @@ export async function runUserScoring() {
         meshScore,
         phase,
         hub: hubFlag,
+        deviceTier,
+        earnMode,
+        testEarnActive,
         instances,
         lastUpdated: Date.now()
       },
       { merge: true }
     );
-  });
+
+    // ------------------------------------------------------
+    // LOG SCORING SNAPSHOT
+    // ------------------------------------------------------
+    await logScoringSnapshot(doc.id, {
+      trustScore,
+      meshScore,
+      phase,
+      hubFlag,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      instances
+    });
+  }
 
   await batch.commit();
 }

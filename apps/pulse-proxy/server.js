@@ -1,10 +1,9 @@
 // ======================================================
-//  PULSE ENGINE — SERVER.JS (UNIFIED V3 BUILD)
-//  MASTER PAGE INDEX — ROOT OF BACKEND ARCHITECTURE
+//  PULSE ENGINE — SERVER.JS (UNIFIED V5 HEALING BUILD)
+//  MASTER PAGE INDEX — ROOT OF BACKEND + OS ARCHITECTURE
 // ======================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
-//  WHAT THIS FILE IS:
+// WHAT THIS FILE IS:
 //  -------------------
 //  • The ROOT of the entire Pulse backend.
 //  • The entrypoint for the Tropic Pulse Proxy.
@@ -17,12 +16,19 @@
 //  • The system that handles email alerts.
 //  • The system that sets identity + version headers.
 //  • The system that protects the user by FAILING OPEN.
+//  • The system that exposes healing metadata for PulseProxyHealer.
 //
-//  WHAT THIS FILE IS NOT:
+//  • The system that boots the Pulse‑OS layer:
+//        - PulseOS (global supervisor)
+//        - PulseOSHealer (OS-level drift detector)
+//        - GlobalHealer (system-wide healer)
+//        - Midnight Timer (compiler input generator)
+//
+// WHAT THIS FILE IS NOT:
 //  -----------------------
 //  • NOT a compute engine.
-//  • NOT a miner engine.
-//  • NOT a miner runtime.
+//  • NOT a Earn engine.
+//  • NOT a Earn runtime.
 //  • NOT a job orchestrator.
 //  • NOT a marketplace adapter.
 //  • NOT a scoring engine.
@@ -33,116 +39,49 @@
 //  • NOT a place for arbitrary code execution.
 //  • NOT a place for business logic that belongs in subsystems.
 //
-//  ROLE IN THE ARCHITECTURE:
-//  --------------------------
-//  This file is the ROOT NODE of the backend dependency tree.
-//  Every subsystem above it depends on this file functioning:
+// DESIGN LAW FOR THIS FILE:
+//  -------------------------
+//  “If any subsystem fails, the proxy must fail OPEN.
+//   The proxy must never block, stall, or degrade the user’s device.
+//   The proxy must always pass traffic through even if the entire Earn
+//   stack is offline.”
 //
-//      Pulse Engine (server.js)
-//          ↓
-//      Pulse Proxy
-//          ↓
-//      Pulse User Metrics
-//          ↓
-//      Pulse User Scoring
-//          ↓
-//      Pulse Instance Orchestrator
-//          ↓
-//      Pulse Miner Engine
-//          ↓
-//      Pulse Miner Runtime
-//          ↓
-//      Pulse Compute
-//          ↓
-//      Packet Engine
-//
-//  If THIS file breaks → the entire backend stack collapses.
-//  If THIS file stalls → the proxy stalls.
-//  If THIS file blocks → the user experience breaks.
-//  If THIS file misroutes → the trust system collapses.
-//
-//  Therefore:
-//  THIS FILE MUST ALWAYS FAIL OPEN.
-//  THIS FILE MUST ALWAYS RETURN A RESPONSE.
-//  THIS FILE MUST NEVER BLOCK USER TRAFFIC.
-//  THIS FILE MUST NEVER EXECUTE ARBITRARY CODE.
-//  THIS FILE MUST NEVER BECOME A POINT OF FAILURE.
-//
-//
-//  SAFETY CONTRACT:
+// SAFETY CONTRACT:
 //  ----------------
 //  • Always fail OPEN — never block user traffic.
 //  • Never run user-provided scripts.
 //  • Never eval, Function(), or dynamic import.
 //  • Never perform compute here — delegate to subsystems.
 //  • Never mutate global state except logs + metrics.
-//  • Never assume miner availability — proxy must stand alone.
+//  • Never assume Earn availability — proxy must stand alone.
 //  • Never assume Redis availability — fail open.
 //  • Never assume Firestore availability — fail open.
 //  • Never assume packet engine availability — fail open.
 //  • Never assume email availability — fail silently.
 //
-//
-//  OPERATIONAL RESPONSIBILITIES:
-//  -----------------------------
-//  • Express server initialization.
-//  • Identity headers (node, region, version).
-//  • Rate limiting (Redis-backed, fail-open).
-//  • Logging (in-memory ring buffer).
-//  • User metrics (lightweight, non-blocking).
-//  • Admin endpoints (UserScores, logs).
-//  • Universal proxy endpoint (/TPProxy).
-//  • Warm connection logic.
-//  • Chunking utilities.
-//  • Email alert system (non-blocking).
-//  • PacketEngine passthrough (safe).
-//
-//  THIS FILE MUST NEVER:
-//  ----------------------
-//  • Perform job scoring.
-//  • Perform job selection.
-//  • Perform job execution.
-//  • Perform GPU work.
-//  • Perform miner orchestration.
-//  • Perform trust scoring.
-//  • Perform instance allocation.
-//  • Perform marketplace communication.
-//  • Perform compute of any kind.
-//
-//
-//  FUTURE-YOU WARNING (CRITICAL):
-//  ------------------------------
-//  Five months from now, when something breaks:
-//
-//    • If the proxy is slow → check server.js first.
-//    • If rate limiting misbehaves → check server.js.
-//    • If logs vanish → check server.js.
-//    • If metrics stop updating → check server.js.
-//    • If admin dashboards break → check server.js.
-//    • If packet engine stops responding → check server.js.
-//    • If TPProxy returns errors → check server.js.
-//
-//  This file is the ROOT OF TRUST.
-//  This file is the FIRST POINT OF FAILURE.
-//  This file is the LAST LINE OF DEFENSE.
-//
-//
-//  DESIGN LAW FOR THIS FILE:
-//  -------------------------
-//  “If any subsystem fails, the proxy must fail OPEN.
-//   The proxy must never block, stall, or degrade the user’s device.
-//   The proxy must always pass traffic through even if the entire miner
-//   stack is offline.”
-//
-//
-//  FINAL NOTE:
-//  -----------
-//  This file is the operational heart of Tropic Pulse.
-//  Treat it as sacred.
-//  Treat it as immutable.
-//  Treat it as the root of your architecture.
-//
 // ======================================================
+// Healing Metadata (v5)
+// ------------------------------------------------------
+
+const healingState = {
+  lastRequestTs: null,
+  lastError: null,
+  lastProxyError: null,
+  lastRedisError: null,
+  lastEmailError: null,
+  lastWarmConnection: null,
+  lastRateLimitDecision: null,
+  lastTPProxyCall: null,
+  lastHealthCheck: null,
+  lastMetricsCheck: null,
+  lastNodeCheck: null,
+  lastPingCheck: null,
+  cycleCount: 0,
+  status: "healthy", // healthy | warning | error
+};
+
+// ======================================================
+
 import express from "express";
 import fetch from "node-fetch";
 import crypto from "crypto";
@@ -156,15 +95,28 @@ import {
   readPacketExists,
   writePacket,
   generatePacketData
-} from "./pulse-miner/PacketEngine.js";
+} from "./pulse-earn/PacketEngine.js";
 
 // ------------------------------------------------------
-//  NEW: Timer Layer (Non‑Operational Logging + Saving)
+//  Timer Layer (Non‑Operational Logging + Saving)
 // ------------------------------------------------------
-import startPulseTimer from "./timer.js";   // <--- ADD THIS LINE
+import startPulseTimer from "./timer.js";
+// ------------------------------------------------------
+//  Pulse‑OS Layer (Global Supervisor + Healers)
+// ------------------------------------------------------
+import startPulseOS from "./pulse-os/PulseOS.js";
+import startPulseOSHealer from "./pulse-os/PulseOSHealer.js";
+import startGlobalHealer from "./pulse-os/GlobalHealer.js";
 
-// Start the background timer loop
-startPulseTimer();                          // <--- AND THIS LINE
+// Start the background timer loop (kept to avoid behavior change)
+startPulseTimer();
+// ------------------------------------------------------
+//  Start Pulse‑OS (Global Supervisor + Healers)
+// ------------------------------------------------------
+startPulseOS();          // OS brain — heartbeat + FUNCTION_LOG ingestion
+startPulseOSHealer();    // OS-level drift detector
+startGlobalHealer();     // System-wide healer
+
 // ------------------------------------------------------
 
 const app = express();
@@ -196,7 +148,6 @@ const NODE_ID =
 
 const PULSE_VERSION = process.env.PULSE_VERSION || "v3";
 
-// Middleware
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -204,13 +155,10 @@ app.use((req, res, next) => {
   res.setHeader("X-Pulse-Version", PULSE_VERSION);
   res.setHeader("X-Pulse-Node", NODE_ID);
   res.setHeader("X-Pulse-Region", CLOUD_REGION);
+  healingState.lastRequestTs = Date.now();
+  healingState.cycleCount++;
   next();
 });
-
-// ------------------------------------------------------
-//  ❌ REMOVED: /getJob and /submitJob that depended on deleted routing.js
-//  These must be re-wired later to call the miner over HTTP instead of imports.
-// ------------------------------------------------------
 
 // ------------------------------------------------------
 //  Redis
@@ -258,13 +206,13 @@ async function sendCriticalEmail(subject, payload) {
       text: JSON.stringify(payload, null, 2)
     });
   } catch (err) {
+    healingState.lastEmailError = String(err);
     console.error("[PULSE EMAIL ERROR]", String(err));
   }
 }
 
 // ------------------------------------------------------
-// GET /admin/userscores
-// Returns all user scoring data for admin dashboard
+// GET /UserScores (admin)
 // ------------------------------------------------------
 
 export const adminUserScores = app.get("/UserScores", async (req, res) => {
@@ -288,7 +236,6 @@ export const adminUserScores = app.get("/UserScores", async (req, res) => {
       });
     });
 
-    // Sort by trustScore descending (admin-friendly)
     results.sort((a, b) => b.trustScore - a.trustScore);
 
     res.json({
@@ -298,6 +245,7 @@ export const adminUserScores = app.get("/UserScores", async (req, res) => {
     });
 
   } catch (err) {
+    healingState.lastError = String(err);
     console.error("Error fetching UserScores:", err);
     res.status(500).json({
       ok: false,
@@ -316,6 +264,7 @@ function pushPulseLog(entry) {
   pulseLogs.unshift(entry);
   if (pulseLogs.length > MAX_LOGS) pulseLogs.pop();
 }
+
 function updateUserMetrics(userId, data) {
   try {
     global.__userMetrics = global.__userMetrics || {};
@@ -345,7 +294,9 @@ async function checkRateLimit(ip) {
     await redis.expire(key, 24 * 60 * 60);
   }
 
-  return current <= MAX_REQUESTS_PER_DAY;
+  const allowed = current <= MAX_REQUESTS_PER_DAY;
+  healingState.lastRateLimitDecision = { ip, day, allowed, current };
+  return allowed;
 }
 
 // ------------------------------------------------------
@@ -357,8 +308,10 @@ async function warmConnection(url) {
       method: "GET",
       headers: { range: "bytes=0-0" }
     });
+    healingState.lastWarmConnection = { url, ts: Date.now(), ok: true };
     return true;
-  } catch {
+  } catch (err) {
+    healingState.lastWarmConnection = { url, ts: Date.now(), ok: false, error: String(err) };
     return false;
   }
 }
@@ -373,6 +326,7 @@ function chunkBuffer(buffer, chunkSize = 128 * 1024) {
   }
   return chunks;
 }
+
 // ------------------------------------------------------
 //  Logs Endpoint
 // ------------------------------------------------------
@@ -384,6 +338,7 @@ app.get("/pulse-proxy/logs", (req, res) => {
       logs: pulseLogs.slice()
     });
   } catch (e) {
+    healingState.lastError = String(e);
     res.json({
       ts: Date.now(),
       count: 0,
@@ -393,10 +348,13 @@ app.get("/pulse-proxy/logs", (req, res) => {
     });
   }
 });
+
 // ---------------------------------------------------------
 //  UNIVERSAL PROXY — FINAL TPProxy ENDPOINT
 // ---------------------------------------------------------
 app.get("/TPProxy", async (req, res) => {
+  healingState.lastTPProxyCall = Date.now();
+
   const target = req.query.url;
   if (!target) return res.status(400).json({ error: "Missing_URL" });
 
@@ -417,7 +375,6 @@ app.get("/TPProxy", async (req, res) => {
   const meshPing  = req.get("x-pulse-mesh-ping") === "1";
   const hubFlag   = req.get("x-pulse-hub") === "1";
 
-  // Rate limit
   try {
     const allowed = await checkRateLimit(ip);
     if (!allowed) {
@@ -441,6 +398,7 @@ app.get("/TPProxy", async (req, res) => {
       return res.status(429).json({ error: "rate_limited" });
     }
   } catch (err) {
+    healingState.lastError = String(err);
     console.error("[PULSE RATE LIMIT ERROR]", String(err));
   }
 
@@ -458,7 +416,6 @@ app.get("/TPProxy", async (req, res) => {
       warmDuration = Date.now() - warmStart;
     }
 
-    // Cache hit
     if (rememberMe && redisReady) {
       const cachedRaw = await redis.get(cacheKey);
       if (cachedRaw) {
@@ -494,7 +451,6 @@ app.get("/TPProxy", async (req, res) => {
       }
     }
 
-    // Fetch upstream
     const upstreamRes = await fetch(target);
     const contentType =
       upstreamRes.headers.get("content-type") || "application/octet-stream";
@@ -503,7 +459,6 @@ app.get("/TPProxy", async (req, res) => {
     const bytes = buf.length;
     const chunks = chunkBuffer(buf);
 
-    // Cache store
     if (rememberMe && redisReady) {
       await redis.set(
         cacheKey,
@@ -564,6 +519,8 @@ app.get("/TPProxy", async (req, res) => {
     };
 
     global.__lastProxyError = String(err);
+    healingState.lastProxyError = String(err);
+    healingState.status = "warning";
 
     pushPulseLog({
       ts: Date.now(),
@@ -596,6 +553,7 @@ app.get("/TPProxy", async (req, res) => {
 // ------------------------------------------------------
 app.get("/pulse-proxy/health", async (req, res) => {
   const now = Date.now();
+  healingState.lastHealthCheck = now;
 
   const start = process.hrtime.bigint();
   await Promise.resolve();
@@ -633,6 +591,7 @@ app.get("/pulse-proxy/health", async (req, res) => {
 // ------------------------------------------------------
 app.get("/pulse-proxy/metrics", async (req, res) => {
   const now = Date.now();
+  healingState.lastMetricsCheck = now;
 
   const start = process.hrtime.bigint();
   await Promise.resolve();
@@ -686,6 +645,7 @@ app.get("/pulse-proxy/metrics", async (req, res) => {
 // ------------------------------------------------------
 app.get("/pulse-proxy/node", async (req, res) => {
   const now = Date.now();
+  healingState.lastNodeCheck = now;
 
   const start = process.hrtime.bigint();
   await Promise.resolve();
@@ -724,8 +684,8 @@ app.get("/pulse-proxy/node", async (req, res) => {
 // ------------------------------------------------------
 app.get("/pulse-proxy/ping", async (req, res) => {
   const t0 = Date.now();
+  healingState.lastPingCheck = t0;
 
-  // Proxy RTT
   const proxyBase = {
     ok: true,
     message: "pong",
@@ -742,7 +702,6 @@ app.get("/pulse-proxy/ping", async (req, res) => {
   const proxyMsPerKB = proxyRtt / proxyPacketKB;
   const proxyKbps = 1000 / proxyMsPerKB;
 
-  // Backend RTT
   let backend = {
     ok: false,
     rtt: null,
@@ -767,9 +726,9 @@ app.get("/pulse-proxy/ping", async (req, res) => {
 
   } catch (err) {
     backend.error = String(err);
+    healingState.lastError = String(err);
   }
 
-  // Unified physics
   const unified = {
     ok: true,
     route: "Primary",
@@ -798,6 +757,9 @@ app.get("/pulse-proxy/ping", async (req, res) => {
   res.json(unified);
 });
 
+// ------------------------------------------------------
+//  Packet Worker + Orchestrator (kept as‑is, now observed)
+// ------------------------------------------------------
 async function processWorker({
   fileId,
   totalPackets,
@@ -810,26 +772,15 @@ async function processWorker({
   let start = 0;
   let step = 1;
 
-  // ---------------------------------------------------
-  // 1. DYNAMIC MODE (we CAN detect active instances)
-  // ---------------------------------------------------
   if (typeof activeInstances === "number" && activeInstances > 0) {
     const sliceSize = Math.floor(totalPackets / activeInstances);
     start = sliceSize * instanceId;
     step = 1;
-  }
-
-  // ---------------------------------------------------
-  // 2. FALLBACK MODE (we CANNOT detect instances)
-  // ---------------------------------------------------
-  else {
+  } else {
     start = instanceId * 4;
     step = 4;
   }
 
-  // ---------------------------------------------------
-  // 3. MAIN LOOP (NEVER REMOVE THIS)
-  // ---------------------------------------------------
   for (let packetIndex = start; packetIndex < totalPackets; packetIndex += step) {
     const exists = await readPacketExists(fileId, packetIndex);
     if (exists) continue;
@@ -847,23 +798,25 @@ async function processWorker({
   };
 }
 
-// ------------------------------------------------------
-// ALWAYS DO WORK — ALWAYS COMPUTE — ALWAYS SEND PACKETS
-// ------------------------------------------------------
 async function runInstanceOrchestrator() {
-  const totalPackets = 10000;   // keep your value
-  const activeInstances = 1;    // keep your value
-  const instanceId = 0;         // keep your value
+  const totalPackets = 10000;
+  const activeInstances = 1;
+  const instanceId = 0;
 
-  await processWorker({
-    fileId: "default",
-    totalPackets,
-    instanceId,
-    activeInstances,
-    readPacketExists,
-    writePacket,
-    generatePacketData,
-  });
+  try {
+    await processWorker({
+      fileId: "default",
+      totalPackets,
+      instanceId,
+      activeInstances,
+      readPacketExists,
+      writePacket,
+      generatePacketData,
+    });
+  } catch (err) {
+    healingState.lastError = String(err);
+    console.error("[InstanceOrchestrator ERROR]", err);
+  }
 }
 
 // ------------------------------------------------------
@@ -876,11 +829,12 @@ async function init() {
       redisReady = true;
       console.log("[REDIS] Connected");
     } catch (err) {
+      global.__lastRedisError = String(err);
+      healingState.lastRedisError = String(err);
       console.error("[REDIS INIT ERROR]", err);
     }
   }
 
-  // ALWAYS DO WORK — EVERY SECOND
   setInterval(runInstanceOrchestrator, 1000);
 
   app.listen(PORT, () => {
@@ -894,3 +848,10 @@ async function init() {
 }
 
 init();
+
+// ------------------------------------------------------
+// Export healing metadata for PulseProxyHealer
+// ------------------------------------------------------
+export function getPulseProxyHealingState() {
+  return { ...healingState };
+}
