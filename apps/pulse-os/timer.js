@@ -15,7 +15,7 @@ const FUNCTION_LOGS_COLLECTION = "FUNCTION_LOGS";
 const MIDNIGHT_WINDOW_MINUTES = 5;
 const DEFAULT_PAGES_ROOT = path.join(process.cwd(), "pages");
 
-// -----------------------------
+// ----------------------------- I LOVE THIS ITS MY BEAUTY LOGGER EMAIL
 // EMAIL TRANSPORT
 // -----------------------------
 
