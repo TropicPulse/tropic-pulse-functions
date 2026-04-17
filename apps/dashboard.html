@@ -1355,8 +1355,7 @@ async function renderDashboard(identity, trusted, user) {
       const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
       window.isIdle = !!inactiveFlag;
 
-      updatePulseBandImage();
-      updatePulseBandPanel();
+      
     });
 
     // Badge toggle listener (mini badge)
@@ -1376,8 +1375,6 @@ async function renderDashboard(identity, trusted, user) {
           window.isIdle = true;
         }
 
-        updatePulseBandImage();
-        updatePulseBandPanel();
       });
     }
   }

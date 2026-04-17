@@ -783,7 +783,7 @@ if (!window.__sendPinBound) {
 
 
 // ============================================================================
-// 3) VERIFY PIN (UI → backend → save identity/token → attachScanner)
+// 3) VERIFY PIN (UI → backend → save identity/token → redirect)
 // ============================================================================
 if (!window.__verifyPinBound) {
   window.__verifyPinBound = true;
@@ -826,11 +826,13 @@ if (!window.__verifyPinBound) {
           localStorage.removeItem("tp_stay_signed_v4");
         }
 
-        // ⭐ NEW: Attach identity to PageScanner BEFORE redirect
-        const id = await identity();     // load + validate + repair
-        if (id) attachScanner(id);       // give PageScanner its context
+        // ⭐ NO system logic here
+        // NO identity()
+        // NO PageScanner
+        // NO PulseBand system
+        // NO pipelines
+        // NO update loops
 
-        // Redirect after fresh login
         window.location.href = returnTo || "/dashboard.html";
         return;
       }
@@ -851,47 +853,35 @@ if (!window.__verifyPinBound) {
   });
 }
 
-// ============================================================================
-// ⭐ PULSEBAND WARM START + UI PIPELINE (CLEAN VERSION)
-// ============================================================================
 
-// -----------------------------------------
-// ⭐ Prevent duplicate listeners
-// -----------------------------------------
+// ============================================================================
+// ⭐ PULSEBAND UI BADGE ONLY (NO SYSTEM LAYERS, NO UI REFRESH)
+// ============================================================================
 if (!window.__pulsebandListenersAttached) {
   window.__pulsebandListenersAttached = true;
 
-  // ⭐ 1. Restore PulseBand state on load
+  // Restore idle state only
   window.addEventListener("load", () => {
-    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-
-    // If user explicitly disabled → idle
-    window.isIdle = inactiveFlag === true;
-
-    updatePulseBandImage();
-    updatePulseBandPanel();
+    const disabled = localStorage.getItem("pulseband_disabled") === "1";
+    window.isIdle = disabled;
   });
 
-  // ⭐ 2. Badge toggle listener
+  // Toggle idle state only
   document.getElementById("pb-mini-badge")?.addEventListener("click", () => {
-    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
+    const disabled = localStorage.getItem("pulseband_disabled") === "1";
 
-    if (inactiveFlag) {
-      // Turn ON
+    if (disabled) {
       localStorage.removeItem("pulseband_disabled");
       window.isIdle = false;
     } else {
-      // Turn OFF
       localStorage.setItem("pulseband_disabled", "1");
       window.isIdle = true;
     }
-
-    updatePulseBandImage();
-    updatePulseBandPanel();
   });
 }
 
 mark("🔥 WARM START COMPLETE");
+
 
 
 // ============================================================================
