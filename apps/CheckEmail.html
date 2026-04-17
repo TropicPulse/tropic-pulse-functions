@@ -650,7 +650,7 @@ const params        = new URLSearchParams(window.location.search);
 const returnTo      = params.get("returnTo");
 
 
-
+let identity = null;
 let isIdle = true;
 const defaultPayloadKB = 20;
 let isDesk = isDesktop();
