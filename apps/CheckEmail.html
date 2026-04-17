@@ -17,7 +17,8 @@
 <!-- Backend Connector Layer -->
 <script type="module">
   import { pulseband } from "/proxy/PulseBand.js";
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageScanner.js";
+  import { identity } from "./PulseIdentity.js";
+  import { attachScanner } from "/lib/Connectors/PageScanner.js";
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -640,19 +641,9 @@ text-align: center;
   };
 console.log("🌞 Script loaded, attaching visibility listener…");
   let persistenceEnabled = true;
-  let lastTime = null;
   let firstTime = null;
 
-window.__serverTimeOffset = 0;
 
-window.setServerNow = function (serverNowMs) {
-  const localNow = Date.now();
-  window.__serverTimeOffset = serverNowMs - localNow;
-};
-
-window.nowMs = function () {
-  return Date.now() + window.__serverTimeOffset;
-};
 
 // --- GLOBAL STATE ---
 const params        = new URLSearchParams(window.location.search);
@@ -665,7 +656,6 @@ const defaultPayloadKB = 20;
 let isDesk = isDesktop();
 let token = null;
 let resizeTimeout = null;
-let identity = null;
 let trusted = null;
 let autologin = null;
 let loggedIn = false;
@@ -680,203 +670,67 @@ let pinInput    = document.getElementById("pinInput");
 let emailInput  = document.getElementById("emailInput");
 let rememberSection = document.getElementById("rememberSection");
 
-function markAuth(label) {
-  const now = nowMs();
-  lastTime = now;
-  firstTime = now;
-  console.log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
-}
+// ============================================================================
+// LOGIN PAGE — PULSE OS v5 (CLEAN VERSION)
+// Minimal logic: UI + sendPin + verifyPin + identity bootstrap
+// ============================================================================
 
-async function reportDanger(reason) {
-  try {
-    await getHook({
-      type: "danger",
-      payload: {
-        reason,
-        identitySnapshot: identity || null,
-        tokenSnapshot: token || null,
-        userAgent: navigator.userAgent,
-        ts: nowMs()
-      }
-    });
-  } catch (err) {
-    console.warn("Failed to report danger:", err);
-  }
+// Small debug marker (kept for support)
+function mark(msg) {
+  console.log("[LOGIN]", msg);
 }
 
 // -----------------------------
-// LOGOUT VARIANTS
+// LOADER UI
 // -----------------------------
-function safeLogout() {
-  localStorage.removeItem("tp_token_v4");
-  localStorage.removeItem("tp_device_token_v4");
-  mark("SAFE LOGOUT");
+function showTPLoader() {
+  const el = document.getElementById("t-loading");
+  if (!el) return;
+  el.style.display = "flex";
+  requestAnimationFrame(() => el.classList.add("show"));
 }
 
-async function hardLogout(reason) {
-  try {
-    mark("HARD LOGOUT: " + (reason || "unknown"));
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-    await reportDanger(reason || "hardLogout");
-  } catch (err) {
-    mark("HARD LOGOUT ERROR: " + err);
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-  } finally {
-    window.location.replace("/CheckEmail.html");
-  }
+function hideTPLoader() {
+  const el = document.getElementById("t-loading");
+  if (!el) return;
+  el.classList.remove("show");
+  setTimeout(() => (el.style.display = "none"), 150);
 }
 
 // -----------------------------
-// UNIFIED LOGIN BOOTSTRAP
+// SHOW LOGIN UI (email + pin)
 // -----------------------------
+function showLoginUI() {
+  emailSection.style.display = "block";
+  rememberSection.style.display = "block";
+  pinSection.style.display = "none";
+  authMsg.style.display = "none";
+}
+
+// ============================================================================
+// 1) LOGIN BOOTSTRAP — identity() decides if user is already logged in
+// ============================================================================
 async function loginBootstrap() {
   showTPLoader();
   mark("BOOTSTRAP START");
 
-  try {
-    identity = JSON.parse(localStorage.getItem("tp_identity_v4") || "{}");
-    
-  } catch (err) {
-    identity = null;
-  }
-  
-userName  = identity.name  || null;
-    userEmail = identity.email || null;
-    userID    = identity.uid   || null;
-  token     = localStorage.getItem("tp_token_v4");
-  autologin = localStorage.getItem("tp_stay_signed_v4") === "1";
-  trusted   = localStorage.getItem("tp_device_token_v4") === "1";
+  const id = await identity();     // Load + validate + repair identity
 
-  const now       = nowMs();
-  const lastLocal = Number(localStorage.getItem("tp_last_active_v4")) || 0;
-  const inactive  = now - lastLocal > 15 * 60 * 1000;
-
-  // 1️⃣ No token → must log in
-  if (!token) {
+  if (!id) {
+    // No identity → show login UI
     hideTPLoader();
-    mark("NO TOKEN → REQUIRE LOGIN");
-    emailSection.style.display = "block";
-    rememberSection.style.display = "block";
-    pinSection.style.display = "none";
+    showLoginUI();
     return;
   }
 
-  // 2️⃣ Try restoring identity
-  const result = await restoreIdentityFlow("BOOTSTRAP", token);
-  if (!result.ok) {
-    hideTPLoader();
-    mark("RESTORE FAILED → SHOW LOGIN UI");
-    emailSection.style.display = "block";
-    rememberSection.style.display = "block";
-    pinSection.style.display = "none";
-    return;
-  }
-
-  // 3️⃣ Session logic
-  const target = returnTo || "https://www.tropicpulse.bz/dashboard.html";
-
-  if (!inactive) {
-    mark("SESSION ACTIVE → PREWARM + REDIRECT");
-    hideTPLoader();
-    return window.location.href = target;
-  }
-
-  if (inactive && (autologin || trusted)) {
-    mark("SESSION STALE BUT TRUSTED/AUTOLOGIN → PREWARM + REDIRECT");
-    hideTPLoader();
-    return window.location.href = target;
-  }
-
-  // 4️⃣ Stale + not trusted → PIN
+  // Identity valid → redirect to dashboard
   hideTPLoader();
-  mark("STALE + NOT TRUSTED → REQUIRE PIN");
-  emailSection.style.display = "block";
-  rememberSection.style.display = "block";
-  pinSection.style.display = "none";
+  window.location.href = returnTo || "/dashboard.html";
 }
 
-// -----------------------------
-// UNIFIED IDENTITY RESTORE ENGINE
-// -----------------------------
-async function restoreIdentityFlow(mode, jwtToken) {
-  
-
-  const data = await getAuth( jwtToken );
-
-  // HARD LOGOUT
-  if (data.hardLogout) {
-    mark(`HARD LOGOUT → ${mode}`);
-    await hardLogout(`${mode}_hardLogout`);
-    return { ok: false };
-  }
-
-  // SOFT LOGOUT
-  if (!data.firebaseToken) {
-    mark(`SOFT LOGOUT → ${mode}`);
-    safeLogout();
-    return { ok: false };
-  }
-
-  // Load identity
-  try {
-    identity = JSON.parse(localStorage.getItem("tp_identity_v4") || "{}");
-  } catch (err) {
-    mark(`IDENTITY PARSE ERROR → ${mode}: ${err}`);
-    safeLogout();
-    return { ok: false };
-  }
-
-  // Update identity + token
-  identity.fauth = data.firebaseToken;
-
-  if (!data.storedToken) {
-    mark(`❌ NO storedToken FROM BACKEND → ${mode}`);
-    safeLogout();
-    return { ok: false };
-  }
-
-  token = data.storedToken;
-
-  localStorage.setItem("tp_token_v4", token);
-  localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-  localStorage.setItem("tp_last_active_v4", nowMs());
-
-  mark(`IDENTITY FLOW SUCCESS → ${mode}`);
-
-  return { ok: true, realign: data.realign === true };
-}
-
-// -----------------------------
-// LOADER
-// -----------------------------
-function showTPLoader() {
-  mark("OPENING LOADER IMAGE HERE WE GO!");
-  const el = document.getElementById("t-loading");
-  if (!el) return;
-
-  el.style.display = "flex";
-  requestAnimationFrame(() => {
-    el.classList.add("show");
-  });
-}
-
-// -----------------------------
-// WARM START (UI ONLY)
-// -----------------------------
-function warmStartApp() {
-  mark("🔥 WARM START INITIATED");
-  try {
-    if (pulseband && typeof pulseband.setInitialUIState === "function") {
-      pulseband.setInitialUIState();
-    }
-  } catch (err) {
-    mark("warmStartApp: PulseBand UI not ready → " + err);
-  }
-  // -----------------------------
-// SEND PIN (GUARDED)
-// -----------------------------
+// ============================================================================
+// 2) SEND PIN (UI → backend)
+// ============================================================================
 if (!window.__sendPinBound) {
   window.__sendPinBound = true;
 
@@ -889,68 +743,48 @@ if (!window.__sendPinBound) {
       authMsg.textContent = "Please Enter a Valid Email!";
       authMsg.className = "msg error";
       authMsg.style.display = "block";
-      emailSection.style.display = "block";
-      rememberSection.style.display = "block";
-      pinSection.style.display = "none";
-      authMsg.style.fontWeight = "600";
+      showLoginUI();
       emailInput.focus();
       return;
     }
 
     authMsg.style.display = "none";
-    try {
-      const data = await getHook({
-        type: "sendPin",
-        email
-      });
 
+    try {
+      const data = await getHook({ type: "sendPin", email });
       hideTPLoader();
 
       if (data.success) {
-
-        if (data.rateLimitRemaining !== undefined) {
-          console.log(
-            `PIN requests left: ${data.rateLimitRemaining}, resets at: ${data.rateLimitResetAt}`
-          );
-        }
-
-        authMsg.style.display = "block";
         authMsg.className = "msg success";
         authMsg.textContent = "PIN Sent! Check your Email!";
-        authMsg.style.fontWeight = "600";
+        authMsg.style.display = "block";
 
         emailSection.style.display = "none";
         rememberSection.style.display = "none";
         pinSection.style.display = "block";
         pinInput.focus();
-
       } else {
-        authMsg.textContent = "Could not Send PIN. Try again!";
         authMsg.className = "msg error";
+        authMsg.textContent = "Could not Send PIN. Try again!";
         authMsg.style.display = "block";
-
-        emailSection.style.display = "block";
-        rememberSection.style.display = "block";
-        pinSection.style.display = "none";
+        showLoginUI();
         emailInput.focus();
       }
-
     } catch (err) {
       hideTPLoader();
-      authMsg.textContent = "Network error. Try again!";
       authMsg.className = "msg error";
+      authMsg.textContent = "Network error. Try again!";
       authMsg.style.display = "block";
-
-      emailSection.style.display = "block";
-      rememberSection.style.display = "block";
-      pinSection.style.display = "none";
+      showLoginUI();
       emailInput.focus();
     }
   });
 }
-// -----------------------------
-// VERIFY PIN (GUARDED)
-// -----------------------------
+
+
+// ============================================================================
+// 3) VERIFY PIN (UI → backend → save identity/token → attachScanner)
+// ============================================================================
 if (!window.__verifyPinBound) {
   window.__verifyPinBound = true;
 
@@ -961,161 +795,143 @@ if (!window.__verifyPinBound) {
 
     if (pin.length !== 6) {
       hideTPLoader();
-      authMsg.textContent = "PIN must be 6 digits!";
       authMsg.className = "msg error";
+      authMsg.textContent = "PIN must be 6 digits!";
       authMsg.style.display = "block";
       pinInput.focus();
       return;
     }
 
     authMsg.style.display = "none";
+
     try {
       const data = await getHook({
         type: "verifyPin",
         email,
         pin,
-        purpose: "login",
-        userID
+        purpose: "login"
       });
 
       hideTPLoader();
 
-      // -----------------------------------------
       // SUCCESS → Save identity + token
-      // -----------------------------------------
       if (data.success && data.token && data.identity) {
-
-        // Save JWT
         localStorage.setItem("tp_token_v4", data.token);
-
-        // Save identity
         localStorage.setItem("tp_identity_v4", JSON.stringify(data.identity));
-
-        // Mark device as trusted
         localStorage.setItem("tp_device_token_v4", "1");
 
-        // Stay signed in
-        if (document.getElementById("staySignedIn").checked) {
+        if (staySignedIn.checked) {
           localStorage.setItem("tp_stay_signed_v4", "1");
         } else {
           localStorage.removeItem("tp_stay_signed_v4");
         }
 
-        // Referral redemption (now backend-based)
-        const pendingRef = localStorage.getItem("pendingReferral");
-        if (pendingRef) {
-          try {
-            await getHook({
-              type: "redeemReferral",
-              referralCode: pendingRef,
-              uid: data.identity.uid
-            });
-          } catch (err) {
-            console.error("Referral redemption failed:", err);
-          }
-          localStorage.removeItem("pendingReferral");
-        }
+        // ⭐ NEW: Attach identity to PageScanner BEFORE redirect
+        const id = await identity();     // load + validate + repair
+        if (id) attachScanner(id);       // give PageScanner its context
 
-        // Identity restore (OS-style)
-        const result = await restoreIdentityFlow("FRESH_LOGIN", data.token);
-
-        if (result.ok) {
-          window.location.href = returnTo || "https://www.tropicpulse.bz/dashboard.html";
-          return;
-        }
-
-        // Restore failed → show login UI
-        emailSection.style.display = "block";
-        rememberSection.style.display = "block";
-        pinSection.style.display = "none";
+        // Redirect after fresh login
+        window.location.href = returnTo || "/dashboard.html";
         return;
       }
 
-      // -----------------------------------------
       // FAILURE → Invalid PIN
-      // -----------------------------------------
-      authMsg.textContent = "Invalid PIN. Try again!";
       authMsg.className = "msg error";
+      authMsg.textContent = "Invalid PIN. Try again!";
       authMsg.style.display = "block";
       pinInput.focus();
 
     } catch (err) {
       hideTPLoader();
-      authMsg.textContent = "Network error. Try again!";
       authMsg.className = "msg error";
+      authMsg.textContent = "Network error. Try again!";
       authMsg.style.display = "block";
       pinInput.focus();
     }
   });
 }
+
+// ============================================================================
+// ⭐ PULSEBAND WARM START + UI PIPELINE (CLEAN VERSION)
+// ============================================================================
+
 // -----------------------------------------
-  // ⭐ PREVENT DUPLICATE LISTENERS
-  // -----------------------------------------
-  if (!window.__pulsebandListenersAttached) {
-    window.__pulsebandListenersAttached = true;
+// ⭐ Prevent duplicate listeners
+// -----------------------------------------
+if (!window.__pulsebandListenersAttached) {
+  window.__pulsebandListenersAttached = true;
 
-    // ⭐ 1. Restore state on load (runs ONCE)
-    window.addEventListener("load", () => {
-      const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-      const disabled = (window.isIdle === true && inactiveFlag === true);
+  // ⭐ 1. Restore PulseBand state on load
+  window.addEventListener("load", () => {
+    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
 
-      if (disabled) {
-        window.isIdle = true;
-        
-      } else {
-        window.isIdle = false; // active by default
-        
-      }
+    // If user explicitly disabled → idle
+    window.isIdle = inactiveFlag === true;
 
-      updatePulseBandImage();
-      updatePulseBandPanel();
-    });
+    updatePulseBandImage();
+    updatePulseBandPanel();
+  });
 
-    // ⭐ 2. Badge toggle listener
-    document.getElementById("pb-mini-badge").addEventListener("click", () => {
-      const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-      const disabled = (window.isIdle === true && inactiveFlag === true);
+  // ⭐ 2. Badge toggle listener
+  document.getElementById("pb-mini-badge")?.addEventListener("click", () => {
+    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
 
-      if (disabled) {
-        // Turn ON
-        localStorage.removeItem("pulseband_disabled");
-        window.isIdle = false;
-        
-      } else {
-        // Turn OFF
-        localStorage.setItem("pulseband_disabled", "1");
-        window.isIdle = true;
-        
-      }
+    if (inactiveFlag) {
+      // Turn ON
+      localStorage.removeItem("pulseband_disabled");
+      window.isIdle = false;
+    } else {
+      // Turn OFF
+      localStorage.setItem("pulseband_disabled", "1");
+      window.isIdle = true;
+    }
 
-      updatePulseBandImage();
-      updatePulseBandPanel();
-    });
-  }
-  mark("🔥 WARM START COMPLETE");
+    updatePulseBandImage();
+    updatePulseBandPanel();
+  });
 }
 
+mark("🔥 WARM START COMPLETE");
+
+
+// ============================================================================
+// ⭐ LOADER UI (CLEAN + FIXED)
+// ============================================================================
 function hideTPLoader() {
   const el = document.getElementById("t-loading");
   if (!el) return;
 
   el.classList.remove("show");
-  requestAnimationFrame(() => {
-    mark("HIDING LOADER IMAGE ITS ALMOST OVER!");
-    el.style.display = "none";
-  }, 300);
 
-  if (emailInput) emailInput.focus();
-  if (pinInput) pinInput.focus();
+  // Delay removal slightly for smoother fade-out
+  setTimeout(() => {
+    mark("HIDING LOADER IMAGE");
+    el.style.display = "none";
+  }, 150);
+
+  // Focus helpers (non-breaking)
+  emailInput?.focus();
+  pinInput?.focus();
 }
 
-function mark(label) {
-    const now = nowMs();
-    console.log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
-    lastTime = now;
-  }
 
-  function isDesktop() {
+// ============================================================================
+// ⭐ MARKER (FIXED TIMING BUG)
+// ============================================================================
+let lastTime = Date.now();
+
+function mark(label) {
+  const now = Date.now();
+  const diff = now - lastTime;
+  console.log(`${label}: +${diff.toFixed(1)}ms`);
+  lastTime = now;
+}
+
+
+// ============================================================================
+// ⭐ DESKTOP DETECTION (CLEAN VERSION)
+// ============================================================================
+function isDesktop() {
   const ua = navigator.userAgent.toLowerCase();
 
   const mobileUA =
@@ -1127,37 +943,51 @@ function mark(label) {
   const smallScreen = window.innerWidth < 900 || window.innerHeight < 700;
   const touch = navigator.maxTouchPoints > 1;
 
-  // If UA says mobile AND screen is small AND touch exists → it's mobile
+  // If UA says mobile AND screen is small AND touch exists → mobile
   if (mobileUA && smallScreen && touch) return false;
 
-  // Otherwise → desktop
-  return true;
+  return true; // otherwise desktop
 }
-// ------------------------------------------------------
-// UNIVERSAL PULSEBAND DATA PIPELINE (ADD TO EVERY PAGE)
-// ------------------------------------------------------
-function attachPulseBandPipeline() {
+
+
+// ============================================================================
+// ⭐ UNIVERSAL PULSEBAND DATA PIPELINE (ES MODULE VERSION)
+// ============================================================================
+
+export function attachPulseBandPipeline(PulseClient, pulseband, pulsenet) {
   if (!PulseClient || !pulseband) {
     console.warn("PulseBand pipeline: PulseClient or pulseband missing");
     return;
   }
 
-  // 1. When PulseClient state changes → update PulseBand UI
-  PulseClient.onStateChange = (state) => {
-    try {
-      if (pulseband.update) {
-        pulseband.update(state);
-      }
-    } catch (err) {
-      console.error("PulseBand.update failed:", err);
-    }
-  };
-
-  // 2. Immediately push initial state if available
+  // ⭐ 1. Live updates from PulseClient → PulseBand UI
   try {
-    if (PulseClient.getState && pulseband.update) {
-      const initial = PulseClient.getState();
-      pulseband.update(initial);
+    PulseClient.onStateChange = (state) => {
+      try {
+        pulseband.update?.(state);
+      } catch (err) {
+        console.error("PulseBand.update failed:", err);
+      }
+
+      // Forward to PulseNet if available
+      try {
+        pulsenet?.updateSignalFromPulseBand?.(pulseband.getStatus());
+      } catch (err) {
+        console.error("PulseNet update failed:", err);
+      }
+    };
+  } catch (err) {
+    console.error("PulseBand pipeline: unable to attach onStateChange", err);
+  }
+
+  // ⭐ 2. Push initial state immediately
+  try {
+    const initial = PulseClient.getState?.();
+    if (initial) {
+      pulseband.update?.(initial);
+
+      // Forward initial state to PulseNet
+      pulsenet?.updateSignalFromPulseBand?.(pulseband.getStatus());
     }
   } catch (err) {
     console.error("PulseBand initial update failed:", err);
@@ -1166,55 +996,61 @@ function attachPulseBandPipeline() {
 
 (async () => {
 
-  // Optional logging helper
+  // -----------------------------------------
+  // ⭐ Minimal debug marker
+  // -----------------------------------------
   function mark(label) {
-    console.log(label);
+    console.log("[CHECKEMAIL]", label);
   }
 
-  mark("CHECKEMAIL: STARTING DOM LOAD");
-  // ------------------------------------
-  // WARM START (PulseBand UI only)
-  // ------------------------------------
-  mark("STARTING DOM WARMSTARTAPP");
+  mark("STARTING DOM LOAD");
+
+  // -----------------------------------------
+  // ⭐ PulseBand warm start (UI only)
+  // -----------------------------------------
+  mark("WARMSTART → BEGIN");
   warmStartApp();
-  mark("ENDING DOM WARMSTARTAPP");
-  mark("STARTING DOM attachPulseBandPipeline");
+  mark("WARMSTART → END");
+
+  // -----------------------------------------
+  // ⭐ PulseBand data pipeline
+  // -----------------------------------------
+  mark("PIPELINE → BEGIN");
   attachPulseBandPipeline();
-  mark("ENDING DOM attachPulseBandPipeline");
-  
-  // ------------------------------------
-  // LOGIN BOOTSTRAP (identity + session + cache warm)
-  // ------------------------------------
-  mark("STARTING DOM BOOTSTRAP");
+  mark("PIPELINE → END");
+
+  // -----------------------------------------
+  // ⭐ LOGIN BOOTSTRAP (identity decides everything)
+  // -----------------------------------------
+  mark("BOOTSTRAP → BEGIN");
   await loginBootstrap();
-  mark("ENDING DOM BOOTSTRAP");
-  // ------------------------------------
-  // PULSEBAND BADGE + PANEL TOGGLE
-  // ------------------------------------
+  mark("BOOTSTRAP → END");
+
+  // -----------------------------------------
+  // ⭐ PulseBand badge + panel toggle
+  // -----------------------------------------
   const badge = document.getElementById("pulseband-badge");
   const panel = document.getElementById("pulseband-panel");
 
-  badge.onclick = (e) => {
-    e.stopPropagation();
-    panel.style.display = panel.style.display === "block" ? "none" : "block";
-  };
+  if (badge && panel) {
+    badge.onclick = (e) => {
+      e.stopPropagation();
+      panel.style.display = panel.style.display === "block" ? "none" : "block";
+    };
 
-  document.addEventListener("click", (e) => {
-    const clickedInsidePanel = panel.contains(e.target);
-    const clickedBadge = badge.contains(e.target);
+    document.addEventListener("click", (e) => {
+      const inside = panel.contains(e.target);
+      const onBadge = badge.contains(e.target);
+      if (!inside && !onBadge) panel.style.display = "none";
+    });
+  }
 
-    if (!clickedInsidePanel && !clickedBadge) {
-      panel.style.display = "none";
-    }
-  });
   // -----------------------------------------
-  // ⭐ LIVE PULSEBAND UPDATE LOOP
+  // ⭐ LIVE PULSEBAND UPDATE LOOP (UI ONLY)
   // -----------------------------------------
   setInterval(async () => {
-    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-    const disabled = (window.isIdle === true && inactiveFlag === true);
-
-    if (disabled) return;
+    const disabled = localStorage.getItem("pulseband_disabled") === "1";
+    if (disabled || window.isIdle) return;
 
     const status = pulseband.getStatus();
     const data = await window.getPulseBandRate();
@@ -1228,15 +1064,14 @@ function attachPulseBandPipeline() {
   }, 3000);
 
   // -----------------------------------------
-  // ⭐ LAST SYNC COUNTER LOOP
+  // ⭐ LAST SYNC COUNTER LOOP (UI ONLY)
   // -----------------------------------------
   setInterval(() => {
-    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-    const disabled = (window.isIdle === true && inactiveFlag === true);
+    const disabled = localStorage.getItem("pulseband_disabled") === "1";
+    if (disabled || window.isIdle) return;
 
     const status = pulseband.getStatus();
     const ts = getSafeTimestamp(status);
-
     const seconds = safeSeconds((nowMs() - ts) / 1000);
 
     pulseband.setStatus({
@@ -1245,9 +1080,11 @@ function attachPulseBandPipeline() {
       lastSyncSeconds: seconds
     });
   }, 1000);
-  mark("CHECKEMAIL: ENDING DOM LOAD");
+
+  mark("ENDING DOM LOAD");
 
 })();
+
 </script>
 </body>
 </html>

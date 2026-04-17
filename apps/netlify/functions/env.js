@@ -105,6 +105,15 @@ const PIN_TTL_MS = MAX_REQUESTS_PER_WINDOW * RATE_LIMIT_WINDOW_MS; // 5 minutes
 
 const corsHandler = pulseCors;
 
+window.__serverTimeOffset = 0;
+
+window.setServerNow = function(serverNowMs) {
+  window.__serverTimeOffset = serverNowMs - Date.now();
+};
+
+window.nowMs = function() {
+  return Date.now() + window.__serverTimeOffset;
+};
 
 
 // Initialize Firebase ONCE

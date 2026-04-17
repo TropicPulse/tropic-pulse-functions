@@ -16,7 +16,9 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSX89KS63P"></script>
 <!-- Backend Connector Layer -->
 <script type="module">
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageScanner.js";
+  import { pulseband } from "/proxy/PulseBand.js";
+  import { identity } from "./PulseIdentity.js";
+  import { getAuth, getHook, getMap, callHelper, attachScanner } from "/lib/Connectors/PageScanner.js";
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -2838,16 +2840,7 @@ button:active,
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
   
-  window.__serverTimeOffset = 0;
-
-    window.setServerNow = function (serverNowMs) {
-      const localNow = Date.now();
-      window.__serverTimeOffset = serverNowMs - localNow;
-    };
-
-    window.nowMs = function () {
-      return Date.now() + window.__serverTimeOffset;
-    };
+  
   let persistenceEnabled = true;
   let lastTime = null;
   let firstTime = null;

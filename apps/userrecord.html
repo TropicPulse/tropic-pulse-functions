@@ -16,7 +16,9 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSX89KS63P"></script>
 <!-- Backend Connector Layer -->
 <script type="module">
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageScanner.js";
+  import { pulseband } from "/proxy/PulseBand.js";
+  import { identity } from "./PulseIdentity.js";
+  import { getAuth, getHook, getMap, callHelper, attachScanner } from "/lib/Connectors/PageScanner.js";
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -1234,84 +1236,173 @@ body::before {
 </div>
 
 <script type="module">
-    
-  window.__serverTimeOffset = 0;
+   // ============================================================================
+// USER RECORD PAGE (Pulse‑OS‑v5 CLEAN VERSION)
+// Supports:
+//   - Normal user editing themselves
+//   - Admin editing ANY user via dropdown
+//   - Email change requires PIN before save
+// ============================================================================
 
-    window.setServerNow = function (serverNowMs) {
-      const localNow = Date.now();
-      window.__serverTimeOffset = serverNowMs - localNow;
-    };
+// -----------------------------
+// GLOBAL STATE
+// -----------------------------
+let identityUser = null;   // logged-in identity()
+let currentUser = null;    // user being edited (self or selected)
+let isAdmin = false;
+let formIsDirty = false;
 
-    window.nowMs = function () {
-      return Date.now() + window.__serverTimeOffset;
-    };
+function markDirty() { formIsDirty = true; }
 
-  let resizeTimeout;
-  let trusted = null;
-  let autologin = null;
-  let userName = null;
-  let userEmail = null;
-  let userID = null;
-  let token = localStorage.getItem("tp_token_v4") || null;
-  let persistenceEnabled = true;
-  let lastTime = null;
-  let firstTime = null;
+// -----------------------------
+// DOM ELEMENTS
+// -----------------------------
+const img             = document.getElementById("profilePhoto");
+const emailInput      = document.getElementById("email");
+const verifyEmailBtn  = document.getElementById("verifyEmailBtn");
+const saveBtn         = document.getElementById("saveBtn");
+const changeBtn       = document.getElementById("changePhotoBtn");
+const photoInput      = document.getElementById("photoInput");
+const redeemBtn       = document.getElementById("redeemPulseBtn");
+const confirmInline   = document.getElementById("redeemConfirmInline");
+const redeemYes       = document.getElementById("redeemYesBtn");
+const redeemNo        = document.getElementById("redeemNoBtn");
+const msg             = document.getElementById("msg");
 
-  let isLoggedIn = false;
+// -----------------------------
+// BOOTSTRAP (OS‑v5 CONSUMER‑ONLY)
+// -----------------------------
+(async function userRecordBootstrap() {
+  showTPLoader();
 
-  let isDesk = isDesktop();
-  let isIdle = true;
-const defaultPayloadKB = 20;
-  let formIsDirty = false;
-  function markDirty() { formIsDirty = true; }
+  // 1️⃣ Load identity (authoritative, allowed)
+  identityUser = await identity();
+  if (!identityUser) {
+    window.location.replace("/CheckEmail.html");
+    return;
+  }
 
-  // ---------------------------
-  // LOAD IDENTITY
-  // ---------------------------
-  
-  // ---------------------------------------------
-// IDENTITY (CANONICAL SOURCE: localStorage)
-// ---------------------------------------------
-let identity = {};
-try {
-  identity = JSON.parse(localStorage.getItem("tp_identity_v4") || "{}");
-} catch {
-  identity = {};
+  isAdmin = identityUser.role === "Admin";
+
+  // 2️⃣ Determine which user to edit (CONSUME ONLY)
+  if (isAdmin) {
+    setupAdminUserDropdown(); // uses getUsersCache() which is warmed by OS layer
+  } else {
+    const users = (typeof getUsersCache === "function") ? getUsersCache() : null;
+
+    currentUser =
+      (Array.isArray(users) && users.find(u => u.id === identityUser.uid)) ||
+      identityUser;
+
+    populateUserUI(currentUser);
+  }
+
+  hideTPLoader();
+})();
+
+
+// -----------------------------
+// ADMIN DROPDOWN
+// -----------------------------
+function setupAdminUserDropdown() {
+  const dropdown = document.getElementById("userSelectDropdown");
+  if (!dropdown) return;
+
+  dropdown.style.display = "block";
+
+  const users = getUsersCache().sort((a, b) =>
+    (a.displayName || "").localeCompare(b.displayName || "")
+  );
+
+  dropdown.innerHTML = `<option value="">Select a user...</option>`;
+
+  for (const u of users) {
+    const opt = document.createElement("option");
+    opt.value = u.id;
+    opt.textContent = `${u.displayName || u.email} (${u.email})`;
+    dropdown.appendChild(opt);
+  }
+
+  dropdown.onchange = () => {
+    const uid = dropdown.value;
+    if (!uid) return;
+
+    currentUser = users.find(u => u.id === uid);
+    populateUserUI(currentUser);
+  };
 }
 
-// ---------------------------------------------
-// DOM ELEMENTS
-// ---------------------------------------------
-const img = document.getElementById("profilePhoto");
-const emailInput = document.getElementById("email");
-const verifyEmailBtn = document.getElementById("verifyEmailBtn");
-const saveBtn = document.getElementById("saveBtn");
-const changeBtn = document.getElementById("changePhotoBtn");
-const photoInput = document.getElementById("photoInput");
+// -----------------------------
+// POPULATE UI
+// -----------------------------
+function populateUserUI(user) {
+  if (!user) return;
 
-// ---------------------------------------------
-// SAVE PROFILE
-// ---------------------------------------------
-saveBtn.onclick = async () => {
-  const ok = await updateUserRecordFromUI();
-  if (ok) {
-    showMessage("Profile updated!", "success");
+  document.getElementById("displayNameInput").value = user.displayName || "";
+  emailInput.value = user.email || "";
 
-    // Update identity locally
-    identity.displayName = payload.displayName;
-    localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
+  img.src = user.photoURL || "https://www.tropicpulse.bz/Frustrated.png";
 
-    formIsDirty = false;
+  const pointsEl = document.getElementById("pointsBalance");
+  if (pointsEl) {
+    pointsEl.textContent = user.pointsBalance ?? 0;
   }
+
+  document.getElementById("emailPinContainer").style.display = "none";
+  verifyEmailBtn.style.display = "none";
+  saveBtn.disabled = false;
+  saveBtn.classList.remove("disabled");
+  formIsDirty = false;
+}
+
+// -----------------------------
+// SAVE PROFILE
+// -----------------------------
+saveBtn.onclick = async () => {
+  if (!currentUser) return;
+
+  const payload = {
+    uid: currentUser.id,
+    displayName: document.getElementById("displayNameInput").value.trim(),
+    email: currentUser.email, // email already validated / pinned
+    photoURL: currentUser.photoURL
+  };
+
+  const ok = await updateUserRecordFromUI(payload);
+  if (!ok) {
+    showMessage("Unable to update profile.", "error");
+    return;
+  }
+
+  Object.assign(currentUser, payload);
+
+  if (currentUser.id === identityUser.uid) {
+    Object.assign(identityUser, payload);
+    localStorage.setItem("tp_identity_v4", JSON.stringify(identityUser));
+  }
+
+  showMessage("Profile updated!", "success");
+  formIsDirty = false;
 };
 
-// ---------------------------------------------
+// -----------------------------
 // EMAIL CHANGE HANDLER
-// ---------------------------------------------
+// -----------------------------
 emailInput.addEventListener("input", () => {
+  if (!currentUser) return;
+
   const newEmail = emailInput.value.trim().toLowerCase();
 
-  if (identity && newEmail !== identity.email.toLowerCase()) {
+  // Admin editing someone else → block email editing
+  if (isAdmin && currentUser.id !== identityUser.uid) {
+    emailInput.value = currentUser.email || "";
+    showMessage("Admins cannot change another user's email.", "error");
+    return;
+  }
+
+  const currentEmail = (currentUser.email || "").toLowerCase();
+
+  if (newEmail && newEmail !== currentEmail) {
     verifyEmailBtn.style.display = "inline-block";
     saveBtn.disabled = true;
     saveBtn.classList.add("disabled");
@@ -1322,17 +1413,23 @@ emailInput.addEventListener("input", () => {
   }
 });
 
-// ---------------------------------------------
+// -----------------------------
 // SEND EMAIL VERIFICATION PIN
-// ---------------------------------------------
+// -----------------------------
 verifyEmailBtn.onclick = async () => {
+  if (!currentUser) return;
+
   const newEmail = emailInput.value.trim().toLowerCase();
+  if (!newEmail) {
+    showMessage("Please enter a valid email first.", "error");
+    return;
+  }
 
   try {
     const data = await getHook({
       type: "sendPin",
       email: newEmail,
-      uid: identity.uid,
+      uid: identityUser.uid, // always identity user
       purpose: "emailChange"
     });
 
@@ -1342,235 +1439,81 @@ verifyEmailBtn.onclick = async () => {
     } else {
       showMessage(data.error || "Unable to send verification PIN.", "error");
     }
-
   } catch (err) {
     showMessage("Unable to send verification PIN.", "error");
   }
-};
-// ---------------------------------------------
-// PHOTO UPLOAD
-// ---------------------------------------------
-changeBtn.onclick = () => photoInput.click();
-photoInput.onchange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = async () => {
-    const base64 = reader.result.split(",")[1];
-
-    let data;
-    try {
-      // 1️⃣ Send to backend through Router → Endpoint → Backend
-      data = await callHelper("uploadProfilePhoto", {
-        uid: identity.uid,
-        image: base64
-      });
-    } catch (err) {
-      showMessage("Unable to upload photo.", "error");
-      return;
-    }
-
-    // 2️⃣ Backend response
-    if (!data?.success || !data?.photoURL) {
-      showMessage("Photo upload failed.", "error");
-      return;
-    }
-
-    // 3️⃣ Update UI
-    img.style.display = "none";
-
-    img.onload = () => {
-      img.style.display = "block";
-    };
-
-    img.onerror = () => {
-      img.src = "https://www.tropicpulse.bz/Frustrated.png";
-      img.style.display = "block";
-    };
-
-    img.src = data.photoURL;
-
-    // 4️⃣ Update identity
-    identity.photoURL = data.photoURL;
-    localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-
-    showMessage("Profile photo updated!", "success");
-  };
-
-  reader.readAsDataURL(file);
-};
-// ---------------------------------------------
-// REDEEM PULSE POINTS
-// ---------------------------------------------
-const redeemBtn = document.getElementById("redeemPulseBtn");
-const confirmInline = document.getElementById("redeemConfirmInline");
-const redeemYes = document.getElementById("redeemYesBtn");
-const redeemNo = document.getElementById("redeemNoBtn");
-
-redeemBtn.onclick = () => {
-  const points = identity.pointsBalance ?? 0;
-
-  if (points < 500) {
-    showMessage("You need at least 500 points to redeem.", "error");
-    return;
-  }
-
-  redeemBtn.style.display = "none";
-  confirmInline.style.display = "flex";
-  saveBtn.disabled = true;
-  saveBtn.classList.add("disabled");
-};
-
-redeemNo.onclick = () => {
-  confirmInline.style.display = "none";
-  redeemBtn.style.display = "inline-block";
-  saveBtn.disabled = false;
-  saveBtn.classList.remove("disabled");
-};
-
-redeemYes.onclick = async () => {
-  const points = identity.pointsBalance;
-  const token = localStorage.getItem("tp_token_v4");
-
-  try {
-    const data = await getHook({
-      type: "redeemPulsePoints",
-      token,
-      uid: identity.uid,
-      email: identity.email,
-      pointsToRedeem: points
-    });
-
-    if (!data?.success) {
-      showMessage(data?.message || data?.error || "Error submitting redemption request.", "error");
-      confirmInline.style.display = "none";
-      redeemBtn.style.display = "inline-block";
-      saveBtn.disabled = false;
-      saveBtn.classList.remove("disabled");
-      return;
-    }
-
-    // SUCCESS
-    identity.pointsBalance = data.pointsBalance;
-    localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-
-    showMessage("Redemption request submitted! Wallet will update within 24-48 hours.", "success");
-
-  } catch (err) {
-    console.error(err);
-    showMessage("Network error submitting redemption request.", "error");
-  }
-
-  confirmInline.style.display = "none";
-  redeemBtn.style.display = "inline-block";
-  saveBtn.disabled = false;
-  saveBtn.classList.remove("disabled");
-};
-
-document.getElementById("checkDisplayNameBtn").onclick = async () => {
-  const input = document.getElementById("displayNameInput");
-  const status = document.getElementById("displayNameStatus");
-
-  let raw = input.value.trim();
-
-  // 1️⃣ If empty → ask backend to generate a brand new name
-  if (!raw) {
-    const data = await getHook({
-      type: "checkDisplayName",
-      generate: true
-    });
-
-    input.value = data.generated;
-    status.className = "msg success show";
-    status.textContent = "A New Display Name was Created!";
-    return;
-  }
-
-  // 2️⃣ Sanitize user input
-  const clean = sanitizeDisplayName(raw);
-  input.value = clean;
-
-  // 3️⃣ Check availability
-  const data = await getHook({
-    type: "checkDisplayName",
-    name: clean
-  });
-
-  status.style.display = "block";
-
-  if (data.available) {
-    status.className = "msg success show";
-    status.textContent = "Display Name is Available!";
-    return;
-  }
-
-  // 4️⃣ If taken → ask backend to generate the next available version
-  const data2 = await getHook({
-    type: "checkDisplayName",
-    base: clean
-  });
-
-  input.value = data2.suggested;
-  status.className = "msg error show";
-  status.textContent = "That Name was Taken — Try This One!";
-};
-
+};// -----------------------------
+// VERIFY EMAIL PIN (FINAL — CLEAN)
+// -----------------------------
 document.getElementById("submitEmailPinBtn").onclick = async () => {
+  if (!currentUser) return;
+
   const newEmail = emailInput.value.trim().toLowerCase();
   const pin = document.getElementById("emailPinInput").value.trim();
-  const saveBtn = document.getElementById("saveBtn");
+
+  if (!newEmail || !pin) {
+    showMessage("Please enter both email and PIN.", "error");
+    return;
+  }
 
   try {
     const data = await getHook({
       type: "verifyPin",
       email: newEmail,
       pin,
-      uid: identity.uid,
+      uid: identityUser.uid,
       purpose: "emailChange"
     });
 
-    if (data.success) {
-      identity.email = newEmail;
-      localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-
-      verifyEmailBtn.style.display = "none";
-      document.getElementById("emailPinContainer").style.display = "none";
-      saveBtn.disabled = false;
-      saveBtn.classList.remove("disabled");
-
-      showMessage("Email Verified and Updated!", "success");
-    } else {
+    if (!data.success) {
       showMessage(data.error || "Invalid PIN.", "error");
+      return;
     }
 
+    // Update identity + currentUser if self
+    identityUser.email = newEmail;
+    if (currentUser.id === identityUser.uid) {
+      currentUser.email = newEmail;
+    }
+
+    // Persist identity (v4 contract)
+    localStorage.setItem("tp_identity_v4", JSON.stringify(identityUser));
+
+    verifyEmailBtn.style.display = "none";
+    document.getElementById("emailPinContainer").style.display = "none";
+    saveBtn.disabled = false;
+    saveBtn.classList.remove("disabled");
+
+    showMessage("Email Verified and Updated!", "success");
   } catch (err) {
     showMessage("Network error verifying PIN.", "error");
   }
 };
 
-const msg = document.getElementById("msg");
 
+// -----------------------------
+// MESSAGES
+// -----------------------------
 function showMessage(text, type = "error") {
   const msg = document.getElementById("msg");
   msg.textContent = text;
   msg.className = "msg " + type;
   msg.style.display = "block";
 
-  // pulse animation
   msg.classList.add("show");
   setTimeout(() => msg.classList.remove("show"), 300);
 
-  // smooth scroll
   msg.scrollIntoView({ behavior: "smooth", block: "center" });
 
-  // auto-hide
   setTimeout(() => {
     msg.style.display = "none";
   }, 4000);
 }
 
+
+// -----------------------------
+// DIRTY FORM TRACKING
+// -----------------------------
 [
   "fullName",
   "displayNameInput",
@@ -1597,19 +1540,10 @@ window.addEventListener("beforeunload", (e) => {
   e.returnValue = "";
 });
 
-// ---------------------------------------------
-// AUTH MARKERS + PERSISTENCE
-// ---------------------------------------------
-function markAuth(label) {
-  const now = nowMs();
-  lastTime = now;
-  firstTime = now;
-  console.log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
-}
 
-// ---------------------------------------------
-// LOADER + LOGOUT HELPERS
-// ---------------------------------------------
+// -----------------------------
+// LOADER
+// -----------------------------
 function hideTPLoader() {
   const el = document.getElementById("t-loading");
   if (!el) return;
@@ -1617,129 +1551,16 @@ function hideTPLoader() {
   setTimeout(() => el.remove(), 700);
 }
 
-function safeLogout() {
-  localStorage.removeItem("tp_token_v4");
-  localStorage.removeItem("tp_device_token_v4");
-  mark("SAFE LOGOUT");
-}
 
-async function hardLogout(reason) {
-  try {
-    mark("HARD LOGOUT: " + (reason || "unknown"));
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-    await reportDanger(reason || "hardLogout");
-  } catch (err) {
-    mark("HARD LOGOUT ERROR: " + err);
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-  } finally {
-    window.location.replace("/CheckEmail.html");
-  }
-}
-
-function mark(label) {
-  const now = nowMs();
-  console.log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
-  lastTime = now;
-}
-
-// ---------------------------------------------
-// CLEAN SESSIONCHECK (NO CACHE/HEARTBEAT JUNK)
-// ---------------------------------------------
-async function sessionCheck() {
-  mark("sessionCheck");
-
-  // -----------------------------------------
-  // 1. LOAD LOCAL VARIABLES
-  // -----------------------------------------
-  autologin = localStorage.getItem("tp_stay_signed_v4") === "1";
-  trusted   = localStorage.getItem("tp_device_token_v4") === "1";
-
-  try {
-    identity = JSON.parse(localStorage.getItem("tp_identity_v4") || "{}");
-  } catch {
-    identity = null;
-  }
-
-  token     = localStorage.getItem("tp_token_v4");
-  userID    = identity?.uid   || null;
-  userEmail = identity?.email || null;
-  userName  = identity?.displayName || null;
-
-  // -----------------------------------------
-  // 2. IDENTITY + TOKEN MUST EXIST
-  // -----------------------------------------
-  if (!identity || !userID || !token) {
-    mark("Missing identity or token → HARD LOGOUT");
-    hardLogout("missing_identity_or_token");
-    return false;
-  }
-
-  // -----------------------------------------
-  // 3. LOCAL INACTIVITY CHECK
-  // -----------------------------------------
-  const now       = nowMs();
-  const lastLocal = Number(localStorage.getItem("tp_last_active_v4")) || 0;
-  const diff      = now - lastLocal;
-
-  const inactive15 = diff > 15 * 60 * 1000; // > 15 minutes
-
-  if (inactive15 && !trusted) {
-    if (!autologin) {
-      mark("Inactive >15 min AND not autologin/trusted → HARD LOGOUT");
-      hardLogout("inactive_and_not_remembered");
-    } else {
-      mark("Inactive >15 min AND autologin → SOFT LOGOUT");
-      safeLogout();
-    }
-    return false;
-  }
-
-  // -----------------------------------------
-  // 4. BACKEND AUTH REFRESH (THE ONLY REAL STEP)
-  // -----------------------------------------
-  const data = await getAuth(token);
-
-  if (data.hardLogout) {
-    mark("Backend flagged danger → HARD LOGOUT");
-    hardLogout("backend_danger_flag");
-    return false;
-  }
-
-  if (!data.identity) {
-    mark("Backend returned no identity → HARD LOGOUT");
-    hardLogout("missing_identity_from_backend");
-    return false;
-  }
-
-  // Update JWT lineage if provided
-  if (data.newJwtToken) {
-    token = data.newJwtToken;
-    localStorage.setItem("tp_token_v4", token);
-    mark("Updated JWT lineage from backend");
-  }
-
-  // Update identity cache
-  identity = data.identity;
-  localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-
-  // -----------------------------------------
-  // 5. UPDATE LAST ACTIVE
-  // -----------------------------------------
-  localStorage.setItem("tp_last_active_v4", now);
-
-  return true;
-}
-
+// -----------------------------
+// LEAVE CONFIRM / STRIPE REDIRECT
+// -----------------------------
 window.attemptStripeRedirect = function (url) {
-  // If redirecting to Stripe, ALWAYS allow it
   if (url.includes("stripe.com") || url.includes("connect.stripe.com")) {
     window.location.href = url;
     return;
   }
 
-  // Otherwise use the confirmation row
   if (!formIsDirty) {
     window.location.href = url;
     return;
@@ -1758,21 +1579,21 @@ window.attemptStripeRedirect = function (url) {
   };
 };
 
+
+// -----------------------------
+// HERO HEADER ENTRANCE
+// -----------------------------
 export async function runHeroHeaderEntrance() {
   if (window.__heroHeaderPlayed) return;
   window.__heroHeaderPlayed = true;
 
-  // ---------------------------------------------------
-  // CREATE BACKDROP ELEMENTS
-  // ---------------------------------------------------
   const top = document.createElement("div");
   const bottom = document.createElement("div");
-  const header = document.querySelector(".profile-header");
   top.id = "hero-backdrop-top";
   bottom.id = "hero-backdrop-bottom";
-top.style.opacity = "1";
-      bottom.style.opacity = "1";
-  // Shared backdrop styles
+  top.style.opacity = "1";
+  bottom.style.opacity = "1";
+
   const baseStyle = {
     position: "fixed",
     left: "0",
@@ -1797,28 +1618,15 @@ top.style.opacity = "1";
   document.body.appendChild(top);
   document.body.appendChild(bottom);
 
-  
-
-  // Wait TWO frames so intro state is painted
   await new Promise(requestAnimationFrame);
   await new Promise(requestAnimationFrame);
-
-  // ---------------------------------------------------
-  // CINEMATIC PAUSE
-  // ---------------------------------------------------
   await new Promise(res => setTimeout(res, 600));
 
   bottom.style.height = "0";
+  top.style.height = "115px";
 
-  // Top backdrop shrinks down to header height
-  top.style.height = "115px"; // your header height
+  setTimeout(() => top.style.opacity = "0", 900);
 
-  // Fade out top backdrop after header settles
-  setTimeout(() => {
-    top.style.opacity = "0";
-  }, 900);
-
-  // Remove both backdrops after animation completes
   setTimeout(() => {
     bottom.style.opacity = "0";
     top.remove();
@@ -1826,63 +1634,34 @@ top.style.opacity = "1";
   }, 1800);
 }
 
-// -----------------------------------------------------
-// PHONE NORMALIZER
-// -----------------------------------------------------
+
+// ============================================================================
+// UTILITIES (UNCHANGED, CORRECT)
+// ============================================================================
 function normalizePhone(raw, row, coords = {}) {
   if (!raw) return null;
 
-  // Clean weird whitespace + NBSP
-  let v = String(raw)
-    .replace(/\u00A0/g, " ")
-    .trim();
-
-  // Strip everything except digits and +
+  let v = String(raw).replace(/\u00A0/g, " ").trim();
   v = v.replace(/[^\d+]/g, "");
 
-  // Already valid E.164
-  if (v.startsWith("+") && v.length >= 8 && v.length <= 15) {
-    return v;
-  }
-
-  // Remove leading +
+  if (v.startsWith("+") && v.length >= 8 && v.length <= 15) return v;
   if (v.startsWith("+")) v = v.slice(1);
 
-  // Pure digits
   const digits = v.replace(/\D/g, "");
 
-  // --- BELIZE LOGIC ---
-  // 7‑digit local numbers → +501
-  if (digits.length === 7) {
-    return "+501" + digits;
-  }
+  if (digits.length === 7) return "+501" + digits;
+  if (digits.startsWith("501") && digits.length === 10) return "+501" + digits.slice(3);
 
-  // 501 + 7 digits → +501xxxxxxx
-  if (digits.startsWith("501") && digits.length === 10) {
-    return "+501" + digits.slice(3);
-  }
+  if (digits.length === 10) return "+1" + digits;
+  if (digits.length === 11 && digits.startsWith("1")) return "+1" + digits.slice(1);
 
-  // --- US / CANADA ---
-  if (digits.length === 10) {
-    return "+1" + digits;
-  }
+  if (digits.length >= 8 && digits.length <= 15) return "+" + digits;
 
-  if (digits.length === 11 && digits.startsWith("1")) {
-    return "+1" + digits.slice(1);
-  }
-
-  // --- INTERNATIONAL FALLBACK ---
-  if (digits.length >= 8 && digits.length <= 15) {
-    return "+" + digits;
-  }
-
-  // Reject everything else
   return null;
 }
 
 function isDesktop() {
   const ua = navigator.userAgent.toLowerCase();
-
   const mobileUA =
     ua.includes("iphone") ||
     ua.includes("android") ||
@@ -1892,168 +1671,102 @@ function isDesktop() {
   const smallScreen = window.innerWidth < 900 || window.innerHeight < 700;
   const touch = navigator.maxTouchPoints > 1;
 
-  // If UA says mobile AND screen is small AND touch exists → it's mobile
   if (mobileUA && smallScreen && touch) return false;
-
-  // Otherwise → desktop
   return true;
 }
-// ---------------------------
-  // LOAD STRIPE STATUS
-  // ---------------------------
-  async function loadStripeStatus() {
-    if (!isLoggedIn) return;
 
-    const statusEl = document.getElementById("stripeStatus");
-    const actionEl = document.getElementById("stripeAction");
+// ============================================================================
+// STRIPE STATUS (UPDATED TO USE identityUser)
+// ============================================================================
+// ============================================================================
+// STRIPE STATUS (FINAL — CLEAN, SINGLE SOURCE, identityUser‑correct)
+// ============================================================================
+async function loadStripeStatus() {
+  if (!identityUser) return;
 
-    statusEl.textContent = "Checking Status…";
+  const statusEl = document.getElementById("stripeStatus");
+  const actionEl = document.getElementById("stripeAction");
 
-    const stripeId =
-      identity.stripeAccountID ||
-      identity.stripeId ||
-      null;
-    try {
-      const data = await getHook({
-        type: "getStripeStatus",
-        uid: identity.uid,
-        stripeAccountId: stripeId
-      });
+  statusEl.textContent = "Checking Status…";
 
-      if (!data.success) {
-        statusEl.textContent = "Unable to Load Stripe Status!?";
-        actionEl.innerHTML = "";
-        return;
-      }
+  const stripeId =
+    identityUser.stripeAccountID ||
+    identityUser.stripeId ||
+    null;
 
-      const status = data.status;
-      const actionDiv = document.getElementById("stripeAction");
+  try {
+    const data = await getHook({
+      type: "getStripeStatus",
+      uid: identityUser.uid,
+      stripeAccountId: stripeId
+    });
 
-      if (status === "connected") {
-        document.getElementById("stripeStatus").textContent = "Connected ✔";
-        actionDiv.innerHTML = `
-          <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.dashboardLink}')">
-            Open Stripe Dashboard
-          </div>`;
-      } else if (status === "pending") {
-        document.getElementById("stripeStatus").textContent = "Onboarding Not Complete";
-        actionDiv.innerHTML = `
-          <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
-            Continue Setup
-          </div>`;
-      } else if (status === "needs_verification") {
-        document.getElementById("stripeStatus").textContent = "Verification Required";
-        actionDiv.innerHTML = `
-          <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
-            Fix Now
-          </div>`;
-      } else {
-        document.getElementById("stripeStatus").textContent = "Not Connected";
-        actionDiv.innerHTML = `
-          <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
-            Start Setup
-          </div>`;
-      }
-
-    } catch (err) {
-      document.getElementById("stripeStatus").textContent = "Error Loading Status!?";
+    if (!data.success) {
+      statusEl.textContent = "Unable to Load Stripe Status!?";
+      actionEl.innerHTML = "";
+      return;
     }
-  }
-  // ---------------------------
-  // LOAD FIRESTORE USER (OS VERSION)
-  // ---------------------------
-  async function loadFirestoreUser() {
-    if (!identity?.uid) return;
 
-    try {
-      const data = await getHook({
-        type: "getUserData",
-        uid: identity.uid
-      });
+    const status = data.status;
 
-      if (data.success && data.user) {
-        firestoreUser = data.user;
-        loadFallbackPhoto();
-        fillFormWithFirestore();
-      } else {
-        loadFallbackPhoto();
-      }
-
-    } catch (err) {
-      console.error("Error loading Firestore user:", err);
-      loadFallbackPhoto();
+    if (status === "connected") {
+      statusEl.textContent = "Connected ✔";
+      actionEl.innerHTML = `
+        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.dashboardLink}')">
+          Open Stripe Dashboard
+        </div>`;
+    } else if (status === "pending") {
+      statusEl.textContent = "Onboarding Not Complete";
+      actionEl.innerHTML = `
+        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
+          Continue Setup
+        </div>`;
+    } else if (status === "needs_verification") {
+      statusEl.textContent = "Verification Required";
+      actionEl.innerHTML = `
+        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
+          Fix Now
+        </div>`;
+    } else {
+      statusEl.textContent = "Not Connected";
+      actionEl.innerHTML = `
+        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
+          Start Setup
+        </div>`;
     }
-  }
 
-  // ---------------------------
-  // FALLBACK PHOTO
-  // ---------------------------
-function loadFallbackPhoto() {
-  const shimmer = document.getElementById("shimmer");
-
-  // shimmer on
-  shimmer.style.display = "block";
-  // Determine the correct photo in priority order
-  const photo =
-    identity?.photoURL?.trim() ||
-    "https://www.tropicpulse.bz/Frustrated.png";
-    mark("USERRECORD: GRABBING PHOTO URL");
-
-  if (photo) {
-    img.src = photo;
-    img.onload = () => {
-      shimmer.style.display = "none";
-      img.style.display = "block";
-    };
-    img.onerror = () => {
-      shimmer.style.display = "block";
-      img.style.display = "none";
-      mark("IMAGE LOAD ERROR PHOTO URL → FALLBACK TO FIRESTORE PHOTO");
-      // fall through to Firestore photo
-      loadFirestorePhoto(user, img, shimmer);
-      shimmer.style.display = "none";
-      img.style.display = "block";
-    };
+  } catch (err) {
+    statusEl.textContent = "Error Loading Status!?";
   }
 }
 
-  function sanitizeDisplayName(name) {
-    if (!name) return "";
 
-    // Convert middle dot to bullet dot (normalize everything)
-    name = name.replace(/·/g, "•");
+// ============================================================================
+// DISPLAY NAME SANITIZER (KEEP — CLEAN)
+// ============================================================================
+function sanitizeDisplayName(name) {
+  if (!name) return "";
 
-    // Allow letters, numbers, spaces, hyphens, underscores, and the bullet dot
-    name = name.replace(/[^\p{L}\p{N}\s\-_•]/gu, "");
+  name = name.replace(/·/g, "•");
+  name = name.replace(/[^\p{L}\p{N}\s\-_•]/gu, "");
+  name = name.replace(/[\s\-_]+/g, "•");
+  name = name.replace(/•+/g, "•");
+  name = name.replace(/^•|•$/g, "");
 
-    // Convert spaces, hyphens, underscores → bullet dot
-    name = name.replace(/[\s\-_]+/g, "•");
+  name = name
+    .split("•")
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join("•");
 
-    // Collapse multiple dots
-    name = name.replace(/•+/g, "•");
+  return name;
+}
 
-    // Trim dots from start/end
-    name = name.replace(/^•|•$/g, "");
 
-    // Capitalize each segment
-    name = name
-      .split("•")
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join("•");
-
-    return name;
-  }
-
- // -----------------------------
-// UPDATE USER RECORD FROM UI (CLOUD FUNCTION ONLY)
-// -----------------------------
-async function updateUserRecordFromUI() {
+// ============================================================================
+// UPDATE USER RECORD (FINAL — CLEAN, IDENTITY‑CORRECT)
+// ============================================================================
+async function updateUserRecordFromUI(payloadOverride = null) {
   try {
-    mark("USER: UPDATE FROM UI");
-
-    // -----------------------------------------
-    // 1️⃣ Extract + normalize UI fields
-    // -----------------------------------------
     const rawName        = document.getElementById("fullName").value.trim();
     const rawDisplayName = document.getElementById("displayNameInput").value.trim();
     const rawEmail       = document.getElementById("email").value.trim().toLowerCase();
@@ -2068,57 +1781,43 @@ async function updateUserRecordFromUI() {
     const normalizedPhone  = normalizePhone(rawPhone, country);
 
     const token = localStorage.getItem("tp_token_v4");
-
-    if (!token || !identity?.uid) {
+    if (!token || !identityUser?.uid) {
       showMessage("Missing identity or token.", "error");
       return false;
     }
 
-    // -----------------------------------------
-    // 2️⃣ Send update request through Router → Backend
-    // -----------------------------------------
-    const data = await getHook({
-      type: "updateUserRecord",
-      token,
-      uid: identity.uid,
-      payload: {
-        name: rawName,
-        displayName: cleanDisplayName,
-        email: rawEmail,
-        phone: normalizedPhone,
-        country,
-        role,
-        receiveSMS: smsOpt,
-        receiveMassEmails: emailOpt,
-        photoURL: identity.photoURL || ""
-      }
-    });
-
-    // -----------------------------------------
-    // 3️⃣ Handle backend response
-    // -----------------------------------------
-    if (!data?.success) {
-      showMessage(data?.message || data?.error || "Unable to update profile.", "error");
-      return false;
-    }
-
-    // -----------------------------------------
-    // 4️⃣ Update local identity snapshot
-    // -----------------------------------------
-    identity = {
-      ...identity,
-      ...data.identity, // backend-normalized fields
+    const payload = payloadOverride || {
+      uid: currentUser.id,
       name: rawName,
       displayName: cleanDisplayName,
       email: rawEmail,
       phone: normalizedPhone,
       country,
-      role
+      role,
+      receiveSMS: smsOpt,
+      receiveMassEmails: emailOpt,
+      photoURL: currentUser.photoURL || ""
     };
 
-    localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
+    const data = await getHook({
+      type: "updateUserRecord",
+      token,
+      uid: currentUser.id,
+      payload
+    });
 
-    mark("USER: UPDATE COMPLETE");
+    if (!data?.success) {
+      showMessage(data?.message || data?.error || "Unable to update profile.", "error");
+      return false;
+    }
+
+    Object.assign(currentUser, payload);
+
+    if (currentUser.id === identityUser.uid) {
+      Object.assign(identityUser, payload);
+      localStorage.setItem("tp_identity_v4", JSON.stringify(identityUser));
+    }
+
     showMessage("Profile updated!", "success");
     return true;
 
@@ -2129,181 +1828,155 @@ async function updateUserRecordFromUI() {
   }
 }
 
+
+// ============================================================================
+// FALLBACK PHOTO (FINAL — CLEAN)
+// ============================================================================
+function loadFallbackPhoto() {
+  const shimmer = document.getElementById("shimmer");
+  shimmer.style.display = "block";
+
+  const photo =
+    currentUser?.photoURL?.trim() ||
+    identityUser?.photoURL?.trim() ||
+    "https://www.tropicpulse.bz/Frustrated.png";
+
+  img.src = photo;
+
+  img.onload = () => {
+    shimmer.style.display = "none";
+    img.style.display = "block";
+  };
+
+  img.onerror = () => {
+    shimmer.style.display = "none";
+    img.src = "https://www.tropicpulse.bz/Frustrated.png";
+    img.style.display = "block";
+  };
+}
+
+
+// ============================================================================
+// STRIPE REDIRECT (KEEP — CLEAN)
+// ============================================================================
+window.attemptStripeRedirect = function (url) {
+  if (url.includes("stripe.com") || url.includes("connect.stripe.com")) {
+    window.location.href = url;
+    return;
+  }
+
+  if (!formIsDirty) {
+    window.location.href = url;
+    return;
+  }
+
+  const row = document.getElementById("leaveConfirmRow");
+  row.style.display = "flex";
+
+  document.getElementById("leaveYesBtn").onclick = () => {
+    row.style.display = "none";
+    window.location.href = url;
+  };
+
+  document.getElementById("leaveNoBtn").onclick = () => {
+    row.style.display = "none";
+  };
+};
+
+
 // -----------------------------
-// USERRECORD BOOTSTRAP (NEW, SAFE)
+// USERRECORD BOOTSTRAP (NEW, SAFE, FINAL)
+// -----------------------------
+// -----------------------------
+// USERRECORD BOOTSTRAP (FINAL — CLEAN, SAFE)
 // -----------------------------
 (async () => {
-  function mark(label, position = false) {
+  // Minimal timing marker
+  let lastTime = nowMs();
+  function mark(label, absolute = false) {
     const now = nowMs();
-    if (position) {
-      console.log(`${label}: +${(now - firstTime).toFixed(1)}ms`);
-    } else {
-      console.log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
-    }
+    const diff = now - lastTime;
+    console.log(
+      absolute
+        ? `${label}: @${now.toFixed(1)}ms`
+        : `${label}: +${diff.toFixed(1)}ms`
+    );
     lastTime = now;
   }
 
-  // Always start visually idle
-  window.isIdle = true;
-
-  // Engine is allowed to run unless the flag exists
-  
-
-  const badge = document.getElementById("pulseband-badge");
-  const panel = document.getElementById("pulseband-panel");
+  // -----------------------------
+  // GLOBAL PAGE STATE (MATCH EXISTING SYSTEM)
+  // -----------------------------
+  window.isIdle       = true;
+  window.identityUser = window.identityUser || null;
+  window.currentUser  = window.currentUser  || null;
+  window.isAdmin      = window.isAdmin      || false;
 
   // -----------------------------
-  // PULSEBAND PANEL TOGGLE
+  // 1. LOAD IDENTITY (SINGLE SOURCE OF TRUTH)
   // -----------------------------
-  badge.onclick = (e) => {
-    e.stopPropagation();
-    panel.style.display = panel.style.display === "block" ? "none" : "block";
-  };
+  mark("USERRECORD: STARTING IDENTITY()");
+  identityUser = await identity(); // existing contract
 
-  document.addEventListener("click", (e) => {
-    const clickedInsidePanel = panel.contains(e.target);
-    const clickedBadge = badge.contains(e.target);
-    if (!clickedInsidePanel && !clickedBadge) {
-      panel.style.display = "none";
-    }
-  });
+  if (!identityUser) {
+    window.location.replace("/CheckEmail.html");
+    return;
+  }
+
+  isAdmin = identityUser.role === "Admin";
 
   // -----------------------------
-  // VISIBILITY → SESSIONCHECK
+  // 2. DETERMINE CURRENT USER (CONSUME CACHES ONLY)
   // -----------------------------
-  if (!document.__loyaltyVisibilityBound) {
-    document.__loyaltyVisibilityBound = true;
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        setTimeout(async () => await sessionCheck(), 250);
-        mark("✅ VisibilityChange RERAN SESSIONCHECK AND LET THE FUNCTION DO THE LOGIC");
-      }
-    });
+  if (isAdmin) {
+    // Uses existing contract: setupAdminUserDropdown() with no args.
+    setupAdminUserDropdown(); // uses getUsersCache + populateUserUI
+  } else {
+    const users = (typeof getUsersCache === "function") ? getUsersCache() : null;
+
+    currentUser =
+      (Array.isArray(users) && users.find(u => u.id === identityUser.uid)) ||
+      identityUser;
+
+    populateUserUI(currentUser);
   }
 
   // -----------------------------
-  // SESSIONCHECK
+  // 3. STRIPE VISIBILITY / TITLE
   // -----------------------------
-  mark("USERRECORD: STARTING SESSIONCHECK");
-  await sessionCheck();
+  const stripeSection = document.querySelector(".stripe-section");
+  const pageTitle     = document.getElementById("pageTitle");
+  const pageSubtitle  = document.getElementById("pageSubtitle");
 
-  const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-  const disabled = (window.isIdle === true && inactiveFlag === true);
-
-  // -----------------------------
-  // PULSEBAND LIVE HOOKS
-  // -----------------------------
-  pulseband.on("update", updatePulseBandPanel);
-
-  function pulsebandTransferFlash() {
-    badge.classList.add("transfer");
-    setTimeout(() => badge.classList.remove("transfer"), 250);
+  if (pageTitle) {
+    pageTitle.textContent = "Your Tropic Pulse Profile";
   }
 
-  pulseband.on("microWindow", () => {
-    pulsebandTransferFlash();
-  });
-
-  // -----------------------------
-  // TITLE / STRIPE VISIBILITY
-  // -----------------------------
-  if (!isLoggedIn) {
-    document.getElementById("pageTitle").textContent = "Create Account";
-    document.getElementById("pageSubtitle").textContent = "Set Up your Tropic Pulse Profile.";
-    document.querySelector(".stripe-section").style.display = "none";
+  if (pageSubtitle) {
+    pageSubtitle.textContent = "Update your account details and preferences.";
   }
 
+  if (stripeSection) {
+    stripeSection.style.display = "block";
+  }
+
+  // -----------------------------
+  // 4. HIDE LOADER + STRIPE STATUS
+  // -----------------------------
   hideTPLoader();
+  await loadStripeStatus(); // existing signature
 
-  // No Firestore user load here anymore — just Stripe status
-  await loadStripeStatus();
-
+  // -----------------------------
+  // 5. HERO HEADER ANIMATION
+  // -----------------------------
   document.body.classList.add("hero-header-intro");
-
-  mark("USERRECORD: STARTING HEROS ENTRANCE DOM");
+  mark("USERRECORD: STARTING HERO ENTRANCE");
   await runHeroHeaderEntrance();
 
-  // -----------------------------
-  // LIVE PULSEBAND UPDATE LOOP
-  // -----------------------------
-  setInterval(async () => {
-    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-    const disabled = (window.isIdle === true && inactiveFlag === true);
-    if (disabled) return;
-
-    const status = pulseband.getStatus();
-    const data = await window.getPulseBandRate();
-
-    pulseband.setStatus({
-      ...status,
-      ...data,
-      lastSyncTimestamp: nowMs(),
-      lastSyncSeconds: 0
-    });
-  }, 3000);
-
-  // -----------------------------
-  // LAST SYNC COUNTER LOOP
-  // -----------------------------
-  setInterval(() => {
-    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-    const disabled = (window.isIdle === true && inactiveFlag === true);
-
-    const status = pulseband.getStatus();
-    const ts = getSafeTimestamp(status);
-    const seconds = safeSeconds((nowMs() - ts) / 1000);
-
-    pulseband.setStatus({
-      ...status,
-      lastSyncTimestamp: ts,
-      lastSyncSeconds: seconds
-    });
-  }, 1000);
-
-  // -----------------------------
-  // ONE-TIME BADGE STATE LISTENERS
-  // -----------------------------
-  if (!window.__pulsebandListenersAttached) {
-    window.__pulsebandListenersAttached = true;
-
-    window.addEventListener("load", () => {
-      const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-      const disabled = (window.isIdle === true && inactiveFlag === true);
-
-      if (disabled) {
-        window.isIdle = true;
-        
-      } else {
-        window.isIdle = false;
-        
-      }
-
-      updatePulseBandImage();
-      updatePulseBandPanel();
-    });
-
-    document.getElementById("pb-mini-badge").addEventListener("click", () => {
-      const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-      const disabled = (window.isIdle === true && inactiveFlag === true);
-
-      if (disabled) {
-        localStorage.removeItem("pulseband_disabled");
-        window.isIdle = false;
-        
-      } else {
-        localStorage.setItem("pulseband_disabled", "1");
-        window.isIdle = true;
-        
-      }
-
-      updatePulseBandImage();
-      updatePulseBandPanel();
-    });
-  }
-
-  mark("ENDING DOM BOOTSTRAP");
+  mark("USERRECORD: ENDING DOM BOOTSTRAP");
   mark("USERRECORD: ENDING DOM LOAD", true);
 })();
+
 </script>
 </body>
 </html>

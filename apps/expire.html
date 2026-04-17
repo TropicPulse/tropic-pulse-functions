@@ -11,7 +11,8 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSX89KS63P"></script>
 <!-- Backend Connector Layer -->
 <script type="module">
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageScanner.js";
+  import { pulseband } from "/proxy/PulseBand.js";
+  import { getAuth, getHook, getMap, callHelper, attachScanner } from "/lib/Connectors/PageScanner.js";
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];

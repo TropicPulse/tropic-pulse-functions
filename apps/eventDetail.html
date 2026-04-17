@@ -17,7 +17,9 @@
 
 <!-- Backend Connector Layer -->
 <script type="module">
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageScanner.js";
+  import { pulseband } from "/proxy/PulseBand.js";
+  import { identity } from "./PulseIdentity.js";
+  import { getAuth, getHook, getMap, callHelper, attachScanner } from "/lib/Connectors/PageScanner.js";
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -921,16 +923,7 @@ body::before {
 <div id="tpToast"><span class="icon">📥</span><span id="tpToastMsg"></span></div>
 <script type="module">
      
-  window.__serverTimeOffset = 0;
-
-    window.setServerNow = function (serverNowMs) {
-      const localNow = Date.now();
-      window.__serverTimeOffset = serverNowMs - localNow;
-    };
-
-    window.nowMs = function () {
-      return Date.now() + window.__serverTimeOffset;
-    };
+  
   
   let currentUserLocation = null;
 let persistenceEnabled = true;

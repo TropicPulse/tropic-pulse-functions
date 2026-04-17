@@ -8,10 +8,23 @@
      - Loads on ANY frontend page
      - PulseBand.html dashboard works globally
    ============================================================ */
+// ============================================================================
+// PULSEBAND — CORE GPU + UPDATE + CLIENT + NET IMPORTS
+// ============================================================================
 
+// GPU Intelligence Layer
 import { BrainInput, PulseGPUBrainExport } from "../pulse-gpu/PulseGPUBrain.js";
 import { PulseGPURuntime } from "../pulse-gpu/PulseGPURuntime.js";
 import { PulseGPUEngine } from "../pulse-gpu/PulseGPUEngine.js";
+
+// Pulse Update Loop (device → band)
+import { PulseUpdate } from "../pulse-update/PulseUpdate.js";
+
+// Pulse Client (fetch wrapper)
+import { PulseClient } from "../pulse-client/PulseClient.js";
+
+// PulseNet (network intelligence)
+import { PulseNet } from "../pulse-net/PulseNet.js";
 
 
 (function () {

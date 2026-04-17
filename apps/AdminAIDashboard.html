@@ -319,7 +319,9 @@ input[type="file"] {
 </div>
 <!-- Backend Connector Layer -->
 <script type="module">
-  import { getAuth, getHook, getMap, callHelper } from "/lib/Connectors/PageScanner.js";
+  import { pulseband } from "/proxy/PulseBand.js";
+  import { identity } from "./PulseIdentity.js";
+  import { getAuth, getHook, getMap, callHelper, attachScanner } from "/lib/Connectors/PageScanner.js";
 </script>
 <script>
 /* -------------------------------------------------------

@@ -25,6 +25,20 @@ export async function callHelper(helperName, payload = {}) {
 }
 
 // ------------------------------------------------------------
+// ⭐ ATTACH SCANNER (identity-aware activation)
+// ------------------------------------------------------------
+export function attachScanner(id) {
+  if (!id) return;
+
+  // Store identity context globally for scanner + hooks
+  window.tp_identity = id;
+
+  console.log("[PageScanner] Attached with identity:", id.uid);
+
+  // (Optional) future: start observers, heartbeat, hook batching, etc.
+}
+
+// ------------------------------------------------------------
 // ⭐ GLOBAL ERROR INTERCEPTOR (A → A2)
 // ------------------------------------------------------------
 let healingInProgress = false;
