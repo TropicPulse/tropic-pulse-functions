@@ -1,15 +1,34 @@
 // ============================================================================
 // FILE: /apps/lib/Connectors/PageScanner.js
-// LAYER: A2‑LAYER (PAGE‑LEVEL SCANNER / PASS‑THROUGH)
+// LAYER: C‑LAYER (PUBLIC FRONTEND API)
 // ============================================================================
 
-import { route } from "./router.js";   // ⭐ FIXED: no getHook
+import { route } from "./router.js";
 
-let healingInProgress = false;
+// ------------------------------------------------------------
+// ⭐ PUBLIC API (C‑LAYER)
+// ------------------------------------------------------------
+export async function getAuth(jwtToken) {
+  return await route("auth", { jwtToken });
+}
+
+export async function getHook(name, payload = {}) {
+  return await route("hook", { name, payload });
+}
+
+export async function getMap(mapName) {
+  return await route("map", { mapName });
+}
+
+export async function callHelper(helperName, payload = {}) {
+  return await route("helper", { helperName, payload });
+}
 
 // ------------------------------------------------------------
 // ⭐ GLOBAL ERROR INTERCEPTOR (A → A2)
 // ------------------------------------------------------------
+let healingInProgress = false;
+
 window.addEventListener("error", async (event) => {
   if (healingInProgress) return;
 
@@ -24,14 +43,12 @@ window.addEventListener("error", async (event) => {
   console.warn("[PageScanner] Missing:", `${table}.${field}`);
 
   try {
-    // ⭐ SEND LOG + HEALING REQUEST TO ROUTER (A2 → B)
     await route("fetchField", {
       table,
       field,
       message: msg,
       page: window.location.pathname
     });
-
   } catch (err) {
     console.error("[PageScanner] Router fetch failed:", err);
   }
@@ -56,4 +73,3 @@ function parseMissingField(message) {
 
   return null;
 }
-// ============================================================================
