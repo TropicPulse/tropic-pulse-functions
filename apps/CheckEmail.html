@@ -690,13 +690,6 @@ function showTPLoader() {
   requestAnimationFrame(() => el.classList.add("show"));
 }
 
-function hideTPLoader() {
-  const el = document.getElementById("t-loading");
-  if (!el) return;
-  el.classList.remove("show");
-  setTimeout(() => (el.style.display = "none"), 150);
-}
-
 // -----------------------------
 // SHOW LOGIN UI (email + pin)
 // -----------------------------
