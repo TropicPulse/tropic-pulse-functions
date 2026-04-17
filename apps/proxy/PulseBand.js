@@ -18,13 +18,13 @@ import { PulseGPURuntime } from "../pulse-gpu/PulseGPURuntime.js";
 import { PulseGPUEngine } from "../pulse-gpu/PulseGPUEngine.js";
 
 // Pulse Update Loop (device → band)
-import { PulseUpdate } from "../pulse-update/PulseUpdate.js";
+import { PulseUpdate } from "./PulseUpdate.js";
 
 // Pulse Client (fetch wrapper)
-import { PulseClient } from "../pulse-client/PulseClient.js";
+import { PulseClient } from "./PulseClient.js";
 
 // PulseNet (network intelligence)
-import { PulseNet } from "../pulse-net/PulseNet.js";
+import { PulseNet } from "./PulseNet.js";
 
 
 (function () {
