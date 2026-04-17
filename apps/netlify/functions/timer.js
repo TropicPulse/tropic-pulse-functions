@@ -12,16 +12,13 @@
 import * as admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 
-
-// ---- TASK MODULES (IMPLEMENT THESE AS MODULAR BACKEND FILES) ---------------
-import { timerLogout } from "./timerLogout.js";               
-import { securitySweep } from "./securitySweep.js";           
-import { scheduledUserScoring } from "./scheduledUserScoring.js";               
-import { refreshEnvironmentSmart } from "./refreshEnvironmentSmart.js"; 
-import { pulsebandCleanup } from "./pulsebandCleanup.js";     
-import { pulseHistoryRepair } from "./pulseHistoryRepair.js"; 
-// ---------------------------------------------------------------------------
-
+// ---- TASK MODULES ----------------------------------------------------------
+import { timerLogout } from "./timerLogout.js";
+import { securitySweep } from "./securitySweep.js";
+import { scheduledUserScoring } from "./scheduledUserScoring.js";
+import { refreshEnvironmentSmart } from "./refreshEnvironmentSmart.js";
+import { pulsebandCleanup } from "./pulsebandCleanup.js";
+import { pulseHistoryRepair } from "./pulseHistoryRepair.js";
 // ---------------------------------------------------------------------------
 
 if (!admin.apps.length) {
@@ -38,41 +35,41 @@ const TASKS = [
     key: "logoutSweep",
     label: "Logout Sweep",
     intervalMs: 5 * 60 * 1000,
-    runner: runLogoutSweep
+    runner: timerLogout
   },
   {
     key: "userScoring",
     label: "User Scoring",
     intervalMs: 5 * 60 * 1000,
-    runner: runUserScoring
+    runner: scheduledUserScoring
   },
   {
-  key: "refreshEnvironmentSmart",
-  label: "Environment Refresh",
-  intervalMs: 30 * 60 * 1000,
-  runner: refreshEnvironmentSmart
-},
+    key: "refreshEnvironmentSmart",
+    label: "Environment Refresh",
+    intervalMs: 30 * 60 * 1000,
+    runner: refreshEnvironmentSmart
+  },
   {
     key: "securitySweep",
     label: "Security Sweep",
     intervalMs: 24 * 60 * 60 * 1000,
-    runner: runSecuritySweep
+    runner: securitySweep
   },
   {
     key: "pulsebandCleanup",
     label: "Pulseband Cleanup",
     intervalMs: 24 * 60 * 60 * 1000,
-    runner: runPulsebandCleanup
+    runner: pulsebandCleanup
   },
   {
     key: "pulseHistoryRepair",
     label: "Pulse History Repair",
     intervalMs: 60 * 60 * 1000,
-    runner: runPulseHistoryRepair
+    runner: pulseHistoryRepair
   }
 ];
 
-const STATE_DOC = "PULSE_OS_TIMER_STATE"; // single doc to track last runs
+const STATE_DOC = "PULSE_OS_TIMER_STATE";
 
 // ============================================================================
 // INTERNAL: LOAD / UPDATE STATE
@@ -138,7 +135,7 @@ export const handler = async () => {
           continue;
         }
 
-        await task.runner(); // task module does its own logging / writes
+        await task.runner();
         taskResult.ran = true;
         lastRuns[task.key] = now;
 
@@ -146,7 +143,7 @@ export const handler = async () => {
         taskResult.error = String(err);
 
         await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${task.key}`).set({
-          fn: "timerHeartbeat",
+          fn: "timer",
           task: task.key,
           label: task.label,
           error: String(err),
@@ -161,7 +158,7 @@ export const handler = async () => {
     await updateState(stateRef, { lastRuns });
 
     await db.collection("TIMER_LOGS").doc(logId).set({
-      fn: "timerHeartbeat",
+      fn: "timer",
       runId,
       tasks: results.tasks,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -178,7 +175,7 @@ export const handler = async () => {
 
   } catch (err) {
     await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}FATAL`).set({
-      fn: "timerHeartbeat",
+      fn: "timer",
       stage: "fatal",
       error: String(err),
       runId,
