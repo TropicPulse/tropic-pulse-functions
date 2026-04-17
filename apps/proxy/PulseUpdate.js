@@ -81,7 +81,7 @@ async function pollPulseTelemetry() {
     load: window.gpu?.runtime?.loadPercent ?? 0
   };
 
-  window.pulseband?.setStatus({
+  pulseband?.setStatus({
     live: {
       latency,
       phoneKbps: kbps,
@@ -99,8 +99,8 @@ async function pollPulseTelemetry() {
   });
 
   // Bridge into PulseNet (if present)
-  if (window.pulsenet && window.pulseband) {
-    window.pulsenet.updateSignalFromPulseBand(window.pulseband.getStatus());
+  if (window.pulsenet && pulseband) {
+    window.pulsenet.updateSignalFromPulseBand(pulseband.getStatus());
   }
 }
 

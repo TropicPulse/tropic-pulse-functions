@@ -1525,7 +1525,7 @@ async function sessionCheck() {
   hideTPLoader();
 
   // HERO ENTRANCE SNAPSHOT
-  const s = window.pulseband.getStatus();
+  const s = pulseband.getStatus();
 
   const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
   const disabled = (window.isIdle === true && inactiveFlag === true);
@@ -1557,10 +1557,10 @@ async function sessionCheck() {
 
     if (disabled) return;
 
-    const status = window.pulseband.getStatus();
+    const status = pulseband.getStatus();
     const data = await window.getPulseBandRate();
 
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       ...status,
       ...data,
       lastSyncTimestamp: nowMs(),
@@ -1575,12 +1575,12 @@ async function sessionCheck() {
     const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
     const disabled = (window.isIdle === true && inactiveFlag === true);
 
-    const status = window.pulseband.getStatus();
+    const status = pulseband.getStatus();
     const ts = getSafeTimestamp(status);
 
     const seconds = safeSeconds((nowMs() - ts) / 1000);
 
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       ...status,
       lastSyncTimestamp: ts,
       lastSyncSeconds: seconds

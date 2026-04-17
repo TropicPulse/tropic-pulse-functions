@@ -302,7 +302,7 @@ import { PulseGPUEngine } from "../pulse-gpu/PulseGPUEngine.js";
   // ------------------------------------------------------------
   // Expose globally
   // ------------------------------------------------------------
-  window.pulseband = pulseband;
+  pulseband = pulseband;
 
   // ------------------------------------------------------------
   // GPU + Engine Warmup

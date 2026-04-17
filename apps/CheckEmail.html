@@ -868,8 +868,8 @@ function showTPLoader() {
 function warmStartApp() {
   mark("🔥 WARM START INITIATED");
   try {
-    if (window.pulseband && typeof window.pulseband.setInitialUIState === "function") {
-      window.pulseband.setInitialUIState();
+    if (pulseband && typeof pulseband.setInitialUIState === "function") {
+      pulseband.setInitialUIState();
     }
   } catch (err) {
     mark("warmStartApp: PulseBand UI not ready → " + err);
@@ -1137,16 +1137,16 @@ function mark(label) {
 // UNIVERSAL PULSEBAND DATA PIPELINE (ADD TO EVERY PAGE)
 // ------------------------------------------------------
 function attachPulseBandPipeline() {
-  if (!window.PulseClient || !window.pulseband) {
+  if (!PulseClient || !pulseband) {
     console.warn("PulseBand pipeline: PulseClient or pulseband missing");
     return;
   }
 
   // 1. When PulseClient state changes → update PulseBand UI
-  window.PulseClient.onStateChange = (state) => {
+  PulseClient.onStateChange = (state) => {
     try {
-      if (window.pulseband.update) {
-        window.pulseband.update(state);
+      if (pulseband.update) {
+        pulseband.update(state);
       }
     } catch (err) {
       console.error("PulseBand.update failed:", err);
@@ -1155,9 +1155,9 @@ function attachPulseBandPipeline() {
 
   // 2. Immediately push initial state if available
   try {
-    if (window.PulseClient.getState && window.pulseband.update) {
-      const initial = window.PulseClient.getState();
-      window.pulseband.update(initial);
+    if (PulseClient.getState && pulseband.update) {
+      const initial = PulseClient.getState();
+      pulseband.update(initial);
     }
   } catch (err) {
     console.error("PulseBand initial update failed:", err);
@@ -1216,10 +1216,10 @@ function attachPulseBandPipeline() {
 
     if (disabled) return;
 
-    const status = window.pulseband.getStatus();
+    const status = pulseband.getStatus();
     const data = await window.getPulseBandRate();
 
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       ...status,
       ...data,
       lastSyncTimestamp: nowMs(),
@@ -1234,12 +1234,12 @@ function attachPulseBandPipeline() {
     const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
     const disabled = (window.isIdle === true && inactiveFlag === true);
 
-    const status = window.pulseband.getStatus();
+    const status = pulseband.getStatus();
     const ts = getSafeTimestamp(status);
 
     const seconds = safeSeconds((nowMs() - ts) / 1000);
 
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       ...status,
       lastSyncTimestamp: ts,
       lastSyncSeconds: seconds

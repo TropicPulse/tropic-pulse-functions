@@ -592,7 +592,7 @@ async function generatePulsebandActivity(s) {
     const throughputHealth = detectThroughputHealth(bytes, duration);
 
     // WRITE TO LIVE + SNAPSHOT (v3)
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       live: {
         latency: pulseMs,
         networkHealth: throughputHealth,
@@ -641,7 +641,7 @@ async function generatePulsebandActivity(s) {
     });
 
   } catch (err) {
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       lastError: String(err),
       live: { state: "error", route: "error" },
       lastUpdatedTs: nowMs()
@@ -1614,8 +1614,8 @@ function detectThrottling(callback) {
       );
 
       // Optional: send to backend logs
-      if (window.pulseband?.logEvent) {
-        window.pulseband.logEvent("throttle_event", {
+      if (pulseband?.logEvent) {
+        pulseband.logEvent("throttle_event", {
           state,
           lag: Math.round(lag),
           bigChange
@@ -1677,7 +1677,7 @@ async function getSystemInfo(s) {
     /* ---------------- VERSION FINGERPRINT ---------------- */
     appVersion: window.__APP_VERSION__ ?? null,
     webVersion: window.__WEB_VERSION__ ?? null,
-    pulsebandVersion: window.pulseband?.version ?? null,
+    pulsebandVersion: pulseband?.version ?? null,
     proxyVersion: window.__proxyHealth?.version ?? null,
     browserVersion: browser,
     osVersion,
@@ -1761,7 +1761,7 @@ async function renderSystemInfo(s) {
   const versions = {
     app: window.__APP_VERSION__ ?? "—",
     web: window.__WEB_VERSION__ ?? "—",
-    pulseband: window.pulseband?.version ?? "—",
+    pulseband: pulseband?.version ?? "—",
     proxy: window.__proxyHealth?.version ?? "—",
     os: sys.osVersion ?? "—",
     browser: sys.browser ?? "—",
@@ -2287,12 +2287,12 @@ function renderCriticalErrors() {
 }
 
 function debugPulseBandState() {
-  if (!window.pulseband) {
+  if (!pulseband) {
     console.warn("❌ PulseBand not loaded at all.");
     return;
   }
 
-  const s = window.pulseband.getStatus?.();
+  const s = pulseband.getStatus?.();
   if (!s) {
     console.warn("❌ getStatus() returned null or undefined.");
     return;
@@ -2303,11 +2303,11 @@ function debugPulseBandState() {
 
   console.group("🔍 PulseBand Engine State Debug");
 
-  console.log("pulseband exists:", !!window.pulseband);
-  console.log("getStatus exists:", !!window.pulseband.getStatus);
-  console.log("setStatus exists:", !!window.pulseband.setStatus);
-  console.log("emit exists:", !!window.pulseband.emit);
-  console.log("on exists:", !!window.pulseband.on);
+  console.log("pulseband exists:", !!pulseband);
+  console.log("getStatus exists:", !!pulseband.getStatus);
+  console.log("setStatus exists:", !!pulseband.setStatus);
+  console.log("emit exists:", !!pulseband.emit);
+  console.log("on exists:", !!pulseband.on);
 
   // -----------------------------
   // CORE ENGINE STATE
@@ -2379,8 +2379,8 @@ function debugPulseBandState() {
 async function waitForPulseBand() {
   return new Promise(resolve => {
     const check = () => {
-      if (window.pulseband &&
-          typeof window.pulseband.requestFullBusinessCache === "function") {
+      if (pulseband &&
+          typeof pulseband.requestFullBusinessCache === "function") {
         resolve();
       } else {
         setTimeout(check, 20);
@@ -2414,11 +2414,11 @@ async function waitForPulseBand() {
     console.warn("🔥 Redis historical data loaded into PulseBand snapshot.");
     
     setInterval(async () => {
-      let status = window.pulseband.getStatus();
+      let status = pulseband.getStatus();
       generatePulsebandActivity(status)
-      status = window.pulseband.getStatus();
+      status = pulseband.getStatus();
       const data = await window.getPulseBandRate();
-      window.pulseband.setStatus({
+      pulseband.setStatus({
         ...status,
         ...data,
         lastSyncTimestamp: nowMs(),
@@ -2426,8 +2426,8 @@ async function waitForPulseBand() {
       });
     }, 3000);
     setInterval(() => {
-      const s = window.pulseband.getStatus();
-      window.pulseband.setStatus({
+      const s = pulseband.getStatus();
+      pulseband.setStatus({
         ...s,
         lastSyncSeconds: (s.lastSyncSeconds || 0) + 1
       });
@@ -2443,9 +2443,9 @@ async function waitForPulseBand() {
     --------------------------------------------------------- */
     console.log("⏳ Waiting for PulseBand Dashboard to Render...");
     setInterval(() => {
-      let s = window.pulseband.getStatus();
+      let s = pulseband.getStatus();
       renderPulseStatusUnified(s);
-      s = window.pulseband.getStatus();
+      s = pulseband.getStatus();
       renderSystemInfo(s);        // upgraded system info
       renderProxyHealth(s);       // upgraded proxy health with bars
       renderLogs();              // upgraded logs

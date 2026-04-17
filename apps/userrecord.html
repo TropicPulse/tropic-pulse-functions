@@ -2193,14 +2193,14 @@ async function updateUserRecordFromUI() {
   // -----------------------------
   // PULSEBAND LIVE HOOKS
   // -----------------------------
-  window.pulseband.on("update", updatePulseBandPanel);
+  pulseband.on("update", updatePulseBandPanel);
 
   function pulsebandTransferFlash() {
     badge.classList.add("transfer");
     setTimeout(() => badge.classList.remove("transfer"), 250);
   }
 
-  window.pulseband.on("microWindow", () => {
+  pulseband.on("microWindow", () => {
     pulsebandTransferFlash();
   });
 
@@ -2231,10 +2231,10 @@ async function updateUserRecordFromUI() {
     const disabled = (window.isIdle === true && inactiveFlag === true);
     if (disabled) return;
 
-    const status = window.pulseband.getStatus();
+    const status = pulseband.getStatus();
     const data = await window.getPulseBandRate();
 
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       ...status,
       ...data,
       lastSyncTimestamp: nowMs(),
@@ -2249,11 +2249,11 @@ async function updateUserRecordFromUI() {
     const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
     const disabled = (window.isIdle === true && inactiveFlag === true);
 
-    const status = window.pulseband.getStatus();
+    const status = pulseband.getStatus();
     const ts = getSafeTimestamp(status);
     const seconds = safeSeconds((nowMs() - ts) / 1000);
 
-    window.pulseband.setStatus({
+    pulseband.setStatus({
       ...status,
       lastSyncTimestamp: ts,
       lastSyncSeconds: seconds

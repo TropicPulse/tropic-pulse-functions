@@ -41,8 +41,8 @@ function pushPulseLog(entry) {
     window.__pulseLogs.push(log);
     if (window.__pulseLogs.length > 200) window.__pulseLogs.shift();
 
-    if (window.pulseband?.emit) {
-      window.pulseband.emit("log", log);
+    if (pulseband?.emit) {
+      pulseband.emit("log", log);
     }
 
   } catch (err) {
@@ -95,12 +95,12 @@ function saveLocalCache(cache, version, hash) {
 
 // ⭐ FULL CACHE (fallback or initial load)
 async function fetchFullUsersCache() {
-  return await window.pulseband.requestFullUsersCache();
+  return await pulseband.requestFullUsersCache();
 }
 
 // ⭐ DELTA CACHE (v3 optimization)
 async function fetchUsersDelta(baseVersion) {
-  return await window.pulseband.requestUsersCacheDelta(baseVersion);
+  return await pulseband.requestUsersCacheDelta(baseVersion);
 }
 
 // ---------------------------------------------------------

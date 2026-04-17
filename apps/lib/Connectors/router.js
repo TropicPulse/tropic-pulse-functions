@@ -13,7 +13,6 @@
 // ============================================================================
 
 import { RouterMemory } from "./RouterMemory.js";
-import { timer } from "./timer.js";
 
 // ------------------------------------------------------------
 // ⭐ UNIVERSAL SYS‑CALL FUNCTION (A → B → C)

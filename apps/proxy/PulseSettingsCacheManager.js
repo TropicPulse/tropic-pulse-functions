@@ -42,8 +42,8 @@ function pushPulseLog(entry) {
     window.__pulseLogs.push(log);
     if (window.__pulseLogs.length > 200) window.__pulseLogs.shift();
 
-    if (window.pulseband?.emit) {
-      window.pulseband.emit("log", log);
+    if (pulseband?.emit) {
+      pulseband.emit("log", log);
     }
 
   } catch (err) {
@@ -95,7 +95,7 @@ function saveLocalSettingsCache(cache, version, hash) {
 // ---------------------------------------------------------
 async function fetchFullSettingsCache() {
   // Wire this to PulseBand full OR your /proxy endpoint
-  return await window.pulseband.requestFullSettingsCache();
+  return await pulseband.requestFullSettingsCache();
 }
 
 // ---------------------------------------------------------

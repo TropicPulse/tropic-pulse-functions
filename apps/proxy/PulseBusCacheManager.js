@@ -43,8 +43,8 @@ function pushPulseLog(entry) {
     window.__pulseLogs.push(log);
     if (window.__pulseLogs.length > 200) window.__pulseLogs.shift();
 
-    if (window.pulseband?.emit) {
-      window.pulseband.emit("log", log);
+    if (pulseband?.emit) {
+      pulseband.emit("log", log);
     }
 
   } catch (err) {
@@ -96,11 +96,11 @@ function saveLocalBusCache(cache, version, hash) {
 // SERVER CALLS
 // ---------------------------------------------------------
 async function fetchCacheControl() {
-  return await window.pulseband.requestCacheControl();
+  return await pulseband.requestCacheControl();
 }
 
 async function fetchFullBusinessCache() {
-  return await window.pulseband.requestFullBusinessCache();
+  return await pulseband.requestFullBusinessCache();
 }
 
 // ---------------------------------------------------------

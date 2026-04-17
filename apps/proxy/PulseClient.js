@@ -54,7 +54,7 @@ async function pulseFetch(url) {
     else data = await res.arrayBuffer();
 
     // Report to PulseBand
-    window.pulseband?.setStatus({
+    pulseband?.setStatus({
       snapshot: {
         advantage: 1.0, // placeholder until v6.1 fetch metrics
         timeSaved: 0
@@ -66,7 +66,7 @@ async function pulseFetch(url) {
     });
 
     // Report to PulseNet
-    window.pulsenet?.updateSignalFromPulseBand(window.pulseband.getStatus());
+    window.pulsenet?.updateSignalFromPulseBand(pulseband.getStatus());
 
     return { data, meta: { route: "Pulse", bytes, durationMs } };
 
@@ -85,7 +85,7 @@ async function pulseFetch(url) {
     else data = await fbRes.arrayBuffer();
 
     // Report fallback to PulseBand
-    window.pulseband?.setStatus({
+    pulseband?.setStatus({
       live: {
         route: "Phone",
         lastSyncTimestamp: Date.now()
@@ -93,7 +93,7 @@ async function pulseFetch(url) {
     });
 
     // Report to PulseNet
-    window.pulsenet?.updateSignalFromPulseBand(window.pulseband.getStatus());
+    window.pulsenet?.updateSignalFromPulseBand(pulseband.getStatus());
 
     return { data, meta: { route: "Phone", bytes, durationMs: fbDuration } };
   }
@@ -102,6 +102,6 @@ async function pulseFetch(url) {
 /* ------------------------------------------------------------
    Public API
 ------------------------------------------------------------ */
-window.PulseClient = {
+PulseClient = {
   get: pulseFetch
 };
