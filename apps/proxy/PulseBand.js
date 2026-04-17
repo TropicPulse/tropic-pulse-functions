@@ -305,7 +305,7 @@ export const pulseband = {
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("[PulseBand] DOM ready — warming up…");
 
-  await PulseBand.initGraphics({
+  await pulseband.initGraphics({
     textures: [],
     meshes: [],
     animations: [],
@@ -313,7 +313,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     scenes: []
   });
 
-  await PulseBand.initEngine();
+  await pulseband.initEngine();
 
   console.log("[PulseBand] Warmup complete.");
 });
