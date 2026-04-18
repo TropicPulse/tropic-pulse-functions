@@ -693,15 +693,16 @@ nav a:hover::after {
 
 .hero-grid {
   display: grid;
-  gap: 200px;
   align-items: center;
+  gap: clamp(24px, 5vw, 80px);
 }
 
 @media (min-width: 900px) {
   .hero-grid {
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   }
 }
+
 
 .hero-eyebrow {
   margin-bottom: 12px;
@@ -760,9 +761,11 @@ nav a:hover::after {
 
 .phone-screen-img {
   width: 100%;
-  height: 520px;
+  height: auto;
+  aspect-ratio: 9 / 19.5;
   object-fit: cover;
 }
+
 
 .phone-glow {
   position: absolute;
@@ -1261,499 +1264,175 @@ nav a:hover::after {
   </header>
 
   <!-- OS HERO (NEW) -->
-  <section class="hero gradient-bg" id="tp-os-hero">
-    <div class="hero-bg"></div>
-    <div class="hero-overlay"></div>
+<section class="hero gradient-bg" id="tp-os-hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
 
-    <div class="hero-inner">
-      <div class="hero-grid">
+  <div class="hero-inner">
+    <div class="hero-grid">
 
-        <div>
-          <div class="hero-eyebrow">
-            <span class="badge">A Browser-Native Operating System</span>
-          </div>
-
-          <h1 class="hero-title">Tropic Pulse OS</h1>
-
-          <p class="hero-subtitle">
-            Not an app. Not a website. A GPU‑accelerated operating system that runs inside your browser — powering identity, performance, and live intelligence for anything you build.
-          </p>
-
-          <div class="hero-ctas">
-            <a href="#tp-live-demo" class="btn btn-primary">Test the OS</a>
-            <a href="#tp-use-cases" class="btn btn-outline">See What It Powers</a>
-          </div>
-
-          <div class="hero-meta">
-            Built for Belize. Designed for the world. Engineered for the future.
-          </div>
+      <div>
+        <div class="hero-eyebrow">
+          <span class="badge">A Browser-Native Operating System</span>
         </div>
 
-        <div class="hero-phone">
-          <div class="phone-frame">
-            <div class="phone-inner">
-              <img src="https://www.tropicpulse.bz/Phone1.png" class="phone-screen-img" alt="OS Preview">
-            </div>
-          </div>
-          <div class="phone-glow"></div>
-        </div>
+        <h1 class="hero-title">Tropic Pulse OS</h1>
 
-      </div>
-    </div>
-  </section>
-
-  <!-- LIVE DEMO (NEW) -->
-  <section class="section" id="tp-live-demo" style="background:#000;color:#fff;">
-    <div class="container">
-
-      <div class="section-header" style="text-align:center;">
-        <div class="section-eyebrow" style="color:#FFD400;">Live in Your Browser</div>
-        <h2 class="section-title" style="color:#fff;">Test Tropic Pulse OS</h2>
-        <p class="section-subtitle" style="color:#ddd;max-width:720px;margin:0 auto;">
-          Upload a file and watch Tropic Pulse wrap it with GPU acceleration, PulseBand metrics, and network intelligence — right inside your browser.
+        <p class="hero-subtitle">
+          Not an app. Not a website. A GPU‑accelerated operating system that runs inside your browser — powering identity, performance, and live intelligence for anything you build.
         </p>
-      </div>
 
-      <div class="feature-grid" style="margin-top:28px;grid-template-columns:minmax(0,2fr) minmax(0,1.4fr);align-items:flex-start;">
-
-        <div class="feature-card" style="background:#111;border-radius:16px;padding:20px;">
-          <h3 style="margin-bottom:10px;">Test this feature</h3>
-          <p style="font-size:0.95rem;opacity:0.9;margin-bottom:14px;">
-            You can run this test once every 15 minutes per device.
-          </p>
-
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <input type="file" id="tp-test-file" accept="image/*,application/json" />
-            <button class="btn btn-primary" id="tp-test-button">Run Test</button>
-            <div id="tp-test-status" style="font-size:0.85rem;opacity:0.85;"></div>
-          </div>
+        <div class="hero-ctas">
+          <a href="#tp-live-demo" class="btn btn-primary">Test the OS</a>
+          <a href="#tp-use-cases" class="btn btn-outline">See What It Powers</a>
         </div>
 
-        <div class="feature-card" style="background:#111;border-radius:16px;padding:20px;">
-          <h3 style="margin-bottom:10px;">What you'll see</h3>
-          <ul style="list-style:none;padding:0;margin:0;font-size:0.9rem;opacity:0.9;">
-            <li>• GPU warm state & smoothness</li>
-            <li>• PulseBand advantage score</li>
-            <li>• Network route prediction</li>
-            <li>• CPU & memory impact</li>
-          </ul>
-          <div id="tp-test-metrics" style="margin-top:14px;font-size:0.85rem;color:#FFD400;">
-            Metrics will appear here after your test runs.
+        <div class="hero-meta">
+          Built for Belize. Designed for the world. Engineered for the future.
+        </div>
+      </div>
+
+      <div class="hero-phone">
+        <div class="phone-frame">
+          <div class="phone-inner">
+            <img src="https://www.tropicpulse.bz/Phone1.png" class="phone-screen-img" alt="OS Preview">
           </div>
         </div>
-
+        <div class="phone-glow"></div>
       </div>
+
     </div>
-  </section>
-
-  <!-- USE CASES (NEW) -->
-  <section class="section" id="tp-use-cases">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow">More than Delivery</div>
-        <h2 class="section-title">One OS, Many Front Doors!</h2>
-        <p class="section-subtitle">
-          Tropic Pulse started with Food Delivery! Now it powers Dashboards, Marketplaces, Local Networks, and Real-Time Overlays that sit on Top of any Product.
-        </p>
-      </div>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/PulseBackbone.png" alt="Pulse Backbone" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Pulse Backbone</div>
-            <div class="feature-card-text">
-              The layered core of the new internet — <strong>PulseBand</strong> for speed and reliability, <strong>PulseNet</strong> for unbreakable signal, and <strong>PulseMesh</strong> for community coverage.<br />
-              Together they form a living infrastructure that adapts, heals, and expands in real time.
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/LocalNetworks.png" alt="Local Networks" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Local Networks</div>
-            <div class="feature-card-text">
-              Build living maps of Cities, Islands, or Campuses with Identity and Trust Baked In!
-            </div>
-          </div>
-        </div>
-
-        <div class="feature-grid">
-          <div class="feature-card">
-            <img src="https://www.tropicpulse.bz/PulseEarn.png" alt="Pulse Earn" />
-            <div class="feature-card-overlay">
-              <div class="feature-card-title">Pulse Earn</div>
-              <div class="feature-card-text">
-                A system so advanced it feels Impossible — value, motion, and momentum fused into one living layer.<br />
-                <strong>Coming Soon.</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/PulseGPU.png" alt="Pulse-GPU" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Pulse‑GPU</div>
-            <div class="feature-card-text">
-              Feels less like a dashboard and more like a graphics engine for your entire business — everything rendered in real time.<br />
-              <strong>Coming Soon.</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/PulseLoyalty.png" alt="Loyalty & Identity" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Identity & Loyalty</div>
-            <div class="feature-card-text">
-              Device‑Aware Identity, Points, and Rewards that travel across every Experience — including Referrals that Reward both sides of the Connection.
-            </div>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/AdminPanels.png" alt="Admin Dashboards" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Admin Dashboards</div>
-            <div class="feature-card-text">
-              Give operators a live view of Performance, Health, and Behavior — powered by PulseBand!
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- DELIVERY + DIRECTORY (UPGRADED) -->
-  <section class="section" id="tp-delivery-directory" style="background:#ffff99;">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow">Still here. Still fast.</div>
-        <h2 class="section-title">Delivery & Directory — Powered by the OS</h2>
-        <p class="section-subtitle">
-          The original Tropic Pulse experience now runs on top of the OS — with 1ms load times, GPU acceleration, and PulseBand intelligence.
-        </p>
-      </div>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/PulseDelivery.png" alt="Delivery" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Delivery</div>
-            <div class="feature-card-text">
-              The fastest delivery interface in Belize — now running on Tropic Pulse OS.
-            </div>
-            <a href="https://www.tropicpulse.bz/PulseDelivery.html" class="btn btn-primary">Explore Delivery</a>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <img src="https://www.tropicpulse.bz/PulseDirectory.png" alt="Directory" />
-          <div class="feature-card-overlay">
-            <div class="feature-card-title">Directory</div>
-            <div class="feature-card-text">
-              Shops, services, events, and more — all accelerated by the OS.
-            </div>
-            <a href="https://www.tropicpulse.bz/businesspage.html" class="btn btn-primary">Explore Directory</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HALF 2 (testimonials, pricing, FAQ, contact, footer, JS) WILL COME NEXT -->
-     <!-- TESTIMONIALS -->
-  <section class="section" id="testimonials">
-  <div class="testimonials-container">
-
-    <div class="testimonials-wrapper" style="background:#FFD400;padding:8px;border-radius:20px;">
-      <div class="testimonials-inner" style="background:#000;border-radius:16px;padding:8px;color:#fff;">
-
-        <div class="testimonials-header" style="text-align:center;margin-bottom:35px;">
-          <div class="testimonials-eyebrow" style="color:#FFD400;font-size:0.9rem;letter-spacing:1px;margin-bottom:6px;">
-            What people are saying
-          </div>
-          <h2 class="testimonials-title" style="color:#FFD400;margin-bottom:10px;">
-            Loved by Locals, Visitors, and Vendors
-          </h2>
-          <p class="testimonials-subtitle" style="color:#fff;opacity:0.85;max-width:750px;margin:0 auto;">
-            Tropic Pulse is built with the community — for the community. Here’s what early users are saying.
-          </p>
-        </div>
-
-        <div class="feature-grid" style="display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
-
-          <div class="testimonial-card" style="background:#111;border-radius:14px;padding:22px;color:#fff;">
-            <div style="font-size:0.9rem;color:#FFD400;margin-bottom:8px;">Customer</div>
-            <p style="font-size:0.95rem;margin-bottom:12px;opacity:0.9;">
-              “I used to bounce between apps, Facebook groups, and word of mouth. Now I just open Tropic Pulse and everything I need is there.”
-            </p>
-            <div style="font-weight:600;color:#FFD400;">Marisol, San Pedro</div>
-          </div>
-
-          <div class="testimonial-card" style="background:#111;border-radius:14px;padding:22px;color:#fff;">
-            <div style="font-size:0.9rem;color:#FFD400;margin-bottom:8px;">Restaurant Owner</div>
-            <p style="font-size:0.95rem;margin-bottom:12px;opacity:0.9;">
-              “We finally have a platform that feels like it was built for Belize — not just copied from somewhere else.”
-            </p>
-            <div style="font-weight:600;color:#FFD400;">Carlos, Beachfront Grill</div>
-          </div>
-
-          <div class="testimonial-card" style="background:#111;border-radius:14px;padding:22px;color:#fff;">
-            <div style="font-size:0.9rem;color:#FFD400;margin-bottom:8px;">Deliverer</div>
-            <p style="font-size:0.95rem;margin-bottom:12px;opacity:0.9;">
-              “I know the island well — now I get paid to use that knowledge. The app makes it simple.”
-            </p>
-            <div style="font-weight:600;color:#FFD400;">Jamal, Deliverer</div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
   </div>
 </section>
 
-  <!-- PRICING -->
-  <section class="section" id="pricing" style="background:#ffff99;">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow">Simple, Transparent</div>
-        <h2 class="section-title">Pricing that works for Belize</h2>
-        <p class="section-subtitle">
-          Tropic Pulse is built to support local businesses — with clear, straightforward pricing and no surprises.
-        </p>
-      </div>
-
-      <div class="feature-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
-        <div class="feature-card" style="height:auto;box-shadow:0 4px 14px rgba(0,0,0,0.08);color:#1a1a1a;">
-          <div style="background:#ffffff;padding:24px;">
-            <h3 style="font-size:1.3rem;margin-bottom:6px;">Customers</h3>
-            <p style="font-size:0.95rem;color:#555;margin-bottom:12px;">Free to browse, explore, and order.</p>
-            <ul style="list-style:none;padding:0;margin:0 0 16px 0;font-size:0.9rem;color:#555;">
-              <li>• No subscription required</li>
-              <li>• Transparent delivery fees</li>
-              <li>• Pay directly in the app (where available)</li>
-            </ul>
-            <span style="font-size:0.85rem;color:#777;">Perfect for locals and visitors exploring Belize.</span>
-          </div>
-        </div>
-
-        <div class="feature-card" style="height:auto;box-shadow:0 4px 14px rgba(0,0,0,0.08);color:#1a1a1a;">
-          <div style="background:#ffffff;padding:24px;">
-            <h3 style="font-size:1.3rem;margin-bottom:6px;">Vendors</h3>
-            <p style="font-size:0.95rem;color:#555;margin-bottom:12px;">Simple, fair fees that scale with your business.</p>
-            <ul style="list-style:none;padding:0;margin:0 0 16px 0;font-size:0.9rem;color:#555;">
-              <li>• No setup fee for early partners</li>
-              <li>• Per‑order commission structure</li>
-              <li>• Payouts via Stripe Connect</li>
-            </ul>
-            <span style="font-size:0.85rem;color:#777;">Talk to us for custom terms as we grow.</span>
-          </div>
-        </div>
-
-        <div class="feature-card" style="height:auto;box-shadow:0 4px 14px rgba(0,0,0,0.08);color:#1a1a1a;">
-          <div style="background:#ffffff;padding:24px;">
-            <h3 style="font-size:1.3rem;margin-bottom:6px;">Deliverers</h3>
-            <p style="font-size:0.95rem;color:#555;margin-bottom:12px;">Earn per delivery, plus tips.</p>
-            <ul style="list-style:none;padding:0;margin:0 0 16px 0;font-size:0.9rem;color:#555;">
-              <li>• Flexible schedule</li>
-              <li>• Keep your tips</li>
-              <li>• Clear earnings breakdown</li>
-            </ul>
-            <span style="font-size:0.85rem;color:#777;">We’re building a fair, sustainable ecosystem for everyone.</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="section" id="faq" style="background: #ffff99;">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow">Questions, Answered</div>
-        <h2 class="section-title">Frequently Asked Questions</h2>
-        <p class="section-subtitle">
-          Here are some of the most common questions about Tropic Pulse. Want to know more? Reach out anytime.
-        </p>
-      </div>
-
-      <div class="faq-list" style="max-width:800px;margin:0 auto;">
-        <div class="faq-item" data-faq>
-          <button class="faq-question">
-            <span>How does Tropic Pulse work?</span>
-            <span class="faq-toggle">+</span>
-          </button>
-          <div class="faq-answer">
-            Tropic Pulse connects customers, vendors, and deliverers in one app. Customers browse and order, vendors
-            manage their menus and offerings, and deliverers fulfill orders across San Pedro and beyond.
-          </div>
-        </div>
-
-        <div class="faq-item" data-faq>
-          <button class="faq-question">
-            <span>Is Tropic Pulse free to use?</span>
-            <span class="faq-toggle">+</span>
-          </button>
-          <div class="faq-answer">
-            For customers, browsing and exploring is free. Vendors and deliverers participate under a simple, transparent
-            fee structure designed to support local businesses and fair earnings.
-          </div>
-        </div>
-
-        <div class="faq-item" data-faq>
-          <button class="faq-question">
-            <span>How do I become a Vendor?</span>
-            <span class="faq-toggle">+</span>
-          </button>
-          <div class="faq-answer">
-            Use the contact form below or email us directly with your business details. We’ll walk you through onboarding,
-            menu setup, and payouts so you can start receiving orders quickly.
-          </div>
-        </div>
-
-        <div class="faq-item" data-faq>
-          <button class="faq-question">
-            <span>How do payouts work?</span>
-            <span class="faq-toggle">+</span>
-          </button>
-          <div class="faq-answer">
-            Payouts are handled via Stripe Connect, giving vendors and deliverers a secure, reliable way to receive funds.
-            Specific payout schedules and options are discussed during onboarding.
-          </div>
-        </div>
-
-        <div class="faq-item" data-faq>
-          <button class="faq-question">
-            <span>Where is Tropic Pulse available?</span>
-            <span class="faq-toggle">+</span>
-          </button>
-          <div class="faq-answer">
-            Tropic Pulse is launching in San Pedro, Belize, with plans to expand across the country and into the wider
-            Caribbean as we grow.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- CONTACT + FOOTER -->
-  <section class="intouchsection" id="contact" style="background:#ffff99;padding:0;margin-bottom:60px;">
+<!-- LIVE DEMO (NEW) -->
+<section class="section" id="tp-live-demo" style="background:#000;color:#fff;">
   <div class="container">
 
-    <!-- Black Outer Border -->
-    <div style="background:#000;
-      padding:6px;
-      border-radius:18px;">
-
-      <!-- Beach Image Inner Box -->
-      <div style="background:url('https://www.tropicpulse.bz/Beach.png') center/cover no-repeat;
-        border-radius:20px;
-        padding:16px;">
-
-        <!-- Content Overlay -->
-        <div style="background:rgba(0,0,0,0.55);
-          border-radius:14px;
-          padding:6px;
-          color:#fff;">
-
-          <div class="section-header">
-            <div class="section-eyebrow" style="color:#FFD400;font-size:0.9rem;letter-spacing:1px;margin-bottom:6px;">
-              Get in Touch
-            </div>
-            <h2 class="section-title" style="color:#FFD400;margin-bottom:30px;">
-              Let’s build the future of Belize together
-            </h2>
-            <p class="section-subtitle" style="color:#fff;opacity:0.9;max-width:650px;margin:0 auto;">
-              Whether you’re a vendor, deliverer, or partner — we’d love to hear from you.
-            </p>
-          </div>
-
-          <div class="two-column" style="display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;">
-
-            <!-- FORM -->
-            <div style="flex:1;min-width:280px;">
-              <form style="background:rgba(0,0,0,0.7);border-radius:16px;padding:22px;color:#fff;">
-                <div style="margin-bottom:12px;">
-                  <label for="name" style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Name</label>
-                  <input id="name" type="text" placeholder="Your name" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #333;background:#000;color:#fff;font-size:0.9rem;">
-                </div>
-
-                <div style="margin-bottom:12px;">
-                  <label for="email" style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Email</label>
-                  <input id="email" type="email" placeholder="you@example.com" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #333;background:#000;color:#fff;font-size:0.9rem;">
-                </div>
-
-                <div style="margin-bottom:12px;">
-                  <label for="role" style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">I’m interested as a...</label>
-                  <select id="role" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #333;background:#000;color:#fff;font-size:0.9rem;">
-                    <option>Customer</option>
-                    <option>Vendor</option>
-                    <option>Deliverer</option>
-                    <option>Partner</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-
-                <div style="margin-bottom:16px;">
-                  <label for="message" style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Message</label>
-                  <textarea id="message" rows="4" placeholder="Tell us a bit about what you have in mind..." style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #333;background:#000;color:#fff;font-size:0.9rem;"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width:100%;background:#FFD400;color:#000;font-weight:700;border:none;border-radius:10px;padding:12px 0;">
-                  Send message
-                </button>
-              </form>
-            </div>
-
-            <!-- TEXT BLOCK -->
-            <div class="contact-text-block" style="flex:1;min-width:280px;color:#fff;">
-              <h2 style="font-size:1.6rem;margin-bottom:10px;color:#FFD400;">Tropic Pulse — San Pedro, Belize</h2>
-              <p style="color:#fff;opacity:0.9;max-width:650px;margin:0 auto;">
-                We’re building Tropic Pulse from the ground up with Belize in mind — combining modern technology with the
-                warmth, flavor, and energy of the Caribbean.
-              </p>
-
-              <ul class="icon-list" style="margin-top:10px;list-style:none;padding:0;">
-                <li style="display:flex;align-items:center;margin-bottom:8px;">
-                  <div class="icon-bullet" style="margin-right:8px;color:#FFD400;">@</div>
-                  <span><strong><a href="mailto:Sales@TropicPulse.bz" style="color:#FFD400;">Sales@TropicPulse.bz</a></strong></span>
-                </li>
-
-                <li style="display:flex;align-items:center;margin-bottom:8px;">
-                  <div class="icon-bullet" style="margin-right:8px;color:#FFD400;">☎</div>
-                  <span><strong><a href="https://wa.me/15096077261" style="color:#FFD400;">+1 (509) 607‑7261</a></strong></span>
-                </li>
-
-                <li style="display:flex;align-items:center;margin-bottom:8px;">
-                  <div class="icon-bullet" style="margin-right:8px;color:#FFD400;">🌐</div>
-                  <span><strong><a href="https://www.tropicpulse.bz" style="color:#FFD400;">https://www.tropicpulse.bz</a></strong></span>
-                </li>
-              </ul>
-
-              <p style="color:#fff;opacity:0.9;max-width:650px;margin:0 auto;">
-                Interested in partnering, investing, or collaborating? Reach out — we’re always open to conversations that
-                move Belize forward.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
+    <div class="section-header" style="text-align:center;">
+      <div class="section-eyebrow" style="color:#FFD400;">Live in Your Browser</div>
+      <h2 class="section-title" style="color:#fff;">Test Tropic Pulse OS</h2>
+      <p class="section-subtitle" style="color:#ddd;max-width:720px;margin:0 auto;">
+        Upload a file and watch Tropic Pulse wrap it with GPU acceleration, PulseBand metrics, and network intelligence — right inside your browser.
+      </p>
     </div>
 
+    <div class="feature-grid" style="margin-top:28px;grid-template-columns:minmax(0,2fr) minmax(0,1.4fr);align-items:flex-start;">
+
+      <div class="feature-card" style="background:#111;border-radius:16px;padding:20px;">
+        <h3 style="margin-bottom:10px;">Test this feature</h3>
+        <p style="font-size:0.95rem;opacity:0.9;margin-bottom:14px;">
+          You can run this test once every 15 minutes per device.
+        </p>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input type="file" id="tp-test-file" accept="image/*,application/json" />
+          <button class="btn btn-primary" id="tp-test-button">Run Test</button>
+          <div id="tp-test-status" style="font-size:0.85rem;opacity:0.85;"></div>
+        </div>
+      </div>
+
+      <div class="feature-card" style="background:#111;border-radius:16px;padding:20px;">
+        <h3 style="margin-bottom:10px;">What you'll see</h3>
+        <ul style="list-style:none;padding:0;margin:0;font-size:0.9rem;opacity:0.9;">
+          <li>• GPU warm state & smoothness</li>
+          <li>• PulseBand advantage score</li>
+          <li>• Network route prediction</li>
+          <li>• CPU & memory impact</li>
+        </ul>
+        <div id="tp-test-metrics" style="margin-top:14px;font-size:0.85rem;color:#FFD400;">
+          Metrics will appear here after your test runs.
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
+
+<!-- USE CASES (NEW) -->
+<section class="section" id="tp-use-cases">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">More than Delivery</div>
+      <h2 class="section-title">One OS, Many Front Doors!</h2>
+      <p class="section-subtitle">
+        Tropic Pulse started with Food Delivery! Now it powers Dashboards, Marketplaces, Local Networks, and Real-Time Overlays that sit on Top of any Product.
+      </p>
+    </div>
+
+    <!-- FIXED: ONE GRID, ALL CARDS AS SIBLINGS -->
+    <div class="feature-grid">
+
+      <div class="feature-card">
+        <img src="https://www.tropicpulse.bz/PulseBackbone.png" alt="Pulse Backbone" />
+        <div class="feature-card-overlay">
+          <div class="feature-card-title">Pulse Backbone</div>
+          <div class="feature-card-text">
+            The layered core of the new internet — <strong>PulseBand</strong> for speed and reliability,
+            <strong>PulseNet</strong> for unbreakable signal, and <strong>PulseMesh</strong> for community coverage.<br />
+            Together they form a living infrastructure that adapts, heals, and expands in real time.
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <img src="https://www.tropicpulse.bz/LocalNetworks.png" alt="Local Networks" />
+        <div class="feature-card-overlay">
+          <div class="feature-card-title">Local Networks</div>
+          <div class="feature-card-text">
+            Build living maps of Cities, Islands, or Campuses with Identity and Trust Baked In!
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <img src="https://www.tropicpulse.bz/PulseEarn.png" alt="Pulse Earn" />
+        <div class="feature-card-overlay">
+          <div class="feature-card-title">Pulse Earn</div>
+          <div class="feature-card-text">
+            A system so advanced it feels Impossible — value, motion, and momentum fused into one living layer.<br />
+            <strong>Coming Soon.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <img src="https://www.tropicpulse.bz/PulseGPU.png" alt="Pulse-GPU" />
+        <div class="feature-card-overlay">
+          <div class="feature-card-title">Pulse‑GPU</div>
+          <div class="feature-card-text">
+            Feels less like a dashboard and more like a graphics engine for your entire business —
+            everything rendered in real time.<br />
+            <strong>Coming Soon.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <img src="https://www.tropicpulse.bz/PulseLoyalty.png" alt="Loyalty & Identity" />
+        <div class="feature-card-overlay">
+          <div class="feature-card-title">Identity & Loyalty</div>
+          <div class="feature-card-text">
+            Device‑Aware Identity, Points, and Rewards that travel across every Experience —
+            including Referrals that Reward both sides of the Connection.
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <img src="https://www.tropicpulse.bz/AdminPanels.png" alt="Admin Dashboards" />
+        <div class="feature-card-overlay">
+          <div class="feature-card-title">Admin Dashboards</div>
+          <div class="feature-card-text">
+            Give operators a live view of Performance, Health, and Behavior — powered by PulseBand!
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 
   <footer style="background:#ffff99;padding:0;text-align:center;font-size:0.95rem;color:#333;">
   <div style="max-width:900px;margin:0 auto;">
