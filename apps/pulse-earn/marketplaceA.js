@@ -1,56 +1,40 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaceA.js
-//
-// Marketplace A Client Adapter v5 — Deterministic, Drift‑Proof, Config‑Driven HTTP Wrapper
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE STANDARD BEARER (Marketplace Protocol + Universal Adapter)
+// ============================================================================
 //
 // ROLE:
-//   Marketplace A Client Adapter — defines how Tropic Pulse communicates
-//   with a marketplace using the standardized interface:
-//     • ping()
-//     • fetchJobs()
-//     • submitResult()
+//   THE STANDARD BEARER — Pulse‑Earn’s canonical marketplace template.
+//   • Defines the universal interface for all marketplaces
+//   • Provides a config‑driven, reusable adapter
+//   • Establishes the minimum contract (ping, fetchJobs, submitResult)
 //
-//   This adapter is CONFIG‑DRIVEN and can be reused for multiple
-//   connection types by updating its config at runtime.
+// WHY “STANDARD BEARER”?:
+//   • It carries the protocol that all marketplaces must follow
+//   • It is the blueprint for custom + dynamic marketplaces
+//   • It sets the rules, expectations, and safe defaults
+//   • It is the constitution of the Earn marketplace layer
 //
-// RESPONSIBILITIES:
-//   • Perform safe HTTP requests
-//   • Validate responses
-//   • Never throw unhandled errors
-//   • Return deterministic fallback values
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof marketplace template
+//   • Allow runtime configuration for custom integrations
+//   • Guarantee safe HTTP behavior + fallback values
 //
-// THIS FILE IS:
-//   • A network adapter
-//   • A pure ESM client module
-//   • A fetch-based HTTP wrapper
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for config overrides
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic fetch‑based wrapper only
 //
-// THIS FILE IS NOT:
-//   • A job processor
-//   • A scheduler
-//   • A compute engine
-//   • A marketplace router
-//   • A backend service
-//
-// DEPLOYMENT:
-//   Lives in /apps/pulse-earn as part of the Pulse Earn subsystem.
-//   Must run in any JS environment with fetch() available.
-//   Must remain ESM-only and side-effect-free.
-//
-// SAFETY RULES:
-//   • Never mutate job objects
-//   • Never execute arbitrary code
-//   • Never use Node APIs
-//   • Always validate fetch() responses
-//   • Always return safe fallbacks
-//
-// ------------------------------------------------------
-// Config — can be overridden at startup
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 marketplaceA
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Config — Standard Bearer Identity (runtime‑overrideable)
+// ---------------------------------------------------------------------------
 let marketplaceConfig = {
   id: "A",
   name: "Marketplace A",
@@ -62,9 +46,10 @@ let marketplaceConfig = {
   },
 };
 
-// Optional: allow runtime configuration from Firebase or env
+// ---------------------------------------------------------------------------
+// configureMarketplaceA — Safe, shallow config override
+// ---------------------------------------------------------------------------
 export function configureMarketplaceA(config) {
-  // Shallow, safe merge — only known keys
   marketplaceConfig = {
     ...marketplaceConfig,
     ...config,
@@ -75,28 +60,24 @@ export function configureMarketplaceA(config) {
   };
 }
 
-// ------------------------------------------------------
-// Helpers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Helpers — URL Builder
+// ---------------------------------------------------------------------------
 function buildUrl(pathKey) {
   const base = marketplaceConfig.baseUrl || "";
   const path = marketplaceConfig.endpoints[pathKey] || "";
   return `${base}${path}`;
 }
 
-// ------------------------------------------------------
-// Marketplace A Client — ping(), fetchJobs(), submitResult()
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Standard Bearer Client — ping(), fetchJobs(), submitResult()
+// ---------------------------------------------------------------------------
 async function ping() {
   try {
     const start = Date.now();
     const res = await fetch(buildUrl("ping"));
-
     if (!res.ok) return null;
     return Date.now() - start;
-
   } catch {
     return null;
   }
@@ -105,12 +86,9 @@ async function ping() {
 async function fetchJobs() {
   try {
     const res = await fetch(buildUrl("jobs"));
-
     if (!res.ok) return [];
     const data = await res.json();
-
     return Array.isArray(data) ? data : [];
-
   } catch {
     return [];
   }
@@ -121,10 +99,7 @@ async function submitResult(job, result) {
     const res = await fetch(buildUrl("submit"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jobId: job.id,
-        result,
-      }),
+      body: JSON.stringify({ jobId: job.id, result }),
     });
 
     if (!res.ok) {
@@ -134,9 +109,7 @@ async function submitResult(job, result) {
       };
     }
 
-    const data = await res.json();
-    return data;
-
+    return await res.json();
   } catch (err) {
     return {
       success: false,
@@ -145,6 +118,9 @@ async function submitResult(job, result) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Export Standard Bearer Adapter
+// ---------------------------------------------------------------------------
 export const marketplaceA = {
   id: () => marketplaceConfig.id,
   name: () => marketplaceConfig.name,

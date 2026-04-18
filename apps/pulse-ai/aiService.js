@@ -1,37 +1,30 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/aiService.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE GATEWAY (AI Service Layer + Safe Entry Point)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIService — the public API for all AI operations inside Pulse OS.
-//   Wraps aiEngine + aiTools to provide high‑level, safe AI services.
+//   THE GATEWAY — The public API for all Pulse AI operations
+//   • Wraps the Cortex (aiEngine)
+//   • Exposes high‑level AI services
+//   • Ensures diagnostics + trace for every operation
 //
 // PURPOSE:
-//   • Provide simple functions for analyzing Firestore, SQL, Pulse schemas
+//   • Provide simple, deterministic AI analysis functions
 //   • Detect mismatches, drift, missing fields, slowdown causes
-//   • Return results + trace + diagnostics for debugging
+//   • Return { result, context } for debugging + admin tools
 //
-// OUTPUT:
-//   • { result, context } for every operation
-//
-// RESPONSIBILITIES:
-//   • Wrap aiEngine with high‑level operations
-//   • Provide a clean API for backend usage
-//   • Ensure all operations produce diagnostics + trace
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
 //   • Deterministic analysis only
 //
-// ------------------------------------------------------
-// Pulse‑AI Service Layer
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 aiService
+// ============================================================================
 
 import { runAI } from "./aiEngine.js";
 import {
@@ -42,14 +35,9 @@ import {
   validatePulseSchema,
 } from "./aiTools.js";
 
-/**
- * Analyze a Firestore document and return:
- *   • PulseFields
- *   • mismatches
- *   • missing fields
- *   • slowdown causes
- *   • trace
- */
+// ============================================================================
+// FIRESTORE ANALYSIS — Gateway Wrapper
+// ============================================================================
 export async function runAnalyzeFirestore(docData, request = {}) {
   return runAI(
     {
@@ -67,13 +55,9 @@ export async function runAnalyzeFirestore(docData, request = {}) {
   );
 }
 
-/**
- * Analyze a SQL schema and return:
- *   • PulseFields
- *   • mismatches
- *   • drift
- *   • trace
- */
+// ============================================================================
+// SQL ANALYSIS — Gateway Wrapper
+// ============================================================================
 export async function runAnalyzeSQL(sqlSchema, request = {}) {
   return runAI(
     {
@@ -91,9 +75,9 @@ export async function runAnalyzeSQL(sqlSchema, request = {}) {
   );
 }
 
-/**
- * Compare PulseFields ↔ FirestoreFields and detect drift.
- */
+// ============================================================================
+// DRIFT DETECTION — Gateway Wrapper
+// ============================================================================
 export async function runDetectDrift(pulseSchema, firestoreSchema, request = {}) {
   return runAI(
     {
@@ -110,9 +94,9 @@ export async function runDetectDrift(pulseSchema, firestoreSchema, request = {})
   );
 }
 
-/**
- * Validate a Pulse schema and return mismatches + trace.
- */
+// ============================================================================
+// PULSE SCHEMA VALIDATION — Gateway Wrapper
+// ============================================================================
 export async function runValidatePulse(pulseSchema, request = {}) {
   return runAI(
     {
@@ -129,14 +113,9 @@ export async function runValidatePulse(pulseSchema, request = {}) {
   );
 }
 
-/**
- * Full audit:
- *   • Analyze Firestore
- *   • Validate Pulse
- *   • Detect drift
- *   • Detect slowdown causes
- *   • Return EVERYTHING
- */
+// ============================================================================
+// FULL AUDIT — Gateway Wrapper
+// ============================================================================
 export async function runFullAudit(pulseSchema, firestoreDoc, request = {}) {
   return runAI(
     {

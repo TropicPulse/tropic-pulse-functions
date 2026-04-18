@@ -1,50 +1,40 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-design/translator.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE ARCHITECT (Master Orchestrator + System Translator)
+// ============================================================================
 //
 // ROLE:
-//   Translator — top‑level orchestrator for the VS/HTML → JS → Manifest
-//   translation pipeline. This module coordinates RepoWalker,
-//   FileClassifier, and ManifestWriter to produce the canonical
-//   pulse_project.json manifest.
+//   THE ARCHITECT — Top‑level orchestrator for the Pulse‑Design pipeline
+//   • Coordinates the Cartographer (RepoWalker)
+//   • Delegates classification to the Anatomist (FileClassifier)
+//   • Hands results to the Surveyor (ManifestWriter)
+//   • Produces the canonical pulse_project.json manifest
 //
 // PURPOSE:
-//   • Provide a single entry point for generating the Pulse project manifest
-//   • Make the entire system AI‑readable and human‑readable
-//   • Produce deterministic, drift‑proof architecture snapshots
+//   • Provide a single entry point for generating the architecture snapshot
+//   • Translate raw filesystem structure → unified manifest
+//   • Make the entire system AI‑readable + human‑readable
+//   • Guarantee deterministic, drift‑proof output
 //
-// OUTPUT:
-//   • /pulse_project.json — the canonical architecture manifest
-//
-// RESPONSIBILITIES:
-//   • Walk the repo (via RepoWalker)
-//   • Classify files (via FileClassifier)
-//   • Write manifest (via ManifestWriter)
-//   • Enforce deterministic ordering and stable output
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY except for writing the manifest output
+// CONTRACT:
+//   • READ‑ONLY except for writing manifest output
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing scanned code
 //   • NO network calls
-//   • Deterministic output only
+//   • Deterministic orchestration only
 //
-// ------------------------------------------------------
-// Translator — Pipeline Orchestrator
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 translator.js
+// ============================================================================
 
 import path from "path";
 import { walkRepo } from "./repoWalker.js";
 import { writeManifest } from "./manifestWriter.js";
 
-/**
- * buildPulseManifest(rootDir)
- * @param {string} rootDir — absolute path to project root
- * @returns {object} result metadata
- */
+// ============================================================================
+// PUBLIC API — Architectural Translation Pipeline
+// ============================================================================
 export async function buildPulseManifest(rootDir) {
   if (!rootDir) {
     throw new Error("translator: missing rootDir");
@@ -52,14 +42,14 @@ export async function buildPulseManifest(rootDir) {
 
   const absRoot = path.resolve(rootDir);
 
-  // ------------------------------------------------------
-  // Step 1 — Walk repo + classify files
-  // ------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Step 1 — Cartographer: Walk repo + classify files
+  // --------------------------------------------------------------------------
   const classifiedFiles = walkRepo(absRoot);
 
-  // ------------------------------------------------------
-  // Step 2 — Write manifest
-  // ------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Step 2 — Surveyor: Write canonical manifest
+  // --------------------------------------------------------------------------
   const result = writeManifest(absRoot, classifiedFiles);
 
   return {

@@ -1,12 +1,57 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/pulseHistoryRepair.js
-// LAYER: D‑LAYER (BACKEND FUNCTION)
+// PULSE HISTORY REPAIR — VERSION 6.3
+// “THE SHORT‑TERM MEMORY LAYER / WORKING MEMORY REPAIR ENGINE”
+// ============================================================================
 //
-// PURPOSE:
-// • Normalize + repair pulse_history entries.
-// • Prune dead records older than 30 days.
-// • Ensure deterministic lineage for scoring + history.
-// • Called directly by heartbeat (timer.js).
+// PAGE INDEX (v6.3 Source of Truth)
+// ---------------------------------
+// ROLE:
+//   pulseHistoryRepair is the **SHORT‑TERM MEMORY LAYER** of the Pulse OS.
+//   It is the **WORKING MEMORY REPAIR ENGINE** — responsible for keeping
+//   recent history coherent, normalized, and free of drift.
+//
+//   • Repairs missing or malformed fields in recent history
+//   • Prunes dead or expired entries older than 30 days
+//   • Ensures deterministic lineage for scoring + insights
+//   • Runs automatically via heartbeat (timer.js)
+//
+// WHAT THIS FILE *IS*:
+//   • A deterministic short‑term memory repair engine
+//   • A cleanup + normalization layer for active history
+//   • A stability mechanism for scoring + insights
+//
+// WHAT THIS FILE *IS NOT*:
+//   • NOT long‑term memory (that’s index.js)
+//   • NOT personality (SettingsMemory)
+//   • NOT identity (CheckIdentity)
+//   • NOT sanity cleanup (pulsebandCleanup)
+//
+// SAFETY CONTRACT (v6.3):
+//   • Fail‑open: errors logged, not fatal
+//   • No randomness in repair logic
+//   • No mutation outside intended collections
+//   • Always logs repairs + deletions for traceability
+//   • No cross‑subsystem writes
+//
+// STRUCTURE RULES:
+//   • Repair → Normalize → Prune → Log
+//   • No new fields added without architectural approval
+//   • No reclassification logic inside this file
+//
+// VERSION TAG:
+//   version: 6.3
+//
+// ============================================================================
+// ⭐ v6.3 COMMENT LOG
+// ---------------------------------------------------------------------------
+// • Added full v6.3 PAGE INDEX
+// • Added metaphor layer (SHORT‑TERM MEMORY / WORKING MEMORY REPAIR ENGINE)
+// • Added safety contract + structure rules
+// • Added v6.3 context map
+// • No logic changes
+// • No renames
+// • No behavior drift
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -18,13 +63,15 @@ if (!admin.apps.length) {
 const db = getFirestore();
 
 // ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP
+// ⭐ HUMAN‑READABLE CONTEXT MAP (v6.3)
 // ------------------------------------------------------------
 const REPAIR_CONTEXT = {
   label: "PULSE_HISTORY_REPAIR",
   layer: "D‑Layer",
+  role: "Short‑Term Memory Repair",
   purpose: "Pulse History Normalization + Cleanup",
-  context: "Repairs missing fields, prunes dead entries, ensures deterministic lineage"
+  context: "Repairs missing fields, prunes dead entries, ensures deterministic lineage",
+  version: "6.3"
 };
 
 // ============================================================================
@@ -35,7 +82,7 @@ export async function pulseHistoryRepair() {
   const errorPrefix = `ERR_${runId}_`;
 
   console.log(
-    `%c🟦 START ${REPAIR_CONTEXT.label} → ${runId}`,
+    `%c🧠 START SHORT‑TERM MEMORY REPAIR → ${runId}`,
     "color:#03A9F4; font-weight:bold;"
   );
 
@@ -65,7 +112,7 @@ export async function pulseHistoryRepair() {
           deletedDocs.push(id);
 
           console.log(
-            `%c🟨 DELETED → ${id}`,
+            `%c🟨 FORGOT (expired) → ${id}`,
             "color:#FFC107; font-weight:bold;"
           );
 
@@ -97,14 +144,14 @@ export async function pulseHistoryRepair() {
           repairedDocs.push(id);
 
           console.log(
-            `%c🟩 REPAIRED → ${id}`,
+            `%c🟩 REPAIRED MEMORY → ${id}`,
             "color:#4CAF50; font-weight:bold;"
           );
         }
 
       } catch (err) {
         console.error(
-          `%c🟥 ERROR (doc) → ${id}`,
+          `%c🟥 MEMORY ERROR (doc) → ${id}`,
           "color:#FF5252; font-weight:bold;",
           err
         );
@@ -136,7 +183,7 @@ export async function pulseHistoryRepair() {
     });
 
     console.log(
-      `%c🟩 COMPLETE ${REPAIR_CONTEXT.label} → ${runId}`,
+      `%c🟩 SHORT‑TERM MEMORY REPAIR COMPLETE → ${runId}`,
       "color:#4CAF50; font-weight:bold;"
     );
 
@@ -150,7 +197,7 @@ export async function pulseHistoryRepair() {
 
   } catch (err) {
     console.error(
-      `%c🟥 FATAL ERROR`,
+      `%c🟥 FATAL SHORT‑TERM MEMORY ERROR`,
       "color:#FF5252; font-weight:bold;",
       err
     );

@@ -1,47 +1,42 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaces/RenderAdapter.js
-//
-// RenderAdapter v5 — Deterministic, Drift‑Proof, Self‑Healing Render Adapter
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE ARTISAN (GPU Rendering Specialist + Creative Compute Interpreter)
+// ============================================================================
 //
 // ROLE:
-//   Render Network Marketplace Client Adapter — defines how Tropic Pulse
-//   communicates with the Render GPU rendering marketplace.
+//   THE ARTISAN — Pulse‑Earn’s rendering‑focused marketplace agent.
+//   • Interfaces with the Render Network GPU marketplace
+//   • Fetches creative compute jobs (frames, scenes, assets)
+//   • Normalizes raw render tasks into Pulse‑Earn job schema
+//   • Submits completed render outputs
+//   • Maintains healing metadata for Earn healers
 //
-// RESPONSIBILITIES:
-//   • ping()        → measure latency
-//   • fetchJobs()   → fetch + normalize jobs
-//   • submitResult()→ submit completed results
-//   • normalizeJob()→ Render job → Pulse Earn job schema
-//   • Maintain adapter healing metadata
+// WHY “ARTISAN”?:
+//   • Render Network is a creative compute marketplace
+//   • Jobs involve GPU craftsmanship (frames, scenes, assets)
+//   • Workloads are structured, artistic, and visually oriented
+//   • The Artisan specializes in creative job normalization
 //
-// THIS FILE IS:
-//   • A network adapter for Render Network
-//   • A pure ESM client module
-//   • A fetch-based HTTP wrapper
-//   • A job normalizer
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof adapter for Render Network
+//   • Maintain strict protocol boundaries
+//   • Ensure safe, predictable rendering job communication
 //
-// THIS FILE IS NOT:
-//   • A ledger client
-//   • A wallet/settlement handler
-//   • A financial engine
-//   • A compute engine
-//   • A scheduler
-//   • A backend service
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic normalization only
 //
-// SAFETY NOTES:
-//   • Never throw unhandled errors (except submitResult, which surfaces errors)
-//   • Never mutate raw job objects
-//   • Always validate fetch() responses
-//   • Remain deterministic and side-effect-free
-//
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 RenderAdapter
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Artisan Interaction Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -54,14 +49,16 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// Render Network Marketplace Client
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// ARTISAN CLIENT — Render Network Interface
+// ---------------------------------------------------------------------------
 export const RenderAdapter = {
   id: "render",
   name: "Render Network",
 
+  // -------------------------------------------------------------------------
+  // Ping — Measure creative marketplace latency
+  // -------------------------------------------------------------------------
   async ping() {
     const url = "https://api.rendernetwork.com/ping";
     const start = Date.now();
@@ -84,6 +81,9 @@ export const RenderAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Fetch Jobs — Retrieve creative GPU tasks
+  // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
     const url = "https://api.rendernetwork.com/jobs";
 
@@ -118,6 +118,9 @@ export const RenderAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Submit Result — Return completed render outputs
+  // -------------------------------------------------------------------------
   async submitResult(job, result) {
     const url = `https://api.rendernetwork.com/jobs/${job.id}/submit`;
     healingState.lastSubmitJobId = job?.id ?? null;
@@ -140,6 +143,9 @@ export const RenderAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Normalize Job — Convert Render job → Pulse‑Earn job schema
+  // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
       if (!raw || typeof raw !== "object") {
@@ -194,10 +200,9 @@ export const RenderAdapter = {
   },
 };
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Miner healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing State Export — Artisan Interaction Log
+// ---------------------------------------------------------------------------
 export function getRenderAdapterHealingState() {
   return { ...healingState };
 }

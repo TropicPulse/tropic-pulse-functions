@@ -1,47 +1,42 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaces/VastAdapter.js
-//
-// VastAdapter v5 — Deterministic, Drift‑Proof, Self‑Healing Vast.ai Adapter
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE AUCTIONEER (Bid‑Floor Interpreter + Volatility Handler)
+// ============================================================================
 //
 // ROLE:
-//   Vast.ai Marketplace Client Adapter — defines how Tropic Pulse
-//   communicates with the Vast.ai compute marketplace.
+//   THE AUCTIONEER — Pulse‑Earn’s agent for the chaotic Vast.ai marketplace.
+//   • Interfaces with Vast.ai’s dynamic compute listings
+//   • Fetches auction‑style job offers
+//   • Normalizes inconsistent metadata into Pulse‑Earn job schema
+//   • Submits completed results
+//   • Maintains healing metadata for Earn healers
 //
-// RESPONSIBILITIES:
-//   • ping()        → measure latency
-//   • fetchJobs()   → fetch + normalize jobs
-//   • submitResult()→ submit completed results
-//   • normalizeJob()→ Vast job → Pulse Earn job schema
-//   • Maintain adapter healing metadata
+// WHY “AUCTIONEER”?:
+//   • Vast.ai behaves like a compute auction house
+//   • Listings fluctuate constantly (price, GPU score, duration)
+//   • Metadata is inconsistent and unpredictable
+//   • The Auctioneer specializes in extracting order from chaos
 //
-// THIS FILE IS:
-//   • A network adapter for Vast.ai
-//   • A pure ESM client module
-//   • A fetch-based HTTP wrapper
-//   • A job normalizer
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof adapter for Vast.ai
+//   • Maintain strict protocol boundaries
+//   • Ensure safe, predictable job normalization
 //
-// THIS FILE IS NOT:
-//   • A ledger client
-//   • A wallet/settlement handler
-//   • A compute engine
-//   • A scheduler
-//   • A backend service
-//   • A business logic module
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic normalization only
 //
-// SAFETY NOTES:
-//   • Never throw unhandled errors (except submitResult, which surfaces errors)
-//   • Never mutate raw job objects
-//   • Always validate fetch() responses
-//   • Remain deterministic and side-effect-free
-//
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 VastAdapter
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Auctioneer Interaction Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -54,14 +49,16 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// Vast.ai Marketplace Client
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// AUCTIONEER CLIENT — Vast.ai Marketplace Interface
+// ---------------------------------------------------------------------------
 export const VastAdapter = {
   id: "vast",
   name: "Vast.ai",
 
+  // -------------------------------------------------------------------------
+  // Ping — Measure auction floor latency
+  // -------------------------------------------------------------------------
   async ping() {
     const url = "https://api.vast.ai/v0/ping";
     const start = Date.now();
@@ -84,6 +81,9 @@ export const VastAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Fetch Jobs — Retrieve auction‑style listings
+  // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
     const url = "https://api.vast.ai/v0/jobs/list";
 
@@ -119,6 +119,9 @@ export const VastAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Submit Result — Return completed work to Vast.ai
+  // -------------------------------------------------------------------------
   async submitResult(job, result) {
     const url = `https://api.vast.ai/v0/jobs/${job.id}/submit`;
     healingState.lastSubmitJobId = job?.id ?? null;
@@ -141,6 +144,9 @@ export const VastAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Normalize Job — Convert Vast listing → Pulse‑Earn job schema
+  // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
       if (!raw || typeof raw !== "object") {
@@ -195,10 +201,9 @@ export const VastAdapter = {
   },
 };
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Miner healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing State Export — Auctioneer Interaction Log
+// ---------------------------------------------------------------------------
 export function getVastAdapterHealingState() {
   return { ...healingState };
 }

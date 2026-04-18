@@ -1,12 +1,58 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/pulsebandCleanup.js
-// LAYER: D‑LAYER (BACKEND FUNCTION)
+// PULSEBAND CLEANUP — VERSION 6.3
+// “THE SANITY LAYER / PURIFIER / ORDER‑KEEPER”
+// ============================================================================
 //
-// PURPOSE:
-// • Cleanup expired Pulseband sessions + chunks.
-// • Cleanup Pulseband errors + redownload logs.
-// • Maintain deterministic badge integrity.
-// • Called directly by heartbeat (timer.js).
+// PAGE INDEX (v6.3 Source of Truth)
+// ---------------------------------
+// ROLE:
+//   pulsebandCleanup is the **SANITY LAYER** of the PulseBand subsystem.
+//   It is the **PURIFIER / ORDER‑KEEPER** — the subsystem that prevents
+//   chaos, clutter, and corruption by removing expired sessions, chunks,
+//   errors, and redownload logs.
+//
+//   • Clears old data before it becomes a problem
+//   • Maintains structural integrity of PulseBand storage
+//   • Ensures deterministic, stable, predictable behavior
+//   • Runs automatically via heartbeat (timer.js)
+//
+// WHAT THIS FILE *IS*:
+//   • A deterministic cleanup engine
+//   • A pure backend maintenance function
+//   • A stability + order enforcement layer
+//
+// WHAT THIS FILE *IS NOT*:
+//   • NOT a renderer
+//   • NOT a GPU subsystem
+//   • NOT a business logic module
+//   • NOT a user-facing endpoint
+//
+// SAFETY CONTRACT (v6.3):
+//   • Fail-open: errors are logged, not fatal
+//   • No randomness in cleanup logic
+//   • No mutation outside intended collections
+//   • Always logs actions for traceability
+//   • No external side effects beyond Firestore writes
+//
+// STRUCTURE RULES:
+//   • Cleanup order must remain deterministic
+//   • No new collections may be added without architectural approval
+//   • No cross-subsystem mutations allowed
+//
+// VERSION TAG:
+//   version: 6.3
+//
+// ============================================================================
+// ⭐ v6.3 COMMENT LOG
+// ---------------------------------------------------------------------------
+// • Added full v6.3 PAGE INDEX
+// • Added metaphor layer (SANITY LAYER / PURIFIER / ORDER‑KEEPER)
+// • Added safety contract + structure rules
+// • Added v6.3 context map
+// • No logic changes
+// • No renames
+// • No behavior drift
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -18,13 +64,15 @@ if (!admin.apps.length) {
 const db = getFirestore();
 
 // ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP
+// ⭐ HUMAN‑READABLE CONTEXT MAP (v6.3)
 // ------------------------------------------------------------
 const CLEANUP_CONTEXT = {
   label: "PULSEBAND_CLEANUP",
   layer: "D‑Layer",
+  role: "Sanity Layer / Purifier",
   purpose: "Pulseband Session + Error Cleanup",
-  context: "Deletes expired sessions, chunks, errors, and redownload logs"
+  context: "Deletes expired sessions, chunks, errors, and redownload logs",
+  version: "6.3"
 };
 
 // ============================================================================
@@ -35,7 +83,7 @@ export async function pulsebandCleanup() {
   const errorPrefix = `ERR_${runId}_`;
 
   console.log(
-    `%c🟦 START ${CLEANUP_CONTEXT.label} → ${runId}`,
+    `%c🧹 START SANITY CLEANUP → ${runId}`,
     "color:#03A9F4; font-weight:bold;"
   );
 
@@ -111,7 +159,7 @@ export async function pulsebandCleanup() {
     });
 
     console.log(
-      `%c🟩 COMPLETE ${CLEANUP_CONTEXT.label} → ${runId}`,
+      `%c🟩 SANITY CLEANUP COMPLETE → ${runId}`,
       "color:#4CAF50; font-weight:bold;"
     );
 
@@ -119,7 +167,7 @@ export async function pulsebandCleanup() {
 
   } catch (err) {
     console.error(
-      `%c🟥 FATAL ERROR`,
+      `%c🟥 SANITY CLEANUP ERROR`,
       "color:#FF5252; font-weight:bold;",
       err
     );

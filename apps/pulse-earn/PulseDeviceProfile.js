@@ -1,58 +1,43 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseDeviceProfile.js
-//
-// PulseDeviceProfile v5 — Deterministic, Drift‑Proof, Self‑Healing Device Profile
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE INSPECTOR
+// (Device Capability Assessment + Performance Declaration)
+// ============================================================================
 //
 // ROLE:
-//   PulseDeviceProfile — authoritative description of WHAT THIS DEVICE CAN DO.
+//   THE INSPECTOR — Pulse‑Earn’s authoritative device evaluator.
+//   • Inspects CPU, memory, GPU, bandwidth, stability
+//   • Computes capability scores
+//   • Produces the official device capability passport
+//   • Supplies the Earn Engine with the “owner’s instructions”
 //
-// RESPONSIBILITIES:
-//   • Detect local CPU / memory
-//   • Derive GPU info (best‑effort)
-//   • Estimate bandwidth
-//   • Estimate stability
-//   • Compute GPU score
-//   • Provide unified device profile
-//   • Maintain healing metadata
+// WHY “INSPECTOR”?:
+//   • Examines the device like a certified inspector
+//   • Determines what workloads are safe + possible
+//   • Issues the capability report used by all Earn subsystems
+//   • Acts as the identity + performance declaration of the device
 //
-// THIS FILE IS:
-//   • A capability detector
-//   • A performance estimator
-//   • A stability estimator
-//   • A GPU score generator
-//   • A unified device profile provider
+// PURPOSE:
+//   • Provide deterministic, drift‑proof device profiling
+//   • Guarantee safe capability detection
+//   • Supply the Traffic Officer + Scorekeeper with accurate data
 //
-// THIS FILE IS NOT:
-//   • A scheduler
-//   • A compute engine
-//   • A job selector
-//   • A marketplace adapter
-//   • A reputation engine
-//   • A blockchain client
-//   • A wallet or token handler
+// CONTRACT:
+//   • PURE CAPABILITY ENGINE — no AI layers, no translation, no memory model
+//   • NO eval(), NO dynamic imports, NO arbitrary code execution
+//   • NO network calls, NO filesystem access, NO crypto operations
+//   • Deterministic hardware inspection only
 //
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO network calls
-//   • NO filesystem access
-//   • NO crypto operations
-//
-// ------------------------------------------------------
-// Imports
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 DeviceProfile
+// ============================================================================
 
 import os from "os";
 
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing Metadata — Inspector Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastProfile: null,
   lastGpuModel: null,
@@ -62,10 +47,9 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// GPU detection (best‑effort)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// GPU Detection — Inspector’s Visual Check
+// ---------------------------------------------------------------------------
 let gpuInfo = { model: "unknown", vramMB: 2048 };
 
 try {
@@ -80,10 +64,9 @@ try {
   // keep defaults
 }
 
-// ------------------------------------------------------
-// Network bandwidth estimation (placeholder)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Bandwidth Estimation — Inspector’s Network Check
+// ---------------------------------------------------------------------------
 function estimateBandwidthMbps() {
   try {
     return 50;
@@ -92,10 +75,9 @@ function estimateBandwidthMbps() {
   }
 }
 
-// ------------------------------------------------------
-// Stability score (0–1)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Stability Score — Inspector’s Uptime Check
+// ---------------------------------------------------------------------------
 function estimateStability() {
   const uptime = os.uptime();
   if (uptime > 3600) return 0.9;
@@ -103,10 +85,9 @@ function estimateStability() {
   return 0.5;
 }
 
-// ------------------------------------------------------
-// GPU capability score
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// GPU Score — Inspector’s Performance Rating
+// ---------------------------------------------------------------------------
 function computeGpuScore() {
   const model = gpuInfo.model.toLowerCase();
 
@@ -124,10 +105,10 @@ function computeGpuScore() {
   return 150;
 }
 
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
 // MAIN EXPORT — getDeviceProfile()
-// ------------------------------------------------------
-
+// Inspector’s Official Capability Passport
+// ---------------------------------------------------------------------------
 export function getDeviceProfile() {
   healingState.cycleCount++;
 
@@ -141,21 +122,14 @@ export function getDeviceProfile() {
   const profile = {
     id: os.hostname(),
 
-    // CPU
     cpuCores: cpus.length || 4,
-
-    // Memory
     memoryMB: totalMemMB || 4096,
 
-    // GPU
     gpuModel: gpuInfo.model,
     vramMB: gpuInfo.vramMB,
     gpuScore,
 
-    // Network
     bandwidthMbps,
-
-    // Stability
     stabilityScore,
   };
 
@@ -168,10 +142,9 @@ export function getDeviceProfile() {
   return profile;
 }
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Earn healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Export Healing Metadata — Inspector Report
+// ---------------------------------------------------------------------------
 export function getPulseDeviceProfileHealingState() {
   return { ...healingState };
 }

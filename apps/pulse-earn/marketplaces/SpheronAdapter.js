@@ -1,47 +1,42 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaces/SpheronAdapter.js
-//
-// SpheronAdapter v5 — Deterministic, Drift‑Proof, Self‑Healing Spheron Adapter
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE COURIER (Fast‑Turnaround Compute Runner + Job Delivery Agent)
+// ============================================================================
 //
 // ROLE:
-//   Spheron Compute Marketplace Client Adapter — defines how Tropic Pulse
-//   communicates with the Spheron compute marketplace.
+//   THE COURIER — Pulse‑Earn’s lightweight, fast‑turnaround marketplace agent.
+//   • Interfaces with the Spheron Compute marketplace
+//   • Fetches simple compute jobs
+//   • Normalizes them into Pulse‑Earn job schema
+//   • Submits completed results
+//   • Maintains healing metadata for Earn healers
 //
-// RESPONSIBILITIES:
-//   • ping()        → measure latency
-//   • fetchJobs()   → fetch + normalize jobs
-//   • submitResult()→ submit completed results
-//   • normalizeJob()→ Spheron job → Pulse Earn job schema
-//   • Maintain adapter healing metadata
+// WHY “COURIER”?:
+//   • Spheron behaves like a job delivery network
+//   • Jobs are simple, fast, and low‑overhead
+//   • No auctions, no leases, no creative assets
+//   • Pure pickup → execute → drop‑off workflow
 //
-// THIS FILE IS:
-//   • A network adapter for Spheron Compute
-//   • A pure ESM client module
-//   • A fetch-based HTTP wrapper
-//   • A job normalizer
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof adapter for Spheron Compute
+//   • Maintain strict protocol boundaries
+//   • Ensure safe, predictable job delivery communication
 //
-// THIS FILE IS NOT:
-//   • A ledger client
-//   • A wallet/settlement handler
-//   • A financial engine
-//   • A compute engine
-//   • A scheduler
-//   • A backend service
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic normalization only
 //
-// SAFETY NOTES:
-//   • Never throw unhandled errors (except submitResult, which surfaces errors)
-//   • Never mutate raw job objects
-//   • Always validate fetch() responses
-//   • Remain deterministic and side-effect-free
-//
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 SpheronAdapter
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Courier Interaction Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -54,14 +49,16 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// Spheron Compute Marketplace Client
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// COURIER CLIENT — Spheron Compute Interface
+// ---------------------------------------------------------------------------
 export const SpheronAdapter = {
   id: "spheron",
   name: "Spheron Compute",
 
+  // -------------------------------------------------------------------------
+  // Ping — Measure courier route latency
+  // -------------------------------------------------------------------------
   async ping() {
     const url = "https://api-v2.spheron.network/health";
     const start = Date.now();
@@ -84,6 +81,9 @@ export const SpheronAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Fetch Jobs — Pick up compute tasks from Spheron
+  // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
     const url = "https://api-v2.spheron.network/compute/jobs";
 
@@ -118,6 +118,9 @@ export const SpheronAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Submit Result — Deliver completed work back to Spheron
+  // -------------------------------------------------------------------------
   async submitResult(job, result) {
     const url = `https://api-v2.spheron.network/compute/jobs/${job.id}/submit`;
     healingState.lastSubmitJobId = job?.id ?? null;
@@ -140,6 +143,9 @@ export const SpheronAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Normalize Job — Convert Spheron job → Pulse‑Earn job schema
+  // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
       if (!raw || typeof raw !== "object") {
@@ -192,10 +198,9 @@ export const SpheronAdapter = {
   },
 };
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Miner healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing State Export — Courier Interaction Log
+// ---------------------------------------------------------------------------
 export function getSpheronAdapterHealingState() {
   return { ...healingState };
 }

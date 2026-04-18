@@ -1,55 +1,50 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaces/RegisteredMarketplaces.js
-//
-// RegisteredMarketplaces v5 — Deterministic, Drift‑Proof, Self‑Healing Registry
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE EMBASSY LEDGER (Marketplace Registry + Identity Verifier)
+// ============================================================================
 //
 // ROLE:
-//   Marketplace Registry for Pulse Earn — clean, deterministic export of all
-//   marketplace adapters used by the Earn runtime.
+//   THE EMBASSY LEDGER — The official registry of all Pulse‑Earn marketplace
+//   representatives. Maintains a deterministic roster of foreign marketplace
+//   agents (Ambassador, Broker, Artisan, Courier, Auctioneer).
 //
-// RESPONSIBILITIES:
-//   • Import marketplace adapters
-//   • Validate adapter structure
-//   • Export adapters as a stable array
-//   • Maintain healing metadata
+// PURPOSE:
+//   • Provide Earn Engine with a clean, stable list of marketplace adapters
+//   • Validate adapter identity + required capabilities
+//   • Maintain healing metadata for adapter integrity
+//   • Serve as the diplomatic ledger of all external compute markets
 //
-// THIS FILE IS:
-//   • A pure registry of marketplace adapters
-//   • A dependency for Earn-side orchestration
-//   • A deterministic, side-effect-free module
+// WHY “EMBASSY LEDGER”?:
+//   • Each marketplace adapter is a foreign representative
+//   • This file is the official registry of those agents
+//   • It validates credentials (ping, fetchJobs, submitResult)
+//   • It records missing or invalid agents
+//   • It exports a deterministic roster for Earn orchestration
 //
-// THIS FILE IS NOT:
-//   • A bootstrap file
-//   • A reputation loader
-//   • A scheduler
-//   • A compute engine
-//   • A backend service
-//   • A financial/settlement handler
+// CONTRACT:
+//   • PURE REGISTRY — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic validation only
 //
-// SAFETY RULES:
-//   • Never mutate adapter objects
-//   • Never import backend/server modules
-//   • Never perform side effects
-//   • Always remain deterministic
-//
-// ------------------------------------------------------
-// Imports
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 registry
+// ============================================================================
 
-import { VastAdapter } from "./VastAdapter.js";
-import { AkashAdapter } from "./AkashAdapter.js";
-import { RenderAdapter } from "./RenderAdapter.js";
-import { SpheronAdapter } from "./SpheronAdapter.js";
-import { FluidStackAdapter } from "./FluidStackAdapter.js";
+// ---------------------------------------------------------------------------
+// Imports — Marketplace Representatives
+// ---------------------------------------------------------------------------
+import { VastAdapter } from "./VastAdapter.js";        // The Auctioneer
+import { AkashAdapter } from "./AkashAdapter.js";      // The Ambassador
+import { RenderAdapter } from "./RenderAdapter.js";    // The Artisan
+import { SpheronAdapter } from "./SpheronAdapter.js";  // The Courier
+import { FluidStackAdapter } from "./FluidStackAdapter.js"; // The Broker
 
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing Metadata — Embassy Ledger Integrity Log
+// ---------------------------------------------------------------------------
 const healingState = {
   adaptersLoaded: [],
   missingAdapters: [],
@@ -57,10 +52,9 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// Adapter Validation (v5 deterministic integrity check)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Adapter Validation — Diplomatic Credential Check
+// ---------------------------------------------------------------------------
 function validateAdapter(name, adapter) {
   healingState.cycleCount++;
 
@@ -69,7 +63,7 @@ function validateAdapter(name, adapter) {
     return false;
   }
 
-  // Required adapter methods
+  // Required diplomatic capabilities
   const required = ["ping", "fetchJobs", "submitResult"];
 
   const missing = required.filter(fn => typeof adapter[fn] !== "function");
@@ -86,32 +80,29 @@ function validateAdapter(name, adapter) {
   return true;
 }
 
-// ------------------------------------------------------
-// Validate all adapters
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Validate All Marketplace Representatives
+// ---------------------------------------------------------------------------
 validateAdapter("VastAdapter", VastAdapter);
 validateAdapter("AkashAdapter", AkashAdapter);
 validateAdapter("RenderAdapter", RenderAdapter);
 validateAdapter("SpheronAdapter", SpheronAdapter);
 validateAdapter("FluidStackAdapter", FluidStackAdapter);
 
-// ------------------------------------------------------
-// Export registry (deterministic, side-effect-free)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Export Registry — The Embassy Roster
+// ---------------------------------------------------------------------------
 export const marketplaces = [
-  VastAdapter,
-  AkashAdapter,
-  RenderAdapter,
-  SpheronAdapter,
-  FluidStackAdapter,
+  VastAdapter,        // The Auctioneer
+  AkashAdapter,       // The Ambassador
+  RenderAdapter,      // The Artisan
+  SpheronAdapter,     // The Courier
+  FluidStackAdapter,  // The Broker
 ];
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Miner healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Export Healing Metadata — Embassy Ledger Integrity Report
+// ---------------------------------------------------------------------------
 export function getRegisteredMarketplacesHealingState() {
   return { ...healingState };
 }

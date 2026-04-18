@@ -1,14 +1,61 @@
-/* ============================================================
-   PulseNet.js — PulseNet v6 (ES Module)
-   Purpose: Signal bridge + route health metadata for PulseBand
-   Notes:
-     - No path memory / probing / cloud hints / extended reach
-     - No micropulse / scoring / switching / logs
-     - Just: PulseBand → PulseNet → UI
-   ============================================================ */
+// ============================================================================
+// FILE: /apps/tropic-pulse/lib/Connectors/PulseNet.js
+// LAYER: THE PULSE (Signal Path + Arterial Rhythm Layer)
+// ============================================================================
+//
+// ROLE:
+//   THE PULSE — The arterial signal path of Pulse OS
+//   • Receives signal from Nervous System (PulseBand)
+//   • Computes signalScore + signalSlope
+//   • Classifies route health
+//   • Emits pulse updates to the OS
+//
+// CONTRACT:
+//   • No PulseBand imports
+//   • No PulseClient imports
+//   • No PulseUpdate imports
+//   • Pure subsystem module
+//
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 PulseNet
+// ============================================================================
 
+// ============================================================================
+// LAYER CONSTANTS + DIAGNOSTICS
+// ============================================================================
+const PULSE_LAYER_ID = "PULSE-LAYER";
+const PULSE_LAYER_NAME = "THE PULSE";
+const PULSE_LAYER_ROLE = "Signal Path + Arterial Rhythm Layer";
+
+const PULSE_DIAGNOSTICS_ENABLED =
+  window?.PULSE_PULSE_DIAGNOSTICS === true ||
+  window?.PULSE_DIAGNOSTICS === true;
+
+const pulseLog = (stage, details = {}) => {
+  if (!PULSE_DIAGNOSTICS_ENABLED) return;
+
+  console.log(
+    JSON.stringify({
+      pulseLayer: PULSE_LAYER_ID,
+      pulseName: PULSE_LAYER_NAME,
+      pulseRole: PULSE_LAYER_ROLE,
+      stage,
+      ...details
+    })
+  );
+};
+
+pulseLog("PULSE_INIT", {});
+
+// ============================================================================
+// INTERNAL HELPERS
+// ============================================================================
 const nowMs = () => Date.now();
 
+// ============================================================================
+// THE PULSE — STATE + SIGNAL ENGINE
+// ============================================================================
 export const PulseNet = {
   listeners: {},
 
@@ -29,14 +76,19 @@ export const PulseNet = {
     lastUpdateTimestamp: 0
   },
 
-  /* ---------------------------------------------------------
-     STATUS API
-  --------------------------------------------------------- */
+  // --------------------------------------------------------------------------
+  // STATUS API — Pulse Snapshot
+  // --------------------------------------------------------------------------
   getStatus() {
+    osLog("PulseNet → getStatus()");
+    pulseLog("GET_STATUS");
     return { ...this.state, routeHealth: { ...this.state.routeHealth } };
   },
 
   setStatus(newState) {
+    osLog("PulseNet → setStatus()");
+    pulseLog("SET_STATUS_CALLED");
+
     const now = nowMs();
     const clean = {};
 
@@ -52,34 +104,55 @@ export const PulseNet = {
       lastUpdateTimestamp: now
     };
 
+    osLog("PulseNet → emit(update)");
+    pulseLog("EMIT_UPDATE");
     this.emit("update", this.getStatus());
   },
 
-  /* ---------------------------------------------------------
-     EVENTS
-  --------------------------------------------------------- */
+  // --------------------------------------------------------------------------
+  // EVENTS — Pulse Firing
+  // --------------------------------------------------------------------------
   on(event, callback) {
+    osLog(`PulseNet → on(${event})`);
+    pulseLog("EVENT_SUBSCRIBE", { event });
+
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(callback);
   },
 
   emit(event, data) {
+    osLog(`PulseNet → emit(${event})`);
+    pulseLog("EVENT_EMIT", { event });
+
     if (this.listeners[event]) {
       this.listeners[event].forEach(cb => cb(data));
     }
   },
 
-  /* ---------------------------------------------------------
-     ⭐ SIGNAL BRIDGE (PulseBand → PulseNet)
-  --------------------------------------------------------- */
+  // --------------------------------------------------------------------------
+  // ⭐ SIGNAL BRIDGE — Nervous System → Pulse
+  // --------------------------------------------------------------------------
   updateSignalFromPulseBand(pulsebandStatus) {
-    if (!pulsebandStatus) return;
+    osLog("PulseNet → updateSignalFromPulseBand()");
+    pulseLog("SIGNAL_BRIDGE_START");
+
+    if (!pulsebandStatus) {
+      osLog("PulseNet → updateSignalFromPulseBand() aborted (no status)");
+      pulseLog("SIGNAL_BRIDGE_ABORT");
+      return;
+    }
 
     const L = pulsebandStatus.live || pulsebandStatus;
 
     const latency = Number(L.latency ?? 0);
     const phoneBars = Number(L.phoneBars ?? 0);
     const pulsebandBars = Number(L.pulsebandBars ?? 0);
+
+    osLog(
+      `PulseNet → Raw Input: latency=${latency}, phoneBars=${phoneBars}, pulsebandBars=${pulsebandBars}`
+    );
+
+    pulseLog("SIGNAL_RAW", { latency, phoneBars, pulsebandBars });
 
     // Derive stabilityScore if missing
     let stabilityScore = Number(L.stabilityScore ?? 0);
@@ -88,7 +161,11 @@ export const PulseNet = {
       const barScore =
         (Math.min(pulsebandBars, 4) / 4) * 60 +
         (Math.min(phoneBars, 4) / 4) * 40;
+
       stabilityScore = Math.round((latScore * 0.5 + barScore * 0.5));
+
+      osLog(`PulseNet → Derived stabilityScore=${stabilityScore}`);
+      pulseLog("STABILITY_DERIVED", { stabilityScore });
     }
 
     const samples = this.state.lastSignalSamples;
@@ -102,11 +179,17 @@ export const PulseNet = {
     samples.push(score);
     if (samples.length > 8) samples.shift();
 
+    osLog(`PulseNet → signalScore=${score.toFixed(1)} (samples=${samples.length})`);
+    pulseLog("SIGNAL_SCORE", { score, samples: samples.length });
+
     let slope = this.state.signalSlope;
     if (samples.length >= 4) {
       const first = samples[0];
       const last = samples[samples.length - 1];
       slope = last - first;
+
+      osLog(`PulseNet → signalSlope=${slope.toFixed(1)}`);
+      pulseLog("SIGNAL_SLOPE", { slope });
     }
 
     this.state.signalScore = score;
@@ -115,6 +198,9 @@ export const PulseNet = {
     let signalState = "Normal";
     if (score < 55 || slope < -15) signalState = "LowSignal";
     if (score < 25) signalState = "NoSignal";
+
+    osLog(`PulseNet → signalState=${signalState}`);
+    pulseLog("SIGNAL_STATE", { signalState });
 
     const routeHealth = this._deriveRouteHealth({
       score,
@@ -125,6 +211,12 @@ export const PulseNet = {
       signalState
     });
 
+    osLog(
+      `PulseNet → routeHealth=${routeHealth.label} (${routeHealth.reason})`
+    );
+
+    pulseLog("ROUTE_HEALTH", routeHealth);
+
     this.setStatus({
       activePath: L.route || this.state.activePath,
       signalState,
@@ -132,10 +224,13 @@ export const PulseNet = {
     });
   },
 
-  /* ---------------------------------------------------------
-     ROUTE HEALTH CLASSIFIER
-  --------------------------------------------------------- */
+  // --------------------------------------------------------------------------
+  // ROUTE HEALTH CLASSIFIER — Arterial Integrity
+  // --------------------------------------------------------------------------
   _deriveRouteHealth({ score, slope, latency, pulsebandBars, phoneBars, signalState }) {
+    osLog("PulseNet → _deriveRouteHealth()");
+    pulseLog("ROUTE_HEALTH_START");
+
     let label = "Excellent";
     let reason = "High score";
 
@@ -160,6 +255,9 @@ export const PulseNet = {
         reason = "Severely degraded";
       }
     }
+
+    osLog(`PulseNet → Health classified as ${label} (${reason})`);
+    pulseLog("ROUTE_HEALTH_CLASSIFIED", { label, reason });
 
     return {
       label,

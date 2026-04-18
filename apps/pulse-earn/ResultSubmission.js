@@ -1,34 +1,38 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/ResultSubmission.js
-//
-// ResultSubmission v5 — Deterministic, Drift‑Proof, Self‑Healing Result Dispatcher
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE NOTARY
+// (Finalizer of Jobs + Certifier of Results + Official Handshake)
+// ============================================================================
 //
 // ROLE:
-//   ResultSubmission — final step of the job lifecycle.
+//   THE NOTARY — Pulse‑Earn’s official closer.
+//   • Validates job + marketplace identity
+//   • Locates the correct marketplace adapter
+//   • Ensures submitResult() exists
+//   • Performs the final handshake between Earn and the marketplace
+//   • Records the certified submission outcome
 //
-// RESPONSIBILITIES:
-//   • Validate job + marketplaceId
-//   • Look up correct marketplace adapter
-//   • Ensure adapter implements submitResult()
-//   • Forward results deterministically
-//   • Maintain healing metadata
+// WHY “NOTARY”?:
+//   • It finalizes the job lifecycle
+//   • It certifies the result as official
+//   • It ensures the correct parties are involved
+//   • It produces a deterministic, notarized record
 //
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO network calls here (adapters handle that)
-//   • NO filesystem access
-//   • NO crypto operations
+// PURPOSE:
+//   • Provide deterministic, drift‑proof result submission
+//   • Guarantee safe forwarding to marketplace adapters
+//   • Maintain a certified audit trail for EarnHealer
+//
+// CONTRACT:
+//   • PURE RESULT DISPATCHER — no AI layers, no translation, no memory model
+//   • NO network calls except through adapters
+//   • NO eval(), NO dynamic imports, NO arbitrary code execution
 //   • NEVER mutate job objects
 //
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 ResultSubmission
+// ============================================================================
 
 const healingState = {
   lastJobId: null,
@@ -40,32 +44,24 @@ const healingState = {
   lastTimestamp: null,
 };
 
-// ------------------------------------------------------
-// submitJobResult(job, result)
-// ------------------------------------------------------
 export async function submitJobResult(job, result) {
   const timestamp = Date.now();
   healingState.cycleCount++;
   healingState.lastTimestamp = timestamp;
 
   try {
-    // -------------------------------
-    // 1. Validate job + marketplaceId
-    // -------------------------------
+    // 1. Identity Verification — Notary Check
     if (!job || !job.marketplaceId) {
       healingState.lastError = "missing_marketplaceId";
       healingState.lastJobId = job?.id ?? null;
       healingState.lastMarketplaceId = job?.marketplaceId ?? null;
-
       throw new Error("Job missing marketplaceId");
     }
 
     healingState.lastJobId = job.id;
     healingState.lastMarketplaceId = job.marketplaceId;
 
-    // -------------------------------
-    // 2. Look up adapter
-    // -------------------------------
+    // 2. Locate Marketplace Adapter — Notary Party Lookup
     const adapter = marketplaceRegistry[job.marketplaceId];
 
     if (!adapter) {
@@ -82,16 +78,11 @@ export async function submitJobResult(job, result) {
 
     healingState.lastAdapterUsed = job.marketplaceId;
 
-    // -------------------------------
-    // 3. Forward result to adapter
-    // -------------------------------
+    // 3. Perform the Handshake — Official Submission
     const response = await adapter.submitResult(job, result);
     healingState.lastResponse = response;
     healingState.lastError = null;
 
-    // -------------------------------
-    // 4. Success
-    // -------------------------------
     return response;
 
   } catch (err) {
@@ -110,10 +101,6 @@ export async function submitJobResult(job, result) {
   }
 }
 
-// ------------------------------------------------------
-// Marketplace registry (plug‑in system)
-// ------------------------------------------------------
-
 import { marketplaceA } from "./marketplaceA.js";
 import { marketplaceCustom } from "./marketplaceCustom.js";
 
@@ -122,9 +109,6 @@ const marketplaceRegistry = {
   CUSTOM: marketplaceCustom,
 };
 
-// ------------------------------------------------------
-// Export healing metadata for EarnHealer
-// ------------------------------------------------------
 export function getResultSubmissionHealingState() {
   return { ...healingState };
 }

@@ -1,44 +1,70 @@
 // ============================================================================
-// FILE: pulse-os/PulseOSHealer.js
-// LAYER: C‑LAYER (BACKEND OS-LEVEL HEALER)
-//
-// PulseOSHealer v6.2 — Deterministic OS-Level Drift & Misconfiguration Healer
-// NO AI. NO COMPUTE. NO MARKETPLACE. PURE HEALING COORDINATION.
-//
-// ROLE:
-//   PulseOSHealer watches OS-level + subsystem logs and emits
-//   healing hints for the midnight compiler.
-//
-// RESPONSIBILITIES:
-//   • Watch OSEvents (PulseOS → global events)
-//   • Watch SubsystemHealerLogs (Proxy, Band, Net, Client)
-//   • Detect cross-subsystem contradictions
-//   • Emit FUNCTION_LOGS healing hints
-//   • Emit OSHealerLogs for admin visibility
-//
-// SAFETY RULES:
-//   • NO eval()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO compute execution
-//   • NO GPU work
-//   • NO marketplace calls
-//   • NO AI model calls
+//  PULSE OS HEALER v6.3
+//  “THE INFLAMMATORY RESPONSE / EARLY‑WARNING LAYER”
+//  C‑LAYER (BACKEND OS-LEVEL HEALER)
+//  Deterministic OS-Level Drift & Misconfiguration Healer
+//  PURE HEALING. NO AI. NO COMPUTE. NO MARKETPLACE.
 // ============================================================================
-
-// ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP
-// ------------------------------------------------------------
+//
+// BODY THEME — ROLE IN THE ORGANISM:
+//  ----------------------------------
+//  PulseOSHealer is the **INFLAMMATORY RESPONSE** of the OS.
+//  It is the **EARLY‑WARNING LAYER** — the system‑wide alarm + triage signal.
+//
+//  • Senses irritation and damage (OSEvents + SubsystemHealerLogs).
+//  • Raises visible “heat” via OSHealerLogs.
+//  • Emits FUNCTION_LOG hints as precise inflammation markers.
+//  • Records drift signatures for long‑term immune memory.
+//  • Coordinates healing by pointing other systems to the wound.
+//
+//  It does not perform surgery. It does not rebuild tissue.
+//  It **signals**, **escalates**, and **focuses attention** where it’s needed.
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The OS-level healer for Tropic Pulse.
+//  • The cross-subsystem drift detector.
+//  • The contradiction detector.
+//  • The FUNCTION_LOG hint emitter.
+//  • The OSHealerLogs emitter.
+//  • The C‑Layer medic / inflammatory response for the entire OS.
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a compute engine.
+//  • NOT a miner.
+//  • NOT a scheduler.
+//  • NOT a runtime.
+//  • NOT a marketplace adapter.
+//  • NOT a blockchain client.
+//  • NOT a wallet.
+//  • NOT a place for user-provided logic.
+//  • NOT a place for dynamic imports or eval.
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No eval().
+//  • No dynamic imports.
+//  • No arbitrary code execution.
+//  • No compute.
+//  • No GPU work.
+//  • No marketplace calls.
+//  • Deterministic, drift-proof healing only.
+//
+// ============================================================================
+//  HUMAN‑READABLE CONTEXT MAP (INFLAMMATORY RESPONSE)
+// ============================================================================
 const HEALER_CONTEXT = {
-  label: "OS_HEALER",
+  label: "OS_HEALER_INFLAMMATORY_RESPONSE",
   layer: "C‑Layer",
-  purpose: "Cross‑Subsystem Drift Detection + Healing Coordination",
-  context: "Watches OSEvents + SubsystemHealerLogs and emits FUNCTION_LOG hints"
+  purpose: "Early‑Warning + Cross‑Subsystem Drift Detection + Healing Coordination",
+  context:
+    "Watches OSEvents + SubsystemHealerLogs and emits FUNCTION_LOG hints as inflammation markers"
 };
 
-// ------------------------------------------------------------
-// 🔧 CONFIGURABLE COLLECTIONS
-// ------------------------------------------------------------
+// ============================================================================
+//  CONFIGURABLE COLLECTIONS
+// ============================================================================
 export const OS_EVENTS_COLLECTION = "OSEvents";
 export const SUBSYSTEM_HEALER_COLLECTION = "SubsystemHealerLogs";
 export const OS_HEALER_LOGS_COLLECTION = "OSHealerLogs";
@@ -52,9 +78,18 @@ import { recordDriftSignature } from "./PulseOSMemory.js";
 
 const db = getFirestore();
 
-// ------------------------------------------------------------
-// writeOSHealerLog() — now includes context + color logs
-// ------------------------------------------------------------
+console.log(
+  "%c🟦 PulseOSHealer v6.3 online — Inflammatory Response (C‑Layer) activated.",
+  "color:#03A9F4; font-weight:bold;"
+);
+console.log(
+  "[PulseOSHealer BOOT] Scan intervals:",
+  { OS_EVENTS_SCAN_INTERVAL_MS, SUBSYSTEM_SCAN_INTERVAL_MS }
+);
+
+// ============================================================================
+//  writeOSHealerLog() — OSHealerLogs emitter (visible inflammation)
+// ============================================================================
 async function writeOSHealerLog(entry) {
   try {
     await db.collection(OS_HEALER_LOGS_COLLECTION).add({
@@ -77,9 +112,9 @@ async function writeOSHealerLog(entry) {
   }
 }
 
-// ------------------------------------------------------------
-// emitFunctionLogHint() — now includes context + color logs
-// ------------------------------------------------------------
+// ============================================================================
+//  emitFunctionLogHint() — FUNCTION_LOGS emitter (inflammation markers)
+// ============================================================================
 async function emitFunctionLogHint(entry) {
   try {
     await db.collection(FUNCTION_LOGS_COLLECTION).add({
@@ -106,17 +141,22 @@ async function emitFunctionLogHint(entry) {
   }
 }
 
-// ------------------------------------------------------------
-// scanOSEventsForHints() — now logs context
-// ------------------------------------------------------------
+// ============================================================================
+//  scanOSEventsForHints() — watches OS-level events (system‑wide irritation)
+// ============================================================================
 async function scanOSEventsForHints() {
+  console.log("%c🟪 Scanning OSEvents…", "color:#9C27B0; font-weight:bold;");
+
   const snap = await db
     .collection(OS_EVENTS_COLLECTION)
     .orderBy("ts", "desc")
     .limit(100)
     .get();
 
-  if (snap.empty) return;
+  if (snap.empty) {
+    console.log("[PulseOSHealer] No OSEvents found.");
+    return;
+  }
 
   for (const doc of snap.docs) {
     const ev = doc.data();
@@ -140,17 +180,25 @@ async function scanOSEventsForHints() {
   }
 }
 
-// ------------------------------------------------------------
-// scanSubsystemHealerLogs() — now logs context + color
-// ------------------------------------------------------------
+// ============================================================================
+//  scanSubsystemHealerLogs() — watches subsystem healers (local tissue signals)
+// ============================================================================
 async function scanSubsystemHealerLogs() {
+  console.log(
+    "%c🟪 Scanning SubsystemHealerLogs…",
+    "color:#9C27B0; font-weight:bold;"
+  );
+
   const snap = await db
     .collection(SUBSYSTEM_HEALER_COLLECTION)
     .orderBy("ts", "desc")
     .limit(100)
     .get();
 
-  if (snap.empty) return;
+  if (snap.empty) {
+    console.log("[PulseOSHealer] No subsystem healer logs found.");
+    return;
+  }
 
   for (const doc of snap.docs) {
     const log = doc.data();
@@ -275,19 +323,19 @@ async function scanSubsystemHealerLogs() {
   }
 }
 
-// ------------------------------------------------------------
-// PUBLIC: startPulseOSHealer()
-// ------------------------------------------------------------
+// ============================================================================
+//  PUBLIC: startPulseOSHealer() — activate inflammatory response loop
+// ============================================================================
 export default function startPulseOSHealer() {
   console.log(
-    `%c🟦 PulseOSHealer v6.2 started`,
+    "%c🟦 PulseOSHealer v6.3 started — Inflammatory Response (C‑Layer) active.",
     "color:#03A9F4; font-weight:bold;"
   );
 
   setInterval(() => {
     scanOSEventsForHints().catch((err) => {
       console.error(
-        `%c🟥 OSEvents scan error`,
+        "%c🟥 OSEvents scan error",
         "color:#FF5252; font-weight:bold;",
         err
       );
@@ -297,7 +345,7 @@ export default function startPulseOSHealer() {
   setInterval(() => {
     scanSubsystemHealerLogs().catch((err) => {
       console.error(
-        `%c🟥 Subsystem scan error`,
+        "%c🟥 Subsystem scan error",
         "color:#FF5252; font-weight:bold;",
         err
       );

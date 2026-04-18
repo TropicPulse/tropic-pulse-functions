@@ -1,62 +1,58 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/netlify/functions/root-redirect.js
+// PULSE REDIRECT — VERSION 6.3
+// “THE CROSSING GUARD / SAFE‑PASSAGE REDIRECT LAYER”
+// ============================================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
-// 📘 PAGE INDEX — Source of Truth for This File
-//
-// This PAGE INDEX defines the identity, purpose, boundaries, and allowed
-// behavior of this file. It is the compressed representation of the entire
-// page. Keep this updated as functions, responsibilities, and logic evolve.
-//
-// If AI becomes uncertain or drifts, request: "Rules Design (Trust/Data)"
-//
-// CONTENTS TO MAINTAIN:
-//   • What this file IS
-//   • What this file IS NOT
-//   • Its responsibilities
-//   • Its exported functions
-//   • Its internal logic summary
-//   • Allowed imports
-//   • Forbidden imports
-//   • Deployment rules
-//   • Safety constraints
-//
-// The PAGE INDEX + SUB‑COMMENTS allow full reconstruction of the file
-// without needing to paste the entire codebase. Keep summaries accurate.
-// The comments are the source of truth — if code and comments disagree,
-// the comments win.
-//
+// PAGE INDEX (v6.3 Source of Truth)
+// ---------------------------------
 // ROLE:
-//   Netlify HTTP endpoint that receives userID + eventID and redirects
-//   to the real Stripe Payment Link with those parameters appended.
-//   This file IS a Netlify handler — routing is allowed here.
-//   Logic must remain minimal; heavy logic belongs in shared modules.
+//   root-redirect.js is the **CROSSING GUARD** of the backend.
+//   It stands at the public edge of the system and ensures safe passage
+//   from the app → to Stripe → and back.
 //
-// DEPLOYMENT:
-//   PRIMARY HOST: Netlify (all backend execution runs here)
-//   BACKUP HOSTS: Cloudflare + Firebase Hosting (static/CDN only)
-//   Firebase Functions = deprecated — do NOT add new Firebase Functions code
+//   • Validates minimal required parameters (userID, eventID)
+//   • Prevents unsafe or malformed crossings
+//   • Redirects users safely to the correct Stripe Payment Link
+//   • Keeps logic minimal, predictable, and deterministic
 //
-// SYNTAX RULES:
-//   ESM JavaScript ONLY — no TypeScript, no CommonJS, no require()
-//   ALWAYS use named exports (`export function handler`)
-//   NEVER use default exports
+// WHAT THIS FILE *IS*:
+//   • A Netlify HTTP redirect endpoint
+//   • A safe-passage layer for payment flows
+//   • A deterministic, zero-side-effect redirector
 //
-// IMPORT RULES:
-//   This file should avoid imports unless absolutely required
-//   (redirect endpoints must stay lightweight and fast).
+// WHAT THIS FILE *IS NOT*:
+//   • NOT a router
+//   • NOT a backend logic module
+//   • NOT a GPU or OS subsystem
+//   • NOT a business logic handler
 //
-// STRUCTURE:
-//   Lives in /netlify/functions (flat) unless Aldwyn creates subfolders
-//   This file is a pure redirect endpoint — no shared logic, no utilities
+// SAFETY CONTRACT (v6.3):
+//   • Validate required query parameters
+//   • Never expose secrets
+//   • Never call external APIs
+//   • Keep redirect URLs explicit and intentional
+//   • Keep logic minimal and deterministic
 //
-// DEPENDENCY RULES:
-//   Must remain deterministic and side‑effect‑free
-//   Must NOT call external APIs — only constructs redirect URLs
+// STRUCTURE RULES:
+//   • No imports allowed unless absolutely required
+//   • No mutation of request or response objects
+//   • No additional logic beyond validation + redirect
 //
-// SAFETY NOTES:
-//   Validate required query parameters (userID, eventID)
-//   Never expose secrets or internal URLs in responses
-//   Keep redirect URLs explicit and intentional
+// VERSION TAG:
+//   version: 6.3
+//
+// ============================================================================
+// ⭐ v6.3 COMMENT LOG
+// ---------------------------------------------------------------------------
+// • Added full v6.3 PAGE INDEX
+// • Added metaphor layer (CROSSING GUARD / SAFE‑PASSAGE REDIRECT LAYER)
+// • Added safety contract + structure rules
+// • Added v6.3 context map
+// • No logic changes
+// • No renames
+// • No behavior drift
+// ============================================================================
 
 export async function handler(event, context) {
   try {

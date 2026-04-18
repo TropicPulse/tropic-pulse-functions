@@ -1,26 +1,32 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUUXBridge.js
+// PULSE GPU UX BRIDGE v6.3
+// “INTELLIGENCE LAYER / COGNITIVE COMMUNICATION BRIDGE”
+// ============================================================================
 //
 // INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT.
 //
-// 📘 PAGE INDEX — Source of Truth for This File
+// PERSONALITY + ROLE:
+//   PulseGPUUXBridge is the **INTELLIGENCE LAYER** of the GPU subsystem.
+//   It is the **COGNITIVE COMMUNICATION BRIDGE** — the part that translates
+//   internal objects (advice, plans, insights) into human-readable notifications.
 //
-// ROLE:
-//   PulseGPUUXBridge — converts internal Pulse-GPU objects (advice, plans, insights)
-//   into UI-ready "notification" objects that any UI layer can render.
+//   • Consumes advice (The Coach), plans (Cognitive Recognition), insights (The Sage)
+//   • Produces UI-ready notifications with titles, messages, severity, and actions
+//   • Speaks “human” on behalf of the GPU OS
 //
-//   This file IS:
-//     • A pure logic module (full GPU, API-agnostic)
-//     • A deterministic formatter/adapter for UX messages
-//     • A bridge between engine intelligence and human-readable output
-//     • v5-ready: notifications include metadata for self-healing + replay
+// WHAT THIS FILE IS:
+//   • A deterministic formatter/adapter for UX messages
+//   • A pure logic module (API-agnostic, full GPU)
+//   • A bridge between engine intelligence and human-readable output
 //
-//   This file IS NOT:
-//     • A renderer
-//     • A GPU runtime
-//     • A WebGPU/WebGL interface
-//     • A persistence layer
-//     • A UI or notification system
-//     • A backend module
+// WHAT THIS FILE IS NOT:
+//   • NOT a renderer
+//   • NOT a GPU runtime
+//   • NOT a WebGPU/WebGL interface
+//   • NOT a persistence layer
+//   • NOT a UI or notification system
+//   • NOT a backend module
 //
 // SAFETY RULES:
 //   • NO randomness or timestamps
@@ -29,7 +35,7 @@
 //   • SELF-REPAIR READY: notifications must be reconstructable + validateable
 //
 // ------------------------------------------------------
-// Notification builder (v5-ready)
+// Notification builder (v6-ready)
 // ------------------------------------------------------
 
 function buildNotification({
@@ -47,7 +53,7 @@ function buildNotification({
     message: message || "",
     meta: {
       layer: "PulseGPUUXBridge",
-      version: 4,
+      version: 6.3,
       target: "full-gpu",
       selfRepairable: true,
       ...(meta || {})
@@ -74,7 +80,7 @@ function validateNotification(n) {
 }
 
 // ------------------------------------------------------
-// PulseGPUUXBridge (v4/v5-ready)
+// PulseGPUUXBridge (v6-ready)
 // ------------------------------------------------------
 
 class PulseGPUUXBridge {
@@ -83,7 +89,7 @@ class PulseGPUUXBridge {
   // Static metadata for healing layer
   static meta = {
     layer: "PulseGPUUXBridge",
-    version: 4,
+    version: 6.3,
     target: "full-gpu",
     selfRepairable: true
   };
@@ -249,7 +255,9 @@ class PulseGPUUXBridge {
         kind: "settings",
         severity: "high",
         title: "Restore best-known settings",
-        message: reason || "Performance regressed; restoring best-known configuration is recommended.",
+        message:
+          reason ||
+          "Performance regressed; restoring best-known configuration is recommended.",
         actions: [
           {
             label: "Restore now",
@@ -272,7 +280,9 @@ class PulseGPUUXBridge {
         kind: "settings",
         severity: "medium",
         title: "Apply optimal settings",
-        message: reason || "Better settings are available based on your best-known performance.",
+        message:
+          reason ||
+          "Better settings are available based on your best-known performance.",
         actions: [
           {
             label: "Apply optimal settings",
@@ -295,7 +305,9 @@ class PulseGPUUXBridge {
         kind: "tier",
         severity: "medium",
         title: "Tier upgrade opportunity",
-        message: reason || "A higher tier configuration has historically delivered better performance.",
+        message:
+          reason ||
+          "A higher tier configuration has historically delivered better performance.",
         actions: [
           {
             label: "View tier options",

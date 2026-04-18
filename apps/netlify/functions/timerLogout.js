@@ -1,11 +1,56 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/timerLogout.js
-// LAYER: D‑LAYER (BACKEND FUNCTION)
+// PULSE RESET ENGINE — v6.3
+// “THE CUSTODIAN / STATE RESET & LINEAGE RESTORATION ENGINE”
+// ============================================================================
 //
-// PURPOSE:
-// • Direct backend function for timerLogout.
-// • Name matches file, matches function, matches logs.
-// • No scheduling wrapper — heartbeat calls this.
+// ⭐ v6.3 COMMENT LOG
+// - THEME: “THE CUSTODIAN / STATE RESET & LINEAGE RESTORATION ENGINE”
+// - ROLE: Daily population reset + lineage repair
+// - Added LAYER CONSTANTS + DIAGNOSTICS helper
+// - Added structured JSON logs (DOM-visible inspector compatible)
+// - Added explicit STAGE markers for settings/logout/history/fatal
+// - ZERO logic changes to logout or repair behavior
+//
+// ============================================================================
+// PERSONALITY + ROLE — “THE CUSTODIAN”
+// ----------------------------------------------------------------------------
+// timerLogout is the **CUSTODIAN** of the Pulse OS.
+// It is the **STATE RESET & LINEAGE RESTORATION ENGINE** — the subsystem that
+// performs daily cleanup, resets inactive users, repairs loyalty state,
+// and restores missing pulse history snapshots.
+//
+//   • Logs out inactive users
+//   • Repairs loyalty state
+//   • Fixes missing pulse history snapshots
+//   • Ensures lineage integrity
+//   • Writes reset logs for diagnostics
+//
+// This is the OS’s **ritual maintenance layer** — the daily purification pass.
+//
+// ============================================================================
+// WHAT THIS FILE IS
+// ----------------------------------------------------------------------------
+//   ✔ A deterministic reset engine
+//   ✔ A lineage repair subsystem
+//   ✔ A population integrity maintainer
+//
+// WHAT THIS FILE IS NOT
+// ----------------------------------------------------------------------------
+//   ✘ NOT a scheduler (The Heart calls this)
+//   ✘ NOT a scoring engine
+//   ✘ NOT a security sweep
+//   ✘ NOT a router
+//
+// ============================================================================
+// SAFETY CONTRACT (v6.3)
+// ----------------------------------------------------------------------------
+//   • Never mutate root tokens
+//   • Only reset session state + loyalty state
+//   • Always repair missing snapshots deterministically
+//   • Always log lineage corrections
+//   • Fail-open per user: errors logged, reset continues
+//
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -17,6 +62,31 @@ if (!admin.apps.length) {
 const db = getFirestore();
 
 // ============================================================================
+// LAYER CONSTANTS + DIAGNOSTICS
+// ============================================================================
+const LAYER_ID = "CUSTODIAN-LAYER";
+const LAYER_NAME = "THE CUSTODIAN";
+const LAYER_ROLE = "STATE RESET & LINEAGE RESTORATION";
+
+const CUSTODIAN_DIAGNOSTICS_ENABLED =
+  process.env.PULSE_CUSTODIAN_DIAGNOSTICS === "true" ||
+  process.env.PULSE_DIAGNOSTICS === "true";
+
+const logCustodian = (stage, details = {}) => {
+  if (!CUSTODIAN_DIAGNOSTICS_ENABLED) return;
+
+  console.log(
+    JSON.stringify({
+      pulseLayer: LAYER_ID,
+      pulseName: LAYER_NAME,
+      pulseRole: LAYER_ROLE,
+      stage,
+      ...details
+    })
+  );
+};
+
+// ============================================================================
 // BACKEND ENTRY POINT (CALLED BY HEARTBEAT)
 // ============================================================================
 export async function timerLogout() {
@@ -26,6 +96,8 @@ export async function timerLogout() {
 
   const userChanges = {};
   const pulseChanges = {};
+
+  logCustodian("RESET_START", { runId });
 
   try {
     const now = Date.now();
@@ -51,7 +123,11 @@ export async function timerLogout() {
 
       calculationVersion = settings.calculationVersion ?? 1;
 
+      logCustodian("SETTINGS_LOADED", { seasonalActive, seasonalName });
+
     } catch (err) {
+      logCustodian("SETTINGS_ERROR", { message: String(err) });
+
       await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}SETTINGS`).set({
         fn: "timerLogout",
         stage: "settings_load",
@@ -69,6 +145,8 @@ export async function timerLogout() {
         .where("TPSecurity.lastAppActive", "<", cutoff)
         .where("TPSecurity.isLoggedIn", "==", true)
         .get();
+
+      logCustodian("LOGOUT_QUERY", { count: snap.size });
 
       for (const docSnap of snap.docs) {
         const uid = docSnap.id;
@@ -96,8 +174,12 @@ export async function timerLogout() {
 
           userChanges[uid] = "LogoutCHANGE";
 
+          logCustodian("USER_LOGOUT", { uid });
+
         } catch (err) {
           userChanges[uid] = "LogoutNOCHANGE";
+
+          logCustodian("USER_LOGOUT_ERROR", { uid, message: String(err) });
 
           await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
             fn: "timerLogout",
@@ -111,6 +193,8 @@ export async function timerLogout() {
       }
 
     } catch (err) {
+      logCustodian("LOGOUT_BLOCK_ERROR", { message: String(err) });
+
       await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}LOGOUT_BLOCK`).set({
         fn: "timerLogout",
         stage: "logout_block",
@@ -126,6 +210,8 @@ export async function timerLogout() {
     try {
       const usersSnap = await db.collection("Users").get();
 
+      logCustodian("PULSE_QUERY_USERS", { count: usersSnap.size });
+
       for (const userDoc of usersSnap.docs) {
         const uid = userDoc.id;
 
@@ -134,6 +220,8 @@ export async function timerLogout() {
           const histSnap = await histRef.where("pointsSnapshot", "==", null).limit(50).get();
 
           if (histSnap.empty) continue;
+
+          logCustodian("PULSE_MISSING", { uid, count: histSnap.size });
 
           for (const entry of histSnap.docs) {
             const entryKey = `${uid}/${entry.id}`;
@@ -166,8 +254,15 @@ export async function timerLogout() {
 
               pulseChanges[entryKey] = "LogoutCHANGE";
 
+              logCustodian("PULSE_REPAIRED", { entryKey });
+
             } catch (err) {
               pulseChanges[entryKey] = "LogoutNOCHANGE";
+
+              logCustodian("PULSE_REPAIR_ERROR", {
+                entryKey,
+                message: String(err)
+              });
 
               await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${entryKey.replace("/", "_")}`).set({
                 fn: "timerLogout",
@@ -182,6 +277,8 @@ export async function timerLogout() {
           }
 
         } catch (err) {
+          logCustodian("PULSE_QUERY_ERROR", { uid, message: String(err) });
+
           await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
             fn: "timerLogout",
             stage: "pulsehistory_query",
@@ -194,6 +291,8 @@ export async function timerLogout() {
       }
 
     } catch (err) {
+      logCustodian("PULSE_BLOCK_ERROR", { message: String(err) });
+
       await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}PULSE_BLOCK`).set({
         fn: "timerLogout",
         stage: "pulse_block",
@@ -214,10 +313,14 @@ export async function timerLogout() {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
+    logCustodian("RESET_COMPLETE", { runId });
+
   } catch (err) {
     // ---------------------------------------------------------
     // ⭐ 5. FATAL ERROR
     // ---------------------------------------------------------
+    logCustodian("FATAL_ERROR", { message: String(err) });
+
     await db.collection("FUNCTION_ERRORS").doc(`ERR_FATAL_${runId}`).set({
       fn: "timerLogout",
       stage: "fatal",

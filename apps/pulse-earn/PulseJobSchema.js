@@ -1,55 +1,48 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseJobSchema.js
-//
-// PulseJobSchema v5 — Deterministic, Drift‑Proof, Self‑Healing Canonical Job Format
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE CONSTITUTION
+// (The One True Job Contract + Immutable Cross‑System Law)
+// ============================================================================
 //
 // ROLE:
-//   PulseJobSchema — the ONE TRUE job format used across the entire Pulse stack.
+//   THE CONSTITUTION — the supreme, immutable job contract of Pulse‑Earn.
+//   • Defines the canonical job structure
+//   • Establishes the cross‑system treaty all modules must obey
+//   • Guarantees compatibility across the entire Earn OS
 //
-// RESPONSIBILITIES:
-//   • Define the canonical job shape
-//   • Remain stable across all subsystems
-//   • Provide a cross‑system compatibility contract
+// WHY “CONSTITUTION”?:
+//   • It is the highest authority in the Earn ecosystem
+//   • It cannot drift, mutate, or adapt dynamically
+//   • All subsystems must obey it without exception
+//   • It defines the structure of every job, forever
 //
-// THIS FILE IS:
-//   • A static schema
-//   • A deterministic contract
-//   • A cross‑system interface definition
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof job format
+//   • Ensure universal compatibility across all Earn layers
+//   • Serve as the legal foundation for job execution + routing
 //
-// THIS FILE IS NOT:
-//   • A validator
-//   • A compute engine
-//   • A scheduler
-//   • A marketplace adapter
-//   • A runtime
+// CONTRACT:
+//   • PURE STATIC SCHEMA — no logic, no runtime behavior
+//   • NO dynamic fields, NO optional structural keys
+//   • NO environment‑specific or marketplace‑specific fields
+//   • Immutable across versions unless explicitly ratified
 //
-// SAFETY RULES (CRITICAL):
-//   • NO dynamic fields
-//   • NO optional structural keys
-//   • NO runtime logic
-//   • NO environment‑specific fields
-//   • NO marketplace‑specific fields
-//   • NO device‑specific fields
-//
-// ------------------------------------------------------
-// PulseJobSchema — Canonical Pulse Job Format (v5)
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 schema
+// ============================================================================
 
 export const PulseJobSchema = {
-  id: "string", // Unique job ID
+  id: "string", // Unique job ID (constitutional requirement)
 
   payload: {
-    type: "string", // e.g. "marketplace-job", "internal-task"
-    data: "any",    // Raw job data (marketplace metadata, internal task data, etc.)
+    type: "string", // Job category (marketplace-job, internal-task, etc.)
+    data: "any",    // Raw job data (marketplace metadata, internal task data)
 
     gpu: {
-      workgroupSize: "number", // GPU workgroup size (PulseBand uses this)
+      workgroupSize: "number", // GPU workgroup size (PulseBand)
       iterations: "number",    // Number of compute passes
-      shader: "string"         // WGSL shader source (empty string for non-GPU jobs)
+      shader: "string"         // WGSL shader source (empty for non-GPU jobs)
     }
   },
 

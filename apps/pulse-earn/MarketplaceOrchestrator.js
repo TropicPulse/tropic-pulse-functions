@@ -1,65 +1,48 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/MarketplaceOrchestrator.js
-//
-// MarketplaceOrchestrator v5 — Deterministic, Drift‑Proof, Self‑Healing Job Router
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE TRAFFIC OFFICER
+// (Marketplace Traffic Control + Job Routing + Reputation Weighting)
+// ============================================================================
 //
 // ROLE:
-//   MarketplaceOrchestrator — multi‑marketplace job discovery + selection.
+//   THE TRAFFIC OFFICER — Pulse‑Earn’s job traffic controller.
+//   • Pings all marketplaces (traffic awareness)
+//   • Filters unhealthy ones (unsafe vehicles)
+//   • Fetches jobs from healthy markets (incoming lanes)
+//   • Applies reputation weighting (driver trust)
+//   • Selects the best job for the device (directs traffic)
 //
-// RESPONSIBILITIES:
-//   • Ping all marketplaces
-//   • Filter unhealthy ones
-//   • Fetch jobs from healthy marketplaces
-//   • Apply marketplace reputation weighting
-//   • Select best job using capability scoring
-//   • Maintain deterministic healing metadata
+// WHY “TRAFFIC OFFICER”?:
+//   • Stands in the middle of all marketplaces
+//   • Directs which marketplace gets to move next
+//   • Stops unhealthy or slow marketplaces
+//   • Routes jobs based on capability + reputation
+//   • Keeps the Earn economy flowing smoothly
 //
-// THIS FILE IS:
-//   • A job discovery engine
-//   • A marketplace health checker
-//   • A job aggregator
-//   • A capability‑based job selector
-//   • A reputation‑weighted scoring engine
+// PURPOSE:
+//   • Provide deterministic, drift‑proof job routing
+//   • Guarantee safe multi‑marketplace discovery
+//   • Maintain healing metadata for the Physician (EarnHealer)
 //
-// THIS FILE IS NOT:
-//   • A scheduler
-//   • A compute engine
-//   • A marketplace adapter
-//   • A job wrapper
-//   • A result submitter
-//   • A ledger/wallet/token handler
+// CONTRACT:
+//   • PURE ROUTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic job selection only
 //
-// SAFETY RULES:
-//   • Never throw unhandled errors
-//   • Always validate job objects
-//   • Never mutate job objects
-//   • Always remain deterministic
-//
-// IMPORT RULES:
-//   Allowed:
-//     • PulseJobScoring.js
-//     • PulseDeviceProfile.js
-//     • MarketplaceReputation.js
-//
-//   Forbidden:
-//     • Direct marketplace API calls
-//     • Node.js APIs
-//     • Backend modules
-//     • DOM manipulation
-//
-// ------------------------------------------------------
-// MarketplaceOrchestrator — Multi‑marketplace job discovery + selection (v5)
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 Orchestrator
+// ============================================================================
 
 import { scoreJobForDevice } from "./PulseJobScoring.js";
 import { getDeviceProfile } from "./PulseDeviceProfile.js";
 import { getMarketplaceReputation } from "./MarketplaceReputation.js";
 
-// Healing metadata
+// ---------------------------------------------------------------------------
+// Healing Metadata — Traffic Officer Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastPingError: null,
   lastFetchError: null,
@@ -70,9 +53,9 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// 1. discoverHealthyMarketplaces()
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 1. discoverHealthyMarketplaces — Traffic Awareness Scan
+// ---------------------------------------------------------------------------
 export async function discoverHealthyMarketplaces(marketplaces, maxLatencyMs = 1500) {
   healingState.cycleCount++;
 
@@ -102,9 +85,9 @@ export async function discoverHealthyMarketplaces(marketplaces, maxLatencyMs = 1
   }
 }
 
-// ------------------------------------------------------
-// 2. fetchJobsFromMarketplaces()
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 2. fetchJobsFromMarketplaces — Incoming Lanes
+// ---------------------------------------------------------------------------
 export async function fetchJobsFromMarketplaces(marketplaces) {
   try {
     const allJobsArrays = await Promise.all(
@@ -129,9 +112,9 @@ export async function fetchJobsFromMarketplaces(marketplaces) {
   }
 }
 
-// ------------------------------------------------------
-// 3. selectBestJob()
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 3. selectBestJob — Traffic Direction Decision
+// ---------------------------------------------------------------------------
 export function selectBestJob(jobs) {
   try {
     const device = getDeviceProfile();
@@ -140,7 +123,6 @@ export function selectBestJob(jobs) {
     let bestScore = -Infinity;
 
     for (const job of jobs) {
-      // Validate job structure
       if (!job.id || !job.marketplaceId) continue;
 
       const capabilityScore = scoreJobForDevice(job, device);
@@ -166,9 +148,9 @@ export function selectBestJob(jobs) {
   }
 }
 
-// ------------------------------------------------------
-// 4. getNextJob()
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 4. getNextJob — Full Traffic Control Cycle
+// ---------------------------------------------------------------------------
 export async function getNextJob(allMarketplaces) {
   try {
     const healthy = await discoverHealthyMarketplaces(allMarketplaces);
@@ -190,9 +172,9 @@ export async function getNextJob(allMarketplaces) {
   }
 }
 
-// ------------------------------------------------------
-// Export healing metadata for EarnHealer
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Export Healing Metadata — Traffic Officer Report
+// ---------------------------------------------------------------------------
 export function getMarketplaceOrchestratorHealingState() {
   return { ...healingState };
 }

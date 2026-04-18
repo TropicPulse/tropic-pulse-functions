@@ -1,23 +1,51 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/Earner.js
-// LAYER: EARN-SUBSYSTEM (PURE LOGIC / SAFE COMPUTE ENGINE)
+// LAYER: THE CITIZEN (Deterministic Worker + Safe Compute Participant)
+// ============================================================================
 //
-// Earner v5.2 — Deterministic, Drift‑Proof, Self‑Healing Compute Engine
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
+// ROLE:
+//   THE CITIZEN — Pulse‑Earn’s sandboxed compute participant.
+//   • Receives assigned jobs from the Foreman (EarnEngine)
+//   • Executes deterministic, rule‑bound compute tasks
+//   • Returns safe, structured results
+//   • Maintains personal healing metadata
+//
+// WHY “CITIZEN”?:
+//   • Operates inside strict laws (no network, no mutation, no side effects)
+//   • Performs labor assigned by the Foreman
+//   • Maintains personal state + work history
+//   • Represents a single worker in the Pulse‑Earn economy
+//
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof compute engine
+//   • Guarantee safe execution of text/math/data/json operations
+//   • Maintain healing metadata for Earn healers
+//
+// CONTRACT:
+//   • PURE COMPUTE — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO network access
+//   • NO executing user code
+//   • Deterministic output only
+//
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 Earner
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v5 CONTEXT METADATA
+// CITIZEN CONTEXT METADATA
 // ------------------------------------------------------------
 const EARNER_CONTEXT = {
   layer: "Earner",
-  role: "EARN_COMPUTE_ENGINE",
+  role: "CITIZEN_WORKER",
   purpose: "Execute deterministic, sandboxed compute operations for Earn jobs",
-  context: "Safe compute dispatcher + healing metadata"
+  context: "Safe compute participant + healing metadata"
 };
 
 // ------------------------------------------------------------
-// Healing Metadata
+// Healing Metadata — Citizen Work Log
 // ------------------------------------------------------------
 const healingState = {
   lastJobType: null,
@@ -30,7 +58,7 @@ const healingState = {
 };
 
 // ------------------------------------------------------------
-// computeWork(job)
+// computeWork(job) — Citizen performs assigned labor
 // ------------------------------------------------------------
 export async function computeWork(job) {
   const start = performance.now();
@@ -97,7 +125,7 @@ export async function computeWork(job) {
 }
 
 // ------------------------------------------------------------
-// SAFE COMPUTE MODULES
+// SAFE COMPUTE MODULES — Citizen Skillset
 // ------------------------------------------------------------
 function textTransform({ text = "", mode = "upper" }) {
   switch (mode) {
@@ -140,7 +168,7 @@ function jsonTransform({ json, pick }) {
 }
 
 // ------------------------------------------------------------
-// Export healing metadata for EarnHealer
+// Export healing metadata — Citizen Work History
 // ------------------------------------------------------------
 export function getEarnerHealingState() {
   return { ...healingState };

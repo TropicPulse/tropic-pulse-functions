@@ -1,52 +1,52 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/persona.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE IDENTITY LAYER (Self‑Definition + Role Assignment)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIPersona — defines the AI personas that operate inside Pulse OS,
-//   including their identity, intent, and linkage to permissions + boundaries.
+//   THE IDENTITY LAYER — Defines who each AI persona *is*
+//   • Provides explicit identity metadata
+//   • Binds personas to permissions + boundaries
+//   • Gives each AI a clear role + scope inside Pulse OS
 //
 // PURPOSE:
-//   • Give each AI a clear, explicit identity
-//   • Bind personas to permissions and boundaries
-//   • Make AI roles human‑readable + AI‑readable
+//   • Make AI identity human‑readable + AI‑readable
+//   • Provide deterministic persona resolution
+//   • Serve as the foundation for routing + cognition
 //
-// OUTPUT:
-//   • Persona objects for backend‑ai and frontend‑ai
-//
-// RESPONSIBILITIES:
-//   • Define persona metadata (name, description, scope)
-//   • Attach permissions + boundaries references
-//   • Provide helpers to resolve persona by id
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
-//   • Deterministic persona resolution only
+//   • Deterministic persona lookup only
 //
-// ------------------------------------------------------
-// Pulse‑AI Persona Layer
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 persona.js
+// ============================================================================
 
 import {
   BackendAIPermissions,
   FrontendAIPermissions,
 } from "./permissions.js";
+
 import {
   BackendAIBoundaries,
   FrontendAIBoundaries,
 } from "./boundaries.js";
 
+// ============================================================================
+// PERSONA IDs — Identity Tokens
+// ============================================================================
 export const Personas = {
   BACKEND_AI: "backend-ai",
   FRONTEND_AI: "frontend-ai",
 };
 
+// ============================================================================
+// PERSONA REGISTRY — Identity Definitions
+// ============================================================================
 export const PersonaRegistry = {
   [Personas.BACKEND_AI]: {
     id: Personas.BACKEND_AI,
@@ -69,9 +69,9 @@ export const PersonaRegistry = {
   },
 };
 
-/**
- * getPersona(personaId)
- */
+// ============================================================================
+// PERSONA RESOLUTION — Identity Lookup
+// ============================================================================
 export function getPersona(personaId) {
   return PersonaRegistry[personaId] || null;
 }

@@ -1,55 +1,67 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/aiAdminPanel.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE CLINICIAN (Diagnostic Interpreter + Triage Specialist)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIAdminPanel — shapes AI debug context into a UI‑ready model
-//   for an admin dashboard (sections, severities, icons, actions).
+//   THE CLINICIAN — The diagnostic interpreter of Pulse OS
+//   • Reads raw AI trace + diagnostics
+//   • Classifies issues by severity
+//   • Builds structured admin dashboard models
+//   • Produces summary cards + issue lists
+//   • Preserves trace for deep inspection
 //
-// PURPOSE:
-//   • Turn raw trace + diagnostics into a structured admin view
-//   • Classify issues by severity (error / warning / info / ok)
-//   • Provide per‑field issue objects for clickable UI
-//
-// OUTPUT:
-//   • AdminPanelModel: { summaryCards, issueList, trace, meta }
-//
-// RESPONSIBILITIES:
-//   • Map diagnostics → summary cards
-//   • Map mismatches/missing/drift/slowdown → issue list
-//   • Preserve trace for deep inspection
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes, no mutations
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
+//   • Pure diagnostic transformation
 //
-// ------------------------------------------------------
-// Pulse‑AI Admin Panel Model
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 aiAdminPanel
+// ============================================================================
 
-/**
- * buildAdminPanelModel(context, options?)
- *
- * Returns:
- * {
- *   summaryCards: [...],
- *   issueList: [...],
- *   trace: [...],
- *   meta: {...}
- * }
- */
+// ============================================================================
+// LAYER CONSTANTS + DIAGNOSTICS
+// ============================================================================
+const CLINICIAN_LAYER_ID = "CLINICIAN-LAYER";
+const CLINICIAN_LAYER_NAME = "THE CLINICIAN";
+const CLINICIAN_LAYER_ROLE = "Diagnostic Interpreter + Triage Specialist";
+
+const CLINICIAN_DIAGNOSTICS_ENABLED =
+  process?.env?.PULSE_CLINICIAN_DIAGNOSTICS === "true" ||
+  process?.env?.PULSE_DIAGNOSTICS === "true";
+
+const clinicianLog = (stage, details = {}) => {
+  if (!CLINICIAN_DIAGNOSTICS_ENABLED) return;
+
+  console.log(
+    JSON.stringify({
+      pulseLayer: CLINICIAN_LAYER_ID,
+      pulseName: CLINICIAN_LAYER_NAME,
+      pulseRole: CLINICIAN_LAYER_ROLE,
+      stage,
+      ...details
+    })
+  );
+};
+
+clinicianLog("CLINICIAN_INIT", {});
+
+// ============================================================================
+// PUBLIC API — Build Admin Panel Model
+// ============================================================================
 export function buildAdminPanelModel(context, options = {}) {
+  clinicianLog("BUILD_MODEL_START");
+
   const { trace, diagnostics } = context;
 
   const summaryCards = buildSummaryCards(diagnostics);
   const issueList = buildIssueList(diagnostics);
 
-  return {
+  const model = {
     summaryCards,
     issueList,
     trace: [...trace],
@@ -61,13 +73,20 @@ export function buildAdminPanelModel(context, options = {}) {
       ...options.meta,
     },
   };
+
+  clinicianLog("BUILD_MODEL_COMPLETE", {
+    totalIssues: model.meta.totalIssues
+  });
+
+  return model;
 }
 
-/**
- * buildSummaryCards(diagnostics)
- * Produces high‑level cards for the top of the admin dashboard.
- */
+// ============================================================================
+// SUMMARY CARDS — Clinical Overview
+// ============================================================================
 function buildSummaryCards(diagnostics) {
+  clinicianLog("SUMMARY_CARDS_START");
+
   const cards = [];
 
   const mismatchCount = diagnostics.mismatches.length;
@@ -130,14 +149,16 @@ function buildSummaryCards(diagnostics) {
       : "No schema drift detected.",
   });
 
+  clinicianLog("SUMMARY_CARDS_COMPLETE", { count: cards.length });
   return cards;
 }
 
-/**
- * buildIssueList(diagnostics)
- * Produces a flat list of issues for table/list rendering.
- */
+// ============================================================================
+// ISSUE LIST — Clinical Triage Table
+// ============================================================================
 function buildIssueList(diagnostics) {
+  clinicianLog("ISSUE_LIST_START");
+
   const issues = [];
 
   diagnostics.mismatches.forEach((m) => {
@@ -181,5 +202,6 @@ function buildIssueList(diagnostics) {
     });
   }
 
+  clinicianLog("ISSUE_LIST_COMPLETE", { count: issues.length });
   return issues;
 }

@@ -1,48 +1,39 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-design/manifestBuilder.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE ARCHIVIST (System Historian + Canonical Recorder)
+// ============================================================================
 //
 // ROLE:
-//   ManifestBuilder — deterministic, read‑only scanner that walks the repo,
-//   classifies files, extracts metadata, and outputs a unified manifest
-//   describing the entire Pulse project structure.
+//   THE ARCHIVIST — Deterministic repo‑wide scanner + cataloger
+//   • Walks the entire project directory
+//   • Classifies files using the Anatomist
+//   • Extracts structural + behavioral metadata
+//   • Produces the canonical architecture snapshot
 //
 // PURPOSE:
-//   • Make the system AI‑readable
-//   • Make the system human‑readable
-//   • Provide a single source of truth for routes, components, data usage,
-//     PulseBand usage, healing hooks, and file types
+//   • Make the entire system AI‑readable + human‑readable
+//   • Provide a single source of truth for pages, components, layouts, APIs
+//   • Detect PulseBand usage, healing hooks, and data sources
+//   • Output pulse_project.json — the official architecture manifest
 //
-// OUTPUT:
-//   • /pulse_project.json — the canonical architecture snapshot
-//
-// RESPONSIBILITIES:
-//   • Walk the repo deterministically
-//   • Detect pages, components, layouts, API routes
-//   • Detect PulseBand usage
-//   • Detect healing hooks
-//   • Detect data sources (SQL, Firestore, Pulse‑Fields)
-//   • Classify file types (page, component, layout, api, util, unknown)
-//   • Produce a stable manifest for AI + humans
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes except the manifest output
+// CONTRACT:
+//   • READ‑ONLY — no writes except manifest output
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
-//   • NO mutation of scanned files
 //   • Deterministic output only
 //
-// ------------------------------------------------------
-// ManifestBuilder — Deterministic Repo Scanner
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 manifestBuilder
+// ============================================================================
 
 import fs from "fs";
 import path from "path";
 
+// ============================================================================
+// PUBLIC API — Build Canonical Architecture Manifest
+// ============================================================================
 export async function buildManifest(rootDir) {
   const manifest = {
     generatedAt: new Date().toISOString(),
@@ -60,7 +51,7 @@ export async function buildManifest(rootDir) {
   walk(rootDir, (filePath) => {
     const rel = path.relative(rootDir, filePath);
 
-    // Skip node_modules and build artifacts
+    // Skip build artifacts
     if (rel.includes("node_modules") || rel.includes(".next") || rel.includes("dist")) {
       return;
     }
@@ -68,17 +59,19 @@ export async function buildManifest(rootDir) {
     const fileInfo = classifyFile(rel);
     manifest.files.push(fileInfo);
 
-    // Categorize
+    // Categorization
     if (fileInfo.type === "page") manifest.pages.push(fileInfo);
     if (fileInfo.type === "component") manifest.components.push(fileInfo);
     if (fileInfo.type === "layout") manifest.layouts.push(fileInfo);
     if (fileInfo.type === "api") manifest.apis.push(fileInfo);
     if (fileInfo.usesPulseBand) manifest.pulseband.push(fileInfo);
     if (fileInfo.usesHealing) manifest.healingHooks.push(fileInfo);
-    if (fileInfo.dataSources.length > 0) manifest.dataSources.push(...fileInfo.dataSources);
+    if (fileInfo.dataSources.length > 0) {
+      manifest.dataSources.push(...fileInfo.dataSources);
+    }
   });
 
-  // Write manifest
+  // Write canonical manifest
   const outPath = path.join(rootDir, "pulse_project.json");
   fs.writeFileSync(outPath, JSON.stringify(manifest, null, 2));
 
@@ -89,9 +82,9 @@ export async function buildManifest(rootDir) {
   };
 }
 
-// ------------------------------------------------------
-// walk(dir, callback) — deterministic directory walker
-// ------------------------------------------------------
+// ============================================================================
+// DIRECTORY WALKER — Deterministic Traversal
+// ============================================================================
 function walk(dir, callback) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -106,14 +99,14 @@ function walk(dir, callback) {
   }
 }
 
-// ------------------------------------------------------
-// classifyFile(filePath) — detect type + metadata
-// ------------------------------------------------------
+// ============================================================================
+// FILE CLASSIFICATION — Delegated Anatomical Scan
+// ============================================================================
 function classifyFile(relPath) {
   const ext = path.extname(relPath);
   const content = safeRead(relPath);
 
-  const info = {
+  return {
     path: relPath,
     ext,
     type: detectType(relPath),
@@ -121,13 +114,11 @@ function classifyFile(relPath) {
     usesHealing: content.includes("useHealing") || content.includes("healing"),
     dataSources: detectDataSources(content),
   };
-
-  return info;
 }
 
-// ------------------------------------------------------
-// detectType(relPath)
-// ------------------------------------------------------
+// ============================================================================
+// TYPE DETECTION — Structural Identity
+// ============================================================================
 function detectType(relPath) {
   const lower = relPath.toLowerCase();
 
@@ -139,9 +130,9 @@ function detectType(relPath) {
   return "unknown";
 }
 
-// ------------------------------------------------------
-// detectDataSources(content)
-// ------------------------------------------------------
+// ============================================================================
+// DATA SOURCE DETECTION — Firestore, SQL, PulseFields
+// ============================================================================
 function detectDataSources(content) {
   const sources = [];
 
@@ -160,9 +151,9 @@ function detectDataSources(content) {
   return sources;
 }
 
-// ------------------------------------------------------
-// safeRead(filePath)
-// ------------------------------------------------------
+// ============================================================================
+// SAFE READ — Non‑Throwing File Read
+// ============================================================================
 function safeRead(filePath) {
   try {
     return fs.readFileSync(filePath, "utf8");

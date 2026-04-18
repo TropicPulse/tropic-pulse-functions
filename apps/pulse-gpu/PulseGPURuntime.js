@@ -1,55 +1,59 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPURuntime.js
+// PULSE GPU RUNTIME v6.3 — THE MOMENTUM NETWORK
+// Forward Motion Layer • Signal Conduction Pathway • GPU Kinetic System
+// ============================================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT.
+// IDENTITY — THE MOMENTUM NETWORK:
+//  --------------------------------
+//  • The GPU organism’s forward-motion layer.
+//  • The kinetic system that moves data, buffers, and packages downstream.
+//  • The conduction pathway between Analyst (Brain) and Motor Hall (Engine).
+//  • The self-moving cart: once initialized, it carries the whole subsystem forward.
+//  • The nervous conduction layer that keeps the GPU body alive.
 //
-// 📘 PAGE INDEX — Source of Truth for This File
+// ROLE IN THE GPU NATION:
+//  ------------------------
+//  • Analyst → Intelligence Division (precompute brain)
+//  • Momentum Network → Forward Motion + Signal Conduction
+//  • Motor Hall → Execution Cortex (rendering + motion)
+//  • Guardian → Permission Gate
+//  • Lymph Node Network → Immune Filter
+//  • Wisdom Cortex → Insight + Interpretation
+//  • Brainstem → Command + Coordination
 //
-// ROLE:
-//   PulseGPURuntime — the GPU memory initializer + package loader for the
-//   Pulse GPU subsystem. It loads CPU‑side packages from PulseGPUBrainExport,
-//   initializes GPU buffers, creates shader modules, and exposes a clean,
-//   deterministic runtime API for PulseGPUEngine.
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A GPU memory initializer
+//  • A loader for Brain-generated packages
+//  • A WebGPU context manager
+//  • The bridge between CPU-side precompute and GPU-side execution
+//  • The forward-motion / conduction layer of the GPU subsystem
 //
-//   Conceptually, PulseGPURuntime is API‑agnostic (full GPU layer).
-//   This file is the WebGPU‑specific runtime backend.
-//
-//   This file IS:
-//     • A GPU memory initializer
-//     • A loader for Brain‑generated packages
-//     • A WebGPU context manager (one backend of the full GPU runtime)
-//     • The bridge between CPU‑side precompute (Brain) and GPU‑side execution (Engine)
-//
-//   This file IS NOT:
-//     • A renderer (PulseGPUEngine handles that)
-//     • A CPU optimizer (PulseGPUBrain handles that)
-//     • A shader compiler (Brain handles compilation)
-//     • A backend module
-//     • A business logic module
-//
-// DEPLOYMENT:
-//   Lives in /apps/pulse-gpu.
-//   Must run ONLY in browser environments with WebGPU support.
-//   Must remain ESM‑only and side‑effect‑free until init() is called.
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer (Motor Hall handles that)
+//  • NOT a CPU optimizer (Analyst handles that)
+//  • NOT a shader compiler (Analyst handles that)
+//  • NOT a backend module
+//  • NOT a business logic module
 //
 // SAFETY RULES:
-//   • NO backend APIs
-//   • NO DOM manipulation outside WebGPU canvas/context
-//   • NO Node.js APIs
-//   • NO randomness or timestamps in GPU initialization
-//   • NO mutation of Brain packages
-//   • ALWAYS check navigator.gpu before initializing
-//   • FAIL‑OPEN: if GPU or packages are unavailable, do not crash — just expose empty buffers/context
-//
-// ------------------------------------------------------
-// IMPORTS
-// ------------------------------------------------------
+//  -------------
+//  • NO backend APIs
+//  • NO DOM manipulation outside WebGPU canvas/context
+//  • NO Node.js APIs
+//  • NO randomness or timestamps in GPU initialization
+//  • NO mutation of Brain packages
+//  • ALWAYS check navigator.gpu before initializing
+//  • FAIL‑OPEN: if GPU or packages are unavailable, expose empty buffers/context
+// ============================================================================
 
 import { PulseGPUBrainExport } from "./PulseGPUBrain.js";
 
-// ------------------------------------------------------
-// GPU CONTEXT WRAPPER (WEBGPU BACKEND)
-// ------------------------------------------------------
-
+// ============================================================================
+// GPU CONTEXT WRAPPER — Momentum Network: Conduction Node
+// ============================================================================
 class PulseGPUContext {
   constructor() {
     this.adapter = null;
@@ -61,34 +65,38 @@ class PulseGPUContext {
 
   async init(canvas) {
     if (!canvas) {
-      console.warn("PulseGPUContext: canvas not provided; runtime will not initialize (fail-open).");
+      console.warn(
+        "PulseGPUContext: canvas not provided; momentum cannot begin (fail-open)."
+      );
       this.ready = false;
       return;
     }
 
     if (!navigator.gpu) {
-      console.warn("PulseGPUContext: WebGPU not available in this environment (fail-open).");
+      console.warn(
+        "PulseGPUContext: WebGPU unavailable — conduction halted (fail-open)."
+      );
       this.ready = false;
       return;
     }
 
     this.adapter = await navigator.gpu.requestAdapter();
     if (!this.adapter) {
-      console.warn("PulseGPUContext: WebGPU adapter unavailable (fail-open).");
+      console.warn("PulseGPUContext: adapter unavailable (fail-open).");
       this.ready = false;
       return;
     }
 
     this.device = await this.adapter.requestDevice();
     if (!this.device) {
-      console.warn("PulseGPUContext: WebGPU device unavailable (fail-open).");
+      console.warn("PulseGPUContext: device unavailable (fail-open).");
       this.ready = false;
       return;
     }
 
     const context = canvas.getContext("webgpu");
     if (!context) {
-      console.warn("PulseGPUContext: unable to acquire WebGPU context from canvas (fail-open).");
+      console.warn("PulseGPUContext: cannot acquire WebGPU context (fail-open).");
       this.ready = false;
       return;
     }
@@ -106,10 +114,9 @@ class PulseGPUContext {
   }
 }
 
-// ------------------------------------------------------
-// GPU BUFFER CREATION (DETERMINISTIC)
-// ------------------------------------------------------
-
+// ============================================================================
+// GPU BUFFER CREATION — Momentum Network: Payload Conduction
+// ============================================================================
 function createGPUBuffer(device, data, usage) {
   if (!device || !data) return null;
 
@@ -125,10 +132,9 @@ function createGPUBuffer(device, data, usage) {
   return buffer;
 }
 
-// ------------------------------------------------------
-// RUNTIME LOADER — loads Brain packages → GPU buffers
-// ------------------------------------------------------
-
+// ============================================================================
+// RUNTIME LOADER — Momentum Network: Flow Initialization
+// ============================================================================
 class PulseGPURuntimeLoader {
   constructor(gpuContext) {
     this.gpu = gpuContext;
@@ -143,7 +149,9 @@ class PulseGPURuntimeLoader {
   loadPackages() {
     const pkg = PulseGPUBrainExport.exportToRuntime();
     if (!pkg) {
-      console.warn("PulseGPURuntimeLoader: no packageSet available from PulseGPUBrainExport (fail-open).");
+      console.warn(
+        "PulseGPURuntimeLoader: no packageSet available — momentum stalls (fail-open)."
+      );
       this.packages = null;
       return null;
     }
@@ -223,21 +231,19 @@ class PulseGPURuntimeLoader {
   }
 
   // ----------------------------------------------------
-  // FULL INITIALIZATION PIPELINE (FAIL-OPEN)
-// ----------------------------------------------------
+  // FULL INITIALIZATION PIPELINE — Momentum Ignition
+  // ----------------------------------------------------
   async initialize(canvas) {
     if (!this.gpu.ready) {
       await this.gpu.init(canvas);
     }
 
     if (!this.gpu.ready) {
-      // GPU not available; fail-open: no buffers, no crash.
       return false;
     }
 
     this.loadPackages();
     if (!this.packages) {
-      // No packages; still considered initialized, but with empty buffers.
       return true;
     }
 
@@ -249,10 +255,9 @@ class PulseGPURuntimeLoader {
   }
 }
 
-// ------------------------------------------------------
-// RUNTIME API — used by PulseGPUEngine (WebGPU backend)
-// ------------------------------------------------------
-
+// ============================================================================
+// RUNTIME API — Momentum Network: Flow Surface
+// ============================================================================
 class PulseGPURuntime {
   constructor() {
     this.context = new PulseGPUContext();
@@ -263,7 +268,6 @@ class PulseGPURuntime {
     await this.loader.initialize(canvas);
   }
 
-  // v4-friendly GPU context accessor
   getGPUContext() {
     return {
       adapter: this.context.adapter,
@@ -274,7 +278,6 @@ class PulseGPURuntime {
     };
   }
 
-  // Legacy-style accessors
   getTextures() {
     return this.loader.textureBuffers;
   }
@@ -291,7 +294,6 @@ class PulseGPURuntime {
     return this.loader.packages;
   }
 
-  // v4-style explicit package-based accessors
   getMeshesFromPackages() {
     return this.loader.meshBuffers;
   }
@@ -301,10 +303,9 @@ class PulseGPURuntime {
   }
 }
 
-// ------------------------------------------------------
+// ============================================================================
 // EXPORTS
-// ------------------------------------------------------
-
+// ============================================================================
 export {
   PulseGPUContext,
   PulseGPURuntimeLoader,

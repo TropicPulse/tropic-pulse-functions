@@ -55,7 +55,7 @@
   ============================= -->
   <script type="module">
     import { pulseband } from "./proxy/PulseBand.js";
-    import { identity } from "./netlify/functions/PulseIdentity.js";
+    import { identity } from "./PulseIdentity.js";
     import { getAuth, getHook, getMap, callHelper, attachScanner }
       from "./lib/Connectors/PageScanner.js";
   </script>
@@ -1750,7 +1750,7 @@ nav a:hover::after {
    IMPORTS — THE ONLY 3 IMPORTS ALLOWED ON EVERY FRONTEND PAGE
    ============================================================ */
 import { pulseband } from "./proxy/PulseBand.js";
-import { identity } from "./netlify/functions/PulseIdentity.js";
+import { identity } from "./PulseIdentity.js";
 import { getAuth, getHook, getMap, callHelper, attachScanner } 
   from "./lib/Connectors/PageScanner.js";
 

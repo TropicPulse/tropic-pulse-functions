@@ -1,24 +1,61 @@
 // ============================================================================
-// FILE: pulse-os/GlobalHealer.js
-// LAYER: C‑LAYER (TOP‑LEVEL IMMUNE SYSTEM)
-//
-// GlobalHealer v6.2 — Deterministic, Drift‑Aware, OS‑Level Healing Coordinator
-// NO AI. NO COMPUTE. NO MARKETPLACE. PURE HEALING COORDINATION.
+//  GLOBAL HEALER v6.3
+//  C‑LAYER (TOP‑LEVEL IMMUNE SYSTEM)
+//  Deterministic, Drift‑Aware, OS‑Level Healing Coordinator
+//  PURE HEALING. NO AI. NO COMPUTE. NO MARKETPLACE.
 // ============================================================================
-
-// ------------------------------------------------------------
-// ⭐ OS‑v5 CONTEXT MAP
-// ------------------------------------------------------------
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The top-level immune system of Tropic Pulse.
+//  • The global healer that watches all subsystem healers.
+//  • The cross‑OS drift detector.
+//  • The contradiction detector.
+//  • The global FUNCTION_LOG hint emitter.
+//  • The GlobalHealerLogs emitter.
+//  • The commander of the OS healing layer.
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a compute engine.
+//  • NOT a miner.
+//  • NOT a scheduler.
+//  • NOT a runtime.
+//  • NOT a marketplace adapter.
+//  • NOT a blockchain client.
+//  • NOT a wallet.
+//  • NOT a place for user-provided logic.
+//  • NOT a place for dynamic imports or eval.
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No eval().
+//  • No dynamic imports.
+//  • No arbitrary code execution.
+//  • No compute.
+//  • No GPU work.
+//  • No marketplace calls.
+//  • Deterministic, drift-proof global healing only.
+//
+// ============================================================================
+//  OS‑v6 CONTEXT MAP
+// ============================================================================
 const GLOBAL_HEALER_CONTEXT = {
   layer: "C‑Layer",
   role: "GLOBAL_HEALER",
   purpose: "Cross‑OS drift detection + global healing coordination",
-  context: "Watches OSHealerLogs + SubsystemHealerLogs and emits FUNCTION_LOG hints"
+  context: "Watches OSHealerLogs + SubsystemHealerLogs and emits FUNCTION_LOG hints",
+  version: 6.3
 };
 
-// ------------------------------------------------------------
-// COLLECTIONS
-// ------------------------------------------------------------
+console.log(
+  "%c🟦 GlobalHealer v6.3 online — Top‑Level Immune System Activated.",
+  "color:#03A9F4; font-weight:bold;"
+);
+
+// ============================================================================
+//  COLLECTIONS
+// ============================================================================
 export const OS_HEALER_LOGS_COLLECTION = "OSHealerLogs";
 export const SUBSYSTEM_HEALER_COLLECTION = "SubsystemHealerLogs";
 export const GLOBAL_HEALER_LOGS_COLLECTION = "GlobalHealerLogs";
@@ -32,8 +69,12 @@ import { recordDriftSignature } from "./PulseOSMemory.js";
 
 const db = getFirestore();
 
+/* ============================================================================
+   LOGGING HELPERS
+   ============================================================================ */
+
 // ------------------------------------------------------------
-// writeGlobalHealerLog() — now includes context + color logs
+// writeGlobalHealerLog() — GlobalHealerLogs emitter
 // ------------------------------------------------------------
 async function writeGlobalHealerLog(entry) {
   try {
@@ -58,7 +99,7 @@ async function writeGlobalHealerLog(entry) {
 }
 
 // ------------------------------------------------------------
-// emitFunctionLogHint() — now includes context + color logs
+// emitFunctionLogHint() — FUNCTION_LOGS emitter
 // ------------------------------------------------------------
 async function emitFunctionLogHint(entry) {
   try {
@@ -86,17 +127,26 @@ async function emitFunctionLogHint(entry) {
   }
 }
 
-// ------------------------------------------------------------
-// scanOSHealerLogsForGlobalHints()
-// ------------------------------------------------------------
+/* ============================================================================
+   OS HEALER LOG SCAN — watches OSHealerLogs
+   ============================================================================ */
+
 async function scanOSHealerLogsForGlobalHints() {
+  console.log(
+    "%c🟪 Scanning OSHealerLogs…",
+    "color:#9C27B0; font-weight:bold;"
+  );
+
   const snap = await db
     .collection(OS_HEALER_LOGS_COLLECTION)
     .orderBy("ts", "desc")
     .limit(100)
     .get();
 
-  if (snap.empty) return;
+  if (snap.empty) {
+    console.log("[GlobalHealer] No OSHealerLogs found.");
+    return;
+  }
 
   for (const doc of snap.docs) {
     const log = doc.data();
@@ -120,17 +170,26 @@ async function scanOSHealerLogsForGlobalHints() {
   }
 }
 
-// ------------------------------------------------------------
-// scanSubsystemHealerLogsForGlobalHints()
-// ------------------------------------------------------------
+/* ============================================================================
+   SUBSYSTEM HEALER LOG SCAN — watches SubsystemHealerLogs
+   ============================================================================ */
+
 async function scanSubsystemHealerLogsForGlobalHints() {
+  console.log(
+    "%c🟪 Scanning SubsystemHealerLogs…",
+    "color:#9C27B0; font-weight:bold;"
+  );
+
   const snap = await db
     .collection(SUBSYSTEM_HEALER_COLLECTION)
     .orderBy("ts", "desc")
     .limit(100)
     .get();
 
-  if (snap.empty) return;
+  if (snap.empty) {
+    console.log("[GlobalHealer] No SubsystemHealerLogs found.");
+    return;
+  }
 
   for (const doc of snap.docs) {
     const log = doc.data();
@@ -255,19 +314,20 @@ async function scanSubsystemHealerLogsForGlobalHints() {
   }
 }
 
-// ------------------------------------------------------------
-// PUBLIC: startGlobalHealer()
-// ------------------------------------------------------------
+/* ============================================================================
+   PUBLIC: startGlobalHealer()
+   ============================================================================ */
+
 export default function startGlobalHealer() {
   console.log(
-    `%c🟦 GlobalHealer v6.2 started`,
+    "%c🟦 GlobalHealer v6.3 started — Global immune system active.",
     "color:#03A9F4; font-weight:bold;"
   );
 
   setInterval(() => {
     scanOSHealerLogsForGlobalHints().catch((err) => {
       console.error(
-        `%c🟥 OSHealerLogs scan error`,
+        "%c🟥 OSHealerLogs scan error",
         "color:#FF5252; font-weight:bold;",
         err
       );
@@ -277,7 +337,7 @@ export default function startGlobalHealer() {
   setInterval(() => {
     scanSubsystemHealerLogsForGlobalHints().catch((err) => {
       console.error(
-        `%c🟥 SubsystemHealerLogs scan error`,
+        "%c🟥 SubsystemHealerLogs scan error",
         "color:#FF5252; font-weight:bold;",
         err
       );

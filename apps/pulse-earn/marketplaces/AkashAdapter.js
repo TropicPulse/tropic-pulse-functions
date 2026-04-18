@@ -1,47 +1,35 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaces/AkashAdapter.js
-//
-// AkashAdapter v5 — Deterministic, Drift‑Proof, Self‑Healing Akash Adapter
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE AMBASSADOR (Marketplace Liaison + External Negotiator)
+// ============================================================================
 //
 // ROLE:
-//   Akash Marketplace Client Adapter — defines how Tropic Pulse communicates
-//   with the Akash distributed compute marketplace.
+//   THE AMBASSADOR — Pulse‑Earn’s diplomatic interface to the Akash Network.
+//   • Communicates with the external compute marketplace
+//   • Fetches leases → normalizes them into Pulse‑Earn jobs
+//   • Submits completed results
+//   • Tracks healing metadata for Earn healers
 //
-// RESPONSIBILITIES:
-//   • ping()        → measure latency
-//   • fetchJobs()   → fetch + normalize leases as jobs
-//   • submitResult()→ submit completed results
-//   • normalizeJob()→ Akash lease → Pulse Earn job schema
-//   • Maintain adapter healing metadata
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof adapter for Akash
+//   • Maintain strict protocol boundaries
+//   • Ensure safe, predictable marketplace communication
 //
-// THIS FILE IS:
-//   • A network adapter for Akash Network
-//   • A pure ESM client module
-//   • A fetch-based HTTP wrapper
-//   • A job normalizer
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic normalization only
 //
-// THIS FILE IS NOT:
-//   • A ledger client
-//   • A wallet/token handler
-//   • A financial engine
-//   • A compute engine
-//   • A scheduler
-//   • A backend service
-//
-// SAFETY NOTES:
-//   • Never throw unhandled errors (except submitResult, which surfaces errors)
-//   • Never mutate raw lease objects
-//   • Always validate fetch() responses
-//   • Remain deterministic and side-effect-free
-//
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 AkashAdapter
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Ambassador Interaction Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -54,14 +42,16 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// Akash Marketplace Client
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// AMBASSADOR CLIENT — Akash Marketplace Interface
+// ---------------------------------------------------------------------------
 export const AkashAdapter = {
   id: "akash",
   name: "Akash Network",
 
+  // -------------------------------------------------------------------------
+  // Ping — Measure diplomatic channel latency
+  // -------------------------------------------------------------------------
   async ping() {
     const url = "https://akash-api.polkachu.com/blocks/latest";
     const start = Date.now();
@@ -84,6 +74,9 @@ export const AkashAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Fetch Jobs — Retrieve leases from the Akash marketplace
+  // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
     const url =
       "https://akash-api.polkachu.com/akash/market/v1beta3/leases/list";
@@ -119,6 +112,9 @@ export const AkashAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Submit Result — Return completed work to the marketplace
+  // -------------------------------------------------------------------------
   async submitResult(job, result) {
     const url = `https://akash-api.polkachu.com/akash/market/v1beta3/leases/${job.id}/submit`;
     healingState.lastSubmitJobId = job?.id ?? null;
@@ -141,6 +137,9 @@ export const AkashAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Normalize Job — Convert Akash lease → Pulse‑Earn job schema
+  // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
       if (!raw || typeof raw !== "object") {
@@ -191,10 +190,9 @@ export const AkashAdapter = {
   },
 };
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Earn healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing State Export — Ambassador Interaction Log
+// ---------------------------------------------------------------------------
 export function getAkashAdapterHealingState() {
   return { ...healingState };
 }

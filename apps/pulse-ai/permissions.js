@@ -1,47 +1,35 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/permissions.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE EGO (Capability Contract + Self‑Regulation Layer)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIPermissions — the OS‑level security contract that defines what
-//   each AI persona (backend AI vs frontend AI) is allowed to do inside
-//   the Pulse OS.
+//   THE EGO — Defines what each AI persona *can* do
+//   • Mediates between desire (intent) and law (Superego)
+//   • Provides the capability map for backend‑ai vs frontend‑ai
+//   • Enforces strict separation of power
 //
 // PURPOSE:
-//   • Enforce strict capability boundaries between AIs
-//   • Prevent unauthorized creation, mutation, or backend access
-//   • Allow safe read‑only operations for user‑facing AI
-//   • Allow full creation + backend access for owner AI
-//   • Provide a deterministic, human‑readable + AI‑readable permissions map
+//   • Prevent unauthorized mutation or backend access
+//   • Allow safe read‑only operations for user AI
+//   • Allow full creation + mutation for owner AI
+//   • Provide deterministic, human‑readable permissions
 //
-// OUTPUT:
-//   • A permissions object describing allowed + forbidden actions
-//
-// RESPONSIBILITIES:
-//   • Define backend AI capabilities
-//   • Define frontend AI capabilities
-//   • Define forbidden actions for all AIs
-//   • Provide helper functions for permission checks
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
 //   • Deterministic permission checks only
 //
-// ------------------------------------------------------
-// Pulse‑AI Permissions Layer
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 permissions.js
+// ============================================================================
 
-/**
- * BACKEND AI (Owner AI)
- * Full creation + mutation + healing + backend access.
- * This is YOU.
- */
+// ============================================================================
+// BACKEND AI — The Owner’s Ego (Full Capability)
+// ============================================================================
 export const BackendAIPermissions = {
   canReadFiles: true,
   canWriteFiles: true,
@@ -70,11 +58,9 @@ export const BackendAIPermissions = {
   persona: "backend-ai",
 };
 
-/**
- * FRONTEND AI (User AI)
- * Read‑only + safe transformations only.
- * Cannot create, mutate, or access backend.
- */
+// ============================================================================
+// FRONTEND AI — The User’s Ego (Read‑Only + Safe Transformations)
+// ============================================================================
 export const FrontendAIPermissions = {
   canReadFiles: true,
   canWriteFiles: false,
@@ -103,10 +89,9 @@ export const FrontendAIPermissions = {
   persona: "frontend-ai",
 };
 
-/**
- * UNIVERSAL FORBIDDEN ACTIONS
- * No AI can ever do these.
- */
+// ============================================================================
+// UNIVERSAL FORBIDDEN ACTIONS — No Persona May Ever Do These
+// ============================================================================
 export const ForbiddenActions = {
   canExecuteArbitraryCode: false,
   canAccessOS: false,
@@ -119,11 +104,11 @@ export const ForbiddenActions = {
   canModifyPulseCore: false,
 };
 
-/**
- * checkPermission(persona, action)
- * Returns true/false based on the permissions map.
- */
+// ============================================================================
+// PERMISSION CHECK — Ego Decision
+// ============================================================================
 export function checkPermission(persona, action) {
+  // Universal forbidden actions override everything
   if (ForbiddenActions[action] === false) return false;
 
   if (persona === "backend-ai") {

@@ -1,47 +1,44 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaces/FluidStackAdapter.js
-//
-// FluidStackAdapter v5 — Deterministic, Drift‑Proof, Self‑Healing FluidStack Adapter
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE BROKER (Opportunistic Job Trader + Elastic Flow Agent)
+// ============================================================================
 //
 // ROLE:
-//   FluidStack Marketplace Client Adapter — defines how Tropic Pulse
-//   communicates with the FluidStack compute marketplace.
+//   THE BROKER — Pulse‑Earn’s fast‑flow, opportunistic marketplace agent.
+//   • Interfaces with the FluidStack compute marketplace
+//   • Fetches high‑volume, fluid jobs
+//   • Normalizes raw offers into Pulse‑Earn job schema
+//   • Submits completed results
+//   • Maintains healing metadata for Earn healers
 //
-// RESPONSIBILITIES:
-//   • ping()        → measure latency
-//   • fetchJobs()   → fetch + normalize jobs
-//   • submitResult()→ submit completed results
-//   • normalizeJob()→ FluidStack job → Pulse Earn job schema
-//   • Maintain adapter healing metadata
+// WHY “BROKER”?:
+//   • FluidStack is not diplomatic like Akash (Ambassador)
+//   • It is transactional, elastic, burst‑driven, and fluid
+//   • Jobs appear/disappear rapidly — like market liquidity
+//   • The Broker thrives in fast‑moving markets
+//   • Executes trades, not treaties
 //
-// THIS FILE IS:
-//   • A network adapter for FluidStack
-//   • A pure ESM client module
-//   • A fetch-based HTTP wrapper
-//   • A job normalizer
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof adapter for FluidStack
+//   • Maintain strict protocol boundaries
+//   • Ensure safe, predictable marketplace communication
 //
-// THIS FILE IS NOT:
-//   • A payment handler
-//   • A ledger client
-//   • A wallet/token manager
-//   • A compute engine
-//   • A scheduler
-//   • A backend service
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • NO network calls beyond marketplace endpoints
+//   • Deterministic normalization only
 //
-// SAFETY NOTES:
-//   • Never throw unhandled errors (except submitResult, which surfaces errors)
-//   • Never mutate raw job objects
-//   • Always validate fetch() responses
-//   • Remain deterministic and side-effect-free
-//
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 FluidStackAdapter
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Broker Interaction Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -54,14 +51,16 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// FluidStack Marketplace Client
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// BROKER CLIENT — FluidStack Marketplace Interface
+// ---------------------------------------------------------------------------
 export const FluidStackAdapter = {
   id: "fluidstack",
   name: "FluidStack",
 
+  // -------------------------------------------------------------------------
+  // Ping — Measure market channel latency
+  // -------------------------------------------------------------------------
   async ping() {
     const url = "https://api.fluidstack.io/ping";
     const start = Date.now();
@@ -84,6 +83,9 @@ export const FluidStackAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Fetch Jobs — Retrieve fluid job offers from the marketplace
+  // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
     const url = "https://api.fluidstack.io/jobs";
 
@@ -118,6 +120,9 @@ export const FluidStackAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Submit Result — Return completed work to the marketplace
+  // -------------------------------------------------------------------------
   async submitResult(job, result) {
     const url = `https://api.fluidstack.io/jobs/${job.id}/submit`;
     healingState.lastSubmitJobId = job?.id ?? null;
@@ -140,6 +145,9 @@ export const FluidStackAdapter = {
     }
   },
 
+  // -------------------------------------------------------------------------
+  // Normalize Job — Convert FluidStack job → Pulse‑Earn job schema
+  // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
       if (!raw || typeof raw !== "object") {
@@ -194,10 +202,9 @@ export const FluidStackAdapter = {
   },
 };
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Miner healers
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Healing State Export — Broker Interaction Log
+// ---------------------------------------------------------------------------
 export function getFluidStackAdapterHealingState() {
   return { ...healingState };
 }

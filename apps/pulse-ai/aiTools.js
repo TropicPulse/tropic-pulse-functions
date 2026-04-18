@@ -1,39 +1,30 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/aiTools.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE INSTRUMENTS (Natural Abilities + Diagnostic Tools)
+// ============================================================================
 //
 // ROLE:
-//   PulseAITools — safe utility functions the AI can use to analyze,
-//   validate, translate, and diagnose data structures.
+//   THE INSTRUMENTS — The AI’s built‑in abilities + diagnostic tools
+//   • Analyze Firestore + SQL + Pulse schemas
+//   • Detect mismatches, missing fields, drift, slowdown
+//   • Log diagnostic steps into the Cognitive Frame
 //
 // PURPOSE:
-//   • Provide safe analysis tools for Firestore + SQL + PulseFields
-//   • Detect mismatches, missing fields, drift, slowdown causes
-//   • Integrate with aiContext for logging + diagnostics
+//   • Provide deterministic, safe analysis utilities
+//   • Serve as the AI’s “hands” and “tools”
+//   • Integrate tightly with aiContext for trace + diagnostics
 //
-// OUTPUT:
-//   • Pure functions that operate on data + context
-//
-// RESPONSIBILITIES:
-//   • Analyze Firestore documents
-//   • Analyze SQL schemas
-//   • Validate PulseField definitions
-//   • Detect drift between Pulse ↔ Firestore ↔ SQL
-//   • Log diagnostic steps into aiContext
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
 //   • Deterministic analysis only
 //
-// ------------------------------------------------------
-// Pulse‑AI Tools
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 aiTools
+// ============================================================================
 
 import {
   translateFirestoreDocument,
@@ -48,10 +39,9 @@ import {
   validatePulseField,
 } from "../pulse-specs/pulseFields.js";
 
-/**
- * analyzeFirestoreDoc(context, docData)
- * Produces PulseFields + diagnostics.
- */
+// ============================================================================
+// FIRESTORE ANALYSIS — Instrument Procedure
+// ============================================================================
 export function analyzeFirestoreDoc(context, docData = {}) {
   context.logStep("Analyzing Firestore document...");
 
@@ -66,13 +56,12 @@ export function analyzeFirestoreDoc(context, docData = {}) {
       context.flagMismatch(key, "valid PulseField", "invalid PulseField");
     }
 
-    // Detect empty or null fields
     if (docData[key] === null || docData[key] === undefined) {
       context.flagMissingField(key);
     }
   }
 
-  // Detect slowdown patterns
+  // Slowdown detection
   if (Object.keys(docData).length > 50) {
     context.flagSlowdown("Large Firestore document with many fields.");
   }
@@ -80,10 +69,9 @@ export function analyzeFirestoreDoc(context, docData = {}) {
   return pulseSchema;
 }
 
-/**
- * analyzeSQLSchema(context, sqlSchema)
- * Produces PulseFields + diagnostics.
- */
+// ============================================================================
+// SQL ANALYSIS — Instrument Procedure
+// ============================================================================
 export function analyzeSQLSchema(context, sqlSchema = {}) {
   context.logStep("Analyzing SQL schema...");
 
@@ -101,10 +89,9 @@ export function analyzeSQLSchema(context, sqlSchema = {}) {
   return pulseSchema;
 }
 
-/**
- * detectDrift(context, pulseSchema, firestoreSchema)
- * Compares PulseFields ↔ FirestoreFields.
- */
+// ============================================================================
+// DRIFT DETECTION — Instrument Procedure
+// ============================================================================
 export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
   context.logStep("Checking for schema drift...");
 
@@ -127,10 +114,9 @@ export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
   return context.diagnostics.driftDetected;
 }
 
-/**
- * detectSlowdownPatterns(context, data)
- * Looks for common causes of slow AI reasoning.
- */
+// ============================================================================
+// SLOWDOWN DETECTION — Instrument Procedure
+// ============================================================================
 export function detectSlowdownPatterns(context, data) {
   context.logStep("Checking for slowdown patterns...");
 
@@ -152,9 +138,9 @@ export function detectSlowdownPatterns(context, data) {
   }
 }
 
-/**
- * validatePulseSchema(context, schema)
- */
+// ============================================================================
+// PULSE SCHEMA VALIDATION — Instrument Procedure
+// ============================================================================
 export function validatePulseSchema(context, schema = {}) {
   context.logStep("Validating Pulse schema...");
 

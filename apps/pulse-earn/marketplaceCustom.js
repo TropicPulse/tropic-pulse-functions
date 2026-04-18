@@ -1,50 +1,54 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/marketplaceCustom.js
-//
-// Universal Marketplace Adapter v5 — Firebase‑Driven, Deterministic, Drift‑Proof
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE STANDARDS BUREAU
+// (Dynamic Marketplace Interpreter + Database‑Driven Adapter Loader)
+// ============================================================================
 //
 // ROLE:
-//   Universal Marketplace Adapter — loads marketplace configuration from Firebase
-//   and exposes the standardized interface:
-//     • ping()
-//     • fetchJobs()
-//     • submitResult()
+//   THE STANDARDS BUREAU — Pulse‑Earn’s dynamic marketplace interpreter.
+//   • Loads marketplace definitions from Firebase
+//   • Interprets config into a working marketplace adapter
+//   • Enforces the universal interface (ping, fetchJobs, submitResult)
 //
-//   This adapter works for ALL marketplace types because the configuration
-//   (baseUrl, endpoints, headers, auth, etc.) is stored in Firebase.
+// WHY “STANDARDS BUREAU”?:
+//   • It reads marketplace standards from the database
+//   • It interprets them into a functional adapter
+//   • It enforces the universal protocol defined by the Standard Bearer
+//   • It allows infinite marketplaces without code changes
 //
-// RESPONSIBILITIES:
-//   • Load marketplace config from Firebase
-//   • Perform safe HTTP requests
-//   • Validate responses
-//   • Never throw unhandled errors
-//   • Return deterministic fallback values
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof dynamic marketplace adapter
+//   • Allow runtime marketplace creation from Firestore
+//   • Guarantee safe HTTP behavior + fallback values
 //
-// SAFETY RULES:
-//   • Never mutate job objects
-//   • Never execute arbitrary code
-//   • Never use Node APIs
-//   • Always validate fetch() responses
-//   • Always return safe fallbacks
+// CONTRACT:
+//   • PURE NETWORK ADAPTER — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for config caching
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic fetch‑based wrapper only
 //
-// ------------------------------------------------------
-// Firebase Loader (config comes from your Firestore design)
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 marketplaceCustom
+// ============================================================================
 
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
+// ---------------------------------------------------------------------------
+// Standards Bureau Cache — prevents repeated DB reads
+// ---------------------------------------------------------------------------
 let cachedConfig = null;
 
+// ---------------------------------------------------------------------------
+// loadMarketplaceConfig — Reads marketplace standards from Firestore
+// ---------------------------------------------------------------------------
 async function loadMarketplaceConfig() {
   if (cachedConfig) return cachedConfig;
 
   try {
     const db = getFirestore();
-    const ref = doc(db, "marketplaces", "custom"); // your custom marketplace doc
+    const ref = doc(db, "marketplaces", "custom"); // dynamic marketplace doc
     const snap = await getDoc(ref);
 
     if (!snap.exists()) {
@@ -55,6 +59,7 @@ async function loadMarketplaceConfig() {
     return cachedConfig;
 
   } catch (err) {
+    // Deterministic fallback — empty marketplace
     return {
       baseUrl: "",
       endpoints: { ping: "", jobs: "", submit: "" },
@@ -63,16 +68,18 @@ async function loadMarketplaceConfig() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// URL Builder — interprets standards into usable endpoints
+// ---------------------------------------------------------------------------
 function buildUrl(config, key) {
   const base = config.baseUrl || "";
   const path = config.endpoints?.[key] || "";
   return `${base}${path}`;
 }
 
-// ------------------------------------------------------
-// Universal Marketplace Client — ping(), fetchJobs(), submitResult()
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Standards Bureau Client — ping(), fetchJobs(), submitResult()
+// ---------------------------------------------------------------------------
 async function ping() {
   try {
     const config = await loadMarketplaceConfig();
@@ -140,10 +147,9 @@ async function submitResult(job, result) {
   }
 }
 
-// ------------------------------------------------------
-// Export — this is the universal adapter
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// Export — The Standards Bureau Adapter
+// ---------------------------------------------------------------------------
 export const marketplaceA = {
   id: "CUSTOM",
   name: "Custom Marketplace",

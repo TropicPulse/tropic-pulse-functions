@@ -1,87 +1,55 @@
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUEngine.js
+// ============================================================================
+//  PULSE GPU ENGINE v6.3
+//  WebGPU Execution Layer (Frontend-Only, Deterministic, Fail-Open)
+//  PURE RENDERING. ZERO BUSINESS LOGIC. ZERO SIDE EFFECTS OUTSIDE init()/render.
+// ============================================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT;
-// if I am unsure of intent, I will ask you for the full INTENT paragraph.
+// PERSONALITY + ROLE:
+//  -------------------
+//  PulseGPUEngine is the “hands” of the GPU subsystem.
+//  • Runtime = “nervous system”
+//  • Brain = “thinking / preparation”
+//  • Engine = “muscle + motion”
 //
-// 📘 PAGE INDEX — Source of Truth for This File
+//  This file gives the GPU subsystem its *execution personality*:
+//    - Calm under failure (fail-open)
+//    - Predictable under load (deterministic)
+//    - Honest about readiness (visible flags)
+//    - Never surprises the caller (no hidden work)
+//    - Never mutates runtime internals
 //
-// ROLE:
-//   PulseGPUEngine — final GPU execution layer for the Pulse GPU subsystem (v4).
-//   This file is the **WebGPU backend implementation** of the full Pulse‑GPU
-//   execution layer. It consumes PulseGPURuntime (full‑GPU, API‑agnostic),
-//   uses GPU‑ready packages (from PulseGPUBrain), builds WebGPU pipelines,
-//   constructs render passes, and issues draw calls.
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A WebGPU backend implementation of the Pulse GPU engine
+//  • A renderer that consumes GPU-ready packages from PulseGPURuntime
+//  • A pipeline + pass + draw-call executor
 //
-//   Conceptually, PulseGPUEngine is API‑agnostic (DX/Vulkan/Metal/WebGPU/etc.).
-//   This file is the WebGPU‑specific engine implementation.
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a CPU optimizer (PulseGPUBrain does that)
+//  • NOT a GPU memory orchestrator (PulseGPURuntime does that)
+//  • NOT a shader compiler (Brain again)
+//  • NOT a backend module
+//  • NOT a business logic layer
 //
-//   This file IS:
-//     • A frontend‑only WebGPU execution layer (one backend of the full GPU engine)
-//     • A renderer that issues draw calls
-//     • A consumer of GPU‑ready packages from PulseGPURuntime (full GPU)
+// SAFETY CONTRACT:
+//  ----------------
+//  • Browser-only (WebGPU required)
+//  • No DOM manipulation outside canvas/context
+//  • No Node APIs
+//  • No randomness
+//  • No timestamps
+//  • No async except init()
+//  • Fail-open: missing GPU → no render, no crash
+//  • Deterministic: same inputs → same frame behavior
 //
-//   This file IS NOT:
-//     • A backend module
-//     • A CPU‑side optimizer (that’s PulseGPUBrain)
-//     • A GPU memory/logic orchestrator (that’s PulseGPURuntime)
-//     • A shader compiler (that’s PulseGPUBrain)
-//     • A business logic module
-//
-// DEPLOYMENT:
-//   Lives in /apps/pulse-gpu as part of the GPU subsystem.
-//   Must run ONLY in browser environments with WebGPU support.
-//   Must remain ESM‑only and side‑effect‑free until init() is called.
-//
-// SYNTAX RULES:
-//   ESM JavaScript ONLY — no TypeScript, no CommonJS, no require().
-//   Named exports ONLY — no default exports.
-//
-// IMPORT RULES:
-//   Allowed:
-//     • PulseGPURuntime from ./PulseGPURuntime.js
-//
-//   Forbidden:
-//     • Node.js APIs
-//     • Firebase, Stripe, Twilio, or any backend modules
-//     • DOM manipulation outside WebGPU canvas/context
-//     • Any environment‑specific dependencies beyond WebGPU canvas/context
-//
-// INTERNAL LOGIC SUMMARY (v4, WebGPU backend):
-//   • PulseRenderPassBuilder:
-//       - Builds basic render pass descriptors using the current swapchain texture
-//
-//   • PulsePipelineBuilder:
-//       - Creates WebGPU render pipelines from shader modules
-//
-//   • PulseDrawExecutor:
-//       - Issues draw calls for meshes using provided pipelines
-//
-//   • PulseGPUEngine (WebGPU):
-//       - Initializes PulseGPURuntime with a canvas
-//       - Asks runtime for GPU context + GPU‑ready mesh/shader packages
-//       - Builds pipelines from shader modules
-//       - Iterates meshes and draws them
-//       - Submits command buffers to GPU queue
-//       - Fails open: if anything is missing, it simply does not render, but never bricks the app
-//
-// SAFETY NOTES:
-//   • Must NEVER run on backend — WebGPU is browser‑only
-//   • Must NEVER mutate runtime internals directly
-//   • Must ALWAYS check readiness before rendering
-//   • Must remain deterministic and side‑effect‑free outside init()/renderFrame()
-//   • On failure (no GPU, no context, no shaders/meshes), must fail open: no rendering, but no crash
-//
-// ------------------------------------------------------
-// Consumes PulseGPURuntime (full GPU) → builds WebGPU pipelines →
-// executes render passes and draw calls (WebGPU backend).
-// ------------------------------------------------------
+// ============================================================================
 
 import { PulseGPURuntime } from "./PulseGPURuntime.js";
 
-// ------------------------------------------------------
-// RENDER PASS BUILDER
-// ------------------------------------------------------
-
+// ============================================================================
+//  RENDER PASS BUILDER
+// ============================================================================
 class PulseRenderPassBuilder {
   constructor(device, context, format = "bgra8unorm") {
     this.device = device;
@@ -106,10 +74,9 @@ class PulseRenderPassBuilder {
   }
 }
 
-// ------------------------------------------------------
-// PIPELINE BUILDER
-// ------------------------------------------------------
-
+// ============================================================================
+//  PIPELINE BUILDER
+// ============================================================================
 class PulsePipelineBuilder {
   constructor(device, colorFormat = "bgra8unorm") {
     this.device = device;
@@ -136,10 +103,9 @@ class PulsePipelineBuilder {
   }
 }
 
-// ------------------------------------------------------
-// DRAW CALL EXECUTOR
-// ------------------------------------------------------
-
+// ============================================================================
+//  DRAW EXECUTOR
+// ============================================================================
 class PulseDrawExecutor {
   constructor(device, passBuilder) {
     this.device = device;
@@ -164,10 +130,9 @@ class PulseDrawExecutor {
   }
 }
 
-// ------------------------------------------------------
-// MAIN ENGINE (v4, WebGPU backend)
-// ------------------------------------------------------
-
+// ============================================================================
+//  MAIN ENGINE (WebGPU Backend)
+// ============================================================================
 class PulseGPUEngine {
   constructor() {
     this.runtime = new PulseGPURuntime();
@@ -181,37 +146,40 @@ class PulseGPUEngine {
     this.drawExecutor = null;
 
     this.ready = false;
+
+    console.log(
+      "%c[PulseGPUEngine] Constructed — awaiting init().",
+      "color:#03A9F4; font-weight:bold;"
+    );
   }
 
   // ----------------------------------------------------
-  // INITIALIZE RUNTIME + ENGINE (FAIL-OPEN)
-// ----------------------------------------------------
+  // INITIALIZE ENGINE (FAIL-OPEN)
+  // ----------------------------------------------------
   async init(canvas) {
-    // Canvas is required for WebGPU; if missing, fail open (no render, no crash).
     if (!canvas) {
-      console.warn("PulseGPUEngine: canvas not provided; engine will not render (fail-open).");
+      console.warn(
+        "[PulseGPUEngine] No canvas provided — engine will remain inactive (fail-open)."
+      );
       this.ready = false;
       return;
     }
 
-    // Runtime is responsible for:
-    //   - acquiring adapter/device
-    //   - configuring the canvas/context
-    //   - preparing GPU-ready packages from PulseGPUBrain
     try {
       await this.runtime.init(canvas);
     } catch (err) {
-      console.warn("PulseGPUEngine: runtime init failed (fail-open).", err);
+      console.warn("[PulseGPUEngine] Runtime init failed (fail-open).", err);
       this.ready = false;
       return;
     }
 
-    const gpuContext = this.runtime.getGPUContext
-      ? this.runtime.getGPUContext()
-      : this.runtime.context; // fallback for older shape
+    const gpuContext =
+      this.runtime.getGPUContext?.() || this.runtime.context;
 
     if (!gpuContext || !gpuContext.device || !gpuContext.context) {
-      console.warn("PulseGPUEngine: GPU context is not available (fail-open).");
+      console.warn(
+        "[PulseGPUEngine] GPU context unavailable — engine inactive (fail-open)."
+      );
       this.ready = false;
       return;
     }
@@ -232,47 +200,50 @@ class PulseGPUEngine {
     this.drawExecutor = new PulseDrawExecutor(this.device, this.passBuilder);
 
     this.ready = true;
+
+    console.log(
+      "%c[PulseGPUEngine] Ready — WebGPU backend active.",
+      "color:#4CAF50; font-weight:bold;"
+    );
   }
 
   // ----------------------------------------------------
-  // BUILD PIPELINES FROM SHADERS (GPU-ready packages)
-// ----------------------------------------------------
+  // BUILD PIPELINES
+  // ----------------------------------------------------
   buildPipelines() {
     const shaders =
-      this.runtime.getShadersFromPackages?.() || this.runtime.getShaders?.() || [];
+      this.runtime.getShadersFromPackages?.() ||
+      this.runtime.getShaders?.() ||
+      [];
 
-    if (!Array.isArray(shaders) || shaders.length === 0) {
-      return [];
-    }
+    if (!Array.isArray(shaders) || shaders.length === 0) return [];
 
-    const pipelines = [];
-
-    shaders.forEach((shaderModule) => {
-      const pipeline = this.pipelineBuilder.createPipeline(shaderModule, [
+    const pipelines = shaders.map((shaderModule) =>
+      this.pipelineBuilder.createPipeline(shaderModule, [
         {
           arrayStride: 12,
-          attributes: [
-            { shaderLocation: 0, offset: 0, format: "float32x3" }
-          ]
+          attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }]
         }
-      ]);
-
-      pipelines.push(pipeline);
-    });
+      ])
+    );
 
     return pipelines;
   }
 
   // ----------------------------------------------------
-  // RENDER A FRAME (FAIL-OPEN)
-// ----------------------------------------------------
+  // RENDER FRAME (FAIL-OPEN)
+  // ----------------------------------------------------
   renderFrame() {
     if (!this.ready) return;
 
     const meshes =
-      this.runtime.getMeshesFromPackages?.() || this.runtime.getMeshes?.() || [];
+      this.runtime.getMeshesFromPackages?.() ||
+      this.runtime.getMeshes?.() ||
+      [];
     const shaders =
-      this.runtime.getShadersFromPackages?.() || this.runtime.getShaders?.() || [];
+      this.runtime.getShadersFromPackages?.() ||
+      this.runtime.getShaders?.() ||
+      [];
 
     if (!meshes.length || !shaders.length) return;
 
@@ -291,10 +262,9 @@ class PulseGPUEngine {
   }
 }
 
-// ------------------------------------------------------
-// EXPORTS
-// ------------------------------------------------------
-
+// ============================================================================
+//  EXPORTS
+// ============================================================================
 export {
   PulseGPUEngine,
   PulsePipelineBuilder,

@@ -1,25 +1,52 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/EarnHealer.js
-// LAYER: EARN-SUBSYSTEM (PURE LOGIC / SUBSYSTEM HEALING)
+// LAYER: THE PHYSICIAN (Subsystem Doctor + Drift Diagnostician)
+// ============================================================================
 //
-// EarnHealer v5.2 — Deterministic, Drift‑Proof, Subsystem‑Level Healing Layer
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
+// ROLE:
+//   THE PHYSICIAN — Pulse‑Earn’s subsystem doctor.
+//   • Checks vitals across all Earn subsystems
+//   • Detects drift, errors, and inconsistencies
+//   • Prescribes deterministic repairs
+//   • Maintains subsystem health records
+//
+// WHY “PHYSICIAN”?:
+//   • Performs diagnostic evaluations (runHealthCheck)
+//   • Prescribes treatment (runRepair)
+//   • Monitors vitals (healing metadata)
+//   • Maintains medical history (reports, timestamps)
+//   • Protects the health of the Earn organism
+//
+// PURPOSE:
+//   • Provide deterministic, drift‑proof subsystem healing
+//   • Guarantee safe repair of PacketEngine + related modules
+//   • Maintain OS‑v5 healing metadata for Earn healers
+//
+// CONTRACT:
+//   • PURE HEALING — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for deterministic repair actions
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic drift detection only
+//
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 EarnHealer
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v5 CONTEXT METADATA
+// PHYSICIAN CONTEXT METADATA
 // ------------------------------------------------------------
 const EARN_HEALER_CONTEXT = {
   layer: "EarnHealer",
-  role: "EARN_SUBSYSTEM_HEALER",
-  purpose: "Detect and repair drift across EarnEngine, Runtime, Worker, Submission, Packets, Earner, Connector",
-  context: "Subsystem-level drift detection + deterministic repair"
+  role: "PHYSICIAN",
+  purpose: "Diagnose and repair drift across Earn subsystems",
+  context: "Subsystem doctor + deterministic healing"
 };
 
 // ------------------------------------------------------------
-// Imports — healing metadata from all Earn modules
+// Imports — subsystem vitals
 // ------------------------------------------------------------
-
 import { getEarnEngineHealingState } from "./EarnEngine.js";
 import { getEarnRuntimeHealingState } from "./EarnRuntime.js";
 import { getWorkerExecutionHealingState } from "./WorkerExecution.js";
@@ -33,9 +60,8 @@ import { getEarnerHealingState } from "./Earner.js";
 import { getMarketplaceConnectorHealingState } from "./MarketplaceConnector.js";
 
 // ------------------------------------------------------------
-// Healer State (now includes OS‑v5 metadata)
+// Physician State — medical chart
 // ------------------------------------------------------------
-
 const healerState = {
   lastCheck: null,
   lastRepair: null,
@@ -47,7 +73,7 @@ const healerState = {
 };
 
 // ------------------------------------------------------------
-// runHealthCheck() — subsystem‑level drift detection
+// runHealthCheck() — diagnostic exam
 // ------------------------------------------------------------
 export async function runHealthCheck() {
   healerState.cycleCount++;
@@ -110,7 +136,7 @@ export async function runHealthCheck() {
 }
 
 // ------------------------------------------------------------
-// runRepair() — subsystem‑level auto‑repair
+// runRepair() — prescribed treatment
 // ------------------------------------------------------------
 export async function runRepair() {
   healerState.lastRepair = Date.now();
@@ -149,7 +175,7 @@ export async function runRepair() {
 }
 
 // ------------------------------------------------------------
-// getEarnHealerState()
+// getEarnHealerState() — medical chart export
 // ------------------------------------------------------------
 export function getEarnHealerState() {
   return { ...healerState };

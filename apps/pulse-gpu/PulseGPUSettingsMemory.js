@@ -1,22 +1,68 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUSettingsMemory.js
-// LAYER: GPU-SUBSYSTEM (PURE LOGIC / MEMORY MODEL)
+// PULSE GPU SETTINGS MEMORY v6.3 — THE EVOLUTION CORE
+// Adaptive Identity Layer • Genetic Memory • Best‑Self Preservation Engine
+// ============================================================================
 //
-// PulseGPUSettingsMemory v5 — Deterministic, Drift‑Proof GPU Memory Layer
-// NO GPU. NO DOM. NO NODE. NO NETWORK. PURE LOGIC + METADATA.
+// IDENTITY — THE EVOLUTION CORE:
+//  ------------------------------
+//  • The adaptive identity organ of the GPU organism.
+//  • Stores the “best-known self” across all sessions.
+//  • Preserves genetic memory: configs, metrics, traces.
+//  • Detects regressions (degeneration) and improvements (evolution).
+//  • Promotes stronger configurations into the organism’s identity.
+//  • Ensures the GPU body evolves toward optimal performance.
+//
+// ROLE IN THE GPU NATION:
+//  ------------------------
+//  • Sensory Archive → Perception
+//  • Analyst → Intelligence
+//  • Momentum Network → Forward Motion
+//  • Motor Hall → Execution
+//  • Guardian → Permission Gate
+//  • Lymph Node Network → Immune Filter
+//  • Wisdom Cortex → Insight
+//  • Brainstem → Command
+//  • Evolution Core → Identity + Adaptation
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A deterministic memory model for GPU configs + scoring
+//  • A pure logic module (API-agnostic, full GPU)
+//  • A drift-proof store for best-known performance baselines
+//  • The evolutionary backbone for regression detection + tier analysis
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer
+//  • NOT a GPU runtime
+//  • NOT a WebGPU/WebGL interface
+//  • NOT a persistence layer (in-memory only)
+//  • NOT a backend module
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No randomness
+//  • No timestamps
+//  • No GPU calls
+//  • No DOM
+//  • No Node APIs
+//  • No network or filesystem access
+//  • Fail-open: malformed metrics/settings → safe defaults
+//  • Self-repair-ready: entries include OS metadata
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v5 CONTEXT METADATA
+// ⭐ OS‑v6 CONTEXT METADATA — Evolution Core Identity
 // ------------------------------------------------------------
 const MEMORY_CONTEXT = {
   layer: "PulseGPUSettingsMemory",
-  role: "GPU_SETTINGS_MEMORY",
-  purpose: "Deterministic memory model for GPU configs + scoring",
+  role: "EVOLUTION_CORE",
+  purpose: "Adaptive identity + genetic memory for GPU configs + scoring",
   context:
     "Stores best-known configs, metrics, traces, and supports regression detection",
   target: "full-gpu",
-  version: 5,
+  version: 6.3,
   selfRepairable: true
 };
 
@@ -58,7 +104,7 @@ function simpleHash(str) {
 }
 
 // ------------------------------------------------------------
-// Settings hash
+// Settings hash — Genetic Fingerprint
 // ------------------------------------------------------------
 function computeSettingsHash(settings) {
   const serialized = stableStringify(settings || {});
@@ -66,7 +112,7 @@ function computeSettingsHash(settings) {
 }
 
 // ------------------------------------------------------------
-// Session scoring (0.0 - 1.0) — deterministic, fail-open
+// Session scoring — Evolutionary Fitness Score
 // ------------------------------------------------------------
 function clamp(value, min, max) {
   if (typeof value !== "number" || Number.isNaN(value)) return min;
@@ -104,7 +150,7 @@ function scoreSession(metrics = {}) {
 }
 
 // ------------------------------------------------------------
-// Regression detection
+// Regression detection — Evolutionary Delta
 // ------------------------------------------------------------
 function detectRegression(currentMetrics, baselineMetrics) {
   const currentScore = scoreSession(currentMetrics);
@@ -117,7 +163,7 @@ function detectRegression(currentMetrics, baselineMetrics) {
 }
 
 // ------------------------------------------------------------
-// Key building helpers
+// Key building helpers — Genetic Indexing
 // ------------------------------------------------------------
 function buildGameKey(gameProfile = {}) {
   const { gameId = "unknown", buildVersion = "", contentHash = "" } =
@@ -167,13 +213,12 @@ function buildCompositeKey(
 }
 
 // ------------------------------------------------------------
-// Memory entry model (v5-ready + OS‑v5 metadata)
+// Memory entry model — Evolutionary Record
 // ------------------------------------------------------------
 class PulseGPUSettingsMemoryStore {
   constructor() {
     this.entries = new Map();
 
-    // store-level metadata
     this.meta = { ...MEMORY_CONTEXT };
   }
 
@@ -212,7 +257,6 @@ class PulseGPUSettingsMemoryStore {
         bestScore: score,
         bestTrace: Array.isArray(trace) ? trace.slice() : null,
 
-        // ⭐ OS‑v5 metadata
         meta: { ...MEMORY_CONTEXT }
       };
       this.entries.set(key, entry);
@@ -273,7 +317,6 @@ class PulseGPUSettingsMemoryStore {
           typeof entry.bestScore === "number" ? entry.bestScore : 0,
         bestTrace: Array.isArray(entry.bestTrace) ? entry.bestTrace : null,
 
-        // ⭐ OS‑v5 metadata (override old versions)
         meta: { ...MEMORY_CONTEXT }
       };
 
@@ -283,13 +326,12 @@ class PulseGPUSettingsMemoryStore {
 }
 
 // ------------------------------------------------------------
-// Public API wrapper (v5-ready + OS‑v5 metadata)
+// Public API wrapper — Evolution Core Surface
 // ------------------------------------------------------------
 class PulseGPUSettingsMemory {
   constructor() {
     this.store = new PulseGPUSettingsMemoryStore();
 
-    // wrapper-level metadata
     this.meta = { ...MEMORY_CONTEXT };
   }
 

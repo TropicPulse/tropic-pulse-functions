@@ -1,20 +1,58 @@
-/* ============================================================
-   PulseBand.js — PulseBand v6 (ES Module)
-   Purpose: Internal Proxy-App Acceleration Layer + UI Dashboard
-   Notes:
-     - Runs from /proxy/
-     - GPU subsystem lives in /pulse-gpu/
-     - No Earn / No Marketplace / No Compute Loop
-     - Loads on ANY frontend page
-     - PulseBand.html dashboard works globally
-   ============================================================ */
 // ============================================================================
-// PULSEBAND — CORE GPU + UPDATE + CLIENT + NET IMPORTS
+// FILE: /apps/tropic-pulse/lib/Connectors/PulseBand.js
+// LAYER: NERVOUS SYSTEM (PULSEBAND v6.3)
+// ============================================================================
+//
+// ROLE:
+//   THE NERVOUS SYSTEM — Sensory + Motor + Reflex Layer
+//   • Senses: latency, network health, GPU readiness, pacing, stalls
+//   • Processes: live + snapshot + GPU performance into a flat mirror
+//   • Fires: events to the rest of the OS ("update", "request", "page-toggle")
+//   • Controls: GPU warmup + engine init + micro-window activity
+//
+// CONTRACT:
+//   • No backend calls here
+//   • No routing logic
+//   • No persistence
+//   • Pure in-memory nervous system state + events
+//
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 PulseBand
 // ============================================================================
 
-// GPU Intelligence Layer
+// ============================================================================
+// NERVOUS SYSTEM — CORE GPU + SHADOWLAYER IMPORTS
+// ============================================================================
 import * as PulseGPU from "../pulse-gpu/PulseGPU.js";
-import * as Pulse from "./Pulse.js"; // kept for side‑effects / future use
+import * as Pulse from "./Pulse.js"; // SHADOWLAYER side-effects only
+
+// ============================================================================
+// LAYER CONSTANTS + DIAGNOSTICS
+// ============================================================================
+const NERVOUS_LAYER_ID = "NERVOUS-SYSTEM";
+const NERVOUS_LAYER_NAME = "PULSEBAND";
+const NERVOUS_LAYER_ROLE = "Sensory + Motor + Reflex Layer";
+
+const NERVOUS_DIAGNOSTICS_ENABLED =
+  window?.PULSE_NERVOUS_DIAGNOSTICS === true ||
+  window?.PULSE_DIAGNOSTICS === true;
+
+const nervousLog = (stage, details = {}) => {
+  if (!NERVOUS_DIAGNOSTICS_ENABLED) return;
+
+  console.log(
+    JSON.stringify({
+      pulseLayer: NERVOUS_LAYER_ID,
+      pulseName: NERVOUS_LAYER_NAME,
+      pulseRole: NERVOUS_LAYER_ROLE,
+      stage,
+      ...details
+    })
+  );
+};
+
+nervousLog("NERVOUS_INIT", {});
 
 // ------------------------------------------------------------
 // Utility helpers
@@ -42,7 +80,7 @@ const getSafeTimestamp = (status) => {
 };
 
 // ------------------------------------------------------------
-// PulseBand v6 — Engine State
+// PulseBand v6 — Engine State (NERVOUS SYSTEM STATE)
 // ------------------------------------------------------------
 export const pulseband = {
   listeners: {},
@@ -54,11 +92,10 @@ export const pulseband = {
 
   engine: {
     initialized: false,
-    pageEnabled: true,   // page-level toggle
-    globalEnabled: true  // future global toggle
+    pageEnabled: true,
+    globalEnabled: true
   },
 
-  // Live + Snapshot state
   state: {
     live: {
       pulsebandBars: 0,
@@ -93,7 +130,7 @@ export const pulseband = {
       load: 0
     },
 
-    // Flat mirror for UI
+    // Flat mirror — nervous system summary
     latency: 0,
     latencyClass: "Unknown",
     networkHealth: "Unknown",
@@ -113,9 +150,12 @@ export const pulseband = {
   },
 
   // ------------------------------------------------------------
-  // GPU Brain Init
+  // GPU Brain Init — Motor Cortex Warmup
   // ------------------------------------------------------------
   async initGraphics(rawAssets) {
+    osLog("PulseBand → initGraphics() called");
+    nervousLog("GPU_INIT_CALLED");
+
     try {
       const input = new PulseGPU.BrainInput({
         rawTextures: rawAssets.textures || [],
@@ -126,24 +166,37 @@ export const pulseband = {
       });
 
       const packages = PulseGPU.PulseGPUBrainExport.buildAndStore(input);
+
+      osLog("PulseBand → GPU Brain ready");
       console.log("[PulseBand] GPU Brain ready:", packages);
 
       this.gpu.packages = packages;
       this.gpu.ready = !!packages;
+
+      nervousLog("GPU_INIT_READY", { gpuReady: this.gpu.ready });
+
     } catch (err) {
+      osLog("PulseBand → GPU Brain FAILED");
       console.error("[PulseBand] GPU Brain failed:", err);
       this.gpu.ready = false;
+
+      nervousLog("GPU_INIT_FAILED", { error: String(err) });
     }
   },
 
   // ------------------------------------------------------------
-  // Engine Init (Proxy-App Layer)
+  // Engine Init — Nervous System Boot
   // ------------------------------------------------------------
   async initEngine() {
-    if (this.engine.initialized) return;
-    this.engine.initialized = true;
+    if (this.engine.initialized) {
+      osLog("PulseBand → initEngine() skipped (already initialized)");
+      nervousLog("ENGINE_INIT_SKIPPED", { initialized: true });
+      return;
+    }
 
-    console.log("[PulseBand] Initializing v6 engine…");
+    osLog("PulseBand → Initializing engine…");
+    nervousLog("ENGINE_INIT_START");
+    this.engine.initialized = true;
 
     this.setStatus({
       live: {
@@ -155,18 +208,23 @@ export const pulseband = {
       }
     });
 
-    console.log("[PulseBand] Engine ready.");
+    osLog("PulseBand → Engine ready");
+    nervousLog("ENGINE_INIT_READY", { initialized: true });
   },
 
   // ------------------------------------------------------------
-  // Page-Level Toggle
+  // Page Toggle — Local Nervous System Enable/Disable
   // ------------------------------------------------------------
   enableForPage() {
+    osLog("PulseBand → Page enabled");
+    nervousLog("PAGE_ENABLE");
     this.engine.pageEnabled = true;
     this.emit("page-toggle", { pageEnabled: true });
   },
 
   disableForPage() {
+    osLog("PulseBand → Page disabled");
+    nervousLog("PAGE_DISABLE");
     this.engine.pageEnabled = false;
     this.emit("page-toggle", { pageEnabled: false });
   },
@@ -176,7 +234,7 @@ export const pulseband = {
   },
 
   // ------------------------------------------------------------
-  // Status API
+  // Status API — Nervous System Snapshot
   // ------------------------------------------------------------
   getStatus() {
     const status = {
@@ -193,7 +251,13 @@ export const pulseband = {
     return status;
   },
 
+  // ------------------------------------------------------------
+  // setStatus — NERVOUS SYSTEM PULSE
+  // ------------------------------------------------------------
   setStatus(newState) {
+    osLog("PulseBand → setStatus()");
+    nervousLog("SET_STATUS_CALLED");
+
     const now = nowMs();
     const clean = {};
 
@@ -203,11 +267,16 @@ export const pulseband = {
 
     // GPU auto-init
     if (!this.gpu.ready && clean.gpuAssets) {
+      osLog("PulseBand → GPU auto-init triggered");
+      nervousLog("GPU_AUTO_INIT");
       this.initGraphics(clean.gpuAssets);
     }
 
-    // LIVE merge
+    // LIVE merge — sensory input
     if (clean.live) {
+      osLog("PulseBand → LIVE merge");
+      nervousLog("LIVE_MERGE", { keys: Object.keys(clean.live || {}) });
+
       const L = clean.live;
       const latency = L.latency ?? this.state.live.latency ?? 0;
 
@@ -228,8 +297,11 @@ export const pulseband = {
       };
     }
 
-    // SNAPSHOT merge
+    // SNAPSHOT merge — short-term memory
     if (clean.snapshot) {
+      osLog("PulseBand → SNAPSHOT merge");
+      nervousLog("SNAPSHOT_MERGE", { keys: Object.keys(clean.snapshot || {}) });
+
       this.state.snapshot = {
         ...this.state.snapshot,
         ...clean.snapshot,
@@ -237,7 +309,9 @@ export const pulseband = {
       };
     }
 
-    // Flat mirror
+    // Flat mirror update — nervous system summary
+    osLog("PulseBand → Flat mirror update");
+
     const L = this.state.live;
     const S = this.state.snapshot;
 
@@ -266,33 +340,47 @@ export const pulseband = {
     this.state.gpuReady = this.gpu.ready;
     this.state.gpuPerformance.warm = this.gpu.ready;
 
+    osLog("PulseBand → emit(update)");
+    nervousLog("EMIT_UPDATE");
     this.emit("update", this.getStatus());
   },
 
   // ------------------------------------------------------------
-  // Events
+  // Events — Neural Firing
   // ------------------------------------------------------------
   on(event, callback) {
+    osLog(`PulseBand → on(${event})`);
+    nervousLog("EVENT_SUBSCRIBE", { event });
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(callback);
   },
 
   emit(event, data) {
+    osLog(`PulseBand → emit(${event})`);
+    nervousLog("EVENT_EMIT", { event });
     if (this.listeners[event]) {
       this.listeners[event].forEach((cb) => cb(data));
     }
   },
 
   // ------------------------------------------------------------
-  // PulseCache Request Helper
+  // PulseCache Request Helper — Signal Request/Response
   // ------------------------------------------------------------
   _request(type, extra = {}) {
+    osLog(`PulseBand → _request(${type})`);
+    nervousLog("REQUEST_START", { type });
+
     return new Promise((resolve, reject) => {
       try {
         const sessionId = type + "_" + Date.now();
         this.emit("request", { type, sessionId, ...extra });
-        this.on("response:" + sessionId, (payload) => resolve(payload));
+        this.on("response:" + sessionId, (payload) => {
+          nervousLog("RESPONSE_RECEIVED", { type, sessionId });
+          resolve(payload);
+        });
       } catch (err) {
+        osLog("PulseBand → _request FAILED");
+        nervousLog("REQUEST_FAILED", { type, error: String(err) });
         reject(err);
       }
     });
@@ -300,10 +388,11 @@ export const pulseband = {
 };
 
 // ------------------------------------------------------------
-// GPU + Engine Warmup
+// GPU + Engine Warmup — Nervous System Boot on DOM Ready
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("[PulseBand] DOM ready — warming up…");
+  osLog("PulseBand → DOM ready — warming up…");
+  nervousLog("DOM_READY");
 
   await pulseband.initGraphics({
     textures: [],
@@ -315,5 +404,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await pulseband.initEngine();
 
-  console.log("[PulseBand] Warmup complete.");
+  osLog("PulseBand → Warmup complete");
+  nervousLog("WARMUP_COMPLETE");
 });

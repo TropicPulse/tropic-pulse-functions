@@ -1,75 +1,50 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/aiEngine.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE CORTEX (Execution Layer + Safety Enforcer)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIEngine — orchestrates AI operations by building context,
-//   running translators/specs, collecting diagnostics, and returning
-//   a safe, human‑readable trace of what happened.
+//   THE CORTEX — The execution + control center of Pulse AI
+//   • Builds cognitive context (persona, permissions, boundaries)
+//   • Enforces safety + permissions
+//   • Executes AI operations deterministically
+//   • Captures diagnostics, drift, mismatches, slowdown
+//   • Returns result + trace for debugging
 //
 // PURPOSE:
-//   • Central execution wrapper for all AI tasks
-//   • Build AI context (persona, permissions, boundaries, diagnostics)
-//   • Run safe operations (translate, analyze, validate)
-//   • Capture slowdown causes, mismatches, missing fields, drift
-//   • Return results + trace for debugging
+//   • Central orchestrator for all AI tasks
+//   • Provide safe execution environment
+//   • Log reasoning summaries (SAFE, not chain‑of‑thought)
+//   • Guarantee deterministic, auditable behavior
 //
-// OUTPUT:
-//   • { result, context: { trace[], diagnostics{} } }
-//
-// RESPONSIBILITIES:
-//   • Build context via aiContext
-//   • Enforce persona permissions + boundaries
-//   • Run translators/specs safely
-//   • Log diagnostic steps
-//   • Return deterministic results
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
-//   • NO chain‑of‑thought — only SAFE summaries
+//   • SAFE summaries only — never chain‑of‑thought
 //
-// ------------------------------------------------------
-// Pulse‑AI Engine
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 aiEngine
+// ============================================================================
 
 import { createAIContext } from "./aiContext.js";
 import { checkPermission } from "./permissions.js";
 
-/**
- * runAI(request, operation)
- *
- * request = {
- *   intent: "analyze" | "generate" | "heal" | "migrate",
- *   touchesBackend: boolean,
- *   touchesFrontend: boolean,
- *   touchesSchemas: boolean,
- *   touchesFiles: boolean,
- *   userIsOwner: boolean
- * }
- *
- * operation = a SAFE function that receives (context) and returns a result
- *
- * Returns:
- * {
- *   result,
- *   context: {
- *     trace: [...],
- *     diagnostics: {...}
- *   }
- * }
- */
+// ============================================================================
+// PUBLIC API — Cortex Execution Wrapper
+// ============================================================================
 export async function runAI(request = {}, operation) {
-  // 1) Build context
+  // --------------------------------------------------------------------------
+  // 1) Build Cognitive Frame
+  // --------------------------------------------------------------------------
   const context = createAIContext(request);
   context.logStep("AI context initialized.");
-
-  // 2) Permission check
+  
+  // --------------------------------------------------------------------------
+  // 2) Permission Enforcement — Executive Control
+  // --------------------------------------------------------------------------
   const allowed = checkPermission(
     context.personaId,
     request.intent === "generate" ? "canGenerateFunctions" : "canReadFiles"
@@ -89,7 +64,9 @@ export async function runAI(request = {}, operation) {
     `Permission granted for persona "${context.personaId}" to perform intent "${request.intent}".`
   );
 
-  // 3) Execute operation safely
+  // --------------------------------------------------------------------------
+  // 3) Execute Operation — Cortex Action
+  // --------------------------------------------------------------------------
   let result = null;
 
   try {
@@ -102,7 +79,9 @@ export async function runAI(request = {}, operation) {
     result = null;
   }
 
-  // 4) Return result + diagnostics
+  // --------------------------------------------------------------------------
+  // 4) Return Result + Cognitive Trace
+  // --------------------------------------------------------------------------
   return {
     result,
     context,

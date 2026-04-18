@@ -1,78 +1,61 @@
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUInsightsEngine.js
+// ============================================================================
+//  PULSE GPU INSIGHTS ENGINE v6.3 — THE WISDOM CORTEX
+//  Deterministic, Pure Logic, Drift‑Proof Analytics Over Session Traces
+// ============================================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT.
+// IDENTITY — THE WISDOM CORTEX:
+//  -----------------------------
+//  • The interpretive cortex of the GPU organism.
+//  • Observes the past (baseline traces).
+//  • Studies the present (current traces).
+//  • Compares them with calm, deterministic clarity.
+//  • Reveals meaning — the “wisdom” already hidden in the data.
+//  • No guessing. No prediction. No speculation.
+//  • Pure interpretation. Pure understanding.
 //
-// 📘 PAGE INDEX — Source of Truth for This File
+// ROLE IN THE GPU NATION:
+//  ------------------------
+//  • Analyst → Intelligence (precompute brain)
+//  • Nerve Network → Runtime (memory + context)
+//  • Motor Hall → Execution (motion)
+//  • Guardian → Permissions (auto-opt policy)
+//  • Lymph Node Network → Immune System (validation + repair)
+//  • Wisdom Cortex → Insight + Interpretation (meaning)
 //
-// ROLE:
-//   PulseGPUInsightsEngine — consumes SessionTrace objects (from PulseGPUSessionTracer)
-//   and produces higher-order "insight objects" about performance over time.
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A pure logic analytics layer (API‑agnostic, full GPU)
+//  • A deterministic transformer of SessionTrace → Insight objects
+//  • A generator of structured, metadata‑rich insights
+//  • A safe, replayable, self‑repair‑ready wisdom engine
 //
-//   This file IS:
-//     • A pure logic module (full GPU, API-agnostic)
-//     • A deterministic analytics layer over traces
-//     • A generator of structured insights for UI / reports / advisors
-//     • v5-ready: insights include metadata for self-healing + replay
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer
+//  • NOT a GPU runtime
+//  • NOT a WebGPU/WebGL interface
+//  • NOT a persistence layer
+//  • NOT a backend module
+//  • NOT a UI system
 //
-//   This file IS NOT:
-//     • A renderer
-//     • A GPU runtime
-//     • A WebGPU/WebGL interface
-//     • A persistence layer
-//     • A UI or notification system
-//     • A backend module
-//
-// DEPLOYMENT:
-//   Lives in /apps/pulse-gpu as part of the GPU subsystem.
-//   Must remain ESM-only and side-effect-free.
-//   Must be safe to run in both browser and server environments.
-//
-// SAFETY RULES:
-//   • NO WebGPU/WebGL APIs
-//   • NO DOM APIs
-//   • NO Node.js APIs
-//   • NO filesystem or network access
-//   • NO randomness or timestamps
-//   • NO mutation of external state
-//   • FAIL-OPEN: malformed traces or metrics must not break the system
-//   • SELF-REPAIR READY: insights must contain enough metadata for healing/rebuild
-//
-// INTERNAL LOGIC SUMMARY (v4/v5-ready):
-//   • Data model:
-//       - SessionTrace (from PulseGPUSessionTracer)
-//       - Insight:
-//           {
-//             type: string,
-//             severity: "low" | "medium" | "high" | "critical",
-//             message: string,
-//             gameProfile?: object,
-//             hardwareProfile?: object,
-//             tierProfile?: object,
-//             stepId?: string,
-//             deltaPercent?: number,
-//             baselineAvgDurationMs?: number,
-//             currentAvgDurationMs?: number,
-//             extra?: object,
-//             meta: { layer, version, target }
-//           }
-//
-//   • Core operations:
-//       - analyzeStepDurations(baselineTraces, currentTraces)
-//       - groupStepsById(traces)
-//       - computeStepAverages(group)
-//       - classifyDelta(deltaPercent)
-//       - buildInsight(...)
-//
-// ------------------------------------------------------
-// IMPORTS (types / structure only; no runtime coupling required)
-// ------------------------------------------------------
+// SAFETY CONTRACT:
+//  ----------------
+//  • No randomness
+//  • No timestamps
+//  • No GPU calls
+//  • No DOM
+//  • No Node APIs
+//  • No network or filesystem access
+//  • Fail‑open: malformed traces → ignored, never crash
+//  • Deterministic: same traces → same insights
+//  • Self‑repair‑ready: insights include metadata
+// ============================================================================
 
 import { SessionTrace } from "./PulseGPUSessionTracer.js";
 
-// ------------------------------------------------------
-// Utility: clamp
-// ------------------------------------------------------
-
+// ============================================================================
+// UTILITY: clamp — Wisdom requires boundaries
+// ============================================================================
 function clamp(value, min, max) {
   if (typeof value !== "number" || Number.isNaN(value)) return min;
   if (value < min) return min;
@@ -80,10 +63,9 @@ function clamp(value, min, max) {
   return value;
 }
 
-// ------------------------------------------------------
-// Delta classification helpers (fail-open)
-// ------------------------------------------------------
-
+// ============================================================================
+// DELTA CLASSIFICATION — Wisdom about change
+// ============================================================================
 function classifyDelta(deltaPercent) {
   if (typeof deltaPercent !== "number" || Number.isNaN(deltaPercent)) {
     return "low";
@@ -97,10 +79,9 @@ function classifyDelta(deltaPercent) {
   return "critical";
 }
 
-// ------------------------------------------------------
-// Insight builder (v5-ready)
-// ------------------------------------------------------
-
+// ============================================================================
+// INSIGHT BUILDER — Structured understanding
+// ============================================================================
 function buildInsight({
   type,
   severity,
@@ -120,8 +101,10 @@ function buildInsight({
     message,
     meta: {
       layer: "PulseGPUInsightsEngine",
-      version: 4,
-      target: "full-gpu"
+      role: "WISDOM_CORTEX",
+      version: 6.3,
+      target: "full-gpu",
+      selfRepairable: true
     }
   };
 
@@ -143,12 +126,11 @@ function buildInsight({
   return insight;
 }
 
-// ------------------------------------------------------
-// Group steps by stepId across traces (fail-open)
-// ------------------------------------------------------
-
+// ============================================================================
+// GROUP STEPS — The Cortex organizes the story
+// ============================================================================
 function groupStepsById(traces = []) {
-  const groups = new Map(); // stepId -> { durations: number[], metaSamples: object[] }
+  const groups = new Map();
 
   traces.forEach((trace) => {
     if (!trace || !Array.isArray(trace.steps)) return;
@@ -179,21 +161,18 @@ function groupStepsById(traces = []) {
   return groups;
 }
 
-// ------------------------------------------------------
-// Compute average duration per step group
-// ------------------------------------------------------
-
+// ============================================================================
+// COMPUTE AVERAGES — The Cortex finds the pattern
+// ============================================================================
 function computeStepAverages(groups) {
-  const result = new Map(); // stepId -> { avgDurationMs, sampleCount, sampleMeta }
+  const result = new Map();
 
   for (const [stepId, group] of groups.entries()) {
     const durations = group.durations;
     if (!durations || durations.length === 0) continue;
 
     let sum = 0;
-    durations.forEach((d) => {
-      sum += d;
-    });
+    durations.forEach((d) => (sum += d));
 
     const avg = sum / durations.length;
 
@@ -211,16 +190,12 @@ function computeStepAverages(groups) {
   return result;
 }
 
-// ------------------------------------------------------
-// PulseGPUInsightsEngine (v4/v5-ready)
-// ------------------------------------------------------
-
+// ============================================================================
+//  PULSE GPU INSIGHTS ENGINE — THE WISDOM CORTEX
+// ============================================================================
 class PulseGPUInsightsEngine {
   constructor() {}
 
-  // ----------------------------------------------------
-  // Analyze step duration changes between two sets of traces
-  // ----------------------------------------------------
   analyzeStepDurations(baselineTraces = [], currentTraces = []) {
     const baselineGroups = groupStepsById(baselineTraces);
     const currentGroups = groupStepsById(currentTraces);
@@ -242,9 +217,7 @@ class PulseGPUInsightsEngine {
       const delta = (baselineAvg - currentAvg) / baselineAvg;
       const deltaPercent = delta * 100;
 
-      if (Math.abs(deltaPercent) < 5) {
-        continue;
-      }
+      if (Math.abs(deltaPercent) < 5) continue;
 
       const severity = classifyDelta(deltaPercent);
 
@@ -279,9 +252,6 @@ class PulseGPUInsightsEngine {
     return insights;
   }
 
-  // ----------------------------------------------------
-  // Convenience: analyze a single game/hardware filter
-  // ----------------------------------------------------
   analyzeStepDurationsForGameAndHardware({
     baselineTraces = [],
     currentTraces = [],
@@ -310,10 +280,9 @@ class PulseGPUInsightsEngine {
   }
 }
 
-// ------------------------------------------------------
+// ============================================================================
 // EXPORTS
-// ------------------------------------------------------
-
+// ============================================================================
 export {
   PulseGPUInsightsEngine,
   buildInsight,

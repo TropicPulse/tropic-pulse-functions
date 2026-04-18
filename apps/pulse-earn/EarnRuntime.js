@@ -1,52 +1,45 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/EarnRuntime.js
-//
-// EarnRuntime v5 — Deterministic, Drift‑Proof, Self‑Healing Worker Loop
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE PULSE (Heartbeat Loop + Purpose Executor)
+// ============================================================================
 //
 // ROLE:
-//   EarnRuntime — the active worker loop for Pulse Earn.
+//   THE PULSE — Pulse‑Earn’s continuous heartbeat.
+//   • Pulls jobs from the Exchange Office (MarketplaceConnector)
+//   • Executes jobs via the Craftsman (WorkerExecution)
+//   • Submits results via the Return Clerk (ResultSubmission)
+//   • Logs each beat of the worker’s lifecycle
 //
-// RESPONSIBILITIES:
-//   • Continuously pull jobs from MarketplaceConnector
-//   • Execute jobs via WorkerExecution
-//   • Submit results via ResultSubmission
-//   • Log lifecycle events
-//   • Obey engineRef.running for lifecycle control
+// WHY “PULSE”?:
+//   • It is the rhythmic loop that keeps Earn alive
+//   • It beats continuously while the Foreman allows it
+//   • It pumps jobs through the system like blood through veins
+//   • It maintains the life cycle of the Earn worker
 //
-// THIS FILE IS:
-//   • The worker loop
-//   • The runtime executor
-//   • The job → compute → submit pipeline
-//   • A deterministic, safe execution environment
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof execution loop
+//   • Guarantee safe job → compute → submit flow
+//   • Maintain healing metadata for the Physician (EarnHealer)
 //
-// THIS FILE IS NOT:
-//   • A scheduler
-//   • A supervisor
-//   • A compute engine
-//   • A marketplace adapter
-//   • A reputation engine
-//   • A ledger client
-//   • A wallet or token handler
+// CONTRACT:
+//   • PURE RUNTIME — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic loop only
 //
-// SAFETY RULES:
-//   • Never execute arbitrary code
-//   • Never mutate job objects
-//   • Always catch runtime errors
-//   • Always remain deterministic
-//
-// ------------------------------------------------------
-// EarnRuntime — Worker Execution Loop (v5 Healing Edition)
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 EarnRuntime
+// ============================================================================
 
 import { getNextJob } from "./MarketplaceConnector.js";
 import { executeJob } from "./WorkerExecution.js";
 import { submitJobResult } from "./ResultSubmission.js";
 
-// Healing metadata
+// ---------------------------------------------------------------------------
+// Healing Metadata — Pulse Rhythm Log
+// ---------------------------------------------------------------------------
 const runtimeHealing = {
   cycles: 0,
   lastJob: null,
@@ -57,6 +50,9 @@ const runtimeHealing = {
   lastTimestamp: null,
 };
 
+// ---------------------------------------------------------------------------
+// startEarnRuntime — Begin the heartbeat
+// ---------------------------------------------------------------------------
 export async function startEarnRuntime(workerId, config, engineRef) {
   const { logFn, idleDelayMs, stopOnError } = config;
 
@@ -68,7 +64,7 @@ export async function startEarnRuntime(workerId, config, engineRef) {
       runtimeHealing.lastTimestamp = Date.now();
 
       // ------------------------------------------------------
-      // 1. FETCH
+      // 1. FETCH — Pulse contraction
       // ------------------------------------------------------
       const job = await getNextJob(config.marketplaces);
 
@@ -83,7 +79,7 @@ export async function startEarnRuntime(workerId, config, engineRef) {
       logFn("earn:runtime_job_selected", { workerId, jobId: job.id });
 
       // ------------------------------------------------------
-      // 2. EXECUTE
+      // 2. EXECUTE — Pulse pumps
       // ------------------------------------------------------
       const result = await executeJob(job);
       runtimeHealing.lastResult = result;
@@ -96,7 +92,7 @@ export async function startEarnRuntime(workerId, config, engineRef) {
       });
 
       // ------------------------------------------------------
-      // 3. SUBMIT
+      // 3. SUBMIT — Pulse releases
       // ------------------------------------------------------
       const submission = await submitJobResult(job, result);
       runtimeHealing.lastSubmission = submission;
@@ -131,13 +127,16 @@ export async function startEarnRuntime(workerId, config, engineRef) {
   logFn("earn:runtime_exit", { workerId });
 }
 
+// ---------------------------------------------------------------------------
+// stopEarnRuntime — Pulse stops when Foreman stops engine
+// ---------------------------------------------------------------------------
 export function stopEarnRuntime() {
   // No-op: engine controls lifecycle
 }
 
-// ------------------------------------------------------
-// Export healing metadata for EarnHealer
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Export healing metadata — Pulse Rhythm Report
+// ---------------------------------------------------------------------------
 export function getEarnRuntimeHealingState() {
   return { ...runtimeHealing };
 }

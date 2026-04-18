@@ -1,22 +1,65 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUSessionTracer.js
-// LAYER: GPU-SUBSYSTEM (PURE LOGIC / SESSION TRACING)
+//  PULSE GPU SESSION TRACER v6.3 — THE SENSORY ARCHIVE
+//  Afferent Nervous System • Deterministic Perception Layer • Pure Recording
+// ============================================================================
 //
-// PulseGPUSessionTracer v5 — Deterministic, Pure-Logic Session Tracer
-// NO GPU. NO DOM. NO NODE. NO NETWORK. PURE HEALING + REPLAY.
+// IDENTITY — THE SENSORY ARCHIVE:
+//  -------------------------------
+//  • The afferent nervous system of the GPU organism.
+//  • Records every sensation: duration, warnings, errors, stutters, load.
+//  • Never judges, never interprets — only perceives and preserves.
+//  • The black box of the GPU body.
+//  • The raw sensory feed for the Wisdom Cortex, Brainstem, Lymph Nodes, Drive Center.
+//
+// ROLE IN THE GPU NATION:
+//  ------------------------
+//  • Sensory Archive → Perception + Recording
+//  • Analyst → Intelligence Division
+//  • Momentum Network → Forward Motion
+//  • Motor Hall → Execution Cortex
+//  • Guardian → Permission Gate
+//  • Lymph Node Network → Immune Filter
+//  • Wisdom Cortex → Insight + Interpretation
+//  • Brainstem → Command + Coordination
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A deterministic session recorder
+//  • A pure logic module (API-agnostic, full GPU)
+//  • A generator of SessionTrace objects
+//  • A replay + healing-friendly trace layer
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer
+//  • NOT a GPU runtime
+//  • NOT a WebGPU/WebGL interface
+//  • NOT a persistence layer
+//  • NOT a backend module
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No randomness
+//  • No timestamps
+//  • No GPU calls
+//  • No DOM
+//  • No Node APIs
+//  • No network or filesystem access
+//  • Fail-open: invalid steps → normalized safely
+//  • Self-repair-ready: traces include metadata
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v5 CONTEXT METADATA
+// ⭐ OS‑v6 CONTEXT METADATA — Sensory Archive Identity
 // ------------------------------------------------------------
 const TRACER_CONTEXT = {
   layer: "PulseGPUSessionTracer",
-  role: "GPU_SESSION_TRACER",
-  purpose: "Deterministic GPU/game session tracing",
+  role: "SENSORY_ARCHIVE",
+  purpose: "Afferent nervous system — deterministic perception + recording",
   context: "Records ordered steps with durations + health signals",
   target: "full-gpu",
   selfRepairable: true,
-  version: 5
+  version: 6.3
 };
 
 // ------------------------------------------------------------
@@ -30,7 +73,7 @@ function clamp(value, min, max) {
 }
 
 // ------------------------------------------------------------
-// Step normalization (v5-ready + OS‑v5 metadata)
+// Step normalization — Sensory Input Normalization
 // ------------------------------------------------------------
 function normalizeStep(step = {}) {
   const {
@@ -62,7 +105,6 @@ function normalizeStep(step = {}) {
         ? clamp(vramUsageMB, 0, 4_000_000)
         : undefined,
 
-    // ⭐ OS‑v5 metadata
     meta: {
       ...TRACER_CONTEXT
     }
@@ -70,7 +112,7 @@ function normalizeStep(step = {}) {
 }
 
 // ------------------------------------------------------------
-// SessionTrace model (v5-ready + OS‑v5 metadata)
+// SessionTrace — Sensory Recording Unit
 // ------------------------------------------------------------
 class SessionTrace {
   constructor({ sessionId, gameProfile, hardwareProfile, tierProfile }) {
@@ -80,7 +122,6 @@ class SessionTrace {
     this.tierProfile = tierProfile || {};
     this.steps = [];
 
-    // ⭐ OS‑v5 metadata
     this.meta = {
       ...TRACER_CONTEXT
     };
@@ -112,7 +153,6 @@ class SessionTrace {
       totalStutters,
       stepCount: this.steps.length,
 
-      // ⭐ OS‑v5 metadata
       meta: {
         ...TRACER_CONTEXT
       }
@@ -121,13 +161,12 @@ class SessionTrace {
 }
 
 // ------------------------------------------------------------
-// PulseGPUSessionTracer (v5-ready + OS‑v5 metadata)
+// PulseGPUSessionTracer — Sensory Archive Controller
 // ------------------------------------------------------------
 class PulseGPUSessionTracer {
   constructor() {
     this.sessions = new Map();
 
-    // ⭐ OS‑v5 metadata
     this.meta = {
       ...TRACER_CONTEXT
     };
@@ -151,7 +190,7 @@ class PulseGPUSessionTracer {
     const id = String(sessionId || "unknown-session");
     const trace = this.sessions.get(id);
 
-    if (!trace) return null; // fail-open
+    if (!trace) return null;
 
     trace.addStep(step || {});
     return trace;

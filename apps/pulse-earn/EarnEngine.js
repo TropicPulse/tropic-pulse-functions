@@ -1,62 +1,39 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/EarnEngine.js
-//
-// EarnEngine v5 — Deterministic, Drift‑Proof, Self‑Healing Worker Lifecycle Manager
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE FOREMAN (Worker Supervisor + Profit Orchestrator)
+// ============================================================================
 //
 // ROLE:
-//   EarnEngine — deterministic worker lifecycle manager for Pulse Earn.
+//   THE FOREMAN — deterministic supervisor of the Pulse‑Earn worker fleet.
+//   • Oversees worker lifecycle
+//   • Fetches jobs from MarketplaceConnector
+//   • Executes jobs via WorkerExecution
+//   • Submits results via ResultSubmission
+//   • Maintains healing metadata + structured logs
 //
-// RESPONSIBILITIES:
-//   • Spawn worker loops
-//   • Maintain deterministic worker state
-//   • Request jobs from MarketplaceConnector
-//   • Execute jobs via WorkerExecution
-//   • Submit results via ResultSubmission
-//   • Emit structured lifecycle logs
-//   • Maintain healing metadata
-//   • Handle soft/hard stops
+// WHY “FOREMAN”?:
+//   • Manages a team of workers
+//   • Ensures continuous throughput
+//   • Handles errors + safety
+//   • Oversees job execution pipeline
+//   • Keeps the operation profitable and stable
 //
-// THIS FILE IS:
-//   • A worker supervisor
-//   • A job execution loop
-//   • A result submission pipeline
-//   • A logging + healing metadata controller
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof worker lifecycle engine
+//   • Guarantee safe, predictable job execution
+//   • Maintain healing metadata for Earn healers
 //
-// THIS FILE IS NOT:
-//   • A scheduler
-//   • A job selector
-//   • A compute engine
-//   • A marketplace adapter
-//   • A scoring engine
-//   • A ledger/wallet/token handler
+// CONTRACT:
+//   • PURE SUPERVISOR — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic worker loops only
 //
-// SAFETY RULES:
-//   • Never execute arbitrary code
-//   • Never mutate job objects
-//   • Always catch worker errors
-//   • Never block the event loop
-//   • Always remain deterministic
-//
-// IMPORT RULES:
-//   Allowed:
-//     • MarketplaceConnector.js (getNextJob)
-//     • WorkerExecution.js (executeJob)
-//     • ResultSubmission.js (submitJobResult)
-//
-//   Forbidden:
-//     • Direct marketplace API calls
-//     • Node.js APIs
-//     • Any compute logic
-//     • Any scoring logic
-//     • Any schema logic
-//
-// ------------------------------------------------------
-// EarnEngine — Worker Lifecycle Manager (v5 Healing Edition)
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 EarnEngine
+// ============================================================================
 
 import { getNextJob } from "./MarketplaceConnector.js";
 import { executeJob } from "./WorkerExecution.js";
@@ -66,7 +43,9 @@ const EarnEngine = {
   running: false,
   workers: new Map(),
 
-  // Healing metadata
+  // -------------------------------------------------------------------------
+  // Healing Metadata — Foreman State Log
+  // -------------------------------------------------------------------------
   engineState: "idle", // idle | running | stopping | error
   workerStates: new Map(), // workerId → { state, lastJobId, lastError }
   cycleCount: 0,
@@ -75,9 +54,9 @@ const EarnEngine = {
   lastError: null,
   lastReason: null,
 
-  // ------------------------------------------------------
-  // start(config)
-  // ------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // start(config) — Begin worker fleet operation
+  // -------------------------------------------------------------------------
   async start(config) {
     if (this.running) {
       config.logFn("earn:already_running");
@@ -106,9 +85,9 @@ const EarnEngine = {
     }
   },
 
-  // ------------------------------------------------------
-  // workerLoop(workerId, config)
-  // ------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // workerLoop(workerId, config) — Foreman’s main supervision loop
+  // -------------------------------------------------------------------------
   async workerLoop(workerId, config) {
     config.logFn("earn:worker_start", { workerId });
 
@@ -123,7 +102,7 @@ const EarnEngine = {
         this.cycleCount++;
 
         // ------------------------------------------------------
-        // 1. FETCH
+        // 1. FETCH — Foreman assigns next job
         // ------------------------------------------------------
         this.workerStates.get(workerId).state = "fetching";
 
@@ -144,7 +123,7 @@ const EarnEngine = {
         });
 
         // ------------------------------------------------------
-        // 2. EXECUTE
+        // 2. EXECUTE — Worker performs assigned task
         // ------------------------------------------------------
         this.workerStates.get(workerId).state = "executing";
 
@@ -159,7 +138,7 @@ const EarnEngine = {
         });
 
         // ------------------------------------------------------
-        // 3. SUBMIT
+        // 3. SUBMIT — Worker returns completed work
         // ------------------------------------------------------
         this.workerStates.get(workerId).state = "submitting";
 
@@ -172,7 +151,7 @@ const EarnEngine = {
         });
 
         // ------------------------------------------------------
-        // 4. IDLE
+        // 4. IDLE — Worker waits for next assignment
         // ------------------------------------------------------
         this.workerStates.get(workerId).state = "idle";
 
@@ -197,9 +176,9 @@ const EarnEngine = {
     config.logFn("earn:worker_exit", { workerId });
   },
 
-  // ------------------------------------------------------
-  // hardStop(config, reason)
-  // ------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // hardStop(config, reason) — Emergency shutdown
+  // -------------------------------------------------------------------------
   async hardStop(config, reason) {
     if (!this.running) return;
 
@@ -226,9 +205,9 @@ const EarnEngine = {
     this.workers.clear();
   },
 
-  // ------------------------------------------------------
-  // softStop(config)
-  // ------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // softStop(config) — Graceful shutdown
+  // -------------------------------------------------------------------------
   softStop(config) {
     if (!this.running) return;
 

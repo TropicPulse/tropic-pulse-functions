@@ -1,70 +1,45 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/aiRouter.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE INTERPRETER (Intent Decoder + Persona Selector)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIRouter — decides WHICH persona (backend‑ai vs frontend‑ai)
-//   should handle a given request, and exposes a deterministic routing
-//   decision + reasoning summary.
+//   THE INTERPRETER — Decodes intent + selects the correct AI persona
+//   • Inspects request intent + flags
+//   • Chooses backend‑ai vs frontend‑ai
+//   • Attaches permissions + boundaries
+//   • Produces a SAFE reasoning trace (not chain‑of‑thought)
 //
 // PURPOSE:
-//   • Route requests to the correct AI persona
-//   • Make routing logic explicit and inspectable
-//   • Expose a human‑readable “thought process” summary
+//   • Provide deterministic persona routing
+//   • Make routing logic explicit + inspectable
+//   • Explain routing decisions in human‑readable form
 //
-// OUTPUT:
-//   • { personaId, permissions, boundaries, reasoning[] }
-//
-// RESPONSIBILITIES:
-//   • Inspect request intent + flags
-//   • Decide backend vs frontend persona
-//   • Attach permissions + boundaries
-//   • Produce a step‑by‑step reasoning trace (non‑secret, non‑code‑exec)
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
 //   • Deterministic routing only
 //
-// ------------------------------------------------------
-// Pulse‑AI Router
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 aiRouter
+// ============================================================================
 
 import { Personas, getPersona } from "./persona.js";
 import { checkPermission } from "./permissions.js";
 import { BoundaryLevels, canPerform } from "./boundaries.js";
 
-/**
- * routeAIRequest(request)
- *
- * Input shape (example):
- * {
- *   intent: "analyze" | "generate" | "heal" | "migrate" | "explain",
- *   touchesBackend: boolean,
- *   touchesFrontend: boolean,
- *   touchesSchemas: boolean,
- *   touchesFiles: boolean,
- *   userIsOwner: boolean
- * }
- *
- * Output:
- * {
- *   personaId,
- *   persona,
- *   permissions,
- *   boundaries,
- *   reasoning: [step1, step2, ...]
- * }
- */
+// ============================================================================
+// PUBLIC API — Interpret + Route
+// ============================================================================
 export function routeAIRequest(request = {}) {
   const reasoning = [];
 
-  // 1) Normalize intent
+  // --------------------------------------------------------------------------
+  // 1) Normalize Intent — Interpreter Step
+  // --------------------------------------------------------------------------
   const intent = (request.intent || "analyze").toLowerCase();
   reasoning.push(`Intent detected: "${intent}"`);
 
@@ -82,10 +57,11 @@ export function routeAIRequest(request = {}) {
   if (touchesFiles) reasoning.push("Request touches FILES.");
   if (userIsOwner) reasoning.push("User is OWNER (has elevated rights).");
 
-  // 2) Decide persona
+  // --------------------------------------------------------------------------
+  // 2) Persona Selection — Interpreter Decision
+  // --------------------------------------------------------------------------
   let personaId = Personas.FRONTEND_AI;
 
-  // Any backend / schema / file mutation intent → backend‑ai (if owner)
   const wantsMutation =
     intent === "generate" ||
     intent === "heal" ||
@@ -100,7 +76,6 @@ export function routeAIRequest(request = {}) {
         "Routing to BACKEND AI: mutation requested on backend/schemas/files and user is owner."
       );
     } else {
-      personaId = Personas.FRONTEND_AI;
       reasoning.push(
         "Staying on FRONTEND AI: mutation requested but user is NOT owner."
       );
@@ -113,7 +88,9 @@ export function routeAIRequest(request = {}) {
 
   const persona = getPersona(personaId);
 
-  // 3) Attach permissions + boundaries
+  // --------------------------------------------------------------------------
+  // 3) Attach Permissions + Boundaries
+  // --------------------------------------------------------------------------
   const permissions = persona?.permissions || {};
   const boundaries = persona?.boundaries || {};
 
@@ -128,10 +105,9 @@ export function routeAIRequest(request = {}) {
   };
 }
 
-/**
- * explainRoutingDecision(request)
- * Returns a compact, step‑style explanation of the routing logic.
- */
+// ============================================================================
+// EXPLAIN ROUTING — Interpreter Summary
+// ============================================================================
 export function explainRoutingDecision(request = {}) {
   const result = routeAIRequest(request);
 

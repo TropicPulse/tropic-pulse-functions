@@ -1,34 +1,41 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PacketEngine.js
-//
-// PacketEngine v5 — Deterministic, Drift‑Proof, Self‑Healing Packet Layer
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE ARCHIVIST
+// (Keeper of Packets + Guardian of Determinism + Memory of the Future)
+// ============================================================================
 //
 // ROLE:
-//   PacketEngine — deterministic, in‑memory packet read/write/compute layer.
+//   THE ARCHIVIST — Pulse‑Earn’s deterministic packet memory.
+//   • Stores packet data in a safe, in‑memory archive
+//   • Generates deterministic packet values (identity → future)
+//   • Ensures reproducibility for healing + compute
+//   • Maintains packet‑level healing metadata
 //
-// RESPONSIBILITIES:
-//   • Check if a packet exists
-//   • Write packet data
-//   • Generate deterministic packet data
-//   • Maintain healing metadata
+// WHY “ARCHIVIST”?:
+//   • Protects the smallest unit of truth (packets)
+//   • Guarantees deterministic reconstruction of future data
+//   • Acts as the vault for Earn’s memory substrate
+//   • Supports healing by regenerating lost packets
 //
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO Function()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO mutation of external state
-//   • NO network calls
-//   • NO filesystem access
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof packet layer
+//   • Guarantee safe read/write/compute operations
+//   • Serve as the foundation for EarnHealer’s repair logic
 //
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// CONTRACT:
+//   • PURE PACKET ENGINE — no AI layers, no translation, no memory model
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO network calls, NO filesystem, NO external mutation
+//   • Deterministic hashing + safe in‑memory storage only
+//
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 PacketEngine
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Archivist Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastKey: null,
   lastWrite: null,
@@ -38,15 +45,14 @@ const healingState = {
   lastTimestamp: null,
 };
 
-// ------------------------------------------------------
-// In-memory packet store (replace with Redis/Firestore later)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// In‑Memory Archive — Packet Store
+// ---------------------------------------------------------------------------
 const packetStore = new Map();
 
-// ------------------------------------------------------
-// 1. readPacketExists(fileId, packetIndex)
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 1. readPacketExists — Archive Lookup
+// ---------------------------------------------------------------------------
 export async function readPacketExists(fileId, packetIndex) {
   healingState.cycleCount++;
   healingState.lastTimestamp = Date.now();
@@ -63,9 +69,9 @@ export async function readPacketExists(fileId, packetIndex) {
   }
 }
 
-// ------------------------------------------------------
-// 2. writePacket(fileId, packetIndex, data)
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 2. writePacket — Archive Write
+// ---------------------------------------------------------------------------
 export async function writePacket(fileId, packetIndex, data) {
   healingState.cycleCount++;
   healingState.lastTimestamp = Date.now();
@@ -74,7 +80,6 @@ export async function writePacket(fileId, packetIndex, data) {
     const key = `${fileId}:${packetIndex}`;
     healingState.lastKey = key;
 
-    // deterministic write
     packetStore.set(key, structuredClone(data));
 
     healingState.lastWrite = { key, size: JSON.stringify(data).length };
@@ -88,9 +93,9 @@ export async function writePacket(fileId, packetIndex, data) {
   }
 }
 
-// ------------------------------------------------------
-// 3. generatePacketData(fileId, packetIndex)
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 3. generatePacketData — Deterministic Future Generator
+// ---------------------------------------------------------------------------
 export async function generatePacketData(fileId, packetIndex) {
   healingState.cycleCount++;
   healingState.lastTimestamp = Date.now();
@@ -99,7 +104,7 @@ export async function generatePacketData(fileId, packetIndex) {
     const key = `${fileId}:${packetIndex}`;
     healingState.lastKey = key;
 
-    // Deterministic hash (FNV‑1a style)
+    // Deterministic FNV‑1a hash → future value
     let hash = 2166136261;
     for (let i = 0; i < key.length; i++) {
       hash ^= key.charCodeAt(i);
@@ -127,9 +132,9 @@ export async function generatePacketData(fileId, packetIndex) {
   }
 }
 
-// ------------------------------------------------------
-// Export healing metadata for EarnHealer
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Export Healing Metadata — Archivist Report
+// ---------------------------------------------------------------------------
 export function getPacketEngineHealingState() {
   return { ...healingState };
 }

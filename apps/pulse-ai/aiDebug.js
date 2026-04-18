@@ -1,48 +1,67 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/aiDebug.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE SCRIBE (Report Writer + Debug Formatter)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIDebug — formats AI context (trace + diagnostics) into a clean,
-//   human‑readable debug report.
+//   THE SCRIBE — The recorder of Pulse OS diagnostics
+//   • Formats AI context into readable debug reports
+//   • Summarizes mismatches, drift, slowdown, missing fields
+//   • Outputs human‑friendly diagnostic strings + objects
 //
 // PURPOSE:
-//   • Provide a readable diagnostic summary
-//   • Help identify bad data, mismatches, drift, slowdown causes
-//   • Make debugging AI behavior fast and intuitive
+//   • Provide a clean, readable diagnostic summary
+//   • Make debugging AI behavior fast + intuitive
+//   • Present trace + issues in a structured format
 //
-// OUTPUT:
-//   • A formatted string or object representing the debug report
-//
-// RESPONSIBILITIES:
-//   • Format trace steps
-//   • Format mismatches
-//   • Format missing fields
-//   • Format drift
-//   • Format slowdown causes
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
+//   • Pure formatting + summarization
 //
-// ------------------------------------------------------
-// Pulse‑AI Debug Formatter
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 aiDebug
+// ============================================================================
 
-/**
- * formatDebugReport(context)
- *
- * Produces a clean, human‑readable diagnostic summary.
- */
+// ============================================================================
+// LAYER CONSTANTS + DIAGNOSTICS
+// ============================================================================
+const SCRIBE_LAYER_ID = "SCRIBE-LAYER";
+const SCRIBE_LAYER_NAME = "THE SCRIBE";
+const SCRIBE_LAYER_ROLE = "Report Writer + Debug Formatter";
+
+const SCRIBE_DIAGNOSTICS_ENABLED =
+  process?.env?.PULSE_SCRIBE_DIAGNOSTICS === "true" ||
+  process?.env?.PULSE_DIAGNOSTICS === "true";
+
+const scribeLog = (stage, details = {}) => {
+  if (!SCRIBE_DIAGNOSTICS_ENABLED) return;
+
+  console.log(
+    JSON.stringify({
+      pulseLayer: SCRIBE_LAYER_ID,
+      pulseName: SCRIBE_LAYER_NAME,
+      pulseRole: SCRIBE_LAYER_ROLE,
+      stage,
+      ...details
+    })
+  );
+};
+
+scribeLog("SCRIBE_INIT", {});
+
+// ============================================================================
+// PUBLIC API — Build Debug Report (Object)
+// ============================================================================
 export function formatDebugReport(context) {
+  scribeLog("FORMAT_REPORT_START");
+
   const { trace, diagnostics } = context;
 
-  return {
+  const report = {
     summary: buildSummary(diagnostics),
     trace: [...trace],
     mismatches: [...diagnostics.mismatches],
@@ -50,25 +69,29 @@ export function formatDebugReport(context) {
     slowdownCauses: [...diagnostics.slowdownCauses],
     driftDetected: diagnostics.driftDetected,
   };
+
+  scribeLog("FORMAT_REPORT_COMPLETE", {
+    summaryLines: report.summary.length,
+    traceLength: report.trace.length
+  });
+
+  return report;
 }
 
-/**
- * buildSummary(diagnostics)
- * Creates a short, readable summary of the most important issues.
- */
+// ============================================================================
+// SUMMARY BUILDER — Clinical Summary Lines
+// ============================================================================
 function buildSummary(diagnostics) {
+  scribeLog("SUMMARY_START");
+
   const summary = [];
 
   if (diagnostics.mismatches.length > 0) {
-    summary.push(
-      `⚠️ ${diagnostics.mismatches.length} field mismatches detected`
-    );
+    summary.push(`⚠️ ${diagnostics.mismatches.length} field mismatches detected`);
   }
 
   if (diagnostics.missingFields.length > 0) {
-    summary.push(
-      `⚠️ ${diagnostics.missingFields.length} missing fields detected`
-    );
+    summary.push(`⚠️ ${diagnostics.missingFields.length} missing fields detected`);
   }
 
   if (diagnostics.driftDetected) {
@@ -76,24 +99,23 @@ function buildSummary(diagnostics) {
   }
 
   if (diagnostics.slowdownCauses.length > 0) {
-    summary.push(
-      `🐢 Slowdown causes: ${diagnostics.slowdownCauses.join(", ")}`
-    );
+    summary.push(`🐢 Slowdown causes: ${diagnostics.slowdownCauses.join(", ")}`);
   }
 
   if (summary.length === 0) {
     summary.push("✅ No issues detected");
   }
 
+  scribeLog("SUMMARY_COMPLETE", { lines: summary.length });
   return summary;
 }
 
-/**
- * formatDebugString(context)
- *
- * Returns a pretty‑printed string version of the debug report.
- */
+// ============================================================================
+// STRING FORMATTER — Pretty Printed Debug Report
+// ============================================================================
 export function formatDebugString(context) {
+  scribeLog("FORMAT_STRING_START");
+
   const report = formatDebugReport(context);
 
   let out = "\n=== AI DEBUG REPORT ===\n\n";
@@ -133,5 +155,6 @@ export function formatDebugString(context) {
 
   out += "\n========================\n";
 
+  scribeLog("FORMAT_STRING_COMPLETE");
   return out;
 }

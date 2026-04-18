@@ -1,55 +1,47 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/MarketplaceReputation.js
-//
-// MarketplaceReputation v5 — Deterministic, Drift‑Proof, Self‑Healing Reputation Engine
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE SCOREKEEPER
+// (Performance Intelligence + Reputation Tracking + Trust Scoring)
+// ============================================================================
 //
 // ROLE:
-//   MarketplaceReputation — persistent reliability scoring for all marketplaces.
+//   THE SCOREKEEPER — Pulse‑Earn’s performance intelligence division.
+//   • Tracks marketplace reliability and profitability
+//   • Computes normalized performance signals
+//   • Applies weighted scoring to determine trust
+//   • Blends historical + recent performance (EMA)
+//   • Persists reputation for long-term intelligence
 //
-// RESPONSIBILITIES:
-//   • Load/save reputation from/to disk
-//   • Track operational signals (latency, errors, quality, profit, success)
-//   • Compute normalized 0–1 signals
-//   • Apply weighted scoring model
-//   • Blend old + new via EMA
-//   • Clamp scores to 0–1
-//   • Maintain healing metadata
+// WHY “SCOREKEEPER”?:
+//   • Observes every marketplace’s performance
+//   • Updates the score after every job
+//   • Influences who gets routed next
+//   • Maintains the long-term standings of all marketplaces
 //
-// THIS FILE IS:
-//   • A persistent reputation engine
-//   • A weighted scoring model
-//   • A disk-backed memory store
-//   • A reliability tracker
+// PURPOSE:
+//   • Provide deterministic, drift‑proof reputation scoring
+//   • Maintain persistent trust levels across Earn sessions
+//   • Supply the Traffic Officer (Orchestrator) with intelligence
 //
-// THIS FILE IS NOT:
-//   • A scheduler
-//   • A job selector
-//   • A compute engine
-//   • A marketplace adapter
-//   • A ledger/wallet/settlement handler
+// CONTRACT:
+//   • PURE INTELLIGENCE ENGINE — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for deterministic reputation updates
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic scoring only
 //
-// SAFETY NOTES:
-//   • Never throw unhandled errors
-//   • Always clamp values to 0–1
-//   • Always persist after updates
-//   • Remain deterministic
-//
-// ------------------------------------------------------
-// Imports
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 Reputation Engine
+// ============================================================================
 
 import fs from "fs";
 import path from "path";
 
-// ------------------------------------------------------
-// Constants
-// ------------------------------------------------------
-
-const DEFAULT_REPUTATION = 0.5; // neutral baseline
+// ---------------------------------------------------------------------------
+// Constants — Scorekeeper Baselines
+// ---------------------------------------------------------------------------
+const DEFAULT_REPUTATION = 0.5;
 const REPUTATION_FILE = path.resolve(
   "pulse-earn/data/marketplace-reputation.json"
 );
@@ -57,7 +49,9 @@ const REPUTATION_FILE = path.resolve(
 // In-memory reputation store
 let reputation = new Map();
 
-// Healing metadata
+// ---------------------------------------------------------------------------
+// Healing Metadata — Scorekeeper Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastMarketplaceId: null,
   lastReputationBefore: null,
@@ -68,9 +62,9 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// Load reputation from disk
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Load reputation from disk — Scorekeeper Memory
+// ---------------------------------------------------------------------------
 export function loadMarketplaceReputation() {
   try {
     if (!fs.existsSync(REPUTATION_FILE)) {
@@ -90,9 +84,9 @@ export function loadMarketplaceReputation() {
   }
 }
 
-// ------------------------------------------------------
-// Save reputation to disk
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Save reputation to disk — Scorekeeper Persistence
+// ---------------------------------------------------------------------------
 function saveMarketplaceReputation() {
   try {
     const obj = Object.fromEntries(reputation);
@@ -105,16 +99,16 @@ function saveMarketplaceReputation() {
   }
 }
 
-// ------------------------------------------------------
-// Get current reputation for a marketplace
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Get current reputation — Score Lookup
+// ---------------------------------------------------------------------------
 export function getMarketplaceReputation(id) {
   return Number(reputation.get(id)) || DEFAULT_REPUTATION;
 }
 
-// ------------------------------------------------------
-// Update reputation based on signals
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Update reputation — Scorekeeper Decision
+// ---------------------------------------------------------------------------
 export function updateMarketplaceReputation(id, signals) {
   healingState.cycleCount++;
   healingState.lastMarketplaceId = id;
@@ -149,16 +143,13 @@ export function updateMarketplaceReputation(id, signals) {
   return clamped;
 }
 
-// ------------------------------------------------------
-// Normalize values into 0–1 range
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Normalization Helpers — Score Calibration
+// ---------------------------------------------------------------------------
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-// ------------------------------------------------------
-// Convert raw metrics into normalized signals
-// ------------------------------------------------------
 export function computeReputationSignals({
   latencyMs,
   apiErrors,
@@ -177,9 +168,9 @@ export function computeReputationSignals({
   };
 }
 
-// ------------------------------------------------------
-// Normalizers
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Normalizers — Scorekeeper Metrics
+// ---------------------------------------------------------------------------
 function normalizeLatency(ms) {
   if (ms < 200) return 1;
   if (ms < 500) return 0.8;
@@ -209,9 +200,9 @@ function normalizeProfit(p) {
   return 0.3;
 }
 
-// ------------------------------------------------------
-// Export healing metadata for Earn/Earn healers
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Export Healing Metadata — Scorekeeper Report
+// ---------------------------------------------------------------------------
 export function getMarketplaceReputationHealingState() {
   return { ...healingState };
 }

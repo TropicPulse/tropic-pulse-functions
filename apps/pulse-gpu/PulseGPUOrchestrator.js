@@ -1,62 +1,54 @@
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUOrchestrator.js
+// ============================================================================
+//  PULSE GPU ORCHESTRATOR v6.3 — THE BRAINSTEM
+//  Autonomic Command Spine of the GPU Subsystem
+//  Deterministic, Pure Logic, Full-GPU Coordination Layer
+// ============================================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT.
+// IDENTITY — THE BRAINSTEM:
+//  -------------------------
+//  • The autonomic command center of the GPU organism.
+//  • Routes signals between all GPU subsystems.
+//  • Ensures survival-level coordination and continuity.
+//  • Issues orders; never performs the work itself.
+//  • The spine every subsystem reports into.
 //
-// 📘 PAGE INDEX — Source of Truth for This File
+// ROLE IN THE GPU NATION:
+//  ------------------------
+//  • Analyst → Intelligence Division
+//  • Nerve Network → Runtime Memory
+//  • Motor Hall → Execution Cortex
+//  • Guardian → Permission Gate
+//  • Lymph Node Network → Immune Filter
+//  • Wisdom Cortex → Insight + Interpretation
+//  • Brainstem → Command + Coordination
 //
-// ROLE:
-//   PulseGPUOrchestrator — coordinates all Pulse-GPU subsystems into a single,
-//   deterministic flow for sessions, memory, advice, restoration, auto-opt, insights,
-//   events, and UX notifications.
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A pure logic coordinator (API-agnostic, full GPU)
+//  • The wiring layer for all Pulse-GPU components
+//  • The single entrypoint for “run a session through the GPU body”
+//  • A deterministic, fail-open, self-repair-ready command spine
 //
-//   This file IS:
-//     • A pure logic coordinator (full GPU, API-agnostic)
-//     • A wiring layer for Pulse-GPU components
-//     • A single entrypoint for "run a session through the brain"
-//     • v5-ready: emits structured, self-healing-friendly events + results
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer
+//  • NOT a GPU runtime
+//  • NOT a WebGPU/WebGL interface
+//  • NOT a persistence layer
+//  • NOT a backend module
+//  • NOT a UI system
 //
-//   This file IS NOT:
-//     • A renderer
-//     • A GPU runtime
-//     • A WebGPU/WebGL interface
-//     • A persistence layer
-//     • A UI or notification system
-//     • A backend module
-//
-// DEPLOYMENT:
-//   Lives in /apps/pulse-gpu as part of the GPU subsystem.
-//   Must remain ESM-only and side-effect-free (no globals).
-//   Must be safe to run in both browser and server environments.
-//
-// SAFETY RULES:
-//   • NO WebGPU/WebGL APIs
-//   • NO DOM APIs
-//   • NO Node.js APIs
-//   • NO filesystem or network access
-//   • NO randomness or timestamps
-//   • FAIL-OPEN: missing subsystems or partial failures must not crash the orchestrator
-//   • SELF-REPAIR READY: outputs + events must contain enough metadata for healing/replay
-//
-// HIGH-LEVEL FLOW (v4/v5-ready):
-//
-//   1. startSession(...) → tracer session + "session-started" event
-//   2. recordStep(...)   → tracer step + "session-step-recorded" event
-//   3. endSession(...)   →
-//        - tracer returns SessionTrace
-//        - memory.recordSession(...)
-//        - advisor.analyzeCurrentSession(...)
-//        - restorer.buildRestorePlan(...)
-//        - autoOptimize.decide(...)
-//        - uxBridge.fromAdvisorResult(...)
-//        - uxBridge.fromRestorePlan(...)
-//        - healer.healSessionFlow(...)
-//        - events emitted for advice/plan/decision/notifications/healing
-//
-//   4. analyzeInsights(...) → insights + notifications + events
-//
-// ------------------------------------------------------
-// IMPORTS
-// ------------------------------------------------------
+// SAFETY CONTRACT:
+//  ----------------
+//  • No randomness
+//  • No timestamps
+//  • No GPU calls
+//  • No DOM
+//  • No Node APIs
+//  • No network or filesystem access
+//  • Fail-open: missing subsystems never crash the brainstem
+//  • Self-repair-ready: all outputs include metadata
+// ============================================================================
 
 import { PulseGPUSettingsMemory } from "./PulseGPUSettingsMemory.js";
 import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
@@ -68,28 +60,37 @@ import { PulseGPUUXBridge } from "./PulseGPUUXBridge.js";
 import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
 import { PulseGPUHealer } from "./PulseGPUHealer.js";
 
-// ------------------------------------------------------
-// PulseGPUOrchestrator (v4/v5-ready)
-// ------------------------------------------------------
-
+// ============================================================================
+//  PULSE GPU ORCHESTRATOR — THE BRAINSTEM
+// ============================================================================
 class PulseGPUOrchestrator {
   constructor(options = {}) {
     this.settingsMemory =
       options.settingsMemory || new PulseGPUSettingsMemory();
+
     this.performanceAdvisor =
       options.performanceAdvisor ||
       new PulseGPUPerformanceAdvisor(this.settingsMemory);
+
     this.settingsRestorer =
       options.settingsRestorer || new PulseGPUSettingsRestorer();
+
     this.sessionTracer =
       options.sessionTracer || new PulseGPUSessionTracer();
+
     this.insightsEngine =
       options.insightsEngine || new PulseGPUInsightsEngine();
+
     this.eventEmitter =
       options.eventEmitter || new PulseGPUEventEmitter();
-    this.uxBridge = options.uxBridge || new PulseGPUUXBridge();
+
+    this.uxBridge =
+      options.uxBridge || new PulseGPUUXBridge();
+
     this.autoOptimize =
-      options.autoOptimize || new PulseGPUAutoOptimize(options.userPreferences);
+      options.autoOptimize ||
+      new PulseGPUAutoOptimize(options.userPreferences);
+
     this.healer =
       options.healer ||
       new PulseGPUHealer({
@@ -100,12 +101,16 @@ class PulseGPUOrchestrator {
         settingsMemory: this.settingsMemory,
         userPreferences: options.userPreferences
       });
+
+    console.log(
+      "%c[Brainstem] Command spine online — autonomic coordination active.",
+      "color:#03A9F4; font-weight:bold;"
+    );
   }
 
-  // ----------------------------------------------------
-  // Session lifecycle
-  // ----------------------------------------------------
-
+  // ========================================================================
+  // SESSION LIFECYCLE — AUTONOMIC COMMAND SIGNALS
+  // ========================================================================
   startSession({ sessionId, gameProfile, hardwareProfile, tierProfile }) {
     const trace = this.sessionTracer.startSession({
       sessionId,
@@ -137,9 +142,9 @@ class PulseGPUOrchestrator {
     return trace;
   }
 
-  // ----------------------------------------------------
-  // End session → full pipeline (fail-open, v5-ready)
-  // ----------------------------------------------------
+  // ========================================================================
+  // END SESSION — FULL AUTONOMIC COMMAND PIPELINE
+  // ========================================================================
   endSession({
     sessionId,
     gameProfile,
@@ -165,7 +170,9 @@ class PulseGPUOrchestrator {
       trace
     });
 
-    // 1) Memory (fail-open)
+    // MEMORY → ADVISOR → RESTORER → AUTO-OPT → NOTIFICATIONS → HEALER
+    // (the full autonomic reflex arc)
+
     let memoryEntry = null;
     try {
       memoryEntry = this.settingsMemory.recordSession({
@@ -180,13 +187,13 @@ class PulseGPUOrchestrator {
       memoryEntry = null;
     }
 
-    // 2) Advisor
     let advisorResult = {
       currentScore: 0,
       baselineScore: null,
       deltaPercent: null,
       advice: []
     };
+
     try {
       advisorResult = this.performanceAdvisor.analyzeCurrentSession({
         gameProfile: safeGameProfile,
@@ -195,14 +202,7 @@ class PulseGPUOrchestrator {
         settings: safeSettings,
         metrics: safeMetrics
       });
-    } catch {
-      advisorResult = {
-        currentScore: 0,
-        baselineScore: null,
-        deltaPercent: null,
-        advice: []
-      };
-    }
+    } catch {}
 
     this.eventEmitter.emit("performance-advice", {
       sessionId,
@@ -212,15 +212,12 @@ class PulseGPUOrchestrator {
       advisorResult
     });
 
-    // 3) Restorer
     let restorePlan = { action: "noop" };
     try {
       restorePlan = this.settingsRestorer.buildRestorePlan(
         advisorResult.advice || []
       );
-    } catch {
-      restorePlan = { action: "noop" };
-    }
+    } catch {}
 
     this.eventEmitter.emit("settings-restore-plan", {
       sessionId,
@@ -230,14 +227,13 @@ class PulseGPUOrchestrator {
       restorePlan
     });
 
-    // 4) AutoOptimize
     let autoDecision = {
       mode: "require-confirmation",
       reason: "Auto-optimize decision unavailable; defaulting to confirmation.",
       plan: restorePlan,
       meta: {
         layer: "PulseGPUAutoOptimize",
-        version: 4,
+        version: 6.3,
         target: "full-gpu"
       }
     };
@@ -246,9 +242,7 @@ class PulseGPUOrchestrator {
       autoDecision = this.autoOptimize.decide(restorePlan, {
         adviceList: advisorResult.advice || []
       });
-    } catch {
-      // keep default
-    }
+    } catch {}
 
     this.eventEmitter.emit("auto-optimize-decision", {
       sessionId,
@@ -258,21 +252,16 @@ class PulseGPUOrchestrator {
       decision: autoDecision
     });
 
-    // 5) UXBridge
     let advisorNotifications = [];
     let planNotification = null;
 
     try {
       advisorNotifications = this.uxBridge.fromAdvisorResult(advisorResult) || [];
-    } catch {
-      advisorNotifications = [];
-    }
+    } catch {}
 
     try {
       planNotification = this.uxBridge.fromRestorePlan(restorePlan) || null;
-    } catch {
-      planNotification = null;
-    }
+    } catch {}
 
     let notifications = advisorNotifications.slice();
     if (planNotification) notifications.push(planNotification);
@@ -287,45 +276,41 @@ class PulseGPUOrchestrator {
       });
     }
 
-    // 6) Healer post-pass (fail-open, v5-ready)
     let healingReport = null;
-    try {
-      if (this.healer) {
-        healingReport = this.healer.healSessionFlow({
-          advisorResult,
-          restorePlan,
-          autoDecision,
-          notifications,
-          context: {
-            gameProfile: safeGameProfile,
-            hardwareProfile: safeHardwareProfile,
-            tierProfile: safeTierProfile,
-            settings: safeSettings,
-            metrics: safeMetrics,
-            userPreferences: this.autoOptimize?.userPreferences || {}
-          }
-        });
 
-        this.eventEmitter.emit("healing-report", {
-          sessionId,
+    try {
+      healingReport = this.healer.healSessionFlow({
+        advisorResult,
+        restorePlan,
+        autoDecision,
+        notifications,
+        context: {
           gameProfile: safeGameProfile,
           hardwareProfile: safeHardwareProfile,
           tierProfile: safeTierProfile,
-          healingReport
-        });
-
-        if (healingReport && healingReport.status === "repaired") {
-          advisorResult = healingReport.advisorResult || advisorResult;
-          restorePlan = healingReport.restorePlan || restorePlan;
-          autoDecision = healingReport.autoDecision || autoDecision;
-          notifications = Array.isArray(healingReport.notifications)
-            ? healingReport.notifications
-            : notifications;
+          settings: safeSettings,
+          metrics: safeMetrics,
+          userPreferences: this.autoOptimize?.userPreferences || {}
         }
+      });
+
+      this.eventEmitter.emit("healing-report", {
+        sessionId,
+        gameProfile: safeGameProfile,
+        hardwareProfile: safeHardwareProfile,
+        tierProfile: safeTierProfile,
+        healingReport
+      });
+
+      if (healingReport && healingReport.status === "repaired") {
+        advisorResult = healingReport.advisorResult || advisorResult;
+        restorePlan = healingReport.restorePlan || restorePlan;
+        autoDecision = healingReport.autoDecision || autoDecision;
+        notifications = Array.isArray(healingReport.notifications)
+          ? healingReport.notifications
+          : notifications;
       }
-    } catch {
-      healingReport = null;
-    }
+    } catch {}
 
     return {
       trace,
@@ -338,9 +323,9 @@ class PulseGPUOrchestrator {
     };
   }
 
-  // ----------------------------------------------------
-  // Insights pipeline (fail-open, v5-ready)
-  // ----------------------------------------------------
+  // ========================================================================
+  // INSIGHTS PIPELINE — BRAINSTEM CONSULTS THE WISDOM CORTEX
+  // ========================================================================
   analyzeInsights({
     baselineTraces = [],
     currentTraces = [],
@@ -348,6 +333,7 @@ class PulseGPUOrchestrator {
     gpuModel
   }) {
     let insights = [];
+
     try {
       insights =
         this.insightsEngine.analyzeStepDurationsForGameAndHardware({
@@ -356,9 +342,7 @@ class PulseGPUOrchestrator {
           gameId,
           gpuModel
         }) || [];
-    } catch {
-      insights = [];
-    }
+    } catch {}
 
     this.eventEmitter.emit("insights-available", {
       gameId,
@@ -369,9 +353,7 @@ class PulseGPUOrchestrator {
     let notifications = [];
     try {
       notifications = this.uxBridge.fromInsights(insights) || [];
-    } catch {
-      notifications = [];
-    }
+    } catch {}
 
     if (notifications.length > 0) {
       this.eventEmitter.emit("notifications", {
@@ -388,10 +370,7 @@ class PulseGPUOrchestrator {
   }
 }
 
-// ------------------------------------------------------
+// ============================================================================
 // EXPORTS
-// ------------------------------------------------------
-
-export {
-  PulseGPUOrchestrator
-};
+// ============================================================================
+export { PulseGPUOrchestrator };

@@ -1,3 +1,50 @@
+// ============================================================================
+// FILE: /apps/netlify/functions/index.js
+// PULSE BACKEND ARCHIVE v6.3
+// “THE LONG‑TERM MEMORY / ANCESTRAL KNOWLEDGE LAYER”
+// ============================================================================
+//
+// ROLE:
+//   This file is the **ARCHIVE** — the long-term memory of the backend.
+//   It contains every backend function ever created in the early system,
+//   preserved exactly as they were, without imports, without dependencies,
+//   without modern modular structure.
+//
+//   It is the **ancestral knowledge base** of the OS.
+//
+//   • The new C‑Layer (endpoint.js) consults this file only as a fallback.
+//   • Router.js uses this file to heal missing or unimplemented functions.
+//   • No new logic should be added here — this is a historical record.
+//   • This file ensures backward compatibility across all OS versions.
+//
+// PERSONALITY + METAPHOR:
+//   • “THE ARCHIVE” — stores everything the system once knew.
+//   • “THE LONG‑TERM MEMORY” — persistent, stable, unchanging.
+//   • “THE ANCESTRAL LAYER” — the old soul of the backend.
+//   • “THE ROOT HISTORY” — the final fallback when all else fails.
+//
+// WHAT THIS FILE IS:
+//   • A complete collection of legacy backend functions
+//   • A deterministic fallback for healing + compatibility
+//   • A static, import‑free, self‑contained logic archive
+//
+// WHAT THIS FILE IS NOT:
+//   • NOT part of the modern modular backend
+//   • NOT updated with new features
+//   • NOT a router or dispatcher
+//   • NOT a GPU or OS subsystem
+//
+// SAFETY CONTRACT:
+//   • Never delete functions from this file
+//   • Never add imports or external dependencies
+//   • Never mutate this file’s structure
+//   • Only add new functions if absolutely required for healing
+//
+// ============================================================================
+//
+//  ↓↓↓  ALL LEGACY BACKEND FUNCTIONS LIVE BELOW THIS LINE  ↓↓↓
+// ============================================================================
+
 
 
 async function logSecurityPatch(uid, patch, reason = "auto") {

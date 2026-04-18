@@ -1,61 +1,39 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/MarketplaceConnector.js
-//
-// MarketplaceConnector v5 — Deterministic, Drift‑Proof, Self‑Healing Interface
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE EXCHANGE OFFICE
+// (Job Intake + Result Forwarding + Reputation Updating)
+// ============================================================================
 //
 // ROLE:
-//   MarketplaceConnector — PUBLIC API between Pulse Earn and Pulse Proxy.
+//   THE EXCHANGE OFFICE — Pulse‑Earn’s public-facing counter.
+//   • Fetches next job from all marketplaces (via MarketplaceOrchestrator)
+//   • Converts marketplace jobs into PulseJobSchema-like structures
+//   • Submits completed results back to the correct marketplace
+//   • Updates marketplace reputation based on job outcomes
 //
-// RESPONSIBILITIES:
-//   • Fetch next job from ALL marketplaces (via MarketplaceOrchestrator)
-//   • Normalize marketplace jobs into PulseJobSchema-like structure
-//   • Submit completed results to the correct marketplace
-//   • Update marketplace reputation based on job outcomes
-//   • Maintain deterministic healing metadata
+// WHY “EXCHANGE OFFICE”?:
+//   • It is the bridge between internal performance and external profit
+//   • It handles job intake (incoming currency)
+//   • It handles result submission (outgoing currency)
+//   • It updates marketplace trust (exchange rate)
+//   • It is the public counter for PulseProxy
 //
-// THIS FILE IS:
-//   • A clean interface for PulseProxy
-//   • A wrapper around MarketplaceOrchestrator
-//   • A job normalizer
-//   • A reputation updater
-//   • A result forwarder
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof interface between Earn and Proxy
+//   • Normalize jobs and forward results safely
+//   • Maintain healing metadata for the Physician (EarnHealer)
 //
-// THIS FILE IS NOT:
-//   • A marketplace adapter
-//   • A scheduler
-//   • A compute engine
-//   • A job selector
-//   • A scoring engine
-//   • A ledger/wallet/token handler
+// CONTRACT:
+//   • PURE INTERFACE — no AI layers, no translation, no memory model
+//   • READ‑ONLY except for healing metadata + reputation updates
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO executing user code
+//   • Deterministic job intake + result forwarding only
 //
-// SAFETY RULES:
-//   • Never throw unhandled errors
-//   • Always validate job objects before wrapping
-//   • Never mutate job objects
-//   • Always remain deterministic
-//
-// IMPORT RULES:
-//   Allowed:
-//     • MarketplaceOrchestrator.js
-//     • MarketplaceReputation.js
-//     • PulseJobSchema.js
-//     • PulseDeviceProfile.js
-//     • RegisteredMarketplaces.js
-//     • ResultSubmission.js
-//
-//   Forbidden:
-//     • Direct marketplace API calls
-//     • Node.js APIs
-//     • Backend modules
-//     • DOM manipulation
-//
-// ------------------------------------------------------
-// MarketplaceConnector — Public API for PulseProxy (v5 Healing Edition)
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 MarketplaceConnector
+// ============================================================================
 
 import {
   updateMarketplaceReputation,
@@ -68,7 +46,9 @@ import { getDeviceProfile } from "./PulseDeviceProfile.js";
 import { marketplaces } from "./RegisteredMarketplaces.js";
 import { sendResultToMarketplace } from "./ResultSubmission.js";
 
-// Healing metadata
+// ---------------------------------------------------------------------------
+// Healing Metadata — Exchange Office Activity Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastFetchError: null,
   lastSubmitError: null,
@@ -77,16 +57,15 @@ const healingState = {
   cycleCount: 0,
 };
 
-// ------------------------------------------------------
-// fetchJobFromMarketplace()
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// fetchJobFromMarketplace — Intake Window
+// ---------------------------------------------------------------------------
 export async function fetchJobFromMarketplace() {
   healingState.cycleCount++;
 
   try {
     const device = getDeviceProfile();
 
-    // Deterministic capacity struct
     const capacity = {
       cpuAvailable: device.cpuCores ?? 4,
       memoryAvailable: device.memoryMB ?? 8192
@@ -108,20 +87,18 @@ export async function fetchJobFromMarketplace() {
   }
 }
 
-// ------------------------------------------------------
-// getNextMarketplaceJob(deviceId)
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// getNextMarketplaceJob — Job Conversion Counter
+// ---------------------------------------------------------------------------
 export async function getNextMarketplaceJob(deviceId) {
   const job = await fetchJobFromMarketplace();
   if (!job) return null;
 
-  // Validate job object
   if (!job.id || !job.marketplaceId) {
     healingState.lastFetchError = "invalid_job_structure";
     return null;
   }
 
-  // Normalize into PulseJobSchema-like structure
   return {
     id: job.id,
 
@@ -136,7 +113,7 @@ export async function getNextMarketplaceJob(deviceId) {
       gpu: {
         workgroupSize: 1,
         iterations: 1,
-        shader: "" // placeholder until GPU jobs are supported
+        shader: ""
       }
     },
 
@@ -146,12 +123,11 @@ export async function getNextMarketplaceJob(deviceId) {
   };
 }
 
-// ------------------------------------------------------
-// submitMarketplaceResult(job, result)
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// submitMarketplaceResult — Result Forwarding Window
+// ---------------------------------------------------------------------------
 export async function submitMarketplaceResult(job, result) {
   try {
-    // Validate job + result
     if (!job || !job.marketplaceId) {
       healingState.lastSubmitError = "invalid_job_for_submission";
       return null;
@@ -178,9 +154,9 @@ export async function submitMarketplaceResult(job, result) {
   }
 }
 
-// ------------------------------------------------------
-// Export healing metadata for EarnHealer
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Export Healing Metadata — Exchange Office Report
+// ---------------------------------------------------------------------------
 export function getMarketplaceConnectorHealingState() {
   return { ...healingState };
 }

@@ -1,58 +1,45 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-design/manifestWriter.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE SURVEYOR (Blueprint Generator + Canonical Output Layer)
+// ============================================================================
 //
 // ROLE:
-//   ManifestWriter — deterministic, read‑only output module that takes the
-//   classified file list from RepoWalker + FileClassifier and writes the
-//   canonical Pulse project manifest.
+//   THE SURVEYOR — Produces the official architectural blueprint of Pulse OS
+//   • Accepts classified file metadata from the Archivist
+//   • Sorts and structures the manifest deterministically
+//   • Writes the canonical pulse_project.json snapshot
 //
 // PURPOSE:
-//   • Produce a stable, AI‑readable + human‑readable architecture snapshot
-//   • Ensure deterministic ordering of all manifest sections
-//   • Guarantee drift‑proof output for versioning + AI ingestion
+//   • Generate a stable, drift‑proof architecture manifest
+//   • Make the system AI‑readable + human‑readable
+//   • Provide the authoritative blueprint for the entire repo
 //
-// OUTPUT:
-//   • /pulse_project.json — the canonical architecture manifest
-//
-// RESPONSIBILITIES:
-//   • Accept classified file metadata
-//   • Sort and structure manifest sections deterministically
-//   • Write manifest to disk safely
-//   • Never mutate input
-//   • Never execute scanned code
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY except for writing the manifest output
+// CONTRACT:
+//   • READ‑ONLY except for writing manifest output
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
 //   • Deterministic output only
 //
-// ------------------------------------------------------
-// ManifestWriter — Deterministic Manifest Output Engine
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 manifestWriter
+// ============================================================================
 
 import fs from "fs";
 import path from "path";
 
-/**
- * writeManifest(rootDir, classifiedFiles)
- * @param {string} rootDir — absolute project root
- * @param {Array<object>} classifiedFiles — output from RepoWalker + FileClassifier
- * @returns {object} result metadata
- */
+// ============================================================================
+// PUBLIC API — Surveyor Output
+// ============================================================================
 export function writeManifest(rootDir, classifiedFiles = []) {
   if (!rootDir) {
     throw new Error("manifestWriter: missing rootDir");
   }
 
-  // ------------------------------------------------------
-  // Build manifest structure
-  // ------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Build canonical blueprint
+  // --------------------------------------------------------------------------
   const manifest = {
     generatedAt: new Date().toISOString(),
     root: rootDir,
@@ -71,9 +58,9 @@ export function writeManifest(rootDir, classifiedFiles = []) {
     dataSources: extractDataSources(classifiedFiles),
   };
 
-  // ------------------------------------------------------
-  // Write manifest to disk
-  // ------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Write official blueprint to disk
+  // --------------------------------------------------------------------------
   const outPath = path.join(rootDir, "pulse_project.json");
 
   fs.writeFileSync(outPath, JSON.stringify(manifest, null, 2), "utf8");
@@ -85,16 +72,16 @@ export function writeManifest(rootDir, classifiedFiles = []) {
   };
 }
 
-// ------------------------------------------------------
-// sortByPath(list) — deterministic ordering
-// ------------------------------------------------------
+// ============================================================================
+// SORTING — Deterministic Ordering
+// ============================================================================
 function sortByPath(list) {
   return [...list].sort((a, b) => a.path.localeCompare(b.path));
 }
 
-// ------------------------------------------------------
-// extractDataSources(classifiedFiles)
-// ------------------------------------------------------
+// ============================================================================
+// DATA SOURCE EXTRACTION — Structured Survey Output
+// ============================================================================
 function extractDataSources(files) {
   const out = [];
 

@@ -1,58 +1,46 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-design/repoWalker.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE CARTOGRAPHER (Terrain Explorer + Directory Mapper)
+// ============================================================================
 //
 // ROLE:
-//   RepoWalker — deterministic, read‑only directory walker that scans the
-//   project filesystem, reads file contents, and passes them to the
-//   FileClassifier for structured metadata extraction.
+//   THE CARTOGRAPHER — Deterministic explorer of the Pulse OS filesystem
+//   • Walks the entire directory tree
+//   • Reads file contents safely
+//   • Passes data to the Anatomist (FileClassifier)
+//   • Produces the raw map of the project terrain
 //
 // PURPOSE:
-//   • Provide ManifestBuilder with a complete, classified file list
-//   • Walk the repo deterministically
-//   • Read files safely (UTF‑8 only)
-//   • Skip build artifacts and irrelevant directories
+//   • Provide the Archivist with a complete, classified file list
+//   • Traverse the repo deterministically and safely
+//   • Skip irrelevant or dangerous directories
 //
-// OUTPUT:
-//   • Array of classified file objects
-//
-// RESPONSIBILITIES:
-//   • Walk directories recursively
-//   • Read file contents safely
-//   • Pass filePath + content to FileClassifier
-//   • Return structured metadata for each file
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
-//   • NO mutation of scanned files
-//   • Deterministic output only
+//   • Deterministic traversal only
 //
-// ------------------------------------------------------
-// RepoWalker — Deterministic Directory Scanner
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 repoWalker
+// ============================================================================
 
 import fs from "fs";
 import path from "path";
 import { classifyFile } from "./fileClassifier.js";
 
-/**
- * walkRepo(rootDir)
- * @param {string} rootDir — absolute path to project root
- * @returns {Array<object>} classified file metadata
- */
+// ============================================================================
+// PUBLIC API — Cartographic Scan
+// ============================================================================
 export function walkRepo(rootDir) {
   const results = [];
 
   walk(rootDir, (fullPath) => {
     const rel = path.relative(rootDir, fullPath);
 
-    // Skip irrelevant directories
+    // Skip irrelevant or unsafe directories
     if (
       rel.includes("node_modules") ||
       rel.includes(".next") ||
@@ -72,9 +60,9 @@ export function walkRepo(rootDir) {
   return results;
 }
 
-// ------------------------------------------------------
-// walk(dir, callback) — recursive directory walker
-// ------------------------------------------------------
+// ============================================================================
+// DIRECTORY WALKER — Recursive Terrain Traversal
+// ============================================================================
 function walk(dir, callback) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -89,9 +77,9 @@ function walk(dir, callback) {
   }
 }
 
-// ------------------------------------------------------
-// safeRead(filePath)
-// ------------------------------------------------------
+// ============================================================================
+// SAFE READ — Silent, Non‑Throwing File Access
+// ============================================================================
 function safeRead(filePath) {
   try {
     return fs.readFileSync(filePath, "utf8");

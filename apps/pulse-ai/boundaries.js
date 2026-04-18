@@ -1,65 +1,49 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-ai/boundaries.js
-
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE SUPEREGO (Behavioral Constraints + Ethical Boundaries)
+// ============================================================================
 //
 // ROLE:
-//   PulseAIBoundaries — behavioral boundary layer that defines what each
-//   AI persona is allowed to TOUCH, SUGGEST, or CHANGE across the Pulse OS.
+//   THE SUPEREGO — The AI’s moral + behavioral constraint system
+//   • Defines what each persona may TOUCH, SUGGEST, or CHANGE
+//   • Enforces ethical boundaries across the Pulse OS
+//   • Requires human/owner confirmation for sensitive actions
 //
 // PURPOSE:
-//   • Define hard boundaries for backend AI vs frontend AI
 //   • Separate SAFE vs UNSAFE operations
-//   • Require human / owner confirmation for sensitive actions
-//   • Make AI behavior constraints human‑readable + AI‑readable
+//   • Provide deterministic, auditable boundary checks
+//   • Make constraints human‑readable + AI‑readable
 //
-// OUTPUT:
-//   • Boundary maps for each AI persona
-//   • Helper functions for boundary checks
-//
-// RESPONSIBILITIES:
-//   • Define resource‑level boundaries (files, data, subsystems)
-//   • Define action‑level boundaries (read, suggest, write, delete)
-//   • Define confirmation requirements (none, human, owner)
-//   • Provide deterministic boundary checks
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
+// CONTRACT:
+//   • READ‑ONLY — no writes
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
 //   • NO network calls
 //   • Deterministic boundary checks only
 //
-// ------------------------------------------------------
-// Pulse‑AI Boundary Layer
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 boundaries.js
+// ============================================================================
 
 import {
   BackendAIPermissions,
   FrontendAIPermissions,
 } from "./permissions.js";
 
-/**
- * Boundary levels:
- *   "none"   — no confirmation required
- *   "human"  — requires human confirmation
- *   "owner"  — requires owner (you) confirmation
- *   "never"  — forbidden for this persona
- */
+// ============================================================================
+// BOUNDARY LEVELS — Moral Law
+// ============================================================================
 export const BoundaryLevels = {
-  NONE: "none",
-  HUMAN: "human",
-  OWNER: "owner",
-  NEVER: "never",
+  NONE: "none",     // Allowed freely
+  HUMAN: "human",   // Requires human confirmation
+  OWNER: "owner",   // Requires owner (you)
+  NEVER: "never",   // Forbidden
 };
 
-/**
- * Backend AI boundaries (your AI)
- * This AI can do everything, but some actions still require
- * explicit OWNER confirmation.
- */
+// ============================================================================
+// BACKEND AI — Your AI (High Power, High Responsibility)
+// ============================================================================
 export const BackendAIBoundaries = {
   files: {
     read: BoundaryLevels.NONE,
@@ -95,10 +79,9 @@ export const BackendAIBoundaries = {
   },
 };
 
-/**
- * Frontend AI boundaries (user AI)
- * This AI is read‑only and suggestion‑only.
- */
+// ============================================================================
+// FRONTEND AI — User AI (Read‑Only + Suggestion‑Only)
+// ============================================================================
 export const FrontendAIBoundaries = {
   files: {
     read: BoundaryLevels.NONE,
@@ -134,20 +117,18 @@ export const FrontendAIBoundaries = {
   },
 };
 
-/**
- * getBoundariesForPersona(persona)
- */
+// ============================================================================
+// BOUNDARY LOOKUP — Superego Query
+// ============================================================================
 export function getBoundariesForPersona(persona) {
   if (persona === "backend-ai") return BackendAIBoundaries;
   if (persona === "frontend-ai") return FrontendAIBoundaries;
   return null;
 }
 
-/**
- * canPerform(persona, domain, action)
- * Returns:
- *   { allowed: boolean, level: "none" | "human" | "owner" | "never" }
- */
+// ============================================================================
+// BOUNDARY CHECK — Moral Enforcement
+// ============================================================================
 export function canPerform(persona, domain, action) {
   const boundaries = getBoundariesForPersona(persona);
   if (!boundaries) {

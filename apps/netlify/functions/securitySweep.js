@@ -1,11 +1,58 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/securitySweep.js
-// LAYER: D‑LAYER (BACKEND FUNCTION)
+// PULSE SECURITY SWEEP — v6.3
+// “THE RELIABILITY OFFICER / TRUST ENFORCEMENT ENGINE”
+// ============================================================================
 //
-// PURPOSE:
-// • Direct backend function for securitySweep.
-// • Name matches file, matches function, matches logs.
-// • No scheduling wrapper — heartbeat calls this.
+// ⭐ v6.3 COMMENT LOG
+// - THEME: “THE RELIABILITY OFFICER / TRUST ENFORCEMENT ENGINE”
+// - ROLE: Scheduled identity integrity + trust enforcement across the graph
+// - Added LAYER CONSTANTS + DIAGNOSTICS helper
+// - Added structured JSON logs (for inspector / DOM-visible pipelines)
+// - Added explicit STAGE markers for sweep phases
+// - Preserved deterministic rotation + flagging behavior
+// - ZERO logic changes to security rules, Firestore writes, or rotation logic
+//
+// ============================================================================
+// PERSONALITY + ROLE — “THE RELIABILITY OFFICER”
+// ----------------------------------------------------------------------------
+// securitySweep is the **RELIABILITY OFFICER** of the Pulse OS.
+// It is the **TRUST ENFORCEMENT ENGINE** — responsible for walking the
+// entire identity graph on a schedule and ensuring that tokens, flags,
+// and security state remain trustworthy, consistent, and safe.
+//
+//   • Performs daily + weekly + bi‑weekly integrity sweeps
+//   • Detects danger flags (vaultLockdown, appLocked, hackerFlag, etc.)
+//   • Detects IP jumps + device jumps
+//   • Decides when identities need early refresh vs. 30‑day rotation
+//   • Rotates session tokens (resendToken) deterministically
+//   • Logs identity changes to TPIdentityHistory
+//   • Updates Users records with corrected security state
+//   • Produces rotatedUsers + flaggedUsers for downstream monitoring
+//
+// ============================================================================
+// WHAT THIS FILE IS
+// ----------------------------------------------------------------------------
+//   ✔ A deterministic identity integrity sweep
+//   ✔ A trust maintenance + reliability enforcement layer
+//   ✔ A heartbeat‑driven backend function (no external scheduler)
+//
+// WHAT THIS FILE IS NOT
+// ----------------------------------------------------------------------------
+//   ✘ NOT a router
+//   ✘ NOT a scoring engine
+//   ✘ NOT a generic cleanup function
+//   ✘ NOT a personality or memory layer
+//
+// ============================================================================
+// SAFETY CONTRACT (v6.3)
+// ----------------------------------------------------------------------------
+//   • Never mutate root tokens (UserToken)
+//   • Only rotate session tokens (TPIdentity.resendToken)
+//   • Always log identity changes to TPIdentityHistory
+//   • Always record danger flags + sweep metadata in TIMER_LOGS
+//   • Fail‑open per user: errors are logged, sweep continues
+//
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -19,6 +66,31 @@ if (!admin.apps.length) {
 const db = getFirestore();
 
 // ============================================================================
+// LAYER CONSTANTS + DIAGNOSTICS
+// ============================================================================
+const LAYER_ID = "SECURITY-SWEEP-LAYER";
+const LAYER_NAME = "THE RELIABILITY OFFICER";
+const LAYER_ROLE = "TRUST ENFORCEMENT ENGINE";
+
+const SECURITY_SWEEP_DIAGNOSTICS_ENABLED =
+  process.env.PULSE_SECURITY_SWEEP_DIAGNOSTICS === "true" ||
+  process.env.PULSE_DIAGNOSTICS === "true";
+
+const logReliability = (stage, details = {}) => {
+  if (!SECURITY_SWEEP_DIAGNOSTICS_ENABLED) return;
+
+  console.log(
+    JSON.stringify({
+      pulseLayer: LAYER_ID,
+      pulseName: LAYER_NAME,
+      pulseRole: LAYER_ROLE,
+      stage,
+      ...details
+    })
+  );
+};
+
+// ============================================================================
 // BACKEND ENTRY POINT (CALLED BY HEARTBEAT)
 // ============================================================================
 export async function securitySweep() {
@@ -28,6 +100,8 @@ export async function securitySweep() {
 
   const rotatedUsers = [];
   const flaggedUsers = [];
+
+  logReliability("RUN_START", { runId });
 
   try {
     const nowMs = Date.now();
@@ -42,8 +116,15 @@ export async function securitySweep() {
 
     const usersSnap = await db.collection("Users").get();
 
+    logReliability("USERS_LOADED", {
+      runId,
+      userCount: usersSnap.size,
+      isWeeklyCheckDay,
+      isBiWeeklyIntegrityCheck
+    });
+
     // ---------------------------------------------------------
-    // ⭐ 1. IDENTITY SWEEP
+    // ⭐ 1. IDENTITY SWEEP (PER‑USER RELIABILITY PASS)
     // ---------------------------------------------------------
     try {
       for (const doc of usersSnap.docs) {
@@ -101,13 +182,20 @@ export async function securitySweep() {
             (TPSecurity.appLocked ? 5 : 0);
 
           if (totalFlags >= 10) {
-            flaggedUsers.push({
+            const flagged = {
               uid,
               email: TPIdentity.email || null,
               failedLoginAttempts: TPSecurity.failedLoginAttempts || 0,
               vaultLockdown: !!TPSecurity.vaultLockdown,
               appLocked: !!TPSecurity.appLocked,
               hackerFlag: !!TPSecurity.hackerFlag
+            };
+            flaggedUsers.push(flagged);
+
+            logReliability("USER_FLAGGED", {
+              runId,
+              uid,
+              ...flagged
             });
           }
 
@@ -135,6 +223,12 @@ export async function securitySweep() {
               { expiresIn: "30d" }
             );
           } catch (err) {
+            logReliability("JWT_SIGN_ERROR", {
+              runId,
+              uid,
+              message: String(err)
+            });
+
             await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
               fn: "securitySweep",
               stage: "jwt_sign",
@@ -172,6 +266,12 @@ export async function securitySweep() {
               createdAt: admin.firestore.FieldValue.serverTimestamp()
             });
           } catch (err) {
+            logReliability("IDENTITY_LOG_ERROR", {
+              runId,
+              uid,
+              message: String(err)
+            });
+
             await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
               fn: "securitySweep",
               stage: "identity_log",
@@ -200,6 +300,12 @@ export async function securitySweep() {
               "TPSecurity.forceIdentityRefresh": false
             });
           } catch (err) {
+            logReliability("USER_UPDATE_ERROR", {
+              runId,
+              uid,
+              message: String(err)
+            });
+
             await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
               fn: "securitySweep",
               stage: "user_update",
@@ -213,7 +319,23 @@ export async function securitySweep() {
 
           rotatedUsers.push(uid);
 
+          logReliability("USER_ROTATED", {
+            runId,
+            uid,
+            reason,
+            ipJump,
+            deviceJump,
+            needsEarlyRefresh,
+            needs30DayRefresh
+          });
+
         } catch (err) {
+          logReliability("USER_LOOP_ERROR", {
+            runId,
+            uid,
+            message: String(err)
+          });
+
           await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
             fn: "securitySweep",
             stage: "user_loop",
@@ -225,6 +347,11 @@ export async function securitySweep() {
         }
       }
     } catch (err) {
+      logReliability("IDENTITY_SWEEP_BLOCK_ERROR", {
+        runId,
+        message: String(err)
+      });
+
       await db.collection("FUNCTION_ERRORS").doc(`ERR_IDENTITY_SWEEP_${runId}`).set({
         fn: "securitySweep",
         stage: "identity_sweep_block",
@@ -235,7 +362,7 @@ export async function securitySweep() {
     }
 
     // ---------------------------------------------------------
-    // ⭐ 2. TIMER LOG
+    // ⭐ 2. TIMER LOG (SWEEP SUMMARY)
     // ---------------------------------------------------------
     await db.collection("TIMER_LOGS").doc(logId).set({
       fn: "securitySweep",
@@ -249,7 +376,18 @@ export async function securitySweep() {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
+    logReliability("SWEEP_SUMMARY_RECORDED", {
+      runId,
+      rotationCount: rotatedUsers.length,
+      flaggedCount: flaggedUsers.length
+    });
+
   } catch (err) {
+    logReliability("FATAL_ERROR", {
+      runId,
+      message: String(err)
+    });
+
     await db.collection("FUNCTION_ERRORS").doc(`ERR_FATAL_${runId}`).set({
       fn: "securitySweep",
       stage: "fatal",
@@ -258,6 +396,12 @@ export async function securitySweep() {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
   }
+
+  logReliability("RUN_COMPLETE", {
+    runId,
+    rotationCount: rotatedUsers.length,
+    flaggedCount: flaggedUsers.length
+  });
 
   return {
     ok: true,

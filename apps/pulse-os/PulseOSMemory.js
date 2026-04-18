@@ -1,44 +1,97 @@
 // ============================================================================
-// FILE: pulse-os/PulseOSMemory.js
-// LAYER: C‑LAYER (OS MEMORY + RESTORE ENGINE)
-//
-// PulseOSMemory v6.2 — Deterministic OS Memory + Restore Points
-// NO AI. NO COMPUTE. NO MARKETPLACE. PURE STATE CAPTURE.
+//  PULSE OS MEMORY v6.3
+//  “THE LIVER” — C‑LAYER (OS MEMORY + RESTORE ENGINE)
+//  Deterministic OS Memory + Restore Points
+//  PURE STATE CAPTURE. NO AI. NO COMPUTE. NO MARKETPLACE.
 // ============================================================================
-
-// ------------------------------------------------------------
-// ⭐ OS‑v5 CONTEXT METADATA
-// ------------------------------------------------------------
+//
+// BODY THEME — ORGAN ROLE:
+//  ------------------------
+//  PulseOSMemory is the **LIVER** of Tropic Pulse.
+//  It is the **METABOLIC ARCHIVE + RESTORE ORGAN** of the OS.
+//
+//  • Stores long-term “biochemical” state (snapshots per subsystem).
+//  • Records “toxicity / damage signatures” (drift signatures).
+//  • Builds “time machine vials” (restore points).
+//  • Generates “treatment plans” (restore plans).
+//  • Acts as the historical archive of how the OS has actually lived.
+//
+//  This is not mood, not emotion — it is **identity history**:
+//  how the organism has been configured, stressed, damaged, and restored.
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The OS memory engine for Tropic Pulse.
+//  • The subsystem snapshot recorder.
+//  • The drift signature recorder.
+//  • The restore point generator.
+//  • The restore plan generator.
+//  • The historical archive of the OS (long-term state).
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a compute engine.
+//  • NOT a miner.
+//  • NOT a scheduler.
+//  • NOT a runtime.
+//  • NOT a marketplace adapter.
+//  • NOT a blockchain client.
+//  • NOT a wallet.
+//  • NOT a place for user-provided logic.
+//  • NOT a place for dynamic imports or eval.
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No eval().
+//  • No dynamic imports.
+//  • No arbitrary code execution.
+//  • No compute.
+//  • No GPU work.
+//  • No marketplace calls.
+//  • Deterministic, drift-proof memory only.
+//  • Always behaves like a stable organ: same inputs → same stored state.
+//
+// ============================================================================
+//  OS‑v6 CONTEXT METADATA — ORGAN IDENTITY
+// ============================================================================
 const MEMORY_CONTEXT = {
   layer: "PulseOSMemory",
-  role: "OS_MEMORY",
-  purpose: "Store OS + subsystem snapshots, drift signatures, restore points",
-  context: "Deterministic OS memory + restore engine",
-  version: 6,
+  role: "OS_LIVER",
+  purpose:
+    "Store OS + subsystem snapshots, drift signatures, restore points (metabolic archive)",
+  context: "Deterministic OS memory + restore engine (long-term state organ)",
+  version: 6.3,
   target: "os-core",
   selfRepairable: true
 };
 
-// ------------------------------------------------------------
-// Collections
-// ------------------------------------------------------------
+console.log(
+  "%c🟦 PulseOSMemory v6.3 online — LIVER / OS archival engine active.",
+  "color:#03A9F4; font-weight:bold;"
+);
+
+// ============================================================================
+//  Collections — Where the “biochemical records” live
+// ============================================================================
 export const OS_SNAPSHOTS_COLLECTION = "OSSnapshots";
 export const OS_RESTORE_POINTS_COLLECTION = "OSRestorePoints";
 export const DRIFT_SIGNATURES_COLLECTION = "DriftSignatures";
 
-// Snapshot retention
+// Snapshot retention — how much history this organ keeps
 export const MAX_SNAPSHOTS_PER_SUBSYSTEM = 50;
 export const MAX_RESTORE_POINTS = 20;
 
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 const db = getFirestore();
 
-/* ------------------------------------------------------------
-   1. SNAPSHOTS
-   ------------------------------------------------------------ */
+/* ============================================================================
+   1. SNAPSHOTS — OS + Subsystem State Capture
+   The liver stores “current blood chemistry” as snapshots.
+   ============================================================================ */
 
 /**
  * saveSnapshot(subsystem, payload)
+ * Records a point-in-time state for a subsystem — like a lab panel.
  */
 export async function saveSnapshot(subsystem, payload) {
   const now = Date.now();
@@ -53,11 +106,11 @@ export async function saveSnapshot(subsystem, payload) {
     });
 
     console.log(
-      `%c🟦 OS_MEMORY SNAPSHOT SAVED → ${subsystem}`,
+      `%c🟦 SNAPSHOT SAVED → ${subsystem}`,
       "color:#03A9F4; font-weight:bold;"
     );
 
-    // Trim old snapshots
+    // Trim old snapshots — the liver keeps history, but not infinite.
     const snap = await db
       .collection(OS_SNAPSHOTS_COLLECTION)
       .where("subsystem", "==", subsystem)
@@ -65,15 +118,21 @@ export async function saveSnapshot(subsystem, payload) {
       .offset(MAX_SNAPSHOTS_PER_SUBSYSTEM)
       .get();
 
+    if (!snap.empty) {
+      console.log(
+        `%c🟧 SNAPSHOT TRIM → ${subsystem} | removing ${snap.size} old snapshots`,
+        "color:#FF9800; font-weight:bold;"
+      );
+    }
+
     const batch = db.batch();
     snap.forEach((doc) => batch.delete(doc.ref));
     if (!snap.empty) await batch.commit();
 
     return ref.id;
-
   } catch (err) {
     console.error(
-      `%c🟥 OS_MEMORY SNAPSHOT ERROR`,
+      `%c🟥 SNAPSHOT ERROR`,
       "color:#FF5252; font-weight:bold;",
       err
     );
@@ -83,6 +142,7 @@ export async function saveSnapshot(subsystem, payload) {
 
 /**
  * getLatestSnapshot(subsystem)
+ * Fetches the most recent “lab panel” for a subsystem.
  */
 export async function getLatestSnapshot(subsystem) {
   const snap = await db
@@ -93,16 +153,25 @@ export async function getLatestSnapshot(subsystem) {
     .get();
 
   if (snap.empty) return null;
+
   const doc = snap.docs[0];
+
+  console.log(
+    `%c🟦 LATEST SNAPSHOT FETCHED → ${subsystem}`,
+    "color:#03A9F4; font-weight:bold;"
+  );
+
   return { id: doc.id, ...doc.data() };
 }
 
-/* ------------------------------------------------------------
-   2. DRIFT SIGNATURES
-   ------------------------------------------------------------ */
+/* ============================================================================
+   2. DRIFT SIGNATURES — OS-Level Drift Recording
+   The liver records “toxicity / damage signatures” over time.
+   ============================================================================ */
 
 /**
  * recordDriftSignature(subsystem, signature)
+ * Logs a drift event — like recording a toxic exposure or injury pattern.
  */
 export async function recordDriftSignature(subsystem, signature) {
   const now = Date.now();
@@ -120,13 +189,12 @@ export async function recordDriftSignature(subsystem, signature) {
     });
 
     console.log(
-      `%c🟨 OS_MEMORY DRIFT SIGNATURE → ${subsystem} / ${signature.type}`,
+      `%c🟨 DRIFT SIGNATURE → ${subsystem} / ${signature.type}`,
       "color:#FFC107; font-weight:bold;"
     );
-
   } catch (err) {
     console.error(
-      `%c🟥 OS_MEMORY DRIFT ERROR`,
+      `%c🟥 DRIFT SIGNATURE ERROR`,
       "color:#FF5252; font-weight:bold;",
       err
     );
@@ -135,6 +203,7 @@ export async function recordDriftSignature(subsystem, signature) {
 
 /**
  * getRecentDriftSignatures(subsystem, limit = 20)
+ * Returns recent “injury / toxicity records” for a subsystem.
  */
 export async function getRecentDriftSignatures(subsystem, limit = 20) {
   const snap = await db
@@ -144,21 +213,33 @@ export async function getRecentDriftSignatures(subsystem, limit = 20) {
     .limit(limit)
     .get();
 
+  console.log(
+    `%c🟨 FETCH DRIFT SIGNATURES → ${subsystem} (${snap.size})`,
+    "color:#FFC107; font-weight:bold;"
+  );
+
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/* ------------------------------------------------------------
-   3. RESTORE POINTS
-   ------------------------------------------------------------ */
+/* ============================================================================
+   3. RESTORE POINTS — OS Time Machine
+   The liver bottles “vials of time” — full-state restore kits.
+   ============================================================================ */
 
 /**
  * createRestorePoint(label, subsystems)
+ * Creates a multi-organ restore kit from latest snapshots.
  */
 export async function createRestorePoint(label, subsystems = []) {
   const now = Date.now();
   const payload = {};
 
   try {
+    console.log(
+      `%c🟦 CREATING RESTORE POINT → ${label}`,
+      "color:#03A9F4; font-weight:bold;"
+    );
+
     for (const subsystem of subsystems) {
       const snap = await getLatestSnapshot(subsystem);
       if (snap) {
@@ -180,26 +261,32 @@ export async function createRestorePoint(label, subsystems = []) {
     });
 
     console.log(
-      `%c🟩 OS_MEMORY RESTORE POINT CREATED → ${label}`,
+      `%c🟩 RESTORE POINT CREATED → ${label}`,
       "color:#4CAF50; font-weight:bold;"
     );
 
-    // Trim old restore points
+    // Trim old restore points — limited “time machine capacity”.
     const snap = await db
       .collection(OS_RESTORE_POINTS_COLLECTION)
       .orderBy("ts", "desc")
       .offset(MAX_RESTORE_POINTS)
       .get();
 
+    if (!snap.empty) {
+      console.log(
+        `%c🟧 RESTORE POINT TRIM → removing ${snap.size} old restore points`,
+        "color:#FF9800; font-weight:bold;"
+      );
+    }
+
     const batch = db.batch();
     snap.forEach((doc) => batch.delete(doc.ref));
     if (!snap.empty) await batch.commit();
 
     return ref.id;
-
   } catch (err) {
     console.error(
-      `%c🟥 OS_MEMORY RESTORE POINT ERROR`,
+      `%c🟥 RESTORE POINT ERROR`,
       "color:#FF5252; font-weight:bold;",
       err
     );
@@ -209,15 +296,23 @@ export async function createRestorePoint(label, subsystems = []) {
 
 /**
  * getRestorePoint(id)
+ * Fetches a specific “time vial” by ID.
  */
 export async function getRestorePoint(id) {
   const doc = await db.collection(OS_RESTORE_POINTS_COLLECTION).doc(id).get();
   if (!doc.exists) return null;
+
+  console.log(
+    `%c🟦 RESTORE POINT FETCHED → ${id}`,
+    "color:#03A9F4; font-weight:bold;"
+  );
+
   return { id: doc.id, ...doc.data() };
 }
 
 /**
  * listRestorePoints(limit = 20)
+ * Lists recent “time vials” available for restoration.
  */
 export async function listRestorePoints(limit = 20) {
   const snap = await db
@@ -226,19 +321,31 @@ export async function listRestorePoints(limit = 20) {
     .limit(limit)
     .get();
 
+  console.log(
+    `%c🟦 RESTORE POINT LIST FETCHED (${snap.size})`,
+    "color:#03A9F4; font-weight:bold;"
+  );
+
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/* ------------------------------------------------------------
-   4. RESTORE INTENT (READ-ONLY)
-// ------------------------------------------------------------ */
+/* ============================================================================
+   4. RESTORE INTENT (READ-ONLY) — OS Time Machine Plan
+   The liver prepares a **treatment plan** from a chosen time vial.
+   ============================================================================ */
 
 /**
  * getRestorePlan(restorePointId)
+ * Builds a read-only plan describing how to restore subsystems.
  */
 export async function getRestorePlan(restorePointId) {
   const rp = await getRestorePoint(restorePointId);
   if (!rp) return null;
+
+  console.log(
+    `%c🟦 RESTORE PLAN GENERATED → ${restorePointId}`,
+    "color:#03A9F4; font-weight:bold;"
+  );
 
   const plan = {
     restorePointId: rp.id,

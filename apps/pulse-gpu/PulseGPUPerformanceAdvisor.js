@@ -1,66 +1,55 @@
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUPerformanceAdvisor.js
+// ============================================================================
+//  PULSE GPU PERFORMANCE ADVISOR v6.3 — THE DRIVE CENTER
+//  Internal Performance Instinct • Deterministic, Pure Logic, Drift‑Proof
+// ============================================================================
 //
-// INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT.
+// IDENTITY — THE DRIVE CENTER:
+//  ----------------------------
+//  • The GPU organism’s internal performance instinct.
+//  • Evaluates current performance vs historical best.
+//  • Detects regressions (danger) and improvements (growth).
+//  • Generates structured “pressure signals” to guide adaptation.
+//  • The subsystem that pushes the organism toward optimal function.
 //
-// 📘 PAGE INDEX — Source of Truth for This File
+// ROLE IN THE GPU NATION:
+//  ------------------------
+//  • Analyst → Intelligence Division
+//  • Nerve Network → Runtime Memory
+//  • Motor Hall → Execution Cortex
+//  • Guardian → Permission Gate
+//  • Lymph Node Network → Immune Filter
+//  • Wisdom Cortex → Insight + Interpretation
+//  • Brainstem → Command + Coordination
+//  • Drive Center → Performance Instinct + Self‑Assessment
 //
-// ROLE:
-//   PulseGPUPerformanceAdvisor — deterministic, pure-logic advisor that reads GPU session
-//   memory (PulseGPUSettingsMemory), compares current sessions to known-good baselines,
-//   detects regressions/improvements, and produces structured “advice objects”.
+// WHAT THIS FILE IS:
+//  -------------------
+//  • A deterministic advisor over GPU performance data
+//  • A pure logic module (API‑agnostic, full GPU)
+//  • A generator of structured performance‑pressure advice
+//  • A self‑repair‑ready component for the healing layer
 //
-//   This file IS:
-//     • A pure logic module (full GPU, API-agnostic)
-//     • A deterministic advisor over GPU performance data
-//     • A generator of structured suggestions (no side effects)
-//     • v5-ready: advice objects are compatible with the self-healing layer
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer
+//  • NOT a GPU runtime
+//  • NOT a WebGPU/WebGL interface
+//  • NOT a persistence layer
+//  • NOT a backend module
+//  • NOT a UI system
 //
-//   This file IS NOT:
-//     • A renderer
-//     • A GPU runtime
-//     • A WebGPU/WebGL interface
-//     • A persistence layer
-//     • A UI or notification system
-//     • A backend module
-//
-// DEPLOYMENT:
-//   Lives in /apps/pulse-gpu as part of the GPU subsystem.
-//   Must remain ESM-only and side-effect-free.
-//   Must be safe to run in both browser and server environments.
-//
-// SAFETY RULES:
-//   • NO WebGPU/WebGL APIs
-//   • NO DOM APIs
-//   • NO Node.js APIs
-//   • NO filesystem or network access
-//   • NO randomness or timestamps in logic
-//   • NO mutation of external state
-//   • FAIL-OPEN: invalid metrics, missing baselines, or malformed data must not break logic
-//   • SELF-REPAIR READY: advice objects must contain enough structure for the healing layer
-//
-// INTERNAL LOGIC SUMMARY (v4/v5-ready):
-//   • Consumes PulseGPUSettingsMemory
-//   • Produces advice objects with:
-//       - type
-//       - severity
-//       - message
-//       - deltaPercent
-//       - currentScore
-//       - baselineScore
-//       - settings + baselineSettings
-//       - extra (v5 healing metadata)
-//   • Core operations:
-//       - analyzeCurrentSession()
-//       - analyzeSuboptimalSettings()
-//       - analyzeTierUpgrade()
-//       - classifyDelta()
-//       - buildAdvice()
-//       - validateAdvice()
-//       - safeAnalyzeCurrentSession()
-//
-// ------------------------------------------------------
-// IMPORTS
-// ------------------------------------------------------
+// SAFETY CONTRACT:
+//  ----------------
+//  • No randomness
+//  • No timestamps
+//  • No GPU calls
+//  • No DOM
+//  • No Node APIs
+//  • No network or filesystem access
+//  • Fail‑open: malformed metrics → safe defaults
+//  • Deterministic: same inputs → same advice
+//  • Self‑repair‑ready: advice includes metadata
+// ============================================================================
 
 import {
   PulseGPUSettingsMemory,
@@ -68,10 +57,9 @@ import {
   detectRegression
 } from "./PulseGPUSettingsMemory.js";
 
-// ------------------------------------------------------
-// Delta classification helpers (deterministic, fail-open)
-// ------------------------------------------------------
-
+// ============================================================================
+// DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC
+// ============================================================================
 function classifyDelta(deltaPercent) {
   if (typeof deltaPercent !== "number" || Number.isNaN(deltaPercent)) {
     return "low";
@@ -93,10 +81,9 @@ function isRegression(deltaPercent) {
   return typeof deltaPercent === "number" && deltaPercent < 0;
 }
 
-// ------------------------------------------------------
-// Advice object builder (v5-ready)
-// ------------------------------------------------------
-
+// ============================================================================
+// ADVICE BUILDER — Structured Drive Signals
+// ============================================================================
 function buildAdvice({
   type,
   severity,
@@ -117,7 +104,8 @@ function buildAdvice({
     message,
     meta: {
       layer: "PulseGPUPerformanceAdvisor",
-      version: 4,
+      role: "DRIVE_CENTER",
+      version: 6.3,
       target: "full-gpu",
       selfRepairable: true
     }
@@ -136,10 +124,9 @@ function buildAdvice({
   return advice;
 }
 
-// ------------------------------------------------------
-// Advice validation (for healing layer)
-// ------------------------------------------------------
-
+// ============================================================================
+// ADVICE VALIDATION — For Immune Layer
+// ============================================================================
 function validateAdvice(advice) {
   if (!advice || typeof advice !== "object") return false;
   if (typeof advice.type !== "string") return false;
@@ -150,26 +137,22 @@ function validateAdvice(advice) {
   return true;
 }
 
-// ------------------------------------------------------
-// PulseGPUPerformanceAdvisor (v4/v5-ready)
-// ------------------------------------------------------
-
+// ============================================================================
+//  PULSE GPU PERFORMANCE ADVISOR — THE DRIVE CENTER
+// ============================================================================
 class PulseGPUPerformanceAdvisor {
   constructor(settingsMemory) {
     this.memory = settingsMemory || new PulseGPUSettingsMemory();
   }
 
-  // Static metadata for self-healing layer
   static meta = {
     layer: "PulseGPUPerformanceAdvisor",
-    version: 4,
+    role: "DRIVE_CENTER",
+    version: 6.3,
     target: "full-gpu",
     selfRepairable: true
   };
 
-  // ----------------------------------------------------
-  // Analyze a single current session vs best-known baseline
-  // ----------------------------------------------------
   analyzeCurrentSession({
     gameProfile,
     hardwareProfile,
@@ -199,6 +182,9 @@ class PulseGPUPerformanceAdvisor {
 
     const advice = [];
 
+    // --------------------------------------------------
+    // Regression → Negative Drive Pressure
+    // --------------------------------------------------
     if (isRegression(deltaPercent)) {
       const severity = classifyDelta(deltaPercent);
 
@@ -208,8 +194,8 @@ class PulseGPUPerformanceAdvisor {
           severity,
           message:
             severity === "critical"
-              ? "Performance is significantly worse than your best-known configuration."
-              : "Performance is worse than your best-known configuration.",
+              ? "Performance has fallen far below your historical best."
+              : "Performance is below your historical best.",
           deltaPercent,
           currentScore,
           baselineScore,
@@ -224,7 +210,12 @@ class PulseGPUPerformanceAdvisor {
           }
         })
       );
-    } else if (isImprovement(deltaPercent)) {
+    }
+
+    // --------------------------------------------------
+    // Improvement → Positive Drive Pressure
+    // --------------------------------------------------
+    else if (isImprovement(deltaPercent)) {
       const severity = classifyDelta(deltaPercent);
 
       advice.push(
@@ -233,8 +224,8 @@ class PulseGPUPerformanceAdvisor {
           severity,
           message:
             severity === "critical"
-              ? "Performance is significantly better than your previous best-known configuration."
-              : "Performance is better than your previous best-known configuration.",
+              ? "Performance exceeds your historical best by a wide margin."
+              : "Performance is above your historical best.",
           deltaPercent,
           currentScore,
           baselineScore,
@@ -259,17 +250,10 @@ class PulseGPUPerformanceAdvisor {
     };
   }
 
-  // ----------------------------------------------------
-  // Safe wrapper: never throws, always returns valid shape
-  // ----------------------------------------------------
   safeAnalyzeCurrentSession(input) {
     try {
       const result = this.analyzeCurrentSession(input || {});
-      if (
-        !result ||
-        typeof result !== "object" ||
-        !Array.isArray(result.advice)
-      ) {
+      if (!result || typeof result !== "object" || !Array.isArray(result.advice)) {
         return {
           currentScore: 0,
           baselineScore: null,
@@ -302,9 +286,6 @@ class PulseGPUPerformanceAdvisor {
     }
   }
 
-  // ----------------------------------------------------
-  // Suboptimal settings detection
-  // ----------------------------------------------------
   analyzeSuboptimalSettings({
     gameProfile,
     hardwareProfile,
@@ -337,7 +318,7 @@ class PulseGPUPerformanceAdvisor {
         type: "suboptimal",
         severity,
         message:
-          "Your current settings are below your best-known configuration for this game and hardware.",
+          "Your current settings underperform your historical best for this game and hardware.",
         deltaPercent,
         currentScore,
         baselineScore,
@@ -354,9 +335,6 @@ class PulseGPUPerformanceAdvisor {
     ];
   }
 
-  // ----------------------------------------------------
-  // Tier upgrade opportunity
-  // ----------------------------------------------------
   analyzeTierUpgrade({
     gameProfile,
     hardwareProfile,
@@ -391,7 +369,7 @@ class PulseGPUPerformanceAdvisor {
         type: "tier-upgrade-opportunity",
         severity,
         message:
-          "A higher tier configuration has historically delivered better performance for this game and hardware.",
+          "A higher tier configuration has historically delivered better performance.",
         deltaPercent,
         currentScore,
         baselineScore: newTierScore,
@@ -411,10 +389,9 @@ class PulseGPUPerformanceAdvisor {
   }
 }
 
-// ------------------------------------------------------
+// ============================================================================
 // EXPORTS
-// ------------------------------------------------------
-
+// ============================================================================
 export {
   PulseGPUPerformanceAdvisor,
   classifyDelta,

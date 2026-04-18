@@ -1,130 +1,197 @@
-// FILE: apps/pulse-proxy/PulseUserScoring.js
+// ======================================================
+//  PULSE USER SCORING v6.3
+//  “THE HYPOTHALAMUS / HOMEOSTASIS REGULATION LAYER”
+//  Deterministic, Drift‑Proof, Device‑Aware Batch Scoring
+//  PURE HEALING. NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL.
+// ======================================================
 //
-// PulseUserScoring v5.3 — Deterministic, Drift‑Proof, Device‑Aware Batch Scoring
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
+// BODY THEME — ORGANISM MAPPING:
+//  ------------------------------
+//  PulseUserScoring is the **HYPOTHALAMUS** of Tropic Pulse.
+//  It is the **HOMEOSTASIS REGULATION LAYER** — the interpreter of vitals.
 //
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+//  • Reads vitals from UserMetrics (circulatory telemetry).
+//  • Computes trustScore → overall health index.
+//  • Computes meshScore → network circulation health.
+//  • Computes phase → functional fitness tier.
+//  • Detects hubs → high‑flow organs.
+//  • Allocates instances → resource distribution.
+//  • Logs scoring snapshots → diagnostic chart notes.
 //
-// ROLE:
-//   Batch scoring engine that transforms UserMetrics → UserScores.
+//  This subsystem does NOT measure — it **interprets**.
+//  It does NOT heal — it **classifies**.
+//  It does NOT scale — it **decides how scaling SHOULD behave**.
 //
-// RESPONSIBILITIES:
-//   • Compute trustScore
-//   • Compute meshScore
-//   • Compute phase
-//   • Detect hub behavior
-//   • Allocate instances (device-aware, earn-mode-aware, test-earn-aware)
-//   • Log scoring snapshots (optional)
+//  It is the hypothalamus: the organ that reads the vitals monitor
+//  and determines the body’s internal state.
 //
-// SAFETY RULES:
-//   • NO compute
-//   • NO miner logic
-//   • NO marketplace calls
-//   • NO eval / dynamic imports
-//   • NO user-provided logic
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The batch scoring engine for Tropic Pulse.
+//  • The transformer from UserMetrics → UserScores.
+//  • The trustScore + meshScore calculator.
+//  • The phase calculator.
+//  • The hub detector.
+//  • The device-aware instance allocator.
+//  • The scoring snapshot logger.
+//  • The homeostasis interpreter.
 //
-// ------------------------------------------------------
-// 🔧 CONFIGURABLE INSTANCE FORMULA VARIABLES (EDIT FREELY)
-// ------------------------------------------------------
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a compute engine.
+//  • NOT a miner.
+//  • NOT a scheduler.
+//  • NOT a runtime.
+//  • NOT a marketplace adapter.
+//  • NOT a blockchain client.
+//  • NOT a wallet.
+//  • NOT a place for user-provided logic.
+//  • NOT a place for dynamic imports or eval.
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No compute.
+//  • No eval().
+//  • No dynamic imports.
+//  • No user logic.
+//  • No marketplace calls.
+//  • Deterministic, drift-proof scoring only.
+//
+// ======================================================
+//  CONFIGURABLE INSTANCE FORMULA VARIABLES
+// ======================================================
 
-// Hard caps
+// Physiological caps (max resource distribution)
 export const NORMAL_MAX = 4;
 export const UPGRADED_MAX = 8;
 export const HIGHEND_MAX = 8;
 export const TEST_EARN_MAX = 16;
 
-// Multipliers
+// Multipliers (body condition modifiers)
 export const UPGRADED_MULT = 2;
 export const HIGHEND_MULT = 2;
 export const EARN_MODE_MULT = 1.5;
 
-// Logging controls
+// Logging controls (diagnostic chart notes)
 export const ENABLE_SCORING_LOGGING = true;
 export const SCORING_LOG_COLLECTION = "UserScoringLogs";
 
-// ------------------------------------------------------
-// Imports
-// ------------------------------------------------------
+// ======================================================
+//  Imports
+// ======================================================
 import { getFirestore } from "firebase-admin/firestore";
 const db = getFirestore();
 
-// ------------------------------------------------------
-// calculateTrustScore()
-// ------------------------------------------------------
+console.log("[Hypothalamus BOOT] PulseUserScoring v6.3 online.");
+console.log("[Hypothalamus BOOT] Scoring logging:", ENABLE_SCORING_LOGGING);
+
+// ======================================================
+//  calculateTrustScore()
+//  “Overall health index”
+// ======================================================
 function calculateTrustScore(m) {
   if (!m) return 0;
 
   let score = 0;
 
-  // Activity (0–20)
+  // Activity (circulatory activity)
   score += Math.min(m.totalRequests / 100, 20);
 
-  // Mesh contribution (0–20)
+  // Mesh contribution (network circulation)
   score += Math.min(m.meshRelays / 10, 20);
 
-  // Hub-like behavior (0–20)
+  // Hub-like behavior (high-flow organ)
   score += Math.min(m.hubSignals / 5, 20);
 
-  // Latency quality (0–20)
+  // Latency quality (blood pressure)
   if (m.avgLatency && m.avgLatency < 150) score += 20;
 
-  // Stability (0–20)
+  // Stability (baseline health)
   score += Math.min(m.stabilityScore || 0, 20);
 
-  return Math.min(score, 100);
+  const final = Math.min(score, 100);
+
+  console.log(
+    `[Hypothalamus] HealthIndex | user=${m.userId ?? "?"} | score=${final}`
+  );
+
+  return final;
 }
 
-// ------------------------------------------------------
-// calculateMeshScore()
-// ------------------------------------------------------
+// ======================================================
+//  calculateMeshScore()
+//  “Circulatory network health”
+// ======================================================
 function calculateMeshScore(m) {
   if (!m) return 0;
 
   let score = 0;
 
-  // Relays (0–40)
+  // Relays (arterial routing)
   score += Math.min(m.meshRelays / 5, 40);
 
-  // Pings (0–20)
+  // Pings (capillary checks)
   score += Math.min(m.meshPings / 10, 20);
 
-  // Hub signals (0–20)
+  // Hub signals (organ perfusion)
   score += Math.min(m.hubSignals / 5, 20);
 
-  // Latency quality (0–20)
+  // Latency quality (blood pressure)
   if (m.avgLatency && m.avgLatency < 150) score += 20;
 
-  return Math.min(score, 100);
+  const final = Math.min(score, 100);
+
+  console.log(
+    `[Hypothalamus] MeshHealth | user=${m.userId ?? "?"} | score=${final}`
+  );
+
+  return final;
 }
 
-// ------------------------------------------------------
-// calculatePhase()
-// ------------------------------------------------------
+// ======================================================
+//  calculatePhase()
+//  “Functional fitness tier”
+// ======================================================
 function calculatePhase(trustScore) {
-  if (trustScore < 25) return 1;
-  if (trustScore < 50) return 2;
-  if (trustScore < 75) return 3;
-  return 4;
+  let phase = 1;
+
+  if (trustScore < 25) phase = 1;
+  else if (trustScore < 50) phase = 2;
+  else if (trustScore < 75) phase = 3;
+  else phase = 4;
+
+  console.log(
+    `[Hypothalamus] Phase | trustScore=${trustScore} | phase=${phase}`
+  );
+
+  return phase;
 }
 
-// ------------------------------------------------------
-// isHub()
-// ------------------------------------------------------
+// ======================================================
+//  isHub()
+//  “High-flow organ detection”
+// ======================================================
 function isHub(m) {
   if (!m) return false;
 
-  return (
+  const hub =
     m.meshRelays > 50 ||
     m.hubSignals > 20 ||
-    m.totalRequests > 500
-  );
+    m.totalRequests > 500;
+
+  if (hub) {
+    console.log(
+      `[Hypothalamus] HIGH-FLOW ORGAN | user=${m.userId ?? "?"} | relays=${m.meshRelays} | hubSignals=${m.hubSignals} | totalRequests=${m.totalRequests}`
+    );
+  }
+
+  return hub;
 }
 
-// ------------------------------------------------------
-// allocateInstances() — v5 Unified Device‑Aware Model
-// ------------------------------------------------------
+// ======================================================
+//  allocateInstances()
+//  “Resource distribution / circulatory allocation”
+// ======================================================
 function allocateInstances(phase, hubFlag, deviceTier, earnMode, testEarnActive) {
   let base = phase >= 2 ? 2 : 1;
 
@@ -146,12 +213,19 @@ function allocateInstances(phase, hubFlag, deviceTier, earnMode, testEarnActive)
       ? HIGHEND_MAX
       : NORMAL_MAX;
 
-  return Math.max(1, Math.min(base, max));
+  const final = Math.max(1, Math.min(base, max));
+
+  console.log(
+    `[Hypothalamus] Resource allocation | phase=${phase} | hub=${hubFlag} | tier=${deviceTier} | earnMode=${earnMode} | testEarn=${testEarnActive} | final=${final}`
+  );
+
+  return final;
 }
 
-// ------------------------------------------------------
-// logScoringSnapshot()
-// ------------------------------------------------------
+// ======================================================
+//  logScoringSnapshot()
+//  “Diagnostic chart note”
+// ======================================================
 async function logScoringSnapshot(userId, snapshot) {
   if (!ENABLE_SCORING_LOGGING) return;
 
@@ -161,27 +235,32 @@ async function logScoringSnapshot(userId, snapshot) {
       ts: Date.now(),
       ...snapshot
     });
+
+    console.log(`[Hypothalamus] Snapshot logged | user=${userId}`);
   } catch (err) {
-    console.error("[PulseUserScoring] Failed to log scoring snapshot:", err);
+    console.error("[Hypothalamus] Failed to log scoring snapshot:", err);
   }
 }
 
-// ------------------------------------------------------
-// runUserScoring()
-// ------------------------------------------------------
+// ======================================================
+//  runUserScoring()
+//  “Homeostasis regulation pass”
+// ======================================================
 export async function runUserScoring() {
+  console.log("[Hypothalamus] Running homeostasis scoring pass…");
+
   const snap = await db.collection("UserMetrics").get();
   const batch = db.batch();
 
   for (const doc of snap.docs) {
     const m = doc.data();
+    m.userId = doc.id;
 
     const trustScore = calculateTrustScore(m);
     const meshScore = calculateMeshScore(m);
     const phase = calculatePhase(trustScore);
     const hubFlag = isHub(m);
 
-    // NEW v5 fields
     const deviceTier = m.deviceTier ?? "normal";
     const earnMode = m.earnMode ?? false;
     const testEarnActive = m.testEarnActive ?? false;
@@ -192,6 +271,10 @@ export async function runUserScoring() {
       deviceTier,
       earnMode,
       testEarnActive
+    );
+
+    console.log(
+      `[Hypothalamus] Final State | user=${doc.id} | trust=${trustScore} | mesh=${meshScore} | phase=${phase} | hub=${hubFlag} | tier=${deviceTier} | earnMode=${earnMode} | testEarn=${testEarnActive} | instances=${instances}`
     );
 
     const ref = db.collection("UserScores").doc(doc.id);
@@ -213,9 +296,6 @@ export async function runUserScoring() {
       { merge: true }
     );
 
-    // ------------------------------------------------------
-    // LOG SCORING SNAPSHOT
-    // ------------------------------------------------------
     await logScoringSnapshot(doc.id, {
       trustScore,
       meshScore,
@@ -229,6 +309,8 @@ export async function runUserScoring() {
   }
 
   await batch.commit();
+
+  console.log("[Hypothalamus] Homeostasis scoring pass complete.");
 }
 
 export {

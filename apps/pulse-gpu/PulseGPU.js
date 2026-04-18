@@ -1,44 +1,63 @@
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPU.js
-// LAYER: GPU-SUBSYSTEM (OS-FACING BRIDGE / GPU OS LAYER)
+// ============================================================================
+//  PULSE GPU v6.3 — THE SHADOW ENGINE
+//  GPU-SUBSYSTEM (OS-FACING BRIDGE / GPU SUBCONSCIOUS LAYER)
+//  The hidden power grid beneath the OS.
+//  PURE HEALING. NO AI. NO MARKETPLACE. NO BACKEND.
+// ============================================================================
 //
-// ROLE:
-//   PulseGPU — unified GPU subsystem surface for the rest of the OS.
-//   - Wires Brain + Runtime + Engine + Orchestrator into a single, deterministic API.
-//   - Exposes GPU readiness + basic metrics + handles fail-open behavior.
-//   - Stays ESM-only, no hidden side effects; optional window-attach for debugging only.
+// IDENTITY — THE SHADOW ENGINE:
+//  -----------------------------
+//  • The invisible compute layer beneath Pulse Earn.
+//  • The subconscious GPU brain that powers visuals + compute.
+//  • The silent orchestrator of GPU sessions, healing, and optimization.
+//  • The fail-open guardian that never blocks the OS.
+//  • The hidden force that keeps PulseBand + PulseNet alive.
 //
-//   This file IS:
-//     • The OS-facing GPU bridge
-//     • The connection point for PulseBand / PulseNet / dashboards
-//     • A thin coordinator over already-pure subsystems
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The OS-facing GPU bridge.
+//  • The unified surface for Brain + Runtime + Engine + Orchestrator.
+//  • The GPU readiness reporter.
+//  • The GPU metrics reporter.
+//  • The fail-open GPU coordinator.
+//  • The GPU OS layer for PulseBand / PulseNet / dashboards.
 //
-//   This file IS NOT:
-//     • A renderer by itself
-//     • A backend module
-//     • A place for business logic
-//     • A place for random globals (window attach is opt-in, explicit)
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a renderer by itself.
+//  • NOT a backend module.
+//  • NOT a compute engine.
+//  • NOT a miner.
+//  • NOT a place for business logic.
+//  • NOT a place for globals (window attach is explicit).
 //
-// SAFETY:
-//   • No DOM work beyond what Runtime/Engine already do with canvas
-//   • No Node APIs
-//   • Fail-open: if GPU is unavailable, status stays not-ready, no crash
-//   • Deterministic: no randomness, no timestamps here
-// -------------------------------------------------------------------
+// SAFETY CONTRACT:
+//  ----------------
+//  • No Node APIs.
+//  • No randomness.
+//  • No timestamps (except metrics counters).
+//  • Fail-open: GPU unavailable → no crash.
+//  • Deterministic: no hidden side effects.
+//  • ESM-only.
+// ============================================================================
 
+console.log(
+  "%c🟦 PulseGPU v6.3 online — SHADOW ENGINE activated.",
+  "color:#03A9F4; font-weight:bold;"
+);
+
+// ============================================================================
+//  IMPORTS — RAW SUBSYSTEMS (Shadow Components)
+// ============================================================================
 import {
   BrainInput,
   PulseGPUBrainExport
 } from "./PulseGPUBrain.js";
 
-import {
-  PulseGPURuntime
-} from "./PulseGPURuntime.js";
-
-import {
-  PulseGPUEngine
-} from "./PulseGPUEngine.js";
-
+import { PulseGPURuntime } from "./PulseGPURuntime.js";
+import { PulseGPUEngine } from "./PulseGPUEngine.js";
 import { PulseGPUOrchestrator } from "./PulseGPUOrchestrator.js";
+
 import { PulseGPUSettingsMemory } from "./PulseGPUSettingsMemory.js";
 import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
 import { PulseGPUSettingsRestorer } from "./PulseGPUSettingsRestorer.js";
@@ -49,23 +68,24 @@ import { PulseGPUUXBridge } from "./PulseGPUUXBridge.js";
 import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
 import { PulseGPUHealer } from "./PulseGPUHealer.js";
 
-// -------------------------------------------------------------------
-// INTERNAL SINGLETONS (GPU OS CORE)
-// -------------------------------------------------------------------
-
+// ============================================================================
+//  INTERNAL SINGLETONS — Shadow Engine Core
+// ============================================================================
+console.log("%c[ShadowEngine] Initializing GPU Runtime…", "color:#9C27B0;");
 const gpuRuntime = new PulseGPURuntime();
 
-// Engine is assumed to consume the runtime; if your constructor differs,
-// adjust this wiring to match PulseGPUEngine’s actual signature.
+console.log("%c[ShadowEngine] Initializing GPU Engine…", "color:#9C27B0;");
 const gpuEngine = new PulseGPUEngine(gpuRuntime);
 
-// Orchestrator owns its own memory/advisor/etc internally.
+console.log("%c[ShadowEngine] Initializing GPU Orchestrator…", "color:#9C27B0;");
 const gpuOrchestrator = new PulseGPUOrchestrator();
 
-// Minimal OS-facing state snapshot (not a source of truth, just a view)
+// ============================================================================
+//  GPU OS STATE SNAPSHOT — Shadow Memory
+// ============================================================================
 const gpuState = {
   layer: "PulseGPU",
-  version: 1,
+  version: 6.3,
   ready: false,
   brainReady: false,
   runtimeReady: false,
@@ -80,38 +100,53 @@ const gpuState = {
   }
 };
 
-// -------------------------------------------------------------------
-// INTERNAL HELPERS
-// -------------------------------------------------------------------
-
+// ============================================================================
+//  INTERNAL HELPERS — Shadow Logic
+// ============================================================================
 function updateReadyFlags() {
   const ctx = gpuRuntime.getGPUContext();
+
   gpuState.runtimeReady = !!ctx?.ready;
   gpuState.engineReady = !!gpuEngine;
   gpuState.brainReady = !!PulseGPUBrainExport;
+
   gpuState.ready =
     gpuState.runtimeReady &&
     gpuState.engineReady &&
     gpuState.brainReady;
+
+  console.log(
+    `%c[ShadowEngine] ReadyFlags → brain=${gpuState.brainReady} | runtime=${gpuState.runtimeReady} | engine=${gpuState.engineReady} | ready=${gpuState.ready}`,
+    "color:#4CAF50; font-weight:bold;"
+  );
 }
 
 function safeSetError(err) {
   gpuState.lastError = err ? String(err) : null;
+  console.error(
+    `%c[ShadowEngine ERROR] ${gpuState.lastError}`,
+    "color:#FF5252; font-weight:bold;"
+  );
 }
 
-// -------------------------------------------------------------------
-// PUBLIC OS-FACING API
-// -------------------------------------------------------------------
-
-/**
- * Initialize the GPU runtime with a canvas.
- * Fail-open: returns false if GPU is unavailable; no crash.
- */
+// ============================================================================
+//  PUBLIC OS-FACING API — Shadow Interface
+// ============================================================================
 async function init(canvas) {
+  console.log("%c[ShadowEngine] init() called.", "color:#03A9F4;");
+
   try {
     await gpuRuntime.init(canvas);
     updateReadyFlags();
+
+    if (gpuState.ready) {
+      console.log("%c[ShadowEngine] GPU READY.", "color:#4CAF50; font-weight:bold;");
+    } else {
+      console.warn("%c[ShadowEngine] GPU NOT READY (fail-open).", "color:#FFC107;");
+    }
+
     return gpuState.ready;
+
   } catch (err) {
     safeSetError(err);
     updateReadyFlags();
@@ -119,11 +154,6 @@ async function init(canvas) {
   }
 }
 
-/**
- * Optional: hook for your render loop.
- * This assumes PulseGPUEngine exposes a render() or tick() method.
- * If your engine API differs, adapt this to match.
- */
 function renderFrame(frameContext) {
   if (!gpuState.ready || !gpuEngine || typeof gpuEngine.render !== "function") {
     return;
@@ -132,15 +162,19 @@ function renderFrame(frameContext) {
   try {
     gpuEngine.render(frameContext);
     gpuState.metrics.framesRendered += 1;
+
+    if (gpuState.metrics.framesRendered % 60 === 0) {
+      console.log(
+        `%c[ShadowEngine] FramesRendered=${gpuState.metrics.framesRendered}`,
+        "color:#8BC34A;"
+      );
+    }
+
   } catch (err) {
     safeSetError(err);
   }
 }
 
-/**
- * Lightweight status snapshot for PulseBand / PulseNet / dashboards.
- * This is read-only; callers should not mutate the returned object.
- */
 function getStatus() {
   updateReadyFlags();
   return {
@@ -149,47 +183,38 @@ function getStatus() {
   };
 }
 
-/**
- * Access to the underlying runtime (for advanced flows).
- */
 function getRuntime() {
   return gpuRuntime;
 }
 
-/**
- * Access to the underlying engine (for advanced flows).
- */
 function getEngine() {
   return gpuEngine;
 }
 
-/**
- * Access to the orchestrator (sessions, advice, healing, insights).
- */
 function getOrchestrator() {
   return gpuOrchestrator;
 }
 
-/**
- * Optional: attach a debug handle to window for inspection.
- * This is explicit so you never get surprise globals.
- */
 function attachToWindowDebug() {
   if (typeof window === "undefined") return;
+
   window.PulseGPU = {
     getStatus,
     getRuntime,
     getEngine,
     getOrchestrator
   };
+
+  console.log(
+    "%c[ShadowEngine] Debug handle attached to window.PulseGPU",
+    "color:#03A9F4; font-weight:bold;"
+  );
 }
 
-// -------------------------------------------------------------------
-// EXPORTS — OS-FACING GPU OBJECT + RAW SUBSYSTEMS
-// -------------------------------------------------------------------
-
+// ============================================================================
+//  EXPORTS — Shadow Engine Surface
+// ============================================================================
 const PulseGPU = {
-  // High-level OS API
   init,
   renderFrame,
   getStatus,
@@ -199,10 +224,9 @@ const PulseGPU = {
   attachToWindowDebug
 };
 
-// Default-style unified GPU OS surface
 export { PulseGPU };
 
-// Raw building blocks (for direct imports where needed)
+// Raw building blocks (unchanged)
 export {
   BrainInput,
   PulseGPUBrainExport,

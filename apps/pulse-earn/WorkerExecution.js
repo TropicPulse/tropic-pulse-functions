@@ -1,53 +1,42 @@
+// ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/WorkerExecution.js
-//
-// WorkerExecution v5 — Deterministic, Drift‑Proof, Self‑Healing Execution Dispatcher
-// NO AI LAYERS. NO TRANSLATION. NO MEMORY MODEL. PURE HEALING.
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
+// LAYER: THE CRAFTSMAN
+// (Interpreter of Jobs + Safe Executor + Builder of Deterministic Results)
+// ============================================================================
 //
 // ROLE:
-//   WorkerExecution — safe execution bridge between job payloads and EarnCompute.
+//   THE CRAFTSMAN — Pulse‑Earn’s hands‑on executor.
+//   • Reads the blueprint (job payload)
+//   • Selects the correct safe tool (compute/image/script handler)
+//   • Produces a deterministic finished product
+//   • Never improvises, never executes unsafe code
 //
-// RESPONSIBILITIES:
-//   • Validate job structure
-//   • Extract payload
-//   • Route job to safe compute handlers
-//   • Maintain deterministic healing metadata
-//   • Return success/failure objects
+// WHY “CRAFTSMAN”?:
+//   • Takes structured instructions and turns them into real output
+//   • Chooses the right tool for the job
+//   • Works with precision, safety, and discipline
+//   • Produces consistent, reliable results every time
 //
-// THIS FILE IS:
-//   • A safe dispatcher
-//   • A compute router
-//   • A job validator
-//   • A deterministic execution layer
+// PURPOSE:
+//   • Provide a deterministic, drift‑proof execution layer
+//   • Safely route job payloads to predefined handlers
+//   • Guarantee no arbitrary code ever runs
+//   • Maintain execution‑level healing metadata
 //
-// THIS FILE IS NOT:
-//   • A compute engine
-//   • A scheduler
-//   • A runtime loop
-//   • A marketplace adapter
-//   • A reputation engine
-//   • A blockchain client
-//   • A wallet or token handler
-//   • A dynamic code executor
-//
-// SAFETY RULES (CRITICAL):
-//   • NO eval()
-//   • NO Function()
-//   • NO dynamic imports
-//   • NO arbitrary code execution
-//   • NO user-provided scripts
-//   • NO network calls
-//   • NO filesystem access
-//   • NO crypto operations
+// CONTRACT:
+//   • PURE EXECUTION BRIDGE — no AI layers, no translation, no memory model
+//   • NO eval(), NO Function(), NO dynamic imports
+//   • NO user scripts, NO network calls, NO filesystem access
 //   • NEVER mutate job objects
 //
-// ------------------------------------------------------
-// Healing Metadata
-// ------------------------------------------------------
+// SAFETY:
+//   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
+//   • All behavior remains identical to pre‑v6.3 WorkerExecution
+// ============================================================================
 
+// ---------------------------------------------------------------------------
+// Healing Metadata — Craftsman’s Work Log
+// ---------------------------------------------------------------------------
 const healingState = {
   lastJobId: null,
   lastPayloadType: null,
@@ -58,9 +47,9 @@ const healingState = {
   lastTimestamp: null,
 };
 
-// ------------------------------------------------------
-// executeJob(job)
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// executeJob(job) — Craftsman’s Main Workflow
+// ---------------------------------------------------------------------------
 export async function executeJob(job) {
   const start = Date.now();
   healingState.cycleCount++;
@@ -68,9 +57,7 @@ export async function executeJob(job) {
   healingState.lastTimestamp = start;
 
   try {
-    // -------------------------------
-    // 1. Validate job structure
-    // -------------------------------
+    // 1. Blueprint Inspection — Validate job structure
     if (!job || !job.id || !job.payload) {
       healingState.lastError = "invalid_job_format";
       throw new Error("Invalid job format");
@@ -80,9 +67,7 @@ export async function executeJob(job) {
     healingState.lastJobId = job.id;
     healingState.lastPayloadType = payload.type;
 
-    // -------------------------------
-    // 2. Execute workload (SAFE ONLY)
-    // -------------------------------
+    // 2. Tool Selection + Safe Execution
     healingState.executionState = "executing";
 
     let result;
@@ -108,9 +93,7 @@ export async function executeJob(job) {
 
     healingState.lastResult = result;
 
-    // -------------------------------
-    // 3. Return success
-    // -------------------------------
+    // 3. Deliver Finished Product
     healingState.executionState = "returning";
 
     return {
@@ -121,9 +104,7 @@ export async function executeJob(job) {
     };
 
   } catch (err) {
-    // -------------------------------
-    // 4. Return failure
-    // -------------------------------
+    // 4. Error Handling — Craftsman’s Failure Report
     healingState.executionState = "error";
     healingState.lastError = err.message;
 
@@ -136,10 +117,9 @@ export async function executeJob(job) {
   }
 }
 
-// ------------------------------------------------------
-// SAFE workload handlers (NO arbitrary code execution)
-// ------------------------------------------------------
-
+// ---------------------------------------------------------------------------
+// SAFE workload handlers — Craftsman’s Tools
+// ---------------------------------------------------------------------------
 async function runComputeTask(data) {
   return {
     output: "compute-result",
@@ -163,9 +143,9 @@ async function runScriptTask(script, input) {
   };
 }
 
-// ------------------------------------------------------
-// Export healing metadata for EarnHealer
-// ------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Export healing metadata — Craftsman’s Ledger
+// ---------------------------------------------------------------------------
 export function getWorkerExecutionHealingState() {
   return { ...healingState };
 }

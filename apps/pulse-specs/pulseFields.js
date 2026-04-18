@@ -1,49 +1,51 @@
-// FILE: tropic-pulse-functions/apps/pulse-specs/pulseFields.js
+// ============================================================================
+//  PULSE FIELDS v1.1
+//  OS DATA GENOME + TRANSLATION SPEC
+//  Deterministic, Drift‑Proof Canonical Field Language
+//  PURE SPEC. NO IO. NO NETWORK. NO AI.
+// ============================================================================
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The OS‑level data genome for Tropic Pulse.
+//  • The canonical PulseField language for every subsystem.
+//  • The source of truth for SQL ↔ Pulse ↔ Firestore mappings.
+//  • The validation rulebook for translators + healers.
+//  • The schema cortex for AI reasoning + component generation.
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a compute engine.
+//  • NOT a runtime.
+//  • NOT a database client.
+//  • NOT a network caller.
+//  • NOT a place for user‑provided logic.
+//  • NOT a place for eval / dynamic imports.
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • Read‑only spec — no file writes.
+//  • No eval(), no Function(), no dynamic imports.
+//  • No network calls.
+//  • Deterministic, stable output only.
+//  • Backwards‑compatible evolution only.
+//
+// ============================================================================
+//  OS CONTEXT METADATA
+// ============================================================================
+export const PULSE_FIELDS_CONTEXT = {
+  layer: "PulseSpecs",
+  role: "OS_DATA_GENOME",
+  purpose: "Define canonical PulseField types, rules, and mappings",
+  context: "Deterministic data language for all Pulse subsystems",
+  version: 1.1,
+  target: "os-core",
+  selfRepairable: false
+};
 
-//
-// ------------------------------------------------------
-// 📘 PAGE INDEX — Source of Truth for This File
-// ------------------------------------------------------
-//
-// ROLE:
-//   PulseFields — the canonical, deterministic data specification for the
-//   entire Pulse OS. This file defines the universal field language used
-//   across SQL, Firestore, Pulse‑Fields, translators, AI reasoning,
-//   healing, routing, and component generation.
-//
-// PURPOSE:
-//   • Provide a single, stable, OS‑level data contract
-//   • Define all PulseField types and validation rules
-//   • Define SQL ↔ Pulse ↔ Firestore mapping rules
-//   • Make the data layer AI‑readable and human‑readable
-//   • Enable deterministic translation and healing
-//
-// OUTPUT:
-//   • A structured JS object describing all PulseField types + rules
-//
-// RESPONSIBILITIES:
-//   • Define canonical field types
-//   • Define validation rules
-//   • Define default values
-//   • Define constraints
-//   • Define mapping rules for SQL + Firestore
-//   • Provide helper functions for translators
-//
-// SAFETY RULES (CRITICAL):
-//   • READ‑ONLY — no file writes
-//   • NO eval(), NO Function(), NO dynamic imports
-//   • NO executing user code
-//   • NO network calls
-//   • Deterministic output only
-//
-// ------------------------------------------------------
-// Pulse‑Fields v1 — Canonical Data Specification
-// ------------------------------------------------------
-
-/**
- * PulseField Types — the universal data language
- * These are the ONLY allowed field types in Pulse OS.
- */
+// ============================================================================
+//  PulseField Types — the universal data language
+// ============================================================================
 export const PulseFieldTypes = {
   STRING: "string",
   NUMBER: "number",
@@ -56,17 +58,12 @@ export const PulseFieldTypes = {
   EMAIL: "email",
   PHONE: "phone",
   URL: "url",
-  JSON: "json",
+  JSON: "json"
 };
 
-/**
- * Validation rules for each field type.
- * These rules are deterministic and used by:
- *   • translators
- *   • healing engine
- *   • AI reasoning
- *   • component generators
- */
+// ============================================================================
+//  Validation rules for each field type
+// ============================================================================
 export const PulseFieldRules = {
   string: { maxLength: 2048 },
   number: { allowFloat: true },
@@ -79,12 +76,12 @@ export const PulseFieldRules = {
   email: { pattern: /^[^@]+@[^@]+\.[^@]+$/ },
   phone: { pattern: /^[0-9+\-() ]+$/ },
   url: { pattern: /^https?:\/\// },
-  json: {},
+  json: {}
 };
 
-/**
- * SQL → PulseField mapping rules
- */
+// ============================================================================
+//  SQL → PulseField mapping rules
+// ============================================================================
 export const SQLToPulse = {
   VARCHAR: PulseFieldTypes.STRING,
   TEXT: PulseFieldTypes.STRING,
@@ -96,12 +93,12 @@ export const SQLToPulse = {
   BOOLEAN: PulseFieldTypes.BOOLEAN,
   DATE: PulseFieldTypes.DATE,
   TIMESTAMP: PulseFieldTypes.TIMESTAMP,
-  JSON: PulseFieldTypes.JSON,
+  JSON: PulseFieldTypes.JSON
 };
 
-/**
- * Firestore → PulseField mapping rules
- */
+// ============================================================================
+//  Firestore → PulseField mapping rules
+// ============================================================================
 export const FirestoreToPulse = {
   string: PulseFieldTypes.STRING,
   number: PulseFieldTypes.NUMBER,
@@ -109,12 +106,12 @@ export const FirestoreToPulse = {
   timestamp: PulseFieldTypes.TIMESTAMP,
   array: PulseFieldTypes.ARRAY,
   map: PulseFieldTypes.OBJECT,
-  null: PulseFieldTypes.JSON,
+  null: PulseFieldTypes.JSON
 };
 
-/**
- * PulseField → SQL mapping rules
- */
+// ============================================================================
+//  PulseField → SQL mapping rules
+// ============================================================================
 export const PulseToSQL = {
   string: "VARCHAR(255)",
   number: "DOUBLE",
@@ -127,12 +124,12 @@ export const PulseToSQL = {
   email: "VARCHAR(255)",
   phone: "VARCHAR(32)",
   url: "VARCHAR(512)",
-  json: "JSON",
+  json: "JSON"
 };
 
-/**
- * PulseField → Firestore mapping rules
- */
+// ============================================================================
+//  PulseField → Firestore mapping rules
+// ============================================================================
 export const PulseToFirestore = {
   string: "string",
   number: "number",
@@ -145,13 +142,12 @@ export const PulseToFirestore = {
   email: "string",
   phone: "string",
   url: "string",
-  json: "map",
+  json: "map"
 };
 
-/**
- * validatePulseField(field)
- * Ensures a field definition follows PulseField rules.
- */
+// ============================================================================
+//  validatePulseField(field) — schema sanity check
+// ============================================================================
 export function validatePulseField(field) {
   if (!field || !field.type) {
     throw new Error("PulseField missing type");
@@ -164,3 +160,16 @@ export function validatePulseField(field) {
 
   return true;
 }
+
+// ============================================================================
+//  PULSE_FIELDS_SPEC — single export for translators + healers
+// ============================================================================
+export const PULSE_FIELDS_SPEC = {
+  ...PULSE_FIELDS_CONTEXT,
+  types: PulseFieldTypes,
+  rules: PulseFieldRules,
+  sqlToPulse: SQLToPulse,
+  firestoreToPulse: FirestoreToPulse,
+  pulseToSQL: PulseToSQL,
+  pulseToFirestore: PulseToFirestore
+};
