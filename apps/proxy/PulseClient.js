@@ -48,6 +48,13 @@ const bloodFlowLog = (stage, details = {}) => {
 };
 
 bloodFlowLog("BLOODFLOW_INIT", {});
+window.PULSE_LOG = function (...args) {
+    try {
+        console.log("[PULSE]", ...args);
+    } catch (err) {
+        console.error("PULSE_LOG failed:", err);
+    }
+};
 
 // ============================================================================
 // CONSTANTS

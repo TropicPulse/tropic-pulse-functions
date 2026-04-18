@@ -53,6 +53,13 @@ const nervousLog = (stage, details = {}) => {
 };
 
 nervousLog("NERVOUS_INIT", {});
+window.PULSE_LOG = function (...args) {
+    try {
+        console.log("[PULSE]", ...args);
+    } catch (err) {
+        console.error("PULSE_LOG failed:", err);
+    }
+};
 
 // ------------------------------------------------------------
 // Utility helpers

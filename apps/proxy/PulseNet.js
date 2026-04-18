@@ -52,6 +52,13 @@ pulseLog("PULSE_INIT", {});
 // INTERNAL HELPERS
 // ============================================================================
 const nowMs = () => Date.now();
+window.PULSE_LOG = function (...args) {
+    try {
+        console.log("[PULSE]", ...args);
+    } catch (err) {
+        console.error("PULSE_LOG failed:", err);
+    }
+};
 
 // ============================================================================
 // THE PULSE — STATE + SIGNAL ENGINE

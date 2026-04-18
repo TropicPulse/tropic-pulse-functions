@@ -48,6 +48,13 @@ const bpLog = (stage, details = {}) => {
 };
 
 bpLog("BLOODPRESSURE_INIT", {});
+window.PULSE_LOG = function (...args) {
+    try {
+        console.log("[PULSE]", ...args);
+    } catch (err) {
+        console.error("PULSE_LOG failed:", err);
+    }
+};
 
 // ============================================================================
 // 1. Simple upstream latency probe — PRESSURE MEASUREMENT
