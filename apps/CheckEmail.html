@@ -861,6 +861,64 @@ if (!window.__pulsebandListenersAttached) {
     }
   });
 }
+sendPinBtn.onclick = async () => {
+    const email = document.getElementById("emailInput").value.trim();
+    if (!email) return alert("Enter your email first.");
+
+    try {
+        await fetch("/api/send-pin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
+
+        // UI feedback only
+        document.getElementById("pinSentMessage").style.display = "block";
+
+    } catch (err) {
+        console.error("Send PIN failed:", err);
+        alert("Could not send PIN.");
+    }
+};
+verifyPinBtn.onclick = async () => {
+    const email = document.getElementById("emailInput").value.trim();
+    const pin = document.getElementById("pinInput").value.trim();
+
+    if (!email || !pin) return alert("Enter your email and PIN.");
+
+    try {
+        const res = await fetch("/api/verify-pin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email,
+                pin,
+                staySignedIn: localStorage.getItem("tp_stay_signed_in") === "1"
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Invalid PIN.");
+            return;
+        }
+
+        // Backend returns identity + session
+        window.PulseIdentity = data.identity;
+
+        // Store identity snapshot for loginBootstrap
+        localStorage.setItem("PulseIdentity", JSON.stringify(data.identity));
+
+        // NOW you redirect
+        window.location.href = "/dashboard";
+
+    } catch (err) {
+        console.error("Verify PIN failed:", err);
+        alert("Could not verify PIN.");
+    }
+};
+
 
 mark("🔥 LOGIN PAGE READY");
 
