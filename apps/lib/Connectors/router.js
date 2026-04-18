@@ -1,18 +1,34 @@
 // ============================================================================
 // FILE: /apps/tropic-pulse/lib/Connectors/router.js
-// PULSE COMMUNICATION INTELLIGENCE — v6.4
+// PULSE COMMUNICATION INTELLIGENCE — v6.4+
 // “THE WISDOM+ / COMMUNICATION INTELLIGENCE LAYER”
 // ============================================================================
 //
-// ⭐ v6.4 COMMENT LOG  [OS‑LEVEL — WHITE]
+// ⭐ v6.4+ COMMENT LOG  [WHITE — OS‑LEVEL]
 // - THEME: “THE WISDOM+ / COMMUNICATION INTELLIGENCE LAYER”
 // - ROLE: Structured communication, logging, retry, healing, alerting
-// - Updated: Replaced misleading ‘timer’ with GateHeartbeat
-// - Updated: Clarified subsystem identity (Router = Nervous System)
-// - Updated: Clarified that frontend NEVER performs timing logic
+// - Confirmed: A → A2 → B → C2 → D → D2 chain intact
+// - Frontend router (B‑Layer) → Backend endpoint (C2‑Layer / BODYGUARD)
 // - Updated: Healing + retry logic aligned with v6.3+ invariants
 // - ZERO timing logic on frontend
 // - ZERO scheduling, loops, or intervals
+//
+// ============================================================================
+// ARCHITECTURE MAP  [WHITE — OS‑LEVEL]
+// ----------------------------------------------------------------------------
+//   A   = Page (UI Shell)
+//   A2  = PageScanner.js        [PROTECTOR — ERROR GUARDIAN / IMMUNE SCOUT]
+//   B   = THIS FILE (router.js) [WISDOM+ — COMMUNICATION INTELLIGENCE]
+//   C2  = endpoint.js           [BODYGUARD — GUARDIAN SECURITY LAYER]
+//   D   = index.js              [DISPATCHER — BACKEND ROUTE DISPATCH]
+//   D2  = Modular backend files [ORGANS — getHook.js, getAuth.js, etc.]
+//
+//   • A2 imports B (PageScanner → router.js)
+//   • B calls C2 via HTTP (/ .netlify/functions/endpoint)
+//   • C2 imports D (endpoint.js → index.js)
+//   • D imports D2 (index.js → modular backend logic)
+//
+//   INVARIANT: “IMPORT AT THE TOP, COMPLETE THE CONNECTION.”
 //
 // ============================================================================
 // SUBSYSTEM IDENTITY — “THE WISDOM+”  [PURPLE — SUBSYSTEM IDENTITY]
@@ -38,18 +54,18 @@
 //   ✔ A logging + retry + healing connector
 //   ✔ A communication intelligence layer
 //   ✔ A route‑down detection + alert layer
-//   ✔ A frontend → backend signaling system
+//   ✔ A frontend → backend signaling system (B → C2)
 //
 // WHAT THIS FILE IS NOT  [GREEN — CLARITY]
 // ----------------------------------------------------------------------------
-//   ✘ NOT a backend router
+//   ✘ NOT a backend router (that’s C / C2)
 //   ✘ NOT a business logic layer
-//   ✘ NOT a security layer
+//   ✘ NOT a security layer (that’s endpoint.js / BODYGUARD)
 //   ✘ NOT a database writer
 //   ✘ NOT a timing or scheduling system
 //
 // ============================================================================
-// SAFETY CONTRACT (v6.4)  [CYAN — SAFETY RULES]
+// SAFETY CONTRACT (v6.4+)  [CYAN — SAFETY RULES]
 // ----------------------------------------------------------------------------
 //   • Never mutate payloads
 //   • Never bypass RouterMemory
@@ -60,9 +76,10 @@
 //   • Never run timing logic on frontend
 //
 // ============================================================================
-
-import { RouterMemory } from "./RouterMemory.js"; // [BLUE]
-import { GateHeartbeat } from "./Gate.js";        // [GOLD] frontend → backend signal
+// FRONTEND IMPORTS — COMPLETE THE CONNECTION (A2 → B)  [BLUE / GOLD]
+// ============================================================================
+import { RouterMemory } from "./RouterMemory.js"; // [BLUE] Network memory / log buffer
+import { GateHeartbeat } from "./Gate.js";        // [GOLD] Frontend → backend heartbeat signal
 
 // ============================================================================
 // CONSTANTS + DIAGNOSTICS  [BLUE]
@@ -98,12 +115,20 @@ const ROUTER_CONTEXT = {
   label: "ROUTER",
   layer: "B‑Layer",
   purpose: "Frontend → Backend Connector",
-  context: "Sends structured requests to backend router"
+  context: "Sends structured requests to backend BODYGUARD (endpoint.js)"
 };
 
 // ============================================================================
 // ⭐ ROUTER MEMORY HEALING (pre‑flush)  [BLUE → RED — GOLD]
-// ============================================================================
+// ----------------------------------------------------------------------------
+// B‑Layer → calls backend healing organ:
+//   • Frontend logs live in RouterMemory (BLUE)
+//   • Before sending heartbeat, we offer logs to backend healer
+//   • Backend CheckRouterMemory function (RED) may:
+//       - compress logs
+//       - repair drift
+//       - return a healed log set
+// ----------------------------------------------------------------------------
 async function healRouterMemoryIfNeeded() {
   const logs = RouterMemory.getAll();
   if (!logs || logs.length === 0) {
@@ -135,7 +160,10 @@ async function healRouterMemoryIfNeeded() {
 
 // ============================================================================
 // ⭐ ROUTE‑DOWN ALERT TRIGGER  [BLUE → RED — GOLD]
-// ============================================================================
+// ----------------------------------------------------------------------------
+// When repeated failures occur, B‑Layer notifies a backend IMMUNE ORGAN
+// (RouteDownAlert.js) so the owner can be alerted out‑of‑band.
+// ----------------------------------------------------------------------------
 async function triggerRouteDownAlert(error, type) {
   logWisdom("ALERT_TRIGGER", { error, type });
 
@@ -154,7 +182,12 @@ async function triggerRouteDownAlert(error, type) {
 
 // ============================================================================
 // ⭐ UNIVERSAL SYS‑CALL FUNCTION  [BLUE → RED — GOLD]
-// ============================================================================
+// ----------------------------------------------------------------------------
+// B‑Layer → C2‑Layer (endpoint.js / BODYGUARD)
+//   • Sends { type, payload } to backend kernel dispatcher
+//   • Expects safe JSON response
+//   • Handles retry + alerting
+// ----------------------------------------------------------------------------
 export async function route(type, payload = {}) {
   logWisdom("ROUTE_CALL", { type });
 
@@ -178,9 +211,18 @@ export async function route(type, payload = {}) {
 
   } catch (err) {
     routeFailureCount++;
-    logWisdom("ROUTE_ERROR", { type, message: String(err), count: routeFailureCount });
+    logWisdom("ROUTE_ERROR", {
+      type,
+      message: String(err),
+      count: routeFailureCount
+    });
 
-    logEvent("routeError", { type, payload, error: String(err), ...ROUTER_CONTEXT });
+    logEvent("routeError", {
+      type,
+      payload,
+      error: String(err),
+      ...ROUTER_CONTEXT
+    });
 
     if (String(err).includes("process is not defined")) {
       RouterMemory.push({
@@ -205,12 +247,20 @@ export async function route(type, payload = {}) {
         routeFailureCount = 0;
 
         logWisdom("ROUTE_RETRY_SUCCESS", { type });
-        logEvent("routeRetrySuccess", { type, payload, retryJson, ...ROUTER_CONTEXT });
+        logEvent("routeRetrySuccess", {
+          type,
+          payload,
+          retryJson,
+          ...ROUTER_CONTEXT
+        });
 
         return retryJson;
 
       } catch (retryErr) {
-        logWisdom("ROUTE_RETRY_FAIL", { type, message: String(retryErr) });
+        logWisdom("ROUTE_RETRY_FAIL", {
+          type,
+          message: String(retryErr)
+        });
         await triggerRouteDownAlert(String(retryErr), type);
         routeFailureCount = 0;
       }
@@ -222,7 +272,11 @@ export async function route(type, payload = {}) {
 
 // ============================================================================
 // ⭐ LOGGING ENTRY POINT  [BLUE → RED — GOLD]
-// ============================================================================
+// ----------------------------------------------------------------------------
+//   • Pushes event into RouterMemory (BLUE)
+//   • Offers logs to backend healer (CheckRouterMemory)
+//   • Sends GateHeartbeat signal AFTER healing attempt
+// ----------------------------------------------------------------------------
 export async function logEvent(eventType, data) {
   logWisdom("LOG_EVENT", { eventType });
 
@@ -243,7 +297,10 @@ export async function logEvent(eventType, data) {
 
 // ============================================================================
 // ⭐ HEALING ENTRY POINT  [BLUE → RED — GOLD]
-// ============================================================================
+// ----------------------------------------------------------------------------
+//   • Frontend requests healing via the same syscall path
+//   • Healing is just another structured route()
+// ----------------------------------------------------------------------------
 export async function heal(type, payload) {
   logWisdom("HEAL_CALL", { type });
 
@@ -251,3 +308,7 @@ export async function heal(type, payload) {
 
   return await route(type, payload);
 }
+
+// ============================================================================
+// END OF FILE — THE WISDOM+ / COMMUNICATION INTELLIGENCE LAYER  [PURPLE]
+// ============================================================================
