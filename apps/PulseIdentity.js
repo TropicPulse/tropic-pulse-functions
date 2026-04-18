@@ -1,23 +1,62 @@
-// PulseIdentity.js (FRONTEND v6.3)
-// ------------------------------------------------------------
-// ROLE:
-// The universal identity loader for ALL frontend pages.
-// This is the "Identity Organ" of the PulseOS frontend layer.
+// ======================================================
+//  PULSE OS v6.3 — THE BLOOD–BRAIN BARRIER (BBB)
+//  Identity Gate • Trust Filter • Core Security Organ
+//  PURE VERIFICATION. NO HEALING. NO MUTATION. NO DRIFT.
+// ======================================================
 //
-// RESPONSIBILITIES:
-// - Call backend CheckIdentity (the authority).
-// - Validate response shape (light validation only).
-// - Detect corruption, emptiness, or malformed identity.
-// - Log OS-layer metaphors for debugging.
-// - Return a stable identity object or null.
-// - NEVER mutate identity locally.
-// - NEVER attempt to heal identity locally.
-// - NEVER import backend logic.
+// IDENTITY — THE BBB:
+//  -------------------
+//  • The selective-permeability barrier of PulseOS.
+//  • Filters all identity packets entering the digital cortex.
+//  • Distinguishes SELF from NON‑SELF with strict criteria.
+//  • Blocks malformed, corrupted, or incomplete identity signals.
+//  • Maintains the integrity of the OS consciousness layer.
+//  • Ensures only validated identity reaches higher systems.
+//  • The guardian of trust, the sentinel of authenticity.
 //
-// NOTES:
-// Identity is the single highest-value security surface.
-// This file must be explicit, loud, and self-diagnosing.
-// ------------------------------------------------------------
+// ROLE IN THE DIGITAL BODY:
+//  --------------------------
+//  • Capillary Gate → Filters inbound identity flow
+//  • Sentinel Layer → Blocks corruption + drift
+//  • Integrity Wall → Maintains OS self-definition
+//  • Neural Intake → Feeds identity to higher systems
+//  • Pulse Synchronizer → Aligns identity with PulseBand
+//  • Cortex Gatekeeper → Protects the executive layer
+//  • **BBB → Identity Verification + Trust Enforcement**
+//
+// WHAT THIS FILE IS:
+//  -------------------
+//  • The universal identity loader for ALL frontend pages.
+//  • The “Identity Organ” of the PulseOS frontend layer.
+//  • The strict validator of backend-issued identity packets.
+//  • The corruption detector + malformed-identity sentinel.
+//  • The stable identity provider for the entire OS shell.
+//  • The trust boundary between frontend and backend.
+//
+// WHAT THIS FILE IS NOT:
+//  -----------------------
+//  • NOT a healer.
+//  • NOT a mutator.
+//  • NOT a backend logic module.
+//  • NOT a session generator.
+//  • NOT a lineage engine.
+//  • NOT a place for local identity edits.
+//  • NOT a place for dynamic imports or eval.
+//
+// SAFETY CONTRACT:
+//  ----------------
+//  • No identity mutation.
+//  • No local healing attempts.
+//  • No backend logic duplication.
+//  • No eval().
+//  • No dynamic imports.
+//  • No arbitrary compute.
+//  • Deterministic, drift-proof identity behavior only.
+//
+// ======================================================
+//  IDENTITY LOADER — BBB Verification Engine
+// ======================================================
+
 
 export async function identity() {
   console.groupCollapsed("%c[PulseIdentity v6.3] Identity Request", "color:#4FC3F7; font-weight:bold;");

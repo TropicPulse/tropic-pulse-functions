@@ -1472,44 +1472,84 @@ input::placeholder {
 
 <body>
   <div id="t-loading">
-  <img src="https://www.tropicpulse.bz/ToucanLogo-Mini.png" id="t-loading-logo" />
-</div>
-<div id="pulseband-overlay">
-  <div id="pulseband-badge">
-    <div class="pb-bars">
-      <span></span><span></span><span></span><span></span>
+    <img src="https://www.tropicpulse.bz/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+  </div>
+  <div id="pulseband-overlay">
+    <div id="pulseband-badge">
+      <div class="pb-bars">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div id="pulseband-panel" class="pb-card">
+
+      <div class="pb-header">
+      <img id="pb-mini-badge" class="pb-mini-badge"
+          src="https://www.tropicpulse.bz/proxy/PulseBand.png"
+          alt="PulseBand Badge">
+    </div>
+
+      <div class="pb-row">
+        <label>PulseBand Bars <span class="pb-hint">(App Speed)</span></label>
+        <span id="pb-bars-text" class="pb-value">0/4</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Phone Bars <span class="pb-hint">(Signal Speed)</span></label>
+        <span id="pb-phonebars-text" class="pb-value">0/4</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Stability <span class="pb-hint">(Connect Quality)</span></label>
+        <span id="pb-stability" class="pb-value">0%</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Latency <span class="pb-hint">(Response Time)</span></label>
+        <span id="pb-latency" class="pb-value">0 ms</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Micro‑Windows <span class="pb-hint">(Speed Bursts)</span></label>
+        <span id="pb-micro" class="pb-value">Idle</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Route <span class="pb-hint">(Network Path)</span></label>
+        <span id="pb-route" class="pb-value">Primary</span>
+      </div>
+
+      <div class="pb-row">
+        <label>State <span class="pb-hint">(Current Mode)</span></label>
+        <span id="pb-state" class="pb-value">Initializing</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Last Sync <span class="pb-hint">(Updated)</span></label>
+        <span id="pb-sync" class="pb-value">0s ago</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Efficiency <span class="pb-hint">(Speed Mode)</span></label>
+        <span id="pb-efficiency" class="pb-value">Micro‑Burst</span>
+      </div>
+
+      <div class="pb-row">
+        <label>Network Health <span class="pb-hint">(Overall)</span></label>
+        <span id="pb-health" class="pb-value">Checking…</span>
+      </div>
+
+      <div class="pb-row">
+        <label>PulseBand Advantage</label>
+        <span id="pb-advantage" class="pb-value">2.5× Faster</span>
+      </div>
+
+      <div class="pb-row">
+        <label>PulseBand vs Phone</label>
+        <span id="pb-estimated" class="pb-value">Calculating…</span>
+      </div>
     </div>
   </div>
-
-  <div id="pulseband-panel">
-    <div class="pb-header">
-      <img class="pb-mini-badge" src="https://www.tropicpulse.bz/proxy/PulseBand.png"></img>
-    </div>
-
-    <div class="pb-row"><label>PulseBand Bars</label><span id="pb-bars-text">0/4</span></div>
-    <div class="pb-row"><label>Phone Bars</label><span id="pb-phonebars-text">0/4</span></div>
-    <div class="pb-row"><label>Stability</label><span id="pb-stability">0%</span></div>
-    <div class="pb-row"><label>Latency</label><span id="pb-latency">0 ms</span></div>
-    <div class="pb-row"><label>Micro‑Windows</label><span id="pb-micro">Idle</span></div>
-    <div class="pb-row"><label>Route</label><span id="pb-route">Primary</span></div>
-    <div class="pb-row"><label>State</label><span id="pb-state">Initializing</span></div>
-    <div class="pb-row"><label>Last Sync</label><span id="pb-sync">0s ago</span></div>
-    <div class="pb-row"><label>Efficiency</label><span id="pb-efficiency">Micro‑Burst</span></div>
-
-    <!-- ⭐ NEW: Network Health -->
-    <div class="pb-row"><label>Network Health</label><span id="pb-health">Checking…</span></div>
-
-    <!-- ⭐ NEW FIELD #1: PulseBand Advantage -->
-    <div class="pb-row"><label>PulseBand Advantage</label>
-      <span id="pb-advantage">2.5× Faster 🚀</span>
-    </div>
-
-    <!-- ⭐ NEW FIELD #2: PulseBand vs Phone Time -->
-    <div class="pb-row"><label>PulseBand vs Phone</label>
-      <span id="pb-estimated">Calculating…</span>
-    </div>
-  </div>
-</div>
 <div class="events-shell">
   <!-- STICKY FILTER HEADER -->
   <div id="stickyFilters">
