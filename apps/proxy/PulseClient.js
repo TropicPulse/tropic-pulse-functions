@@ -64,7 +64,7 @@ function getDeviceInfo() {
     language: navigator.language || ""
   };
 
-  osLog("PulseClient → getDeviceInfo()");
+  window.PULSE_LOG("PulseClient → getDeviceInfo()");
   bloodFlowLog("DEVICE_INFO_COLLECTED", info);
 
   return info;
@@ -74,14 +74,14 @@ function getDeviceInfo() {
 // CORE FETCH WRAPPER — BLOOD FLOW
 // ============================================================================
 async function pulseFetch(url) {
-  osLog(`PulseClient → pulseFetch() called for URL: ${url}`);
+  window.PULSE_LOG(`PulseClient → pulseFetch() called for URL: ${url}`);
   bloodFlowLog("FETCH_START", { url });
 
   const device = getDeviceInfo();
   const start = performance.now();
 
   try {
-    osLog("PulseClient → Attempting PULSE route…");
+    window.PULSE_LOG("PulseClient → Attempting PULSE route…");
     bloodFlowLog("PULSE_ROUTE_ATTEMPT", { url });
 
     const res = await fetch(
@@ -97,7 +97,7 @@ async function pulseFetch(url) {
     const durationMs = performance.now() - start;
 
     if (!res.ok) {
-      osLog(`PulseClient → Pulse route FAILED (${res.status})`);
+      window.PULSE_LOG(`PulseClient → Pulse route FAILED (${res.status})`);
       bloodFlowLog("PULSE_ROUTE_FAIL", { status: res.status });
       throw new Error("Pulse route failed: " + res.status);
     }
@@ -110,7 +110,7 @@ async function pulseFetch(url) {
     else if (contentType.startsWith("text/")) data = await res.text();
     else data = await res.arrayBuffer();
 
-    osLog(
+    window.PULSE_LOG(
       `PulseClient → Pulse route SUCCESS (${durationMs.toFixed(
         1
       )}ms, ${bytes} bytes)`
@@ -124,7 +124,7 @@ async function pulseFetch(url) {
     return { data, meta: { route: "Pulse", bytes, durationMs } };
 
   } catch (err) {
-    osLog("PulseClient → Pulse route FAILED → Falling back to PHONE route");
+    window.PULSE_LOG("PulseClient → Pulse route FAILED → Falling back to PHONE route");
     bloodFlowLog("PULSE_ROUTE_EXCEPTION", { error: String(err) });
 
     const fbStart = performance.now();
@@ -139,7 +139,7 @@ async function pulseFetch(url) {
     else if (contentType.startsWith("text/")) data = await fbRes.text();
     else data = await fbRes.arrayBuffer();
 
-    osLog(
+    window.PULSE_LOG(
       `PulseClient → Phone route SUCCESS (${fbDuration.toFixed(
         1
       )}ms, ${bytes} bytes)`

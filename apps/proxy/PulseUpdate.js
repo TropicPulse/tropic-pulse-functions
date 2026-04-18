@@ -53,7 +53,7 @@ bpLog("BLOODPRESSURE_INIT", {});
 // 1. Simple upstream latency probe — PRESSURE MEASUREMENT
 // ============================================================================
 async function measureLatency(url = "/pulse-proxy/ping") {
-  osLog(`PulseUpdate → measureLatency() called (${url})`);
+  window.PULSE_LOG(`PulseUpdate → measureLatency() called (${url})`);
   bpLog("MEASURE_LATENCY_START", { url });
 
   const start = performance.now();
@@ -62,16 +62,16 @@ async function measureLatency(url = "/pulse-proxy/ping") {
     const res = await fetch(url, { cache: "no-store" });
     const t = performance.now() - start;
 
-    osLog(`PulseUpdate → ping returned in ${t.toFixed(1)}ms`);
+    window.PULSE_LOG(`PulseUpdate → ping returned in ${t.toFixed(1)}ms`);
     bpLog("PING_SUCCESS", { durationMs: t });
 
     let data = {};
     try {
       data = await res.json();
-      osLog("PulseUpdate → ping JSON parsed");
+      window.PULSE_LOG("PulseUpdate → ping JSON parsed");
       bpLog("PING_JSON_PARSED");
     } catch {
-      osLog("PulseUpdate → ping JSON parse failed (ignored)");
+      window.PULSE_LOG("PulseUpdate → ping JSON parse failed (ignored)");
       bpLog("PING_JSON_PARSE_FAILED");
     }
 
@@ -84,7 +84,7 @@ async function measureLatency(url = "/pulse-proxy/ping") {
     };
 
   } catch (err) {
-    osLog("PulseUpdate → ping FAILED");
+    window.PULSE_LOG("PulseUpdate → ping FAILED");
     bpLog("PING_FAILED", { error: String(err) });
 
     return {
@@ -101,7 +101,7 @@ async function measureLatency(url = "/pulse-proxy/ping") {
 // 2. Classifiers — BLOOD PRESSURE INTERPRETATION
 // ============================================================================
 function classifyBars(latency) {
-  osLog(`PulseUpdate → classifyBars(${latency})`);
+  window.PULSE_LOG(`PulseUpdate → classifyBars(${latency})`);
   bpLog("CLASSIFY_BARS", { latency });
 
   if (latency == null) return 1;
@@ -112,7 +112,7 @@ function classifyBars(latency) {
 }
 
 function classifyNetworkHealth(latency) {
-  osLog(`PulseUpdate → classifyNetworkHealth(${latency})`);
+  window.PULSE_LOG(`PulseUpdate → classifyNetworkHealth(${latency})`);
   bpLog("CLASSIFY_HEALTH", { latency });
 
   if (latency == null) return "Unknown";
@@ -126,7 +126,7 @@ function classifyNetworkHealth(latency) {
 // 3. Public API — NORMALIZED VITAL SIGNS PACKET
 // ============================================================================
 async function getPulseTelemetry() {
-  osLog("PulseUpdate → getPulseTelemetry()");
+  window.PULSE_LOG("PulseUpdate → getPulseTelemetry()");
   bpLog("TELEMETRY_START");
 
   const ping = await measureLatency();
@@ -134,13 +134,13 @@ async function getPulseTelemetry() {
   const latency = ping.rtt;
   const kbps = ping.kbps;
 
-  osLog(`PulseUpdate → latency=${latency}, kbps=${kbps}`);
+  window.PULSE_LOG(`PulseUpdate → latency=${latency}, kbps=${kbps}`);
   bpLog("TELEMETRY_VALUES", { latency, kbps });
 
   const pulsebandBars = classifyBars(latency);
   const networkHealth = classifyNetworkHealth(latency);
 
-  osLog(`PulseUpdate → bars=${pulsebandBars}, health=${networkHealth}`);
+  window.PULSE_LOG(`PulseUpdate → bars=${pulsebandBars}, health=${networkHealth}`);
   bpLog("TELEMETRY_CLASSIFIED", { pulsebandBars, networkHealth });
 
   const snapshot = {
@@ -150,7 +150,7 @@ async function getPulseTelemetry() {
     lastChunkIndex: Date.now()
   };
 
-  osLog("PulseUpdate → snapshot built");
+  window.PULSE_LOG("PulseUpdate → snapshot built");
   bpLog("SNAPSHOT_BUILT", snapshot);
 
   const result = {
@@ -169,7 +169,7 @@ async function getPulseTelemetry() {
     snapshot
   };
 
-  osLog("PulseUpdate → telemetry ready");
+  window.PULSE_LOG("PulseUpdate → telemetry ready");
   bpLog("TELEMETRY_READY", result);
 
   return result;
