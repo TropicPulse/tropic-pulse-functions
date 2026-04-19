@@ -838,31 +838,26 @@ function showLoginUI() {
 }
 
 // ============================================================================
-// 1) LOGIN BOOTSTRAP — Only check if identity variable exists (NO identity())
+// 1) LOGIN BOOTSTRAP — Only checks if identity exists (NO identity())
 // ============================================================================
 async function loginBootstrap() {
   showTPLoader();
-  mark("BOOTSTRAP START");
+  console.log("[LOGIN DOM] BOOTSTRAP START");
 
-  // DO NOT CALL identity()
-  // Just check if identity is already in memory/localStorage
   const id = window.PulseIdentity || null;
 
   if (!id) {
-    // No identity → show login UI
     hideTPLoader();
     showLoginUI();
     return;
   }
 
-  // Identity exists → returning user → redirect
   hideTPLoader();
   window.location.href = returnTo || "/dashboard.html";
 }
 
-
 // ============================================================================
-// 2) SEND PIN
+// 2) SEND PIN — SINGLE GUARDED HANDLER
 // ============================================================================
 if (!window.__sendPinBound) {
   window.__sendPinBound = true;
@@ -915,7 +910,7 @@ if (!window.__sendPinBound) {
 }
 
 // ============================================================================
-// 3) VERIFY PIN
+// 3) VERIFY PIN — SINGLE GUARDED HANDLER
 // ============================================================================
 if (!window.__verifyPinBound) {
   window.__verifyPinBound = true;
@@ -977,7 +972,7 @@ if (!window.__verifyPinBound) {
 }
 
 // ============================================================================
-// 4) PULSEBAND BADGE ONLY (NO SYSTEM LAYERS)
+// 4) PULSEBAND BADGE ONLY (UI-only, NO system layers)
 // ============================================================================
 if (!window.__pulsebandListenersAttached) {
   window.__pulsebandListenersAttached = true;
@@ -999,89 +994,15 @@ if (!window.__pulsebandListenersAttached) {
     }
   });
 }
-sendPinBtn.onclick = async () => {
-    const email = document.getElementById("emailInput").value.trim();
-    if (!email) return alert("Enter your email first.");
-
-    try {
-        await fetch("/api/send-pin", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email })
-        });
-
-        // UI feedback only
-        document.getElementById("pinSentMessage").style.display = "block";
-
-    } catch (err) {
-        console.error("Send PIN failed:", err);
-        alert("Could not send PIN.");
-    }
-};
-verifyPinBtn.onclick = async () => {
-    const email = document.getElementById("emailInput").value.trim();
-    const pin = document.getElementById("pinInput").value.trim();
-
-    if (!email || !pin) return alert("Enter your email and PIN.");
-
-    try {
-        const res = await fetch("/api/verify-pin", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                email,
-                pin,
-                staySignedIn: localStorage.getItem("tp_stay_signed_in") === "1"
-            })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            alert(data.message || "Invalid PIN.");
-            return;
-        }
-
-        // Backend returns identity + session
-        window.PulseIdentity = data.identity;
-
-        // Store identity snapshot for loginBootstrap
-        localStorage.setItem("PulseIdentity", JSON.stringify(data.identity));
-
-        // NOW you redirect
-        window.location.href = "/dashboard";
-
-    } catch (err) {
-        console.error("Verify PIN failed:", err);
-        alert("Could not verify PIN.");
-    }
-};
-
-
-mark("🔥 LOGIN PAGE READY");
 
 // ============================================================================
-// LOGIN PAGE — OS v6 DOM SCRIPT
-// pulseband = lowercase UI-only
-// NO PulseClient, NO PulseNet, NO PulseGPU, NO system layers
+// 5) DOM WRAPPER — NO pipelines, NO system layers
 // ============================================================================
-
 (async () => {
+  console.log("[LOGIN DOM] DOM LOAD START");
 
-  function mark(label) {
-    console.log("[LOGIN DOM]", label);
-  }
-
-  mark("DOM LOAD START");
-
-  // -----------------------------------------
-  // ⭐ LOGIN BOOTSTRAP ONLY
-  // -----------------------------------------
   await loginBootstrap();
 
-  // -----------------------------------------
-  // ⭐ PulseBand badge toggle ONLY (UI-only)
-  // -----------------------------------------
   const badge = document.getElementById("pulseband-badge");
   const panel = document.getElementById("pulseband-panel");
 
@@ -1098,19 +1019,8 @@ mark("🔥 LOGIN PAGE READY");
     });
   }
 
-  // -----------------------------------------
-  // ⭐ NO PIPELINES
-  // ⭐ NO TIMERS
-  // ⭐ NO PulseClient
-  // ⭐ NO PulseNet
-  // ⭐ NO PulseGPU
-  // ⭐ NO system layers
-  // -----------------------------------------
-
-  mark("DOM LOAD END");
-
+  console.log("[LOGIN DOM] DOM LOAD END");
 })();
-
 
 </script>
 </body>
