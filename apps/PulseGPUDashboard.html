@@ -645,23 +645,32 @@ async function loadGpuSnapshot() {
         alert("Please select a Pulse GPU snapshot JSON file.");
         return;
     }
-    const text = await input.files[0].text();
-    gpuSnapshot = JSON.parse(text);
 
-    const trace = [];
-    trace.push("Pulse GPU snapshot loaded.");
-    trace.push(`Version: ${gpuSnapshot.gpuVersion || gpuSnapshot.version || "unknown"}`);
-    trace.push(`Snapshot time: ${gpuSnapshot.snapshotTime || "unknown"}`);
+    try {
+        const text = await input.files[0].text();
+        const json = JSON.parse(text);
 
-    if (gpuSnapshot.pipelineStatus) {
-        trace.push(`GPU pipeline status: ${gpuSnapshot.pipelineStatus}`);
-        updateGpuPipelineBanner(gpuSnapshot.pipelineStatus);
-    } else {
-        updateGpuPipelineBanner("unknown");
+        gpuSnapshot = json;
+
+        const trace = [];
+        trace.push("Pulse GPU snapshot loaded.");
+        trace.push(`Version: ${gpuSnapshot.gpuVersion || gpuSnapshot.version || "unknown"}`);
+        trace.push(`Snapshot time: ${gpuSnapshot.snapshotTime || "unknown"}`);
+
+        if (gpuSnapshot.pipelineStatus) {
+            trace.push(`GPU pipeline status: ${gpuSnapshot.pipelineStatus}`);
+            updateGpuPipelineBanner(gpuSnapshot.pipelineStatus);
+        } else {
+            updateGpuPipelineBanner("unknown");
+        }
+
+        renderGpuDashboard(gpuSnapshot, trace);
+    } catch (err) {
+        console.error("Failed to parse GPU snapshot JSON", err);
+        alert("Failed to parse GPU snapshot JSON.");
     }
-
-    renderGpuDashboard(gpuSnapshot, trace);
 }
+
 /* ---------- SNAPSHOT SAVE / LOAD SYSTEM ---------- */
 
 function saveCurrentSnapshot() {
