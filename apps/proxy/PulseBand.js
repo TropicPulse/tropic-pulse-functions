@@ -20,7 +20,7 @@
 //   • v6.3 upgrade is COMMENTAL + DIAGNOSTIC ONLY — NO LOGIC CHANGES
 //   • All behavior remains identical to pre‑v6.3 PulseBand
 // ============================================================================
-import { Impulse } from "./Impulse.js";
+import { Impulse } from "../lib/Connectors/Impulse.js";
 
 // ============================================================================
 // NERVOUS SYSTEM — CORE GPU + SHADOWLAYER IMPORTS
