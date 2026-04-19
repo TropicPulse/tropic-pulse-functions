@@ -14,33 +14,24 @@
 //   • Maintain healing metadata for adapter integrity
 //   • Serve as the diplomatic ledger of all external compute markets
 //
-// WHY “EMBASSY LEDGER”?:
-//   • Each marketplace adapter is a foreign representative
-//   • This file is the official registry of those agents
-//   • It validates credentials (ping, fetchJobs, submitResult)
-//   • It records missing or invalid agents
-//   • It exports a deterministic roster for Earn orchestration
-//
 // CONTRACT:
 //   • PURE REGISTRY — no AI layers, no translation, no memory model
 //   • READ‑ONLY except for healing metadata
 //   • NO eval(), NO Function(), NO dynamic imports
-//   • NO executing user code
 //   • Deterministic validation only
 //
 // SAFETY:
 //   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
-//   • All behavior remains identical to pre‑v6.3 registry
 // ============================================================================
 
 // ---------------------------------------------------------------------------
 // Imports — Marketplace Representatives
 // ---------------------------------------------------------------------------
-import { VastAdapter } from "./VastAdapter.js";        // The Auctioneer
-import { AkashAdapter } from "./AkashAdapter.js";      // The Ambassador
-import { RenderAdapter } from "./RenderAdapter.js";    // The Artisan
-import { SpheronAdapter } from "./SpheronAdapter.js";  // The Courier
-import { FluidStackAdapter } from "./FluidStackAdapter.js"; // The Broker
+import { VastAdapter } from "./VastAdapter.js";              // The Auctioneer
+import { AkashAdapter } from "./AkashAdapter.js";            // The Ambassador
+import { RenderAdapter } from "./RenderAdapter.js";          // The Artisan
+import { SpheronAdapter } from "./SpheronAdapter.js";        // The Courier
+import { FluidStackAdapter } from "./FluidStackAdapter.js";  // The Broker
 
 // ---------------------------------------------------------------------------
 // Healing Metadata — Embassy Ledger Integrity Log
@@ -63,9 +54,7 @@ function validateAdapter(name, adapter) {
     return false;
   }
 
-  // Required diplomatic capabilities
   const required = ["ping", "fetchJobs", "submitResult"];
-
   const missing = required.filter(fn => typeof adapter[fn] !== "function");
 
   if (missing.length > 0) {
@@ -90,9 +79,9 @@ validateAdapter("SpheronAdapter", SpheronAdapter);
 validateAdapter("FluidStackAdapter", FluidStackAdapter);
 
 // ---------------------------------------------------------------------------
-// Export Registry — The Embassy Roster
+// Deterministic Marketplace Roster
 // ---------------------------------------------------------------------------
-export const marketplaces = [
+const marketplaces = [
   VastAdapter,        // The Auctioneer
   AkashAdapter,       // The Ambassador
   RenderAdapter,      // The Artisan
@@ -101,8 +90,16 @@ export const marketplaces = [
 ];
 
 // ---------------------------------------------------------------------------
-// Export Healing Metadata — Embassy Ledger Integrity Report
+// Healing State Accessor
 // ---------------------------------------------------------------------------
-export function getRegisteredMarketplacesHealingState() {
+function getHealingState() {
   return { ...healingState };
 }
+
+// ============================================================================
+// Exported API — EMBASSY LEDGER (Pattern‑Aligned, Blue Module)
+// ============================================================================
+export const RegisteredMarketplaces = {
+  marketplaces,   // Deterministic roster
+  getHealingState // Integrity report
+};

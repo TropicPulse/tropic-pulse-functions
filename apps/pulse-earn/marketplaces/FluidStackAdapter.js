@@ -11,13 +11,6 @@
 //   • Submits completed results
 //   • Maintains healing metadata for Earn healers
 //
-// WHY “BROKER”?:
-//   • FluidStack is not diplomatic like Akash (Ambassador)
-//   • It is transactional, elastic, burst‑driven, and fluid
-//   • Jobs appear/disappear rapidly — like market liquidity
-//   • The Broker thrives in fast‑moving markets
-//   • Executes trades, not treaties
-//
 // PURPOSE:
 //   • Provide a deterministic, drift‑proof adapter for FluidStack
 //   • Maintain strict protocol boundaries
@@ -28,7 +21,6 @@
 //   • READ‑ONLY except for healing metadata
 //   • NO eval(), NO Function(), NO dynamic imports
 //   • NO executing user code
-//   • NO network calls beyond marketplace endpoints
 //   • Deterministic normalization only
 //
 // SAFETY:
@@ -48,8 +40,46 @@ const healingState = {
   lastSubmitError: null,
   lastNormalizedJobId: null,
   lastNormalizationError: null,
+
+  // NEW — FluidStack-specific intelligence metadata (allowed)
+  lastPayloadVersion: null,
+  lastJobType: null,
+  lastResourceShape: null,
+  lastGpuRequirement: null,
+  lastBandwidthInference: null,
+  liquidityScore: 0,          // job count volatility
+  payoutVolatility: 0,        // payout variance
   cycleCount: 0,
 };
+
+// ---------------------------------------------------------------------------
+// INTERNAL — FluidStack-Specific Helpers
+// ---------------------------------------------------------------------------
+
+// Safe getter for inconsistent FluidStack schemas
+function safeGet(obj, path, fallback = null) {
+  try {
+    return path.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// Track volatility (legal, metadata-only)
+function updateVolatility(jobs) {
+  const count = jobs.length;
+  const payouts = jobs.map(j => Number(j.payout ?? 0)).filter(n => Number.isFinite(n));
+
+  // Liquidity = how much job count changes cycle-to-cycle
+  healingState.liquidityScore = Math.abs(count - (healingState.lastFetchCount || 0));
+
+  // Payout volatility = variance of payouts
+  if (payouts.length > 1) {
+    const avg = payouts.reduce((a, b) => a + b, 0) / payouts.length;
+    const variance = payouts.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / payouts.length;
+    healingState.payoutVolatility = variance;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // BROKER CLIENT — FluidStack Marketplace Interface
@@ -98,6 +128,10 @@ export const FluidStackAdapter = {
       }
 
       const data = await res.json();
+
+      // Track schema drift
+      healingState.lastPayloadVersion = typeof data === "object" ? Object.keys(data).join(",") : "unknown";
+
       if (!data || !Array.isArray(data.jobs)) {
         healingState.lastFetchError = "invalid_jobs_payload";
         healingState.lastFetchCount = 0;
@@ -107,6 +141,9 @@ export const FluidStackAdapter = {
       const jobs = data.jobs
         .map(raw => this.normalizeJob(raw))
         .filter(j => j !== null);
+
+      // Track volatility (legal)
+      updateVolatility(jobs);
 
       healingState.lastFetchError = null;
       healingState.lastFetchCount = jobs.length;
@@ -159,25 +196,42 @@ export const FluidStackAdapter = {
         return null;
       }
 
+      // Track job type (FluidStack often includes this)
+      healingState.lastJobType = safeGet(raw, "type", "unknown");
+
       const payout = Number(raw.payout ?? raw.price ?? 0);
       if (!Number.isFinite(payout) || payout <= 0) {
         healingState.lastNormalizationError = "non_positive_payout";
         return null;
       }
 
-      const cpuRequired = Number(raw.cpu ?? 2);
-      const memoryRequired = Number(raw.memory ?? 2048);
-      const estimatedSeconds = Number(raw.estimatedSeconds ?? 1200);
+      const cpuRequired = Number(raw.cpu ?? raw.vcpu ?? 2);
+      const memoryRequired = Number(raw.memory ?? raw.ram ?? 2048);
+      const estimatedSeconds = Number(raw.estimatedSeconds ?? raw.duration ?? 1200);
+
+      // Track resource shape
+      healingState.lastResourceShape = {
+        cpu: cpuRequired,
+        mem: memoryRequired,
+        duration: estimatedSeconds
+      };
 
       if (!Number.isFinite(estimatedSeconds) || estimatedSeconds <= 0) {
         healingState.lastNormalizationError = "non_positive_duration";
         return null;
       }
 
-      const minGpuScore = raw.gpuRequired ? 500 : 150;
-      const bandwidthNeededMbps = Number(
-        raw.dataSizeMB ? raw.dataSizeMB / 20 : 5
-      );
+      // GPU requirement inference
+      const gpuRequired = !!raw.gpuRequired || !!raw.gpu;
+      healingState.lastGpuRequirement = gpuRequired ? "gpu" : "cpu";
+
+      const minGpuScore = gpuRequired ? 500 : 150;
+
+      // Bandwidth inference from data size
+      const dataSizeMB = Number(raw.dataSizeMB ?? 0);
+      const bandwidthNeededMbps = dataSizeMB > 0 ? Math.max(5, dataSizeMB / 20) : 5;
+
+      healingState.lastBandwidthInference = bandwidthNeededMbps;
 
       const normalized = {
         id: String(raw.id),

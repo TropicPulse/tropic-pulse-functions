@@ -341,11 +341,98 @@ input[type="file"] {
     margin-top: 6px;
 }
 
+/* ============================================================
+   MARKETPLACE INTELLIGENCE PANEL — v7.4
+   ============================================================ */
+
+.marketplaces-panel {
+    margin-top: 30px;
+    padding: 20px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+}
+
+.marketplaces-panel h2 {
+    margin-bottom: 16px;
+    color: #38bdf8;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.marketplace-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 16px;
+    transition: 0.2s ease;
+}
+
+.marketplace-card:hover {
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+}
+
+.marketplace-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 10px;
+}
+
+.marketplace-meta {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.marketplace-metric-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+}
+
+.marketplace-metric-label {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.marketplace-metric-value {
+    color: #f1f5f9;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.marketplace-status-ok {
+    color: #4ade80;
+    font-weight: 600;
+}
+
+.marketplace-status-warn {
+    color: #facc15;
+    font-weight: 600;
+}
+
+.marketplace-status-bad {
+    color: #f87171;
+    font-weight: 600;
+}
+
+/* keep your existing rule */
+.status-text {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 6px;
+}
+
 </style>
 </head>
-
-/*   /apps/PulseEarnDashboard.html */
-
 <body>
 
 <header>
@@ -576,6 +663,21 @@ input[type="file"] {
                  - Stripe / bank sync logs
                  - Anomaly detection
                  - Drift detection
+            -->
+        </div>
+    </div>
+
+    <!-- Marketplace Intelligence Panel -->
+    <div class="panel marketplaces-panel">
+        <h2>Marketplace Intelligence</h2>
+
+        <div id="marketplaceGrid" class="marketplace-grid">
+            <!-- Filled dynamically by script:
+                - Vast.ai (Auctioneer)
+                - Akash (Ambassador)
+                - Render (Artisan)
+                - Spheron (Courier)
+                - FluidStack (Broker)
             -->
         </div>
     </div>
@@ -1187,9 +1289,77 @@ function simulateEarnings() {
     renderProjections();
 }
 
+async function updateMarketplacePanel() {
+    const grid = document.getElementById("marketplaceGrid");
+    if (!grid) return;
+
+    // Pull healing states
+    const registry = RegisteredMarketplaces.getHealingState();
+    const router = MarketplaceRouter.getHealingState();
+
+    const stats = router.marketplaceStats || {};
+
+    const cards = [];
+
+    for (const adapter of RegisteredMarketplaces.marketplaces) {
+        const id = adapter.id;
+        const name = adapter.name;
+
+        const m = stats[id] || {
+            jobsSeen: 0,
+            avgSlope: 0,
+            lastCycleJobs: 0
+        };
+
+        const status =
+            m.lastCycleJobs > 0 ? "marketplace-status-ok"
+          : registry.missingAdapters.includes(id) ? "marketplace-status-bad"
+          : "marketplace-status-warn";
+
+        cards.push(`
+            <div class="marketplace-card">
+                <div class="marketplace-title">${name}</div>
+
+                <div class="marketplace-meta">
+                    Role: ${adapter.role || "—"}
+                </div>
+
+                <div class="marketplace-metric-row">
+                    <span class="marketplace-metric-label">Jobs Seen</span>
+                    <span class="marketplace-metric-value">${m.jobsSeen}</span>
+                </div>
+
+                <div class="marketplace-metric-row">
+                    <span class="marketplace-metric-label">Avg Money/Sec</span>
+                    <span class="marketplace-metric-value">
+                        $${m.avgSlope.toFixed(4)}
+                    </span>
+                </div>
+
+                <div class="marketplace-metric-row">
+                    <span class="marketplace-metric-label">Last Cycle Jobs</span>
+                    <span class="marketplace-metric-value">${m.lastCycleJobs}</span>
+                </div>
+
+                <div class="marketplace-metric-row">
+                    <span class="marketplace-metric-label">Status</span>
+                    <span class="${status}">
+                        ${status === "marketplace-status-ok" ? "Active" :
+                          status === "marketplace-status-warn" ? "Idle" :
+                          "Unavailable"}
+                    </span>
+                </div>
+            </div>
+        `);
+    }
+
+    grid.innerHTML = cards.join("");
+}
+
 // ---------- Boot ----------
 window.addEventListener("DOMContentLoaded", () => {
     logEarnTrace("Booting Pulse Earn dashboard engine v1 (demo snapshot mode).");
+    setInterval(updateMarketplacePanel, 3000);
     generateEarnSnapshot().then(applyEarnSnapshot);
 });
 

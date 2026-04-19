@@ -39,8 +39,34 @@ const healingState = {
   lastSubmitError: null,
   lastNormalizedJobId: null,
   lastNormalizationError: null,
+  lastLeaseState: null,          // NEW: track Akash lease state
+  lastPayloadVersion: null,      // NEW: track schema drift
+  lastResourceShape: null,       // NEW: track resource structure
   cycleCount: 0,
 };
+
+// ---------------------------------------------------------------------------
+// INTERNAL — Akash-Specific Helpers
+// ---------------------------------------------------------------------------
+
+// Akash sometimes returns leases in different shapes depending on provider.
+// We harden against that without changing logic.
+function safeGet(obj, path, fallback = null) {
+  try {
+    return path.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// Akash lease states we may encounter
+const VALID_LEASE_STATES = new Set([
+  "active",
+  "open",
+  "insufficient_funds",
+  "closed",
+  "unknown"
+]);
 
 // ---------------------------------------------------------------------------
 // AMBASSADOR CLIENT — Akash Marketplace Interface
@@ -78,8 +104,7 @@ export const AkashAdapter = {
   // Fetch Jobs — Retrieve leases from the Akash marketplace
   // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
-    const url =
-      "https://akash-api.polkachu.com/akash/market/v1beta3/leases/list";
+    const url = "https://akash-api.polkachu.com/akash/market/v1beta3/leases/list";
 
     try {
       const res = await fetch(url);
@@ -90,6 +115,10 @@ export const AkashAdapter = {
       }
 
       const data = await res.json();
+
+      // Track schema drift
+      healingState.lastPayloadVersion = typeof data === "object" ? Object.keys(data).join(",") : "unknown";
+
       if (!data || !Array.isArray(data.leases)) {
         healingState.lastFetchError = "invalid_leases_payload";
         healingState.lastFetchCount = 0;
@@ -146,27 +175,40 @@ export const AkashAdapter = {
         healingState.lastNormalizationError = "invalid_raw_lease";
         return null;
       }
+
+      // Track lease state
+      const leaseState = safeGet(raw, "state", "unknown");
+      healingState.lastLeaseState = VALID_LEASE_STATES.has(leaseState) ? leaseState : "unknown";
+
       if (!raw.id) {
         healingState.lastNormalizationError = "missing_id";
         return null;
       }
 
-      const payout = Number(raw.price?.amount ?? 0);
+      const payout = Number(safeGet(raw, "price.amount", 0));
       if (!Number.isFinite(payout) || payout <= 0) {
         healingState.lastNormalizationError = "non_positive_payout";
         return null;
       }
 
-      const cpuRequired = Number(raw.resources?.cpu?.units ?? 1);
-      const memoryRequired = Number(raw.resources?.memory?.quantity ?? 1024);
-      const estimatedSeconds = Number(raw.duration ?? 600);
+      const cpuRequired = Number(safeGet(raw, "resources.cpu.units", 1));
+      const memoryRequired = Number(safeGet(raw, "resources.memory.quantity", 1024));
+      const estimatedSeconds = Number(safeGet(raw, "duration", 600));
+
+      // Track resource shape
+      healingState.lastResourceShape = {
+        cpu: cpuRequired,
+        mem: memoryRequired,
+        duration: estimatedSeconds
+      };
 
       if (!Number.isFinite(estimatedSeconds) || estimatedSeconds <= 0) {
         healingState.lastNormalizationError = "non_positive_duration";
         return null;
       }
 
-      const hasGpu = !!raw.resources?.gpu;
+      const hasGpu = !!safeGet(raw, "resources.gpu", null);
+
       const normalized = {
         id: String(raw.id),
         marketplaceId: "akash",

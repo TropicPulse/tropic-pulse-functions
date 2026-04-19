@@ -11,12 +11,6 @@
 //   • Submits completed render outputs
 //   • Maintains healing metadata for Earn healers
 //
-// WHY “ARTISAN”?:
-//   • Render Network is a creative compute marketplace
-//   • Jobs involve GPU craftsmanship (frames, scenes, assets)
-//   • Workloads are structured, artistic, and visually oriented
-//   • The Artisan specializes in creative job normalization
-//
 // PURPOSE:
 //   • Provide a deterministic, drift‑proof adapter for Render Network
 //   • Maintain strict protocol boundaries
@@ -31,7 +25,6 @@
 //
 // SAFETY:
 //   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
-//   • All behavior remains identical to pre‑v6.3 RenderAdapter
 // ============================================================================
 
 // ---------------------------------------------------------------------------
@@ -46,8 +39,41 @@ const healingState = {
   lastSubmitError: null,
   lastNormalizedJobId: null,
   lastNormalizationError: null,
+
+  // NEW — Render-specific metadata (allowed)
+  lastPayloadVersion: null,
+  lastJobType: null,
+  lastAssetSizeMB: null,
+  lastGpuTier: null,
+  lastResourceShape: null,
+  payoutVolatility: 0,
+  liquidityScore: 0,
   cycleCount: 0,
 };
+
+// ---------------------------------------------------------------------------
+// INTERNAL — Render-Specific Helpers
+// ---------------------------------------------------------------------------
+function safeGet(obj, path, fallback = null) {
+  try {
+    return path.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function updateVolatility(jobs) {
+  const count = jobs.length;
+  const payouts = jobs.map(j => Number(j.payout ?? 0)).filter(n => Number.isFinite(n));
+
+  healingState.liquidityScore = Math.abs(count - (healingState.lastFetchCount || 0));
+
+  if (payouts.length > 1) {
+    const avg = payouts.reduce((a, b) => a + b, 0) / payouts.length;
+    const variance = payouts.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / payouts.length;
+    healingState.payoutVolatility = variance;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // ARTISAN CLIENT — Render Network Interface
@@ -96,6 +122,10 @@ export const RenderAdapter = {
       }
 
       const data = await res.json();
+
+      // Track schema drift
+      healingState.lastPayloadVersion = typeof data === "object" ? Object.keys(data).join(",") : "unknown";
+
       if (!data || !Array.isArray(data.jobs)) {
         healingState.lastFetchError = "invalid_jobs_payload";
         healingState.lastFetchCount = 0;
@@ -105,6 +135,8 @@ export const RenderAdapter = {
       const jobs = data.jobs
         .map(raw => this.normalizeJob(raw))
         .filter(j => j !== null);
+
+      updateVolatility(jobs);
 
       healingState.lastFetchError = null;
       healingState.lastFetchCount = jobs.length;
@@ -157,6 +189,9 @@ export const RenderAdapter = {
         return null;
       }
 
+      // Track job type (Render often includes this)
+      healingState.lastJobType = safeGet(raw, "type", "unknown");
+
       const payout = Number(raw.reward ?? raw.payout ?? 0);
       if (!Number.isFinite(payout) || payout <= 0) {
         healingState.lastNormalizationError = "non_positive_payout";
@@ -167,15 +202,34 @@ export const RenderAdapter = {
       const memoryRequired = Number(raw.memory ?? 2048);
       const estimatedSeconds = Number(raw.estimatedSeconds ?? 900);
 
+      healingState.lastResourceShape = {
+        cpu: cpuRequired,
+        mem: memoryRequired,
+        duration: estimatedSeconds
+      };
+
       if (!Number.isFinite(estimatedSeconds) || estimatedSeconds <= 0) {
         healingState.lastNormalizationError = "non_positive_duration";
         return null;
       }
 
-      const minGpuScore = raw.gpuRequired ? 400 : 150;
-      const bandwidthNeededMbps = Number(
-        raw.assetSizeMB ? raw.assetSizeMB / 10 : 10
-      );
+      // GPU tier inference
+      const gpuRequired = !!raw.gpuRequired || !!raw.gpuTier;
+      const gpuTier = raw.gpuTier ?? (gpuRequired ? "mid" : "none");
+      healingState.lastGpuTier = gpuTier;
+
+      const minGpuScore =
+        gpuTier === "high" ? 600 :
+        gpuTier === "mid"  ? 400 :
+        gpuTier === "low"  ? 250 : 150;
+
+      // Asset size → bandwidth inference
+      const assetSizeMB = Number(raw.assetSizeMB ?? raw.sceneSizeMB ?? 0);
+      healingState.lastAssetSizeMB = assetSizeMB;
+
+      const bandwidthNeededMbps = assetSizeMB > 0
+        ? Math.max(10, assetSizeMB / 10)
+        : 10;
 
       const normalized = {
         id: String(raw.id),

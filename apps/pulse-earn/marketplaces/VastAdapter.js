@@ -11,12 +11,6 @@
 //   • Submits completed results
 //   • Maintains healing metadata for Earn healers
 //
-// WHY “AUCTIONEER”?:
-//   • Vast.ai behaves like a compute auction house
-//   • Listings fluctuate constantly (price, GPU score, duration)
-//   • Metadata is inconsistent and unpredictable
-//   • The Auctioneer specializes in extracting order from chaos
-//
 // PURPOSE:
 //   • Provide a deterministic, drift‑proof adapter for Vast.ai
 //   • Maintain strict protocol boundaries
@@ -31,7 +25,6 @@
 //
 // SAFETY:
 //   • v6.3 upgrade is COMMENTAL ONLY — NO LOGIC CHANGES
-//   • All behavior remains identical to pre‑v6.3 VastAdapter
 // ============================================================================
 
 // ---------------------------------------------------------------------------
@@ -46,8 +39,42 @@ const healingState = {
   lastSubmitError: null,
   lastNormalizedJobId: null,
   lastNormalizationError: null,
+
+  // NEW — Vast-specific metadata
+  lastPayloadVersion: null,
+  lastJobType: null,
+  lastGpuScore: null,
+  lastResourceShape: null,
+  lastBandwidthInference: null,
+  priceVolatility: 0,
+  listingVolatility: 0,
+
   cycleCount: 0,
 };
+
+// ---------------------------------------------------------------------------
+// INTERNAL — Vast-Specific Helpers
+// ---------------------------------------------------------------------------
+function safeGet(obj, path, fallback = null) {
+  try {
+    return path.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function updateVolatility(jobs) {
+  const count = jobs.length;
+  const payouts = jobs.map(j => Number(j.payout ?? 0)).filter(n => Number.isFinite(n));
+
+  healingState.listingVolatility = Math.abs(count - (healingState.lastFetchCount || 0));
+
+  if (payouts.length > 1) {
+    const avg = payouts.reduce((a, b) => a + b, 0) / payouts.length;
+    const variance = payouts.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / payouts.length;
+    healingState.priceVolatility = variance;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // AUCTIONEER CLIENT — Vast.ai Marketplace Interface
@@ -96,6 +123,10 @@ export const VastAdapter = {
       }
 
       const data = await res.json();
+
+      // Track schema drift
+      healingState.lastPayloadVersion = typeof data === "object" ? Object.keys(data).join(",") : "unknown";
+
       if (!data || !Array.isArray(data.jobs)) {
         healingState.lastFetchError = "invalid_jobs_payload";
         healingState.lastFetchCount = 0;
@@ -105,6 +136,8 @@ export const VastAdapter = {
       const jobs = data.jobs
         .map(raw => this.normalizeJob(raw))
         .filter(j => j !== null);
+
+      updateVolatility(jobs);
 
       healingState.lastFetchError = null;
       healingState.lastFetchCount = jobs.length;
@@ -158,9 +191,17 @@ export const VastAdapter = {
         return null;
       }
 
+      // Track job type (Vast sometimes includes this)
+      healingState.lastJobType = safeGet(raw, "type", "unknown");
+
       const payout =
         raw.payout ??
         (raw.price_per_hour ? Number(raw.price_per_hour) : 0);
+
+      if (!Number.isFinite(payout) || payout <= 0) {
+        healingState.lastNormalizationError = "non_positive_payout";
+        return null;
+      }
 
       const cpuRequired = Number(raw.cpu_required ?? raw.cpu ?? 1);
       const memoryRequired = Number(raw.memory_required ?? raw.ram ?? 1024);
@@ -168,14 +209,24 @@ export const VastAdapter = {
         raw.estimated_seconds ?? raw.duration ?? 600
       );
 
-      if (!Number.isFinite(payout) || payout <= 0) {
-        healingState.lastNormalizationError = "non_positive_payout";
-        return null;
-      }
+      healingState.lastResourceShape = {
+        cpu: cpuRequired,
+        mem: memoryRequired,
+        duration: estimatedSeconds
+      };
+
       if (!Number.isFinite(estimatedSeconds) || estimatedSeconds <= 0) {
         healingState.lastNormalizationError = "non_positive_duration";
         return null;
       }
+
+      // GPU score inference
+      const gpuScore = Number(raw.gpu_score ?? raw.min_gpu_score ?? 100);
+      healingState.lastGpuScore = gpuScore;
+
+      // Bandwidth inference
+      const bandwidth = Number(raw.bandwidth ?? raw.net_mbps ?? 5);
+      healingState.lastBandwidthInference = bandwidth;
 
       const normalized = {
         id: String(raw.id),
@@ -186,8 +237,8 @@ export const VastAdapter = {
         memoryRequired,
         estimatedSeconds,
 
-        minGpuScore: Number(raw.gpu_score ?? raw.min_gpu_score ?? 100),
-        bandwidthNeededMbps: Number(raw.bandwidth ?? 5),
+        minGpuScore: gpuScore,
+        bandwidthNeededMbps: bandwidth,
       };
 
       healingState.lastNormalizedJobId = normalized.id;

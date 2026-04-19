@@ -49,12 +49,13 @@
 // ============================================================================
 
 console.log(
-  "%c🟦 PulseGPUAutoOptimize v7.1 online — GUARDIAN nervous system active.",
+  "%c🟦 PulseGPUAutoOptimize v7.3 online — GUARDIAN neural lattice stabilized.",
   "color:#03A9F4; font-weight:bold;"
 );
 
 // ============================================================================
 //  Utility: build decision (v7-ready, logic unchanged)
+//  EVOLUTION: Added Guardian lineage + nervous-system metadata.
 // ============================================================================
 function buildDecision({ mode, reason, plan }) {
   console.log(
@@ -68,11 +69,24 @@ function buildDecision({ mode, reason, plan }) {
     plan: plan || null,
     meta: {
       layer: "PulseGPUAutoOptimize",
-      version: 7.1,
+      version: 7.3,
       target: "full-gpu",
-      // Evolutionary hints (conceptual only, no logic impact):
-      multiInstanceReady: true,   // safe to fan out many Guardians
-      deterministicPolicy: true   // same inputs → same outputs, always
+
+      // Evolutionary metadata (no logic impact)
+      lineage: "guardian-core",
+      multiInstanceReady: true,
+      deterministicPolicy: true,
+      parallelSafe: true,
+      statelessCore: true,
+      zeroEntropy: true,
+
+      // Nervous-system hints (purely descriptive)
+      neuralRole: "policy-cortex",
+      subsystem: "gpu-healing",
+      instanceBehavior: "predictable",
+      decisionSurface: "severity × preference × plan",
+      driftResistance: "high",
+      mutationRisk: "none"
     }
   };
 }
@@ -114,8 +128,9 @@ function getHighestSeverity(adviceList = []) {
 }
 
 // ============================================================================
-//  PulseGPUAutoOptimize (v7.1) — Guardian Policy Cortex
+//  PulseGPUAutoOptimize (v7.3) — Guardian Policy Cortex
 //  NOTE: All decision logic preserved from v6.3.
+//  EVOLUTION: Added identity, lineage, and introspection logs.
 // ============================================================================
 class PulseGPUAutoOptimize {
   constructor(userPreferences, instanceId) {
@@ -123,8 +138,13 @@ class PulseGPUAutoOptimize {
     this.instanceId = instanceId || "guardian-instance";
 
     console.log(
-      "%c[Guardian] User preferences loaded for " + this.instanceId + ".",
+      `%c[Guardian] Instance ${this.instanceId} initialized.`,
       "color:#9C27B0;"
+    );
+
+    console.log(
+      "%c[Guardian] Identity: policy-cortex | lineage: guardian-core | role: optimization arbiter.",
+      "color:#7E57C2;"
     );
   }
 
@@ -134,7 +154,7 @@ class PulseGPUAutoOptimize {
   // ----------------------------------------------------
   decide(plan, context = {}) {
     console.log(
-      "%c[Guardian] decide() called for " + this.instanceId + ".",
+      `%c[Guardian] decide() invoked for ${this.instanceId}.`,
       "color:#03A9F4;"
     );
 
