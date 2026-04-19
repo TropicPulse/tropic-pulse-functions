@@ -212,8 +212,8 @@ function buildPulseNetSnapshot(rawSignal, previousSignal, meta = {}) {
 // EXPORTED SYNAPSE API (WHAT OTHER LAYERS SHOULD IMPORT)
 // ============================================================================
 
-export {
-  // Layer identity
+export const PulseNet = {
+  // Identity
   PULSE_LAYER_ID,
   PULSE_LAYER_NAME,
   PULSE_LAYER_ROLE,
