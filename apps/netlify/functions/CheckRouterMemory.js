@@ -1,16 +1,15 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/CheckRouterMemory.js
-// PULSE NETWORK MEMORY HEALER — v6.3
+// PULSE NETWORK MEMORY HEALER — v6.4
 // “THE NETWORK / B‑LAYER LOG HEALING + INTAKE ENGINE”
 // ============================================================================
 //
-// ⭐ v6.3 COMMENT LOG
+// ⭐ v6.4 COMMENT LOG
 // - THEME: “THE NETWORK / LOG HEALING + INTAKE ENGINE”
 // - ROLE: Backend intake + validator for RouterMemory flushes
-// - Added LAYER CONSTANTS + DIAGNOSTICS helper
-// - Added structured JSON logs (DOM-visible inspector compatible)
-// - Added explicit STAGE markers for intake/validate/heal/return
-// - NO long‑term storage decisions here — this is a healing + pass‑through layer
+// - Added Lymbic escalation hook on FATAL_ERROR (RouteDownAlert)
+// - Kept safety contract: no direct external writes, fail‑open behavior
+// - Kept healing + normalization logic IDENTICAL to v6.3
 //
 // ============================================================================
 // PERSONALITY + ROLE — “THE NETWORK HEALER”
@@ -43,12 +42,13 @@
 //   ✘ NOT a security or auth layer
 //
 // ============================================================================
-// SAFETY CONTRACT (v6.3)
+// SAFETY CONTRACT (v6.4)
 // ----------------------------------------------------------------------------
 //   • Never write directly to external systems from here
 //   • Fail‑open: invalid payload → empty, safe array
 //   • Never mutate the original input in place
 //   • Always return a structurally safe, array‑of‑objects batch
+//   • Lymbic escalation (RouteDownAlert) must NEVER throw back into this file
 //
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
@@ -60,7 +60,6 @@ const LAYER_ROLE = "B-LAYER MEMORY INTAKE + REPAIR";
 const NETWORK_DIAGNOSTICS_ENABLED =
   process.env.PULSE_NETWORK_DIAGNOSTICS === "true" ||
   process.env.PULSE_DIAGNOSTICS === "true";
-
 
 const logNetworkHealer = (stage, details = {}) => {
   if (!NETWORK_DIAGNOSTICS_ENABLED) return;
@@ -81,7 +80,6 @@ const logNetworkHealer = (stage, details = {}) => {
     })
   );
 };
-
 
 // ============================================================================
 // HUMAN‑READABLE CONTEXT MAP (MIRROR OF FRONTEND MEMORY CONTEXT)
@@ -154,6 +152,35 @@ function healLogBatch(raw) {
   });
 
   return healed;
+}
+
+// ============================================================================
+// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL
+// ----------------------------------------------------------------------------
+// On FATAL_ERROR, we *optionally* notify RouteDownAlert.
+// This is an internal syscall only; if it fails, we swallow the error.
+// ============================================================================
+async function notifyLymbicOnFatal(err) {
+  try {
+    await fetch("/.netlify/functions/RouteDownAlert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: err?.message || String(err) || "Unknown error",
+        type: "CheckRouterMemoryFatal",
+        source: "CheckRouterMemory",
+        extra: {
+          layer: LAYER_ID,
+          role: LAYER_ROLE
+        }
+      })
+    });
+  } catch (e) {
+    // Lymbic must NEVER stab the spine.
+    logNetworkHealer("LYMBIC_NOTIFY_FAILED", {
+      message: String(e)
+    });
+  }
 }
 
 // ============================================================================
@@ -239,6 +266,9 @@ export const handler = async (event, context) => {
     logNetworkHealer("FATAL_ERROR", {
       message: err?.message || "Unknown error"
     });
+
+    // ⭐ Lymbic escalation — MUST NOT throw
+    await notifyLymbicOnFatal(err);
 
     return {
       statusCode: 500,
