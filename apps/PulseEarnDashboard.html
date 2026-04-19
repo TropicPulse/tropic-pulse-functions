@@ -587,6 +587,10 @@ input[type="file"] {
 import { pulseband } from "./proxy/PulseBand.js";
 import { identity } from "./PulseIdentity.js";
 import { getAuth, getHook, getMap, callHelper, attachScanner } from "./lib/Connectors/PageScanner.js";
+
+// THE REAL IMPORT YOU WANT — ALL METRICS COME FROM HERE
+import * as usermetrics from "./pulse-proxy/PulseUserMetrics.js";
+
 // =======================
 // PULSE EARN — ENGINE v7.3
 // Snapshot-first, Stripe-ready, Live-capable, Audit-aligned
@@ -610,14 +614,13 @@ const earnGrowthModel = {
 
 // ---------- Real Earn Snapshot Generator (v7.3) ----------
 async function generateEarnSnapshot() {
-    // These MUST be wired to your real backend.
-    // Right now they are conceptual placeholders, not implementations.
-    const stripeData   = await getStripeMetrics();      // { available, pending, lastPayout, nextPayout, payoutHistory }
-    const bankData     = await getBankMetrics();        // { currentBalance, lastDeposit, nightlyAverage, depositVelocity }
-    const deviceData   = await getDeviceMetrics();      // [DeviceEarner]
-    const userData     = await getUserMetrics();        // [UserEarner]
-    const familyData   = await getFamilyModeMetrics();  // FamilyMode or null
-    const projections  = getProjectionConfig();         // Projections
+    // These MUST be wired to your real backend via PulseUserMetrics.js.
+    const stripeData   = await usermetrics.getStripeMetrics();      // { available, pending, lastPayout, nextPayout, payoutHistory }
+    const bankData     = await usermetrics.getBankMetrics();        // { currentBalance, lastDeposit, nightlyAverage, depositVelocity }
+    const deviceData   = await usermetrics.getDeviceMetrics();      // [DeviceEarner]
+    const userData     = await usermetrics.getUserMetrics();        // [UserEarner]
+    const familyData   = await usermetrics.getFamilyModeMetrics();  // FamilyMode or null
+    const projections  = usermetrics.getProjectionConfig();         // Projections
 
     // 1) Aggregate real earnings from devices as base
     const currentMonthly = deviceData.reduce(
@@ -1112,7 +1115,7 @@ function renderProjections() {
     const devices = deviceInput ? parseInt(deviceInput.value || "1", 10) : 1;
     const users   = userInput ? parseInt(userInput.value || "1", 10) : 1;
 
-    const baseMonthly        = e.currentMonthly * devices;
+    const baseMonthly         = e.currentMonthly * devices;
     const conservativeMonthly = baseMonthly * p.conservativeMultiplier;
     const moderateMonthly     = baseMonthly * p.moderateMultiplier;
     const aggressiveMonthly   = baseMonthly * p.aggressiveMultiplier;
@@ -1184,12 +1187,12 @@ function simulateEarnings() {
     renderProjections();
 }
 
-
 // ---------- Boot ----------
 window.addEventListener("DOMContentLoaded", () => {
     logEarnTrace("Booting Pulse Earn dashboard engine v1 (demo snapshot mode).");
     generateEarnSnapshot().then(applyEarnSnapshot);
 });
+
 </script>
 
 </body>
