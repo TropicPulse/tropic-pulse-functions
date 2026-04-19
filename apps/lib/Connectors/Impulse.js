@@ -6,9 +6,9 @@
 // ROLE:
 //   THE IMPULSE — The adaptive traveling signal of Pulse OS
 //   • Fired by PulseBand (Nervous System)
-//   • Moves through each layer sequentially
+//   • Moves through each layer sequentially (UNBOUNDED PATHWAY, 0..N HOPS)
 //   • Each layer attaches identity + state + delta
-//   • Factors its energy (1/0, 1/2) per hop
+//   • Factors its energy (1/0, 1/2) per hop (no fixed hop count assumed)
 //   • Adapts urgency based on environmental conditions (pattern-inspired)
 //   • Returns to PulseBand with full organism snapshot
 //
@@ -21,6 +21,13 @@
 //   • Spinal Cord (Impulse) becomes identity authority
 //   • Nervous system becomes globally consistent + drift-proof
 //
+// v6.5 UPGRADE (LIVING PATHWAY):
+//   • Formalizes impulse.path as a LIVING NERVOUS PATHWAY (dynamic length)
+//   • Never assumes a fixed number of layers (no “6-layer spine” limit)
+//   • Pathway length emerges from annotate() calls (organism growth-safe)
+//   • Designed to be interpreted by NerveMap + PathwayMemory (evolving map)
+//   • Energy/urgency are hop-relative, not tied to any max depth
+//
 // CONTRACT:
 //   • Pure traveler — no imports from PulseNet, PulseUpdate, PulseClient
 //   • No business logic — pattern only
@@ -29,6 +36,7 @@
 // SAFETY:
 //   • v6.3 was COMMENTAL + DIAGNOSTIC ONLY
 //   • v6.4 adds identity-only fields + safety guard (non-invasive)
+//   • v6.5 adds explicit unbounded-pathway semantics (evolution-safe)
 // ============================================================================
 
 
@@ -68,6 +76,7 @@ export const Impulse = {
 
   // --------------------------------------------------------------------------
   // Create a new impulse (v6.4+: identity-aware + repair-seeded + guarded)
+  // v6.5: pathway-unbounded, ready for NerveMap + PathwayMemory
   // --------------------------------------------------------------------------
   create(intent, payload = {}) {
     const tickId =
@@ -79,7 +88,11 @@ export const Impulse = {
       tickId,
       intent,
       payload,
+
+      // LIVING PATHWAY:
+      // path is an unbounded array of hops; length emerges from annotate() calls
       path: [],
+
       energy: 1,   // starts at full energy
       factor: 1,   // factoring multiplier
       urgency: 0,  // adaptive urgency (pattern-inspired)
@@ -124,7 +137,7 @@ export const Impulse = {
 
   // --------------------------------------------------------------------------
   // Adaptive urgency (pattern-inspired environmental response)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   computeUrgency(layerState) {
     let u = 0;
 
@@ -139,6 +152,7 @@ export const Impulse = {
 
   // --------------------------------------------------------------------------
   // Apply factoring (1/0, 1/2 pattern) + urgency modulation
+  // v6.5: hop-relative, works for any pathway depth
   // --------------------------------------------------------------------------
   factorImpulse(impulse) {
     impulse.factor *= 0.5;
@@ -149,10 +163,11 @@ export const Impulse = {
     }
 
     impulseLog("IMPULSE_FACTOR", {
-      tickId: impulse.tickId,
-      factor: impulse.factor,
-      energy: impulse.energy,
-      urgency: impulse.urgency
+      tickId:   impulse.tickId,
+      factor:   impulse.factor,
+      energy:   impulse.energy,
+      urgency:  impulse.urgency,
+      hopsSoFar: impulse.path.length
     });
 
     return impulse;
@@ -161,6 +176,7 @@ export const Impulse = {
 
   // --------------------------------------------------------------------------
   // Layer attaches identity + state + delta
+  // v6.5: each annotate() call is a Nerve hop in a living pathway
   // --------------------------------------------------------------------------
   annotate(impulse, layerIdentity, layerState, delta) {
     impulse.urgency = this.computeUrgency(layerState);
@@ -183,11 +199,13 @@ export const Impulse = {
     });
 
     impulseLog("IMPULSE_ANNOTATE", {
-      tickId: impulse.tickId,
-      layer: layerIdentity.id,
-      page: impulse.page.name,
-      urgency: impulse.urgency,
-      identityHealth: impulse.identityHealth
+      tickId:         impulse.tickId,
+      layer:          layerIdentity.id,
+      page:           impulse.page.name,
+      urgency:        impulse.urgency,
+      identityHealth: impulse.identityHealth,
+      hopIndex:       impulse.path.length - 1,
+      totalHops:      impulse.path.length
     });
 
     return impulse;
@@ -196,14 +214,15 @@ export const Impulse = {
 
   // --------------------------------------------------------------------------
   // Return impulse to PulseBand
+  // v6.5: pathway length is emergent; NerveMap/PathwayMemory interpret it
   // --------------------------------------------------------------------------
   returnToPulseBand(impulse) {
     impulse.signature = "1001101010101010101"; // return genome
 
     impulseLog("IMPULSE_RETURN", {
-      tickId: impulse.tickId,
-      hops: impulse.path.length,
-      page: impulse.page.name,
+      tickId:         impulse.tickId,
+      hops:           impulse.path.length,
+      page:           impulse.page.name,
       identityHealth: impulse.identityHealth
     });
 
