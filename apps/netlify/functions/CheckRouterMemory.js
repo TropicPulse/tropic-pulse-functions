@@ -66,6 +66,12 @@ const logNetworkHealer = (stage, details = {}) => {
   if (!NETWORK_DIAGNOSTICS_ENABLED) return;
 
   console.log(
+    `%c(${LAYER_NAME} ${LAYER_ROLE}) %c${stage}`,
+    "color:#00eaff;font-weight:bold;",
+    "color:#fff;font-weight:bold;"
+  );
+
+  console.log(
     JSON.stringify({
       pulseLayer: LAYER_ID,
       pulseName: LAYER_NAME,
@@ -75,6 +81,7 @@ const logNetworkHealer = (stage, details = {}) => {
     })
   );
 };
+
 
 // ============================================================================
 // HUMAN‑READABLE CONTEXT MAP (MIRROR OF FRONTEND MEMORY CONTEXT)
