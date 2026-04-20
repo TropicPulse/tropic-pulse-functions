@@ -63,8 +63,6 @@
 //      - unifiedAdvantageField: no OR, both layers always on
 // ============================================================================
 
-import { PulseGPURuntime } from "./PulseGPURuntime.js";
-
 // ============================================================================
 //  ENGINE META — Astral Muscle Identity
 // ============================================================================

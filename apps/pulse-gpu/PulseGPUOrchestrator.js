@@ -57,16 +57,14 @@
 //  • If any organ evolves → the brainstem routes the advantage to all others.
 //  • No OR — all advantages are inherited automatically.
 // ============================================================================
-
 import { PulseGPUSettingsMemory } from "./PulseGPUSettingsMemory.js";
 import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
 import { PulseGPUSettingsRestorer } from "./PulseGPUSettingsRestorer.js";
 import { PulseGPUSessionTracer } from "./PulseGPUSessionTracer.js";
-import { PulseGPUInsightsEngine } from "./PulseGPUInsightsEngine.js";
+
 import { PulseGPUEventEmitter } from "./PulseGPUEventEmitter.js";
 import { PulseGPUUXBridge } from "./PulseGPUUXBridge.js";
 import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
-import { PulseGPUHealer } from "./PulseGPUHealer.js";
 
 // ============================================================================
 //  PULSE GPU ORCHESTRATOR — THE BRAINSTEM

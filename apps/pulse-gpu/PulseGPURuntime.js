@@ -56,8 +56,6 @@
 //  • No OR — all advantages are inherited automatically.
 // ============================================================================
 
-import { PulseGPUBrainExport } from "./PulseGPUBrain.js";
-
 // ============================================================================
 // GPU CONTEXT WRAPPER — Momentum Network: Conduction Node
 // ============================================================================

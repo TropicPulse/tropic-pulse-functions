@@ -95,16 +95,6 @@ const GPU_HEALER_CONTEXT = {
 // ============================================================================
 // IMPORTS
 // ============================================================================
-import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
-import {
-  PulseGPUSettingsRestorer,
-  validatePlan
-} from "./PulseGPUSettingsRestorer.js";
-import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
-import {
-  PulseGPUUXBridge,
-  validateNotification
-} from "./PulseGPUUXBridge.js";
 
 // ============================================================================
 // HEALING REPORT BUILDER (v7-ready, logic unchanged)

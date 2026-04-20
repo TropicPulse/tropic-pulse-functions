@@ -50,6 +50,10 @@
 //  • Always API-agnostic
 //  • Always side-effect-free
 // ============================================================================
+import { PulseGPURuntime } from "./PulseGPURuntime.js";
+import { PulseGPUEngine } from "./PulseGPUEngine.js";
+import { PulseGPUOrchestrator } from "./PulseGPUOrchestrator.js";
+import { PulseGPUInsightsEngine } from "./PulseGPUInsightsEngine.js";
 
 log(
   "gpu",

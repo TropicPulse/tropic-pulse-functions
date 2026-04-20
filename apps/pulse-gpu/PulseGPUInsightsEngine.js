@@ -58,8 +58,6 @@
 //  • No OR: any organism‑level advantage is assumed available to the cortex.
 // ============================================================================
 
-import { SessionTrace } from "./PulseGPUSessionTracer.js";
-
 // ============================================================================
 // UTILITY: clamp — Wisdom requires boundaries
 // ============================================================================
