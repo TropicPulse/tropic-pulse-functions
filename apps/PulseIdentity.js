@@ -18,7 +18,7 @@
 //  NO OTHER FILE DEFINES VERSION / ROLE / COLOR / METAPHOR.
 // ============================================================================
 
-import { log, warn, error } from "./PulseLogger.js";
+import {PulseVersion, PulseRoles, log, warn, error } from "./PulseLogger.js";
 // ============================================================================
 //  LINEAGE MAP — Evolutionary Identity
 // ============================================================================
