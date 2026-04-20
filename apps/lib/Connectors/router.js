@@ -251,9 +251,16 @@ export async function route(type, payload = {}) {
   routingInProgress = true;
 
   logWisdom("ROUTE_CALL", { type });
-  logEvent("routeCall", { type, payload, ...ROUTER_CONTEXT });
+
+  // ⭐ 1. Log the route call (this also heals memory once)
+  await logEvent("routeCall", { type, payload, ...ROUTER_CONTEXT });
+
+  // ⭐ 2. CRITICAL — Heal memory AGAIN before routing
+  // This is the missing link that restores the chain.
+  await healRouterMemoryIfNeeded();
 
   try {
+    // ⭐ 3. Now call backend with clean memory + clean context
     const json = await Transport.callEndpoint(type, payload);
 
     routeFailureCount = 0;
@@ -354,6 +361,7 @@ export async function route(type, payload = {}) {
     return { error: "Frontend connector failed", details: msg, signature };
   }
 }
+
 
 
 // ============================================================================
