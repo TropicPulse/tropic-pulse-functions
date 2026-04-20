@@ -36,6 +36,7 @@
 // ============================================================================
 //  IMPORTS — RAW NEURAL SUBSYSTEMS
 // ============================================================================
+import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error } from "./PulseLogger.js";
 import {
   BrainInput,
   PulseGPUBrainExport

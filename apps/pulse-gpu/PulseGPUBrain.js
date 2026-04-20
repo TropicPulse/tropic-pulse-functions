@@ -50,7 +50,7 @@
 //  • Always API-agnostic
 //  • Always side-effect-free
 // ============================================================================
-import { log, warn, error } from "../PulseLogger.js";
+
 log(
   "gpu",
   "PulseGPUBrain v7.3 — Analyst Cortex active (dual‑mode evolution)."

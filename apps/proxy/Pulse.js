@@ -53,6 +53,7 @@
 //  • Only pure re‑exports.
 //  • Deterministic, drift‑proof facade behavior.
 //
+import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error } from "./PulseLogger.js";
 // ============================================================================
 //  LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
