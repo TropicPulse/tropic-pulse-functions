@@ -68,6 +68,13 @@ const logProtector = (stage, details = {}) => {
 
 
 // ============================================================================
+//  PULSE OS v7.8 — PAGE SCANNER (A → A2 → Router → Backend)
+//  Universal Error Intake • Route Trace • Healing Triggers • Backend Pipe
+// ============================================================================
+
+import { route } from "./router.js";
+
+// ============================================================================
 // ROUTE MEMORY (v7.0) — LIVING MAP, NOT CONFIG
 // ============================================================================
 const RouteMemory = {
@@ -108,12 +115,9 @@ const RouteMemory = {
   }
 };
 
-
 // ============================================================================
 // PUBLIC API (C‑LAYER)
 // ============================================================================
-import { route } from "./router.js";
-
 export async function getAuth(jwtToken) {
   logProtector("GET_AUTH", {});
   return await route("auth", { jwtToken });
@@ -134,7 +138,6 @@ export async function callHelper(helperName, payload = {}) {
   return await route("helper", { helperName, payload });
 }
 
-
 // ============================================================================
 // ATTACH SCANNER
 // ============================================================================
@@ -154,9 +157,8 @@ export function attachScanner(id) {
   );
 }
 
-
 // ============================================================================
-// GLOBAL ERROR INTERCEPTOR (A → A2)
+// GLOBAL ERROR INTERCEPTOR (A → A2 → Router → Backend)
 // ============================================================================
 let healingInProgress = false;
 
@@ -166,45 +168,6 @@ window.addEventListener(
     if (healingInProgress) return;
 
     const msg = event.message || "";
-    logProtector("ERROR_INTERCEPTED", { message: msg });
-
-    // ------------------------------------------------------------------------
-    // v7.1 — PAGE-LEVEL CLASSIFICATION (router-style guards)
-    // ------------------------------------------------------------------------
-    // These never touch backend logic or identity; they just classify and
-    // prevent page-level failures from becoming organism killers.
-    // ------------------------------------------------------------------------
-
-    // 1) Import / module conflict (double import, circular, missing module)
-    if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
-      logProtector("PAGE_IMPORT_CONFLICT", {
-        error: "importConflict",
-        details: msg
-      });
-      // Page-level classification only; router still has its own guard.
-      return;
-    }
-
-    // 2) Env mismatch (process.env used in frontend)
-    if (msg.includes("process is not defined")) {
-      logProtector("PAGE_ENV_MISMATCH", {
-        error: "frontendEnvMismatch",
-        hint: "Replace process.env.* with window.PULSE_*"
-      });
-      // We don't push to RouterMemory here; this is a pure page-level signal.
-      return;
-    }
-
-    // 3) Recursion / thrash at page level (above router)
-    if (msg.includes("Maximum call stack size exceeded")) {
-      logProtector("PAGE_RECURSION_LOOP", {
-        error: "pageRecursionLoop",
-        details: msg
-      });
-      // Router cannot see this; PageScanner is the only safe place to stop it.
-      return;
-    }
-
     const stack = event.error?.stack || "";
     const frames = stack.split("\n").map((s) => s.trim());
 
@@ -212,9 +175,33 @@ window.addEventListener(
       .filter((f) => f.includes(".js"))
       .map((f) => f.replace(/^at\s+/, ""));
 
-    // If we have no frames, we still log and bail safely
-    if (!rawFrames.length) {
-      logProtector("NO_FRAMES_FOUND", {});
+    logProtector("ERROR_INTERCEPTED", { message: msg });
+
+    // ------------------------------------------------------------------------
+    // PAGE-LEVEL CLASSIFICATION (router-style guards)
+    // ------------------------------------------------------------------------
+    if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
+      logProtector("PAGE_IMPORT_CONFLICT", { error: "importConflict", details: msg });
+      await route("logError", { type: "importConflict", message: msg, frames: rawFrames });
+      return;
+    }
+
+    if (msg.includes("process is not defined")) {
+      logProtector("PAGE_ENV_MISMATCH", {
+        error: "frontendEnvMismatch",
+        hint: "Replace process.env.* with window.PULSE_*"
+      });
+      await route("logError", { type: "envMismatch", message: msg, frames: rawFrames });
+      return;
+    }
+
+    if (msg.includes("Maximum call stack size exceeded")) {
+      logProtector("PAGE_RECURSION_LOOP", {
+        error: "pageRecursionLoop",
+        details: msg
+      });
+      await route("logError", { type: "recursionLoop", message: msg, frames: rawFrames });
+      return;
     }
 
     // ------------------------------------------------------------------------
@@ -245,8 +232,19 @@ window.addEventListener(
     }
 
     // ------------------------------------------------------------------------
-    // HEALING LOGIC (v7.2 — same core, smarter targeting)
-// ------------------------------------------------------------------------
+    // ALWAYS PIPE ERROR TO BACKEND (v7.8)
+    // ------------------------------------------------------------------------
+    await route("logError", {
+      type: "unclassified",
+      message: msg,
+      frames: rawFrames,
+      routeTrace,
+      page: window.location.pathname
+    });
+
+    // ------------------------------------------------------------------------
+    // HEALING LOGIC (v7.2)
+    // ------------------------------------------------------------------------
     const parsed = parseMissingField(msg);
     if (!parsed) {
       logProtector("NO_MISSING_FIELD", {});
@@ -254,8 +252,6 @@ window.addEventListener(
     }
 
     const { table, field } = parsed;
-
-    // NEW: resolve which module owns this symbol (field)
     const ownerModule = resolveOwnerModule(field);
 
     logProtector("HEALING_TRIGGERED", {
@@ -288,6 +284,7 @@ window.addEventListener(
   },
   true
 );
+
 
 
 // ============================================================================

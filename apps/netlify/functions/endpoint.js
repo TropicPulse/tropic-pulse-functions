@@ -1,67 +1,36 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/endpoint.js
-// PULSE BACKEND ENDPOINT — VERSION 7.1+
+// PULSE BACKEND ENDPOINT — VERSION 7.8
 // “THE EPITHELIAL GATE / IMMUNE BARRIER LAYER”
 // ============================================================================
 //
-// PAGE INDEX (v7.1+ Source of Truth)
-// ----------------------------------
 // ROLE:
-//   This file is the **EPITHELIAL GATE** of the backend — the Immune Barrier Layer.
-//   It is the organism’s first line of defense, filtering all incoming signals.
-//
-//   • Intercepts every request entering the organism
-//   • Validates intent (type)
+//   • First line of backend defense
+//   • Validates incoming signals
 //   • Routes to modular backend organs
 //   • Falls back to legacy organs
-//   • Reports missing organs for healing
+//   • NEW: Accepts logError packets from PageScanner
+//   • NEW: Writes logs to Firestore via firebase.js
 //
-//   Nothing touches backend organs without passing through this gate.
-//
-// WHAT THIS FILE *IS* (v7.1+):
-//   • The immune barrier + epithelial checkpoint of the backend
-//   • A deterministic, fail‑open routing membrane
-//   • A biological security organ that filters invalid signals
-//   • Version‑aware, drift‑safe, AND‑architecture compliant
-//
-// WHAT THIS FILE *IS NOT*:
-//   • NOT business logic
-//   • NOT a renderer
-//   • NOT a GPU subsystem
-//   • NOT a persistence layer
-//
-// SAFETY CONTRACT (v7.1+):
-//   • Fail‑open: missing organs → healing path
-//   • No randomness
-//   • No timestamps
-//   • No external side effects beyond logging
-//   • No mutation of payload or event
-//   • No new imports without architectural approval
-//
-// STRUCTURE RULES (v7.1+):
-//   • Modular backend organs take priority
-//   • Legacy index.js is fallback only
-//   • Unknown organs must return healing metadata
-//
-// VERSION TAG:
-//   version: 7.1+
 // ============================================================================
+
 import * as LegacyLogic from "./index.js";
+import { db } from "./firebase.js";   // ⭐ BACKEND FIREBASE ACCESS
 
 // ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP (v7.3)
+// ⭐ HUMAN‑READABLE CONTEXT MAP (v7.8)
 // ------------------------------------------------------------
 const ENDPOINT_CONTEXT = {
   label: "ENDPOINT",
   layer: "C‑Layer",
   role: "Epithelial Gate / Immune Barrier",
   purpose: "Backend Kernel Dispatcher",
-  context: "Routes backend organs, falls back to legacy, heals missing organs",
-  version: "7.3"
+  context: "Routes backend organs, logs errors, heals missing organs",
+  version: "7.8"
 };
 
 // ------------------------------------------------------------
-// ⭐ DYNAMIC MODULAR BACKEND ORGAN LOADER (v7.1+)
+// ⭐ DYNAMIC MODULAR BACKEND ORGAN LOADER
 // ------------------------------------------------------------
 async function loadModularHandler(type) {
   try {
@@ -70,20 +39,45 @@ async function loadModularHandler(type) {
       return module.handler;
     }
   } catch (err) {
-    // Missing or invalid organ → fallback
+    // Missing organ → fallback
   }
   return null;
 }
 
 // ------------------------------------------------------------
-// ⭐ MAIN HANDLER — THE EPITHELIAL GATE (v7.3)
+// ⭐ FIRESTORE LOG WRITER (v7.8)
+// ------------------------------------------------------------
+async function writeErrorLog(payload) {
+  try {
+    await db.collection("GLOBAL_ERROR_LOGS").add({
+      ts: Date.now(),
+      ...payload,
+      ...ENDPOINT_CONTEXT
+    });
+
+    console.log(
+      "%c🟦 [ENDPOINT] Error logged to Firestore",
+      "color:#2196F3; font-weight:bold;"
+    );
+
+  } catch (err) {
+    console.error(
+      "%c🟥 [ENDPOINT] Firestore log write FAILED",
+      "color:#F44336; font-weight:bold;",
+      err
+    );
+  }
+}
+
+// ------------------------------------------------------------
+// ⭐ MAIN HANDLER — THE EPITHELIAL GATE (v7.8)
 // ------------------------------------------------------------
 export const handler = async (event) => {
   let type;
   let payload = {};
 
   // ------------------------------------------------------------
-  // 0. NORMALIZE INPUT (v7.1+)
+  // 0. NORMALIZE INPUT
   // ------------------------------------------------------------
   if (event.httpMethod === "POST") {
     try {
@@ -104,26 +98,41 @@ export const handler = async (event) => {
     payload = event.queryStringParameters || {};
   }
 
-  log(
-    `%c🧬 EPITHELIAL GATE CALL → type: ${type}`,
+  console.log(
+    `%c🧬 [ENDPOINT] Incoming → type: ${type}`,
     "color:#00BCD4; font-weight:bold;"
   );
 
   // ------------------------------------------------------------
-  // ⭐ 0.5 — OWNER‑AWARE HEALING PATH (v7.3)
+  // ⭐ 0.5 — SPECIAL CASE: logError (PageScanner → Router → Backend)
   // ------------------------------------------------------------
-  // If PageScanner detected a missing field inside a specific module,
-  // Endpoint must grab that module and heal it.
-  // This is the “HEY OHHHHHHHHHHHH GRAB THAT” logic.
+  if (type === "logError") {
+    console.log(
+      "%c🟪 [ENDPOINT] logError packet received",
+      "color:#9C27B0; font-weight:bold;"
+    );
+
+    await writeErrorLog(payload);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        logged: true,
+        ...ENDPOINT_CONTEXT
+      })
+    };
+  }
+
+  // ------------------------------------------------------------
+  // ⭐ OWNER‑AWARE HEALING PATH
   // ------------------------------------------------------------
   if (payload.ownerModule) {
-    log(
-      `%c🩹 OWNER‑AWARE HEALING → ${payload.ownerModule}`,
+    console.log(
+      `%c🩹 [ENDPOINT] Owner‑aware healing → ${payload.ownerModule}`,
       "color:#FF9800; font-weight:bold;"
     );
 
     try {
-      // Dynamically import the module that owns the broken symbol
       const organ = await import(`./${payload.ownerModule}.js`);
 
       if (organ && typeof organ.heal === "function") {
@@ -140,15 +149,14 @@ export const handler = async (event) => {
         };
       }
 
-      // If no heal() exists, fall through to normal organ loading
-      log(
-        `%c⚠️ OWNER MODULE HAS NO heal() → ${payload.ownerModule}`,
+      console.warn(
+        `%c⚠️ [ENDPOINT] Owner module has no heal() → ${payload.ownerModule}`,
         "color:#FFC107; font-weight:bold;"
       );
 
     } catch (err) {
-      error(
-        `%c🟥 OWNER‑AWARE HEALING FAILURE`,
+      console.error(
+        "%c🟥 [ENDPOINT] Owner‑aware healing failure",
         "color:#FF5252; font-weight:bold;",
         err
       );
@@ -166,13 +174,13 @@ export const handler = async (event) => {
   }
 
   // ------------------------------------------------------------
-  // 1. TRY MODULAR BACKEND ORGAN FIRST (v7.1+)
+  // 1. TRY MODULAR BACKEND ORGAN FIRST
   // ------------------------------------------------------------
   const modularFn = await loadModularHandler(type);
 
   if (modularFn) {
-    log(
-      `%c🟩 ORGAN FOUND → ${type}.js`,
+    console.log(
+      `%c🟩 [ENDPOINT] Organ found → ${type}.js`,
       "color:#4CAF50; font-weight:bold;"
     );
 
@@ -188,8 +196,8 @@ export const handler = async (event) => {
       };
 
     } catch (err) {
-      error(
-        `%c🟥 ORGAN FAILURE`,
+      console.error(
+        "%c🟥 [ENDPOINT] Organ execution failed",
         "color:#FF5252; font-weight:bold;",
         err
       );
@@ -206,10 +214,10 @@ export const handler = async (event) => {
   }
 
   // ------------------------------------------------------------
-  // 2. FALLBACK TO LEGACY ORGAN (index.js)
+  // 2. FALLBACK TO LEGACY ORGAN
   // ------------------------------------------------------------
-  warn(
-    `%c🟨 NO ORGAN FOUND → Falling back to legacy index.js`,
+  console.warn(
+    `%c🟨 [ENDPOINT] No organ found → Falling back to legacy index.js`,
     "color:#FFC107; font-weight:bold;"
   );
 
@@ -228,8 +236,8 @@ export const handler = async (event) => {
       };
 
     } catch (err) {
-      error(
-        `%c🟥 LEGACY ORGAN FAILURE`,
+      console.error(
+        "%c🟥 [ENDPOINT] Legacy organ failure",
         "color:#FF5252; font-weight:bold;",
         err
       );
@@ -248,8 +256,8 @@ export const handler = async (event) => {
   // ------------------------------------------------------------
   // 3. NOTHING FOUND → IMMUNE HEALING PATH
   // ------------------------------------------------------------
-  error(
-    `%c🟥 UNKNOWN ORGAN REQUEST → ${type}`,
+  console.error(
+    `%c🟥 [ENDPOINT] Unknown organ request → ${type}`,
     "color:#FF5252; font-weight:bold;"
   );
 
