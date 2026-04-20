@@ -99,38 +99,6 @@ const TIMER_CONTEXT = {
 // ============================================================================
 const TASKS = [
   {
-    key: "logoutSweep",
-    label: "Logout Sweep",
-    purpose: "Expire inactive sessions",
-    context: "Ensures security + session hygiene",
-    intervalMs: 5 * 60 * 1000,
-    runner: timerLogout
-  },
-  {
-    key: "userScoring",
-    label: "User Scoring",
-    purpose: "Recalculate user scores",
-    context: "Maintains deterministic scoring",
-    intervalMs: 5 * 60 * 1000,
-    runner: scheduledUserScoring
-  },
-  {
-    key: "refreshEnvironmentSmart",
-    label: "Environment Refresh",
-    purpose: "Refresh environment data",
-    context: "Ensures environment freshness",
-    intervalMs: 30 * 60 * 1000,
-    runner: refreshEnvironmentSmart
-  },
-  {
-    key: "securitySweep",
-    label: "Security Sweep",
-    purpose: "Scan for anomalies",
-    context: "Detects suspicious activity",
-    intervalMs: 24 * 60 * 60 * 1000,
-    runner: securitySweep
-  },
-  {
     key: "pulsebandCleanup",
     label: "Pulseband Cleanup",
     purpose: "Clean expired Pulseband entries",
