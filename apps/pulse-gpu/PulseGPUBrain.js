@@ -50,6 +50,7 @@
 //  • Always API-agnostic
 //  • Always side-effect-free
 // ============================================================================
+import { log, warn, error } from "../pulse-core/PulseLogger.js";
 
 log(
   "gpu",
