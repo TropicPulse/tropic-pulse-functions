@@ -24,20 +24,33 @@
 //   • Explicit support for LOCAL-ONLY / OFFLINE nervous operation
 // ============================================================================
 
-import { Impulse } from "../lib/Connectors/Impulse.js";
+import { Impulse } from "./Impulse.js";
 
 // ============================================================================
 // NERVOUS SYSTEM — CORE GPU + SHADOWLAYER IMPORTS
 // ============================================================================
 import * as PulseGPU from "../pulse-gpu/PulseGPU.js";
 import * as Pulse from "./Pulse.js"; // SHADOWLAYER side-effects only
-
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
 const NERVOUS_LAYER_ID = "NERVOUS-SYSTEM";
 const NERVOUS_LAYER_NAME = "PULSEBAND";
 const NERVOUS_LAYER_ROLE = "Sensorimotor Integration Layer";
+
+let logger = {
+  log: () => {},
+  warn: () => {},
+  error: () => {}
+};
+
+export function initPulseBand(options = {}) {
+  if (options.logger) {
+    logger = options.logger;
+  }
+
+  nervousLog("NERVOUS_INIT", {});
+}
 
 const NERVOUS_DIAGNOSTICS_ENABLED =
   (typeof window !== "undefined" && window?.PULSE_NERVOUS_DIAGNOSTICS === true) ||
@@ -46,7 +59,7 @@ const NERVOUS_DIAGNOSTICS_ENABLED =
 const nervousLog = (stage, details = {}) => {
   if (!NERVOUS_DIAGNOSTICS_ENABLED) return;
 
-  log(
+  logger.log(
     JSON.stringify({
       pulseLayer: NERVOUS_LAYER_ID,
       pulseName: NERVOUS_LAYER_NAME,
@@ -57,17 +70,19 @@ const nervousLog = (stage, details = {}) => {
   );
 };
 
-nervousLog("NERVOUS_INIT", {});
-
+// ============================================================================
+// GLOBAL DEBUG HOOK (SAFE)
+// ============================================================================
 if (typeof window !== "undefined") {
   window.PULSE_LOG = function (...args) {
     try {
-      log("[PULSE]", ...args);
+      logger.log("[PULSE]", ...args);
     } catch (err) {
-      error("PULSE_LOG failed:", err);
+      logger.error("PULSE_LOG failed:", err);
     }
   };
 }
+
 
 // ------------------------------------------------------------
 // Utility helpers
