@@ -3,6 +3,7 @@
 //  Unified Logging • Subsystem Identity • Zero Drift
 //  Backward + Forward Compatible (OLD + NEW log calls)
 // ============================================================================
+
 // ============================================================================
 //  VERSION MAP — The Genome of PulseOS
 // ============================================================================
@@ -52,6 +53,15 @@ export const PulseColors = {
 };
 
 // ============================================================================
+//  CAPTURE ORIGINAL CONSOLE FUNCTIONS (prevents recursion)
+// ============================================================================
+const _consoleLog = console.log;
+const _consoleWarn = console.warn;
+const _consoleError = console.error;
+const _consoleGroupCollapsed = console.groupCollapsed;
+const _consoleGroupEnd = console.groupEnd;
+
+// ============================================================================
 //  INTERNAL — Format a subsystem log prefix
 // ============================================================================
 function formatPrefix(subsystem) {
@@ -62,11 +72,6 @@ function formatPrefix(subsystem) {
 
 // ============================================================================
 //  ARGUMENT NORMALIZER (OLD + NEW)
-//  Accepts:
-//    log("gpu", "msg")
-//    log("msg")
-//    log("msg", data)
-//    log("gpu", "msg", data)
 // ============================================================================
 function normalizeArgs(args) {
   let subsystem = "legacy";
@@ -74,16 +79,13 @@ function normalizeArgs(args) {
   let rest = [];
 
   if (args.length === 1) {
-    // log("message")
     message = args[0];
   } else if (args.length >= 2) {
     if (typeof args[0] === "string" && typeof args[1] === "string") {
-      // log("gpu", "message", ...)
       subsystem = args[0];
       message = args[1];
       rest = args.slice(2);
     } else {
-      // log("message", ...)
       message = args[0];
       rest = args.slice(1);
     }
@@ -101,7 +103,7 @@ export function log(...args) {
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
-  console.log(
+  _consoleLog(
     `%c${prefix} — ${message}`,
     `color:${color}; font-weight:bold;`,
     ...rest
@@ -112,7 +114,7 @@ export function warn(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  console.warn(
+  _consoleWarn(
     `%c${prefix} [WARN] — ${message}`,
     "color:#FACC15; font-weight:bold;",
     ...rest
@@ -123,7 +125,7 @@ export function error(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  console.error(
+  _consoleError(
     `%c${prefix} [ERROR] — ${message}`,
     "color:#F87171; font-weight:bold;",
     ...rest
@@ -134,16 +136,16 @@ export function critical(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  console.groupCollapsed(
+  _consoleGroupCollapsed(
     `%c${prefix} [CRITICAL] — ${message}`,
     "color:#DC2626; font-weight:bold; font-size:14px;"
   );
-  console.error(
+  _consoleError(
     `%c${message}`,
     "color:#DC2626; font-weight:bold;",
     ...rest
   );
-  console.groupEnd();
+  _consoleGroupEnd();
 }
 
 // ============================================================================
@@ -153,14 +155,14 @@ export function group(subsystem, label) {
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
-  console.groupCollapsed(
+  _consoleGroupCollapsed(
     `%c${prefix} — ${label}`,
     `color:${color}; font-weight:bold;`
   );
 }
 
 export function groupEnd() {
-  console.groupEnd();
+  _consoleGroupEnd();
 }
 
 // ============================================================================
@@ -178,8 +180,7 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
 }
 
 // ============================================================================
-//  LEGACY CONSOLE REDIRECTS (OPTIONAL)
-//  Makes ALL old console.log calls route into Trinity Logger
+//  LEGACY CONSOLE REDIRECTS (SAFE NOW — no recursion)
 // ============================================================================
 console.log = (...args) => log(...args);
 console.warn = (...args) => warn(...args);
