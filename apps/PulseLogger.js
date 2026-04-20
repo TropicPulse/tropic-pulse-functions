@@ -185,3 +185,12 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
 console.log = (...args) => log(...args);
 console.warn = (...args) => warn(...args);
 console.error = (...args) => error(...args);
+export const logger = {
+  log,
+  warn,
+  error,
+  critical,
+  group,
+  groupEnd,
+  makeTelemetryPacket
+};
