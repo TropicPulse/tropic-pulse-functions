@@ -10,35 +10,37 @@
 //  PulseOSMemory is the **LIVER** of Tropic Pulse.
 //  It is the **METABOLIC ARCHIVE + RESTORE ORGAN** of the OS.
 //
-// SAFETY CONTRACT:
-//  ----------------
-//  • No eval().
-//  • No dynamic imports.
-//  • No arbitrary code execution.
-//  • No compute.
-//  • No GPU work.
-//  • No marketplace calls.
-//  • Deterministic, drift-proof memory only.
-//  • Always behaves like a stable organ: same inputs → same stored state.
+// SAFETY CONTRACT (unchanged):
+//  ----------------------------
+//  • No eval()
+//  • No dynamic imports
+//  • No arbitrary code execution
+//  • No compute
+//  • No GPU work
+//  • No marketplace calls
+//  • Deterministic, drift-proof memory only
+//  • Always behaves like a stable organ: same inputs → same stored state
 //
 // ADVANTAGE CASCADE (v7.3):
 //  -------------------------
-//  • Dual-mode: mental + system.
-//  • Local-aware: node-level metabolic context.
-//  • Internet-aware: cluster/mesh/global metabolic context.
-//  • Advantage-cascade-aware: inherits ANY safe advantage.
-//  • Unified-advantage-field: ALL advantages ON unless unsafe.
-//  • Future-evolution-ready: new safe advantages auto-inherited.
+//  • Dual-mode: mental + system
+//  • Local-aware: node-level metabolic context
+//  • Internet-aware: cluster/mesh/global metabolic context
+//  • Advantage-cascade-aware: inherits ANY safe advantage
+//  • Unified-advantage-field: ALL advantages ON unless unsafe
+//  • Future-evolution-ready: new safe advantages auto-inherited
 // ============================================================================
 //  OS‑v7.3 CONTEXT METADATA — ORGAN IDENTITY
 // ============================================================================
 const MEMORY_CONTEXT = {
-  layer: "PulseOSMemory",
+  organ: "PulseOSMemory",
+  layer: "C-Layer",
   role: "OS_LIVER",
   purpose:
     "Store OS + subsystem snapshots, drift signatures, restore points (metabolic archive)",
   context: "Deterministic OS memory + restore engine (long-term state organ)",
   version: "7.3",
+  generation: "v7",
   target: "os-core",
   selfRepairable: true,
   evo: {
@@ -173,6 +175,7 @@ export async function recordDriftSignature(subsystem, signature) {
     );
   }
 }
+
 export async function getRecentDriftSignatures(subsystem, limit = 20) {
   const snap = await db
     .collection(DRIFT_SIGNATURES_COLLECTION)
