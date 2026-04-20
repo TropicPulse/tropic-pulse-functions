@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error, logger } from "../PulseLogger.js";
-import { initPulseBand } from "./PulseBand.js";
+import { initPulseBand } from "../proxy/PulseBand.js";
 
 // Start PulseBand (nervous system)
 initPulseBand({
