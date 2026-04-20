@@ -1,23 +1,22 @@
 // ============================================================================
-//  PULSE OS v7.4 — LOGGING CORTEX
-//  Unified Logging • Subsystem Identity • Zero Drift
-//  Backward + Forward Compatible (OLD + NEW log calls)
+//  PULSE OS v7.5 — LOGGING CORTEX (HYBRID MODE)
+//  Unified Logging • Subsystem Identity • %c Support • Zero Drift
 // ============================================================================
 
 // ============================================================================
 //  VERSION MAP — The Genome of PulseOS
 // ============================================================================
 export const PulseVersion = {
-  identity: "7.4",
-  brain: "7.4",
-  gpu: "7.4",
-  orchestrator: "7.4",
-  engine: "7.4",
-  optimizer: "7.4",
-  synapse: "7.4",
-  band: "7.4",
-  router: "7.4",
-  marketplaces: "7.4"
+  identity: "7.5",
+  brain: "7.5",
+  gpu: "7.5",
+  orchestrator: "7.5",
+  engine: "7.5",
+  optimizer: "7.5",
+  synapse: "7.5",
+  band: "7.5",
+  router: "7.5",
+  marketplaces: "7.5"
 };
 
 // ============================================================================
@@ -37,19 +36,20 @@ export const PulseRoles = {
 };
 
 // ============================================================================
-//  COLOR MAP — Console Identity Palette
+//  COLOR MAP — Console Identity Palette (v7.5)
 // ============================================================================
 export const PulseColors = {
-  identity: "#4FC3F7",
-  brain: "#8B5CF6",
-  gpu: "#03A9F4",
-  orchestrator: "#4ADE80",
-  engine: "#F59E0B",
-  optimizer: "#03A9F4",
-  synapse: "#38BDF8",
-  band: "#E11D48",
-  router: "#0EA5E9",
-  marketplaces: "#14B8A6"
+  identity: "#4DD0E1",
+  brain: "#7C4DFF",
+  gpu: "#29B6F6",
+  orchestrator: "#66BB6A",
+  engine: "#FFA726",
+  optimizer: "#26C6DA",
+  synapse: "#42A5F5",
+  band: "#EC407A",
+  router: "#26A69A",
+  marketplaces: "#26C281",
+  legacy: "#BDBDBD"
 };
 
 // ============================================================================
@@ -71,51 +71,84 @@ function formatPrefix(subsystem) {
 }
 
 // ============================================================================
-//  ARGUMENT NORMALIZER (OLD + NEW)
+//  ARGUMENT NORMALIZER — HYBRID MODE
+//  Supports:
+//    • log("gpu", "msg")
+//    • log("%c[GPU] msg", "color:...;")
+//    • log({json})
+//    • log("[PULSE]", "...")
+//    • console.log("msg")
 // ============================================================================
 function normalizeArgs(args) {
   let subsystem = "legacy";
   let message = "";
   let rest = [];
 
+  // ============================================================
+  // CASE 1 — %c Chrome-style logs
+  // ============================================================
+  if (typeof args[0] === "string" && args[0].startsWith("%c")) {
+    subsystem = "legacy"; // raw formatting, no prefix
+    message = args[0];
+    rest = args.slice(1);
+    return { subsystem, message, rest, raw: true };
+  }
+
+  // ============================================================
+  // CASE 2 — NEW FORMAT: log("gpu", "message")
+  // ============================================================
+  if (args.length >= 2 && typeof args[0] === "string" && typeof args[1] === "string") {
+    subsystem = args[0];
+    message = args[1];
+    rest = args.slice(2);
+    return { subsystem, message, rest, raw: false };
+  }
+
+  // ============================================================
+  // CASE 3 — JSON logs (PulseBand packets, GPU packets, etc.)
+  // ============================================================
+  if (typeof args[0] === "object") {
+    const obj = args[0];
+
+    // PulseBand packet
+    if (obj.pulseLayer === "NERVOUS-SYSTEM") {
+      subsystem = "band";
+    }
+
+    // GPU packet
+    if (obj.schemaVersion && obj.textures !== undefined) {
+      subsystem = "gpu";
+    }
+
+    message = JSON.stringify(obj);
+    return { subsystem, message, rest: [], raw: false };
+  }
+
+  // ============================================================
+  // CASE 4 — OLD FORMAT: log("message")
+  // ============================================================
   if (args.length === 1) {
     message = args[0];
-  } else if (args.length >= 2) {
-    if (typeof args[0] === "string" && typeof args[1] === "string") {
-      subsystem = args[0];
-      message = args[1];
-      rest = args.slice(2);
-    } else {
-      message = args[0];
-      rest = args.slice(1);
-    }
+    return { subsystem, message, rest: [], raw: false };
   }
 
-  // SPECIAL CASE — PulseBand global hook
-  if (message === "[PULSE]") {
-    subsystem = "band";
-    message = rest.shift() || "";
-  }
-
-  // ========================================================================
-  //  ⭐ FIX: Detect PulseBand JSON logs and classify them as subsystem "band"
-  // ========================================================================
-  if (
-    typeof message === "string" &&
-    message.startsWith("{") &&
-    message.includes(`"pulseLayer":"NERVOUS-SYSTEM"`)
-  ) {
-    subsystem = "band";
-  }
-
-  return { subsystem, message, rest };
+  // fallback
+  message = args.join(" ");
+  return { subsystem, message, rest: [], raw: false };
 }
 
 // ============================================================================
-//  CORE LOGGING FUNCTIONS (NEW + OLD COMPATIBLE)
+//  CORE LOGGING FUNCTIONS — HYBRID MODE
 // ============================================================================
 export function log(...args) {
-  const { subsystem, message, rest } = normalizeArgs(args);
+  const { subsystem, message, rest, raw } = normalizeArgs(args);
+
+  // RAW MODE — %c logs bypass subsystem prefix
+  if (raw) {
+    _consoleLog(message, ...rest);
+    return;
+  }
+
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
@@ -132,7 +165,7 @@ export function warn(...args) {
 
   _consoleWarn(
     `%c${prefix} [WARN] — ${message}`,
-    "color:#FACC15; font-weight:bold;",
+    "color:#FFEE58; font-weight:bold;",
     ...rest
   );
 }
@@ -143,7 +176,7 @@ export function error(...args) {
 
   _consoleError(
     `%c${prefix} [ERROR] — ${message}`,
-    "color:#F87171; font-weight:bold;",
+    "color:#EF5350; font-weight:bold;",
     ...rest
   );
 }
@@ -154,11 +187,11 @@ export function critical(...args) {
 
   _consoleGroupCollapsed(
     `%c${prefix} [CRITICAL] — ${message}`,
-    "color:#DC2626; font-weight:bold; font-size:14px;"
+    "color:#D32F2F; font-weight:bold; font-size:14px;"
   );
   _consoleError(
     `%c${message}`,
-    "color:#DC2626; font-weight:bold;",
+    "color:#D32F2F; font-weight:bold;",
     ...rest
   );
   _consoleGroupEnd();
