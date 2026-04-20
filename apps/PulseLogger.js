@@ -1,17 +1,27 @@
 // ============================================================================
-//  PULSE OS v7.6 — LOGGING CORTEX (HYBRID + FIREBASE DURABLE MODE)
-//  Unified Logging • Subsystem Identity • %c Support • Zero Drift • Firebase Durable Logs
+//  PULSE OS v7.7 — VITALS LOGGER (HYBRID + FIREBASE DURABLE MODE)
+//  Hospital‑Grade Logging • Subsystem Identity • Connection Vitals • Zero Drift
 // ============================================================================
 
 // ---------------------------------------------------------------------------
 //  CAPTURE ORIGINAL CONSOLE (prevents recursion)
 // ---------------------------------------------------------------------------
 const _c = { ...console };
-
+/* -------------------------------------------------------
+   FIREBASE INIT
+------------------------------------------------------- */
+const cfg = {
+  apiKey: "AIzaSyD4I5YDtZMMC_tDuwR9CEjhs_iAdrLzthQ",
+  authDomain: "tropic-pulse.firebaseapp.com",
+  projectId: "tropic-pulse",
+  storageBucket: "tropic-pulse.firebasestorage.app",
+  messagingSenderId: "642785071979",
+  appId: "1:642785071979:web:4287c6bdf51f5233db722e"
+};
 // ---------------------------------------------------------------------------
 //  FIREBASE INITIALIZATION (FRONTEND DURABLE LOGGING)
 // ---------------------------------------------------------------------------
-const app = firebase.initializeApp(window.PULSE_FIREBASE_CONFIG);
+const app = firebase.initializeApp(cfg);
 const db = firebase.firestore(app);
 
 async function writeToFirebaseLog(entry) {
@@ -29,16 +39,16 @@ async function writeToFirebaseLog(entry) {
 //  VERSION MAP — The Genome of PulseOS
 // ============================================================================
 export const PulseVersion = {
-  identity: "7.5",
-  brain: "7.5",
-  gpu: "7.5",
-  orchestrator: "7.5",
-  engine: "7.5",
-  optimizer: "7.5",
-  synapse: "7.5",
-  band: "7.5",
-  router: "7.5",
-  marketplaces: "7.5"
+  identity: "7.7",
+  brain: "7.7",
+  gpu: "7.7",
+  orchestrator: "7.7",
+  engine: "7.7",
+  optimizer: "7.7",
+  synapse: "7.7",
+  band: "7.7",
+  router: "7.7",
+  marketplaces: "7.7"
 };
 
 // ============================================================================
@@ -58,7 +68,7 @@ export const PulseRoles = {
 };
 
 // ============================================================================
-//  COLOR MAP — Console Identity Palette (v7.5)
+//  COLOR MAP — Console Identity Palette (v7.7)
 // ============================================================================
 export const PulseColors = {
   identity: "#4DD0E1",
@@ -130,6 +140,56 @@ function normalizeArgs(args) {
 }
 
 // ============================================================================
+//  VITALS — CONNECTION STATUS (✓ / ✗)
+// ============================================================================
+export async function logConnection(subsystem, status, details = {}) {
+  const ok = status === "ok" || status === true;
+  const symbol = ok ? "✓" : "✗";
+  const color = ok ? "#4CAF50" : "#EF5350";
+  const prefix = formatPrefix(subsystem);
+
+  _c.log(
+    `%c${prefix} — ${symbol} CONNECTION — ${subsystem}`,
+    `color:${color}; font-weight:bold;`,
+    details
+  );
+
+  await writeToFirebaseLog({
+    level: "connection",
+    subsystem,
+    status: ok ? "ok" : "fail",
+    symbol,
+    details,
+    prefix,
+    version: PulseVersion[subsystem],
+    role: PulseRoles[subsystem]
+  });
+}
+
+// ============================================================================
+//  VITALS — HEARTBEAT (latency, uptime, subsystem health)
+// ============================================================================
+export async function logHeartbeat(subsystem, ms, details = {}) {
+  const prefix = formatPrefix(subsystem);
+
+  _c.log(
+    `%c${prefix} — ❤️ HEARTBEAT — ${ms}ms`,
+    "color:#EC407A; font-weight:bold;",
+    details
+  );
+
+  await writeToFirebaseLog({
+    level: "heartbeat",
+    subsystem,
+    latency: ms,
+    details,
+    prefix,
+    version: PulseVersion[subsystem],
+    role: PulseRoles[subsystem]
+  });
+}
+
+// ============================================================================
 //  CORE LOGGING FUNCTIONS — HYBRID + FIREBASE DURABLE MODE
 // ============================================================================
 
@@ -196,7 +256,10 @@ export function critical(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  _c.groupCollapsed(`%c${prefix} [CRITICAL] — ${message}`, "color:#D32F2F; font-weight:bold; font-size:14px;");
+  _c.groupCollapsed(
+    `%c${prefix} [CRITICAL] — ${message}`,
+    "color:#D32F2F; font-weight:bold; font-size:14px;"
+  );
   _c.error(`%c${message}`, "color:#D32F2F; font-weight:bold;", ...rest);
   _c.groupEnd();
 
@@ -253,5 +316,7 @@ export const logger = {
   critical,
   group,
   groupEnd,
-  makeTelemetryPacket
+  makeTelemetryPacket,
+  logConnection,
+  logHeartbeat
 };
