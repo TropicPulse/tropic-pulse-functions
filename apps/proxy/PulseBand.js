@@ -36,7 +36,6 @@
 //   • All prior behavior remains intact; only additive capabilities
 //   • Explicit support for LOCAL-ONLY / OFFLINE nervous operation
 // ============================================================================
-
 import { Impulse } from "./Impulse.js";
 
 // ============================================================================
@@ -44,24 +43,26 @@ import { Impulse } from "./Impulse.js";
 // ============================================================================
 import * as PulseGPU from "../pulse-gpu/PulseGPU.js";
 import * as Pulse from "./Pulse.js"; // SHADOWLAYER side-effects only
+
+// ============================================================================
+// LAYER LOGGER (REAL LOGGER FROM THE OVERALL LAYER)
+// ============================================================================
+import { logger } from "../PulseLogger.js";
+
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
-let logger = {
-  log: () => {},
-  warn: () => {},
-  error: () => {}
-};
 const NERVOUS_LAYER_ID = "NERVOUS-SYSTEM";
 const NERVOUS_LAYER_NAME = "PULSEBAND";
 const NERVOUS_LAYER_ROLE = "Sensorimotor Integration Layer";
 
-const NERVOUS_DIAGNOSTICS_ENABLED =
-  (typeof window !== "undefined" && window?.PULSE_NERVOUS_DIAGNOSTICS === true) ||
-  (typeof window !== "undefined" && window?.PULSE_DIAGNOSTICS === true);
+// Diagnostics must be DYNAMIC — not frozen at load
+const diagnosticsEnabled = () =>
+  (typeof window !== "undefined" && window.PULSE_NERVOUS_DIAGNOSTICS === true) ||
+  (typeof window !== "undefined" && window.PULSE_DIAGNOSTICS === true);
 
 const nervousLog = (stage, details = {}) => {
-  if (!NERVOUS_DIAGNOSTICS_ENABLED) return;
+  if (!diagnosticsEnabled()) return;
 
   logger.log(
     JSON.stringify({
@@ -74,13 +75,10 @@ const nervousLog = (stage, details = {}) => {
   );
 };
 
-export function initPulseBand(options = {}) {
-  if (options.logger) {
-    logger = options.logger;
-  }
-
-  nervousLog("NERVOUS_INIT", {});
-}
+// ============================================================================
+// AUTO-START (NO INIT NEEDED)
+// ============================================================================
+nervousLog("NERVOUS_INIT", {});
 
 // ============================================================================
 // GLOBAL DEBUG HOOK (SAFE)
@@ -94,6 +92,7 @@ if (typeof window !== "undefined") {
     }
   };
 }
+
 
 // ------------------------------------------------------------
 // Utility helpers
