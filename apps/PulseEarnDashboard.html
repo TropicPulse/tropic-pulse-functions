@@ -689,7 +689,8 @@ input[type="file"] {
 import { pulseband } from "./proxy/PulseBand.js";
 
 // THE REAL IMPORT YOU WANT — ALL METRICS COME FROM HERE
-import * as usermetrics from "./pulse-proxy/PulseUserMetrics.js";
+const metrics = await pulseband.getMetrics();
+
 
 // =======================
 // PULSE EARN — ENGINE v7.3
