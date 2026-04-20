@@ -56,11 +56,6 @@
 import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error, logger } from "../PulseLogger.js";
 
 
-initPulseBand({
-    logger: { log, warn, error }
-});
-
-
 // ============================================================================
 //  LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
