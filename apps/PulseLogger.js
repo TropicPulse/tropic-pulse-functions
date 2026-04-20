@@ -91,8 +91,15 @@ function normalizeArgs(args) {
     }
   }
 
+  // SPECIAL CASE — PulseBand global hook
+  if (message === "[PULSE]") {
+    subsystem = "band";
+    message = rest.shift() || "";
+  }
+
   return { subsystem, message, rest };
 }
+
 
 // ============================================================================
 //  CORE LOGGING FUNCTIONS (NEW + OLD COMPATIBLE)
