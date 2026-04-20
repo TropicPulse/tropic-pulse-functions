@@ -38,12 +38,6 @@ const NERVOUS_LAYER_ID = "NERVOUS-SYSTEM";
 const NERVOUS_LAYER_NAME = "PULSEBAND";
 const NERVOUS_LAYER_ROLE = "Sensorimotor Integration Layer";
 
-let logger = {
-  log: () => {},
-  warn: () => {},
-  error: () => {}
-};
-
 export function initPulseBand(options = {}) {
   if (options.logger) {
     logger = options.logger;
