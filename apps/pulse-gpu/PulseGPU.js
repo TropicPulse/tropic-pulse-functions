@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error, logger } from "../PulseLogger.js";
-import { initPulseBand } from "../proxy/PulseBand.js";
+
 
 // --- BRAIN LAYER (B) --------------------------------------------------------
 import { BrainInput, PulseGPUBrainExport, PulseGPUBrainController} from "./PulseGPUBrain.js";
