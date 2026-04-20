@@ -126,7 +126,7 @@ import { updateUserMetrics as recordUserMetrics } from "./pulse-os/PulseUserMetr
 // ------------------------------------------------------
 //  Timer Layer (Non‑Operational Logging + Saving)
 // ------------------------------------------------------
-import startPulseTimer from "./timer.js";
+import startPulseTimer from "./heart.js";
 // ------------------------------------------------------
 //  Pulse‑OS Layer (Global Supervisor + Healers)
 // ------------------------------------------------------

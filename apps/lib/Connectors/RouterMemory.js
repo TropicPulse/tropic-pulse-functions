@@ -8,7 +8,7 @@
 //   • Short‑term neural memory for router.js (B‑Layer)
 //   • Dual‑mode: works identically in offline + online environments
 //   • Lineage‑preserving, context‑aware, evolution‑safe
-//   • Stores logs before backend healing or Timer.js flush
+//   • Stores logs before backend healing or Heart.js flush
 //   • Dedupe with structural awareness (not just JSON equality)
 //   • Never writes to long‑term storage directly
 //   • Never depends on internet or external stimuli
@@ -56,7 +56,7 @@ const MEMORY_CONTEXT = {
   label: "MEMORY",
   layer: "B‑Layer",
   purpose: "Log Buffer + Healing Support",
-  context: "Stores logs before Timer.js flush"
+  context: "Stores logs before Heart.js flush"
 };
 
 
@@ -127,7 +127,7 @@ export const RouterMemory = {
   },
 
   // --------------------------------------------------------------------------
-  // ⭐ GET ALL LOGS (Timer.js → RouterMemory)
+  // ⭐ GET ALL LOGS (Heart.js → RouterMemory)
   // --------------------------------------------------------------------------
   getAll() {
     logNetwork("READ", { total: this._logs.length });
@@ -135,7 +135,7 @@ export const RouterMemory = {
   },
 
   // --------------------------------------------------------------------------
-  // ⭐ CLEAR LOGS AFTER FLUSH (Timer.js → RouterMemory)
+  // ⭐ CLEAR LOGS AFTER FLUSH (Heart.js → RouterMemory)
   // --------------------------------------------------------------------------
   clear() {
     logNetwork("CLEAR", { removed: this._logs.length });

@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/endpoint.js
-// PULSE BACKEND ENDPOINT — VERSION 7.8
+// PULSE BACKEND ENDPOINT — VERSION 8.0
 // “THE EPITHELIAL GATE / IMMUNE BARRIER LAYER”
 // ============================================================================
 //
@@ -8,9 +8,10 @@
 //   • First line of backend defense
 //   • Validates incoming signals
 //   • Routes to modular backend organs
+//   • Evolvable: scans pulse-* backend folders for organs
 //   • Falls back to legacy organs
-//   • NEW: Accepts logError packets from PageScanner
-//   • NEW: Writes logs to Firestore via firebase.js
+//   • Accepts logError packets from PageScanner
+//   • Writes logs to Firestore via firebase.js
 //
 // ============================================================================
 
@@ -18,7 +19,7 @@ import * as LegacyLogic from "./index.js";
 import { db } from "./firebase.js";   // ⭐ BACKEND FIREBASE ACCESS
 
 // ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP (v7.8)
+// ⭐ HUMAN‑READABLE CONTEXT MAP (v8.0)
 // ------------------------------------------------------------
 const ENDPOINT_CONTEXT = {
   label: "ENDPOINT",
@@ -26,26 +27,55 @@ const ENDPOINT_CONTEXT = {
   role: "Epithelial Gate / Immune Barrier",
   purpose: "Backend Kernel Dispatcher",
   context: "Routes backend organs, logs errors, heals missing organs",
-  version: "7.8"
+  version: "8.0"
 };
 
 // ------------------------------------------------------------
-// ⭐ DYNAMIC MODULAR BACKEND ORGAN LOADER
+// ⭐ DYNAMIC MODULAR BACKEND ORGAN LOADER (LOCAL + EVOLVABLE SCAN)
 // ------------------------------------------------------------
 async function loadModularHandler(type) {
+
+  // ------------------------------------------------------------
+  // 1. LOCAL NETLIFY ORGAN
+  // ------------------------------------------------------------
   try {
     const module = await import(`./${type}.js`);
     if (typeof module.handler === "function") {
       return module.handler;
     }
   } catch (err) {
-    // Missing organ → fallback
+    // Local organ missing → continue to evolvable scan
   }
+
+  // ------------------------------------------------------------
+  // 2. EVOLVABLE SCAN ACROSS pulse-* BACKEND FOLDERS
+  // ------------------------------------------------------------
+  const pulseFolders = [
+    "../pulse-earn/functions/",
+    "../pulse-mesh/functions/",
+    "../pulse-os/functions/",
+    "../pulse-proxy/functions/"
+  ];
+
+  for (const folder of pulseFolders) {
+    try {
+      const organ = await import(`${folder}${type}.js`);
+      if (organ && typeof organ.handler === "function") {
+        return organ.handler;
+      }
+    } catch (err) {
+      // Missing organ in this folder → continue scanning
+    }
+  }
+
+  // ------------------------------------------------------------
+  // 3. NOTHING FOUND → RETURN NULL (handler will fallback to legacy)
+  // ------------------------------------------------------------
   return null;
 }
 
 // ------------------------------------------------------------
-// ⭐ FIRESTORE LOG WRITER (v7.8)
+// ⭐ FIRESTORE LOG WRITER (v8.0)
 // ------------------------------------------------------------
 async function writeErrorLog(payload) {
   try {
@@ -70,7 +100,7 @@ async function writeErrorLog(payload) {
 }
 
 // ------------------------------------------------------------
-// ⭐ MAIN HANDLER — THE EPITHELIAL GATE (v7.8)
+// ⭐ MAIN HANDLER — THE EPITHELIAL GATE (v8.0, Evolvable Routing)
 // ------------------------------------------------------------
 export const handler = async (event) => {
   let type;
@@ -104,16 +134,10 @@ export const handler = async (event) => {
   );
 
   // ------------------------------------------------------------
-  // ⭐ 0.5 — SPECIAL CASE: logError (PageScanner → Router → Backend)
+  // ⭐ 0.5 — SPECIAL CASE: logError
   // ------------------------------------------------------------
   if (type === "logError") {
-    console.log(
-      "%c🟪 [ENDPOINT] logError packet received",
-      "color:#9C27B0; font-weight:bold;"
-    );
-
     await writeErrorLog(payload);
-
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -127,17 +151,10 @@ export const handler = async (event) => {
   // ⭐ OWNER‑AWARE HEALING PATH
   // ------------------------------------------------------------
   if (payload.ownerModule) {
-    console.log(
-      `%c🩹 [ENDPOINT] Owner‑aware healing → ${payload.ownerModule}`,
-      "color:#FF9800; font-weight:bold;"
-    );
-
     try {
       const organ = await import(`./${payload.ownerModule}.js`);
-
       if (organ && typeof organ.heal === "function") {
         const result = await organ.heal(payload);
-
         return {
           statusCode: 200,
           body: JSON.stringify({
@@ -148,19 +165,7 @@ export const handler = async (event) => {
           })
         };
       }
-
-      console.warn(
-        `%c⚠️ [ENDPOINT] Owner module has no heal() → ${payload.ownerModule}`,
-        "color:#FFC107; font-weight:bold;"
-      );
-
     } catch (err) {
-      console.error(
-        "%c🟥 [ENDPOINT] Owner‑aware healing failure",
-        "color:#FF5252; font-weight:bold;",
-        err
-      );
-
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -174,19 +179,13 @@ export const handler = async (event) => {
   }
 
   // ------------------------------------------------------------
-  // 1. TRY MODULAR BACKEND ORGAN FIRST
-  // ------------------------------------------------------------
+  // ⭐ 1. TRY MODULAR BACKEND ORGAN FIRST (LOCAL NETLIFY)
+// ------------------------------------------------------------
   const modularFn = await loadModularHandler(type);
 
   if (modularFn) {
-    console.log(
-      `%c🟩 [ENDPOINT] Organ found → ${type}.js`,
-      "color:#4CAF50; font-weight:bold;"
-    );
-
     try {
       const result = await modularFn(payload);
-
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -194,14 +193,7 @@ export const handler = async (event) => {
           ...ENDPOINT_CONTEXT
         })
       };
-
     } catch (err) {
-      console.error(
-        "%c🟥 [ENDPOINT] Organ execution failed",
-        "color:#FF5252; font-weight:bold;",
-        err
-      );
-
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -214,19 +206,46 @@ export const handler = async (event) => {
   }
 
   // ------------------------------------------------------------
-  // 2. FALLBACK TO LEGACY ORGAN
-  // ------------------------------------------------------------
-  console.warn(
-    `%c🟨 [ENDPOINT] No organ found → Falling back to legacy index.js`,
-    "color:#FFC107; font-weight:bold;"
-  );
+  // ⭐ 1.5 — EVOLVABLE ROUTING (SECONDARY SCAN)
+// ------------------------------------------------------------
+  const pulseFolders = [
+    "/apps/pulse-ai/",
+    "/apps/pulse-design/",
+    "/apps/pulse-earn/",
+    "/apps/pulse-gpu/",
+    "/apps/pulse-mesh/",
+    "/apps/pulse-os/",
+    "/apps/pulse-proxy/",
+    "/apps/pulse-specs/",
+    "/apps/pulse-translator/"
+  ];
 
+  for (const folder of pulseFolders) {
+    try {
+      const organ = await import(`${folder}${type}.js`);
+      if (organ && typeof organ.handler === "function") {
+        const result = await organ.handler(payload);
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            ...result,
+            ...ENDPOINT_CONTEXT
+          })
+        };
+      }
+    } catch (err) {
+      // continue scanning
+    }
+  }
+
+  // ------------------------------------------------------------
+  // ⭐ 2. FALLBACK TO LEGACY ORGAN
+  // ------------------------------------------------------------
   const legacyFn = LegacyLogic[type];
 
   if (typeof legacyFn === "function") {
     try {
       const result = await legacyFn(payload);
-
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -234,14 +253,7 @@ export const handler = async (event) => {
           ...ENDPOINT_CONTEXT
         })
       };
-
     } catch (err) {
-      console.error(
-        "%c🟥 [ENDPOINT] Legacy organ failure",
-        "color:#FF5252; font-weight:bold;",
-        err
-      );
-
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -254,13 +266,8 @@ export const handler = async (event) => {
   }
 
   // ------------------------------------------------------------
-  // 3. NOTHING FOUND → IMMUNE HEALING PATH
+  // ⭐ 3. IMMUNE HEALING PATH
   // ------------------------------------------------------------
-  console.error(
-    `%c🟥 [ENDPOINT] Unknown organ request → ${type}`,
-    "color:#FF5252; font-weight:bold;"
-  );
-
   return {
     statusCode: 200,
     body: JSON.stringify({

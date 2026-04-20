@@ -201,7 +201,7 @@ Tropic-Pulse-Functions/
          getMap.js        ← BACKEND LOGIC (D‑Layer)
          getAuth.js       ← BACKEND LOGIC (D‑Layer)
          getHook.js       ← BACKEND LOGIC (D‑Layer)
-         timer.js         ← BACKEND TIMER (OS ENGINE)
+         heart.js         ← BACKEND TIMER (OS ENGINE)
 1. PAGE
 2. PAGESCANNER
 3. ROUTER

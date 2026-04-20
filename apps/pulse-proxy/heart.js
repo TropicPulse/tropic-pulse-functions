@@ -1,11 +1,11 @@
 // ============================================================================
-// FILE: /apps/netlify/functions/timer.js
+// FILE: /apps/netlify/functions/heart.js
 // PULSE HEARTBEAT ENGINE — v7.1+
 // “THE HEART / CARDIAC PACEMAKER ENGINE”
 // ============================================================================
 //
 // ROLE (v7.1+):
-//   timer.js is the **HEART** of PulseOS.
+//   heart.js is the **HEART** of PulseOS.
 //   It is the **CARDIAC PACEMAKER ENGINE** — the subsystem that generates
 //   the organism’s rhythm and circulates tasks through the entire system.
 //
@@ -43,9 +43,9 @@
 
 import * as admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
-import { pulsebandCleanup } from "./pulsebandCleanup.js";
-import { pulseHistoryRepair } from "./pulseHistoryRepair.js";
-import * as timers4 from "./timers4.js";
+import { pulsebandCleanup } from "../netlify/functions/pulsebandCleanup.js";
+import { pulseHistoryRepair } from "../netlify/functions/pulseHistoryRepair.js";
+import * as timers4 from "./heartbeat.js";
 
 // ---- TASK MODULES ----------------------------------------------------------
 

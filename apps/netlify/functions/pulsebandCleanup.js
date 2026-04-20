@@ -13,7 +13,7 @@
 //   • Eliminates stale or expired kinetic data
 //   • Maintains structural integrity of PulseBand storage
 //   • Ensures deterministic, stable, predictable behavior
-//   • Runs automatically via heartbeat (Timer.js)
+//   • Runs automatically via heartbeat (Heart.js)
 //   • Fully aligned with PulseOS v7.1+ stability + organism contracts
 //
 // WHAT THIS FILE *IS* (v7.1+):

@@ -13,7 +13,7 @@
 //   • Determines whether to refresh or skip based on timing + drift
 //   • Updates the environment collection with fresh perception data
 //   • Logs perception events for lineage + diagnostics
-//   • Runs automatically via heartbeat (Timer.js)
+//   • Runs automatically via heartbeat (Heart.js)
 //
 // WHAT THIS FILE *IS* (v7.1+):
 //   • A deterministic sensory organ
