@@ -11,7 +11,6 @@
 //   • Subsystem roles (metaphors)
 //   • Subsystem colors (console identity)
 //   • Subsystem lineage
-//   • Logging format
 //   • Identity loader (BBB)
 //   • Offline-safe identity fallback
 //
@@ -19,6 +18,7 @@
 //  NO OTHER FILE DEFINES VERSION / ROLE / COLOR / METAPHOR.
 // ============================================================================
 
+import { log, warn, error } from "./PulseLogger.js";
 
 // ============================================================================
 //  VERSION MAP — The Genome of PulseOS
@@ -36,7 +36,6 @@ export const PulseVersion = {
   marketplaces: "7.4"
 };
 
-
 // ============================================================================
 //  ROLE MAP — The Organ Metaphors (Subsystem Identity)
 // ============================================================================
@@ -52,7 +51,6 @@ export const PulseRoles = {
   router: "CONSULATE",
   marketplaces: "EMBASSY LEDGER"
 };
-
 
 // ============================================================================
 //  COLOR MAP — Console Identity Palette
@@ -70,7 +68,6 @@ export const PulseColors = {
   marketplaces: "#14B8A6"
 };
 
-
 // ============================================================================
 //  LINEAGE MAP — Evolutionary Identity
 // ============================================================================
@@ -87,28 +84,12 @@ export const PulseLineage = {
   marketplaces: "embassy-core"
 };
 
-
-// ============================================================================
-//  LOGGING CORTEX — Unified Logging Function
-// ============================================================================
-export function pulseLog(subsystem, message) {
-  const color = PulseColors[subsystem] || "#fff";
-  const version = PulseVersion[subsystem] || "7.x";
-  const role = PulseRoles[subsystem] || "SUBSYSTEM";
-
-  console.log(
-    `%c${role} v${version} — ${message}`,
-    `color:${color}; font-weight:bold;`
-  );
-}
-
-
 // ============================================================================
 //  IDENTITY LOADER — BBB Verification Engine (v7.4)
 //  LOCAL-FIRST. REMOTE OPTIONAL. ZERO DEPENDENCY.
 // ============================================================================
 export async function identity() {
-  pulseLog("identity", "Identity Request");
+  log("identity", "Identity Request");
 
   try {
     // ------------------------------------------------------------
@@ -122,21 +103,17 @@ export async function identity() {
       const missing = required.filter(f => !localIdentity[f]);
 
       if (missing.length === 0) {
-        pulseLog("identity", "Local identity validated (offline-capable)");
+        log("identity", "Local identity validated (offline-capable)");
         return localIdentity;
       }
 
-      console.warn(
-        "%c[BBB Warning] Local identity incomplete:",
-        "color:#FFB74D",
-        missing
-      );
+      warn("identity", "Local identity incomplete", missing);
     }
 
     // ------------------------------------------------------------
     // 2. REMOTE VERIFICATION OPTIONAL (v7.4)
     // ------------------------------------------------------------
-    pulseLog("identity", "Offline mode — remote verification skipped");
+    log("identity", "Offline mode — remote verification skipped");
 
     // ------------------------------------------------------------
     // 3. OFFLINE SAFE FALLBACK
@@ -149,18 +126,14 @@ export async function identity() {
       reason: "No valid local identity and remote verification disabled."
     };
 
-    pulseLog("identity", "Returning offline identity fallback");
+    log("identity", "Returning offline identity fallback");
     return offlineIdentity;
 
   } catch (err) {
     // ------------------------------------------------------------
     // 4. HARD FAILURE
     // ------------------------------------------------------------
-    console.error(
-      "%c[BBB Critical] Identity load failed:",
-      "color:#E57373; font-weight:bold;",
-      err
-    );
+    error("identity", "Identity load failed", err);
 
     return {
       uid: null,

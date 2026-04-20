@@ -1,7 +1,7 @@
 // ============================================================================
 //  PULSE OS v7.4 — LOGGING CORTEX
 //  Unified Logging • Subsystem Identity • Zero Drift
-//  This file centralizes ALL logging behavior across PulseOS.
+//  Backward + Forward Compatible (OLD + NEW log calls)
 // ============================================================================
 
 import { PulseColors, PulseRoles, PulseVersion } from "./PulseIdentity.js";
@@ -16,11 +16,43 @@ function formatPrefix(subsystem) {
 }
 
 // ============================================================================
-//  CORE LOGGING FUNCTIONS
+//  ARGUMENT NORMALIZER (OLD + NEW)
+//  Accepts:
+//    log("gpu", "msg")
+//    log("msg")
+//    log("msg", data)
+//    log("gpu", "msg", data)
+// ============================================================================
+function normalizeArgs(args) {
+  let subsystem = "legacy";
+  let message = "";
+  let rest = [];
+
+  if (args.length === 1) {
+    // log("message")
+    message = args[0];
+  } else if (args.length >= 2) {
+    if (typeof args[0] === "string" && typeof args[1] === "string") {
+      // log("gpu", "message", ...)
+      subsystem = args[0];
+      message = args[1];
+      rest = args.slice(2);
+    } else {
+      // log("message", ...)
+      message = args[0];
+      rest = args.slice(1);
+    }
+  }
+
+  return { subsystem, message, rest };
+}
+
+// ============================================================================
+//  CORE LOGGING FUNCTIONS (NEW + OLD COMPATIBLE)
 // ============================================================================
 
-// Standard log
-export function log(subsystem, message, ...rest) {
+export function log(...args) {
+  const { subsystem, message, rest } = normalizeArgs(args);
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
@@ -31,9 +63,10 @@ export function log(subsystem, message, ...rest) {
   );
 }
 
-// Warning
-export function warn(subsystem, message, ...rest) {
+export function warn(...args) {
+  const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
+
   console.warn(
     `%c${prefix} [WARN] — ${message}`,
     "color:#FACC15; font-weight:bold;",
@@ -41,9 +74,10 @@ export function warn(subsystem, message, ...rest) {
   );
 }
 
-// Error
-export function error(subsystem, message, ...rest) {
+export function error(...args) {
+  const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
+
   console.error(
     `%c${prefix} [ERROR] — ${message}`,
     "color:#F87171; font-weight:bold;",
@@ -51,9 +85,10 @@ export function error(subsystem, message, ...rest) {
   );
 }
 
-// Critical (red + bold + grouped)
-export function critical(subsystem, message, ...rest) {
+export function critical(...args) {
+  const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
+
   console.groupCollapsed(
     `%c${prefix} [CRITICAL] — ${message}`,
     "color:#DC2626; font-weight:bold; font-size:14px;"
@@ -66,7 +101,9 @@ export function critical(subsystem, message, ...rest) {
   console.groupEnd();
 }
 
-// Group start
+// ============================================================================
+//  GROUPING
+// ============================================================================
 export function group(subsystem, label) {
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
@@ -77,13 +114,12 @@ export function group(subsystem, label) {
   );
 }
 
-// Group end
 export function groupEnd() {
   console.groupEnd();
 }
 
 // ============================================================================
-//  TELEMETRY PACKET FORMATTER (Optional for PulseTelemetry.js)
+//  TELEMETRY PACKET FORMATTER
 // ============================================================================
 export function makeTelemetryPacket(subsystem, event, data = {}) {
   return {
@@ -95,3 +131,11 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
     data
   };
 }
+
+// ============================================================================
+//  LEGACY CONSOLE REDIRECTS (OPTIONAL)
+//  Makes ALL old console.log calls route into Trinity Logger
+// ============================================================================
+console.log = (...args) => log(...args);
+console.warn = (...args) => warn(...args);
+console.error = (...args) => error(...args);
