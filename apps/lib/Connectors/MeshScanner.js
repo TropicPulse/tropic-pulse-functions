@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: /apps/lib/Connectors/MeshScanner.js
-// PULSE MESH‑LEVEL REFLEX — v1.0
+// PULSE MESH‑LEVEL REFLEX — v1.1
 // “THE ORGAN REFLEX / GLOBAL SENTINEL”
 // ============================================================================
 //
@@ -90,7 +90,7 @@ const MeshRouteMemory = {
 // ============================================================================
 // PUBLIC API (C‑LAYER passthrough — identical pattern)
 // ============================================================================
-import { route } from "./router.js";
+import { route, Router } from "./router.js";
 
 export async function meshAuth(jwtToken) {
   logMesh("MESH_AUTH", {});
@@ -222,6 +222,17 @@ window.addEventListener(
     meshHealing = true;
 
     try {
+      // ⭐ SEND REFLEX TO ROUTER (nervous system) ⭐
+      Router.receiveReflex({
+        reflexOrigin: "MeshScanner",
+        layer: "A3",
+        message: msg,
+        routeTrace,
+        table,
+        field
+      });
+
+      // ⭐ THEN INVOKE HEALING VIA ROUTER ⭐
       await route("fetchField", {
         table,
         field,
@@ -264,5 +275,5 @@ function parseMissingField(message) {
 }
 
 // ============================================================================
-// END OF FILE — THE ORGAN REFLEX / GLOBAL SENTINEL  [v1.0]
+// END OF FILE — THE ORGAN REFLEX / GLOBAL SENTINEL  [v1.1]
 // ============================================================================

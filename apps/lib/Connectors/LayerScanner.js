@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: /apps/lib/Connectors/LayerScanner.js
-// PULSE MID‑LAYER REFLEX — v1.0
+// PULSE MID‑LAYER REFLEX — v1.1
 // “THE TISSUE REFLEX / MID‑LAYER SENTINEL”
 // ============================================================================
 //
@@ -90,7 +90,7 @@ const LayerRouteMemory = {
 // ============================================================================
 // PUBLIC API (C‑LAYER passthrough — identical to PageScanner)
 // ============================================================================
-import { route } from "./router.js";
+import { route, Router } from "./router.js";
 
 export async function layerAuth(jwtToken) {
   logLayer("LAYER_AUTH", {});
@@ -137,7 +137,7 @@ window.addEventListener(
 
     // ------------------------------------------------------------------------
     // MID‑LAYER CLASSIFICATION (router-style guards)
-    // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 
     // 1) Import drift / module conflict
     if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
@@ -196,7 +196,7 @@ window.addEventListener(
 
     // ------------------------------------------------------------------------
     // HEALING LOGIC (same as PageScanner, but tagged A2)
-    // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
     const parsed = parseMissingField(msg);
     if (!parsed) {
       logLayer("NO_MISSING_FIELD", {});
@@ -210,6 +210,17 @@ window.addEventListener(
     layerHealing = true;
 
     try {
+      // ⭐ SEND REFLEX TO ROUTER (nervous system) ⭐
+      Router.receiveReflex({
+        reflexOrigin: "LayerScanner",
+        layer: "A2",
+        message: msg,
+        routeTrace,
+        table,
+        field
+      });
+
+      // ⭐ THEN INVOKE HEALING VIA ROUTER ⭐
       await route("fetchField", {
         table,
         field,
@@ -252,5 +263,5 @@ function parseMissingField(message) {
 }
 
 // ============================================================================
-// END OF FILE — THE TISSUE REFLEX / MID‑LAYER SENTINEL  [v1.0]
+// END OF FILE — THE TISSUE REFLEX / MID‑LAYER SENTINEL  [v1.1]
 // ============================================================================
