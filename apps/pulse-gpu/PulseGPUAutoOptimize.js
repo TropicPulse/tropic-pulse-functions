@@ -59,7 +59,7 @@ log(
 // ============================================================================
 function buildDecision({ mode, reason, plan }) {
   log(
-    `%c[Guardian] Decision → mode=${mode} | reason=${reason}`,
+  `gpu`,`[Guardian] Decision → mode=${mode} | reason=${reason}`,
     "color:#4CAF50; font-weight:bold;"
   );
 
@@ -114,12 +114,12 @@ function getHighestSeverity(adviceList = []) {
 
   if (highest) {
     log(
-      `%c[Guardian] Highest severity advice → ${highest.severity}`,
+  `gpu`,`[Guardian] Highest severity advice → ${highest.severity}`,
       "color:#FFC107; font-weight:bold;"
     );
   } else {
     log(
-      "%c[Guardian] No advisor severity found.",
+  "gpu","[Guardian] No advisor severity found.",
       "color:#FFC107;"
     );
   }
@@ -138,11 +138,13 @@ class PulseGPUAutoOptimize {
     this.instanceId = instanceId || "guardian-instance";
 
     log(
+  "gpu",
       "guardian",
       `Instance ${this.instanceId} initialized.`
     );
 
     log(
+  "gpu",
       "guardian",
       "Identity: policy-cortex | lineage: guardian-core | role: optimization arbiter."
     );
@@ -155,7 +157,7 @@ class PulseGPUAutoOptimize {
   decide(plan, context = {}) {
 
     log(
-      "guardian",
+  "gpu","guardian",
       `decide() invoked for ${this.instanceId}.`
     );
 
@@ -173,7 +175,7 @@ class PulseGPUAutoOptimize {
     };
 
     log(
-      "guardian",
+  "gpu","guardian",
       "Merged preferences",
       mergedPrefs
     );
@@ -203,7 +205,7 @@ class PulseGPUAutoOptimize {
     const severity = topAdvice.severity || "low";
 
     log(
-      "guardian",
+  "gpu","guardian",
       `Plan action=${plan.action} | severity=${severity}`
     );
 
@@ -241,7 +243,7 @@ class PulseGPUAutoOptimize {
   // ----------------------------------------------------
   decideForRestore(plan, severity, prefs) {
     log(
-      `%c[Guardian] decideForRestore() severity=${severity} | instance=${this.instanceId}`,
+  `gpu`,`[Guardian] decideForRestore() severity=${severity} | instance=${this.instanceId}`,
       "color:#03A9F4;"
     );
 
@@ -310,7 +312,7 @@ class PulseGPUAutoOptimize {
   // ----------------------------------------------------
   decideForApplyOptimal(plan, severity, prefs) {
     log(
-      "%c[Guardian] decideForApplyOptimal() instance=" + this.instanceId,
+  "gpu","[Guardian] decideForApplyOptimal() instance=" + this.instanceId,
       "color:#03A9F4;"
     );
 
@@ -334,7 +336,7 @@ class PulseGPUAutoOptimize {
   // ----------------------------------------------------
   decideForTierUpgrade(plan, severity, prefs) {
     log(
-      "%c[Guardian] decideForTierUpgrade() instance=" + this.instanceId,
+  "gpu","[Guardian] decideForTierUpgrade() instance=" + this.instanceId,
       "color:#03A9F4;"
     );
 

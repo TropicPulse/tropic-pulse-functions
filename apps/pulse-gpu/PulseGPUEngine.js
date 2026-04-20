@@ -198,7 +198,7 @@ class PulseGPUEngine {
     this.evo = { ...PULSE_GPU_ENGINE_META.evo };
 
     log(
-      "%c[PulseGPUEngine] Constructed — awaiting init().",
+      "gpu","[PulseGPUEngine] Constructed — awaiting init().",
       "color:#03A9F4; font-weight:bold;"
     );
   }

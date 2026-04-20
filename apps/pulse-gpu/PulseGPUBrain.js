@@ -278,7 +278,7 @@ class BrainInput {
 class TextureOptimizer {
   static process(rawTextures) {
     log(
-      "%c[Analyst] TextureOptimizer → pass-through",
+  "gpu","[Analyst] TextureOptimizer → pass-through",
       "color:#8BC34A;",
       { count: rawTextures.length }
     );
@@ -296,7 +296,7 @@ class TextureOptimizer {
 class MeshOptimizer {
   static process(rawMeshes) {
     log(
-      "%c[Analyst] MeshOptimizer → pass-through",
+  "gpu","[Analyst] MeshOptimizer → pass-through",
       "color:#8BC34A;",
       { count: rawMeshes.length }
     );
@@ -314,7 +314,7 @@ class MeshOptimizer {
 class LightingBaker {
   static process(rawScenes) {
     log(
-      "%c[Analyst] LightingBaker → placeholder",
+  "gpu","[Analyst] LightingBaker → placeholder",
       "color:#8BC34A;",
       { sceneCount: rawScenes.length }
     );
@@ -331,7 +331,7 @@ class LightingBaker {
 class AnimationBaker {
   static process(rawAnimations) {
     log(
-      "%c[Analyst] AnimationBaker → pass-through",
+  "gpu","[Analyst] AnimationBaker → pass-through",
       "color:#8BC34A;",
       { clipCount: rawAnimations.length }
     );
@@ -349,7 +349,7 @@ class AnimationBaker {
 class ShaderCompiler {
   static process(rawShaders) {
     log(
-      "%c[Analyst] ShaderCompiler → pass-through",
+  "gpu","[Analyst] ShaderCompiler → pass-through",
       "color:#8BC34A;",
       { shaderCount: rawShaders.length }
     );
@@ -396,7 +396,7 @@ class RenderPlanner {
 class PulseGPUBrainController {
   static buildPackages(brainInput) {
     log(
-      "%c[Analyst] buildPackages() — starting",
+  "gpu","[Analyst] buildPackages() — starting",
       "color:#03A9F4;",
       {
         schemaVersion: brainInput.schemaVersion,
@@ -431,7 +431,7 @@ class PulseGPUBrainController {
     };
 
     log(
-      "%c[Analyst] buildPackages() — complete",
+  "gpu","[Analyst] buildPackages() — complete",
       "color:#4CAF50;",
       { schemaVersion: packageSet.schemaVersion }
     );
@@ -449,14 +449,14 @@ class PulseGPUBrainExport {
 
   static buildAndStore(brainInput) {
     log(
-      "%c[Analyst] buildAndStore()",
+  "gpu","[Analyst] buildAndStore()",
       "color:#03A9F4;"
     );
 
     this.packageSet = PulseGPUBrainController.buildPackages(brainInput);
 
     log(
-      "%c[Analyst] packageSet stored",
+  "gpu","[Analyst] packageSet stored",
       "color:#4CAF50;"
     );
 
@@ -465,7 +465,7 @@ class PulseGPUBrainExport {
 
   static exportToRuntime() {
     log(
-      "%c[Analyst] exportToRuntime()",
+  "gpu","[Analyst] exportToRuntime()",
       "color:#03A9F4;",
       { hasPackageSet: !!this.packageSet }
     );
