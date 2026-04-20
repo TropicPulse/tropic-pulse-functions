@@ -48,7 +48,7 @@ import { pulseband } from "./proxy/PulseBand.js";
 import { identity, PulseLineage } from "./PulseIdentity.js";
 import { getAuth, getHook, getMap, callHelper, attachScanner } from "./lib/Connectors/PageScanner.js";
 // UI + presentation metadata comes from Logger
-import { PulseVersion, PulseRoles, makeTelemetryPacket } from "./PulseLogger.js";
+import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error } from "./PulseLogger.js";
 
 
 async function logSecurityPatch(uid, patch, reason = "auto") {
