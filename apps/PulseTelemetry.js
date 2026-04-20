@@ -1,41 +1,100 @@
 // ============================================================================
-//  PULSE OS v7.4 — TELEMETRY ORGAN
+//  PULSE OS v7.7 — TELEMETRY ORGAN (Mesh + Mini‑Pulse Upgrade)
 //  Unified Metrics • Subsystem Heartbeats • Drift Detection
-//  This file centralizes ALL telemetry across PulseOS.
+//  Mesh‑Aware Telemetry Propagation (Mini‑Pulse Distance Engine)
 // ============================================================================
 
 // UI + presentation metadata comes from Logger
-import { PulseVersion, PulseRoles, makeTelemetryPacket  } from "./PulseLogger.js";
+import { PulseVersion, PulseRoles, makeTelemetryPacket } from "./PulseLogger.js";
 
-// Telemetry packet builder also comes from Logger
-import { PulseLineage} from "./PulseIdentity.js";
-
+// Lineage comes ONLY from Identity (BBB)
+import { PulseLineage } from "./PulseIdentity.js";
 
 // ============================================================================
 //  INTERNAL STATE — Telemetry Bloodstream
 // ============================================================================
 const telemetryStream = [];
-const MAX_STREAM_SIZE = 5000; // prevents runaway memory
+const MAX_STREAM_SIZE = 5000;
+
+// Mini‑Pulse mesh settings
+const MAX_HOPS = 5;          // how far a pulse can travel
+const DEFAULT_DISTANCE = 1;  // local pulse distance
 
 // ============================================================================
-//  EMIT TELEMETRY — The universal signal emitter
-//  (Telemetry is allowed to use console.error ONLY for internal failures.)
+//  EMIT TELEMETRY — Universal signal emitter
 // ============================================================================
 export function emitTelemetry(subsystem, event, data = {}) {
   try {
-    const packet = makeTelemetryPacket(subsystem, event, data);
+    const packet = makeTelemetryPacket(subsystem, event, {
+      ...data,
+      lineage: PulseLineage[subsystem],
+      hops: 0,
+      distance: DEFAULT_DISTANCE
+    });
 
     telemetryStream.push(packet);
+    if (telemetryStream.length > MAX_STREAM_SIZE) telemetryStream.shift();
 
-    if (telemetryStream.length > MAX_STREAM_SIZE) {
-      telemetryStream.shift();
-    }
+    // NEW: broadcast outward
+    broadcastTelemetry(packet);
 
     return packet;
   } catch (err) {
-    // v7.4: Telemetry is one of the ONLY organs allowed to use console.error
     console.error("[PulseTelemetry] FAILED to emit telemetry:", err);
     return null;
+  }
+}
+
+// ============================================================================
+//  MINI‑PULSE BROADCAST — Send telemetry outward across mesh
+// ============================================================================
+export function broadcastTelemetry(packet) {
+  try {
+    // Prevent infinite loops
+    if (packet.hops >= MAX_HOPS) return;
+
+    const amplified = amplifyPulse(packet);
+
+    // Your existing mini‑pulse sender goes here:
+    // sendMiniPulse(amplified);
+
+    // For now, we simulate mesh propagation:
+    // console.log("[MiniPulse] Broadcasting:", amplified);
+
+  } catch (err) {
+    console.error("[PulseTelemetry] Broadcast failed:", err);
+  }
+}
+
+// ============================================================================
+//  MINI‑PULSE AMPLIFIER — Increase distance + hop count
+// ============================================================================
+export function amplifyPulse(packet) {
+  return {
+    ...packet,
+    hops: packet.hops + 1,
+    distance: packet.distance + 1
+  };
+}
+
+// ============================================================================
+//  RECEIVE MESH PULSE — Accept telemetry from other nodes
+// ============================================================================
+export function receiveMeshPulse(packet) {
+  try {
+    if (!packet || typeof packet !== "object") return;
+
+    // Prevent loops
+    if (packet.hops >= MAX_HOPS) return;
+
+    telemetryStream.push(packet);
+    if (telemetryStream.length > MAX_STREAM_SIZE) telemetryStream.shift();
+
+    // Re‑broadcast outward (mesh propagation)
+    broadcastTelemetry(packet);
+
+  } catch (err) {
+    console.error("[PulseTelemetry] Mesh receive failed:", err);
   }
 }
 
@@ -46,50 +105,37 @@ export function heartbeat(subsystem, extra = {}) {
   return emitTelemetry(subsystem, "heartbeat", {
     version: PulseVersion[subsystem],
     role: PulseRoles[subsystem],
-    lineage: PulseLineage[subsystem],
     ...extra
   });
 }
 
 // ============================================================================
-//  DRIFT DETECTION — Detect unexpected subsystem behavior
+//  DRIFT DETECTION
 // ============================================================================
 export function detectDrift(subsystem, expectedVersion) {
   const actual = PulseVersion[subsystem];
-
   if (actual !== expectedVersion) {
-    return emitTelemetry(subsystem, "version-drift", {
-      expected: expectedVersion,
-      actual
-    });
+    return emitTelemetry(subsystem, "version-drift", { expected: expectedVersion, actual });
   }
-
   return null;
 }
 
 // ============================================================================
-//  ANOMALY — Report unexpected or suspicious behavior
+//  ANOMALY
 // ============================================================================
 export function anomaly(subsystem, description, details = {}) {
-  return emitTelemetry(subsystem, "anomaly", {
-    description,
-    ...details
-  });
+  return emitTelemetry(subsystem, "anomaly", { description, ...details });
 }
 
 // ============================================================================
-//  PERFORMANCE METRICS — GPU, CPU, Router, Marketplace
+//  PERFORMANCE METRICS
 // ============================================================================
 export function metric(subsystem, name, value, extra = {}) {
-  return emitTelemetry(subsystem, "metric", {
-    name,
-    value,
-    ...extra
-  });
+  return emitTelemetry(subsystem, "metric", { name, value, ...extra });
 }
 
 // ============================================================================
-//  STREAM ACCESS — Dashboard / DevTools / Debug Panels
+//  STREAM ACCESS
 // ============================================================================
 export function getStream(limit = 500) {
   if (limit <= 0) return [...telemetryStream];
@@ -97,12 +143,12 @@ export function getStream(limit = 500) {
 }
 
 // ============================================================================
-//  SNAPSHOT — Return a structured telemetry summary
+//  SNAPSHOT
 // ============================================================================
 export function getTelemetrySnapshot() {
   const latest = telemetryStream.slice(-200);
-
   const bySubsystem = {};
+
   latest.forEach((p) => {
     if (!bySubsystem[p.subsystem]) bySubsystem[p.subsystem] = [];
     bySubsystem[p.subsystem].push(p);
@@ -126,5 +172,8 @@ export const PulseTelemetry = {
   anomaly,
   metric,
   getStream,
-  getTelemetrySnapshot
+  getTelemetrySnapshot,
+  broadcastTelemetry,
+  receiveMeshPulse,
+  amplifyPulse
 };
