@@ -4,8 +4,12 @@
 //  This file centralizes ALL telemetry across PulseOS.
 // ============================================================================
 
-import { PulseVersion, PulseRoles, PulseLineage } from "./PulseIdentity.js";
-import { makeTelemetryPacket } from "./PulseLogger.js";
+// UI + presentation metadata comes from Logger
+import { PulseVersion, PulseRoles, makeTelemetryPacket  } from "./PulseLogger.js";
+
+// Telemetry packet builder also comes from Logger
+import { PulseLineage} from "./PulseIdentity.js";
+
 
 // ============================================================================
 //  INTERNAL STATE — Telemetry Bloodstream
