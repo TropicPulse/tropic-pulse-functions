@@ -4,7 +4,12 @@
 // ============================================================================
 
 import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error } from "../PulseLogger.js";
+import { initPulseBand } from "./PulseBand.js";
 
+// Start PulseBand (nervous system)
+initPulseBand({
+  logger: { log, warn, error }
+});
 // --- BRAIN LAYER (B) --------------------------------------------------------
 import { BrainInput, PulseGPUBrainExport, PulseGPUBrainController} from "./PulseGPUBrain.js";
 import { PulseGPUOrchestrator } from "./PulseGPUOrchestrator.js";
