@@ -97,14 +97,23 @@ function normalizeArgs(args) {
     message = rest.shift() || "";
   }
 
+  // ========================================================================
+  //  ⭐ FIX: Detect PulseBand JSON logs and classify them as subsystem "band"
+  // ========================================================================
+  if (
+    typeof message === "string" &&
+    message.startsWith("{") &&
+    message.includes(`"pulseLayer":"NERVOUS-SYSTEM"`)
+  ) {
+    subsystem = "band";
+  }
+
   return { subsystem, message, rest };
 }
-
 
 // ============================================================================
 //  CORE LOGGING FUNCTIONS (NEW + OLD COMPATIBLE)
 // ============================================================================
-
 export function log(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const color = PulseColors[subsystem] || "#fff";
@@ -192,6 +201,7 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
 console.log = (...args) => log(...args);
 console.warn = (...args) => warn(...args);
 console.error = (...args) => error(...args);
+
 export const logger = {
   log,
   warn,
