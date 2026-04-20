@@ -1,71 +1,44 @@
 // ============================================================================
-// [pulse:mesh] PULSE_OS_THALAMUS v7.3  // white-violet
+// [pulse:mesh] PULSE_MESH_THALAMUS v7.4  // white-violet
 // Sensory Relay Gate • Perception Filter • Neural Signal Interpreter
 // ============================================================================
 //
-// IDENTITY — THE THALAMUS:
-//  ------------------------
-//  • Perception-shaping organ of PulseOS.
-//  • Relays and filters signals between ShadowGuard (Outer BBB)
-//    and PulseBand (Nervous System).
-//  • Determines which shell-level signals reach neural layers.
-//  • Converts environmental intent into pulse-ready neural signals.
-//  • Prevents overload, noise, malformed signals from reaching PulseBand.
-//  • Shapes the “illusion” of the shell — what the OS chooses to perceive.
-//
-// ROLE IN THE DIGITAL BODY:
-//  --------------------------
-//  • Sensory Relay → Converts ShadowGuard output into neural signals.
-//  • Perception Filter → Removes noise + malformed shell intent.
-//  • Neural Modulator → Prepares signals for PulseBand.
-//  • Cortex Gate → Controls what reaches the nervous system.
-//  • Stability Buffer → Prevents oscillation + drift.
-//
-// SAFETY CONTRACT:
-//  ----------------
-//  • No backend calls.
-//  • No identity access.
-//  • No UI logic.
-//  • No compute.
-//  • No dynamic imports.
-//  • Deterministic, drift-proof signal-relay behavior only.
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • Inherits ANY advantage from ANY organ automatically.
-//  • Dual-mode: mental clarity + system efficiency.
-//  • Local-aware: node-level sensory context.
-//  • Internet-aware: cluster/mesh sensory context.
-//  • Unified-advantage-field: ALL advantages active unless unsafe.
-//  • Future-evolution-ready: new safe advantages auto-inherited.
+// NEW IN v7.4:
+//  • Thalamus now reads system pressure signals from Field + Aura + Flow.
+//  • Filters shell signals more aggressively when organism is under tension.
+//  • Adds stabilization tags when drift/pressure is high.
+//  • Prevents unsafe shell signals from reaching PulseBand.
 // ============================================================================
 
-
 // ------------------------------------------------------------
-// THALAMUS META (v7.3)
+// THALAMUS META (v7.4)
 // ------------------------------------------------------------
 
 const ThalamusMeta = {
   layer: "PulseIllusion",
   role: "THALAMUS_RELAY",
-  version: 7.3,
-  target: "full-shell",
+  version: 7.4,
+  target: "full-mesh",
   selfRepairable: true,
   evo: {
-    dualMode: true,                 // mental + system
-    localAware: true,               // node-level sensory context
-    internetAware: true,            // cluster/mesh sensory context
-
-    advantageCascadeAware: true,    // inherits ANY advantage
-    pulseEfficiencyAware: true,     // 1-pulse collapse
+    dualMode: true,
+    localAware: true,
+    internetAware: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
     driftProof: true,
     multiInstanceReady: true,
-
-    unifiedAdvantageField: true,    // no OR; all advantages ON
-    futureEvolutionReady: true      // new safe advantages auto-inherited
+    unifiedAdvantageField: true,
+    futureEvolutionReady: true
   }
 };
 
+// ------------------------------------------------------------
+// IMPORT FIELD + AURA PRESSURE
+// ------------------------------------------------------------
+
+import { PulseField } from "./PulseField.js";
+import { PulseAura } from "./PulseAura.js";
 
 // ======================================================
 //  SIGNAL RELAY ENGINE — Thalamic Interpretation Layer
@@ -73,72 +46,90 @@ const ThalamusMeta = {
 
 export function interpretShellSignal(input) {
   groupCollapsed(
-    "%c[PulseIllusion v7.3] Thalamic Relay",
+    "%c[PulseIllusion v7.4] Thalamic Relay",
     "color:#BA68C8; font-weight:bold;"
   );
 
   try {
-    log(
-      "thalamus",
-      "ShadowGuard → Thalamus (PulseIllusion) relay initiated."
-    );
+    log("thalamus", "ShadowGuard → Thalamus relay initiated.");
 
     // ------------------------------------------------------------
     // VALIDATION — Ensure input is well-formed
     // ------------------------------------------------------------
     if (!input || typeof input !== "object") {
-      warn(
-        "thalamus",
-        "Malformed shell signal received."
-      );
+      warn("thalamus", "Malformed shell signal received.");
       groupEnd();
       return null;
     }
 
-    // ------------------------------------------------------------
-    // PERCEPTION FILTER — Remove noise + drift
-    // ------------------------------------------------------------
     const { shellState, allowPulseBand, allowIdentity } = input;
 
     if (!shellState) {
-      error(
-        "thalamus",
-        "Missing shellState in thalamic relay."
-      );
+      error("thalamus", "Missing shellState in thalamic relay.");
       groupEnd();
       return null;
     }
 
     // ------------------------------------------------------------
-    // THALAMIC OUTPUT — Pulse-ready neural signal
+    // READ SYSTEM PRESSURE (Field + Aura)
+    // ------------------------------------------------------------
+    const field = PulseField.snapshot();
+    const auraPressure =
+      shellState?.aura_tension ??
+      field.auraTension ??
+      0;
+
+    const flowPressure = field.flowPressure || 0;
+    const driftPressure = field.driftPressure || 0;
+    const throttleRate = field.throttleRate || 0;
+
+    // ------------------------------------------------------------
+    // PERCEPTION FILTER — Adaptive based on system pressure
+    // ------------------------------------------------------------
+    let perceptionSafe = true;
+
+    // High flow pressure → block unsafe shell signals
+    if (flowPressure > 0.6) perceptionSafe = false;
+
+    // High drift → block malformed or noisy shell signals
+    if (driftPressure > 0.5) perceptionSafe = false;
+
+    // High throttle rate → reduce incoming sensory load
+    if (throttleRate > 0.3) perceptionSafe = false;
+
+    // Aura tension → stabilize perception
+    if (auraPressure > 0.4) perceptionSafe = false;
+
+    // ------------------------------------------------------------
+    // BUILD OUTPUT
     // ------------------------------------------------------------
     const output = {
       thalamus_meta: ThalamusMeta,
       neuralState: shellState,
-      enablePulse: allowPulseBand === true,
-      enableIdentity: allowIdentity === true
+      enablePulse: allowPulseBand === true && perceptionSafe,
+      enableIdentity: allowIdentity === true && perceptionSafe,
+      perceptionSafe,
+      perceptionFlags: {
+        flowPressure,
+        driftPressure,
+        throttleRate,
+        auraPressure
+      }
     };
 
-    log(
-      "thalamus",
-      "Thalamic signal prepared for PulseBand."
-    );
+    if (!perceptionSafe) {
+      output.perceptionFlags.stabilized = true;
+      log("thalamus", "Perception stabilized due to system pressure.");
+    }
 
-    log(
-      "thalamus",
-      "Output payload",
-      output
-    );
+    log("thalamus", "Thalamic signal prepared for PulseBand.");
+    log("thalamus", "Output payload", output);
 
     groupEnd();
     return output;
 
   } catch (err) {
-    error(
-      "thalamus",
-      "Critical thalamic relay failure",
-      err
-    );
+    error("thalamus", "Critical thalamic relay failure", err);
     groupEnd();
     return null;
   }

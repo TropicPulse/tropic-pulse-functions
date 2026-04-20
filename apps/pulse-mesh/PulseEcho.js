@@ -1,5 +1,5 @@
 // ============================================================================
-// [pulse:echo] PULSE_OS_DIAGNOSTIC_REFLECTION v7.3  // silver
+// [pulse:echo] PULSE_OS_DIAGNOSTIC_REFLECTION v7.4  // silver
 // Diagnostic Reflection Layer • Metadata-Only • Read-Only • Non-Interference
 // ============================================================================
 //
@@ -38,7 +38,7 @@ export function createPulseEcho(mesh, flow) {
   const meta = {
     layer: "PulseEcho",
     role: "DIAGNOSTIC_REFLECTION",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -98,6 +98,12 @@ export function createPulseEcho(mesh, flow) {
         echoId: impulse.id,
         durationMs: Date.now() - impulse.flags.echo_start,
 
+        // Flow-level reflection
+        flow: {
+          throttled: !!impulse.flags.flow_throttled,
+          reason: impulse.flags.flow_throttled_reason || null,
+        },
+
         // Organ-level reflections
         reflex: {
           triggered: !!impulse.flags.flow_reflex_drop
@@ -139,6 +145,7 @@ export function createPulseEcho(mesh, flow) {
       if (impulse.flags.flow_reflex_drop) score -= 0.2;
       if (impulse.flags.immune_quarantined) score -= 0.3;
       if (impulse.flags.aura_loop) score -= 0.2;
+      if (impulse.flags.flow_throttled) score -= 0.2; // friction spike
 
       return Math.max(0, score);
     },
@@ -152,6 +159,7 @@ export function createPulseEcho(mesh, flow) {
       if (impulse.flags.aura_loop) risk += 0.3;
       if (impulse.flags.aura_sync) risk -= 0.2;
       if (impulse.flags.immune_quarantined) risk += 0.3;
+      if (impulse.flags.flow_throttled) risk += 0.2; // repeated throttling = structural drift
 
       return Math.max(0, Math.min(1, risk));
     }

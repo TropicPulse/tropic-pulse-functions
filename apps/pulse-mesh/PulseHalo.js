@@ -1,5 +1,5 @@
 // ============================================================================
-// [pulse:halo] PULSE_OS_AWARENESS_RING v7.3  // white
+// [pulse:halo] PULSE_OS_AWARENESS_RING v7.4  // white
 // Read-Only Awareness Ring • System Dashboard • Metadata-Only Reflection
 // ============================================================================
 //
@@ -55,10 +55,13 @@ const HaloState = {
 
   mesh_hops: 0,
 
+  // New: flow-level throttling awareness
+  flow_throttles: 0,
+
   meta: {
     layer: "PulseHalo",
     role: "AWARENESS_RING",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -98,6 +101,9 @@ export const PulseHaloCounters = {
   memoryWrite() { HaloState.memory_writes++; },
 
   meshHops(count = 1) { HaloState.mesh_hops += count; },
+
+  // New: Flow throttling hook (called by PulseFlow)
+  impulseThrottled() { HaloState.flow_throttles++; },
 };
 
 // -----------------------------------------------------------
@@ -157,6 +163,15 @@ export const PulseHalo = {
         ),
       },
 
+      // New: Flow-level awareness
+      flow: {
+        throttles: s.flow_throttles,
+        throttle_rate: this.#ratio(
+          s.flow_throttles,
+          s.impulses_total
+        ),
+      },
+
       health: {
         stability: this.#stability(s),
         drift_risk: this.#drift(s),
@@ -174,7 +189,7 @@ export const PulseHalo = {
 
   // ---------------------------------------------------------
   // INTERNAL HELPERS (metadata-only heuristics)
-// ---------------------------------------------------------
+  // ---------------------------------------------------------
 
   #ratio(n, d) {
     return d ? n / d : 0;

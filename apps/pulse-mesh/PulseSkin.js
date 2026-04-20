@@ -1,44 +1,25 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_SKIN_LAYER v7.3  // silver
-// Boundary Layer • Entry/Exit Normalization • Metadata-Only
+// [pulse:mesh] COMMUNITY_SKIN_LAYER v7.4  // silver
+// Boundary Layer • Entry/Exit Normalization • Pressure-Aware Membrane
 // ============================================================================
 //
-// IDENTITY — THE SKIN:
-//  --------------------
-//  • Boundary layer between the system and external environment.
-//  • Normalizes incoming impulses, sanitizes outgoing impulses.
-//  • Reduces friction, stabilizes transitions, preserves pulse integrity.
-//  • NEVER computes payloads, NEVER mutates data content.
-//  • Metadata-only shaping for safe entry/exit.
-//
-// THEME:
-//  • Color: Silver (boundary, membrane, protection).
-//  • Subtheme: Normalization, stabilization, transition.
-//
-// SAFETY CONTRACT:
-//  • Metadata-only.
-//  • No payload access.
-//  • No routing override.
-//  • No autonomy, no sentience.
-//  • Deterministic, drift-proof boundary behavior.
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • Inherits ANY advantage from ANY organ automatically.
-//  • Dual-mode: mental clarity + system efficiency.
-//  • Local-aware: node-level boundary context.
-//  • Internet-aware: cluster/mesh/global boundary context.
-//  • Unified-advantage-field: ALL advantages active unless unsafe.
-//  • Future-evolution-ready: new safe advantages auto-inherited.
+// NEW IN v7.4:
+//  • Skin now reacts to system pressure signals:
+//      - flowPressure
+//      - throttleRate
+//      - driftPressure
+//      - auraTension
+//      - reflexDropRate
+//      - meshStormPressure
+//  • Skin increases friction/noise under tension.
+//  • Skin reduces boundary load when stabilizing.
+//  • Still metadata-only, deterministic, zero payload mutation.
 // ============================================================================
 
-
-// -----------------------------------------------------------
-// Skin State (environment metadata)
-// -----------------------------------------------------------
+import { PulseField } from "./PulseField.js";
 
 const SkinState = {
-  environment: 'default',
+  environment: "default",
   friction: 0.0,
   noise: 0.0,
   boundaryLoad: 0.0,
@@ -46,28 +27,25 @@ const SkinState = {
   meta: {
     layer: "PulseSkin",
     role: "BOUNDARY_LAYER",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
-      dualMode: true,                 // mental + system
-      localAware: true,               // node-level boundary
-      internetAware: true,            // cluster/mesh/global boundary
-
-      advantageCascadeAware: true,    // inherits ANY advantage
-      pulseEfficiencyAware: true,     // 1-pulse collapse
+      dualMode: true,
+      localAware: true,
+      internetAware: true,
+      advantageCascadeAware: true,
+      pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
-
-      unifiedAdvantageField: true,    // no OR; all advantages ON
-      futureEvolutionReady: true      // new safe advantages auto-inherited
+      unifiedAdvantageField: true,
+      futureEvolutionReady: true
     }
   }
 };
 
-
 // -----------------------------------------------------------
-// Skin Pack: boundary shaping rules (logic unchanged)
+// Skin Pack (v7.4)
 // -----------------------------------------------------------
 
 export const PulseSkin = {
@@ -84,61 +62,79 @@ export const PulseSkin = {
   normalizeExit(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.flags.skin_exit_normalized = true;
-
     impulse.flags.internal_metadata_stripped = true;
+    return impulse;
+  },
+
+  // NEW v7.4: dynamic friction based on system pressure
+  applyDynamicFriction(impulse, field) {
+    const tension =
+      field.flowPressure * 0.4 +
+      field.driftPressure * 0.3 +
+      field.auraTension * 0.3;
+
+    const friction = clamp01(SkinState.friction + tension * 0.5);
+
+    impulse.energy *= (1 - friction * 0.1);
+    impulse.flags.skin_dynamic_friction = friction;
 
     return impulse;
   },
 
-  applyFriction(impulse) {
-    if (SkinState.friction > 0) {
-      impulse.energy *= (1 - SkinState.friction * 0.1);
-    }
+  // NEW v7.4: dynamic noise based on storms + reflex drops
+  applyDynamicNoise(impulse, field) {
+    const turbulence =
+      field.meshStormPressure * 0.5 +
+      field.reflexDropRate * 0.3 +
+      field.throttleRate * 0.2;
+
+    const noise = clamp01(SkinState.noise + turbulence * 0.4);
+
+    impulse.score = clamp01(impulse.score - noise * 0.05);
+    impulse.flags.skin_dynamic_noise = noise;
+
     return impulse;
   },
 
-  applyNoise(impulse) {
-    if (SkinState.noise > 0) {
-      impulse.score = clamp01(
-        impulse.score - SkinState.noise * 0.05
-      );
-    }
-    return impulse;
-  },
+  // NEW v7.4: boundary load reacts to pressure
+  applyDynamicBoundaryLoad(impulse, field) {
+    const load =
+      field.flowPressure * 0.3 +
+      field.driftPressure * 0.3 +
+      field.auraTension * 0.4;
 
-  applyBoundaryLoad(impulse) {
-    impulse.flags = impulse.flags || {};
-    impulse.flags.skin_boundary_load = SkinState.boundaryLoad;
+    const boundaryLoad = clamp01(SkinState.boundaryLoad + load * 0.5);
+
+    impulse.flags.skin_boundary_load = boundaryLoad;
     return impulse;
   }
 };
 
-
 // -----------------------------------------------------------
-// Skin Engine (logic unchanged, metadata upgraded)
+// Skin Engine (v7.4)
 // -----------------------------------------------------------
 
-export function applyPulseSkin(impulse, phase = 'entry') {
+export function applyPulseSkin(impulse, phase = "entry") {
   impulse.flags = impulse.flags || {};
   impulse.flags.skin_meta = SkinState.meta;
 
-  if (phase === 'entry') {
+  const field = PulseField.snapshot();
+
+  if (phase === "entry") {
     PulseSkin.normalizeEntry(impulse);
   }
 
-  PulseSkin.applyFriction(impulse);
-  PulseSkin.applyNoise(impulse);
-  PulseSkin.applyBoundaryLoad(impulse);
+  PulseSkin.applyDynamicFriction(impulse, field);
+  PulseSkin.applyDynamicNoise(impulse, field);
+  PulseSkin.applyDynamicBoundaryLoad(impulse, field);
 
-  if (phase === 'exit') {
+  if (phase === "exit") {
     PulseSkin.normalizeExit(impulse);
   }
 
   impulse.flags.skin_applied = true;
-
   return impulse;
 }
-
 
 // -----------------------------------------------------------
 // Helpers

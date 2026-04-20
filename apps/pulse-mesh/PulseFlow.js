@@ -1,5 +1,5 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_FLOW_LAYER v7.3  // rainbow
+// [pulse:mesh] COMMUNITY_FLOW_LAYER v7.4  // rainbow
 // Full-Spectrum Coordination • Metadata-Only • Self-Repairing Flow Engine
 // ============================================================================
 //
@@ -47,6 +47,52 @@ import { applyPulseAura } from './PulseAura.js';
 import { PulseHaloCounters } from './PulseHalo.js';
 
 // -----------------------------------------------------------
+// Flow Guard — recursion + soft rate limiting
+// -----------------------------------------------------------
+//
+// Design goals:
+//  • Never block a healthy, low-load system.
+//  • Only engage when we are clearly in runaway territory.
+//  • Metadata-only: no payload access, no routing override.
+//  • Tag impulses when throttled so healing/telemetry can see it.
+// -----------------------------------------------------------
+
+const FlowGuard = {
+  activeImpulses: 0,
+  maxActiveImpulsesSoft: 5000,   // absurdly high: normal use never hits this
+  maxDepth: 128,                 // protects against pathological recursion
+  timeSliceMs: 16,               // ~1 frame at 60fps
+  sliceStart: performance.now(),
+};
+
+function shouldThrottle(impulse, depth) {
+  // Depth guard: only trips in true recursion storms.
+  if (depth > FlowGuard.maxDepth) {
+    impulse.flags.flow_throttled = true;
+    impulse.flags.flow_throttled_reason = 'max_depth';
+    return true;
+  }
+
+  // Reset time slice if we moved to a new frame-ish window.
+  const now = performance.now();
+  if (now - FlowGuard.sliceStart > FlowGuard.timeSliceMs) {
+    FlowGuard.sliceStart = now;
+    FlowGuard.activeImpulses = 0;
+  }
+
+  // Soft concurrency guard:
+  // • Normal flows never get close.
+  // • Only a storm of impulses in a single slice will trip this.
+  if (FlowGuard.activeImpulses > FlowGuard.maxActiveImpulsesSoft) {
+    impulse.flags.flow_throttled = true;
+    impulse.flags.flow_throttled_reason = 'max_active_impulses_soft';
+    return true;
+  }
+
+  return false;
+}
+
+// -----------------------------------------------------------
 // Flow Engine
 // -----------------------------------------------------------
 
@@ -56,7 +102,7 @@ export function PulseFlow(mesh) {
   const meta = {
     layer: "PulseFlow",
     role: "FLOW_ORCHESTRATOR",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -83,104 +129,121 @@ export function PulseFlow(mesh) {
       impulse.flags.flow_meta = meta;
       impulse.flags.flow_started = true;
 
-      PulseHaloCounters.impulseStarted();
+      // Depth comes from context if we’re in a recursive mesh path.
+      const depth = (context.flowDepth ?? 0);
 
-      // -----------------------------------------------------
-      // 1. SKIN ENTRY
-      // -----------------------------------------------------
-      applyPulseSkin(impulse, 'entry');
-
-      // -----------------------------------------------------
-      // 2. REFLEX
-      // -----------------------------------------------------
-      const reflexDecision = reflex(impulse, {
-        trustLevel: context.trustLevel,
-        load: context.load,
-      });
-
-      impulse.flags[`flow_reflex_${reflexDecision ? 'pass' : 'drop'}`] = true;
-
-      if (reflexDecision === 0) {
-        PulseHaloCounters.reflexDropped();
+      // FLOW GUARD — only engages in pathological conditions.
+      if (shouldThrottle(impulse, depth)) {
+        PulseHaloCounters.impulseThrottled?.();
         return finalize(impulse);
       }
 
-      // -----------------------------------------------------
-      // 3. CORTEX
-      // -----------------------------------------------------
-      applyPulseCortex(impulse, context);
+      FlowGuard.activeImpulses++;
+      PulseHaloCounters.impulseStarted();
 
-      // -----------------------------------------------------
-      // 4. TENDONS
-      // -----------------------------------------------------
-      applyTendons(impulse);
+      try {
+        // -----------------------------------------------------
+        // 1. SKIN ENTRY
+        // -----------------------------------------------------
+        applyPulseSkin(impulse, 'entry');
 
-      // -----------------------------------------------------
-      // 5. ORGANS
-      // -----------------------------------------------------
-      applyPulseOrgans(impulse);
+        // -----------------------------------------------------
+        // 2. REFLEX
+        // -----------------------------------------------------
+        const reflexDecision = reflex(impulse, {
+          trustLevel: context.trustLevel,
+          load: context.load,
+        });
 
-      // -----------------------------------------------------
-      // 6. IMMUNE
-      // -----------------------------------------------------
-      const immuneBefore = impulse.flags?.immune_quarantined;
-      applyPulseImmune(impulse);
-      if (impulse.flags?.immune_quarantined && !immuneBefore) {
-        PulseHaloCounters.immuneQuarantined();
-      }
+        impulse.flags[`flow_reflex_${reflexDecision ? 'pass' : 'drop'}`] = true;
 
-      // -----------------------------------------------------
-      // 7. MEMORY
-      // -----------------------------------------------------
-      const memoryBefore = impulse.flags?.memory_written;
-      applyPulseMemory(impulse);
-      if (impulse.flags?.memory_written && !memoryBefore) {
-        PulseHaloCounters.memoryWrite();
-      }
-
-      // -----------------------------------------------------
-      // 8. HORMONES
-      // -----------------------------------------------------
-      const hormoneBefore = impulse.flags?.hormone_event;
-      applyPulseHormones(impulse);
-      if (impulse.flags?.hormone_event && !hormoneBefore) {
-        if (impulse.flags.hormone_event === 'boost') {
-          PulseHaloCounters.hormoneBoost();
-        } else if (impulse.flags.hormone_event === 'damp') {
-          PulseHaloCounters.hormoneDamp();
+        if (reflexDecision === 0) {
+          PulseHaloCounters.reflexDropped();
+          return finalize(impulse);
         }
+
+        // -----------------------------------------------------
+        // 3. CORTEX
+        // -----------------------------------------------------
+        applyPulseCortex(impulse, context);
+
+        // -----------------------------------------------------
+        // 4. TENDONS
+        // -----------------------------------------------------
+        applyTendons(impulse);
+
+        // -----------------------------------------------------
+        // 5. ORGANS
+        // -----------------------------------------------------
+        applyPulseOrgans(impulse);
+
+        // -----------------------------------------------------
+        // 6. IMMUNE
+        // -----------------------------------------------------
+        const immuneBefore = impulse.flags?.immune_quarantined;
+        applyPulseImmune(impulse);
+        if (impulse.flags?.immune_quarantined && !immuneBefore) {
+          PulseHaloCounters.immuneQuarantined();
+        }
+
+        // -----------------------------------------------------
+        // 7. MEMORY
+        // -----------------------------------------------------
+        const memoryBefore = impulse.flags?.memory_written;
+        applyPulseMemory(impulse);
+        if (impulse.flags?.memory_written && !memoryBefore) {
+          PulseHaloCounters.memoryWrite();
+        }
+
+        // -----------------------------------------------------
+        // 8. HORMONES
+        // -----------------------------------------------------
+        const hormoneBefore = impulse.flags?.hormone_event;
+        applyPulseHormones(impulse);
+        if (impulse.flags?.hormone_event && !hormoneBefore) {
+          if (impulse.flags.hormone_event === 'boost') {
+            PulseHaloCounters.hormoneBoost();
+          } else if (impulse.flags.hormone_event === 'damp') {
+            PulseHaloCounters.hormoneDamp();
+          }
+        }
+
+        // -----------------------------------------------------
+        // 9. AURA
+        // -----------------------------------------------------
+        const auraBeforeLoop = impulse.flags?.aura_loop;
+        const auraBeforeSync = impulse.flags?.aura_sync;
+
+        applyPulseAura(impulse);
+
+        if (impulse.flags?.aura_loop && !auraBeforeLoop) {
+          PulseHaloCounters.auraLooped();
+        }
+        if (impulse.flags?.aura_sync && !auraBeforeSync) {
+          PulseHaloCounters.auraSyncTagged();
+        }
+
+        // -----------------------------------------------------
+        // 10. MESH ROUTING
+        // -----------------------------------------------------
+        const routed = mesh.routeImpulse(mesh, impulse, entryNodeId, {
+          ...context,
+          flowDepth: depth + 1, // propagate depth for recursion awareness
+        });
+
+        if (routed.flags?.mesh_hops) {
+          PulseHaloCounters.meshHops(routed.flags.mesh_hops);
+        }
+
+        // -----------------------------------------------------
+        // 11. SKIN EXIT
+        // -----------------------------------------------------
+        applyPulseSkin(routed, 'exit');
+
+        return finalize(routed);
+      } finally {
+        FlowGuard.activeImpulses--;
       }
-
-      // -----------------------------------------------------
-      // 9. AURA
-      // -----------------------------------------------------
-      const auraBeforeLoop = impulse.flags?.aura_loop;
-      const auraBeforeSync = impulse.flags?.aura_sync;
-
-      applyPulseAura(impulse);
-
-      if (impulse.flags?.aura_loop && !auraBeforeLoop) {
-        PulseHaloCounters.auraLooped();
-      }
-      if (impulse.flags?.aura_sync && !auraBeforeSync) {
-        PulseHaloCounters.auraSyncTagged();
-      }
-
-      // -----------------------------------------------------
-      // 10. MESH ROUTING
-      // -----------------------------------------------------
-      const routed = mesh.routeImpulse(mesh, impulse, entryNodeId, context);
-
-      if (routed.flags?.mesh_hops) {
-        PulseHaloCounters.meshHops(routed.flags.mesh_hops);
-      }
-
-      // -----------------------------------------------------
-      // 11. SKIN EXIT
-      // -----------------------------------------------------
-      applyPulseSkin(routed, 'exit');
-
-      return finalize(routed);
     },
   };
 }

@@ -3,13 +3,13 @@
 // LAYER: THE MUSCLE SYSTEM (Worker Supervisor + Profit Orchestrator)
 // ============================================================================
 //
-// ROLE (v7.1+):
+// ROLE (v7.5):
 //   THE MUSCLE SYSTEM — deterministic contraction engine of Pulse‑Earn.
 //   • Oversees worker lifecycle (muscle fibers).
 //   • Fetches jobs from MarketplaceConnector (motor signals).
 //   • Executes jobs via WorkerExecution (contraction).
 //   • Submits results via ResultSubmission (release).
-//   • Maintains healing metadata (muscle memory).
+//   • Maintains healing + pressure metadata (muscle memory).
 //
 // WHY “MUSCLE SYSTEM”?:
 //   • Workers behave like muscle fibers contracting in cycles.
@@ -18,22 +18,19 @@
 //   • Handles errors safely (reflexive inhibition).
 //   • Maintains stable, profitable output (homeostasis).
 //
-// PURPOSE (v7.1+):
+// PURPOSE (v7.5):
 //   • Provide a deterministic, drift‑proof worker lifecycle engine.
 //   • Guarantee safe, predictable job execution.
-//   • Maintain healing metadata for Earn healers.
+//   • Maintain healing + pressure metadata for Earn healers.
 //   • Preserve contraction cycles + muscle memory (conceptual only).
 //
-// CONTRACT (unchanged):
+// CONTRACT (unchanged in spirit):
 //   • PURE SUPERVISOR — no AI layers, no translation, no memory model.
 //   • READ‑ONLY except for healing metadata.
 //   • NO eval(), NO Function(), NO dynamic imports.
 //   • NO executing user code.
 //   • Deterministic worker loops only.
-//
-// SAFETY (unchanged):
-//   • v7.1+ upgrade is COMMENTAL ONLY — NO LOGIC CHANGES.
-//   • All behavior remains identical to pre‑v7.1 EarnEngine.
+//   • v7.5 adds metadata-only awareness of tendon/field context.
 // ============================================================================
 
 import { getNextJob } from "./MarketplaceConnector.js";
@@ -48,12 +45,16 @@ const EarnEngine = {
   // Healing Metadata — Muscle Memory Log
   // -------------------------------------------------------------------------
   engineState: "idle", // idle | running | stopping | error
-  workerStates: new Map(), // workerId → { state, lastJobId, lastError }
+  workerStates: new Map(), // workerId → { state, lastJobId, lastError, lastClass, lastVolatility }
   cycleCount: 0,
   lastJob: null,
   lastResult: null,
   lastError: null,
   lastReason: null,
+
+  // v7.5: pressure + context awareness (read-only, for healers/diagnostics)
+  lastTendonContext: null,   // earner_context from job, if present
+  lastVolatility: null,      // earner_volatility from job, if present
 
   // -------------------------------------------------------------------------
   // start(config) — Begin contraction cycles
@@ -80,6 +81,8 @@ const EarnEngine = {
         state: "starting",
         lastJobId: null,
         lastError: null,
+        lastClass: null,
+        lastVolatility: null,
       });
 
       const workerPromise = this.workerLoop(workerId, config);
@@ -97,6 +100,8 @@ const EarnEngine = {
       state: "running",
       lastJobId: null,
       lastError: null,
+      lastClass: null,
+      lastVolatility: null,
     });
 
     while (this.running) {
@@ -118,10 +123,26 @@ const EarnEngine = {
         this.lastJob = job;
         this.workerStates.get(workerId).lastJobId = job.id;
 
+        // v7.5: read tendon/field metadata if present (safe, optional)
+        const tendonContext = job.impulse?.flags?.earner_context || null;
+        const volatility = job.impulse?.flags?.earner_volatility ?? null;
+
+        this.lastTendonContext = tendonContext;
+        this.lastVolatility = volatility;
+
+        if (tendonContext) {
+          this.workerStates.get(workerId).lastClass = tendonContext.class || null;
+        }
+        if (volatility !== null) {
+          this.workerStates.get(workerId).lastVolatility = volatility;
+        }
+
         config.logFn("earn:job_selected", {
           workerId,
           jobId: job.id,
           cycle: this.cycleCount,
+          tendonClass: tendonContext?.class,
+          earnerVolatility: volatility,
         });
 
         // ------------------------------------------------------
@@ -137,6 +158,8 @@ const EarnEngine = {
           jobId: job.id,
           success: result.success,
           durationMs: result.durationMs,
+          tendonClass: tendonContext?.class,
+          earnerVolatility: volatility,
         });
 
         // ------------------------------------------------------
@@ -150,6 +173,8 @@ const EarnEngine = {
           workerId,
           jobId: job.id,
           submission,
+          tendonClass: tendonContext?.class,
+          earnerVolatility: volatility,
         });
 
         // ------------------------------------------------------
@@ -192,6 +217,8 @@ const EarnEngine = {
     config.logFn("earn:engine_hard_stop", {
       reason,
       workers: Array.from(this.workers.keys()),
+      lastTendonContext: this.lastTendonContext,
+      lastVolatility: this.lastVolatility,
     });
 
     try {
@@ -199,6 +226,8 @@ const EarnEngine = {
         reason,
         lastEvent: this.lastReason,
         workers: Array.from(this.workers.keys()),
+        lastTendonContext: this.lastTendonContext,
+        lastVolatility: this.lastVolatility,
       });
     } catch (err) {
       config.logFn("earn:email_failed", { err });

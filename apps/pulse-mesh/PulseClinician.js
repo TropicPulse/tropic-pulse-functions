@@ -1,15 +1,15 @@
 // ============================================================================
-// [pulse:clinician] PULSE_OS_CLINICAL_INTERPRETER v7.3  // white
-// Clinical Interpretation Layer • Read‑Only • Metadata‑Only
+// [pulse:mesh] PULSE_MESH_CLINICIAN v7.4  // white
+// Mesh Clinical Interpreter • Read‑Only • Metadata‑Only
 // ============================================================================
 //
-// IDENTITY — THE CLINICAL INTERPRETER:
-//  ------------------------------------
-//  • Reads Halo, Field, Echo, Flow metadata.
-//  • Produces human‑readable, body‑style interpretations.
+// IDENTITY — THE MESH CLINICIAN:
+//  ------------------------------
+//  • Reads Mesh Halo, Mesh Field, Mesh Echo, Mesh Flow metadata.
+//  • Produces human‑readable, organism‑style interpretations.
 //  • Uses hybrid biological + system language (Option B).
 //  • NEVER mutates system state, NEVER routes, NEVER computes payloads.
-//  • Advantage‑cascade aware: inherits any systemic speed/efficiency gain.
+//  • Pure interpretation organ for mesh‑level diagnostics.
 //
 // THEME:
 //  • Color: White (clinical clarity, observation‑only).
@@ -23,9 +23,7 @@
 //  • Drift‑proof: no mutation, no side effects.
 //
 // ADVANTAGE CASCADE (conceptual only):
-//  • If pulses become faster → interpretation conceptually accelerates.
-//  • If system collapses 1000 pulses into 1 → clinician inherits that gain.
-//  • If any organ evolves → clinician reads with that advantage.
+//  • Inherits ANY advantage from ANY mesh organ automatically.
 //  • No OR — all advantages are inherited automatically.
 // ============================================================================
 
@@ -38,14 +36,14 @@ import { PulseFlow } from './PulseFlow.js';
 // Clinician Factory
 // -----------------------------------------------------------
 
-export function createPulseClinician(mesh) {
+export function createPulseMeshClinician(mesh) {
   const flow = PulseFlow(mesh);
   const echo = createPulseEcho(mesh, flow);
 
   const meta = {
-    layer: "PulseClinician",
-    role: "CLINICAL_INTERPRETER",
-    version: 7.3,
+    layer: "PulseMeshClinician",
+    role: "MESH_CLINICAL_INTERPRETER",
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -60,14 +58,14 @@ export function createPulseClinician(mesh) {
     meta,
 
     // -------------------------------------------------------
-    // [pulse:clinician] EXAMINE_SYSTEM  // white
+    // [pulse:mesh] EXAMINE_MESH  // white
     // -------------------------------------------------------
-    examineSystem(entryNodeId, context = {}) {
-      const haloSnapshot = PulseHalo.snapshotForClinician?.() || {};
+    examineMesh(entryNodeId, context = {}) {
+      const haloSnapshot = PulseHalo.snapshot();
       const fieldSnapshot = PulseField.snapshot();
       const echoReflection = echo.sendEcho(entryNodeId, context);
 
-      return buildClinicalReport({
+      return buildMeshClinicalReport({
         halo: haloSnapshot,
         field: fieldSnapshot,
         echo: echoReflection,
@@ -78,158 +76,195 @@ export function createPulseClinician(mesh) {
 }
 
 // -----------------------------------------------------------
-// Clinical Report Builder
+// Mesh Clinical Report Builder
 // -----------------------------------------------------------
 
-function buildClinicalReport({ halo, field, echo, meta }) {
+function buildMeshClinicalReport({ halo, field, echo, meta }) {
+  const flowThrottles = halo.flow_throttles ?? 0;
+  const flowThrottleRate = halo.flow?.throttle_rate ?? 0;
+
   const sections = [];
 
   // PERFORMANCE SUMMARY
-  const performance = estimatePerformance(field, echo);
+  const performance = estimateMeshPerformance(field, echo, flowThrottleRate);
   sections.push({
-    title: 'System Performance',
-    summary: `Current performance is estimated at ${performance.toFixed(1)}%.`,
+    title: 'Mesh Performance',
+    summary: `Mesh performance estimated at ${performance.toFixed(1)}%.`,
     details: [
-      `Internal Stability (blood pressure): ${(field.stability * 100).toFixed(0)}%`,
-      `Impulse Throughput (pulse rate / blood flow): ${describeThroughput(echo)}`,
-      `Resonance (heart rhythm coherence): ${(field.resonance * 100).toFixed(0)}%`,
-      `Friction (inflammation / resistance): ${(field.friction * 100).toFixed(0)}%`,
-      `Noise (sensory overload): ${(field.noise * 100).toFixed(0)}%`
+      `Stability (blood pressure): ${(field.stability * 100).toFixed(0)}%`,
+      `Throughput (pulse flow): ${describeMeshThroughput(echo)}`,
+      `Resonance (rhythm coherence): ${(field.resonance * 100).toFixed(0)}%`,
+      `Friction (inflammation): ${(field.friction * 100).toFixed(0)}%`,
+      `Noise (sensory load): ${(field.noise * 100).toFixed(0)}%`,
+      `Flow Throttles (self‑protection events): ${flowThrottles}`,
+      `Throttle Rate: ${(flowThrottleRate * 100).toFixed(1)}%`
     ]
   });
 
   // STABILITY & DRIFT
   sections.push({
     title: 'Stability & Drift',
-    summary: describeStabilityAndDrift(field, echo),
+    summary: describeMeshStability(field, echo, flowThrottleRate),
     details: [
-      `Internal Stability (blood pressure): ${(field.stability * 100).toFixed(0)}%`,
-      `Drift Pressure (systemic stress): ${(field.driftPressure * 100).toFixed(0)}%`,
-      `Aura Loop (feedback loop): ${echo.aura.loop ? 'ACTIVE' : 'inactive'}`,
-      `Aura Sync (neural synchronization / grounding): ${echo.aura.sync ? 'ACTIVE' : 'inactive'}`
+      `Stability: ${(field.stability * 100).toFixed(0)}%`,
+      `Drift Pressure: ${(field.driftPressure * 100).toFixed(0)}%`,
+      `Aura Loop: ${echo.aura.loop ? 'ACTIVE' : 'inactive'}`,
+      `Aura Sync: ${echo.aura.sync ? 'ACTIVE' : 'inactive'}`,
+      `Flow Guard Activity: ${(flowThrottleRate * 100).toFixed(1)}%`
     ]
   });
 
   // IMMUNE & HORMONES
   sections.push({
     title: 'Immune & Hormones',
-    summary: describeImmuneAndHormones(echo),
+    summary: describeMeshImmuneHormones(echo),
     details: [
-      `Immune Quarantine (infection isolation): ${echo.immune.quarantined ? 'YES' : 'no'}`,
-      `Hormone Event (adrenaline / cortisol): ${echo.hormones.event || 'none'}`,
-      `Reflex Drop (instinctive rejection): ${echo.reflex.triggered ? 'YES' : 'no'}`
+      `Immune Quarantine: ${echo.immune.quarantined ? 'YES' : 'no'}`,
+      `Hormone Event: ${echo.hormones.event || 'none'}`,
+      `Reflex Drop: ${echo.reflex.triggered ? 'YES' : 'no'}`
     ]
   });
 
-  // ENVIRONMENTAL FIELD
+  // FIELD ENVIRONMENT
   sections.push({
-    title: 'Internal Environment (Field)',
-    summary: describeField(field),
+    title: 'Mesh Internal Environment',
+    summary: describeMeshField(field),
     details: [
-      `Friction (inflammation): ${(field.friction * 100).toFixed(0)}%`,
-      `Noise (sensory overload): ${(field.noise * 100).toFixed(0)}%`,
-      `Load Wave (circulatory surge / metabolic demand): ${(field.loadWave * 100).toFixed(0)}%`,
-      `External Heat (world heat influence): ${(field.externalHeat * 100).toFixed(0)}%`,
-      `External Storm (world turbulence): ${(field.externalStorm * 100).toFixed(0)}%`,
-      `External Signal (world clarity): ${(field.externalSignal * 100).toFixed(0)}%`
+      `Friction: ${(field.friction * 100).toFixed(0)}%`,
+      `Noise: ${(field.noise * 100).toFixed(0)}%`,
+      `Load Wave: ${(field.loadWave * 100).toFixed(0)}%`,
+      `External Heat: ${(field.externalHeat * 100).toFixed(0)}%`,
+      `External Storm: ${(field.externalStorm * 100).toFixed(0)}%`,
+      `External Signal: ${(field.externalSignal * 100).toFixed(0)}%`
+    ]
+  });
+
+  // FLOW & SURVIVAL PATTERNS
+  sections.push({
+    title: 'Flow & Survival Patterns',
+    summary: describeMeshFlowSurvival(echo, flowThrottleRate),
+    details: [
+      `Flow Throttled (this echo): ${echo.flow?.throttled ? 'YES' : 'no'}`,
+      `Throttle Reason: ${echo.flow?.reason || 'none'}`,
+      `Cortex Flow Anomaly: ${echo.flags?.cortex_flow_anomaly ? 'YES' : 'no'}`,
+      `Organism Self‑Protection: ${flowThrottleRate > 0 ? 'ACTIVE' : 'quiet'}`
     ]
   });
 
   return {
     performancePercent: performance,
-    interpretation: summarizeForYou(performance, field, echo),
+    interpretation: summarizeMeshForYou(performance, field, echo, flowThrottleRate),
     sections,
     meta
   };
 }
 
 // -----------------------------------------------------------
-// Interpretation Logic (unchanged)
+// Interpretation Logic (mesh‑aware)
 // -----------------------------------------------------------
 
-function estimatePerformance(field, echo) {
+function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   let base = 100;
   base += field.resonance * 5;
   base -= field.friction * 5;
   base -= field.noise * 5;
   base -= field.driftPressure * 5;
+  base -= flowThrottleRate * 20;
   if (echo.aura.sync) base += 2;
   if (echo.aura.loop) base -= 3;
+  if (echo.flow?.throttled) base -= 5;
   return Math.max(0, base);
 }
 
-function describeThroughput(echo) {
+function describeMeshThroughput(echo) {
   const hops = echo.mesh.hops || 0;
-  if (hops === 0) return 'minimal routing activity';
-  if (hops < 5) return 'light routing activity';
-  if (hops < 15) return 'moderate routing activity';
-  return 'high routing activity';
+  if (hops === 0) return 'minimal routing';
+  if (hops < 5) return 'light routing';
+  if (hops < 15) return 'moderate routing';
+  return 'high routing';
 }
 
-function describeStabilityAndDrift(field, echo) {
-  const stability = field.stability;
-  const drift = field.driftPressure;
+function describeMeshStability(field, echo, flowThrottleRate = 0) {
+  if (flowThrottleRate > 0.2)
+    return 'Flow Guard is engaging frequently — mesh is protecting itself from overload.';
 
-  if (stability > 0.85 && drift < 0.2)
-    return 'System is stable with low Drift Pressure (systemic stress).';
+  if (field.stability > 0.85 && field.driftPressure < 0.2)
+    return 'Mesh is stable with low Drift Pressure.';
 
-  if (stability > 0.6 && drift < 0.4)
-    return 'System is generally stable with mild Drift Pressure.';
+  if (field.stability > 0.6 && field.driftPressure < 0.4)
+    return 'Mesh is generally stable with mild Drift Pressure.';
 
-  if (drift >= 0.4 && !echo.aura.sync)
-    return 'Drift Pressure is elevated and Aura Sync (grounding) is not active — watch for instability.';
+  if (field.driftPressure >= 0.4 && !echo.aura.sync)
+    return 'Drift Pressure elevated and Aura Sync inactive — instability risk.';
 
   if (echo.aura.loop)
-    return 'Aura Loop (feedback loop) detected — system may be cycling on certain patterns.';
+    return 'Aura Loop detected — mesh may be cycling on patterns.';
 
-  return 'Stability and Drift are in a mixed state; system is compensating but should be monitored.';
+  return 'Mixed stability; mesh is compensating.';
 }
 
-function describeImmuneAndHormones(echo) {
+function describeMeshImmuneHormones(echo) {
   const parts = [];
 
   if (echo.immune.quarantined)
-    parts.push('Immune Quarantine is ACTIVE — unsafe impulses are being isolated.');
+    parts.push('Immune Quarantine ACTIVE — unsafe impulses isolated.');
   else
-    parts.push('Immune Quarantine is quiet — no major threats detected.');
+    parts.push('Immune Quarantine quiet.');
 
   if (echo.hormones.event === 'boost')
-    parts.push('Hormone Boost (adrenaline) event detected — system is energizing.');
+    parts.push('Hormone Boost (adrenaline) detected.');
   else if (echo.hormones.event === 'damp')
-    parts.push('Hormone Damp (cortisol) event detected — system is calming.');
+    parts.push('Hormone Damp (cortisol) detected.');
   else
-    parts.push('No major hormone modulation events detected.');
+    parts.push('No hormone modulation.');
 
   if (echo.reflex.triggered)
-    parts.push('Reflex Drop occurred — some impulses were rejected early.');
+    parts.push('Reflex Drop occurred.');
 
   return parts.join(' ');
 }
 
-function describeField(field) {
-  const { friction, noise, loadWave, externalHeat, externalStorm } = field;
+function describeMeshField(field) {
   const bits = [];
-
-  if (friction > 0.5) bits.push('Internal Friction is elevated.');
-  if (noise > 0.5) bits.push('Noise is high.');
-  if (loadWave > 0.5) bits.push('Load Wave is strong.');
-  if (externalHeat > 0.5) bits.push('External Heat is contributing to stress.');
-  if (externalStorm > 0.5) bits.push('External Storm pressure is impacting stability.');
-
-  if (bits.length === 0)
-    return 'Internal Environment is calm — low friction, low noise, manageable load.';
-
+  if (field.friction > 0.5) bits.push('Friction elevated.');
+  if (field.noise > 0.5) bits.push('Noise high.');
+  if (field.loadWave > 0.5) bits.push('Load Wave strong.');
+  if (field.externalHeat > 0.5) bits.push('External Heat contributing.');
+  if (field.externalStorm > 0.5) bits.push('External Storm impacting stability.');
+  if (bits.length === 0) return 'Internal environment calm.';
   return bits.join(' ');
 }
 
-function summarizeForYou(performance, field, echo) {
+function describeMeshFlowSurvival(echo, flowThrottleRate = 0) {
+  if (!echo.flow?.throttled && flowThrottleRate === 0)
+    return 'Flow smooth — no braking needed.';
+
+  if (echo.flow?.reason === 'max_depth')
+    return 'Flow Guard stopped deep recursion — organism prevented runaway loop.';
+
+  if (echo.flow?.reason === 'max_active_impulses_soft')
+    return 'Flow Guard limited impulse surge — organism prevented routing storm.';
+
+  if (flowThrottleRate > 0.2)
+    return 'Flow Guard active — survival patterns prioritizing safety.';
+
+  return 'Flow occasionally braking — mild stress.';
+}
+
+function summarizeMeshForYou(performance, field, echo, flowThrottleRate = 0) {
   const perf = performance.toFixed(1);
 
   if (perf > 100)
-    return `We are at ${perf}%. Stability is holding, resonance is high, and Flow is compensating.`;
+    return `Mesh at ${perf}%. Stability strong, resonance high, Flow compensating cleanly.`;
 
-  if (perf > 90)
-    return `System is performing well at ${perf}%. Drift Pressure and Friction are present but manageable.`;
+  if (perf > 90 && flowThrottleRate === 0)
+    return `Mesh performing well at ${perf}%. No braking needed.`;
 
-  return `System performance is at ${perf}%. Stability and Drift should be watched — Immune and Aura patterns will reveal compensation vs degradation.`;
+  if (perf > 90 && flowThrottleRate > 0)
+    return `Mesh at ${perf}%. High performance, but Flow Guard has begun intervening — you are pushing the edge.`;
+
+  if (flowThrottleRate > 0.2)
+    return `Mesh at ${perf}%. Organism is actively braking — recent patterns were survival‑level stress.`;
+
+  return `Mesh at ${perf}%. Stability and Drift require monitoring — Immune, Aura, and Flow Guard will reveal compensation vs degradation.`;
 }

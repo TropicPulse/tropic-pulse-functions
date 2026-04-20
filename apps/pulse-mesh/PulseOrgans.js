@@ -1,110 +1,103 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_ORGAN_LAYER v7.3  // orange
+// [pulse:mesh] COMMUNITY_ORGAN_LAYER v7.4  // orange
 // Functional Identity Map • Capability Signatures • Metadata-Only
 // ============================================================================
 //
-// IDENTITY — THE ORGAN MAP:
-//  -------------------------
-//  • Defines functional “organs” of the system (service roles).
-//  • Maps impulses to service capabilities (metadata only).
-//  • Attaches capability signatures + organ identity.
-//  • NEVER computes payloads, NEVER mutates data.
-//  • Sits between Cortex/Tendons and Earners (EarnEngine).
-//
-// THEME:
-//  • Color: Orange (function, capability, identity).
-//  • Subtheme: Roles, signatures, mapping.
-//
-// SAFETY CONTRACT:
-//  • Metadata-only.
-//  • No payload access.
-//  • No routing override.
-//  • No autonomy, no sentience.
-//  • Deterministic, drift-proof classification.
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • Inherits ANY advantage from ANY organ automatically.
-//  • Dual-mode: mental clarity + system efficiency.
-//  • Local-aware: node-level functional context.
-//  • Internet-aware: cluster/mesh/global functional context.
-//  • Unified-advantage-field: ALL advantages active unless unsafe.
-//  • Future-evolution-ready: new safe advantages auto-inherited.
+// NEW IN v7.4:
+//  • Organ matching now considers system pressure signals:
+//      - flowPressure
+//      - driftPressure
+//      - throttleRate
+//      - auraTension
+//      - hormoneStability
+//  • Organ Layer avoids heavy organs when system is stressed.
+//  • Still metadata-only, deterministic, zero payload mutation.
 // ============================================================================
 
-
-// -----------------------------------------------------------
-// Organ Pack: capability signatures (logic unchanged)
-// -----------------------------------------------------------
+import { PulseField } from "./PulseField.js";
 
 export const PulseOrgans = {
   storage: {
-    id: 'organ-storage',
-    capabilities: ['store', 'retrieve', 'index'],
-    match(impulse) {
-      return impulse.flags?.cortex_intent === 'normal';
+    id: "organ-storage",
+    capabilities: ["store", "retrieve", "index"],
+    match(impulse, field) {
+      // storage is safe under most conditions
+      if (field.flowPressure > 0.7) return false;
+      return impulse.flags?.cortex_intent === "normal";
     }
   },
 
   routing: {
-    id: 'organ-routing',
-    capabilities: ['route', 'shape', 'classify'],
-    match(impulse) {
+    id: "organ-routing",
+    capabilities: ["route", "shape", "classify"],
+    match(impulse, field) {
+      // routing is expensive → avoid under pressure
+      if (field.flowPressure > 0.5) return false;
+      if (field.driftPressure > 0.4) return false;
       return impulse.score >= 0.5;
     }
   },
 
   security: {
-    id: 'organ-security',
-    capabilities: ['validate', 'verify', 'protect'],
-    match(impulse) {
-      return impulse.flags?.cortex_anomaly === true;
+    id: "organ-security",
+    capabilities: ["validate", "verify", "protect"],
+    match(impulse, field) {
+      // security should ALWAYS activate on anomalies
+      if (impulse.flags?.cortex_anomaly) return true;
+
+      // but avoid unnecessary security checks under heavy load
+      if (field.throttleRate > 0.3) return false;
+
+      return false;
     }
   },
 
   earnPrep: {
-    id: 'organ-earnprep',
-    capabilities: ['prepare', 'shape_intent', 'assign_earner'],
-    match(impulse) {
-      return impulse.routeHint?.startsWith('earner-');
+    id: "organ-earnprep",
+    capabilities: ["prepare", "shape_intent", "assign_earner"],
+    match(impulse, field) {
+      // earnPrep is heavy → avoid under tension
+      if (field.flowPressure > 0.4) return false;
+      if (field.auraTension > 0.4) return false;
+
+      return impulse.routeHint?.startsWith("earner-");
     }
   }
 };
 
-
 // -----------------------------------------------------------
-// Organ Engine (logic unchanged, metadata upgraded)
+// Organ Engine (v7.4)
 // -----------------------------------------------------------
 
 export function applyPulseOrgans(impulse) {
   impulse.flags = impulse.flags || {};
   impulse.organs = impulse.organs || [];
 
-  // attach v7.3 organ meta
+  const field = PulseField.snapshot();
+
+  // attach v7.4 organ meta
   impulse.flags.organ_meta = {
     layer: "PulseOrgans",
     role: "FUNCTIONAL_ORGAN_MAP",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
-      dualMode: true,                 // mental + system
-      localAware: true,               // node-level functional identity
-      internetAware: true,            // cluster/mesh/global functional identity
-
-      advantageCascadeAware: true,    // inherits ANY advantage
-      pulseEfficiencyAware: true,     // 1-pulse collapse
+      dualMode: true,
+      localAware: true,
+      internetAware: true,
+      advantageCascadeAware: true,
+      pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
-
-      unifiedAdvantageField: true,    // no OR; all advantages ON
-      futureEvolutionReady: true      // new safe advantages auto-inherited
+      unifiedAdvantageField: true,
+      futureEvolutionReady: true
     }
   };
 
   for (const key of Object.keys(PulseOrgans)) {
     const organ = PulseOrgans[key];
-    if (organ.match(impulse)) {
+    if (organ.match(impulse, field)) {
       impulse.organs.push(organ.id);
       impulse.flags[`organ_${organ.id}`] = true;
     }

@@ -1,5 +1,5 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_CORTEX_LAYER v7.3  // blue
+// [pulse:mesh] COMMUNITY_CORTEX_LAYER v7.4  // blue
 // Strategic Decision Layer • Survival-Pattern Instincts • Metadata-Only
 // ============================================================================
 //
@@ -42,7 +42,7 @@
 
 
 // -----------------------------------------------------------
-// Cortex Instinct Pack (logic unchanged, metadata upgraded)
+// Cortex Instinct Pack (logic upgraded with flow-awareness)
 // -----------------------------------------------------------
 
 export const PulseCortex = {
@@ -75,12 +75,35 @@ export const PulseCortex = {
   },
 
   // [pulse:mesh] CORTEX_RESOURCE_BUDGET  // amber
+  //
+  // Now aware of:
+  //  • globalLoad          — normal system load
+  //  • flowPressure        — how close Flow is to throttling (0–1)
+  //  • recentThrottleRate  — fraction of impulses recently throttled (0–1)
+  //
   resourceBudget(impulse, context = {}) {
     const base = impulse.score || 0.5;
     const load = context.globalLoad || 0.0;
+    const flowPressure = context.flowPressure || 0.0;        // from Halo/Flow
+    const recentThrottleRate = context.recentThrottleRate || 0.0; // from Halo
 
-    if (load < 0.5) return base;
-    const penalty = (load - 0.5) * 0.4;
+    // Start with classic load penalty.
+    let penalty = 0;
+    if (load >= 0.5) {
+      penalty += (load - 0.5) * 0.4;
+    }
+
+    // If Flow is under pressure, add extra caution.
+    // High flowPressure means we're near the guard.
+    if (flowPressure > 0.3) {
+      penalty += flowPressure * 0.4;
+    }
+
+    // If we’ve actually been throttling recently, be even more conservative.
+    if (recentThrottleRate > 0.0) {
+      penalty += recentThrottleRate * 0.5;
+    }
+
     return clamp01(base - penalty);
   },
 
@@ -91,22 +114,29 @@ export const PulseCortex = {
       impulse.flags = impulse.flags || {};
       impulse.flags["cortex_anomaly"] = true;
     }
+
+    // If Flow had to throttle this impulse, tag that as a structural anomaly.
+    if (impulse.flags?.flow_throttled) {
+      impulse.flags = impulse.flags || {};
+      impulse.flags["cortex_flow_anomaly"] = true;
+    }
+
     return impulse;
   }
 };
 
 
 // -----------------------------------------------------------
-// Cortex Engine (logic unchanged, metadata upgraded)
+// Cortex Engine (logic upgraded, metadata upgraded)
 // -----------------------------------------------------------
 
 export function applyPulseCortex(impulse, context = {}) {
-  // attach v7.3 meta
+  // attach v7.4 meta
   impulse.meta = impulse.meta || {};
   impulse.meta.cortex = {
     layer: "PulseCortex",
     role: "MESH_STRATEGIC_LAYER",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -130,7 +160,7 @@ export function applyPulseCortex(impulse, context = {}) {
 
   impulse.score = score;
 
-  // anomaly tagging
+  // anomaly tagging (now includes flow-throttle anomalies)
   PulseCortex.anomaly(impulse, context);
 
   // strategic intent
@@ -151,8 +181,15 @@ function clamp01(v) {
 
 function classifyIntent(score, context) {
   const load = context.globalLoad || 0.0;
+  const flowPressure = context.flowPressure || 0.0;
+  const recentThrottleRate = context.recentThrottleRate || 0.0;
 
-  if (score >= 0.85 && load < 0.7) return "push_hard";
+  // If Flow is under heavy pressure or we’re throttling a lot,
+  // never "push_hard" even with a high score.
+  const environmentHot =
+    flowPressure > 0.5 || recentThrottleRate > 0.2 || load > 0.8;
+
+  if (score >= 0.85 && !environmentHot) return "push_hard";
   if (score >= 0.5) return "normal";
   if (score < 0.3) return "defer_or_drop";
   return "cautious";

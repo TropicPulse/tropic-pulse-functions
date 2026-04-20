@@ -1,5 +1,5 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_SPINE_LAYER v7.4  // teal
+// [pulse:mesh] COMMUNITY_SPINE_LAYER v8.0  // teal
 // Distributed Routing Spine • Reflex + Cortex + Tendons • Metadata-Only
 // ============================================================================
 //
@@ -10,6 +10,7 @@
 //  • Applies cortex shaping (risk, novelty, cooperation, load).
 //  • Applies tendon shaping (intent, routeHint, energy shaping).
 //  • Accumulates mesh metadata: hops, score, energy, routeHint.
+//  • Emits drift + flow signals to GlobalHealer.
 //  • NEVER mutates payload data, NEVER performs compute.
 //
 // THEME:
@@ -23,24 +24,31 @@
 //  • No autonomy.
 //  • Deterministic, drift-proof routing behavior.
 //
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
+// ADVANTAGE CASCADE:
 //  • Inherits ANY advantage from ANY organ automatically.
-//  • Dual-mode: mental clarity + system efficiency.
-//  • Local-aware: node-level routing context.
-//  • Internet-aware: cluster/mesh/global routing context.
-//  • Unified-advantage-field: ALL advantages active unless unsafe.
-//  • Future-evolution-ready: new safe advantages auto-inherited.
+//  • Unified-advantage-field: ALL advantages ON unless unsafe.
 // ============================================================================
 
 import { createCommunityReflex } from "./CommunityReflex.js";
 import { applyPulseCortex } from "./PulseCortex.js";
 import { applyTendons } from "./Tendons.js";
+import { recordMeshDriftEvent } from "./GlobalHealer.js";
 
-// -----------------------------------------------------------
+// ============================================================================
+// MeshMemory — lineage + drift + flow (metadata-only)
+// ============================================================================
+export const MeshMemory = {
+  drift: [],
+  flow: [],
+  lineage: [],
+  hops: [],
+  trust: [],
+  load: []
+};
+
+// ============================================================================
 // Mesh Factory
-// -----------------------------------------------------------
-
+// ============================================================================
 export function createPulseMesh() {
   return {
     nodes: new Map(),
@@ -49,37 +57,33 @@ export function createPulseMesh() {
     meta: {
       layer: "PulseMeshSpine",
       role: "ROUTING_SPINE",
-      version: 7.4,
+      version: 8.0,
       target: "full-mesh",
       selfRepairable: true,
       evo: {
-        dualMode: true,                 // mental + system
-        localAware: true,               // node-level routing
-        internetAware: true,            // cluster/mesh/global routing
-
-        advantageCascadeAware: true,    // inherits ANY advantage
-        pulseEfficiencyAware: true,     // 1-pulse collapse
+        dualMode: true,
+        localAware: true,
+        internetAware: true,
+        advantageCascadeAware: true,
+        pulseEfficiencyAware: true,
         driftProof: true,
         multiInstanceReady: true,
-
-        unifiedAdvantageField: true,    // no OR; all advantages ON
-        futureEvolutionReady: true      // new safe advantages auto-inherited
+        unifiedAdvantageField: true,
+        futureEvolutionReady: true
       },
 
-      // v7.4: conceptual reach metadata (for dashboards / PulseBand)
       reach: {
         estimatedHops: 0,
         estimatedMeters: 0,
-        mode: "direct" // "direct" | "cluster" | "wide"
+        mode: "direct"
       }
     }
   };
 }
 
-// -----------------------------------------------------------
+// ============================================================================
 // Node Registration
-// -----------------------------------------------------------
-
+// ============================================================================
 export function registerMeshNode(mesh, nodeConfig) {
   if (!nodeConfig?.id) {
     throw new Error("[pulse:mesh] nodeConfig.id required");
@@ -97,11 +101,21 @@ export function registerMeshNode(mesh, nodeConfig) {
   return mesh;
 }
 
-// -----------------------------------------------------------
-// Routing Entry Point
-// -----------------------------------------------------------
+// ============================================================================
+// Flow Recorder (metadata-only)
+// ============================================================================
+function recordFlow(mesh, from, to) {
+  MeshMemory.flow.push({
+    ts: Date.now(),
+    from,
+    to
+  });
+}
 
-export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
+// ============================================================================
+// Routing Entry Point
+// ============================================================================
+export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
   impulse.flags = impulse.flags || {};
   impulse.flags.mesh_meta = mesh.meta;
 
@@ -110,12 +124,30 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 
   while (currentNodeId) {
     const node = mesh.nodes.get(currentNodeId);
-    if (!node) break;
+
+    // -------------------------------------------------------
+    // DRIFT: Missing node
+    // -------------------------------------------------------
+    if (!node) {
+      await recordMeshDriftEvent({
+        driftType: "missing_node",
+        severity: "warning",
+        meshNodeId: currentNodeId,
+        note: "Mesh node missing during routing",
+        fileName: "PulseMesh.js",
+        functionName: "routeImpulse",
+        fieldName: "nodes"
+      });
+
+      MeshMemory.drift.push({ ts: Date.now(), type: "missing_node", node: currentNodeId });
+      break;
+    }
 
     visited.add(currentNodeId);
 
     // update hops
     impulse.hops = (impulse.hops || 0) + 1;
+    MeshMemory.hops.push({ ts: Date.now(), node: node.id });
 
     // -------------------------------------------------------
     // 1. REFLEX (1/0 instinct)
@@ -123,6 +155,18 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     const decision = node.reflex(impulse, node);
     if (decision === 0) {
       impulse.flags[`reflex_drop_at_${node.id}`] = true;
+
+      await recordMeshDriftEvent({
+        driftType: "reflex_drop",
+        severity: "info",
+        meshNodeId: node.id,
+        note: "Reflex dropped impulse",
+        fileName: "PulseMesh.js",
+        functionName: "routeImpulse",
+        fieldName: "reflex"
+      });
+
+      MeshMemory.drift.push({ ts: Date.now(), type: "reflex_drop", node: node.id });
       break;
     }
 
@@ -164,10 +208,26 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     // -------------------------------------------------------
     const nextId = node.neighbors.find((n) => !visited.has(n));
 
+    // DRIFT: Routing stall
     if (!nextId) {
       impulse.flags[`stalled_at_${node.id}`] = true;
+
+      await recordMeshDriftEvent({
+        driftType: "routing_stall",
+        severity: "warning",
+        meshNodeId: node.id,
+        note: "Mesh routing stalled — no available neighbors",
+        fileName: "PulseMesh.js",
+        functionName: "routeImpulse",
+        fieldName: "neighbors"
+      });
+
+      MeshMemory.drift.push({ ts: Date.now(), type: "routing_stall", node: node.id });
       break;
     }
+
+    // record flow
+    recordFlow(mesh, currentNodeId, nextId);
 
     currentNodeId = nextId;
   }
@@ -175,10 +235,9 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
   return impulse;
 }
 
-// -----------------------------------------------------------
+// ============================================================================
 // Earner Targeting Helper
-// -----------------------------------------------------------
-
+// ============================================================================
 function shouldDeliverToEarner(impulse, node) {
   const hint = impulse.routeHint;
   if (!hint) return true;
@@ -189,10 +248,9 @@ function shouldDeliverToEarner(impulse, node) {
   return false;
 }
 
-// -----------------------------------------------------------
-// v7.4 — Mesh Reach Snapshot (Metadata-Only)
-// -----------------------------------------------------------
-
+// ============================================================================
+// Mesh Reach Snapshot (Metadata-Only)
+// ============================================================================
 export function getMeshReachSnapshot(mesh) {
   const nodeCount = mesh.nodes.size;
   const avgDegree =
@@ -203,19 +261,12 @@ export function getMeshReachSnapshot(mesh) {
           0
         ) / nodeCount;
 
-  // Conceptual estimates only — no real RF / geo compute
   const estimatedHops = Math.max(1, Math.round(avgDegree || 1));
-  const estimatedMeters = estimatedHops * 30; // conceptual: ~30m per hop
+  const estimatedMeters = estimatedHops * 30;
 
   let mode = "direct";
   if (estimatedHops >= 3 && estimatedHops < 6) mode = "cluster";
   if (estimatedHops >= 6) mode = "wide";
-
-  const reach = {
-    estimatedHops,
-    estimatedMeters,
-    mode
-  };
 
   return {
     layer: mesh.meta.layer,
@@ -223,6 +274,6 @@ export function getMeshReachSnapshot(mesh) {
     version: mesh.meta.version,
     nodeCount,
     avgDegree,
-    reach
+    reach: { estimatedHops, estimatedMeters, mode }
   };
 }

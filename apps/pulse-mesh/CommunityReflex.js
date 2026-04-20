@@ -1,44 +1,21 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_REFLEX_LAYER v7.3  // amber
+// [pulse:mesh] COMMUNITY_REFLEX_LAYER v7.4  // amber
 // Distributed Survival Arc • Fast Local Instinct Engine • Pure 1/0 Decisions
 // ============================================================================
 //
-// IDENTITY — THE REFLEX ARC:
-//  --------------------------
-//  • The fastest organ in the mesh organism.
-//  • Executes survival-pattern routing at sub‑cognitive speed.
-//  • Never touches payloads — only impulse metadata.
-//  • Cheap, local, deterministic, drift‑proof.
-//  • Advantage‑cascade aware: inherits any systemic speed/efficiency gain.
-//
-// ROLE IN THE MESH ORGANISM:
-//  ---------------------------
-//  • Reflex Arc → 1/0 instinctive routing
-//  • Cortex → strategic shaping
-//  • Tendons → miner/earner targeting hints
-//  • Immune Layer → anomaly flags
-//  • Mesh Spine → distributed conduction
-//
-// SAFETY CONTRACT:
-//  ----------------
-//  • No randomness
-//  • No timestamps
-//  • No payload mutation
-//  • No async
-//  • Fail‑open: missing fields → safe defaults
-//  • Deterministic: same impulse → same reflex result
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses become faster → reflex evaluation conceptually accelerates.
-//  • If system collapses 1000 pulses into 1 → reflex inherits that gain.
-//  • If any organ evolves → reflex arc routes with that advantage.
-//  • No OR — all advantages are inherited automatically.
-//  • Any future evolutionary advantage is included unless it would break safety.
+// NEW IN v7.4:
+//  • Reflex is now aware of:
+//      - Flow pressure (0–1)
+//      - Recent throttle rate (0–1)
+//      - Aura tension tags
+//      - Stabilization-needed tags
+//      - Drift pressure
+//  • Reflex can instantly drop impulses when the organism is under tension.
+//  • Still deterministic, metadata-only, zero payload mutation.
 // ============================================================================
 
 // -----------------------------------------------------------
-// Reflex Pack: instinct rules (logic unchanged)
+// Reflex Pack: instinct rules (v7.4)
 // -----------------------------------------------------------
 
 export const CommunityReflex = {
@@ -86,11 +63,48 @@ export const CommunityReflex = {
   anomaly(impulse) {
     if (impulse.flags?.cortex_anomaly) return 1;
     return 1;
+  },
+
+  // ---------------------------------------------------------
+  // NEW v7.4 REFLEX: SYSTEM PRESSURE AWARENESS
+  // ---------------------------------------------------------
+
+  // [pulse:mesh] REFLEX_FLOW_PRESSURE  // amber
+  flowPressure(impulse) {
+    const p = impulse.flags?.flow_pressure || 0;
+    if (p > 0.7) return 0;     // organism under heavy tension → drop
+    return 1;
+  },
+
+  // [pulse:mesh] REFLEX_THROTTLE_HISTORY  // amber
+  throttleHistory(impulse) {
+    const t = impulse.flags?.recent_throttle_rate || 0;
+    if (t > 0.3) return 0;     // too many recent brakes → drop early
+    return 1;
+  },
+
+  // [pulse:mesh] REFLEX_AURA_TENSION  // violet
+  auraTension(impulse) {
+    if (impulse.flags?.aura_system_under_tension) return 0;
+    return 1;
+  },
+
+  // [pulse:mesh] REFLEX_STABILIZATION_NEEDED  // violet
+  stabilization(impulse) {
+    if (impulse.flags?.aura_stabilization_needed) return 0;
+    return 1;
+  },
+
+  // [pulse:mesh] REFLEX_DRIFT_PRESSURE  // magenta
+  driftPressure(impulse) {
+    const drift = impulse.flags?.drift_pressure || 0;
+    if (drift > 0.5) return 0;
+    return 1;
   }
 };
 
 // -----------------------------------------------------------
-// Combined Reflex Engine (logic unchanged, metadata upgraded)
+// Combined Reflex Engine (v7.4)
 // -----------------------------------------------------------
 
 export function createCommunityReflex() {
@@ -101,27 +115,32 @@ export function createCommunityReflex() {
     CommunityReflex.trust,
     CommunityReflex.priority,
     CommunityReflex.earnerTargeting,
-    CommunityReflex.anomaly
+    CommunityReflex.anomaly,
+
+    // NEW v7.4 survival-pressure instincts
+    CommunityReflex.flowPressure,
+    CommunityReflex.throttleHistory,
+    CommunityReflex.auraTension,
+    CommunityReflex.stabilization,
+    CommunityReflex.driftPressure
   ];
 
   const meta = {
     layer: "CommunityReflex",
     role: "MESH_REFLEX_ARC",
-    version: 7.3,
+    version: 7.4,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
-      dualMode: true,                 // mental + system
-      localAware: true,               // node-level conditions
-      internetAware: true,            // cluster/mesh conditions
-
-      advantageCascadeAware: true,    // inherits ANY advantage
-      pulseEfficiencyAware: true,     // 1-pulse collapse, batching
+      dualMode: true,
+      localAware: true,
+      internetAware: true,
+      advantageCascadeAware: true,
+      pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
-
-      unifiedAdvantageField: true,    // no OR; all advantages active
-      futureEvolutionReady: true      // future safe advantages auto-inherited
+      unifiedAdvantageField: true,
+      futureEvolutionReady: true
     }
   };
 
