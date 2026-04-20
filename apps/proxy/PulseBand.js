@@ -38,13 +38,11 @@ const NERVOUS_LAYER_ID = "NERVOUS-SYSTEM";
 const NERVOUS_LAYER_NAME = "PULSEBAND";
 const NERVOUS_LAYER_ROLE = "Sensorimotor Integration Layer";
 
-export function initPulseBand(options = {}) {
-  if (options.logger) {
-    logger = options.logger;
-  }
-
-  nervousLog("NERVOUS_INIT", {});
-}
+let logger = {
+  log: () => {},
+  warn: () => {},
+  error: () => {}
+};
 
 const NERVOUS_DIAGNOSTICS_ENABLED =
   (typeof window !== "undefined" && window?.PULSE_NERVOUS_DIAGNOSTICS === true) ||
@@ -63,6 +61,15 @@ const nervousLog = (stage, details = {}) => {
     })
   );
 };
+
+export function initPulseBand(options = {}) {
+  if (options.logger) {
+    logger = options.logger;
+  }
+
+  nervousLog("NERVOUS_INIT", {});  // NOW SAFE
+}
+
 
 // ============================================================================
 // GLOBAL DEBUG HOOK (SAFE)
