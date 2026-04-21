@@ -50,6 +50,16 @@
 //  THIS ORGAN HAS ZERO IMPORTS.
 //  ALL dependencies are injected by the CNS Brain.
 // ============================================================================
+// ============================================================================
+//  PULSE OS — Inflammatory Response v9.2
+//  C‑LAYER (TOP‑LEVEL INFLAMMATORY RESPONSE ORGAN)
+//  Deterministic, Drift‑Aware, OS‑Level Irritation Scanner
+//  PURE HEALING COORDINATION. NO AI. NO MARKETPLACE. NO DYNAMIC IMPORTS.
+// ============================================================================
+//
+//  THIS ORGAN HAS ZERO IMPORTS.
+//  ALL dependencies are injected by the CNS Brain.
+// ============================================================================
 
 export function createPulseOSHealer({
   db,
@@ -65,18 +75,18 @@ export function createPulseOSHealer({
     organ: "PulseOSHealer",
     layer: "C-Layer",
     role: "Inflammatory Response",
-    version: "9.0",
+    version: "9.2",
     generation: "v9",
     organism: "PulseOS"
   };
 
-  const OS_EVENTS_COLLECTION = "OSEvents";
-  const SUBSYSTEM_HEALER_COLLECTION = "SubsystemHealerLogs";
-  const OS_HEALER_LOGS_COLLECTION = "OSHealerLogs";
-  const FUNCTION_LOGS_COLLECTION = "FUNCTION_LOGS";
+  const OS_EVENTS_COLLECTION          = "OSEvents";
+  const SUBSYSTEM_HEALER_COLLECTION   = "SubsystemHealerLogs";
+  const OS_HEALER_LOGS_COLLECTION     = "OSHealerLogs";
+  const FUNCTION_LOGS_COLLECTION      = "FUNCTION_LOGS";
 
-  const OS_EVENTS_SCAN_INTERVAL_MS = 45000;
-  const SUBSYSTEM_SCAN_INTERVAL_MS = 45000;
+  const OS_EVENTS_SCAN_INTERVAL_MS    = 45_000;
+  const SUBSYSTEM_SCAN_INTERVAL_MS    = 45_000;
 
   // ---------------------------------------------------------------------------
   // writeOSHealerLog — metadata-only inflammation log
@@ -164,12 +174,12 @@ export function createPulseOSHealer({
     if (snap.empty) return;
 
     for (const doc of snap.docs) {
-      const logEntry = doc.data();
+      const logEntry  = doc.data();
       const subsystem = logEntry.subsystem ?? "unknown";
-      const type = logEntry.type ?? "unknown";
+      const type      = logEntry.type ?? "unknown";
 
       const driftMeta = {
-        version: "9.0",
+        version: "9.2",
         generation: "v9",
         organ: "PulseOSHealer",
         timestamp: Date.now()
@@ -288,7 +298,7 @@ export function createPulseOSHealer({
   // PUBLIC: startPulseOSHealer — activate inflammatory response loop
   // ---------------------------------------------------------------------------
   function startPulseOSHealer() {
-    log("oshealer", "PulseOSHealer v9.0 started — Inflammatory Response active.");
+    log("oshealer", "PulseOSHealer v9.2 started — Inflammatory Response active.");
 
     setInterval(() => {
       scanOSEventsForHints().catch((err) => {
@@ -305,7 +315,7 @@ export function createPulseOSHealer({
 
   return {
     startPulseOSHealer,
-    writeOSHealer: writeOSHealer,
+    writeOSHealer,
     emitHint,
     scanOSEventsForHints,
     scanSubsystemHealerLogs

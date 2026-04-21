@@ -1,10 +1,10 @@
 // ============================================================================
-//  PULSE OS v9.1 — OUTER BLOOD–BRAIN BARRIER (BBB)
+//  PULSE OS v9.2 — OUTER BLOOD–BRAIN BARRIER (BBB)
 //  Perivascular Shield • Shell Gatekeeper • Environmental Filter
 //  PURE PERMISSION. NO BACKEND. NO NETWORK. NO UI.
 // ============================================================================
 //
-//  IDENTITY — OUTER BBB (v9.1):
+//  IDENTITY — OUTER BBB (v9.2):
 //  ----------------------------
 //  • First defensive membrane of the PulseOS organism.
 //  • Filters environmental context before it reaches the cortex (PulseBrain).
@@ -14,8 +14,9 @@
 //  • Protects the inner BBB (Identity Organ) from contamination.
 //  • Fully LOCAL-FIRST — zero backend, zero network dependency.
 //  • Drift-proof, deterministic, offline-capable.
+//  • Pure shell-state engine — no side effects.
 //
-//  ROLE IN THE DIGITAL BODY (v9.1):
+//  ROLE IN THE DIGITAL BODY (v9.2):
 //  --------------------------------
 //  • Environmental Filter → Screens unsafe routes.
 //  • Shell Gatekeeper → Controls PulseBand existence.
@@ -25,7 +26,7 @@
 //  • Offline Autonomy → Works even with WiFi OFF.
 //  • **Outer BBB = Shell Permission + Trust Boundary**.
 //
-//  WHAT THIS FILE IS (v9.1):
+//  WHAT THIS FILE IS (v9.2):
 //  --------------------------
 //  • Global shell boundary for PulseOS.
 //  • Single source of truth for shell state.
@@ -34,8 +35,9 @@
 //  • Environmental classifier for all routes.
 //  • First line of defense in the trust chain.
 //  • Fully local — no backend calls required.
+//  • Pure logic — no side effects, no mutations.
 //
-//  WHAT THIS FILE IS NOT (v9.1):
+//  WHAT THIS FILE IS NOT (v9.2):
 //  ------------------------------
 //  • NOT a backend module.
 //  • NOT an identity loader.
@@ -45,8 +47,9 @@
 //  • NOT a compute engine.
 //  • NOT a place for dynamic imports or eval.
 //  • NOT dependent on network state.
+//  • NOT allowed to mutate identity or memory.
 //
-//  SAFETY CONTRACT (v9.1):
+//  SAFETY CONTRACT (v9.2):
 //  ------------------------
 //  • No backend calls.
 //  • No identity mutation.
@@ -56,6 +59,7 @@
 //  • Deterministic, drift-proof shell-state behavior only.
 //  • Local-only permission logic.
 //  • Offline continuity guaranteed.
+//  • Pure function purity — no side effects.
 // ============================================================================
 
 
@@ -66,7 +70,7 @@
 export function createPulseOSBBB({ log }) {
 
   // ========================================================================
-  //  SHELL STATE ENUM (v9.1)
+  //  SHELL STATE ENUM (v9.2)
   // ========================================================================
   const SHELL_STATES = {
     NO_SHELL:  "no-shell",     // PulseBand forbidden
@@ -75,7 +79,7 @@ export function createPulseOSBBB({ log }) {
   };
 
   // ========================================================================
-  //  ROUTE CLASSIFICATION (v9.1)
+  //  ROUTE CLASSIFICATION (v9.2)
   //  Pure local classification of environment → SAFE / UNSAFE
   // ========================================================================
   const HARD_NO_SHELL_ROUTES = new Set([
@@ -98,7 +102,7 @@ export function createPulseOSBBB({ log }) {
   ]);
 
   // ========================================================================
-  //  determineShellState (v9.1)
+  //  determineShellState (v9.2)
   //  Pure, deterministic, local-first shell-state engine.
   // ========================================================================
   function determineShellState({ routeName, hasIdentity }) {
@@ -124,7 +128,7 @@ export function createPulseOSBBB({ log }) {
   }
 
   // ========================================================================
-  //  guardPulseBand (v9.1)
+  //  guardPulseBand (v9.2)
   //  Convenience helper for PulseBand + connectors.
   // ========================================================================
   function guardPulseBand(ctx) {
@@ -142,7 +146,7 @@ export function createPulseOSBBB({ log }) {
   }
 
   // ========================================================================
-  //  PUBLIC BBB INTERFACE (v9.1)
+  //  PUBLIC BBB INTERFACE (v9.2)
   // ========================================================================
   return {
     SHELL_STATES,

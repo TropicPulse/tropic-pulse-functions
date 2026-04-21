@@ -1,73 +1,52 @@
 // ============================================================================
 // FILE: /apps/organs/aura/PulseMeshAura.js
-// [pulse:mesh] PULSE_MESH_AURA v9.1  // violet
+// [pulse:mesh] PULSE_MESH_AURA v9.2  // violet
 // System-wide Field Layer • Stabilization Loops • Multi-Instance Resonance
 // Metadata-only • Zero Compute • Zero Payload Mutation
 // ============================================================================
 //
-// IDENTITY — THE AURA FIELD:
-//  --------------------------
+// IDENTITY — THE AURA FIELD (v9.2):
+//  --------------------------------
 //  • Organism-wide field surrounding all pulses and instances.
 //  • Provides stabilization loops (loop field).
 //  • Provides multi-instance resonance (sync field).
 //  • Senses Flow pressure + recent throttles → adaptive stabilization.
+//  • Senses mesh factoring pressure → factoring hints.
 //  • Metadata-only: tags, hints, and gentle shaping fields.
-//  • Advantage-cascade aware: inherits any systemic speed/efficiency gain.
+//  • Advantage-cascade aware: inherits ANY systemic advantage automatically.
+//  • Fully deterministic: same impulse → same aura tags.
+//  • Zero randomness, zero timestamps, zero async.
 //
-// ROLE IN THE MESH ORGANISM:
-//  ---------------------------
-//  • Reflex Arc   → 1/0 survival decisions
-//  • Aura Field   → stabilization + resonance + tension sensing
-//  • Cortex       → strategic shaping
-//  • Tendons      → routing hints
-//  • Immune       → anomaly flags
-//  • Mesh Spine   → distributed conduction
-//
-// SAFETY CONTRACT:
-//  ----------------
+// SAFETY CONTRACT (v9.2):
+//  -----------------------
 //  • No randomness
 //  • No timestamps
 //  • No payload mutation
 //  • No async
 //  • Fail-open: missing fields → safe defaults
 //  • Deterministic: same impulse → same aura tags
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • Inherits ANY advantage from ANY organ automatically.
-//  • No OR — all advantages are inherited automatically.
-//  • Any future evolutionary advantage is included unless unsafe.
+//  • Zero imports — zero external dependencies
 // ============================================================================
-//
-// ARCHITECTURE — v9.1 ZERO-IMPORT ORGAN:
-//  -------------------------------------
-//  • No imports — all configuration is injected via control API.
-//  • Global AuraState is metadata-only, self-repairable.
-//  • Multi-instance ready, drift-proof.
-// ============================================================================
+
 
 // -----------------------------------------------------------
 // Aura State (global, metadata-only)
 // -----------------------------------------------------------
-
 const AuraState = {
-  // loop field: controlled stabilization loops
-  loopStrength: 0.0,      // 0–1: stabilization pull
-  loopMaxDepth: 3,        // max loop-tag depth
+  loopStrength: 0.0,
+  loopMaxDepth: 3,
 
-  // sync field: multi-instance resonance
   instanceId: "instance-1",
   clusterId: "cluster-default",
-  syncStrength: 0.0,      // 0–1: resonance strength
+  syncStrength: 0.0,
 
-  // stabilization pressure from Flow/Halo
-  flowPressure: 0.0,          // 0–1: how close Flow is to throttling
-  recentThrottleRate: 0.0,    // 0–1: fraction of impulses throttled recently
+  flowPressure: 0.0,
+  recentThrottleRate: 0.0,
 
   meta: {
     layer: "PulseMeshAura",
     role: "AURA_FIELD",
-    version: 9.1,
+    version: 9.2,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -79,19 +58,19 @@ const AuraState = {
       driftProof: true,
       multiInstanceReady: true,
       unifiedAdvantageField: true,
-      futureEvolutionReady: true
+      futureEvolutionReady: true,
+      signalFactoringAware: true,
+      deterministicField: true,
+      zeroCompute: true,
+      zeroMutation: true
     }
   }
 };
 
+
 // -----------------------------------------------------------
 // Aura Control (trusted writers only, metadata-only)
 // -----------------------------------------------------------
-//
-// This is what Flow/Halo/Environment call into.
-// No imports, no routing, no payloads.
-// -----------------------------------------------------------
-
 export const PulseAuraControl = {
   setLoopStrength(v) {
     AuraState.loopStrength = clamp01(v);
@@ -119,25 +98,22 @@ export const PulseAuraControl = {
   }
 };
 
+
 // -----------------------------------------------------------
 // Aura Pack: loop + sync + stabilization behaviors
 // -----------------------------------------------------------
-
 export const PulseAura = {
-  // [pulse:mesh] AURA_STABILIZATION_SENSE  // violet
-  // - sense Flow pressure + throttle rate → adjust tags
+
   senseStabilization(impulse) {
     const p = AuraState.flowPressure;
     const t = AuraState.recentThrottleRate;
 
     impulse.flags = impulse.flags || {};
 
-    // Tag impulses when the organism is under tension
     if (p > 0.3 || t > 0.1) {
       impulse.flags["aura_system_under_tension"] = true;
     }
 
-    // Tag impulses that need stabilization
     if (p > 0.5 || t > 0.2) {
       impulse.flags["aura_stabilization_needed"] = true;
     }
@@ -145,7 +121,6 @@ export const PulseAura = {
     return impulse;
   },
 
-  // [pulse:mesh] AURA_LOOP_TAG  // violet
   tagLoop(impulse) {
     impulse.flags = impulse.flags || {};
 
@@ -169,14 +144,12 @@ export const PulseAura = {
     return impulse;
   },
 
-  // [pulse:mesh] AURA_LOOP_HINT  // violet
   loopHint(impulse) {
     if (!impulse.flags?.aura_in_loop) return impulse;
     impulse.flags["aura_prefers_stable_routes"] = true;
     return impulse;
   },
 
-  // [pulse:mesh] AURA_SYNC_TAG  // violet
   tagSync(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.flags["aura_instance"] = AuraState.instanceId;
@@ -184,41 +157,51 @@ export const PulseAura = {
     return impulse;
   },
 
-  // [pulse:mesh] AURA_SYNC_HINT  // violet
   syncHint(impulse) {
     if (AuraState.syncStrength <= 0) return impulse;
     impulse.flags = impulse.flags || {};
     impulse.flags["aura_sync_candidate"] = true;
     return impulse;
+  },
+
+  factoringHint(impulse) {
+    const p = AuraState.flowPressure;
+    const t = AuraState.recentThrottleRate;
+
+    if (p <= 0.3 && t <= 0.1) return impulse;
+
+    impulse.flags = impulse.flags || {};
+    impulse.flags["aura_prefers_factored_paths"] = true;
+    impulse.flags["aura_factoring_bias"] = clamp01((p + t) / 2);
+
+    return impulse;
   }
 };
+
 
 // -----------------------------------------------------------
 // Aura Engine (applied per impulse)
 // -----------------------------------------------------------
-
 export function applyPulseAura(impulse) {
   impulse.flags = impulse.flags || {};
   impulse.flags.aura_meta = AuraState.meta;
 
-  // stabilization sensing
   PulseAura.senseStabilization(impulse);
-
-  // loop + sync fields
   PulseAura.tagLoop(impulse);
   PulseAura.loopHint(impulse);
   PulseAura.tagSync(impulse);
   PulseAura.syncHint(impulse);
+  PulseAura.factoringHint(impulse);
 
   impulse.flags["aura_applied"] = true;
 
   return impulse;
 }
 
+
 // -----------------------------------------------------------
 // Helper
 // -----------------------------------------------------------
-
 function clamp01(v) {
   if (typeof v !== "number" || Number.isNaN(v)) return 0;
   return Math.max(0, Math.min(1, v));

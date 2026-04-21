@@ -1,89 +1,110 @@
 // ============================================================================
-//  PULSE OS v7.7 — IMMUNE MEMBRANE LAYER  // red
+//  PULSE OS v9.2 — IMMUNE MEMBRANE LAYER  // red
 //  “System Safety Membrane / Validation / Quarantine / Metadata‑Only”
 // ============================================================================
 //
-//  IDENTITY — THE IMMUNE MEMBRANE (v7.7):
-//  --------------------------------------
+//  IDENTITY — IMMUNE MEMBRANE (v9.2):
+//  ----------------------------------
 //  • First immune filter — blocks malformed or unsafe impulses.
-//  • Reads system pressure signals to decide quarantine.
 //  • Pure metadata-only — zero payload mutation.
-//  • Deterministic, drift-proof, AND-architecture aligned.
+//  • Zero imports — CNS injects pressure snapshot.
+//  • Factoring-aware, aura-aware, drift-aware, flow-aware, mesh-aware.
+//  • Deterministic-field, drift-proof, AND-architecture aligned.
 //
-//  ROLE IN THE DIGITAL BODY (v7.7):
-//  --------------------------------
-//  • Immune Membrane → blocks unsafe impulses at the boundary.
-//  • Pressure-Aware Firewall → quarantines under tension.
-//  • Structural Validator → ensures impulse integrity.
-//  • Route Sanity Checker → prevents invalid routing hints.
-//
-//  SAFETY CONTRACT:
-//  ----------------
+//  SAFETY CONTRACT (v9.2):
+//  -----------------------
 //  • No routing, no compute, no shaping.
 //  • No payload mutation.
 //  • No healing — only blocking/quarantine.
 //  • Pure metadata-only, reversible, safe.
 // ============================================================================
 
-import { PulseField } from "./PulseMeshEnvironmentalField.js";
+export function createPulseImmune({ getPressureSnapshot }) {
 
-export const PulseImmune = {
+  const meta = {
+    layer: "PulseImmune",
+    role: "IMMUNE_MEMBRANE",
+    version: 9.2,
+    target: "full-mesh",
+    selfRepairable: true,
+    evo: {
+      dualMode: true,
+      localAware: true,
+      internetAware: true,
+
+      advantageCascadeAware: true,
+      pulseEfficiencyAware: true,
+      driftProof: true,
+      multiInstanceReady: true,
+
+      unifiedAdvantageField: true,
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      meshPressureAware: true,
+      auraPressureAware: true
+    }
+  };
 
   // ---------------------------------------------------------
-  // STRUCTURAL VALIDATION (unchanged)
+  // STRUCTURAL VALIDATION
   // ---------------------------------------------------------
-  validateStructure(impulse) {
+  function validateStructure(impulse) {
     if (!impulse.id) return fail("missing_id");
     if (!impulse.payloadRef) return fail("missing_payloadRef");
     if (typeof impulse.energy !== "number") return fail("invalid_energy");
     if (typeof impulse.score !== "number") return fail("invalid_score");
     return pass();
-  },
+  }
 
-  validateFlags(impulse) {
+  function validateFlags(impulse) {
     const flags = impulse.flags || {};
-    const keys = Object.keys(flags);
-    if (keys.length > 96) return fail("too_many_flags"); // v7.7: safe upper bound
+    if (Object.keys(flags).length > 96) return fail("too_many_flags");
     return pass();
-  },
+  }
 
   // ---------------------------------------------------------
-  // SYSTEM PRESSURE CHECKS (v7.7)
+  // v9.2 PRESSURE CHECKS (CNS-injected)
   // ---------------------------------------------------------
-  pressureCheck(impulse) {
-    const field = PulseField.snapshot();
+  function pressureCheck(impulse) {
+    const p = getPressureSnapshot() || {};
 
-    const flow = field.flowPressure || 0;
-    const drift = field.driftPressure || 0;
-    const throttle = field.throttleRate || 0;
-    const aura = field.auraTension || 0;
-    const reflexDrops = field.reflexDropRate || 0;
-    const storm = field.meshStormPressure || 0;
+    const flow = p.flowPressure || 0;
+    const drift = p.driftPressure || 0;
+    const throttle = p.throttleRate || 0;
+    const aura = p.auraTension || 0;
+    const factoring = p.factoringPressure || 0;
+    const storm = p.meshStormPressure || 0;
 
+    // v9.2 thresholds (aligned with Hormones + Field + Flow)
     if (flow > 0.7) return fail("flow_pressure_high");
     if (drift > 0.5) return fail("drift_pressure_high");
     if (throttle > 0.3) return fail("throttle_rate_high");
     if (aura > 0.4) return fail("aura_tension_high");
-    if (reflexDrops > 0.4) return fail("reflex_drop_storm");
+    if (factoring > 0.6) return fail("factoring_pressure_high");
     if (storm > 0.4) return fail("mesh_storm_pressure");
 
     return pass();
-  },
+  }
 
   // ---------------------------------------------------------
-  // ANOMALY QUARANTINE (unchanged)
+  // ANOMALY QUARANTINE
   // ---------------------------------------------------------
-  quarantine(impulse) {
+  function quarantine(impulse) {
     if (impulse.flags?.cortex_anomaly) {
       impulse.flags.immune_quarantined = true;
     }
+    if (impulse.flags?.cortex_factoring_anomaly) {
+      impulse.flags.immune_quarantined = true;
+    }
     return pass();
-  },
+  }
 
   // ---------------------------------------------------------
-  // ROUTE SANITY (unchanged)
+  // ROUTE SANITY
   // ---------------------------------------------------------
-  routeSanity(impulse) {
+  function routeSanity(impulse) {
     const hint = impulse.routeHint;
     if (!hint) return pass();
 
@@ -93,72 +114,51 @@ export const PulseImmune = {
     }
 
     return pass();
-  },
+  }
 
   // ---------------------------------------------------------
-  // ENERGY FLOOR (unchanged)
+  // ENERGY FLOOR
   // ---------------------------------------------------------
-  energyFloor(impulse) {
+  function energyFloor(impulse) {
     if (isNaN(impulse.energy)) return fail("energy_nan");
     if (impulse.energy < 0) return fail("energy_negative");
     return pass();
   }
-};
 
-// ============================================================================
-//  IMMUNE MEMBRANE ENGINE (v7.7)
-// ============================================================================
-export function applyPulseImmune(impulse) {
-  impulse.flags = impulse.flags || {};
+  // ---------------------------------------------------------
+  // IMMUNE ENGINE (v9.2)
+  // ---------------------------------------------------------
+  function applyPulseImmune(impulse) {
+    impulse.flags = impulse.flags || {};
+    impulse.flags.immune_meta = meta;
 
-  impulse.flags.immune_meta = {
-    layer: "PulseImmune",
-    role: "IMMUNE_MEMBRANE",
-    version: 7.7,
-    target: "full-mesh",
-    selfRepairable: true,
-    evo: {
-      dualMode: true,
-      localAware: true,
-      internetAware: true,
-      advantageCascadeAware: true,
-      pulseEfficiencyAware: true,
-      driftProof: true,
-      multiInstanceReady: true,
-      unifiedAdvantageField: true,
-      futureEvolutionReady: true
+    const checks = [
+      validateStructure,
+      validateFlags,
+      pressureCheck,
+      quarantine,
+      routeSanity,
+      energyFloor
+    ];
+
+    for (const check of checks) {
+      const result = check(impulse);
+      if (!result.ok) {
+        impulse.flags[`immune_${result.reason}`] = true;
+        impulse.flags.immune_failed = true;
+        return impulse;
+      }
     }
-  };
 
-  const checks = [
-    PulseImmune.validateStructure,
-    PulseImmune.validateFlags,
-    PulseImmune.pressureCheck,
-    PulseImmune.quarantine,
-    PulseImmune.routeSanity,
-    PulseImmune.energyFloor
-  ];
-
-  for (const check of checks) {
-    const result = check(impulse);
-    if (!result.ok) {
-      impulse.flags[`immune_${result.reason}`] = true;
-      impulse.flags.immune_failed = true;
-      return impulse;
-    }
+    impulse.flags.immune_passed = true;
+    return impulse;
   }
 
-  impulse.flags.immune_passed = true;
-  return impulse;
+  return applyPulseImmune;
 }
 
-// ============================================================================
+// -----------------------------------------------------------
 // HELPERS
-// ============================================================================
-function pass() {
-  return { ok: true };
-}
-
-function fail(reason) {
-  return { ok: false, reason };
-}
+// -----------------------------------------------------------
+function pass() { return { ok: true }; }
+function fail(reason) { return { ok: false, reason }; }

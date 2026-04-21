@@ -1,10 +1,10 @@
 // ============================================================================
-//  PULSE OS v7.7 — THE THYMUS
+//  PULSE OS v9.2 — THE THYMUS
 //  Immune Command Organ • Integrity Sentinel • Root Healing Authority
 //  PURE HEALING. ZERO COMPUTE. ZERO AI. ZERO AUTONOMY.
 // ============================================================================
 //
-//  DESCRIPTION — WHAT THE THYMUS IS (v7.7):
+//  DESCRIPTION — WHAT THE THYMUS IS (v9.2):
 //  ----------------------------------------
 //  The Thymus is the **root immune organ** of PulseOS. It is the backend
 //  immune command center responsible for:
@@ -20,15 +20,7 @@
 //  **pure immune behavior**, strictly metadata-only, with zero compute,
 //  zero autonomy, and zero AI.
 //
-//  ROLE IN THE DIGITAL BODY (v7.7):
-//  --------------------------------
-//    • Immune Kernel → backend healing authority
-//    • Integrity Sentinel → detects drift + contradictions
-//    • Vital Signs Monitor → updates OSHealth
-//    • Immune Stimulus Ingestor → processes FUNCTION_LOGS
-//    • Restore Point Commander → creates safe restore snapshots
-//
-//  SAFETY CONTRACT (v7.7):
+//  SAFETY CONTRACT (v9.2):
 //  ------------------------
 //    • No eval()
 //    • No dynamic imports
@@ -38,45 +30,45 @@
 //    • No marketplace calls
 //    • Deterministic, drift-proof immune behavior only
 //
-//  IDENTITY (v7.7):
+//  IDENTITY (v9.2):
 //  ----------------
 //    • organ: Thymus
 //    • role: immune_command_organ
-//    • generation: v7
-//    • version: 7.7
+//    • generation: v9
+//    • version: 9.2
 //    • organism: PulseOS
-//
 // ============================================================================
 
 export const FUNCTION_LOGS_COLLECTION = "FUNCTION_LOGS";
-export const OS_HEALTH_COLLECTION = "OSHealth";
-export const OS_EVENTS_COLLECTION = "OSEvents";
+export const OS_HEALTH_COLLECTION     = "OSHealth";
+export const OS_EVENTS_COLLECTION     = "OSEvents";
 
-export const OS_HEARTBEAT_INTERVAL_MS = 30_000;
+export const OS_HEARTBEAT_INTERVAL_MS      = 30_000;
 export const FUNCTION_LOG_SCAN_INTERVAL_MS = 60_000;
 
-// ⭐ Version + Generation + Organ Identity (v7.7 aligned)
-export const PULSE_OS_ID = "PulseOS-v7.7";
-export const PULSE_OS_ROLE = "immune_command_organ";
-export const PULSE_OS_GENERATION = "v7";
-export const PULSE_OS_ORGAN = "Thymus";
+// ⭐ Version + Generation + Organ Identity (v9.2 aligned)
+export const PULSE_OS_ID         = "PulseOS-v9.2";
+export const PULSE_OS_ROLE       = "immune_command_organ";
+export const PULSE_OS_GENERATION = "v9";
+export const PULSE_OS_ORGAN      = "Thymus";
 
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import {
   saveSnapshot,
   recordDriftSignature,
   createRestorePoint
-} from "./PulseOSLiver.js";
+} from "./PulseOSLiverMemory.js";
 
 const db = getFirestore();
 
-// ⭐ Thymus identity block (v7.7 organism identity)
+// ⭐ Thymus identity block (v9.2 organism identity)
 const THYMUS_CONTEXT = {
   osId: PULSE_OS_ID,
   role: PULSE_OS_ROLE,
   organ: PULSE_OS_ORGAN,
   generation: PULSE_OS_GENERATION,
-  version: "7.7",
+  version: "9.2",
+
   evo: {
     dualMode: true,
     localAware: true,
@@ -86,16 +78,22 @@ const THYMUS_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // Conceptual compatibility (no logic impact)
+    routingContract: "PulseSend-v9.2",
+    osOrganContract: "PulseOS-v9.2",
+    earnCompatibility: "PulseEarn-v9.2"
   }
 };
 
-log("thymus", "PulseOS v7.7 immune kernel online.");
+log("thymus", "PulseOS v9.2 immune kernel online.");
 log("thymus", "Heartbeat interval", OS_HEARTBEAT_INTERVAL_MS, "ms");
 log("thymus", "FUNCTION_LOG scan interval", FUNCTION_LOG_SCAN_INTERVAL_MS, "ms");
 
+
 // ============================================================================
-//  writeOSEvent() — Immune Signal Emitter (v7.7)
+//  writeOSEvent() — Immune Signal Emitter (v9.2)
 // ============================================================================
 async function writeOSEvent(entry) {
   try {
@@ -116,8 +114,9 @@ async function writeOSEvent(entry) {
   }
 }
 
+
 // ============================================================================
-//  updateOSHealth() — Vital Signs + Immune Snapshot (v7.7)
+//  updateOSHealth() — Vital Signs + Immune Snapshot (v9.2)
 // ============================================================================
 async function updateOSHealth(extra = {}) {
   try {
@@ -147,8 +146,9 @@ async function updateOSHealth(extra = {}) {
   }
 }
 
+
 // ============================================================================
-//  processFunctionLogs() — Immune Training + Drift Detection (v7.7)
+//  processFunctionLogs() — Immune Training + Drift Detection (v9.2)
 // ============================================================================
 async function processFunctionLogs() {
   log("thymus", "Scanning FUNCTION_LOGS…");
@@ -218,8 +218,8 @@ async function processFunctionLogs() {
           fieldName: entry.fieldName,
           note: entry.note
         },
-        version: "7.7",
-        generation: "v7",
+        version: "9.2",
+        generation: "v9",
         organ: "Thymus",
         timestamp: Date.now()
       });
@@ -243,8 +243,9 @@ async function processFunctionLogs() {
   }
 }
 
+
 // ============================================================================
-//  PUBLIC: startPulseOS() — Activate Immune Organ (v7.7)
+//  PUBLIC: startPulseOS() — Activate Immune Organ (v9.2)
 // ============================================================================
 export default function startPulseOS() {
   log("thymus", "Starting immune supervisor loops…");
@@ -261,7 +262,7 @@ export default function startPulseOS() {
     });
   }, FUNCTION_LOG_SCAN_INTERVAL_MS);
 
-  log("thymus", "v7.7 immune kernel active.");
+  log("thymus", "v9.2 immune kernel active.");
 }
 
 export { updateOSHealth, processFunctionLogs, writeOSEvent };

@@ -1,60 +1,74 @@
 // ============================================================================
-//  PULSE OS v7.7 — TELEMETRY ORGAN
+//  PULSE OS v9.1 — TELEMETRY ORGAN
 //  Unified Metrics • Subsystem Heartbeats • Drift Detection
 //  Mesh‑Aware Telemetry Propagation (Mini‑Pulse Distance Engine)
 //  PURE NERVOUS‑SYSTEM ORGAN — NO BACKEND, NO DOM, NO GPU
 // ============================================================================
 //
-//  ORGAN DESCRIPTION — WHAT THIS IS (v7.7):
-//  ----------------------------------------
-//  PulseTelemetry is the **bloodstream** of PulseOS. It carries:
-//    • subsystem heartbeats
-//    • metrics
-//    • anomalies
-//    • drift signals
-//    • mesh mini‑pulses
+//  WHAT THIS ORGAN IS (v9.1):
+//  --------------------------
+//  • Bloodstream → circulates telemetry packets
+//  • Heartbeat Layer → periodic subsystem pulses
+//  • Drift Sentinel → detects version mismatches
+//  • Mesh Mini‑Pulse Engine → bounded propagation (MAX_HOPS)
+//  • Nervous‑System Organ → renderer‑only, no backend
 //
-//  It does NOT:
-//    • call backend
-//    • use DOM
-//    • use GPU
-//    • mutate global state outside its bloodstream
-//    • perform compute or reasoning
-//
-//  ROLE IN THE DIGITAL BODY (v7.7):
-//  --------------------------------
-//    • Bloodstream → circulates telemetry packets
-//    • Heartbeat Layer → periodic subsystem pulses
-//    • Drift Sentinel → detects version mismatches
-//    • Mesh Mini‑Pulse Engine → bounded propagation (MAX_HOPS)
-//    • Nervous‑System Organ → renderer‑only, no backend
-//
-//  SAFETY CONTRACT (v7.7):
+//  SAFETY CONTRACT (v9.1):
 //  ------------------------
-//    • No console.* (uses logger only)
-//    • No external dependencies
-//    • No unbounded propagation
-//    • Deterministic packet structure
-//    • Pure telemetry — no healing, no mutation
-//
+//  • No console.* (uses logger only)
+//  • No external dependencies except OSKernel logger (heartbeat exception)
+//  • No backend calls
+//  • No DOM
+//  • No GPU
+//  • No unbounded propagation
+//  • Deterministic packet structure
+//  • Pure telemetry — no healing, no mutation
 // ============================================================================
 
-// Correct CNS imports
+
+// ============================================================================
+//  CNS‑SAFE IMPORTS (Heartbeat‑only, allowed in v9.1)
+// ============================================================================
 import { logger } from "../OSKernel/PulseLogger.js";
 import { PulseVersion, PulseRoles, PulseLineage } from "../OSKernel/PulseIdentity.js";
 
+
 // ============================================================================
-// INTERNAL STATE — Telemetry Bloodstream
+//  ORGAN IDENTITY — v9.1
+// ============================================================================
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseTelemetry",
+  layer: "Bloodstream",
+  version: "9.1",
+  identity: "PulseTelemetryOrgan",
+
+  evo: {
+    driftProof: true,
+    pulseEfficiencyAware: true,
+    unifiedAdvantageField: true,
+    multiInstanceReady: true,
+    meshPulseReady: true,
+    sensorOnly: true,
+    noDecisionMaking: true,
+    futureEvolutionReady: true
+  }
+};
+
+
+// ============================================================================
+// INTERNAL STATE — Telemetry Bloodstream (bounded)
 // ============================================================================
 const telemetryStream = [];
 const MAX_STREAM_SIZE = 5000;
 
 // Mini‑Pulse mesh settings
-const MAX_HOPS = 5;          // bounded propagation
-const DEFAULT_DISTANCE = 1;  // local pulse distance
+const MAX_HOPS = 5;
+const DEFAULT_DISTANCE = 1;
+
 
 // ============================================================================
-// EMIT TELEMETRY — Universal signal emitter (v7.7)
+// EMIT TELEMETRY — Universal signal emitter (v9.1)
 // ============================================================================
 export function emitTelemetry(subsystem, event, data = {}) {
   try {
@@ -64,8 +78,8 @@ export function emitTelemetry(subsystem, event, data = {}) {
       hops: 0,
       distance: DEFAULT_DISTANCE,
       meta: {
-        layer: "PulseTelemetry",
-        version: "7.7",
+        layer: PulseRole.layer,
+        version: PulseRole.version,
         subsystem,
         event
       }
@@ -77,14 +91,16 @@ export function emitTelemetry(subsystem, event, data = {}) {
     broadcastTelemetry(packet);
 
     return packet;
+
   } catch (err) {
     logger.error("telemetry", "emit_failed", { error: String(err) });
     return null;
   }
 }
 
+
 // ============================================================================
-// MINI‑PULSE BROADCAST — Mesh‑safe propagation (v7.7)
+// MINI‑PULSE BROADCAST — Mesh‑safe propagation (v9.1)
 // ============================================================================
 export function broadcastTelemetry(packet) {
   try {
@@ -93,7 +109,6 @@ export function broadcastTelemetry(packet) {
 
     const amplified = amplifyPulse(packet);
 
-    // Real mesh sender would go here
     logger.log("telemetry", "broadcast", {
       subsystem: amplified.subsystem,
       hops: amplified.hops,
@@ -105,8 +120,9 @@ export function broadcastTelemetry(packet) {
   }
 }
 
+
 // ============================================================================
-// MINI‑PULSE AMPLIFIER — Increase distance + hop count (v7.7)
+// MINI‑PULSE AMPLIFIER — Increase distance + hop count (v9.1)
 // ============================================================================
 export function amplifyPulse(packet) {
   return {
@@ -116,8 +132,9 @@ export function amplifyPulse(packet) {
   };
 }
 
+
 // ============================================================================
-// RECEIVE MESH PULSE — Accept telemetry from other nodes (v7.7)
+// RECEIVE MESH PULSE — Accept telemetry from other nodes (v9.1)
 // ============================================================================
 export function receiveMeshPulse(packet) {
   try {
@@ -134,8 +151,9 @@ export function receiveMeshPulse(packet) {
   }
 }
 
+
 // ============================================================================
-// HEARTBEAT — Subsystem periodic pulse (v7.7)
+// HEARTBEAT — Subsystem periodic pulse (v9.1)
 // ============================================================================
 export function heartbeat(subsystem, extra = {}) {
   return emitTelemetry(subsystem, "heartbeat", {
@@ -145,8 +163,9 @@ export function heartbeat(subsystem, extra = {}) {
   });
 }
 
+
 // ============================================================================
-// DRIFT DETECTION (v7.7)
+// DRIFT DETECTION (v9.1)
 // ============================================================================
 export function detectDrift(subsystem, expectedVersion) {
   const actual = PulseVersion[subsystem];
@@ -159,8 +178,9 @@ export function detectDrift(subsystem, expectedVersion) {
   return null;
 }
 
+
 // ============================================================================
-// ANOMALY (v7.7)
+// ANOMALY (v9.1)
 // ============================================================================
 export function anomaly(subsystem, description, details = {}) {
   return emitTelemetry(subsystem, "anomaly", {
@@ -169,8 +189,9 @@ export function anomaly(subsystem, description, details = {}) {
   });
 }
 
+
 // ============================================================================
-// PERFORMANCE METRICS (v7.7)
+// PERFORMANCE METRICS (v9.1)
 // ============================================================================
 export function metric(subsystem, name, value, extra = {}) {
   return emitTelemetry(subsystem, "metric", {
@@ -180,16 +201,18 @@ export function metric(subsystem, name, value, extra = {}) {
   });
 }
 
+
 // ============================================================================
-// STREAM ACCESS (v7.7)
+// STREAM ACCESS (v9.1)
 // ============================================================================
 export function getStream(limit = 500) {
   if (limit <= 0) return [...telemetryStream];
   return telemetryStream.slice(-limit);
 }
 
+
 // ============================================================================
-// SNAPSHOT (v7.7)
+// SNAPSHOT (v9.1)
 // ============================================================================
 export function getTelemetrySnapshot() {
   const latest = telemetryStream.slice(-200);
@@ -206,14 +229,15 @@ export function getTelemetrySnapshot() {
     recentPackets: latest.length,
     bySubsystem,
     meta: {
-      layer: "PulseTelemetry",
-      version: "7.7"
+      layer: PulseRole.layer,
+      version: PulseRole.version
     }
   };
 }
 
+
 // ============================================================================
-// EXPORTS — Telemetry Organ API (v7.7)
+// EXPORTS — Telemetry Organ API (v9.1)
 // ============================================================================
 export const PulseTelemetry = {
   emit: emitTelemetry,
@@ -227,7 +251,8 @@ export const PulseTelemetry = {
   receiveMeshPulse,
   amplifyPulse,
   meta: {
-    layer: "PulseTelemetry",
-    version: "7.7"
-  }
+    layer: PulseRole.layer,
+    version: PulseRole.version
+  },
+  PulseRole
 };

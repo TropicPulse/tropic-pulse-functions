@@ -1,5 +1,5 @@
 // ============================================================================
-// PulseOS Brain — v9.0 (CNS Master Brain)
+// PulseOS Brain — v9.2 (CNS Master Brain)
 // “Central Nervous System: Imports → Evolution → Routing → Validation → Attach”
 // ============================================================================
 //
@@ -11,7 +11,7 @@
 // • Validates PulseRole identity
 // • Prevents structural mutation
 // • Provides Firebase access
-// • Provides Kernel access
+// • Provides Kernel access (but is NOT the kernel itself)
 // • Provides Evolution access
 // • Provides BBB access
 // • Provides Memory access
@@ -20,13 +20,13 @@
 // ============================================================================
 
 // ---------------------------------------------------------------------------
-// GLOBAL IMPORTS (ALL ACCESS)
+// GLOBAL IMPORTS (ALL ACCESS) — PRESERVED FOR IQ (NO DELETIONS)
 // ---------------------------------------------------------------------------
 import { log, warn, error as logError } from "../pulse-proxy/PulseProxyVitalsLogger.js";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
 
-// Kernel / BrainStem
+// Kernel / BrainStem (OS kernel lives here, Brain only routes to it)
 import { PulseOSKernel } from "./PulseOSBrainStem.js";
 
 // Firebase (full access)
@@ -45,19 +45,36 @@ import { evolveRaw } from "./PulseOSBrainEvolution.js";
 import { nanoid } from "nanoid";
 import crypto from "crypto";
 
+
 // ============================================================================
-// 0) BRAIN IDENTITY (PulseRole)
+// 0) BRAIN IDENTITY (PulseRole) — v9.2
 // ============================================================================
 export const PulseRole = {
   type: "Brain",
   subsystem: "OS",
   layer: "CNS",
-  version: "9.0",
-  identity: "PulseOSBrain"
+  version: "9.2",
+  identity: "PulseOSBrain",
+
+  evo: {
+    deterministicNeuron: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    advantageCascadeAware: true,
+    unifiedAdvantageField: true,
+
+    // Conceptual compatibility (no logic impact)
+    routingContract: "PulseSend-v9.2",
+    osOrganContract: "PulseOS-v9.2",
+    earnCompatibility: "PulseEarn-v9.2",
+    proxyCompatibility: "PulseProxySpine-v9.2",
+    gpuCompatibility: "PulseGPU-v9.2"
+  }
 };
 
+
 // ============================================================================
-// 1) ROLE VALIDATION
+// 1) ROLE VALIDATION — CNS Gatekeeper
 // ============================================================================
 export function validatePulseRole(module, expectedType, expectedSubsystem) {
   if (!module?.PulseRole) return false;
@@ -75,8 +92,9 @@ export function validatePulseRole(module, expectedType, expectedSubsystem) {
   return typeOk && subsystemOk;
 }
 
+
 // ============================================================================
-// 2) STRUCTURAL ERROR INTELLIGENCE
+// 2) STRUCTURAL ERROR INTELLIGENCE — Drift Surface
 // ============================================================================
 export function structuralError(expected, found, extraContext = {}) {
   const payload = {
@@ -95,8 +113,9 @@ export function structuralError(expected, found, extraContext = {}) {
   return payload;
 }
 
+
 // ============================================================================
-// 3) EVOLUTION + INTELLIGENCE
+// 3) EVOLUTION + INTELLIGENCE — Design-Driven Organ Loading
 // ============================================================================
 export async function loadOrganByDesign(designIdentity, expectedType, expectedSubsys) {
   const raw = await evolveRaw(designIdentity);
@@ -115,19 +134,33 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
   return structuralError(expected, { type: null, subsystem: null }, { designIdentity });
 }
 
+
 // ============================================================================
-// 4) EXPORT EVERYTHING THE BODY NEEDS
+//– 4) EXPORT EVERYTHING THE BODY NEEDS — CNS Surface (NOT Kernel)
 // ============================================================================
 export const Brain = {
+  // Logging
   log,
   warn,
   logError,
+
+  // Core infrastructure
   firebase,
   BBB,
   PulseOSKernel,
   LongTermMemory,
   evolveRaw,
   loadOrganByDesign,
+
+  // Utilities (kept for historical IQ)
   nanoid,
-  crypto
+  crypto,
+
+  // FS primitives (preserved; used by evolution layer)
+  readdirSync,
+  statSync,
+  join,
+
+  // Identity
+  PulseRole
 };

@@ -1,8 +1,8 @@
 // ============================================================================
-// FILE: /apps/netlify/functions/heart.js
-// PULSE HEARTBEAT ENGINE — v7.8
-// “THE HEART / CARDIAC PACEMAKER ENGINE”
-// PURE PACEMAKER. NO BUSINESS LOGIC. NO DIRECT ORGANS. NO SCHEDULER IMPORTS.
+//  PULSE OS v9.1 — THE HEART
+//  PulseProxyHeart — Cardiac Pacemaker Engine
+//  ONE IMPORT ONLY (Pacemaker / SA Node)
+//  Backend‑Only • Deterministic • Drift‑Proof • No IQ
 // ============================================================================
 //
 // ROLE:
@@ -19,7 +19,7 @@
 //   • All tasks resolved from globals wired by OSKernel / route
 // ============================================================================
 
-// The ONLY import: pacemaker / SA node
+
 import * as heartbeat from "./PulseProxyHeartBeat.js";
 
 // ============================================================================
@@ -31,10 +31,45 @@ const log    = global.log    || console.log;
 const error  = global.error  || console.error;
 
 // Tasks (organs) — wired into globals by OSKernel
-const timerLogout             = global.timerLogout;             // logout + pulse history fix
-const securitySweep           = global.securitySweep;           // identity + security sweep
-const refreshEnvironmentSmart = global.refreshEnvironmentSmart; // environment refresh
-const runUserScoring          = global.runUserScoring;          // homeostasis scoring pass
+const timerLogout             = global.timerLogout;
+const securitySweep           = global.securitySweep;
+const refreshEnvironmentSmart = global.refreshEnvironmentSmart;
+const runUserScoring          = global.runUserScoring;
+
+// ============================================================================
+// HEART IDENTITY — v9.1
+// ============================================================================
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseProxy",
+  layer: "Heart",
+  version: "9.1",
+  identity: "PulseProxyHeart",
+
+  evo: {
+    driftProof: true,
+    deterministic: true,
+    pacemakerOnly: true,
+    noIQ: true,
+    noRouting: true,
+    noCompute: true,
+    backendOnly: true,
+    multiInstanceReady: true,
+    futureEvolutionReady: true
+  }
+};
+
+const HEART_CONTEXT = {
+  layer: PulseRole.layer,
+  role: "CARDIAC_PACEMAKER_ENGINE",
+  version: PulseRole.version,
+  pacemaker: {
+    source: "heartbeat.js",
+    version: heartbeat?.VERSION || "9.1",
+    label: heartbeat?.LABEL || "HEARTBEAT_PACEMAKER"
+  },
+  evo: PulseRole.evo
+};
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
@@ -61,20 +96,14 @@ async function logHeart(stage, details = {}) {
     pulseName: LAYER_NAME,
     pulseRole: LAYER_ROLE,
     stage,
-    ...details,
     ts: Date.now(),
-    pacemaker: {
-      source: "heartbeat.js",
-      version: heartbeat?.VERSION || "7.8",
-      label: heartbeat?.LABEL || "HEARTBEAT_PACEMAKER"
-    }
+    ...details,
+    ...HEART_CONTEXT
   };
 
   try {
     log("heart", "HEART_EVENT", payload);
-  } catch (_) {
-    // logging should never throw
-  }
+  } catch (_) {}
 
   if (!db) return;
 
@@ -86,14 +115,14 @@ async function logHeart(stage, details = {}) {
 }
 
 // ============================================================================
-// HUMAN‑READABLE CONTEXT MAP
+// HUMAN‑READABLE CONTEXT MAP — v9.1
 // ============================================================================
 const TIMER_CONTEXT = {
   label: "HEARTBEAT",
   layer: "D‑Layer",
   purpose: "Scheduled Executor",
   context: "Runs periodic backend tasks and writes logs",
-  version: "7.8"
+  version: PulseRole.version
 };
 
 const STATE_DOC = "PULSE_OS_TIMER_STATE";
@@ -107,28 +136,28 @@ const TASKS = Object.freeze([
     label: "Timer Logout + PulseHistory Fix",
     purpose: "Logout stale users and repair missing snapshots",
     context: "Security + loyalty integrity",
-    intervalMs: 5 * 60 * 1000 // every 5 minutes
+    intervalMs: 5 * 60 * 1000
   },
   {
     key: "securitySweep",
     label: "Security Sweep",
     purpose: "Identity rotation + security flags",
     context: "Vault / JWT / IP / device integrity",
-    intervalMs: 24 * 60 * 60 * 1000 // every 24 hours
+    intervalMs: 24 * 60 * 60 * 1000
   },
   {
     key: "refreshEnvironmentSmart",
     label: "Environment Refresh",
     purpose: "Weather / power / environment refresh",
     context: "Smart environment sync",
-    intervalMs: 30 * 60 * 1000 // every 30 minutes
+    intervalMs: 30 * 60 * 1000
   },
   {
     key: "runUserScoring",
     label: "User Scoring",
     purpose: "Homeostasis scoring pass",
     context: "Trust / mesh / phase / instances",
-    intervalMs: 5 * 60 * 1000 // every 5 minutes
+    intervalMs: 5 * 60 * 1000
   }
 ]);
 
@@ -136,9 +165,7 @@ const TASKS = Object.freeze([
 // STATE HELPERS
 // ============================================================================
 async function loadState() {
-  if (!db) {
-    return { ref: null, data: {} };
-  }
+  if (!db) return { ref: null, data: {} };
 
   const ref = db.collection("TIMER_LOGS").doc(STATE_DOC);
   const snap = await ref.get().catch(err => {
@@ -181,18 +208,10 @@ function shouldRunTask(nowMs, state, task) {
 // ============================================================================
 async function runTask(taskKey) {
   switch (taskKey) {
-    case "timerLogout":
-      if (typeof timerLogout === "function") return timerLogout();
-      break;
-    case "securitySweep":
-      if (typeof securitySweep === "function") return securitySweep();
-      break;
-    case "refreshEnvironmentSmart":
-      if (typeof refreshEnvironmentSmart === "function") return refreshEnvironmentSmart();
-      break;
-    case "runUserScoring":
-      if (typeof runUserScoring === "function") return runUserScoring();
-      break;
+    case "timerLogout":             return timerLogout?.();
+    case "securitySweep":           return securitySweep?.();
+    case "refreshEnvironmentSmart": return refreshEnvironmentSmart?.();
+    case "runUserScoring":          return runUserScoring?.();
   }
 
   const fn = global[taskKey];
@@ -204,7 +223,6 @@ async function runTask(taskKey) {
 
 // ============================================================================
 // MAIN HANDLER — “THE HEARTBEAT”
-// Platform (Netlify, cron, etc.) calls this; heart just beats.
 // ============================================================================
 export const handler = async () => {
   const runId = `HB_${Date.now()}`;

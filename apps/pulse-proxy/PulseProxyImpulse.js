@@ -1,104 +1,68 @@
 // ============================================================================
-// FILE: /apps/lib/Connectors/Impulse.js
-// LAYER: THE IMPULSE (Adaptive Traveler + Pattern Carrier + Identity Anchor)
-// PULSE OS — v7.7
-// OFFLINE‑ABSOLUTE • PURE TRAVELER • ZERO EXTERNAL DEPENDENCY
+//  PULSE OS v9.2 — IMPULSE ORGAN (Shape‑Unified)
+//  Adaptive Traveler • Pattern Carrier • Identity Anchor
+//  PURE INTERNAL ORGAN — ZERO IMPORTS — ZERO DEPENDENCIES
 // ============================================================================
 //
-// ROLE (v7.7):
-//   • Fired by PulseBand (Nervous System)
-//   • Moves through each layer sequentially (UNBOUNDED PATHWAY)
-//   • Each layer attaches identity + state + delta
-//   • Factors its energy (1/0, 1/2) per hop
-//   • Adapts urgency based on environmental conditions
-//   • Returns to PulseBand with full organism snapshot
-//   • v7.0: Guaranteed offline — no external stimuli required
-//   • v7.1: Pathway‑memory ready (no hardcoded pages, no file maps)
-//   • v7.7: OS‑v7 context metadata + diagnostics‑safe + PulseBand v7.7 aligned
+//  WHAT THIS ORGAN IS (v9.2):
+//  --------------------------
+//  • Same Impulse traveler as v9.1 (path, pathway, energy, page, repairSeed).
+//  • PLUS: exposes a Pulse v2–compatible shape for the rest of the body.
+//  • That means: { jobId, pattern, payload, priority, returnTo, lineage, meta }.
+//  • No routing, no movement, no mesh logic — still pure metadata carrier.
 //
-// CONTRACT:
-//   • Pure traveler — no imports from PulseNet, PulseUpdate, PulseClient
-//   • No backend, no fetch, no network, no external state
-//   • Deterministic, drift-proof, organism-safe
-//   • Local-only, internal-only, self-contained
+//  WHAT THIS ORGAN IS NOT:
+//  ------------------------
+//  • Not a router
+//  • Not a compute engine
+//  • Not a decision-maker
+//  • Not a network packet
+//  • Not a backend request
+//  • Not a mesh relay
 //
-// SAFETY (v7.7):
-//   • No randomness except tickId entropy
-//   • No external calls
-//   • No environment access (beyond window for local wiring, guarded)
-//   • No timing loops
-//   • No external stimuli required
+//  SAFETY CONTRACT (v9.2):
+//  ------------------------
+//  • ZERO imports
+//  • ZERO external dependencies
+//  • ZERO backend calls
+//  • ZERO DOM usage
+//  • ZERO GPU usage
+//  • Deterministic, drift‑proof, offline‑absolute
+//  • Pure metadata carrier — no logic, no reasoning
 // ============================================================================
 
+
 // ============================================================================
-// ⭐ OS‑v7 CONTEXT METADATA — Impulse Identity
+// ⭐ IMPULSE CONTEXT — v9.2 Identity
 // ============================================================================
 const IMPULSE_CONTEXT = {
   layer: "Impulse",
   role: "IMPULSE_TRAVELER",
+  version: "9.2",
   purpose: "Adaptive traveler + pattern carrier + identity anchor",
-  context: "Moves through layers, recording state + deltas + pathway identity",
-  target: "full-os",
-  version: "7.7",
-  selfRepairable: true,
   evo: {
-    advantageCascadeAware: true,
-    pulseEfficiencyAware: true,
     driftProof: true,
+    deterministic: true,
+    offlineAbsolute: true,
+    pathwayMemoryReady: true,
+    pulseSendAware: true,
+    meshAware: true,
+    bandAware: true,
     multiInstanceReady: true,
-    parallelSafe: true,
-    fanOutScaling: 1.0,
-    clusterCoherence: true,
-    zeroDriftCloning: true,
-    reflexPropagation: 1.0,
-    dualModeEvolution: true,
-    organismClusterBoost: 1.0,
-    cognitiveComputeLink: true,
-    unifiedAdvantageField: true
+    futureEvolutionReady: true,
+    pulseShapeReady: true
   }
 };
 
-// ============================================================================
-// IMPULSE CONSTANTS
-// ============================================================================
-const IMPULSE_LAYER_ID   = "IMPULSE-LAYER";
-const IMPULSE_LAYER_NAME = "THE IMPULSE";
-const IMPULSE_LAYER_ROLE =
-  "Adaptive Traveler + Pattern Carrier + Identity Anchor";
-
-const IMPULSE_VERSION = "v7.7";
-
-const IMPULSE_DIAGNOSTICS_ENABLED =
-  typeof window !== "undefined" &&
-  (window.PULSE_IMPULSE_DIAGNOSTICS === true ||
-    window.PULSE_DIAGNOSTICS === true);
-
-const impulseLog = (stage, details = {}) => {
-  if (!IMPULSE_DIAGNOSTICS_ENABLED) return;
-
-  log(
-    JSON.stringify({
-      impulseLayer:   IMPULSE_LAYER_ID,
-      impulseName:    IMPULSE_LAYER_NAME,
-      impulseRole:    IMPULSE_LAYER_ROLE,
-      impulseVersion: IMPULSE_VERSION,
-      stage,
-      ...details
-    })
-  );
-};
-
-impulseLog("IMPULSE_INIT", {});
 
 // ============================================================================
-// INTERNAL HELPERS — v7.7
+// INTERNAL HELPERS — v9.2
 // ============================================================================
 function nowMs() {
   return Date.now();
 }
 
 function makeTickId() {
-  // v7.7: still entropy‑seeded, wrapped for clarity + future evolution
   return nowMs() + "-" + Math.random().toString(36).slice(2);
 }
 
@@ -106,42 +70,96 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+function impulseLog(stage, details = {}) {
+  if (typeof window === "undefined") return;
+  if (!window.PULSE_IMPULSE_DIAGNOSTICS && !window.PULSE_DIAGNOSTICS) return;
+
+  try {
+    console.log(
+      JSON.stringify({
+        stage,
+        ...details,
+        meta: { ...IMPULSE_CONTEXT }
+      })
+    );
+  } catch {}
+}
+
+// ⭐ Pulse‑v2 compatible helpers (tiny, deterministic)
+function buildLineage(parentLineage, pattern) {
+  const base = Array.isArray(parentLineage) ? parentLineage : [];
+  return [...base, pattern];
+}
+
+function computeShapeSignature(pattern, lineage) {
+  const lineageKey = lineage.join("::");
+  const raw = `${pattern}::${lineageKey}`;
+
+  let acc = 0;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+
+  return `shape-${acc}`;
+}
+
+function computeEvolutionStage(pattern, lineage) {
+  const depth = lineage.length;
+
+  if (depth === 1) return "seed";
+  if (depth === 2) return "sprout";
+  if (depth === 3) return "branch";
+
+  return "mature";
+}
+
+
 // ============================================================================
-// IMPULSE ENGINE — v7.7
+// ⭐ IMPULSE ENGINE — v9.2
 // PURE INTERNAL TRAVELER — ZERO EXTERNAL DEPENDENCY
 // ============================================================================
 export const Impulse = {
+
   // --------------------------------------------------------------------------
-  // CREATE — v7.7
-  // Identity-aware, repair-seeded, offline-guaranteed, pathway-memory-ready
+  // CREATE — v9.2
+  // Identity‑anchored, repair‑seeded, offline‑absolute, pathway‑ready
+  // PLUS: embeds Pulse v2–compatible shape
   // --------------------------------------------------------------------------
   create(intent, payload = {}) {
     const tickId = makeTickId();
     const pageIdentity = payload?.pageIdentity || {};
 
+    // Pulse‑v2 compatible fields (derived, not “smart”)
+    const jobId       = payload.jobId || tickId;
+    const pattern     = payload.pattern || intent || "UNKNOWN_PATTERN";
+    const priority    = payload.priority || "normal";
+    const returnTo    = payload.returnTo || null;
+    const parentLineage = payload.parentLineage || null;
+
+    const lineage        = buildLineage(parentLineage, pattern);
+    const shapeSignature = computeShapeSignature(pattern, lineage);
+    const evolutionStage = computeEvolutionStage(pattern, lineage);
+
     const impulse = {
       tickId,
       intent,
       payload,
+      version: "v9.2",
 
-      version: IMPULSE_VERSION,
-
-      // LIVING PATHWAY (unbounded)
+      // PATHWAY MEMORY
       path: [],
-
-      // Pathway memory (no hardcoded pages/files)
       pathway: {
-        hops: [],            // sequence of layer ids
-        stable: false,       // becomes true when NerveMap/PathwayMemory confirm
-        learnedRouteId: null // optional id assigned by NerveMap
+        hops: [],
+        stable: false,
+        learnedRouteId: null
       },
 
+      // ENERGY MODEL
       energy: 1,
       factor: 1,
       urgency: 0,
-      signature: "1010101",
 
-      // PAGE IDENTITY ANCHOR (soft — names are hints, not requirements)
+      // PAGE IDENTITY
       page: {
         name:        pageIdentity.page        || "UNKNOWN_PAGE",
         vars:        pageIdentity.vars        || {},
@@ -157,35 +175,44 @@ export const Impulse = {
       // IDENTITY HEALTH
       identityHealth: pageIdentity.page ? "Stable" : "Missing",
 
-      // v7.0 — OFFLINE ABSOLUTE
+      // OFFLINE ABSOLUTE
       offline: true,
       externalDependencies: [],
 
-      // v7.7 — META CONTEXT
+      // ⭐ PULSE v2–COMPATIBLE VIEW
+      pulse: {
+        jobId,
+        pattern,
+        payload,
+        priority,
+        returnTo,
+        lineage,
+        meta: {
+          shapeSignature,
+          evolutionStage
+        }
+      },
+
+      // META
       meta: { ...IMPULSE_CONTEXT }
     };
-
-    if (!pageIdentity.page) {
-      impulseLog("IMPULSE_IDENTITY_MISSING", {
-        tickId,
-        intent,
-        warning: "PAGE IDENTITY MISSING — REPAIR MAY BE DEGRADED"
-      });
-    }
 
     impulseLog("IMPULSE_CREATE", {
       tickId,
       intent,
       page: impulse.page.name,
-      identityHealth: impulse.identityHealth
+      identityHealth: impulse.identityHealth,
+      pulsePattern: impulse.pulse.pattern,
+      pulseShape: impulse.pulse.meta.shapeSignature
     });
 
     return impulse;
   },
 
+
   // --------------------------------------------------------------------------
-  // URGENCY — v7.7
-  // Pure internal environmental response
+  // URGENCY — v9.2
+  // Pure environmental modulation
   // --------------------------------------------------------------------------
   computeUrgency(layerState) {
     let u = 0;
@@ -198,8 +225,9 @@ export const Impulse = {
     return Math.min(1, u);
   },
 
+
   // --------------------------------------------------------------------------
-  // FACTOR — v7.7
+  // FACTOR — v9.2
   // Hop-relative energy factoring + urgency modulation
   // --------------------------------------------------------------------------
   factorImpulse(impulse) {
@@ -211,18 +239,19 @@ export const Impulse = {
     }
 
     impulseLog("IMPULSE_FACTOR", {
-      tickId:    impulse.tickId,
-      factor:    impulse.factor,
-      energy:    impulse.energy,
-      urgency:   impulse.urgency,
+      tickId: impulse.tickId,
+      factor: impulse.factor,
+      energy: impulse.energy,
+      urgency: impulse.urgency,
       hopsSoFar: impulse.path.length
     });
 
     return impulse;
   },
 
+
   // --------------------------------------------------------------------------
-  // ANNOTATE — v7.7
+  // ANNOTATE — v9.2
   // Each hop becomes a nervous-system pathway node
   // --------------------------------------------------------------------------
   annotate(impulse, layerIdentity, layerState, delta) {
@@ -239,34 +268,32 @@ export const Impulse = {
       repairSeed:     impulse.repairSeed,
       identityHealth: impulse.identityHealth,
 
-      // v7.1+ — OFFLINE ABSOLUTE
       offline: true,
       meta: { ...IMPULSE_CONTEXT }
     };
 
     impulse.path.push(hop);
 
-    // Pathway memory: record just the identity id (no file/page hardcoding)
     if (layerIdentity?.id) {
       impulse.pathway.hops.push(layerIdentity.id);
     }
 
     impulseLog("IMPULSE_ANNOTATE", {
-      tickId:         impulse.tickId,
-      layer:          layerIdentity.id,
-      page:           impulse.page.name,
-      urgency:        impulse.urgency,
-      identityHealth: impulse.identityHealth,
-      hopIndex:       impulse.path.length - 1,
-      totalHops:      impulse.path.length
+      tickId: impulse.tickId,
+      layer: layerIdentity.id,
+      page: impulse.page.name,
+      urgency: impulse.urgency,
+      hopIndex: impulse.path.length - 1,
+      totalHops: impulse.path.length
     });
 
     return impulse;
   },
 
+
   // --------------------------------------------------------------------------
-  // SNAPSHOT — v7.7
-  // Returns a frozen, pathway-memory-friendly snapshot
+  // SNAPSHOT — v9.2
+  // Frozen, pathway-memory-friendly snapshot
   // --------------------------------------------------------------------------
   snapshot(impulse) {
     const snap = {
@@ -278,19 +305,22 @@ export const Impulse = {
       identityHealth: impulse.identityHealth,
       pathway: clone(impulse.pathway),
       hops:    impulse.path.length,
+      pulse:   clone(impulse.pulse),
       meta:    { ...IMPULSE_CONTEXT }
     };
 
     impulseLog("IMPULSE_SNAPSHOT", {
       tickId: snap.tickId,
-      hops:   snap.hops
+      hops:   snap.hops,
+      pulsePattern: snap.pulse.pattern
     });
 
     return snap;
   },
 
+
   // --------------------------------------------------------------------------
-  // MARK PATHWAY STABLE — v7.7
+  // MARK PATHWAY STABLE — v9.2
   // Called by NerveMap/PathwayMemory once a route is learned
   // --------------------------------------------------------------------------
   markPathwayStable(impulse, learnedRouteId) {
@@ -298,7 +328,7 @@ export const Impulse = {
     impulse.pathway.learnedRouteId = learnedRouteId || null;
 
     impulseLog("IMPULSE_PATHWAY_STABLE", {
-      tickId:        impulse.tickId,
+      tickId: impulse.tickId,
       learnedRouteId,
       hops: impulse.pathway.hops.length
     });
@@ -306,8 +336,9 @@ export const Impulse = {
     return impulse;
   },
 
+
   // --------------------------------------------------------------------------
-  // RETURN — v7.7
+  // RETURN — v9.2
   // Pure internal return to PulseBand + optional NerveMap ingestion
   // --------------------------------------------------------------------------
   returnToPulseBand(impulse) {
@@ -316,18 +347,17 @@ export const Impulse = {
     const snap = this.snapshot(impulse);
 
     impulseLog("IMPULSE_RETURN", {
-      tickId:         impulse.tickId,
-      hops:           impulse.path.length,
-      page:           impulse.page.name,
-      identityHealth: impulse.identityHealth
+      tickId: impulse.tickId,
+      hops: impulse.path.length,
+      page: impulse.page.name,
+      identityHealth: impulse.identityHealth,
+      pulsePattern: impulse.pulse.pattern
     });
 
-    // Local-only wiring: no network, no backend
     if (typeof window !== "undefined" && window.PulseBand?.receiveImpulseReturn) {
       window.PulseBand.receiveImpulseReturn(impulse, snap);
     }
 
-    // Optional: feed NerveMap / PathwayMemory if present (still local-only)
     if (typeof window !== "undefined" && window.NerveMap?.ingestImpulse) {
       window.NerveMap.ingestImpulse(snap);
     }

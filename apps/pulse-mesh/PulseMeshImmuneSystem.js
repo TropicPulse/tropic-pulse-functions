@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /apps/organs/immune/PulseMeshImmuneSystem.js
-// PULSE OS — v9.1
+// PULSE OS — v9.2
 // MESH IMMUNE SYSTEM COMMANDER — “THE IMMUNE COMMANDER”
 // LOCAL‑FIRST • OFFLINE‑CAPABLE • ZERO DRIFT • PURE LOGIC
 // ============================================================================
 //
-// ROLE (v9.1):
+// ROLE (v9.2):
 //   • Receives analysis from PulseImmunity (mesh + global drift).
 //   • Prioritizes issues (triage).
 //   • Dispatches to real healers (GPU, routing, backend).
@@ -27,7 +27,7 @@
 //   • Identity (self-healing) via declarative identity directives
 //   • Any future healers added to the registry
 //
-// v9.1: IdentityHealer removed — Identity is self-repairing.
+// v9.2: Identity is self-repairing — commander emits declarative directives.
 // ============================================================================
 
 
@@ -46,17 +46,58 @@ export function createPulseMeshImmuneSystem({
 }) {
 
   // ========================================================================
-  // HEALER REGISTRY (v9.1)
+  // IMMUNE COMMANDER META (v9.2)
+  // ========================================================================
+  const meta = {
+    layer: "PulseMeshImmuneSystem",
+    role: "IMMUNE_COMMANDER",
+    version: 9.2,
+    target: "full-mesh",
+    selfRepairable: true,
+    evo: {
+      dualMode: true,
+      localAware: true,
+      internetAware: true,
+
+      advantageCascadeAware: true,
+      pulseEfficiencyAware: true,
+      driftProof: true,
+      multiInstanceReady: true,
+
+      unifiedAdvantageField: true,
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      meshPressureAware: true,
+      auraPressureAware: true
+    }
+  };
+
+  // ========================================================================
+  // HEALER REGISTRY (v9.2)
   // ========================================================================
   const HEALER_REGISTRY = [
     {
       name: "GPUHealer",
-      match: /gpu|render|frame|canvas/i,
-      handler: (issue) => GPUHealer.repair(issue)
+      match: /gpu|render|frame|canvas|advisor|auto_opt/i,
+      handler: (issue) => ({
+        ok: true,
+        type: "gpu_repair_directive",
+        target: "PulseGPU",
+        action: "repair",
+        details: {
+          driftType: issue.driftType ?? "unspecified",
+          severity: issue.severity ?? "info",
+          note: issue.message ?? issue.note ?? null
+        },
+        result: GPUHealer.repair(issue),
+        issue
+      })
     },
     {
       name: "RouteDownResponder",
-      match: /route|network|down|offline|timeout/i,
+      match: /route|network|down|offline|timeout|stall/i,
       handler: (issue) => {
         if (OFFLINE_MODE) {
           return {
@@ -66,7 +107,19 @@ export function createPulseMeshImmuneSystem({
             issue
           };
         }
-        return RouteDownResponder(issue);
+        return {
+          ok: true,
+          type: "routing_repair_directive",
+          target: "PulseMesh",
+          action: "route_repair",
+          details: {
+            driftType: issue.driftType ?? "unspecified",
+            severity: issue.severity ?? "info",
+            note: issue.message ?? issue.note ?? null
+          },
+          result: RouteDownResponder(issue),
+          issue
+        };
       }
     },
     {
@@ -87,9 +140,9 @@ export function createPulseMeshImmuneSystem({
       })
     },
     {
-      // Mesh routing / spine / reflex / stall / missing node
+      // Mesh routing / spine / reflex / stall / missing node / factoring
       name: "MeshRoutingDirective",
-      match: /mesh|routing_stall|missing_node|reflex_drop|PulseMesh/i,
+      match: /mesh|routing|routing_stall|missing_node|reflex_drop|PulseMesh|factoring/i,
       handler: (issue) => ({
         ok: true,
         type: "mesh_repair_directive",
@@ -99,6 +152,7 @@ export function createPulseMeshImmuneSystem({
           meshNodeId: issue.meshNodeId ?? null,
           routeId: issue.routeId ?? null,
           driftType: issue.driftType ?? "unspecified",
+          factoringDepth: issue.factoringDepth ?? null,
           severity: issue.severity ?? "info",
           note: issue.message ?? issue.note ?? null
         },
@@ -109,12 +163,14 @@ export function createPulseMeshImmuneSystem({
 
 
   // ========================================================================
-  // IMMUNE COMMANDER — TOP OF IMMUNE SYSTEM (v9.1)
+  // IMMUNE COMMANDER — TOP OF IMMUNE SYSTEM (v9.2)
   // ========================================================================
   const PulseMeshImmuneSystem = {
 
+    meta,
+
     // ----------------------------------------------------------
-    // TRIAGE (v9.1)
+    // TRIAGE (v9.2)
     // ----------------------------------------------------------
     triage(analysis) {
       const { issues } = analysis;
@@ -123,17 +179,19 @@ export function createPulseMeshImmuneSystem({
         const sa = a.severity || 1;
         const sb = b.severity || 1;
 
+        // Higher severity first
         if (sb !== sa) return sb - sa;
 
+        const aMsg = a.message || "";
+        const bMsg = b.message || "";
+
         const aIsMesh =
-          /mesh|PulseMesh|routing_stall|missing_node|reflex_drop/i.test(
-            a.message || ""
-          ) || a.subsystem === "Mesh";
+          /mesh|PulseMesh|routing|routing_stall|missing_node|reflex_drop|factoring/i.test(aMsg) ||
+          a.subsystem === "Mesh";
 
         const bIsMesh =
-          /mesh|PulseMesh|routing_stall|missing_node|reflex_drop/i.test(
-            b.message || ""
-          ) || b.subsystem === "Mesh";
+          /mesh|PulseMesh|routing|routing_stall|missing_node|reflex_drop|factoring/i.test(bMsg) ||
+          b.subsystem === "Mesh";
 
         if (aIsMesh && !bIsMesh) return -1;
         if (!aIsMesh && bIsMesh) return 1;
@@ -143,7 +201,7 @@ export function createPulseMeshImmuneSystem({
     },
 
     // ----------------------------------------------------------
-    // DISPATCH (v9.1)
+    // DISPATCH (v9.2)
     // ----------------------------------------------------------
     async dispatch(issue) {
       const msg = issue.message || "";
@@ -162,7 +220,7 @@ export function createPulseMeshImmuneSystem({
     },
 
     // ----------------------------------------------------------
-    // COMMAND CYCLE (v9.1)
+    // COMMAND CYCLE (v9.2)
     // ----------------------------------------------------------
     async command(diagSnapshot) {
       const analysis = PulseImmunity.analyze(diagSnapshot);
@@ -179,6 +237,7 @@ export function createPulseMeshImmuneSystem({
       return {
         commander: "PulseMeshImmuneSystem",
         mode: OFFLINE_MODE ? "offline" : "online",
+        meta,
         analysis,
         orderedIssues,
         results

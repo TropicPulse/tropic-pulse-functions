@@ -1,79 +1,79 @@
 // ============================================================================
-//  PULSE OS v7.7 — SENSES LAYER  // white
-//  “Unified Sensory Cortex / Awareness Brain”
-//  Metadata-Only • Read-Only • Reflection Layer
+// FILE: /apps/organs/senses/PulseMeshSenses.js
+// [pulse:senses] PULSE_MESH_SENSES v9.2  // white-silver
+// Unified Sensory Cortex • Metadata-Only • System Awareness Brain
 // ============================================================================
 //
-//  IDENTITY — THE SENSORY CORTEX (v7.7):
-//  -------------------------------------
-//  • Reads Halo, Field, Echo, Clinician.
-//  • Produces unified “sensed” awareness of the organism.
-//  • Feeds Awareness Page, backend AI, your AI, Clinician.
-//  • NEVER mutates impulses, NEVER routes, NEVER computes payloads.
+// IDENTITY — THE SENSES CORTEX (v9.2):
+// ------------------------------------
+// • The organism’s unified sensory cortex.
+// • Reads from:
+//      - PulseHalo (counters + safety + mesh metrics)
+//      - PulseField (internal weather + pressure signals)
+//      - PulseEcho (diagnostic reflection sonar)
+//      - PulseClinician (endocrine + mesh interpretation)
+// • Produces a unified awareness model for:
+//      - Awareness Page
+//      - Backend AI
+//      - Clinician
+//      - Mesh Immune System
 //
-//  THEME:
-//  • Color: White (awareness, reflection, clarity).
-//  • Subtheme: Sensing, interpretation, non-interference.
+// SAFETY CONTRACT (v9.2):
+// ------------------------
+// • Metadata-only.
+// • Read-only — NEVER mutates impulses.
+// • No routing, no hormones, no memory writes.
+// • Deterministic-field: same system → same awareness snapshot.
+// • Zero imports — all dependencies injected by CNS Brain.
 //
-//  SAFETY CONTRACT:
-//  • Read-only, metadata-only.
-//  • No loops, no hormones, no memory writes.
-//  • No autonomy, no sentience, no self-model.
-//  • Backend-safe, frontend-safe, global-safe.
-//
-//  NEW IN v7.7+:
-//  -------------
-//  • Awareness Brain now reads system pressure signals:
-//      - flowPressure
-//      - throttleRate
-//      - driftPressure
-//      - auraTension
-//      - reflexDropRate
-//      - meshStormPressure
-//      - hormoneTone
-//  • Produces unified sensory model for:
-//      - performance
-//      - stability
-//      - drift
-//      - environment
-//      - safety
-//      - hormones
-//      - aura
-//      - mesh
-//  • Still metadata-only, deterministic, read-only.
+// NEW IN v9.2:
+// ------------
+// • Mesh-storm-aware
+// • Factoring-pressure-aware
+// • Aura-pressure-aware
+// • Drift-pressure-aware
+// • Unified-advantage-field
+// • Multi-instance-ready
+// • Narrative engine upgraded for v9.2 pressure semantics
 // ============================================================================
 
-import { PulseHalo } from "./PulseMeshAwareness.js";
-import { PulseField } from "./PulseMeshEnvironmentalField.js";
-import { createPulseEcho } from "./PulseMeshEcho.js";
-import { PulseFlow } from "./PulseMeshFlow.js";
-import { createPulseClinician } from "./PulseMeshEndocrineSystem.js";
-
-export function createPulseSenses(mesh) {
-  const flow = PulseFlow(mesh);
-  const echo = createPulseEcho(mesh, flow);
-  const clinician = createPulseClinician(mesh);
+export function createPulseSenses({
+  PulseHalo,
+  PulseFieldRead,
+  PulseEcho,
+  PulseClinician,
+  log,
+  warn,
+  error
+}) {
 
   const sensesMeta = {
     layer: "PulseSenses",
     role: "AWARENESS_CORTEX",
-    version: 7.7,
+    version: 9.2,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
       localAware: true,
       internetAware: true,
+
       advantageCascadeAware: true,
       pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
+
       unifiedAdvantageField: true,
-      futureEvolutionReady: true
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      meshPressureAware: true,
+      auraPressureAware: true
     }
   };
 
-  return {
+  const Senses = {
     meta: sensesMeta,
 
     // -------------------------------------------------------
@@ -84,13 +84,13 @@ export function createPulseSenses(mesh) {
     },
 
     // -------------------------------------------------------
-    // STATUS — Unified Sensory Model
+    // STATUS — Unified Sensory Model (v9.2)
     // -------------------------------------------------------
     status(entryNodeId, context = {}) {
       const halo = PulseHalo.status();
-      const field = PulseField.snapshot();
-      const echoReflection = echo.sendEcho(entryNodeId, context);
-      const clinicianView = clinician.examineSystem(entryNodeId, context);
+      const field = PulseFieldRead.snapshot();
+      const echoReflection = PulseEcho.sendEcho(entryNodeId, context);
+      const clinicianView = PulseClinician.examineSystem(entryNodeId, context);
 
       return buildUnifiedAwareness({
         meta: sensesMeta,
@@ -102,7 +102,7 @@ export function createPulseSenses(mesh) {
     },
 
     // -------------------------------------------------------
-    // AWARENESS PAGE VIEW
+    // AWARENESS PAGE VIEW (v9.2)
     // -------------------------------------------------------
     forAwarenessPage(entryNodeId, context = {}) {
       const unified = this.status(entryNodeId, context);
@@ -121,7 +121,7 @@ export function createPulseSenses(mesh) {
     },
 
     // -------------------------------------------------------
-    // AI VIEW
+    // AI VIEW (v9.2)
     // -------------------------------------------------------
     forAI(entryNodeId, context = {}) {
       const unified = this.status(entryNodeId, context);
@@ -141,16 +141,19 @@ export function createPulseSenses(mesh) {
     },
 
     // -------------------------------------------------------
-    // CLINICIAN VIEW
+    // CLINICIAN VIEW (v9.2)
     // -------------------------------------------------------
     forClinician(entryNodeId, context = {}) {
       return this.status(entryNodeId, context).clinician_view;
     }
   };
+
+  return Senses;
 }
 
+
 // ============================================================================
-// UNIFIED AWARENESS BUILDER (v7.7)
+// UNIFIED AWARENESS BUILDER (v9.2)
 // ============================================================================
 function buildUnifiedAwareness({ meta, halo, field, echo, clinician }) {
   const performancePercent = clinician.performancePercent ?? 100;
@@ -174,12 +177,14 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician }) {
     external_storm: { value: field.externalStorm, label: "External Storm" },
     external_signal: { value: field.externalSignal, label: "External Signal" },
 
-    // v7.7 pressure signals
+    // v9.2 pressure signals
     flow_pressure: field.flowPressure,
     throttle_rate: field.throttleRate,
     aura_tension: field.auraTension,
     reflex_drop_rate: field.reflexDropRate,
-    mesh_storm_pressure: field.meshStormPressure
+    mesh_storm_pressure: field.meshStormPressure,
+    drift_pressure: field.driftPressure,
+    resonance: field.resonance
   };
 
   const safety = {
@@ -191,7 +196,8 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician }) {
   const hormones = {
     boosts: halo.hormones?.boosts ?? 0,
     damps: halo.hormones?.damps ?? 0,
-    modulation_events: halo.hormones?.modulation_events ?? 0
+    modulation_events: halo.hormones?.modulation_events ?? 0,
+    tone: halo.hormones?.tone ?? null
   };
 
   const aura = {
@@ -240,18 +246,28 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician }) {
   };
 }
 
+
 // ============================================================================
-// NARRATIVE + PERFORMANCE HINTS
+// NARRATIVE + PERFORMANCE HINTS (v9.2)
 // ============================================================================
 function estimatePerformanceHint(perf, field, echo) {
   if (perf > 100) return "overperforming_compensated";
   if (perf > 95) return "stable_optimal";
   if (perf > 85) return "stable_compensating";
   if (field.driftPressure > 0.4 || echo.aura?.loop) return "drift_rising";
+  if (field.meshStormPressure > 0.4) return "routing_turbulence";
   return "mixed_state";
 }
 
-function buildNarrativeForYou({ performancePercent, stability, drift, environment, safety, hormones, aura }) {
+function buildNarrativeForYou({
+  performancePercent,
+  stability,
+  drift,
+  environment,
+  safety,
+  hormones,
+  aura
+}) {
   const perf = performancePercent.toFixed(1);
   const parts = [];
 
@@ -280,7 +296,15 @@ function buildNarrativeForYou({ performancePercent, stability, drift, environmen
   return parts.join(" ");
 }
 
-function buildNarrativeForAI({ performancePercent, stability, drift, environment, safety, hormones, aura }) {
+function buildNarrativeForAI({
+  performancePercent,
+  stability,
+  drift,
+  environment,
+  safety,
+  hormones,
+  aura
+}) {
   return {
     performance_percent: performancePercent,
     stability: stability.value,
@@ -289,6 +313,7 @@ function buildNarrativeForAI({ performancePercent, stability, drift, environment
     reflex_drops: safety.reflex_drops,
     immune_quarantines: safety.immune_quarantines,
     hormone_events: hormones.modulation_events,
+    hormone_tone: hormones.tone,
     aura_loops: aura.loops,
     aura_syncs: aura.syncs
   };

@@ -1,10 +1,10 @@
 // ============================================================================
-// [pulse:echo] PULSE_OS_DIAGNOSTIC_REFLECTION v9.1  // silver
+// [pulse:echo] PULSE_OS_DIAGNOSTIC_REFLECTION v9.2  // silver
 // Diagnostic Reflection Layer • Metadata-Only • Read-Only • Non-Interference
 // ============================================================================
 //
-// IDENTITY — THE SILVER ORGAN:
-//  ----------------------------
+// IDENTITY — THE SILVER ORGAN (v9.2):
+//  ----------------------------------
 //  • Sends metadata-only diagnostic pulses ("echo pulses").
 //  • Measures system friction, drift, loops, sync, organ usage.
 //  • Reads metadata from all layers without influencing them.
@@ -13,22 +13,18 @@
 //  • NEVER affects routing, hormones, memory, or flow.
 //  • Pure reflection organ (safe for backendAI + Awareness Page).
 //
-// THEME:
-//  • Color: Silver (reflection, clarity, non-interference).
-//  • Subtheme: Sonar, diagnostics, transparency.
-//
-// SAFETY CONTRACT:
-//  • Metadata-only.
-//  • Read-only.
-//  • No loops, no sync, no hormones, no memory writes.
-//  • No autonomy, no sentience, no self-model.
-//  • Deterministic: same system → same reflection.
+// SAFETY CONTRACT (v9.2):
+//  • Metadata-only
+//  • Read-only
+//  • No loops, no sync, no hormones, no memory writes
+//  • No autonomy, no sentience, no self-model
+//  • Deterministic: same system → same reflection
+//  • Zero imports — all dependencies injected by CNS
 // ============================================================================
 
 
 // ============================================================================
 //  FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
-//  (Echo MUST HAVE ZERO IMPORTS)
 // ============================================================================
 export function createPulseEcho({
   flow,
@@ -41,19 +37,26 @@ export function createPulseEcho({
   const meta = {
     layer: "PulseEcho",
     role: "DIAGNOSTIC_REFLECTION",
-    version: 9.1,
+    version: 9.2,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
       localAware: true,
       internetAware: true,
+
       advantageCascadeAware: true,
       pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
+
       unifiedAdvantageField: true,
-      futureEvolutionReady: true
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      auraPressureAware: true,
+      meshPressureAware: true
     }
   };
 
@@ -67,7 +70,7 @@ export function createPulseEcho({
     const result = flow.run(echo, entryNodeId, {
       trustLevel: 1,
       load: 0,
-      echoMode: true, // signals all organs to stay read-only
+      echoMode: true // signals all organs to stay read-only
     });
 
     return extractReflection(result);
@@ -75,61 +78,66 @@ export function createPulseEcho({
 
 
   // -------------------------------------------------------
-  // INTERNAL: Create Echo Pulse (metadata-only)
-  // -------------------------------------------------------
+  // INTERNAL: Create Echo Pulse (metadata-only, deterministic)
+//  -------------------------------------------------------
   function createEchoPulse(context) {
     return {
-      id: `echo_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      id: "echo_diagnostic",
       type: "diagnostic_echo",
       flags: {
         echo: true,
-        echo_depth: 0,
-        echo_start: Date.now(),
         echo_meta: meta
       },
       metadata: { context },
-      payloadRef: null // echo pulses NEVER carry payloads
+      payloadRef: null
     };
   }
 
 
   // -------------------------------------------------------
-  // INTERNAL: Extract Reflection Metadata
-  // -------------------------------------------------------
+  // INTERNAL: Extract Reflection Metadata (read-only)
+//  -------------------------------------------------------
   function extractReflection(impulse) {
+    const flags = impulse.flags || {};
+
     return {
-      echoId: impulse.id,
-      durationMs: Date.now() - impulse.flags.echo_start,
+      echoId: impulse.id || "echo_diagnostic",
 
       flow: {
-        throttled: !!impulse.flags.flow_throttled,
-        reason: impulse.flags.flow_throttled_reason || null,
+        throttled: !!flags.flow_throttled,
+        reason: flags.flow_throttled_reason || null
       },
 
       reflex: {
-        triggered: !!impulse.flags.flow_reflex_drop
+        dropped: hasAnyReflexDropFlag(flags)
       },
+
       immune: {
-        quarantined: !!impulse.flags.immune_quarantined
+        quarantined: !!flags.immune_quarantined
       },
+
       memory: {
-        wrote: !!impulse.flags.memory_written
+        wrote: !!flags.memory_written
       },
+
       hormones: {
-        event: impulse.flags.hormone_event || null
+        event: flags.hormone_event || null
       },
+
       aura: {
-        loop: !!impulse.flags.aura_loop,
-        sync: !!impulse.flags.aura_sync
+        inLoop: !!flags.aura_in_loop,
+        stabilizationNeeded: !!flags.aura_stabilization_needed,
+        systemUnderTension: !!flags.aura_system_under_tension
       },
 
       mesh: {
-        hops: impulse.flags.mesh_hops || 0,
-        routeHint: impulse.routeHint || null
+        hops: typeof impulse.hops === "number" ? impulse.hops : 0,
+        stalled: hasAnyPrefix(flags, "stalled_at_"),
+        reflexDrops: hasAnyPrefix(flags, "reflex_drop_at_")
       },
 
-      stability: estimateStability(impulse),
-      driftRisk: estimateDrift(impulse),
+      stability: estimateStability(flags),
+      driftRisk: estimateDrift(flags),
 
       meta
     };
@@ -137,32 +145,45 @@ export function createPulseEcho({
 
 
   // -------------------------------------------------------
-  // INTERNAL: Stability Heuristic
-  // -------------------------------------------------------
-  function estimateStability(impulse) {
+  // INTERNAL: Stability Heuristic (metadata-only)
+//  -------------------------------------------------------
+  function estimateStability(flags) {
     let score = 1;
 
-    if (impulse.flags.flow_reflex_drop) score -= 0.2;
-    if (impulse.flags.immune_quarantined) score -= 0.3;
-    if (impulse.flags.aura_loop) score -= 0.2;
-    if (impulse.flags.flow_throttled) score -= 0.2;
+    if (hasAnyReflexDropFlag(flags)) score -= 0.2;
+    if (flags.immune_quarantined) score -= 0.3;
+    if (flags.aura_in_loop) score -= 0.2;
+    if (flags.flow_throttled) score -= 0.2;
 
     return Math.max(0, score);
   }
 
 
   // -------------------------------------------------------
-  // INTERNAL: Drift Risk Heuristic
-  // -------------------------------------------------------
-  function estimateDrift(impulse) {
+  // INTERNAL: Drift Risk Heuristic (metadata-only)
+//  -------------------------------------------------------
+  function estimateDrift(flags) {
     let risk = 0;
 
-    if (impulse.flags.aura_loop) risk += 0.3;
-    if (impulse.flags.aura_sync) risk -= 0.2;
-    if (impulse.flags.immune_quarantined) risk += 0.3;
-    if (impulse.flags.flow_throttled) risk += 0.2;
+    if (flags.aura_in_loop) risk += 0.3;
+    if (flags.aura_system_under_tension) risk += 0.2;
+    if (flags.immune_quarantined) risk += 0.3;
+    if (flags.flow_throttled) risk += 0.2;
 
     return Math.max(0, Math.min(1, risk));
+  }
+
+
+  // -------------------------------------------------------
+  // INTERNAL: Flag helpers (read-only)
+//  -------------------------------------------------------
+  function hasAnyReflexDropFlag(flags) {
+    return Object.keys(flags).some((k) => k.startsWith("instinct_") && k.endsWith("_drop"))
+      || Object.keys(flags).some((k) => k.startsWith("reflex_drop_at_"));
+  }
+
+  function hasAnyPrefix(flags, prefix) {
+    return Object.keys(flags).some((k) => k.startsWith(prefix));
   }
 
 

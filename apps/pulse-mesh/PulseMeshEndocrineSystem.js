@@ -1,82 +1,76 @@
 // ============================================================================
 // FILE: /apps/organs/endocrine/PulseMeshEndocrineSystem.js
-// [pulse:mesh] PULSE_MESH_ENDOCRINE_SYSTEM v9.1  // white-gold
-// Endocrine Interpreter • System-Wide Monitor • Healing Coordinator
+// PULSE OS v9.2 — MESH ENDOCRINE SYSTEM  // white-gold
+// “Mesh Endocrine Interpreter / System Hormone Clinician”
 // ============================================================================
 //
-// IDENTITY — THE MESH ENDOCRINE SYSTEM:
-//  ------------------------------------
-//  • The endocrine-equivalent organ of PulseMesh.
-//  • Watches immune activity, flow pressure, drift, aura, hormones, routing stress.
-//  • Interprets system-wide signals into a coherent “body state”.
-//  • Coordinates healing by informing immune + repair systems what’s happening.
-//  • Produces human-readable, organism-style diagnostic reports.
-//
-// ROLE (v9.1):
-//  • Oversees immune system behavior (but does NOT fight).
-//  • Oversees healing patterns (but does NOT heal).
-//  • Oversees stress + pressure (but does NOT throttle).
-//  • Oversees hormones (but does NOT modulate).
-//  • Oversees flow (but does NOT route).
-//  • Pure interpretation + coordination layer.
+// IDENTITY — THE MESH ENDOCRINE SYSTEM (v9.2):
+// -------------------------------------------
+// • Reads Halo (counters), Field (pressure), Echo (diagnostic reflection).
+// • Interprets mesh health as endocrine / hormone-like systemic signals.
+// • Produces a structured “mesh endocrine report” for:
+//      - Awareness Page (UI diagnostics)
+//      - Backend AI (immune + analytics)
+//      - Mesh Immune System (healing insight)
+//      - Clinician / you (human-readable interpretation)
+// • NEVER mutates impulses, NEVER routes, NEVER computes payloads.
+// • Pure interpretation organ — white-gold, clinical, non-interference.
 //
 // THEME:
-//  • Color: White-Gold (endocrine clarity + systemic oversight).
-//  • Subtheme: Interpretation, coordination, whole-body state awareness.
+// • Color: White-Gold (clinical clarity + systemic influence).
+// • Subtheme: Interpretation, diagnosis, endocrine-style systemic insight.
 //
-// SAFETY CONTRACT:
-//  • Read-only.
-//  • Metadata-only.
-//  • No control, no autonomy, no mutation.
-//  • No routing, no healing, no immune action.
-//  • Deterministic: same metadata → same interpretation.
-//  • Drift-proof: zero side effects.
+// SAFETY CONTRACT (v9.2):
+// • Read-only, metadata-only.
+// • No loops, no hormones, no memory writes.
+// • No routing, no healing, no mutation, no payload access.
+// • No autonomy, no sentience, no self-model.
+// • Deterministic-field: same Halo/Field/Echo → same report.
+// • Unified-advantage-field: inherits all safe systemic advantages.
+// • Drift-proof, multi-instance-ready, factoring-aware.
 //
-// ADVANTAGE CASCADE (conceptual only):
-//  • Inherits ANY advantage from ANY mesh organ automatically.
-//  • Unified advantage field — all advantages ON unless unsafe.
-// ============================================================================
-//
-// ARCHITECTURE — v9.1 ZERO-IMPORT ORGAN:
-//  -------------------------------------
-//  • No imports — all dependencies are DI from Brain / Heart / LongTermMemory.
-//  • No file-level coupling to other organs.
-//  • Multi-instance ready, drift-proof, circular-import-proof.
+// ARCHITECTURE (v9.2):
+// • Zero imports — all dependencies injected by CNS Brain.
+// • Uses:
+//      - PulseHalo      → counters / safety / flow / mesh vitals
+//      - PulseFieldRead → environmental + internal field snapshot
+//      - PulseEcho      → diagnostic echo pulse (metadata-only)
+// • Pure endocrine interpreter — no routing, no mutation, no compute.
+// • Backend-safe, frontend-safe, global-safe.
 // ============================================================================
 
-// -----------------------------------------------------------
-// Endocrine Interpreter Factory (DI-based, zero-import)
-// -----------------------------------------------------------
-//
-// Expected deps:
-//  • mesh              — the mesh instance
-//  • PulseField        — environmental field organ (read API)
-//  • PulseHalo         — awareness/vitals organ (read API)
-//  • createPulseEcho   — factory for diagnostic echo organ
-//  • PulseFlow         — flow engine factory
-// -----------------------------------------------------------
 
 export function createPulseMeshEndocrineSystem({
-  mesh,
-  PulseField,
   PulseHalo,
-  createPulseEcho,
-  PulseFlow
+  PulseFieldRead,
+  PulseEcho,
+  log,
+  warn,
+  error
 }) {
-  const flow = PulseFlow(mesh);
-  const echo = createPulseEcho(mesh, flow);
-
   const meta = {
     layer: "PulseMeshEndocrineSystem",
     role: "MESH_ENDOCRINE_INTERPRETER",
-    version: 9.1,
+    version: 9.2,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
+      dualMode: true,
+      localAware: true,
+      internetAware: true,
+
       advantageCascadeAware: true,
       pulseEfficiencyAware: true,
       driftProof: true,
-      multiInstanceReady: true
+      multiInstanceReady: true,
+
+      unifiedAdvantageField: true,
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      auraPressureAware: true,
+      meshPressureAware: true
     }
   };
 
@@ -87,9 +81,12 @@ export function createPulseMeshEndocrineSystem({
     // [pulse:mesh] EXAMINE_MESH  // white-gold
     // -------------------------------------------------------
     examineMesh(entryNodeId, context = {}) {
-      const haloSnapshot = PulseHalo.snapshot();
-      const fieldSnapshot = PulseField.snapshot();
-      const echoReflection = echo.sendEcho(entryNodeId, context);
+      const haloSnapshot = PulseHalo.snapshot
+        ? PulseHalo.snapshot()
+        : PulseHalo.status();
+
+      const fieldSnapshot = PulseFieldRead.snapshot();
+      const echoReflection = PulseEcho.sendEcho(entryNodeId, context);
 
       return buildMeshEndocrineReport({
         halo: haloSnapshot,
@@ -101,10 +98,10 @@ export function createPulseMeshEndocrineSystem({
   };
 }
 
-// -----------------------------------------------------------
-// Mesh Endocrine Report Builder
-// -----------------------------------------------------------
 
+// ============================================================================
+// Mesh Endocrine Report Builder (v9.2)
+// ============================================================================
 function buildMeshEndocrineReport({ halo, field, echo, meta }) {
   const flowThrottles = halo.flow_throttles ?? 0;
   const flowThrottleRate = halo.flow?.throttle_rate ?? 0;
@@ -117,13 +114,13 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
     title: "Mesh Performance",
     summary: `Mesh performance estimated at ${performance.toFixed(1)}%.`,
     details: [
-      `Stability (blood pressure): ${(field.stability * 100).toFixed(0)}%`,
+      `Stability (blood pressure): ${pct(field.stability)}`,
       `Throughput (pulse flow): ${describeMeshThroughput(echo)}`,
-      `Resonance (rhythm coherence): ${(field.resonance * 100).toFixed(0)}%`,
-      `Friction (inflammation): ${(field.friction * 100).toFixed(0)}%`,
-      `Noise (sensory load): ${(field.noise * 100).toFixed(0)}%`,
+      `Resonance (rhythm coherence): ${pct(field.resonance)}`,
+      `Friction (inflammation): ${pct(field.friction)}`,
+      `Noise (sensory load): ${pct(field.noise)}`,
       `Flow Throttles (self‑protection events): ${flowThrottles}`,
-      `Throttle Rate: ${(flowThrottleRate * 100).toFixed(1)}%`
+      `Throttle Rate: ${pct(flowThrottleRate)}`
     ]
   });
 
@@ -132,11 +129,11 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
     title: "Stability & Drift",
     summary: describeMeshStability(field, echo, flowThrottleRate),
     details: [
-      `Stability: ${(field.stability * 100).toFixed(0)}%`,
-      `Drift Pressure: ${(field.driftPressure * 100).toFixed(0)}%`,
-      `Aura Loop: ${echo.aura.loop ? "ACTIVE" : "inactive"}`,
-      `Aura Sync: ${echo.aura.sync ? "ACTIVE" : "inactive"}`,
-      `Flow Guard Activity: ${(flowThrottleRate * 100).toFixed(1)}%`
+      `Stability: ${pct(field.stability)}`,
+      `Drift Pressure: ${pct(field.driftPressure)}`,
+      `Aura Loop: ${echo.aura?.inLoop ? "ACTIVE" : "inactive"}`,
+      `Aura Sync: ${echo.aura?.sync ? "ACTIVE" : "inactive"}`,
+      `Flow Guard Activity: ${pct(flowThrottleRate)}`
     ]
   });
 
@@ -145,9 +142,9 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
     title: "Immune & Hormones",
     summary: describeMeshImmuneHormones(echo),
     details: [
-      `Immune Quarantine: ${echo.immune.quarantined ? "YES" : "no"}`,
-      `Hormone Event: ${echo.hormones.event || "none"}`,
-      `Reflex Drop: ${echo.reflex.triggered ? "YES" : "no"}`
+      `Immune Quarantine: ${echo.immune?.quarantined ? "YES" : "no"}`,
+      `Hormone Event: ${echo.hormones?.event || "none"}`,
+      `Reflex Drop: ${echo.reflex?.dropped ? "YES" : "no"}`
     ]
   });
 
@@ -156,12 +153,12 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
     title: "Mesh Internal Environment",
     summary: describeMeshField(field),
     details: [
-      `Friction: ${(field.friction * 100).toFixed(0)}%`,
-      `Noise: ${(field.noise * 100).toFixed(0)}%`,
-      `Load Wave: ${(field.loadWave * 100).toFixed(0)}%`,
-      `External Heat: ${(field.externalHeat * 100).toFixed(0)}%`,
-      `External Storm: ${(field.externalStorm * 100).toFixed(0)}%`,
-      `External Signal: ${(field.externalSignal * 100).toFixed(0)}%`
+      `Friction: ${pct(field.friction)}`,
+      `Noise: ${pct(field.noise)}`,
+      `Load Wave: ${pct(field.loadWave)}`,
+      `External Heat: ${pct(field.externalHeat)}`,
+      `External Storm: ${pct(field.externalStorm)}`,
+      `External Signal: ${pct(field.externalSignal)}`
     ]
   });
 
@@ -172,7 +169,6 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
     details: [
       `Flow Throttled (this echo): ${echo.flow?.throttled ? "YES" : "no"}`,
       `Throttle Reason: ${echo.flow?.reason || "none"}`,
-      `Cortex Flow Anomaly: ${echo.flags?.cortex_flow_anomaly ? "YES" : "no"}`,
       `Organism Self‑Protection: ${flowThrottleRate > 0 ? "ACTIVE" : "quiet"}`
     ]
   });
@@ -190,25 +186,35 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
   };
 }
 
-// -----------------------------------------------------------
-// Interpretation Logic (mesh‑aware)
-// -----------------------------------------------------------
 
+// ============================================================================
+// Interpretation Logic (v9.2)
+// ============================================================================
 function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   let base = 100;
-  base += field.resonance * 5;
-  base -= field.friction * 5;
-  base -= field.noise * 5;
-  base -= field.driftPressure * 5;
+
+  const stability = field.stability ?? 1;
+  const resonance = field.resonance ?? 0;
+  const friction = field.friction ?? 0;
+  const noise = field.noise ?? 0;
+  const drift = field.driftPressure ?? 0;
+
+  base += resonance * 5;
+  base += (stability - 0.5) * 10;
+  base -= friction * 5;
+  base -= noise * 5;
+  base -= drift * 5;
   base -= flowThrottleRate * 20;
-  if (echo.aura.sync) base += 2;
-  if (echo.aura.loop) base -= 3;
+
+  if (echo.aura?.sync) base += 2;
+  if (echo.aura?.inLoop) base -= 3;
   if (echo.flow?.throttled) base -= 5;
+
   return Math.max(0, base);
 }
 
 function describeMeshThroughput(echo) {
-  const hops = echo.mesh.hops || 0;
+  const hops = echo.mesh?.hops || 0;
   if (hops === 0) return "minimal routing";
   if (hops < 5) return "light routing";
   if (hops < 15) return "moderate routing";
@@ -216,19 +222,22 @@ function describeMeshThroughput(echo) {
 }
 
 function describeMeshStability(field, echo, flowThrottleRate = 0) {
+  const stability = field.stability ?? 1;
+  const drift = field.driftPressure ?? 0;
+
   if (flowThrottleRate > 0.2)
     return "Flow Guard is engaging frequently — mesh is protecting itself from overload.";
 
-  if (field.stability > 0.85 && field.driftPressure < 0.2)
+  if (stability > 0.85 && drift < 0.2)
     return "Mesh is stable with low Drift Pressure.";
 
-  if (field.stability > 0.6 && field.driftPressure < 0.4)
+  if (stability > 0.6 && drift < 0.4)
     return "Mesh is generally stable with mild Drift Pressure.";
 
-  if (field.driftPressure >= 0.4 && !echo.aura.sync)
+  if (drift >= 0.4 && !echo.aura?.sync)
     return "Drift Pressure elevated and Aura Sync inactive — instability risk.";
 
-  if (echo.aura.loop)
+  if (echo.aura?.inLoop)
     return "Aura Loop detected — mesh may be cycling on patterns.";
 
   return "Mixed stability; mesh is compensating.";
@@ -237,29 +246,36 @@ function describeMeshStability(field, echo, flowThrottleRate = 0) {
 function describeMeshImmuneHormones(echo) {
   const parts = [];
 
-  if (echo.immune.quarantined)
+  if (echo.immune?.quarantined)
     parts.push("Immune Quarantine ACTIVE — unsafe impulses isolated.");
   else parts.push("Immune Quarantine quiet.");
 
-  if (echo.hormones.event === "boost")
+  if (echo.hormones?.event === "boost")
     parts.push("Hormone Boost (adrenaline) detected.");
-  else if (echo.hormones.event === "damp")
+  else if (echo.hormones?.event === "damp")
     parts.push("Hormone Damp (cortisol) detected.");
   else parts.push("No hormone modulation.");
 
-  if (echo.reflex.triggered) parts.push("Reflex Drop occurred.");
+  if (echo.reflex?.dropped) parts.push("Reflex Drop occurred.");
 
   return parts.join(" ");
 }
 
 function describeMeshField(field) {
   const bits = [];
-  if (field.friction > 0.5) bits.push("Friction elevated.");
-  if (field.noise > 0.5) bits.push("Noise high.");
-  if (field.loadWave > 0.5) bits.push("Load Wave strong.");
-  if (field.externalHeat > 0.5) bits.push("External Heat contributing.");
-  if (field.externalStorm > 0.5)
+  const friction = field.friction ?? 0;
+  const noise = field.noise ?? 0;
+  const loadWave = field.loadWave ?? 0;
+  const externalHeat = field.externalHeat ?? 0;
+  const externalStorm = field.externalStorm ?? 0;
+
+  if (friction > 0.5) bits.push("Friction elevated.");
+  if (noise > 0.5) bits.push("Noise high.");
+  if (loadWave > 0.5) bits.push("Load Wave strong.");
+  if (externalHeat > 0.5) bits.push("External Heat contributing.");
+  if (externalStorm > 0.5)
     bits.push("External Storm impacting stability.");
+
   if (bits.length === 0) return "Internal environment calm.";
   return bits.join(" ");
 }
@@ -296,4 +312,13 @@ function summarizeMeshForYou(performance, field, echo, flowThrottleRate = 0) {
     return `Mesh at ${perf}%. Organism is actively braking — recent patterns were survival‑level stress.`;
 
   return `Mesh at ${perf}%. Stability and Drift require monitoring — Immune, Aura, and Flow Guard will reveal compensation vs degradation.`;
+}
+
+
+// ============================================================================
+// Helpers
+// ============================================================================
+function pct(v) {
+  if (typeof v !== "number" || Number.isNaN(v)) return "0%";
+  return `${(v * 100).toFixed(0)}%`;
 }

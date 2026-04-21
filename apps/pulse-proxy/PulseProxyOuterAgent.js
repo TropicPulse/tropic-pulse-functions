@@ -1,12 +1,12 @@
 // ============================================================================
-//  PULSE OS v7.7 — PROXY OUTER AGENT
+//  PULSE OS v9.1 — PROXY OUTER AGENT
 //  “THE OUTER AGENT / EXTERNAL NEGOTIATOR”
 //  External Interface • Job Courier • Device Ambassador
-//  PURE NEGOTIATION. NO COMPUTE. NO MARKETPLACE LOGIC. NO STATE.
+//  PURE NEGOTIATION. NO COMPUTE. NO MARKETPLACE LOGIC. NO STATE MUTATION.
 // ============================================================================
 //
-//  ORGAN DESCRIPTION — WHAT THIS IS (v7.7):
-//  ----------------------------------------
+//  WHAT THIS ORGAN IS (v9.1):
+//  --------------------------
 //  PulseProxyOuterAgent is the **ambassador organ** of PulseOS. It is the
 //  outermost interface between the OS and the external compute marketplace.
 //
@@ -25,22 +25,19 @@
 //    • syncs credits/tokens
 //    • emits diagnostics (optional)
 //
-//  ROLE IN THE DIGITAL BODY (v7.7):
+//  ROLE IN THE DIGITAL BODY (v9.1):
 //  --------------------------------
 //    • Ambassador → introduces device to the outside world
 //    • Courier → carries jobs in and results out
 //    • Exchange Organ → syncs credits/tokens
 //    • Boundary Organ → sits between proxy and external world
 //
-//  SAFETY CONTRACT (v7.7):
+//  SAFETY CONTRACT (v9.1):
 //  ------------------------
-//    • No PulseBand imports
-//    • No PulseNet imports
-//    • No PulseBrain imports
-//    • No global state
-//    • No compute logic
-//    • No marketplace logic
-//    • No mutation outside this instance
+//    • No imports (wiring comes from OSKernel / Brain)
+//    • No PulseBand / PulseNet / PulseBrain access
+//    • No global state mutation outside this instance
+//    • No compute logic, no marketplace logic
 //    • Deterministic, pure courier behavior
 //
 //  LAYER:
@@ -50,148 +47,224 @@
 
 
 // ============================================================================
-//  LAYER CONSTANTS + DIAGNOSTICS (v7.7)
+//  GLOBAL WIRING — provided by OSKernel / Brain
+// ============================================================================
+const log   = (global && global.log)   || console.log;
+const error = (global && global.error) || console.error;
+
+// Prefer global fetch (Node 18+ / runtime), fallback to globalThis.fetch
+const fetchFn =
+  (typeof global !== "undefined" && global.fetch) ||
+  (typeof globalThis !== "undefined" && globalThis.fetch) ||
+  null;
+
+
+// ============================================================================
+//  LAYER CONSTANTS + DIAGNOSTICS (v9.1)
 // ============================================================================
 const AGENT_LAYER_ID   = "PROXY-OUTER-AGENT";
 const AGENT_LAYER_NAME = "THE OUTER AGENT";
 const AGENT_LAYER_ROLE = "External Interface + Job Courier";
 
-const AGENT_DIAGNOSTICS_ENABLED =
-  typeof window !== "undefined" &&
-  (window.PULSE_AGENT_DIAGNOSTICS === true ||
-   window.PULSE_DIAGNOSTICS === true);
+export const PROXY_OUTER_AGENT_CONTEXT = {
+  layer: "PulseProxyOuterAgent",
+  role: "OUTER_AGENT",
+  version: "9.1",
+  purpose: "External interface + job courier + credit sync",
+  evo: {
+    driftProof: true,
+    deterministic: true,
+    boundaryOrgan: true,
+    marketplaceBoundary: true,
+    multiInstanceReady: true,
+    futureEvolutionReady: true
+  }
+};
 
-const agentLog = (stage, details = {}) => {
+const AGENT_DIAGNOSTICS_ENABLED =
+  (typeof global !== "undefined" && global.PULSE_AGENT_DIAGNOSTICS === true) ||
+  (typeof global !== "undefined" && global.PULSE_DIAGNOSTICS === true) ||
+  false;
+
+function agentLog(stage, details = {}) {
   if (!AGENT_DIAGNOSTICS_ENABLED) return;
 
-  log(
-    JSON.stringify({
-      pulseLayer: AGENT_LAYER_ID,
-      pulseName: AGENT_LAYER_NAME,
-      pulseRole: AGENT_LAYER_ROLE,
-      stage,
-      ...details
-    })
-  );
-};
+  try {
+    log(
+      "outer-agent",
+      JSON.stringify({
+        pulseLayer: AGENT_LAYER_ID,
+        pulseName: AGENT_LAYER_NAME,
+        pulseRole: AGENT_LAYER_ROLE,
+        stage,
+        ...details,
+        meta: { ...PROXY_OUTER_AGENT_CONTEXT }
+      })
+    );
+  } catch {}
+}
 
 agentLog("AGENT_INIT");
 
 
 // ============================================================================
-//  OUTER AGENT CLASS — External Negotiator (v7.7)
+//  OUTER AGENT CLASS — External Negotiator (v9.1)
 // ============================================================================
 export class PulseProxyOuterAgent {
   constructor({ deviceId, gpuInfo, baseUrl }) {
     this.deviceId = deviceId;
-    this.gpuInfo  = gpuInfo;
+    this.gpuInfo  = gpuInfo || null;
 
     // External endpoint (proxy boundary)
-    this.baseUrl = baseUrl || "https://www.tropicpulse.bz/proxy";
+    this.baseUrl =
+      baseUrl ||
+      (typeof global !== "undefined" && global.PULSE_PROXY_BASE_URL) ||
+      "https://www.tropicpulse.bz/proxy";
 
     agentLog("AGENT_CONSTRUCTED", {
-      deviceId,
-      gpuInfo,
+      deviceId: this.deviceId,
+      gpuInfo: this.gpuInfo,
       baseUrl: this.baseUrl
     });
+
+    if (!fetchFn) {
+      agentLog("FETCH_MISSING", {
+        warning: "No fetch available in runtime — outer agent is inert."
+      });
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // INTERNAL FETCH WRAPPER — boundary‑safe
+  // --------------------------------------------------------------------------
+  async #doFetch(url, options = {}, stage) {
+    if (!fetchFn) {
+      const msg = "fetch not available in this runtime";
+      agentLog(stage + "_NO_FETCH", { url, error: msg });
+      return { error: true, message: msg };
+    }
+
+    try {
+      const res = await fetchFn(url, options);
+      let json = null;
+
+      try {
+        json = await res.json();
+      } catch {
+        json = { ok: res.ok, status: res.status };
+      }
+
+      return json;
+    } catch (err) {
+      const msg = String(err?.message || err);
+      error("PulseProxyOuterAgent.fetch failed:", msg);
+      agentLog(stage + "_FETCH_ERROR", { url, error: msg });
+      return { error: true, message: msg };
+    }
   }
 
   // --------------------------------------------------------------------------
   // REGISTER DEVICE — Introduce identity outward
   // --------------------------------------------------------------------------
   async register() {
-    agentLog("REGISTER_START", { deviceId: this.deviceId });
+    const stage = "REGISTER";
+    agentLog(stage + "_START", { deviceId: this.deviceId });
 
-    try {
-      const res = await fetch(`${this.baseUrl}/registerDevice`, {
+    const url = `${this.baseUrl}/registerDevice`;
+    const body = {
+      deviceId: this.deviceId,
+      gpuInfo: this.gpuInfo
+    };
+
+    const json = await this.#doFetch(
+      url,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          deviceId: this.deviceId,
-          gpuInfo: this.gpuInfo
-        })
-      });
+        body: JSON.stringify(body)
+      },
+      stage
+    );
 
-      const json = await res.json();
-      agentLog("REGISTER_SUCCESS", json);
-      return json;
+    agentLog(
+      json?.error ? stage + "_FAIL" : stage + "_SUCCESS",
+      { deviceId: this.deviceId, response: json }
+    );
 
-    } catch (err) {
-      error("PulseProxyOuterAgent.register() failed:", err);
-      agentLog("REGISTER_FAIL", { error: String(err) });
-      return { error: true, message: err.message };
-    }
+    return json;
   }
 
   // --------------------------------------------------------------------------
   // REQUEST JOB — Ask the outside world for work
   // --------------------------------------------------------------------------
   async requestJob() {
-    agentLog("REQUEST_JOB_START", { deviceId: this.deviceId });
+    const stage = "REQUEST_JOB";
+    agentLog(stage + "_START", { deviceId: this.deviceId });
 
-    try {
-      const res = await fetch(
-        `${this.baseUrl}/getJob?deviceId=${this.deviceId}`
-      );
+    const url = `${this.baseUrl}/getJob?deviceId=${encodeURIComponent(
+      this.deviceId
+    )}`;
 
-      const json = await res.json();
-      agentLog("REQUEST_JOB_SUCCESS", json);
-      return json;
+    const json = await this.#doFetch(url, {}, stage);
 
-    } catch (err) {
-      error("PulseProxyOuterAgent.requestJob() failed:", err);
-      agentLog("REQUEST_JOB_FAIL", { error: String(err) });
-      return { error: true, message: err.message };
-    }
+    agentLog(
+      json?.error ? stage + "_FAIL" : stage + "_SUCCESS",
+      { deviceId: this.deviceId, response: json }
+    );
+
+    return json;
   }
 
   // --------------------------------------------------------------------------
   // SUBMIT RESULT — Hand completed work back outward
   // --------------------------------------------------------------------------
   async submitResult(jobId, result) {
-    agentLog("SUBMIT_RESULT_START", { jobId });
+    const stage = "SUBMIT_RESULT";
+    agentLog(stage + "_START", { deviceId: this.deviceId, jobId });
 
-    try {
-      const res = await fetch(`${this.baseUrl}/submitJob`, {
+    const url = `${this.baseUrl}/submitJob`;
+    const body = {
+      deviceId: this.deviceId,
+      jobId,
+      result
+    };
+
+    const json = await this.#doFetch(
+      url,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          deviceId: this.deviceId,
-          jobId,
-          result
-        })
-      });
+        body: JSON.stringify(body)
+      },
+      stage
+    );
 
-      const json = await res.json();
-      agentLog("SUBMIT_RESULT_SUCCESS", json);
-      return json;
+    agentLog(
+      json?.error ? stage + "_FAIL" : stage + "_SUCCESS",
+      { deviceId: this.deviceId, jobId, response: json }
+    );
 
-    } catch (err) {
-      error("PulseProxyOuterAgent.submitResult() failed:", err);
-      agentLog("SUBMIT_RESULT_FAIL", { error: String(err) });
-      return { error: true, message: err.message };
-    }
+    return json;
   }
 
   // --------------------------------------------------------------------------
   // SYNC CREDITS — Exchange tokens with the outside world
   // --------------------------------------------------------------------------
   async syncCredits() {
-    agentLog("SYNC_CREDITS_START", { deviceId: this.deviceId });
+    const stage = "SYNC_CREDITS";
+    agentLog(stage + "_START", { deviceId: this.deviceId });
 
-    try {
-      const res = await fetch(
-        `${this.baseUrl}/syncCredits?deviceId=${this.deviceId}`
-      );
+    const url = `${this.baseUrl}/syncCredits?deviceId=${encodeURIComponent(
+      this.deviceId
+    )}`;
 
-      const json = await res.json();
-      agentLog("SYNC_CREDITS_SUCCESS", json);
-      return json;
+    const json = await this.#doFetch(url, {}, stage);
 
-    } catch (err) {
-      error("PulseProxyOuterAgent.syncCredits() failed:", err);
-      agentLog("SYNC_CREDITS_FAIL", { error: String(err) });
-      return { error: true, message: err.message };
-    }
+    agentLog(
+      json?.error ? stage + "_FAIL" : stage + "_SUCCESS",
+      { deviceId: this.deviceId, response: json }
+    );
+
+    return json;
   }
 }

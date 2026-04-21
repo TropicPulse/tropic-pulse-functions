@@ -1,63 +1,24 @@
 // ============================================================================
-//  PULSE OS v7.7 — PROXY HEALER
+//  PULSE OS v9.2 — PROXY HEALER
 //  “WHITE BLOOD CELL LAYER / IMMUNE PATROL”
 //  Deterministic • Drift‑Proof • Proxy‑Only Healing Layer
 //  PURE DETECTION. NO AI. NO COMPUTE. NO MUTATION.
-// ============================================================================
-//
-//  ORGAN DESCRIPTION — WHAT THIS IS (v7.7):
-//  ----------------------------------------
-//  PulseProxyHealer is the **white blood cell layer** of the proxy subsystem.
-//  It performs *immune patrol* — scanning for irritation, drift, pressure,
-//  misconfiguration, and out‑of‑bounds behavior.
-//
-//  It does NOT:
-//    • heal directly
-//    • mutate state
-//    • compute
-//    • orchestrate
-//    • reason
-//    • call backend logic
-//
-//  It ONLY:
-//    • detects irritation
-//    • emits immune logs
-//    • emits FUNCTION_LOG hints
-//    • records proxy pressure
-//    • records instance anomalies
-//
-//  ROLE IN THE DIGITAL BODY (v7.7):
-//  --------------------------------
-//    • White Blood Cell Layer → proxy‑level immune patrol
-//    • Pressure Monitor → CPU/memory/event‑loop irritation
-//    • Instance Sanity Checker → detects out‑of‑bounds allocations
-//    • Immune Hint Emitter → FUNCTION_LOGS for Thymus + GlobalHealer
-//    • Drift Sentinel → records proxy‑level drift signatures
-//
-//  SAFETY CONTRACT (v7.7):
-//  ------------------------
-//    • No eval()
-//    • No dynamic imports
-//    • No arbitrary code execution
-//    • No compute
-//    • No mutation of proxy state
-//    • No backend orchestration
-//    • Deterministic immune patrol only
-//
 // ============================================================================
 
 const db    = global.db;
 const log   = global.log   || console.log;
 const error = global.error || console.error;
 
+
 // ============================================================================
-//  ORGAN CONTEXT — v7.7
+//  ORGAN CONTEXT — v9.2
 // ============================================================================
 const WBC_CONTEXT = {
   layer: "PulseProxyHealer",
   role: "WHITE_BLOOD_CELL_LAYER",
-  version: "7.7",
+  version: "9.2",
   lineage: PulseLineage.optimizer,   // immune lineage
+
   evo: {
     dualMode: true,
     localAware: true,
@@ -67,22 +28,28 @@ const WBC_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+    deterministicImmuneScan: true,
+    zeroDriftPressure: true
   }
 };
 
-// ============================================================================
-//  IMMUNE CONFIG — v7.7
-// ============================================================================
-export const PROXY_HEALTH_URL  = process.env.PULSE_PROXY_HEALTH_URL  || "http://localhost:8080/pulse-proxy/health";
-export const PROXY_METRICS_URL = process.env.PULSE_PROXY_METRICS_URL || "http://localhost:8080/pulse-proxy/metrics";
 
-export const HEALTH_INTERVAL_MS       = 30_000;  // immune heartbeat
-export const SCORES_SCAN_INTERVAL_MS  = 60_000;  // immune tissue scan
+// ============================================================================
+//  IMMUNE CONFIG — v9.2
+// ============================================================================
+export const PROXY_HEALTH_URL  =
+  process.env.PULSE_PROXY_HEALTH_URL  || "http://localhost:8080/pulse-proxy/health";
 
-export const CPU_PRESSURE_WARN       = 80;
-export const MEM_PRESSURE_WARN       = 80;
-export const EVENT_LOOP_LAG_WARN     = 100;
+export const PROXY_METRICS_URL =
+  process.env.PULSE_PROXY_METRICS_URL || "http://localhost:8080/pulse-proxy/metrics";
+
+export const HEALTH_INTERVAL_MS      = 30_000;  // immune heartbeat
+export const SCORES_SCAN_INTERVAL_MS = 60_000;  // immune tissue scan
+
+export const CPU_PRESSURE_WARN     = 80;
+export const MEM_PRESSURE_WARN     = 80;
+export const EVENT_LOOP_LAG_WARN   = 100;
 
 export const MIN_INSTANCES = 1;
 export const MAX_INSTANCES = 32;
@@ -90,8 +57,9 @@ export const MAX_INSTANCES = 32;
 export const FUNCTION_LOGS_COLLECTION     = "FUNCTION_LOGS";
 export const PROXY_HEALER_LOGS_COLLECTION = "ProxyHealerLogs";
 
+
 // ============================================================================
-//  IMMUNE LOGGING HELPERS — v7.7
+//  IMMUNE LOGGING HELPERS — v9.2
 // ============================================================================
 async function writeFunctionLog(entry) {
   try {
@@ -118,8 +86,9 @@ async function writeHealerLog(entry) {
   }
 }
 
+
 // ============================================================================
-//  HEALTH + METRICS SCAN — v7.7
+//  HEALTH + METRICS SCAN — v9.2
 //  Immune patrol of proxy vitals (pressure, lag, irritation).
 // ============================================================================
 async function checkProxyHealthAndMetrics() {
@@ -176,8 +145,9 @@ async function checkProxyHealthAndMetrics() {
   }
 }
 
+
 // ============================================================================
-//  USER SCORES SCAN — v7.7
+//  USER SCORES SCAN — v9.2
 //  Immune patrol of user scoring tissue (instance sanity).
 // ============================================================================
 async function scanUserScoresForInstanceHints() {
@@ -257,8 +227,9 @@ async function scanUserScoresForInstanceHints() {
   log("wbc", "scores_scan_complete");
 }
 
+
 // ============================================================================
-//  PUBLIC: startPulseProxyHealer() — v7.7
+//  PUBLIC: startPulseProxyHealer() — v9.2
 //  Activates immune patrol loops (health + scoring).
 // ============================================================================
 export default function startPulseProxyHealer() {
@@ -276,5 +247,5 @@ export default function startPulseProxyHealer() {
     );
   }, SCORES_SCAN_INTERVAL_MS);
 
-  log("wbc", "immune_patrol_active_v7_7");
+  log("wbc", "immune_patrol_active_v9_2");
 }

@@ -1,57 +1,39 @@
 // ============================================================================
-//  PULSE OS v7.7 — ADRENAL SYSTEM
+//  PULSE OS v9.1 — ADRENAL SYSTEM
 //  PulseInstanceOrchestrator — Fight‑or‑Flight Scaling Layer
 //  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
+//  Backend‑Only Organ (Proxy Spine)
 // ============================================================================
 //
-//  ORGAN DESCRIPTION — WHAT THIS IS (v7.7):
-//  ----------------------------------------
-//  The Adrenal System is the **fight‑or‑flight organ** of PulseOS. It reacts
-//  reflexively to stress signals (UserScores) and adjusts per‑user worker
-//  instances (“cells”) accordingly.
+//  WHAT THIS ORGAN IS (v9.1):
+//  --------------------------
+//  • A backend reflex organ that scales worker “cells” per user.
+//  • Reads UserScores → computes deterministic instance counts.
+//  • Launches or reabsorbs workers.
+//  • Logs snapshots for admin dashboards.
 //
-//  It does NOT:
-//    • compute jobs
-//    • run marketplace logic
-//    • run user logic
-//    • mutate global state
-//    • perform reasoning or orchestration
-//
-//  It ONLY:
-//    • reads UserScores
-//    • computes deterministic instance counts
-//    • launches or reabsorbs workers
-//    • logs snapshots for admin dashboards
-//
-//  ROLE IN THE DIGITAL BODY (v7.7):
-//  --------------------------------
-//    • Fight‑or‑Flight Reflex → scale up under stress
-//    • Recovery Reflex → scale down when stress drops
-//    • Device‑Aware Scaling → respects device tier limits
-//    • Earn‑Mode Reflex → boosts instances when earning
-//    • Test‑Earn Override → max instances for test mode
-//    • Immune‑Safe Logging → snapshots only, no mutation
-//
-//  SAFETY CONTRACT (v7.7):
+//  WHAT THIS ORGAN IS NOT:
 //  ------------------------
-//    • No eval / Function()
-//    • No dynamic imports
-//    • No marketplace logic
-//    • No compute logic
-//    • No user logic
-//    • No mutation outside worker registry
-//    • Deterministic scaling only
-//    • Drift‑proof instance counts
+//  • Not a Brain organ (no IQ, no reasoning).
+//  • Not a Cortex organ (no decision‑making).
+//  • Not a PulseSend organ (but PulseSend‑aware).
+//  • Not a Mesh/Earn/GPU organ.
+//  • Not allowed in frontend.
 //
-//  BACKEND‑ONLY ORGAN
-//    • Lives under /pulse-proxy
-//    • Never imported by frontend
-//    • Uses OSKernel logger + identity lineage
+//  SAFETY CONTRACT (v9.1):
+//  ------------------------
+//  • Imports allowed (backend‑only).
+//  • No eval / Function().
+//  • No dynamic imports.
+//  • No mutation outside worker registry.
+//  • Deterministic scaling only.
+//  • Drift‑proof instance counts.
+//  • Immune‑safe logging.
 // ============================================================================
 
 
 // ============================================================================
-//  OSKernel imports (correct + safe)
+//  OSKernel imports (backend‑safe)
 // ============================================================================
 import { logger } from "../OSKernel/PulseLogger.js";
 import { PulseLineage } from "../OSKernel/PulseIdentity.js";
@@ -62,13 +44,15 @@ const db = getFirestore();
 
 
 // ============================================================================
-//  ORGAN CONTEXT — v7.7
+//  PULSE ROLE — v9.1 Identity
 // ============================================================================
-const ADRENAL_CONTEXT = {
-  layer: "PulseInstanceOrchestrator",
-  role: "ADRENAL_SYSTEM",
-  version: "7.7",
-  lineage: PulseLineage.optimizer,   // immune/optimizer lineage
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseProxy",
+  layer: "AdrenalSystem",
+  version: "9.1",
+  identity: "PulseInstanceOrchestrator",
+
   evo: {
     dualMode: true,
     localAware: true,
@@ -78,13 +62,26 @@ const ADRENAL_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
+    pulseSendAware: true,     // ⭐ can integrate with PulseSend later
     futureEvolutionReady: true
   }
 };
 
 
 // ============================================================================
-//  CONFIG — Physiological Limits (v7.7)
+//  ORGAN CONTEXT — v9.1
+// ============================================================================
+const ADRENAL_CONTEXT = {
+  layer: PulseRole.layer,
+  role: "ADRENAL_SYSTEM",
+  version: PulseRole.version,
+  lineage: PulseLineage.optimizer,
+  evo: PulseRole.evo
+};
+
+
+// ============================================================================
+//  CONFIG — Physiological Limits (v9.1)
 // ============================================================================
 export const NORMAL_MAX     = 4;
 export const UPGRADED_MAX   = 8;
@@ -120,7 +117,7 @@ function getDeviceMax(deviceTier, testEarnActive) {
 
 
 // ============================================================================
-//  COMPUTE FINAL INSTANCE COUNT — Deterministic v7.7
+//  COMPUTE FINAL INSTANCE COUNT — Deterministic v9.1
 // ============================================================================
 function computeFinalInstances(base, deviceTier, earnMode, testEarnActive) {
   let final = base;
@@ -138,7 +135,7 @@ function computeFinalInstances(base, deviceTier, earnMode, testEarnActive) {
 
 
 // ============================================================================
-//  LOG USER SNAPSHOT — v7.7
+//  LOG USER SNAPSHOT — v9.1
 // ============================================================================
 async function logUserInstanceSnapshot(userId, snapshot) {
   if (!ENABLE_INSTANCE_LOGGING) return;
@@ -186,7 +183,7 @@ function killWorker(worker) {
 
 
 // ============================================================================
-//  MAIN ORCHESTRATOR LOOP — v7.7
+//  MAIN ORCHESTRATOR LOOP — v9.1
 // ============================================================================
 export async function runInstanceOrchestrator() {
   logger.log("adrenal", "tick_start", ADRENAL_CONTEXT);

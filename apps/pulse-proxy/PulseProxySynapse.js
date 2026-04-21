@@ -30,13 +30,18 @@
 //   • Tiny, bounded sync payload
 //   • Fail-open on all browser APIs
 // ============================================================================
+// ============================================================================
+//  PULSE NET — SYNAPSE v9.2+
+//  Neural Signal Router • Tiny Connectivity Organ • Drift‑Proof
+// ============================================================================
+
 const db    = global.db;
 const log   = global.log   || console.log;
 const error = global.error || console.error;
 
 
 // ============================================================================
-// ⭐ OS‑v7 CONTEXT METADATA — Synapse Identity
+// ⭐ OS‑v9.2 CONTEXT METADATA — Synapse Identity
 // ============================================================================
 const PULSENET_CONTEXT = {
   layer: "PulseNet",
@@ -44,8 +49,9 @@ const PULSENET_CONTEXT = {
   purpose: "Neural signal routing + tiny offline-first connectivity organ",
   context: "Processes nervous-system signals + performs tiny sync pulses",
   target: "full-os",
-  version: "7.7",
+  version: "9.2",
   selfRepairable: true,
+
   evo: {
     advantageCascadeAware: true,
     pulseEfficiencyAware: true,
@@ -59,15 +65,17 @@ const PULSENET_CONTEXT = {
     dualModeEvolution: true,
     organismClusterBoost: 1.0,
     cognitiveComputeLink: true,
-    unifiedAdvantageField: true
+    unifiedAdvantageField: true,
+    synapticIntegrity: true,
+    deterministicImpulseFlow: true
   }
 };
 
 
 // ============================================================================
-// LAYER CONSTANTS + DIAGNOSTICS
+// LAYER CONSTANTS + DIAGNOSTICS — v9.2
 // ============================================================================
-const PULSE_LAYER_ID = "SYNAPSE-LAYER";
+const PULSE_LAYER_ID   = "SYNAPSE-LAYER";
 const PULSE_LAYER_NAME = "THE SYNAPSE";
 const PULSE_LAYER_ROLE = "Neural Signal Routing Layer";
 
@@ -91,7 +99,7 @@ const pulseLog = (stage, details = {}) => {
       })
     );
   } catch {
-    // fail-open
+    // diagnostics must never break synapse
   }
 };
 
@@ -99,7 +107,7 @@ pulseLog("SYNAPSE_INIT", {});
 
 
 // ============================================================================
-// CORE PURE HELPERS — v7.7
+// CORE PURE HELPERS — v9.2 (deterministic, drift‑proof)
 // ============================================================================
 function normalizeSignal(rawValue, opts = {}) {
   const { min = 0, max = 100, clamp = true } = opts;
@@ -198,7 +206,7 @@ function buildPulseNetSnapshot(rawSignal, previousSignal, meta = {}) {
   const update = buildPulseUpdate({ rawSignal, previousSignal, meta });
 
   return {
-    version: "7.7",
+    version: "9.2",
     layerId: PULSE_LAYER_ID,
     layerName: PULSE_LAYER_NAME,
     layerRole: PULSE_LAYER_ROLE,
@@ -218,7 +226,7 @@ function buildPulseNetSnapshot(rawSignal, previousSignal, meta = {}) {
 
 
 // ============================================================================
-// PULSE-ONCE CONNECTIVITY ORGAN — v7.7
+// PULSE‑ONCE CONNECTIVITY ORGAN — v9.2
 // ============================================================================
 const PulseNetState = {
   lastPulseTs: null,
@@ -244,7 +252,7 @@ async function multiGatewayReachout() {
     pulseLog("PULSE_REACHOUT_SATELLITE_ERR", { error: String(e) });
   }
 
-  // WiFi placeholders
+  // WiFi placeholder
   pulseLog("PULSE_REACHOUT_WIFI_PLACEHOLDER", {
     note: "WiFi scanning/joining requires native/OS integration."
   });
@@ -333,13 +341,13 @@ async function pulseOnce(deviceId) {
     try {
       if (typeof localStorage !== "undefined") {
         if (payload.identity) {
-          localStorage.setItem("tp_identity_v7", JSON.stringify(payload.identity));
+          localStorage.setItem("tp_identity_v9", JSON.stringify(payload.identity));
         }
         if (payload.config) {
-          localStorage.setItem("tp_earn_config_v7", JSON.stringify(payload.config));
+          localStorage.setItem("tp_earn_config_v9", JSON.stringify(payload.config));
         }
         if (payload.jobs) {
-          localStorage.setItem("tp_jobs_seed_v7", JSON.stringify(payload.jobs));
+          localStorage.setItem("tp_jobs_seed_v9", JSON.stringify(payload.jobs));
         }
       }
     } catch (storageErr) {
@@ -373,32 +381,26 @@ function getPulseNetState() {
 
 
 // ============================================================================
-// EXPORTED SYNAPSE + PULSE-ONCE API — v7.7
+// EXPORTED SYNAPSE + PULSE‑ONCE API — v9.2
 // ============================================================================
 export const PulseNet = {
-  // Identity
   PULSE_LAYER_ID,
   PULSE_LAYER_NAME,
   PULSE_LAYER_ROLE,
 
-  // Diagnostics
   PULSE_DIAGNOSTICS_ENABLED,
   pulseLog,
 
-  // Core math / classification
   normalizeSignal,
   computeSlope,
   classifyRouteHealth,
 
-  // Main routing primitives
   buildPulseUpdate,
   processPulseSignal,
   buildPulseNetSnapshot,
 
-  // Pulse-once connectivity
   pulseOnce,
   getPulseNetState,
 
-  // Meta
   meta: { ...PULSENET_CONTEXT }
 };

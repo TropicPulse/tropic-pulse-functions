@@ -1,38 +1,38 @@
 // ============================================================================
-//  PULSE OS v7.7 — USER SCORING (HYPOTHALAMUS)
-//  “Homeostasis / Stability Regulation Layer”
-//  Reads vitals → writes stable scores → keeps the organism balanced.
-//  PURE SCORING. NO AI. NO MEMORY. NO SCHEDULERS. NO NETWORK.
+//  PULSE OS v9.1 — HYPOTHALAMUS
+//  PulseUserScoring — Homeostasis Regulation Organ
+//  Backend‑Only • Deterministic • Drift‑Proof • No IQ
 // ============================================================================
 //
-//  WHAT THIS ORGAN DOES (simple terms):
-//  ------------------------------------
-//  • Reads vitals from UserMetrics (heartbeats, flow, latency, mesh activity)
-//  • Computes simple health scores (trust, mesh, phase, hub)
-//  • Computes safe instance suggestions (capacity, not scaling)
-//  • Writes stable results to UserScores
-//  • Never heals, never scales, never commands
+//  WHAT THIS ORGAN IS (v9.1):
+//  --------------------------
+//  • The Hypothalamus regulates homeostasis for the organism.
+//  • Reads UserMetrics → computes trustScore, meshScore, phase, hubFlag.
+//  • Allocates instance capacity (suggested worker count).
+//  • Writes results to UserScores.
+//  • Logs scoring snapshots for immune‑safe telemetry.
 //
-//  ROLE IN THE DIGITAL BODY (v7.7):
-//  --------------------------------
-//    • Hypothalamus → keeps the system in balance
-//    • Homeostasis → converts raw vitals into stable signals
-//    • Reflex Input → feeds Adrenal System + Proxy Healer
-//
-//  SAFETY CONTRACT (v7.7):
+//  WHAT THIS ORGAN IS NOT:
 //  ------------------------
-//    • No imports
-//    • No schedulers
-//    • No HTTP
-//    • No PulseBand / PulseNet
-//    • No global mutation except layer state
-//    • Deterministic formulas only
+//  • Not a Brain organ (no IQ, no reasoning).
+//  • Not a Cortex organ (no decision‑making).
+//  • Not a Mesh/Earn/GPU organ.
+//  • Not allowed in frontend.
+//  • Not allowed to mutate global state except layer health.
 //
+//  SAFETY CONTRACT (v9.1):
+//  ------------------------
+//  • Backend‑only (global.db, global.admin).
+//  • No imports except globals.
+//  • Deterministic scoring.
+//  • Drift‑proof formulas.
+//  • No dynamic behavior.
+//  • No routing, no compute, no AI.
 // ============================================================================
 
 
 // ============================================================================
-// GLOBAL WIRING — provided by OSKernel (the “brain”)
+// GLOBAL WIRING — provided by OSKernel (backend environment)
 // ============================================================================
 const db    = global.db;
 const log   = global.log   || console.log;
@@ -40,18 +40,43 @@ const error = global.error || console.error;
 
 
 // ============================================================================
-// LAYER CONSTANTS + DIAGNOSTICS
+// LAYER IDENTITY — v9.1
 // ============================================================================
-const LAYER_ID   = "HYPOTHALAMUS-LAYER";
-const LAYER_NAME = "PulseUserScoring";
-const LAYER_ROLE = "HOMEOSTASIS_REGULATION";
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseProxy",
+  layer: "Hypothalamus",
+  version: "9.1",
+  identity: "PulseUserScoring",
 
+  evo: {
+    driftProof: true,
+    deterministic: true,
+    homeostasisRegulation: true,
+    backendOnly: true,
+    multiInstanceReady: true,
+    pulseSendAware: true,
+    futureEvolutionReady: true
+  }
+};
+
+const HYPOTHALAMUS_CONTEXT = {
+  layer: PulseRole.layer,
+  role: "HYPOTHALAMUS",
+  version: PulseRole.version,
+  evo: PulseRole.evo
+};
+
+
+// ============================================================================
+// LAYER STATE (backend health)
+// ============================================================================
 global.PULSE_LAYER_STATE = global.PULSE_LAYER_STATE || {};
 global.PULSE_LAYER_STATE[4] = {
   name: "Hypothalamus",
   ok: true,
-  role: LAYER_ROLE,
-  version: "7.7"
+  role: HYPOTHALAMUS_CONTEXT.role,
+  version: HYPOTHALAMUS_CONTEXT.version
 };
 
 if (!db) {
@@ -60,7 +85,7 @@ if (!db) {
 
 
 // ============================================================================
-// CONFIG — Instance Formula Limits
+// CONFIG — Instance Formula Limits (unchanged, but v9.1 aligned)
 // ============================================================================
 export const NORMAL_MAX    = 4;
 export const UPGRADED_MAX  = 8;
@@ -76,31 +101,7 @@ export const SCORING_LOG_COLLECTION = "UserScoringLogs";
 
 
 // ============================================================================
-// ORGAN CONTEXT — v7.7
-// ============================================================================
-const HYPOTHALAMUS_CONTEXT = {
-  layer: "PulseUserScoring",
-  role: "HYPOTHALAMUS",
-  version: "7.7",
-  evo: {
-    dualMode: true,
-    localAware: true,
-    internetAware: true,
-    advantageCascadeAware: true,
-    pulseEfficiencyAware: true,
-    driftProof: true,
-    multiInstanceReady: true,
-    unifiedAdvantageField: true,
-    futureEvolutionReady: true
-  }
-};
-
-log("hypothalamus", "Hypothalamus v7.7 online.");
-log("hypothalamus", "Scoring logging:", ENABLE_SCORING_LOGGING);
-
-
-// ============================================================================
-// TRUST SCORE — “Overall health index”
+// TRUST SCORE — “Overall health index” (v9.1 deterministic)
 // ============================================================================
 function calculateTrustScore(m) {
   if (!m) return 0;
@@ -127,7 +128,7 @@ function calculateTrustScore(m) {
 
 
 // ============================================================================
-// MESH SCORE — “Mesh health index”
+// MESH SCORE — “Mesh health index” (v9.1 deterministic)
 // ============================================================================
 function calculateMeshScore(m) {
   if (!m) return 0;
@@ -152,7 +153,7 @@ function calculateMeshScore(m) {
 
 
 // ============================================================================
-// PHASE — “Functional fitness tier”
+// PHASE — “Functional fitness tier” (v9.1 deterministic)
 // ============================================================================
 function calculatePhase(trustScore) {
   const t = Number(trustScore || 0);
@@ -169,7 +170,7 @@ function calculatePhase(trustScore) {
 
 
 // ============================================================================
-// HUB DETECTION — “High‑flow organ”
+// HUB DETECTION — “High‑flow organ” (v9.1 deterministic)
 // ============================================================================
 function isHub(m) {
   if (!m) return false;
@@ -195,7 +196,7 @@ function isHub(m) {
 
 
 // ============================================================================
-// INSTANCE FORMULA — “Capacity suggestion”
+// INSTANCE FORMULA — “Capacity suggestion” (v9.1 deterministic)
 // ============================================================================
 function allocateInstances(
   phase,
@@ -233,7 +234,7 @@ function allocateInstances(
 
 
 // ============================================================================
-// SNAPSHOT LOGGING — “Scoring telemetry snapshot”
+// SNAPSHOT LOGGING — “Scoring telemetry snapshot” (v9.1)
 // ============================================================================
 async function logScoringSnapshot(userId, snapshot) {
   if (!ENABLE_SCORING_LOGGING || !db) return;
@@ -254,8 +255,7 @@ async function logScoringSnapshot(userId, snapshot) {
 
 
 // ============================================================================
-// MAIN PASS — runUserScoring()
-// “Homeostasis scoring pass”
+// MAIN PASS — runUserScoring() (v9.1)
 // ============================================================================
 export async function runUserScoring() {
   log("hypothalamus", "Running homeostasis scoring pass…");

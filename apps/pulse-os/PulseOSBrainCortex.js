@@ -1,11 +1,11 @@
 // ============================================================================
 //  FILE: /apps/pulse-os/PulseOSBrainCortex.js
-//  PULSE OS BRAIN v9.0 — CORTEX ORGAN
+//  PULSE OS BRAIN v9.2 — CORTEX ORGAN
 //  High‑Level Cognition • Shell Orchestration • Nervous System Supervisor
-//  PURE FRONTEND INTELLIGENCE. NO BACKEND. NO NETWORK CALLS.
+//  PURE FRONTEND INTELLIGENCE. NO IMPORTS. NO BACKEND. NO NETWORK CALLS.
 // ============================================================================
 //
-//  IDENTITY — PULSE BRAIN (CORTEX) v9.0:
+//  IDENTITY — PULSE BRAIN (CORTEX) v9.2:
 //  -------------------------------------
 //  • The conscious layer of PulseOS (cortex).
 //  • Interprets environment + identity into OS‑level understanding.
@@ -14,32 +14,7 @@
 //  • Purely local: no backend, no TPProxy, no network dependency.
 //  • Single source of truth for “what the OS thinks is happening”.
 //
-//  ROLE IN THE DIGITAL BODY (v9.0):
-//  --------------------------------
-//  • Cortex → High‑level interpretation of route + identity.
-//  • Shell Orchestrator → Decides NO_SHELL / ANON_SHELL / AUTH_SHELL.
-//  • Nervous System Supervisor → Tells PulseBand whether it may exist.
-//  • Identity Gate Collaborator → Works with Identity Organ (inner BBB).
-//  • Kernel Consumer → Waits for PulseOSKernel to be ready, then thinks.
-//  • Offline‑First Cognition → Works with or without network.
-//
-//  WHAT THIS FILE IS (v9.0):
-//  --------------------------
-//  • The PulseOS “brain” (cortex) for the frontend layer.
-//  • The place where shell + identity + environment are understood.
-//  • The coordinator between BBB, Kernel, and the rest of the OS.
-//  • A pure logic organ: no DOM, no backend, no side‑effects beyond state.
-//
-//  WHAT THIS FILE IS NOT (v9.0):
-//  ------------------------------
-//  • NOT a backend module.
-//  • NOT a UI renderer.
-//  • NOT a network client.
-//  • NOT a healing engine.
-//  • NOT a place for dynamic eval.
-//  • NOT responsible for GPU or engine boot (that’s the Kernel).
-//
-//  SAFETY CONTRACT (v9.0):
+//  SAFETY CONTRACT (v9.2):
 //  ------------------------
 //  • No backend calls.
 //  • No TPProxy usage.
@@ -48,20 +23,28 @@
 //  • Pure, deterministic state transitions only.
 //  • Local‑only cognition based on route + identity.
 // ============================================================================
-// ============================================================================
-//  FILE: /apps/pulse-os/PulseOSBrainCortex.js
-//  PULSE OS BRAIN v9.1 — CORTEX ORGAN
-//  High‑Level Cognition • Shell Orchestration • Nervous System Supervisor
-//  PURE FRONTEND INTELLIGENCE. NO IMPORTS. NO BACKEND. NO NETWORK CALLS.
-// ============================================================================
 
-// ⭐ PulseRole — so the organism can recognize this cortex organ
+// ⭐ PulseRole — organism identity for CNS attachment
 export const PulseRole = {
   type: "Brain",
   subsystem: "OS",
   layer: "Cortex",
-  version: "9.1",
-  identity: "PulseOSBrainCortex"
+  version: "9.2",
+  identity: "PulseOSBrainCortex",
+
+  evo: {
+    deterministicNeuron: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    advantageCascadeAware: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+
+    // Conceptual compatibility (no logic impact)
+    routingContract: "PulseSend-v9.2",
+    osOrganContract: "PulseOS-v9.2",
+    earnCompatibility: "PulseEarn-v9.2"
+  }
 };
 
 // ============================================================================
@@ -72,19 +55,22 @@ export function createPulseBrainCortex({
   determineShellState,
   guardPulseBand,
   PulseOSKernel,
-  getLocalIdentity,   // optional, may be null/undefined
-  log
+  getLocalIdentity,   // optional
+  log                 // optional
 }) {
   const BrainState = {
     bootTs: null,
     ready: false,
     routeName: null,
     hasIdentity: false,
-    shellState: SHELL_STATES.ANON_SHELL,
+    shellState: SHELL_STATES?.ANON_SHELL,
     allowPulseBand: true,
     allowIdentity: false
   };
 
+  // ----------------------------------------------------------
+  // Identity resolution (local-only, deterministic)
+  // ----------------------------------------------------------
   function computeIdentityFlag(explicitHasIdentity) {
     if (typeof explicitHasIdentity === "boolean") {
       return explicitHasIdentity;
@@ -100,6 +86,9 @@ export function createPulseBrainCortex({
     return false;
   }
 
+  // ----------------------------------------------------------
+  // Core cognition: interpret route + identity → shell + permissions
+  // ----------------------------------------------------------
   function updateBrainFromContext({ routeName, hasIdentity }) {
     const route = routeName || "";
     const identityFlag = computeIdentityFlag(hasIdentity);
@@ -121,6 +110,9 @@ export function createPulseBrainCortex({
     BrainState.allowIdentity = allowIdentity;
   }
 
+  // ----------------------------------------------------------
+  // BOOT — Cortex comes online after Kernel readiness
+  // ----------------------------------------------------------
   async function PulseBrainBoot(initialCtx = {}) {
     if (!BrainState.bootTs) {
       BrainState.bootTs = Date.now();
@@ -136,10 +128,13 @@ export function createPulseBrainCortex({
     });
 
     BrainState.ready = true;
-    log && log("[Cortex] Boot complete", { state: BrainState });
+    log && log("[Cortex v9.2] Boot complete", { state: BrainState });
     return BrainState;
   }
 
+  // ----------------------------------------------------------
+  // UPDATE — Route or identity changed
+  // ----------------------------------------------------------
   function PulseBrainUpdateContext(ctx = {}) {
     updateBrainFromContext({
       routeName: ctx.routeName ?? BrainState.routeName,
@@ -148,6 +143,9 @@ export function createPulseBrainCortex({
     return BrainState;
   }
 
+  // ----------------------------------------------------------
+  // PUBLIC API
+  // ----------------------------------------------------------
   return {
     boot: PulseBrainBoot,
     updateContext: PulseBrainUpdateContext,

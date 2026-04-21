@@ -1,56 +1,53 @@
 // ============================================================================
-//  PULSE OS v7.7 — THE BLOOD–BRAIN BARRIER (BBB)
+//  PULSE OS v9.1 — BLOOD–BRAIN BARRIER (BBB)
 //  Identity Gate • Trust Filter • Core Security Organ
-//  PURE VERIFICATION. NO HEALING. NO MUTATION. NO DRIFT.
+//  PURE VERIFICATION. ZERO IMPORTS. ZERO DRIFT.
 //  CENTRALIZED IDENTITY FOR ALL SUBSYSTEMS.
 // ============================================================================
 //
-//  THIS FILE IS THE SOURCE OF TRUTH FOR:
+//  THIS FILE DEFINES THE SOURCE OF TRUTH FOR:
 //
 //   • Subsystem versions
-//   • Subsystem roles (metaphors)
-//   • Subsystem colors (console identity)
+//   • Subsystem roles (organ metaphors)
 //   • Subsystem lineage
+//   • Subsystem colors (console identity)
 //   • Identity loader (BBB)
-//   • Offline-safe identity fallback
+//   • Offline‑safe identity fallback
 //
-//  ALL OTHER FILES MUST IMPORT FROM HERE.
-//  NO OTHER FILE DEFINES VERSION / ROLE / COLOR / METAPHOR.
+//  NO OTHER FILE DEFINES VERSION / ROLE / LINEAGE.
+//  NO IMPORTS ALLOWED. NO DEPENDENCIES. PURE ORGANISM.
 // ============================================================================
 
-// ============================================================================
-// ⭐ INTERNAL LOGGER SHIM — OSKernel‑local, no external imports
-// ============================================================================
-function safeLog(...args) {
-  try { console.log(...args); } catch {}
-}
-function safeWarn(...args) {
-  try { console.warn(...args); } catch {}
-}
-function safeError(...args) {
-  try { console.error(...args); } catch {}
-}
 
 // ============================================================================
-// ⭐ VERSION MAP — The Genome of PulseOS (v7.7)
+// ⭐ INTERNAL LOGGER SHIM — Safe, zero‑import
+// ============================================================================
+function safeLog(...args)  { try { console.log(...args); } catch {} }
+function safeWarn(...args) { try { console.warn(...args); } catch {} }
+function safeError(...args){ try { console.error(...args); } catch {} }
+
+
+// ============================================================================
+// ⭐ VERSION MAP — The Genome of PulseOS (v9.1)
 // ============================================================================
 export const PulseVersion = {
-  identity: "7.7",
-  brain: "7.7",
-  gpu: "7.7",
-  orchestrator: "7.7",
-  engine: "7.7",
-  optimizer: "7.7",
-  synapse: "7.7",
-  band: "7.7",
-  router: "7.7",
-  marketplaces: "7.7",
-  telemetry: "7.7",
-  limbic: "7.7"
+  identity: "9.1",
+  brain: "9.1",
+  gpu: "9.1",
+  orchestrator: "9.1",
+  engine: "9.1",
+  optimizer: "9.1",
+  synapse: "9.1",
+  band: "9.1",
+  router: "9.1",
+  marketplaces: "9.1",
+  telemetry: "9.1",
+  limbic: "9.1"
 };
 
+
 // ============================================================================
-// ⭐ ROLE MAP — Organ Metaphors (v7.7)
+// ⭐ ROLE MAP — Organ Metaphors (v9.1)
 // ============================================================================
 export const PulseRoles = {
   identity: "BLOOD–BRAIN BARRIER (BBB)",
@@ -67,8 +64,9 @@ export const PulseRoles = {
   limbic: "LIMBIC SHADOW"
 };
 
+
 // ============================================================================
-// ⭐ LINEAGE MAP — Evolutionary Identity (v7.7)
+// ⭐ LINEAGE MAP — Evolutionary Identity (v9.1)
 // ============================================================================
 export const PulseLineage = {
   identity:       "bbb-core",
@@ -85,8 +83,9 @@ export const PulseLineage = {
   limbic:         "shadow-core"
 };
 
+
 // ============================================================================
-// ⭐ IDENTITY LOADER — BBB Verification Engine (v7.7)
+// ⭐ IDENTITY LOADER — BBB Verification Engine (v9.1)
 //  LOCAL-FIRST. REMOTE OPTIONAL. ZERO DEPENDENCY.
 // ============================================================================
 export async function identity() {
@@ -94,9 +93,9 @@ export async function identity() {
 
   try {
     // ------------------------------------------------------------
-    // 1. LOCAL-FIRST IDENTITY (v7.7)
+    // 1. LOCAL-FIRST IDENTITY (v9.1)
     // ------------------------------------------------------------
-    const raw = localStorage.getItem("tp_identity_v7");
+    const raw = localStorage.getItem("tp_identity_v9");
     const localIdentity = raw ? JSON.parse(raw) : null;
 
     if (localIdentity) {
@@ -110,7 +109,7 @@ export async function identity() {
           lineage: PulseLineage.identity,
           meta: {
             layer: "PulseIdentity",
-            version: "7.7",
+            version: "9.1",
             mode: "local"
           }
         };
@@ -120,12 +119,12 @@ export async function identity() {
     }
 
     // ------------------------------------------------------------
-    // 2. REMOTE VERIFICATION OPTIONAL (v7.7)
+    // 2. REMOTE VERIFICATION OPTIONAL (v9.1)
     // ------------------------------------------------------------
     safeLog("[BBB] Offline mode — remote verification skipped");
 
     // ------------------------------------------------------------
-    // 3. OFFLINE SAFE FALLBACK (v7.7)
+    // 3. OFFLINE SAFE FALLBACK (v9.1)
     // ------------------------------------------------------------
     const offlineIdentity = {
       uid: null,
@@ -136,7 +135,7 @@ export async function identity() {
       lineage: PulseLineage.identity,
       meta: {
         layer: "PulseIdentity",
-        version: "7.7",
+        version: "9.1",
         mode: "offline-fallback"
       }
     };
@@ -146,7 +145,7 @@ export async function identity() {
 
   } catch (err) {
     // ------------------------------------------------------------
-    // 4. HARD FAILURE (v7.7)
+    // 4. HARD FAILURE (v9.1)
     // ------------------------------------------------------------
     safeError("[BBB] Identity load failed", err);
 
@@ -159,7 +158,7 @@ export async function identity() {
       lineage: PulseLineage.identity,
       meta: {
         layer: "PulseIdentity",
-        version: "7.7",
+        version: "9.1",
         mode: "crash-fallback"
       }
     };

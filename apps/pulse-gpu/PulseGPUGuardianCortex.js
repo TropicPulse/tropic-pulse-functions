@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: /apps/organs/gpu/PulseGPUGuardianCortex.js
-// [pulse:gpu] PULSE_GPU_GUARDIAN_CORTEX v9.1  // blue-gold
+// [pulse:gpu] PULSE_GPU_GUARDIAN_CORTEX v9.2  // blue-gold
 // GPU Permission Cortex • Deterministic Policy Engine • Zero Imports
 // ============================================================================
 //
@@ -11,8 +11,9 @@
 //  • Pure logic: deterministic, stateless, zero-entropy, zero randomness.
 //  • Reads advisor severity + user preferences + plan type.
 //  • Produces a final decision object (mode + reason + plan).
+//  • PulseSend‑2.0‑ready: decisions can be routed by the compute router.
 //
-// ROLE (v9.1):
+// ROLE (v9.2):
 //  • Permission arbiter for GPU healing + optimization.
 //  • Safety cortex for GPU actions.
 //  • Policy cortex for auto-apply vs confirmation.
@@ -36,6 +37,7 @@
 //  • Inherits ANY advantage from ANY GPU organ automatically.
 //  • Zero-entropy decision surface.
 //  • Multi-instance ready.
+//  • PulseSend contract: routingContract: "PulseSend-v2"
 // ============================================================================
 
 // ============================================================================
@@ -48,7 +50,7 @@ function buildDecision({ mode, reason, plan }) {
     plan: plan || null,
     meta: {
       layer: "PulseGPUGuardianCortex",
-      version: 9.1,
+      version: 9.2,
       target: "full-gpu",
 
       // Evolutionary metadata (no logic impact)
@@ -65,7 +67,16 @@ function buildDecision({ mode, reason, plan }) {
       instanceBehavior: "predictable",
       decisionSurface: "severity × preference × plan",
       driftResistance: "high",
-      mutationRisk: "none"
+      mutationRisk: "none",
+
+      // v9.2 unified advantage + PulseSend‑2.0 identity
+      unifiedAdvantageField: true,
+      pulseSend2Ready: true,
+
+      // PulseSend / Earn contracts (conceptual only)
+      routingContract: "PulseSend-v2",
+      gpuOrganContract: "PulseGPU-v9.2",
+      earnCompatibility: "PulseEarn-v9"
     }
   };
 }
@@ -95,7 +106,7 @@ function getHighestSeverity(adviceList = []) {
 }
 
 // ============================================================================
-//  PulseGPUGuardianCortex v9.1 — GPU Permission Cortex
+//  PulseGPUGuardianCortex v9.2 — GPU Permission Cortex
 // ============================================================================
 class PulseGPUGuardianCortex {
   constructor(userPreferences, instanceId) {

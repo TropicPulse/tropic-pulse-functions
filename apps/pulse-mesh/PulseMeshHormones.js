@@ -1,191 +1,179 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_HORMONE_LAYER v9.1  // pink
+// [pulse:mesh] COMMUNITY_HORMONE_LAYER v9.2  // pink
 // Global Modulation Layer • Metadata-Only • System-Wide Influence
 // ============================================================================
 //
-// NEW IN v9.1:
-//  • Hormones receive system pressure via CNS Brain injection.
-//  • Zero imports — pure metadata-only organ.
-//  • Adaptive modulation based on:
-//      - flowPressure
-//      - throttleRate
-//      - driftPressure
-//      - auraTension
-//      - reflexDropRate
-//      - meshStormPressure
-//  • Hormones generate adaptive modulation:
-//      - boost when system is calm
-//      - dampen when system is overheated
-//      - urgency when system is under threat
-//      - cooling when recursion/pressure rises
-//      - stability when drift increases
+// IDENTITY — HORMONES (v9.2):
+// ---------------------------
+// • Global modulation field (metadata-only).
+// • NEVER mutates payloads.
+// • NEVER mutates score or energy.
+// • NEVER computes.
+// • Provides tags that other organs MAY interpret.
+// • Pure influence field, not a compute surface.
+//
+// SAFETY CONTRACT (v9.2):
+// • No payload access.
+// • No score/energy mutation.
+// • No routing override.
+// • No autonomy.
+// • Deterministic-field, drift-proof.
+// • Unified-advantage-field, multi-instance-ready.
+// • Factoring-aware, mesh-pressure-aware, aura-pressure-aware.
 // ============================================================================
 
-
-// ============================================================================
-//  FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
-//  (Hormones MUST HAVE ZERO IMPORTS)
-// ============================================================================
 export function createPulseMeshHormones({ log, warn, error }) {
 
   // -----------------------------------------------------------
-  // Hormone State (global, metadata-only)
+  // Hormone State (metadata-only)
   // -----------------------------------------------------------
   const HormoneState = {
-    boost: 0.0,
-    dampen: 0.0,
-    urgency: 0.0,
-    cooling: 0.0,
-    stability: 0.0,
-    loadSignal: 0.0,
+    // modulation fields (metadata only)
+    boostTag: false,
+    dampTag: false,
+    urgencyTag: false,
+    coolingTag: false,
+    stabilityTag: false,
 
-    // v9.1: system pressure inputs (injected)
+    // v9.2 pressure inputs (injected by CNS Brain)
     flowPressure: 0.0,
     throttleRate: 0.0,
     driftPressure: 0.0,
     auraTension: 0.0,
     reflexDropRate: 0.0,
     meshStormPressure: 0.0,
+    factoringPressure: 0.0,   // NEW v9.2
 
     meta: {
       layer: "PulseHormones",
       role: "GLOBAL_MODULATION",
-      version: 9.1,
+      version: 9.2,
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
         localAware: true,
         internetAware: true,
+
         advantageCascadeAware: true,
         pulseEfficiencyAware: true,
         driftProof: true,
         multiInstanceReady: true,
+
         unifiedAdvantageField: true,
-        futureEvolutionReady: true
+        deterministicField: true,
+        futureEvolutionReady: true,
+
+        signalFactoringAware: true,
+        meshPressureAware: true,
+        auraPressureAware: true
       }
     }
   };
 
 
   // -----------------------------------------------------------
-  // Hormone Pack: adaptive modulation rules (v9.1)
+  // Hormone Pack — metadata-only tagging (v9.2)
   // -----------------------------------------------------------
   const PulseHormones = {
 
-    // NEW v9.1: adaptive hormone synthesis
     synthesizeFromPressure() {
       const p = HormoneState.flowPressure;
       const t = HormoneState.throttleRate;
       const d = HormoneState.driftPressure;
       const a = HormoneState.auraTension;
-      const r = HormoneState.reflexDropRate;
       const m = HormoneState.meshStormPressure;
+      const f = HormoneState.factoringPressure;
 
-      // Calm system → boost clarity + energy
-      if (p < 0.2 && d < 0.2 && a < 0.2) {
-        HormoneState.boost = 0.3;
-        HormoneState.dampen = 0.0;
-        HormoneState.cooling = 0.0;
-        HormoneState.urgency = 0.1;
-        HormoneState.stability = 0.1;
+      // reset tags
+      HormoneState.boostTag = false;
+      HormoneState.dampTag = false;
+      HormoneState.urgencyTag = false;
+      HormoneState.coolingTag = false;
+      HormoneState.stabilityTag = false;
+
+      // Calm → boost + stability
+      if (p < 0.2 && d < 0.2 && a < 0.2 && f < 0.2) {
+        HormoneState.boostTag = true;
+        HormoneState.stabilityTag = true;
       }
 
-      // Moderate pressure → stabilize + cool
-      if (p >= 0.2 || d >= 0.2 || a >= 0.2) {
-        HormoneState.boost = 0.1;
-        HormoneState.dampen = 0.1;
-        HormoneState.cooling = 0.2;
-        HormoneState.urgency = 0.0;
-        HormoneState.stability = 0.3;
+      // Moderate pressure → cooling + stability
+      if (p >= 0.2 || d >= 0.2 || a >= 0.2 || f >= 0.2) {
+        HormoneState.coolingTag = true;
+        HormoneState.stabilityTag = true;
       }
 
-      // High pressure → dampen + cool + stabilize hard
-      if (p > 0.5 || t > 0.2 || d > 0.4 || m > 0.4) {
-        HormoneState.boost = 0.0;
-        HormoneState.dampen = 0.3;
-        HormoneState.cooling = 0.4;
-        HormoneState.urgency = 0.0;
-        HormoneState.stability = 0.5;
+      // High pressure → damp + cooling + stability
+      if (p > 0.5 || t > 0.2 || d > 0.4 || m > 0.4 || f > 0.4) {
+        HormoneState.dampTag = true;
+        HormoneState.coolingTag = true;
+        HormoneState.stabilityTag = true;
       }
 
-      // Emergency (organism braking hard)
-      if (p > 0.7 || t > 0.3) {
-        HormoneState.boost = 0.0;
-        HormoneState.dampen = 0.5;
-        HormoneState.cooling = 0.6;
-        HormoneState.urgency = 0.0;
-        HormoneState.stability = 0.7;
+      // Emergency → hard damp + hard cooling
+      if (p > 0.7 || t > 0.3 || f > 0.6) {
+        HormoneState.dampTag = true;
+        HormoneState.coolingTag = true;
+        HormoneState.stabilityTag = true;
+        HormoneState.urgencyTag = true;
       }
     },
 
-    applyBoost(impulse) {
-      if (HormoneState.boost > 0) {
-        impulse.score = clamp01(impulse.score + HormoneState.boost * 0.2);
+    tagBoost(impulse) {
+      if (HormoneState.boostTag) {
         impulse.flags.hormone_event = "boost";
+        impulse.flags.hormone_boost = true;
       }
     },
 
-    applyDampen(impulse) {
-      if (HormoneState.dampen > 0) {
-        impulse.score = clamp01(impulse.score - HormoneState.dampen * 0.2);
+    tagDamp(impulse) {
+      if (HormoneState.dampTag) {
         impulse.flags.hormone_event = "damp";
+        impulse.flags.hormone_damp = true;
       }
     },
 
-    applyUrgency(impulse) {
-      if (HormoneState.urgency > 0) {
-        impulse.energy *= (1 + HormoneState.urgency * 0.1);
+    tagUrgency(impulse) {
+      if (HormoneState.urgencyTag) {
+        impulse.flags.hormone_urgency = true;
       }
     },
 
-    applyCooling(impulse) {
-      if (HormoneState.cooling > 0) {
-        impulse.energy *= (1 - HormoneState.cooling * 0.1);
+    tagCooling(impulse) {
+      if (HormoneState.coolingTag) {
+        impulse.flags.hormone_cooling = true;
       }
     },
 
-    applyStability(impulse) {
-      if (HormoneState.stability > 0) {
+    tagStability(impulse) {
+      if (HormoneState.stabilityTag) {
         impulse.flags.hormone_stabilized = true;
       }
-    },
-
-    applyLoadSignal(impulse) {
-      impulse.flags.hormone_load = HormoneState.loadSignal;
     }
   };
 
 
   // -----------------------------------------------------------
-  // Hormone Engine (v9.1)
+  // Hormone Engine (v9.2, metadata-only)
   // -----------------------------------------------------------
   function applyPulseHormones(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.flags.hormone_meta = HormoneState.meta;
 
-    // NEW v9.1: synthesize hormones based on system pressure
+    // synthesize tags from system pressure
     PulseHormones.synthesizeFromPressure();
 
-    // Apply modulation
-    PulseHormones.applyBoost(impulse);
-    PulseHormones.applyDampen(impulse);
-    PulseHormones.applyUrgency(impulse);
-    PulseHormones.applyCooling(impulse);
-    PulseHormones.applyStability(impulse);
-    PulseHormones.applyLoadSignal(impulse);
+    // apply tags (metadata only)
+    PulseHormones.tagBoost(impulse);
+    PulseHormones.tagDamp(impulse);
+    PulseHormones.tagUrgency(impulse);
+    PulseHormones.tagCooling(impulse);
+    PulseHormones.tagStability(impulse);
 
     impulse.flags.hormones_applied = true;
 
     return impulse;
-  }
-
-
-  // -----------------------------------------------------------
-  // Helpers
-  // -----------------------------------------------------------
-  function clamp01(v) {
-    return Math.max(0, Math.min(1, v));
   }
 
 

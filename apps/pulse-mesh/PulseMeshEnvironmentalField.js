@@ -1,23 +1,26 @@
 // ============================================================================
-// [pulse:mesh] PULSE_MESH_ENVIRONMENTAL_FIELD v9.1  // teal
+// [pulse:mesh] PULSE_MESH_ENVIRONMENTAL_FIELD v9.2  // teal
 // Internal Weather System • Metadata-Only • Stabilization + Pressure Signals
 // ============================================================================
 //
-// IDENTITY — THE ENVIRONMENTAL FIELD:
-//  -----------------------------------
-//  • The organism’s internal “weather system.”
-//  • Aggregates pressure, tension, drift, and load signals.
-//  • Read-only to all organs except trusted Brain writers.
-//  • Pure metadata-only stabilization layer.
-//  • NOT blood pressure — this is atmospheric/system pressure.
+// IDENTITY — THE ENVIRONMENTAL FIELD (v9.2):
+// ------------------------------------------
+// • The organism’s internal “weather system.”
+// • Aggregates friction, noise, stability, resonance, drift, load, and pressure.
+// • Holds system-pressure indicators for Flow, Aura, Reflex, Mesh, and Factoring.
+// • Read-only to all organs except trusted CNS Brain writers.
+// • Pure metadata-only stabilization layer — zero compute, zero routing.
+// • NOT blood pressure — this is atmospheric/system pressure.
 //
-// SAFETY CONTRACT:
-//  • No payload access.
-//  • No compute.
-//  • No routing.
-//  • No autonomy.
-//  • No imports.
-//  • Deterministic, drift-proof metadata-only behavior.
+// SAFETY CONTRACT (v9.2):
+// • No payload access.
+// • No compute.
+// • No routing.
+// • No autonomy.
+// • No imports.
+// • Deterministic-field: same inputs → same field state.
+// • Unified-advantage-field: inherits all safe systemic advantages.
+// • Drift-proof, multi-instance-ready, factoring-aware, mesh-pressure-aware.
 // ============================================================================
 
 
@@ -40,12 +43,15 @@ export function createPulseField({ log, warn, error }) {
     loadWave: 0,
     driftPressure: 0,
 
-    // System pressure (v9.1)
+    // System pressure (v9.2)
     flowPressure: 0,
     throttleRate: 0,
     auraTension: 0,
     reflexDropRate: 0,
     meshStormPressure: 0,
+
+    // NEW v9.2 — factoring pressure (mesh signal factoring awareness)
+    factoringPressure: 0,
 
     // External influence markers
     externalHeat: 0,
@@ -55,19 +61,27 @@ export function createPulseField({ log, warn, error }) {
     meta: {
       layer: "PulseField",
       role: "ENVIRONMENTAL_FIELD",
-      version: 9.1,
+      version: 9.2,
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
         localAware: true,
         internetAware: true,
+
         advantageCascadeAware: true,
         pulseEfficiencyAware: true,
         driftProof: true,
         multiInstanceReady: true,
+
         unifiedAdvantageField: true,
-        futureEvolutionReady: true
+        deterministicField: true,
+        futureEvolutionReady: true,
+
+        // NEW v9.2 awareness fields
+        signalFactoringAware: true,
+        meshPressureAware: true,
+        auraPressureAware: true
       }
     }
   };
@@ -90,6 +104,9 @@ export function createPulseField({ log, warn, error }) {
     setAuraTension(v) { FieldState.auraTension = clamp01(v); },
     setReflexDropRate(v) { FieldState.reflexDropRate = clamp01(v); },
     setMeshStormPressure(v) { FieldState.meshStormPressure = clamp01(v); },
+
+    // NEW v9.2
+    setFactoringPressure(v) { FieldState.factoringPressure = clamp01(v); },
 
     setExternalHeat(v) { FieldState.externalHeat = clamp01(v); },
     setExternalStorm(v) { FieldState.externalStorm = clamp01(v); },
@@ -125,6 +142,9 @@ export function createPulseField({ log, warn, error }) {
     getAuraTension() { return FieldState.auraTension; },
     getReflexDropRate() { return FieldState.reflexDropRate; },
     getMeshStormPressure() { return FieldState.meshStormPressure; },
+
+    // NEW v9.2
+    getFactoringPressure() { return FieldState.factoringPressure; },
 
     getExternalHeat() { return FieldState.externalHeat; },
     getExternalStorm() { return FieldState.externalStorm; },

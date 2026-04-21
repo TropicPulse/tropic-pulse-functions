@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v7.7 — CIRCULATION MONITOR
+//  PULSE OS v9.1 — CIRCULATION MONITOR
 //  “Blood Pressure + Blood Flow Sensor”
 //  Measures latency (pressure) and speed (flow) and sends simple vital signs.
 //  PURE SENSOR. NO THINKING. NO DECISIONS. NO GLOBAL STATE.
@@ -13,40 +13,56 @@
 //  • Builds a clean vital‑signs packet for the Nervous System (PulseBand)
 //  • Never makes decisions — only measures and reports
 //
-//  SAFETY RULES (v7.7):
+//  SAFETY RULES (v9.1):
 //  ---------------------
 //  • No PulseBand imports
 //  • No PulseNet imports
-//  • No global state
+//  • No global state (beyond this file’s sensor context)
 //  • No console.* (uses PulseLogger)
 //  • No backend calls except the ping endpoint
 //  • No compute, no AI, no mutation
-//
 // ============================================================================
 
-// Logger + Telemetry (safe)
+
+// ============================================================================
+//  Logger + Telemetry (heartbeat‑safe, no IQ)
+// ============================================================================
 import { logger } from "../OSKernel/PulseLogger.js";
 import { emitTelemetry } from "../OSKernel/PulseTelemetry.js";
 
+
 // ============================================================================
-//  ORGAN IDENTITY — v7.7
+//  ORGAN IDENTITY — v9.1
 // ============================================================================
-const CIRCULATION_CONTEXT = {
-  layer: "PulseUpdate",
-  role: "CIRCULATION_MONITOR",
-  purpose: "Measure pressure + flow and send simple vital signs",
-  version: "7.7",
-  target: "full-os",
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseBand",
+  layer: "CirculationMonitor",
+  version: "9.1",
+  identity: "PulseCirculationMonitor",
   evo: {
     driftProof: true,
     pulseEfficiencyAware: true,
     unifiedAdvantageField: true,
-    multiInstanceReady: true
+    multiInstanceReady: true,
+    sensorOnly: true,
+    noDecisionMaking: true,
+    futureEvolutionReady: true
   }
+};
+
+const CIRCULATION_CONTEXT = {
+  layer: PulseRole.layer,
+  role: "CIRCULATION_MONITOR",
+  purpose: "Measure pressure + flow and send simple vital signs",
+  version: PulseRole.version,
+  target: "full-os",
+  evo: PulseRole.evo
 };
 
 // Subsystem name for logs + telemetry
 const SUBSYSTEM = "circulation";
+
 
 // ============================================================================
 //  DIAGNOSTICS (optional)
@@ -68,6 +84,7 @@ function diag(stage, details = {}) {
 }
 
 diag("CIRCULATION_INIT");
+
 
 // ============================================================================
 // 1. PRESSURE CHECK — Measure latency (blood pressure)
@@ -110,6 +127,7 @@ async function measureLatency(url = "/pulse-proxy/ping") {
   }
 }
 
+
 // ============================================================================
 // 2. CLASSIFIERS — Turn numbers into simple ratings
 // ============================================================================
@@ -135,6 +153,7 @@ function classifyNetworkHealth(latency) {
   if (latency < 180) return "Weak";
   return "Poor";
 }
+
 
 // ============================================================================
 // 3. PUBLIC API — Build a simple vital‑signs packet
@@ -188,11 +207,13 @@ async function getPulseTelemetry() {
   return result;
 }
 
+
 // ============================================================================
-//  EXPORT — CIRCULATION MONITOR v7.7
+//  EXPORT — CIRCULATION MONITOR v9.1
 // ============================================================================
 export const PulseUpdate = {
   measureLatency,
   getPulseTelemetry,
-  meta: { ...CIRCULATION_CONTEXT }
+  meta: { ...CIRCULATION_CONTEXT },
+  PulseRole
 };

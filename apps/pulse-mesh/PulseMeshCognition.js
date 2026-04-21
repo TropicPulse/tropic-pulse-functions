@@ -1,27 +1,20 @@
 // ============================================================================
-//  PULSE OS v8.1 — COGNITION LAYER  // yellow
+//  PULSE OS v9.2 — COGNITION LAYER  // yellow
 //  “PulseMeshCognition / Meta‑Memory / Evolution Brain”
 // ============================================================================
 //
-//  IDENTITY — COGNITION (v8.1):
+//  IDENTITY — COGNITION (v9.2):
 //  -----------------------------
 //  • Organizes long‑term and short‑term memory into patterns.
 //  • Stores metadata-only “pattern‑of‑patterns” for evolution.
-//  • Supports Cortex, Tendons, Organs, Mesh, Immune.
+//  • Supports Cortex, Tendons, Organs, Mesh, Immune, Aura, Spine.
 //  • NEVER computes payloads, NEVER mutates data.
 //  • Pure cognition — system-wide learning.
+//  • v9.2: deterministic-field, unified-advantage-field, factoring-aware,
+//          aura-aware, mesh-pressure-aware, multi-instance-ready.
 //
-//  ROLE IN THE DIGITAL BODY (v8.1):
-//  --------------------------------
-//  • Cognition → the brain’s pattern integrator.
-//  • Meta‑Memory → remembers what the system has learned.
-//  • Evolution Engine → supports adaptive improvement.
-//  • Mesh Cognition → remembers mesh-wide behavior.
-//  • Reflex Cognition → remembers reflex patterns.
-//  • Organ Cognition → remembers organ usage patterns.
-//
-//  SAFETY CONTRACT:
-//  ----------------
+//  SAFETY CONTRACT (v9.2):
+//  ------------------------
 //  • Metadata-only.
 //  • No payload access.
 //  • No routing override.
@@ -33,7 +26,6 @@
 // -----------------------------------------------------------
 // Cognition Store (metadata-only)
 // -----------------------------------------------------------
-
 export const CognitionStore = {
   routes: new Map(),
   earners: new Map(),
@@ -44,25 +36,38 @@ export const CognitionStore = {
     hops: [],
     stalls: [],
     drops: [],
-    missingNodes: []
+    missingNodes: [],
+    factoringEvents: [],
+    factoringBias: [],
+    auraTension: [],
+    flowPressure: [],
+    driftPressure: [],
+    throttlePressure: []
   },
 
   meta: {
     layer: "PulseMeshCognition",
     role: "META_MEMORY",
-    version: 8.1,
+    version: 9.2,
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
       localAware: true,
       internetAware: true,
+
       advantageCascadeAware: true,
       pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
+
       unifiedAdvantageField: true,
-      futureEvolutionReady: true
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      auraPressureAware: true,
+      meshPressureAware: true
     }
   }
 };
@@ -71,7 +76,6 @@ export const CognitionStore = {
 // -----------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------
-
 function getOrInit(map, key, init) {
   if (!map.has(key)) map.set(key, { ...init });
   return map.get(key);
@@ -79,9 +83,8 @@ function getOrInit(map, key, init) {
 
 
 // -----------------------------------------------------------
-// Cognition Pack — pattern-of-patterns
+// Cognition Pack — pattern-of-patterns (v9.2)
 // -----------------------------------------------------------
-
 export const PulseMeshCognition = {
 
   recordRoutePattern(impulse) {
@@ -143,44 +146,60 @@ export const PulseMeshCognition = {
     }
   },
 
+  // ---------------------------------------------------------
+  // v9.2 — Mesh Pressure + Factoring Cognition
+  // ---------------------------------------------------------
   recordMeshPattern(impulse) {
     const flags = impulse.flags || {};
 
     if (typeof impulse.hops === "number") {
-      CognitionStore.mesh.hops.push({
-        ts: Date.now(),
-        hops: impulse.hops
-      });
+      CognitionStore.mesh.hops.push({ hops: impulse.hops });
     }
 
     Object.keys(flags).forEach((k) => {
       if (k.startsWith("stalled_at_")) {
-        CognitionStore.mesh.stalls.push({
-          ts: Date.now(),
-          node: k.replace("stalled_at_", "")
-        });
+        CognitionStore.mesh.stalls.push({ node: k.replace("stalled_at_", "") });
       }
       if (k.startsWith("reflex_drop_at_")) {
-        CognitionStore.mesh.drops.push({
-          ts: Date.now(),
-          node: k.replace("reflex_drop_at_", "")
-        });
+        CognitionStore.mesh.drops.push({ node: k.replace("reflex_drop_at_", "") });
       }
       if (k.startsWith("missing_node_")) {
-        CognitionStore.mesh.missingNodes.push({
-          ts: Date.now(),
-          node: k.replace("missing_node_", "")
-        });
+        CognitionStore.mesh.missingNodes.push({ node: k.replace("missing_node_", "") });
       }
     });
+
+    if (flags.mesh_factored) {
+      CognitionStore.mesh.factoringEvents.push({
+        depth: flags.mesh_factor_depth ?? 0
+      });
+    }
+
+    if (flags.aura_factoring_bias !== undefined) {
+      CognitionStore.mesh.factoringBias.push(flags.aura_factoring_bias);
+    }
+
+    if (flags.aura_system_under_tension) {
+      CognitionStore.mesh.auraTension.push(true);
+    }
+
+    if (flags.flow_pressure !== undefined) {
+      CognitionStore.mesh.flowPressure.push(flags.flow_pressure);
+    }
+
+    if (flags.drift_pressure !== undefined) {
+      CognitionStore.mesh.driftPressure.push(flags.drift_pressure);
+    }
+
+    if (flags.recent_throttle_rate !== undefined) {
+      CognitionStore.mesh.throttlePressure.push(flags.recent_throttle_rate);
+    }
   }
 };
 
 
 // -----------------------------------------------------------
-// Cognition Engine
+// Cognition Engine (v9.2)
 // -----------------------------------------------------------
-
 export function applyPulseMeshCognition(impulse) {
   impulse.flags = impulse.flags || {};
   impulse.flags.cognition_meta = CognitionStore.meta;
@@ -200,7 +219,6 @@ export function applyPulseMeshCognition(impulse) {
 // -----------------------------------------------------------
 // Snapshot — read-only meta-memory view
 // -----------------------------------------------------------
-
 export function getCognitionSnapshot() {
   return {
     meta: CognitionStore.meta,
@@ -212,7 +230,13 @@ export function getCognitionSnapshot() {
       hopsCount: CognitionStore.mesh.hops.length,
       stallsCount: CognitionStore.mesh.stalls.length,
       dropsCount: CognitionStore.mesh.drops.length,
-      missingNodesCount: CognitionStore.mesh.missingNodes.length
+      missingNodesCount: CognitionStore.mesh.missingNodes.length,
+      factoringEvents: CognitionStore.mesh.factoringEvents.length,
+      factoringBiasSamples: CognitionStore.mesh.factoringBias.length,
+      auraTensionSamples: CognitionStore.mesh.auraTension.length,
+      flowPressureSamples: CognitionStore.mesh.flowPressure.length,
+      driftPressureSamples: CognitionStore.mesh.driftPressure.length,
+      throttlePressureSamples: CognitionStore.mesh.throttlePressure.length
     }
   };
 }

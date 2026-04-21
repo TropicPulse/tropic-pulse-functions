@@ -1,4 +1,10 @@
 
+// ============================================================================
+//  PULSE OS v9.1 — THE HEARTBEAT
+//  PulseProxyHeartbeat
+//  Backend‑Only • Deterministic • Drift‑Proof • No IQ
+// ============================================================================
+
 export const timerLogout = onSchedule("every 5 minutes", async () => {
   const runId = crypto.randomUUID();
   const logId = `LOGOUT_${runId}`;

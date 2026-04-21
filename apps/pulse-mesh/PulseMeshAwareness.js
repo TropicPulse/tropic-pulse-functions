@@ -1,10 +1,10 @@
 // ============================================================================
-// [pulse:halo] PULSE_OS_AWARENESS_RING v9.1  // white
+// [pulse:halo] PULSE_OS_AWARENESS_RING v9.2  // white
 // Read-Only Awareness Ring • System Dashboard • Metadata-Only Reflection
 // ============================================================================
 //
-// IDENTITY — THE AWARENESS RING:
-//  ------------------------------
+// IDENTITY — THE AWARENESS RING (v9.2):
+//  ------------------------------------
 //  • Read-only awareness ring around the organism.
 //  • Aggregates metadata from all subsystems.
 //  • Exposes safe system status to backendAI + Awareness Page.
@@ -13,25 +13,18 @@
 //  • NEVER influences routing or decisions.
 //  • Pure reflection layer (dashboard organ).
 //
-// THEME:
-//  • Color: White (awareness, reflection, non-interference).
-//  • Subtheme: Clarity, transparency, system-wide visibility.
+// SAFETY CONTRACT (v9.2):
+//  • Metadata-only
+//  • Read-only external surface
+//  • No loops, no sync, no hormones, no memory writes
+//  • No autonomy, no sentience, no self-model
+//  • Backend-safe, frontend-safe, global-safe
 //
-// SAFETY CONTRACT:
-//  • Metadata-only.
-//  • Read-only external surface.
-//  • No loops, no sync, no hormones, no memory writes.
-//  • No autonomy, no sentience, no self-model.
-//  • Backend-safe, frontend-safe, global-safe.
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • Inherits ANY advantage from ANY organ automatically.
-//  • Dual-mode: mental clarity + system efficiency.
-//  • Local-aware: node-level awareness signals.
-//  • Internet-aware: cluster/mesh/global awareness signals.
-//  • Unified-advantage-field: ALL advantages active unless unsafe.
-//  • Future-evolution-ready: new safe advantages auto-inherited.
+// ADVANTAGE CASCADE (v9.2):
+//  • Inherits ANY advantage from ANY organ automatically
+//  • Unified-advantage-field: ALL advantages active unless unsafe
+//  • Future-evolution-ready
+//  • Signal factoring awareness (metadata-only)
 // ============================================================================
 
 
@@ -61,13 +54,17 @@ export function createPulseHalo({ log, warn, error }) {
 
     mesh_hops: 0,
 
-    // New: flow-level throttling awareness
     flow_throttles: 0,
+
+    // v9.2 factoring awareness
+    factoring_collapse_events: 0,
+    factoring_bias_high: 0,
+    factored_path_uses: 0,
 
     meta: {
       layer: "PulseHalo",
       role: "AWARENESS_RING",
-      version: 9.1,
+      version: 9.2,
       target: "full-mesh",
       selfRepairable: true,
       evo: {
@@ -81,7 +78,12 @@ export function createPulseHalo({ log, warn, error }) {
         multiInstanceReady: true,
 
         unifiedAdvantageField: true,
-        futureEvolutionReady: true
+        futureEvolutionReady: true,
+        signalFactoringAware: true,
+
+        zeroCompute: true,
+        zeroMutation: true,
+        zeroRoutingInfluence: true
       }
     }
   };
@@ -95,7 +97,6 @@ export function createPulseHalo({ log, warn, error }) {
     impulseCompleted() { HaloState.impulses_completed++; },
 
     reflexDropped() { HaloState.reflex_drops++; },
-
     immuneQuarantined() { HaloState.immune_quarantines++; },
 
     auraLooped() { HaloState.aura_loops++; },
@@ -108,14 +109,17 @@ export function createPulseHalo({ log, warn, error }) {
 
     meshHops(count = 1) { HaloState.mesh_hops += count; },
 
-    // Flow throttling hook
     impulseThrottled() { HaloState.flow_throttles++; },
+
+    factoringCollapsedManyToOne() { HaloState.factoring_collapse_events++; },
+    factoringBiasHigh() { HaloState.factoring_bias_high++; },
+    factoredPathUsed() { HaloState.factored_path_uses++; }
   };
 
 
   // -----------------------------------------------------------
   // SNAPSHOT (read-only)
-  // -----------------------------------------------------------
+// -----------------------------------------------------------
   function snapshot() {
     return { ...HaloState };
   }
@@ -123,7 +127,7 @@ export function createPulseHalo({ log, warn, error }) {
 
   // -----------------------------------------------------------
   // STATUS (dashboard view)
-  // -----------------------------------------------------------
+// -----------------------------------------------------------
   function status() {
     const s = snapshot();
 
@@ -176,6 +180,16 @@ export function createPulseHalo({ log, warn, error }) {
         ),
       },
 
+      factoring: {
+        collapse_events: s.factoring_collapse_events,
+        bias_high_events: s.factoring_bias_high,
+        factored_path_uses: s.factored_path_uses,
+        collapse_rate: ratio(
+          s.factoring_collapse_events,
+          s.impulses_total
+        )
+      },
+
       health: {
         stability: stability(s),
         drift_risk: drift(s),
@@ -204,7 +218,7 @@ export function createPulseHalo({ log, warn, error }) {
       s.reflex_drops + s.immune_quarantines + s.aura_loops;
     const volume = s.impulses_total || 1;
     const r = anomalies / volume;
-    return Math.max(0, 1 - Math.min(1, r)); // 0–1
+    return Math.max(0, 1 - Math.min(1, r));
   }
 
   function drift(s) {
@@ -212,7 +226,7 @@ export function createPulseHalo({ log, warn, error }) {
     const syncs = s.aura_syncs || 0;
     const base = loops / ((s.impulses_total || 1));
     const sync_protect = Math.min(0.5, syncs / ((s.impulses_total || 1)));
-    return Math.max(0, Math.min(1, base - sync_protect)); // 0–1
+    return Math.max(0, Math.min(1, base - sync_protect));
   }
 
 

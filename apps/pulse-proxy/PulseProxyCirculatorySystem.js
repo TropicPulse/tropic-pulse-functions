@@ -1,47 +1,47 @@
 // ============================================================================
 // FILE: /apps/tropic-pulse/lib/Connectors/PulseClient.js
-// LAYER: CIRCULATORY SYSTEM (Arterial Fetch Layer) — v7.7
+// LAYER: CIRCULATORY SYSTEM (Arterial Fetch Layer) — v9.1
 // ============================================================================
 //
-// ROLE (v7.7):
+// ROLE (v9.1):
 //   THE CIRCULATORY SYSTEM — Arterial Fetch Layer
 //   • Moves data outward through the organism
 //   • Attempts accelerated PULSE route first (arterial path)
 //   • Falls back to PHONE route if needed (venous path)
 //   • Returns clean { data, meta } packets (oxygenated payloads)
 //
-// CONTRACT (v7.7):
+// CONTRACT (v9.1):
 //   • No PulseBand imports
 //   • No PulseNet imports
 //   • No global state
 //   • No side effects
 //   • Pure circulatory subsystem
 //
-// SAFETY (v7.7):
+// SAFETY (v9.1):
 //   • No console.*
-//   • All logs routed through PulseLogger
-//   • All metrics routed through PulseTelemetry
+//   • All logs routed through PulseProxyVitalsLogger
+//   • All metrics routed through PulseProxyBloodStream
 //   • Deterministic, drift‑proof, AND‑architecture aligned
 // ============================================================================
 
 import { log, warn, error } from "./PulseProxyVitalsLogger.js";
 import { emitTelemetry } from "./PulseProxyBloodStream.js";
 
+
 // ============================================================================
-// ⭐ OS‑v7 CONTEXT METADATA — Circulatory Identity
+// ⭐ OS‑v9.1 CONTEXT METADATA — Circulatory Identity
 // ============================================================================
-const CIRCULATION_CONTEXT = {
-  layer: "PulseClient",
-  role: "CIRCULATORY_SYSTEM",
-  purpose: "Arterial fetch layer + venous fallback",
-  context: "Moves data outward through organism with deterministic routing",
-  target: "full-os",
-  version: "7.7",
-  selfRepairable: true,
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseClient",
+  layer: "CirculatorySystem",
+  version: "9.1",
+  identity: "PulseClientArterialLayer",
+
   evo: {
-    advantageCascadeAware: true,
-    pulseEfficiencyAware: true,
     driftProof: true,
+    pulseEfficiencyAware: true,
+    unifiedAdvantageField: true,
     multiInstanceReady: true,
     parallelSafe: true,
     fanOutScaling: 1.0,
@@ -51,22 +51,32 @@ const CIRCULATION_CONTEXT = {
     dualModeEvolution: true,
     organismClusterBoost: 1.0,
     cognitiveComputeLink: true,
-    unifiedAdvantageField: true
+    pulseSendAware: true,
+    futureEvolutionReady: true
   }
 };
+
+const CIRCULATION_CONTEXT = {
+  layer: PulseRole.layer,
+  role: "CIRCULATORY_SYSTEM",
+  purpose: "Arterial fetch layer + venous fallback",
+  context: "Moves data outward through organism with deterministic routing",
+  target: "full-os",
+  version: PulseRole.version,
+  selfRepairable: true,
+  evo: PulseRole.evo
+};
+
 
 // ============================================================================
 // SUBSYSTEM IDENTITY
 // ============================================================================
 const SUBSYSTEM = "circulation";
 
-// ============================================================================
-// LAYER CONSTANTS + DIAGNOSTICS
-// ============================================================================
-const CIRCULATION_LAYER_ID = "CIRCULATORY-LAYER";
-const CIRCULATION_LAYER_NAME = "THE CIRCULATORY SYSTEM";
-const CIRCULATION_LAYER_ROLE = "Arterial Fetch Layer";
 
+// ============================================================================
+// DIAGNOSTICS
+// ============================================================================
 const CIRCULATION_DIAGNOSTICS_ENABLED =
   (typeof window !== "undefined" &&
     (window.PULSE_BLOODFLOW_DIAGNOSTICS === true ||
@@ -77,9 +87,9 @@ const circulationLog = (stage, details = {}) => {
   if (!CIRCULATION_DIAGNOSTICS_ENABLED) return;
 
   log(SUBSYSTEM, stage, {
-    pulseLayer: CIRCULATION_LAYER_ID,
-    pulseName: CIRCULATION_LAYER_NAME,
-    pulseRole: CIRCULATION_LAYER_ROLE,
+    pulseLayer: PulseRole.layer,
+    pulseName: "THE CIRCULATORY SYSTEM",
+    pulseRole: "Arterial Fetch Layer",
     meta: { ...CIRCULATION_CONTEXT },
     ...details
   });
@@ -89,10 +99,12 @@ const circulationLog = (stage, details = {}) => {
 
 circulationLog("CIRCULATION_INIT");
 
+
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 const PULSE_PROXY_URL = "https://www.tropicpulse.bz";
+
 
 // ============================================================================
 // DEVICE METADATA
@@ -108,8 +120,9 @@ function getDeviceInfo() {
   return info;
 }
 
+
 // ============================================================================
-// CORE FETCH WRAPPER — ARTERIAL FLOW (v7.7)
+// CORE FETCH WRAPPER — ARTERIAL FLOW (v9.1)
 // ============================================================================
 async function pulseFetch(url) {
   circulationLog("FETCH_START", { url });
@@ -187,10 +200,12 @@ async function pulseFetch(url) {
   }
 }
 
+
 // ============================================================================
-// PUBLIC API — CIRCULATORY SYSTEM v7.7
+// PUBLIC API — CIRCULATORY SYSTEM v9.1
 // ============================================================================
 export const PulseClient = {
   get: pulseFetch,
-  meta: { ...CIRCULATION_CONTEXT }
+  meta: { ...CIRCULATION_CONTEXT },
+  PulseRole
 };

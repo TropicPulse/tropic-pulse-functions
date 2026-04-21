@@ -1,29 +1,29 @@
 // ============================================================================
-//  PULSE OS v7.7 — VITALS LOGGER (RENDERER ONLY)
-//  Subsystem Identity • Connection Vitals • Zero Drift • No Firebase
-//  PURE RENDERING. NO BACKEND. NO MUTATION. NO COMPUTE.
+//  PULSE OS v9.2 — VITALS LOGGER (RENDERER ONLY)
+//  Subsystem Identity • Connection Vitals • Zero Drift • No Backend
+//  PURE RENDERING. NO NETWORK. NO STORAGE. NO COMPUTE.
 // ============================================================================
 //
-//  ORGAN DESCRIPTION — WHAT THIS IS (v7.7):
+//  ORGAN DESCRIPTION — WHAT THIS IS (v9.2):
 //  ----------------------------------------
 //  PulseLogger is the **vitals renderer** of PulseOS. It is NOT a backend
-//  logger, NOT a telemetry sender, NOT a storage layer. It is a **pure
-//  renderer-only organ** that:
+//  logger, NOT a telemetry sender, NOT a storage layer. It is a **pure,
+//  deterministic renderer-only organ** that:
 //
 //    • formats subsystem identity (role + version + color)
-//    • renders logs in a deterministic, drift-proof format
-//    • normalizes arguments from all subsystems
+//    • renders logs in a drift-proof, deterministic format
+//    • normalizes arguments from all subsystems (hybrid mode)
 //    • provides safe console overrides (no recursion)
 //    • generates telemetry packets (but does NOT send them)
 //
-//  ROLE IN THE DIGITAL BODY (v7.7):
+//  ROLE IN THE DIGITAL BODY (v9.2):
 //  --------------------------------
-//    • Renderer → formats logs for human visibility
-//    • Identity Surface → shows subsystem role + version
-//    • Telemetry Formatter → creates packets for other organs to send
-//    • Zero Drift Layer → ensures consistent console identity
+//    • Renderer → human-readable vitals surface
+//    • Identity Surface → subsystem role + version
+//    • Telemetry Formatter → packet generator (not sender)
+//    • Zero Drift Layer → stable console identity
 //
-//  SAFETY CONTRACT (v7.7):
+//  SAFETY CONTRACT (v9.2):
 //  ------------------------
 //    • No backend calls
 //    • No Firebase
@@ -42,21 +42,21 @@ const _c = { ...console };
 
 
 // ============================================================================
-//  VERSION MAP — The Genome of PulseOS (v7.7)
+//  VERSION MAP — The Genome of PulseOS (v9.2)
 // ============================================================================
 export const PulseVersion = {
-  identity: "7.7",
-  brain: "7.7",
-  gpu: "7.7",
-  orchestrator: "7.7",
-  engine: "7.7",
-  optimizer: "7.7",
-  synapse: "7.7",
-  band: "7.7",
-  router: "7.7",
-  marketplaces: "7.7",
-  telemetry: "7.7",
-  limbic: "7.7"
+  identity: "9.2",
+  brain: "9.2",
+  gpu: "9.2",
+  orchestrator: "9.2",
+  engine: "9.2",
+  optimizer: "9.2",
+  synapse: "9.2",
+  band: "9.2",
+  router: "9.2",
+  marketplaces: "9.2",
+  telemetry: "9.2",
+  limbic: "9.2"
 };
 
 
@@ -80,7 +80,7 @@ export const PulseRoles = {
 
 
 // ============================================================================
-//  COLOR MAP — Console Identity Palette (v7.7)
+//  COLOR MAP — Console Identity Palette (v9.2)
 // ============================================================================
 export const PulseColors = {
   identity: "#4DD0E1",
@@ -104,14 +104,13 @@ export const PulseColors = {
 // ============================================================================
 function formatPrefix(subsystem) {
   const role = PulseRoles[subsystem] || "SUBSYSTEM";
-  const version = PulseVersion[subsystem] || "7.x";
+  const version = PulseVersion[subsystem] || "9.x";
   return `${role} v${version}`;
 }
 
 
 // ============================================================================
-//  ARGUMENT NORMALIZER — HYBRID MODE (v7.7)
-//  Accepts: %c logs, subsystem-first logs, object logs, single args.
+//  ARGUMENT NORMALIZER — HYBRID MODE (v9.2)
 // ============================================================================
 function normalizeArgs(args) {
   let subsystem = "legacy";
@@ -152,7 +151,7 @@ function normalizeArgs(args) {
 
 
 // ============================================================================
-//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v7.7)
+//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v9.2)
 // ============================================================================
 export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
@@ -196,7 +195,7 @@ export function critical(...args) {
 
 
 // ============================================================================
-//  GROUPING HELPERS — v7.7
+//  GROUPING HELPERS — v9.2
 // ============================================================================
 export function group(subsystem, label) {
   const color = PulseColors[subsystem] || "#fff";
@@ -211,20 +210,19 @@ export function groupEnd() {
 
 
 // ============================================================================
-//  TELEMETRY PACKET FORMATTER (v7.7)
-//  Renderer-only: creates packets but does NOT send them.
+//  TELEMETRY PACKET FORMATTER (v9.2)
 // ============================================================================
 export function makeTelemetryPacket(subsystem, event, data = {}) {
   return {
     ts: Date.now(),
     subsystem,
-    version: PulseVersion[subsystem] || "7.x",
+    version: PulseVersion[subsystem] || "9.x",
     role: PulseRoles[subsystem] || "SUBSYSTEM",
     event,
     data,
     meta: {
       layer: "PulseLogger",
-      version: "7.7",
+      version: "9.2",
       subsystem,
       event
     }
@@ -253,7 +251,7 @@ export const logger = {
   makeTelemetryPacket,
   meta: {
     layer: "PulseLogger",
-    version: "7.7"
+    version: "9.2"
   }
 };
 

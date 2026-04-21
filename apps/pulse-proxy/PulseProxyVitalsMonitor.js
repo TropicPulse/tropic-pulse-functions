@@ -1,7 +1,6 @@
 // ============================================================================
-//  PULSE OS v7.7 — USER METRICS (VITALS MONITOR)
+//  PULSE OS v9.2 — USER METRICS (VITALS MONITOR)
 //  “The Vitals Monitor / Circulatory Telemetry Layer”
-//  Records heartbeats, usage vitals, and simple health indicators.
 //  PURE MEASUREMENT. NO HEALING. NO COMMAND. NO SCALING.
 // ============================================================================
 
@@ -10,14 +9,16 @@ const db    = global.db;
 const log   = global.log   || console.log;
 const error = global.error || console.error;
 
+
 // ============================================================================
-//  ORGAN CONTEXT — v7.7
+//  ORGAN CONTEXT — v9.2
 // ============================================================================
 const VITALS_CONTEXT = {
   layer: "PulseUserMetrics",
   role: "VITALS_MONITOR",
-  version: "7.7",
+  version: "9.2",
   lineage: "interface-core",   // circulatory telemetry lineage
+
   evo: {
     dualMode: true,
     localAware: true,
@@ -27,12 +28,15 @@ const VITALS_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+    deterministicVitals: true,
+    zeroDriftAverages: true
   }
 };
 
+
 // ============================================================================
-//  CONFIG — Physiological Limits (used by instance allocation helpers)
+//  CONFIG — Physiological Limits (unchanged behavior, v9.2 identity)
 // ============================================================================
 export const NORMAL_MAX     = 4;
 export const UPGRADED_MAX   = 8;
@@ -46,9 +50,10 @@ export const EARN_MODE_MULT = 1.5;
 export const ENABLE_PERFORMANCE_LOGGING = true;
 export const PERFORMANCE_LOG_COLLECTION = "UserPerformanceLogs";
 
+
 // ============================================================================
 //  updateUserMetrics() — “Record a heartbeat + vitals panel”
-//  Simple: count requests, bytes, latency, mesh activity, hub signals.
+//  PURE MEASUREMENT. Deterministic. Drift‑proof.
 // ============================================================================
 export async function updateUserMetrics(userId, data = {}) {
   if (!userId || userId === "anonymous") return;
@@ -73,7 +78,7 @@ export async function updateUserMetrics(userId, data = {}) {
     const totalRequests = (existing.totalRequests || 0) + 1;
     const totalBytes    = (existing.totalBytes || 0) + (data.bytes || 0);
 
-    // Rolling average latency
+    // Rolling average latency (zero‑drift)
     let avgLatency = existing.avgLatency || 0;
     if (data.durationMs != null) {
       if (!existing.totalRequests) {
@@ -131,9 +136,10 @@ export async function updateUserMetrics(userId, data = {}) {
   }
 }
 
+
 // ============================================================================
 //  calculateTrustScore() — “Overall health index”
-//  Simple scoring: activity + mesh + hub + latency + stability.
+//  Deterministic scoring. Zero‑drift. v9.2 identity.
 // ============================================================================
 export function calculateTrustScore(metrics) {
   if (!metrics) return 0;
@@ -158,9 +164,10 @@ export function calculateTrustScore(metrics) {
   return final;
 }
 
+
 // ============================================================================
 //  calculatePhase() — “Functional fitness tier”
-//  Simple 1–4 tier based on trust score.
+//  1–4 tier. Deterministic. No behavior change.
 // ============================================================================
 export function calculatePhase(trustScore) {
   let phase = 1;
@@ -175,9 +182,10 @@ export function calculatePhase(trustScore) {
   return phase;
 }
 
+
 // ============================================================================
 //  isHub() — “High‑flow organ detection”
-//  Detects heavy mesh activity or high request volume.
+//  Same logic, v9.2 identity.
 // ============================================================================
 export function isHub(metrics) {
   if (!metrics) return false;
@@ -199,9 +207,10 @@ export function isHub(metrics) {
   return hub;
 }
 
+
 // ============================================================================
 //  allocateInstances() — “Circulatory capacity allocation”
-//  NOTE: This organ does NOT scale. It only computes a number.
+//  PURE COMPUTE. No scaling. No command. No healing.
 // ============================================================================
 export function allocateInstances(
   phase,
