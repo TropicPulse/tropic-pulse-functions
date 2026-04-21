@@ -14,7 +14,7 @@
 //   • Writes logs to Firestore via firebase.js
 //
 // ============================================================================
-import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error, logger } from "../../PulseLogger.js";
+import { PulseVersion, PulseRoles, log, warn, error, logger } from "../../PulseLogger.js";
 import * as LegacyLogic from "./index.js";
 import { db } from "./firebase.js";   // ⭐ BACKEND FIREBASE ACCESS
 

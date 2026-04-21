@@ -5,7 +5,7 @@
 // ============================================================================
 
 // UI + presentation metadata comes from Logger
-import { PulseVersion, PulseRoles, makeTelemetryPacket } from "./PulseLogger.js";
+import { PulseVersion, PulseRoles, logger } from "./PulseLogger.js";
 
 // Lineage comes ONLY from Identity (BBB)
 import { PulseLineage } from "./PulseIdentity.js";
@@ -25,7 +25,7 @@ const DEFAULT_DISTANCE = 1;  // local pulse distance
 // ============================================================================
 export function emitTelemetry(subsystem, event, data = {}) {
   try {
-    const packet = makeTelemetryPacket(subsystem, event, {
+    const packet = logger.makeTelemetryPacket(subsystem, event, {
       ...data,
       lineage: PulseLineage[subsystem],
       hops: 0,
