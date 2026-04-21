@@ -2,7 +2,7 @@
 //  PULSE OS v7.7 — VITALS LOGGER (RENDERER ONLY)
 //  Subsystem Identity • Connection Vitals • Zero Drift • No Firebase
 // ============================================================================
-import { pulseband } from "./proxy/PulseBand.js";
+
 // ---------------------------------------------------------------------------
 //  CAPTURE ORIGINAL CONSOLE (prevents recursion)
 // ---------------------------------------------------------------------------
