@@ -53,7 +53,6 @@
 import { PulseGPURuntime } from "./PulseGPURuntime.js";
 import { PulseGPUEngine } from "./PulseGPUEngine.js";
 import { PulseGPUInsightsEngine } from "./PulseGPUInsightsEngine.js";
-import { PulseVersion, PulseRoles, makeTelemetryPacket, log, warn, error, logger } from "../PulseLogger.js";
 log(
   "gpu",
   "PulseGPUBrain v7.3 — Analyst Cortex active (dual‑mode evolution)."
