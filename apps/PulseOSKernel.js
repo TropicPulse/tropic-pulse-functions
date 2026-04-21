@@ -3,19 +3,8 @@
 //  Central Nervous System • Boot Sequence • Organ Orchestrator
 //  This file initializes ALL major PulseOS subsystems in deterministic order.
 // ============================================================================
-
-import { identity } from "./PulseIdentity.js";
-import { log, warn, error } from "./PulseLogger.js";
-import { PulseTelemetry, heartbeat, detectDrift } from "./PulseTelemetry.js";
-
-// Subsystems
-import { PulseGPU } from "./PulseGPU.js";
-import { PulseGPUBrain } from "./PulseGPUBrain.js";
-import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
-import { PulseGPUOrchestrator } from "./PulseGPUOrchestrator.js";
-import { PulseBand } from "./PulseBand.js";
-import { MarketplaceRouter } from "./marketplaces/MarketplaceRouter.js";
-import { RegisteredMarketplaces } from "./marketplaces/RegisteredMarketplaces.js";
+import { PulseVersion, PulseRoles, log, warn, error, logger } from "../../PulseLogger.js";
+import { pulseband } from "./proxy/PulseBand.js";
 
 // ============================================================================
 //  INTERNAL STATE
