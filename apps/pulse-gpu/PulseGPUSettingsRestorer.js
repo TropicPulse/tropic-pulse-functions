@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUSettingsRestorer.js
-// PULSE GPU SETTINGS RESTORER v7.3
+// PULSE GPU SETTINGS RESTORER v7.7
 // “COGNITIVE RECOGNITION LAYER / RESTORATION PLANNER”
 // ============================================================================
 //
@@ -13,12 +13,7 @@
 //   • Recognizes whether to restore, apply optimal, upgrade tier, or noop
 //   • Produces deterministic restoration plans for the Healer + Orchestrator
 //
-// WHAT THIS FILE IS:
-//   • A deterministic planner for GPU settings restoration
-//   • A pure logic module (API-agnostic, full GPU)
-//   • A bridge between advice objects and concrete restore actions
-//
-// SAFETY CONTRACT:
+// SAFETY CONTRACT (v7.7):
 //   • No randomness
 //   • No timestamps
 //   • No GPU calls
@@ -27,12 +22,6 @@
 //   • No network or filesystem access
 //   • Fail-open: invalid advice → noop plan
 //   • Self-repair-ready: plans include OS metadata
-//
-// ADVANTAGE CASCADE (conceptual only):
-//   • If pulses become faster → recognition/planning conceptually accelerates.
-//   • If system collapses 1000 pulses into 1 → planning inherits that gain.
-//   • If any organ evolves → Restorer recognizes with that advantage.
-//   • No OR — all advantages are inherited automatically.
 // ============================================================================
 
 // ------------------------------------------------------------
@@ -45,7 +34,7 @@ const RESTORER_CONTEXT = {
   context:
     "Consumes advisor insights + memory entries to produce restoration plans",
   target: "full-gpu",
-  version: 7.3,
+  version: 7.7,
   selfRepairable: true,
   evo: {
     advantageCascadeAware: true,
@@ -56,7 +45,7 @@ const RESTORER_CONTEXT = {
 };
 
 // ------------------------------------------------------------
-// Restoration plan builder (v7-ready + OS‑v7 metadata)
+// Restoration plan builder (v7.7 + OS‑v7 metadata)
 // ------------------------------------------------------------
 function buildPlan({
   action,
@@ -87,7 +76,7 @@ function validatePlan(plan) {
 }
 
 // ------------------------------------------------------------
-// PulseGPUSettingsRestorer (v7-ready + OS‑v7 metadata)
+// PulseGPUSettingsRestorer v7.7 — Cognitive Recognition Layer
 // ------------------------------------------------------------
 class PulseGPUSettingsRestorer {
   constructor() {}

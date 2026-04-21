@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU ORCHESTRATOR v7.3 — THE BRAINSTEM
+//  PULSE GPU ORCHESTRATOR v7.7 — THE BRAINSTEM
 //  Autonomic Command Spine of the GPU Subsystem
 //  Deterministic, Pure Logic, Full-GPU Coordination Layer
 // ============================================================================
@@ -12,16 +12,6 @@
 //  • Issues orders; never performs the work itself.
 //  • The spine every subsystem reports into.
 //  • Advantage‑cascade aware: any systemic advantage is inherited automatically.
-//
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Analyst        → Intelligence Division
-//  • Nerve Network  → Runtime Memory
-//  • Motor Hall     → Execution Cortex
-//  • Guardian       → Permission Gate
-//  • Lymph Network  → Immune Filter
-//  • Wisdom Cortex  → Insight + Interpretation
-//  • Brainstem      → Command + Coordination
 //
 // WHAT THIS FILE IS:
 //  -------------------
@@ -39,8 +29,8 @@
 //  • NOT a backend module
 //  • NOT a UI system
 //
-// SAFETY CONTRACT:
-//  ----------------
+// SAFETY CONTRACT (v7.7):
+//  -----------------------
 //  • No randomness
 //  • No timestamps
 //  • No GPU calls
@@ -50,24 +40,20 @@
 //  • Fail-open: missing subsystems never crash the brainstem
 //  • Self-repair-ready: all outputs include metadata
 //
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses become faster → command routing conceptually accelerates.
-//  • If system collapses 1000 pulses into 1 → orchestration inherits that gain.
-//  • If any organ evolves → the brainstem routes the advantage to all others.
-//  • No OR — all advantages are inherited automatically.
 // ============================================================================
+
 import { PulseGPUSettingsMemory } from "./PulseGPUSettingsMemory.js";
 import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
 import { PulseGPUSettingsRestorer } from "./PulseGPUSettingsRestorer.js";
 import { PulseGPUSessionTracer } from "./PulseGPUSessionTracer.js";
-
 import { PulseGPUEventEmitter } from "./PulseGPUEventEmitter.js";
 import { PulseGPUUXBridge } from "./PulseGPUUXBridge.js";
-import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
+import { PulseGPUAutoOptimize } from "./PulseGPUGuardianCortex.js";
+import { PulseGPUHealer } from "./PulseGPUHealer.js";
+import { PulseGPUInsightsEngine } from "./PulseGPUInsightsEngine.js";
 
 // ============================================================================
-//  PULSE GPU ORCHESTRATOR — THE BRAINSTEM
+//  ORCHESTRATOR — BRAINSTEM
 // ============================================================================
 class PulseGPUOrchestrator {
   constructor(options = {}) {
@@ -111,7 +97,7 @@ class PulseGPUOrchestrator {
     this.meta = {
       layer: "PulseGPUOrchestrator",
       role: "BRAINSTEM",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       selfRepairable: true,
       evo: {
@@ -123,7 +109,8 @@ class PulseGPUOrchestrator {
     };
 
     log(
-      "gpu","[Brainstem] Command spine online — autonomic coordination active (v7.3).",
+      "gpu",
+      "[Brainstem] Command spine online — autonomic coordination active (v7.7).",
       "color:#03A9F4; font-weight:bold;"
     );
   }
@@ -203,9 +190,7 @@ class PulseGPUOrchestrator {
         metrics: safeMetrics,
         trace: trace ? trace.steps : null
       });
-    } catch {
-      memoryEntry = null;
-    }
+    } catch {}
 
     let advisorResult = {
       currentScore: 0,
@@ -253,7 +238,7 @@ class PulseGPUOrchestrator {
       plan: restorePlan,
       meta: {
         layer: "PulseGPUAutoOptimize",
-        version: 7.3,
+        version: 7.7,
         target: "full-gpu"
       }
     };

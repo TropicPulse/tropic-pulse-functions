@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU ENGINE v7.1 — THE ASTRAL MUSCLE SYSTEM
+//  PULSE GPU ENGINE v7.7 — THE ASTRAL MUSCLE SYSTEM
 //  WebGPU Execution Layer (Frontend-Only, Deterministic, Fail-Open)
 //  PURE RENDERING. ZERO BUSINESS LOGIC. ZERO SIDE EFFECTS OUTSIDE init()/render.
 // ============================================================================
@@ -7,9 +7,9 @@
 // PERSONALITY + ROLE:
 //  -------------------
 //  PulseGPUEngine is the “muscle + motion” of the GPU subsystem.
-//  • Runtime = “nervous system”
-//  • Brain   = “thinking / preparation”
-//  • Engine  = “muscle + motion / contraction layer”
+//  • Runtime = “nervous system” (Momentum Network)
+//  • Brain   = “thinking / preparation” (Analyst Cortex)
+//  • Engine  = “muscle + motion / contraction layer” (THIS FILE)
 //
 //  Execution personality:
 //    - Calm under failure (fail-open)
@@ -32,8 +32,8 @@
 //  • NOT a backend module
 //  • NOT a business logic layer
 //
-// SAFETY CONTRACT:
-//  ----------------
+// SAFETY CONTRACT (v7.7):
+//  -----------------------
 //  • Browser-only (WebGPU required)
 //  • No DOM manipulation outside canvas/context
 //  • No Node APIs
@@ -63,12 +63,14 @@
 //      - unifiedAdvantageField: no OR, both layers always on
 // ============================================================================
 
+import { PulseGPURuntime } from "./PulseGPURuntime.js";
+
 // ============================================================================
 //  ENGINE META — Astral Muscle Identity
 // ============================================================================
 const PULSE_GPU_ENGINE_META = {
   layer: "PulseGPUEngine",
-  version: 7.1,
+  version: 7.7,
   target: "full-gpu",
   description: "WebGPU execution layer — Astral Muscle System.",
   evo: {
@@ -198,7 +200,8 @@ class PulseGPUEngine {
     this.evo = { ...PULSE_GPU_ENGINE_META.evo };
 
     log(
-      "gpu","[PulseGPUEngine] Constructed — awaiting init().",
+      "gpu",
+      "[PulseGPUEngine] Constructed — awaiting init().",
       "color:#03A9F4; font-weight:bold;"
     );
   }
@@ -206,62 +209,58 @@ class PulseGPUEngine {
   // ----------------------------------------------------
   // INITIALIZE ENGINE (FAIL-OPEN)
   // ----------------------------------------------------
-  // ----------------------------------------------------
-// INITIALIZE ENGINE (FAIL-OPEN)
-// ----------------------------------------------------
-async init(canvas) {
-  if (!canvas) {
-    warn(
-      "gpu",
-      "No canvas provided — engine will remain inactive (fail-open)."
+  async init(canvas) {
+    if (!canvas) {
+      warn(
+        "gpu",
+        "No canvas provided — engine will remain inactive (fail-open)."
+      );
+      this.ready = false;
+      return;
+    }
+
+    try {
+      await this.runtime.init(canvas);
+    } catch (err) {
+      warn("gpu", "Runtime init failed (fail-open).", err);
+      this.ready = false;
+      return;
+    }
+
+    const gpuContext =
+      this.runtime.getGPUContext?.() || this.runtime.context;
+
+    if (!gpuContext || !gpuContext.device || !gpuContext.context) {
+      warn(
+        "gpu",
+        "GPU context unavailable — engine inactive (fail-open)."
+      );
+      this.ready = false;
+      return;
+    }
+
+    this.device = gpuContext.device;
+    this.context = gpuContext.context;
+    this.colorFormat = gpuContext.format || "bgra8unorm";
+
+    this.pipelineBuilder = new PulsePipelineBuilder(
+      this.device,
+      this.colorFormat
     );
-    this.ready = false;
-    return;
-  }
-
-  try {
-    await this.runtime.init(canvas);
-  } catch (err) {
-    warn("gpu", "Runtime init failed (fail-open).", err);
-    this.ready = false;
-    return;
-  }
-
-  const gpuContext =
-    this.runtime.getGPUContext?.() || this.runtime.context;
-
-  if (!gpuContext || !gpuContext.device || !gpuContext.context) {
-    warn(
-      "gpu",
-      "GPU context unavailable — engine inactive (fail-open)."
+    this.passBuilder = new PulseRenderPassBuilder(
+      this.device,
+      this.context,
+      this.colorFormat
     );
-    this.ready = false;
-    return;
+    this.drawExecutor = new PulseDrawExecutor(this.device, this.passBuilder);
+
+    this.ready = true;
+
+    log(
+      "gpu",
+      "PulseGPUEngine ready — WebGPU backend active (Astral Muscle)."
+    );
   }
-
-  this.device = gpuContext.device;
-  this.context = gpuContext.context;
-  this.colorFormat = gpuContext.format || "bgra8unorm";
-
-  this.pipelineBuilder = new PulsePipelineBuilder(
-    this.device,
-    this.colorFormat
-  );
-  this.passBuilder = new PulseRenderPassBuilder(
-    this.device,
-    this.context,
-    this.colorFormat
-  );
-  this.drawExecutor = new PulseDrawExecutor(this.device, this.passBuilder);
-
-  this.ready = true;
-
-  log(
-    "gpu",
-    "PulseGPUEngine ready — WebGPU backend active (Astral Muscle)."
-  );
-}
-
 
   // ----------------------------------------------------
   // BUILD PIPELINES

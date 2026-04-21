@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU SESSION TRACER v7.3 — THE SENSORY ARCHIVE
+//  PULSE GPU SESSION TRACER v7.7 — THE SENSORY ARCHIVE
 //  Afferent Nervous System • Deterministic Perception Layer • Pure Recording
 // ============================================================================
 //
@@ -9,37 +9,11 @@
 //  • Records every sensation: duration, warnings, errors, stutters, load.
 //  • Never judges, never interprets — only perceives and preserves.
 //  • The black box of the GPU body.
-//  • The raw sensory feed for the Wisdom Cortex, Brainstem, Lymph Nodes, Drive Center.
-//  • Advantage‑cascade aware: any systemic advantage is inherited automatically.
+//  • The raw sensory feed for Insights, Brainstem, Healer, Advisor.
+//  • Advantage‑cascade aware: inherits all systemic advantages.
 //
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Sensory Archive → Perception + Recording
-//  • Analyst → Intelligence Division
-//  • Momentum Network → Forward Motion
-//  • Motor Hall → Execution Cortex
-//  • Guardian → Permission Gate
-//  • Lymph Node Network → Immune Filter
-//  • Wisdom Cortex → Insight + Interpretation
-//  • Brainstem → Command + Coordination
-//
-// WHAT THIS FILE IS:
-//  -------------------
-//  • A deterministic session recorder
-//  • A pure logic module (API-agnostic, full GPU)
-//  • A generator of SessionTrace objects
-//  • A replay + healing-friendly trace layer
-//
-// WHAT THIS FILE IS NOT:
+// SAFETY CONTRACT (v7.7):
 //  -----------------------
-//  • NOT a renderer
-//  • NOT a GPU runtime
-//  • NOT a WebGPU/WebGL interface
-//  • NOT a persistence layer
-//  • NOT a backend module
-//
-// SAFETY CONTRACT:
-//  ----------------
 //  • No randomness
 //  • No timestamps
 //  • No GPU calls
@@ -48,17 +22,10 @@
 //  • No network or filesystem access
 //  • Fail-open: invalid steps → normalized safely
 //  • Self-repair-ready: traces include metadata
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses become faster → perception conceptually accelerates.
-//  • If system collapses 1000 pulses into 1 → tracing inherits that gain.
-//  • If any organ evolves → Sensory Archive records with that advantage.
-//  • No OR — all advantages are inherited automatically.
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v7 CONTEXT METADATA — Sensory Archive Identity
+// ⭐ OS‑v7.7 CONTEXT METADATA — Sensory Archive Identity
 // ------------------------------------------------------------
 const TRACER_CONTEXT = {
   layer: "PulseGPUSessionTracer",
@@ -67,7 +34,7 @@ const TRACER_CONTEXT = {
   context: "Records ordered steps with durations + health signals",
   target: "full-gpu",
   selfRepairable: true,
-  version: 7.3,
+  version: 7.7,
   evo: {
     advantageCascadeAware: true,
     pulseEfficiencyAware: true,

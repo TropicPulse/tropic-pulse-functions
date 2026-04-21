@@ -1,48 +1,11 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUSettingsMemory.js
-// PULSE GPU SETTINGS MEMORY v7.3 — THE EVOLUTION CORE
+// PULSE GPU SETTINGS MEMORY v7.7 — THE EVOLUTION CORE
 // Adaptive Identity Layer • Genetic Memory • Best‑Self Preservation Engine
 // ============================================================================
 //
-// IDENTITY — THE EVOLUTION CORE:
-//  ------------------------------
-//  • The adaptive identity organ of the GPU organism.
-//  • Stores the “best-known self” across all sessions.
-//  • Preserves genetic memory: configs, metrics, traces.
-//  • Detects regressions (degeneration) and improvements (evolution).
-//  • Promotes stronger configurations into the organism’s identity.
-//  • Ensures the GPU body evolves toward optimal performance.
-//  • Advantage‑cascade aware: any systemic advantage is inherited automatically.
-//
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Sensory Archive → Perception
-//  • Analyst → Intelligence
-//  • Momentum Network → Forward Motion
-//  • Motor Hall → Execution
-//  • Guardian → Permission Gate
-//  • Lymph Node Network → Immune Filter
-//  • Wisdom Cortex → Insight
-//  • Brainstem → Command
-//  • Evolution Core → Identity + Adaptation
-//
-// WHAT THIS FILE IS:
-//  -------------------
-//  • A deterministic memory model for GPU configs + scoring
-//  • A pure logic module (API-agnostic, full GPU)
-//  • A drift-proof store for best-known performance baselines
-//  • The evolutionary backbone for regression detection + tier analysis
-//
-// WHAT THIS FILE IS NOT:
+// SAFETY CONTRACT (v7.7):
 //  -----------------------
-//  • NOT a renderer
-//  • NOT a GPU runtime
-//  • NOT a WebGPU/WebGL interface
-//  • NOT a persistence layer (in-memory only)
-//  • NOT a backend module
-//
-// SAFETY CONTRACT:
-//  ----------------
 //  • No randomness
 //  • No timestamps
 //  • No GPU calls
@@ -51,17 +14,10 @@
 //  • No network or filesystem access
 //  • Fail-open: malformed metrics/settings → safe defaults
 //  • Self-repair-ready: entries include OS metadata
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses become faster → evolution cycles conceptually accelerate.
-//  • If system collapses 1000 pulses into 1 → memory promotion inherits that gain.
-//  • If any organ evolves → Evolution Core updates identity with that advantage.
-//  • No OR — all advantages are inherited automatically.
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v7 CONTEXT METADATA — Evolution Core Identity
+// ⭐ OS‑v7.7 CONTEXT METADATA — Evolution Core Identity
 // ------------------------------------------------------------
 const MEMORY_CONTEXT = {
   layer: "PulseGPUSettingsMemory",
@@ -70,7 +26,7 @@ const MEMORY_CONTEXT = {
   context:
     "Stores best-known configs, metrics, traces, and supports regression detection",
   target: "full-gpu",
-  version: 7.3,
+  version: 7.7,
   selfRepairable: true,
   evo: {
     advantageCascadeAware: true,

@@ -1,33 +1,18 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUUXBridge.js
-// PULSE GPU UX BRIDGE v7.3
+// PULSE GPU UX BRIDGE v7.7
 // “INTELLIGENCE LAYER / COGNITIVE COMMUNICATION BRIDGE”
 // ============================================================================
 //
-// PERSONALITY + ROLE:
-//   PulseGPUUXBridge is the **INTELLIGENCE LAYER** of the GPU subsystem.
-//   It is the **COGNITIVE COMMUNICATION BRIDGE** — the part that translates
-//   internal objects (advice, plans, insights) into human-readable notifications.
-//
-//   • Consumes advice (Drive Center), plans (Recognition Layer), insights (Wisdom Cortex)
-//   • Produces UI-ready notifications with titles, messages, severity, and actions
-//   • Speaks “human” on behalf of the GPU OS
-//
-// SAFETY RULES:
+// SAFETY RULES (v7.7):
 //   • NO randomness or timestamps
 //   • NO DOM, WebGPU, Node, filesystem, or network APIs
 //   • FAIL-OPEN: malformed advice/plan/insight must not break UXBridge
 //   • SELF-REPAIR READY: notifications must be reconstructable + validateable
-//
-// ADVANTAGE CASCADE (conceptual only):
-//   • If pulses become faster → communication conceptually accelerates.
-//   • If system collapses 1000 pulses into 1 → UXBridge inherits that gain.
-//   • If any organ evolves → UXBridge expresses that advantage.
-//   • No OR — all advantages are inherited automatically.
 // ============================================================================
 
 // ------------------------------------------------------
-// ⭐ OS‑v7 Notification builder
+// ⭐ OS‑v7.7 Notification builder
 // ------------------------------------------------------
 function buildNotification({
   kind,
@@ -44,7 +29,7 @@ function buildNotification({
     message: message || "",
     meta: {
       layer: "PulseGPUUXBridge",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       selfRepairable: true,
       evo: {
@@ -76,14 +61,14 @@ function validateNotification(n) {
 }
 
 // ------------------------------------------------------
-// PulseGPUUXBridge (v7-ready)
+// PulseGPUUXBridge v7.7 — Cognitive Communication Layer
 // ------------------------------------------------------
 class PulseGPUUXBridge {
   constructor() {}
 
   static meta = {
     layer: "PulseGPUUXBridge",
-    version: 7.3,
+    version: 7.7,
     target: "full-gpu",
     selfRepairable: true,
     evo: {
@@ -98,9 +83,7 @@ class PulseGPUUXBridge {
   // Advisor result → notifications
   // ----------------------------------------------------
   fromAdvisorResult({ currentScore, baselineScore, deltaPercent, advice }) {
-    if (!Array.isArray(advice) || advice.length === 0) {
-      return [];
-    }
+    if (!Array.isArray(advice) || advice.length === 0) return [];
 
     const notifications = [];
 
@@ -110,6 +93,7 @@ class PulseGPUUXBridge {
       const { type, severity, deltaPercent: dp } = item;
       const gameId = item.gameProfile?.gameId || "this game";
 
+      // REGRESSION
       if (type === "regression") {
         const title = "Performance drop detected";
         const message =
@@ -144,6 +128,7 @@ class PulseGPUUXBridge {
         );
       }
 
+      // IMPROVEMENT
       else if (type === "improvement") {
         const title = "Performance improved";
         const message =
@@ -167,6 +152,7 @@ class PulseGPUUXBridge {
         );
       }
 
+      // SUBOPTIMAL
       else if (type === "suboptimal") {
         const title = "Better settings available";
         const message =
@@ -201,6 +187,7 @@ class PulseGPUUXBridge {
         );
       }
 
+      // TIER UPGRADE
       else if (type === "tier-upgrade-opportunity") {
         const title = "Higher tier performance available";
         const message =
@@ -332,9 +319,7 @@ class PulseGPUUXBridge {
   // Insights → notifications
   // ----------------------------------------------------
   fromInsights(insights = []) {
-    if (!Array.isArray(insights) || insights.length === 0) {
-      return [];
-    }
+    if (!Array.isArray(insights) || insights.length === 0) return [];
 
     const notifications = [];
 

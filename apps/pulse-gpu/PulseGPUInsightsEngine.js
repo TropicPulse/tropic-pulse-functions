@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU INSIGHTS ENGINE v7.3 — THE WISDOM CORTEX
+//  PULSE GPU INSIGHTS ENGINE v7.7 — THE WISDOM CORTEX
 //  Deterministic, Pure Logic, Drift‑Proof Analytics Over Session Traces
 // ============================================================================
 //
@@ -14,33 +14,8 @@
 //  • Pure interpretation. Pure understanding.
 //  • Advantage‑cascade aware: any systemic speed/efficiency gain benefits insight flow.
 //
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Analyst        → Intelligence (precompute brain)
-//  • Nerve Network  → Runtime (memory + context)
-//  • Motor Hall     → Execution (motion)
-//  • Guardian       → Permissions (auto-opt policy)
-//  • Lymph Network  → Immune System (validation + repair)
-//  • Wisdom Cortex  → Insight + Interpretation (meaning)
-//
-// WHAT THIS FILE IS:
-//  -------------------
-//  • A pure logic analytics layer (API‑agnostic, full GPU)
-//  • A deterministic transformer of SessionTrace → Insight objects
-//  • A generator of structured, metadata‑rich insights
-//  • A safe, replayable, self‑repair‑ready wisdom engine
-//
-// WHAT THIS FILE IS NOT:
+// SAFETY CONTRACT (v7.7):
 //  -----------------------
-//  • NOT a renderer
-//  • NOT a GPU runtime
-//  • NOT a WebGPU/WebGL interface
-//  • NOT a persistence layer
-//  • NOT a backend module
-//  • NOT a UI system
-//
-// SAFETY CONTRACT:
-//  ----------------
 //  • No randomness
 //  • No timestamps
 //  • No GPU calls
@@ -50,12 +25,6 @@
 //  • Fail‑open: malformed traces → ignored, never crash
 //  • Deterministic: same traces → same insights
 //  • Self‑repair‑ready: insights include metadata
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses get faster, insight extraction conceptually accelerates.
-//  • If system collapses 1000 pulses into 1, insight flow conceptually inherits that gain.
-//  • No OR: any organism‑level advantage is assumed available to the cortex.
 // ============================================================================
 
 // ============================================================================
@@ -107,7 +76,7 @@ function buildInsight({
     meta: {
       layer: "PulseGPUInsightsEngine",
       role: "WISDOM_CORTEX",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       selfRepairable: true,
       evo: {

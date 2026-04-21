@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU RUNTIME v7.3 — THE MOMENTUM NETWORK
+//  PULSE GPU RUNTIME v7.7 — THE MOMENTUM NETWORK
 //  Forward Motion Layer • Signal Conduction Pathway • GPU Kinetic System
 // ============================================================================
 //
@@ -15,7 +15,7 @@
 // ROLE IN THE GPU NATION:
 //  ------------------------
 //  • Analyst → Intelligence Division (precompute brain)
-//  • Momentum Network → Forward Motion + Signal Conduction
+//  • Momentum Network → Forward Motion + Signal Conduction (THIS FILE)
 //  • Motor Hall → Execution Cortex (rendering + motion)
 //  • Guardian → Permission Gate
 //  • Lymph Node Network → Immune Filter
@@ -38,8 +38,8 @@
 //  • NOT a backend module
 //  • NOT a business logic module
 //
-// SAFETY RULES:
-//  -------------
+// SAFETY RULES (v7.7):
+//  --------------------
 //  • NO backend APIs
 //  • NO DOM manipulation outside WebGPU canvas/context
 //  • NO Node.js APIs
@@ -56,6 +56,8 @@
 //  • No OR — all advantages are inherited automatically.
 // ============================================================================
 
+import { PulseGPUBrainExport } from "./PulseGPUBrain.js";
+
 // ============================================================================
 // GPU CONTEXT WRAPPER — Momentum Network: Conduction Node
 // ============================================================================
@@ -70,7 +72,7 @@ class PulseGPUContext {
     this.meta = {
       layer: "PulseGPUContext",
       role: "MOMENTUM_NODE",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       evo: {
         advantageCascadeAware: true,
@@ -162,7 +164,7 @@ class PulseGPURuntimeLoader {
     this.meta = {
       layer: "PulseGPURuntimeLoader",
       role: "MOMENTUM_FLOW",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       evo: {
         advantageCascadeAware: true,
@@ -173,6 +175,7 @@ class PulseGPURuntimeLoader {
     };
   }
 
+  // Pulls the packageSet from the Analyst Cortex (Brain)
   loadPackages() {
     const pkg = PulseGPUBrainExport.exportToRuntime();
     if (!pkg) {
@@ -250,7 +253,7 @@ class PulseGPURuntimeLoader {
     if (!this.gpu.ready) return false;
 
     this.loadPackages();
-    if (!this.packages) return true;
+    if (!this.packages) return true; // fail-open: GPU ready, no packages
 
     this.initTextures();
     this.initMeshes();
@@ -271,7 +274,7 @@ class PulseGPURuntime {
     this.meta = {
       layer: "PulseGPURuntime",
       role: "MOMENTUM_NETWORK",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       evo: {
         advantageCascadeAware: true,
@@ -312,6 +315,7 @@ class PulseGPURuntime {
     return this.loader.packages;
   }
 
+  // Backwards-compat aliases
   getMeshesFromPackages() {
     return this.loader.meshBuffers;
   }

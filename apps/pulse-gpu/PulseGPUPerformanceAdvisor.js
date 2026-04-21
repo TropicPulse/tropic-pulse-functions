@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU PERFORMANCE ADVISOR v7.3 — THE DRIVE CENTER
+//  PULSE GPU PERFORMANCE ADVISOR v7.7 — THE DRIVE CENTER
 //  Internal Performance Instinct • Deterministic, Pure Logic, Drift‑Proof
 // ============================================================================
 //
@@ -12,35 +12,8 @@
 //  • The subsystem that pushes the organism toward optimal function.
 //  • Advantage‑cascade aware: any systemic advantage is inherited automatically.
 //
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Analyst        → Intelligence Division
-//  • Nerve Network  → Runtime Memory
-//  • Motor Hall     → Execution Cortex
-//  • Guardian       → Permission Gate
-//  • Lymph Network  → Immune Filter
-//  • Wisdom Cortex  → Insight + Interpretation
-//  • Brainstem      → Command + Coordination
-//  • Drive Center   → Performance Instinct + Self‑Assessment
-//
-// WHAT THIS FILE IS:
-//  -------------------
-//  • A deterministic advisor over GPU performance data
-//  • A pure logic module (API‑agnostic, full GPU)
-//  • A generator of structured performance‑pressure advice
-//  • A self‑repair‑ready component for the healing layer
-//
-// WHAT THIS FILE IS NOT:
+// SAFETY CONTRACT (v7.7):
 //  -----------------------
-//  • NOT a renderer
-//  • NOT a GPU runtime
-//  • NOT a WebGPU/WebGL interface
-//  • NOT a persistence layer
-//  • NOT a backend module
-//  • NOT a UI system
-//
-// SAFETY CONTRACT:
-//  ----------------
 //  • No randomness
 //  • No timestamps
 //  • No GPU calls
@@ -50,15 +23,10 @@
 //  • Fail‑open: malformed metrics → safe defaults
 //  • Deterministic: same inputs → same advice
 //  • Self‑repair‑ready: advice includes metadata
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses become faster → performance instinct conceptually sharpens.
-//  • If system collapses 1000 pulses into 1 → Drive Center inherits that gain.
-//  • If any organ evolves → Drive Center evaluates with that advantage.
-//  • No OR — all advantages are inherited automatically.
 // ============================================================================
 
+import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUConfig.js";
+import { PulseGPUSettingsMemory } from "./PulseGPUSettingsMemory.js";
 
 // ============================================================================
 // DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC
@@ -70,9 +38,9 @@ function classifyDelta(deltaPercent) {
 
   const absDelta = Math.abs(deltaPercent);
 
-  if (absDelta < 5) return "low";
-  if (absDelta < 20) return "medium";
-  if (absDelta < 40) return "high";
+  if (absDelta < SEVERITY_THRESHOLDS.LOW) return "low";
+  if (absDelta < SEVERITY_THRESHOLDS.MEDIUM) return "medium";
+  if (absDelta < SEVERITY_THRESHOLDS.HIGH) return "high";
   return "critical";
 }
 
@@ -108,7 +76,7 @@ function buildAdvice({
     meta: {
       layer: "PulseGPUPerformanceAdvisor",
       role: "DRIVE_CENTER",
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       selfRepairable: true,
       evo: {
@@ -147,6 +115,33 @@ function validateAdvice(advice) {
 }
 
 // ============================================================================
+// SCORING + REGRESSION DETECTION HELPERS
+// ============================================================================
+function scoreSession(metrics = {}) {
+  if (!metrics || typeof metrics !== "object") return 0;
+
+  const avg = metrics.avgFps || 0;
+  const min = metrics.minFps || 0;
+  const stutters = metrics.stutters || 0;
+
+  const score =
+    avg * SCORE_CONSTANTS.AVG_FPS_WEIGHT +
+    min * SCORE_CONSTANTS.MIN_FPS_WEIGHT -
+    stutters * SCORE_CONSTANTS.STUTTER_WEIGHT;
+
+  return Math.max(0, score);
+}
+
+function detectRegression(currentMetrics = {}, baselineMetrics = {}) {
+  const currentScore = scoreSession(currentMetrics);
+  const baselineScore = scoreSession(baselineMetrics);
+
+  if (baselineScore === 0) return 0;
+
+  return ((currentScore - baselineScore) / baselineScore) * 100;
+}
+
+// ============================================================================
 //  PULSE GPU PERFORMANCE ADVISOR — THE DRIVE CENTER
 // ============================================================================
 class PulseGPUPerformanceAdvisor {
@@ -157,7 +152,7 @@ class PulseGPUPerformanceAdvisor {
   static meta = {
     layer: "PulseGPUPerformanceAdvisor",
     role: "DRIVE_CENTER",
-    version: 7.3,
+    version: 7.7,
     target: "full-gpu",
     selfRepairable: true,
     evo: {
@@ -168,6 +163,9 @@ class PulseGPUPerformanceAdvisor {
     }
   };
 
+  // ----------------------------------------------------
+  // MAIN ANALYSIS — CURRENT SESSION
+  // ----------------------------------------------------
   analyzeCurrentSession({
     gameProfile,
     hardwareProfile,
@@ -197,9 +195,7 @@ class PulseGPUPerformanceAdvisor {
 
     const advice = [];
 
-    // --------------------------------------------------
-    // Regression → Negative Drive Pressure
-    // --------------------------------------------------
+    // NEGATIVE PRESSURE — REGRESSION
     if (isRegression(deltaPercent)) {
       const severity = classifyDelta(deltaPercent);
 
@@ -227,9 +223,7 @@ class PulseGPUPerformanceAdvisor {
       );
     }
 
-    // --------------------------------------------------
-    // Improvement → Positive Drive Pressure
-    // --------------------------------------------------
+    // POSITIVE PRESSURE — IMPROVEMENT
     else if (isImprovement(deltaPercent)) {
       const severity = classifyDelta(deltaPercent);
 
@@ -265,6 +259,9 @@ class PulseGPUPerformanceAdvisor {
     };
   }
 
+  // ----------------------------------------------------
+  // SAFE ANALYSIS — IMMUNE LAYER ENTRYPOINT
+  // ----------------------------------------------------
   safeAnalyzeCurrentSession(input) {
     try {
       const result = this.analyzeCurrentSession(input || {});
@@ -301,6 +298,9 @@ class PulseGPUPerformanceAdvisor {
     }
   }
 
+  // ----------------------------------------------------
+  // SUBOPTIMAL SETTINGS ANALYSIS
+  // ----------------------------------------------------
   analyzeSuboptimalSettings({
     gameProfile,
     hardwareProfile,
@@ -350,6 +350,9 @@ class PulseGPUPerformanceAdvisor {
     ];
   }
 
+  // ----------------------------------------------------
+  // TIER UPGRADE ANALYSIS
+  // ----------------------------------------------------
   analyzeTierUpgrade({
     gameProfile,
     hardwareProfile,

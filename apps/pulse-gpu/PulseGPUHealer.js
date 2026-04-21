@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE GPU HEALER v7.3 — THE LYMPH NODE NETWORK
+//  PULSE GPU HEALER v7.7 — THE LYMPH NODE NETWORK
 //  Systemic GPU Immune Layer (Deterministic, Pure Logic, Drift‑Proof, Fail‑Open)
 // ============================================================================
 //
@@ -12,14 +12,6 @@
 //  • Ensures the entire GPU organism stays drift‑free and healthy.
 //  • Distributed, systemic, always-on — the GPU’s internal defense grid.
 //  • Dual‑mode evolved: biological + system‑level immune advantage.
-//
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Analyst        → Intelligence (precompute brain)
-//  • Nerve Network  → Runtime (memory + context)
-//  • Motor Hall     → Engine (motion + execution)
-//  • Guardian       → Permissions (auto-opt policy)
-//  • Lymph Network  → Immune System (validation + repair)
 //
 // WHAT THIS FILE IS:
 //  -------------------
@@ -36,8 +28,8 @@
 //  • NOT a backend module
 //  • NOT a compute engine
 //
-// SAFETY CONTRACT:
-//  ----------------
+// SAFETY CONTRACT (v7.7):
+//  -----------------------
 //  • No randomness
 //  • No timestamps
 //  • No environment access
@@ -45,26 +37,12 @@
 //  • No DOM
 //  • Fail-open: invalid inputs → repaired or ignored, never crash
 //  • Self-repair-ready: all outputs include metadata
-//
-// DUAL‑MODE ADVANTAGE (conceptual only):
-//  --------------------------------------
-//  • Biological / mental:
-//      - metabolicBoost: conceptual immune efficiency
-//      - neuralReflexBoost: conceptual response speed
-//      - stabilityBoost: conceptual systemic calm under drift
-//  • System / physical:
-//      - multiInstanceReady: many healers can run in parallel safely
-//      - deterministicNeuron: same inputs → same healing outputs
-//      - parallelSafe: conceptual multi-node immune scaling
-//      - fanOutScaling: conceptual throughput scaling across sessions
-//      - clusterCoherence: conceptual sync across healer instances
-//      - zeroDriftCloning: conceptual no‑drift replication of logic
-//  • Fusion (AND‑architecture):
-//      - dualModeEvolution: mental + physical evolution together
-//      - organismClusterBoost: conceptual boost when many nodes run
-//      - cognitiveComputeLink: conceptual link to Brain/Runtime/Guardian
-//      - unifiedAdvantageField: no OR, both layers always on
 // ============================================================================
+
+import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
+import { PulseGPUSettingsRestorer } from "./PulseGPUSettingsRestorer.js";
+import { PulseGPUAutoOptimize } from "./PulseGPUGuardianCortex.js";
+import { PulseGPUUXBridge } from "./PulseGPUUXBridge.js";
 
 const GPU_HEALER_CONTEXT = {
   layer: "PulseGPUHealer",
@@ -93,11 +71,7 @@ const GPU_HEALER_CONTEXT = {
 };
 
 // ============================================================================
-// IMPORTS
-// ============================================================================
-
-// ============================================================================
-// HEALING REPORT BUILDER (v7-ready, logic unchanged)
+// HEALING REPORT BUILDER
 // ============================================================================
 function buildHealingReport({
   status,
@@ -116,7 +90,7 @@ function buildHealingReport({
     notifications: Array.isArray(notifications) ? notifications.slice() : [],
     meta: {
       ...GPU_HEALER_CONTEXT,
-      version: 7.3,
+      version: 7.7,
       target: "full-gpu",
       selfRepairable: true
     }
@@ -150,6 +124,18 @@ function isAutoDecisionValid(decision) {
   );
 }
 
+function validatePlan(plan) {
+  if (!plan || typeof plan !== "object") return false;
+  if (typeof plan.action !== "string") return false;
+  return true;
+}
+
+function validateNotification(notification) {
+  if (!notification || typeof notification !== "object") return false;
+  if (typeof notification.kind !== "string") return false;
+  return true;
+}
+
 function filterValidNotifications(notifications) {
   if (!Array.isArray(notifications)) return [];
   return notifications.filter((n) => validateNotification(n));
@@ -172,7 +158,7 @@ class PulseGPUHealer {
 
   static meta = {
     ...GPU_HEALER_CONTEXT,
-    version: 7.3,
+    version: 7.7,
     target: "full-gpu",
     selfRepairable: true
   };
@@ -198,9 +184,7 @@ class PulseGPUHealer {
       userPreferences
     } = context;
 
-    // --------------------------------------------------
     // 1) FILTER + REGENERATE ADVISOR RESULT
-    // --------------------------------------------------
     let healedAdvisor = advisorResult;
 
     if (!isAdvisorResultValid(healedAdvisor)) {
@@ -220,9 +204,7 @@ class PulseGPUHealer {
       });
     }
 
-    // --------------------------------------------------
     // 2) FILTER + REGENERATE RESTORE PLAN
-    // --------------------------------------------------
     let healedPlan = restorePlan;
 
     if (!healedPlan || !validatePlan(healedPlan)) {
@@ -236,9 +218,7 @@ class PulseGPUHealer {
       });
     }
 
-    // --------------------------------------------------
     // 3) FILTER + REGENERATE AUTO-OPT DECISION
-    // --------------------------------------------------
     let healedDecision = autoDecision;
 
     const mergedPrefs = { ...(userPreferences || {}) };
@@ -257,9 +237,7 @@ class PulseGPUHealer {
       });
     }
 
-    // --------------------------------------------------
     // 4) FILTER + REGENERATE NOTIFICATIONS
-    // --------------------------------------------------
     let healedNotifications = filterValidNotifications(notifications);
 
     const needAdvisorNotifs =
@@ -287,9 +265,7 @@ class PulseGPUHealer {
       });
     }
 
-    // --------------------------------------------------
     // 5) IMMUNE STATUS
-    // --------------------------------------------------
     const status = actions.length === 0 ? "healthy" : "repaired";
 
     return buildHealingReport({

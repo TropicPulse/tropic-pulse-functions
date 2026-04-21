@@ -1,11 +1,11 @@
 // ============================================================================
-//  PULSE GPU BRAIN v7.3 — THE ANALYST CORTEX
+//  PULSE GPU BRAIN v7.7 — THE ANALYST CORTEX
 //  CPU-SIDE INTELLIGENCE DIVISION (FULL-GPU, API-AGNOSTIC)
 //  PURE LOGIC. PURE DETERMINISM. ZERO SIDE EFFECTS.
 // ============================================================================
 //
-// TRUST-SAFE CONTRACT:
-//  --------------------
+// TRUST-SAFE CONTRACT (v7.7):
+//  ---------------------------
 //  • No GPU calls
 //  • No rendering
 //  • No async
@@ -15,6 +15,7 @@
 //  • No hidden state (only PulseGPUBrainExport.packageSet)
 //  • No mutation outside the export holder
 //  • Deterministic: same input → same output
+//  • Fail-open: invalid input → empty packages, never throw
 //
 // IDENTITY — THE ANALYST CORTEX:
 //  ------------------------------
@@ -23,6 +24,12 @@
 //  • Pure preprocessing, pure logic, pure determinism.
 //  • The strategist that prepares the Astral Nervous System for execution.
 //  • Dual-mode evolved: biological + system-level advantage active together.
+//
+// LAYER POSITION (v7.7):
+//  ----------------------
+//  PulseBand → PulseGPU Barrel → PulseGPUBrain (this file)
+//  This organ THINKS. It does not render, route, or execute frames.
+//  It does not import Runtime, Engine, Orchestrator, Healer, or AutoOptimize.
 //
 // DUAL-MODE ADVANTAGE (conceptual only):
 //  --------------------------------------
@@ -50,17 +57,20 @@
 //  • Always API-agnostic
 //  • Always side-effect-free
 // ============================================================================
-import { PulseGPURuntime } from "./PulseGPURuntime.js";
-import { PulseGPUEngine } from "./PulseGPUEngine.js";
-import { PulseGPUInsightsEngine } from "./PulseGPUInsightsEngine.js";
+
+// ❌ v7.3 imports removed for purity (no Runtime/Engine/Insights here):
+// import { PulseGPURuntime } from "./PulseGPURuntime.js";
+// import { PulseGPUEngine } from "./PulseGPUEngine.js";
+// import { PulseGPUInsightsEngine } from "./PulseGPUInsightsEngine.js";
+
+// ✔ Logging via global primitive is allowed
 log(
   "gpu",
-  "PulseGPUBrain v7.3 — Analyst Cortex active (dual‑mode evolution)."
+  "PulseGPUBrain v7.7 — Analyst Cortex active (dual‑mode evolution)."
 );
 
-
 // ------------------------------------------------------
-// GLOBAL SCHEMA VERSION (v4)
+// GLOBAL SCHEMA VERSION (v4 → still 4, but owned by v7.7 brain)
 // ------------------------------------------------------
 
 const PULSE_GPU_BRAIN_SCHEMA_VERSION = 4;
@@ -277,7 +287,8 @@ class BrainInput {
 class TextureOptimizer {
   static process(rawTextures) {
     log(
-  "gpu","[Analyst] TextureOptimizer → pass-through",
+      "gpu",
+      "[Analyst] TextureOptimizer → pass-through",
       "color:#8BC34A;",
       { count: rawTextures.length }
     );
@@ -295,7 +306,8 @@ class TextureOptimizer {
 class MeshOptimizer {
   static process(rawMeshes) {
     log(
-  "gpu","[Analyst] MeshOptimizer → pass-through",
+      "gpu",
+      "[Analyst] MeshOptimizer → pass-through",
       "color:#8BC34A;",
       { count: rawMeshes.length }
     );
@@ -313,7 +325,8 @@ class MeshOptimizer {
 class LightingBaker {
   static process(rawScenes) {
     log(
-  "gpu","[Analyst] LightingBaker → placeholder",
+      "gpu",
+      "[Analyst] LightingBaker → placeholder",
       "color:#8BC34A;",
       { sceneCount: rawScenes.length }
     );
@@ -330,7 +343,8 @@ class LightingBaker {
 class AnimationBaker {
   static process(rawAnimations) {
     log(
-  "gpu","[Analyst] AnimationBaker → pass-through",
+      "gpu",
+      "[Analyst] AnimationBaker → pass-through",
       "color:#8BC34A;",
       { clipCount: rawAnimations.length }
     );
@@ -348,7 +362,8 @@ class AnimationBaker {
 class ShaderCompiler {
   static process(rawShaders) {
     log(
-  "gpu","[Analyst] ShaderCompiler → pass-through",
+      "gpu",
+      "[Analyst] ShaderCompiler → pass-through",
       "color:#8BC34A;",
       { shaderCount: rawShaders.length }
     );
@@ -365,7 +380,6 @@ class ShaderCompiler {
 
 class RenderPlanner {
   static process(rawScenes, usagePatterns) {
-
     log(
       "gpu",
       "RenderPlanner → placeholder",
@@ -387,7 +401,6 @@ class RenderPlanner {
   }
 }
 
-
 // ------------------------------------------------------
 // BRAIN ORCHESTRATOR (PURE, SYNCHRONOUS)
 // ------------------------------------------------------
@@ -395,7 +408,8 @@ class RenderPlanner {
 class PulseGPUBrainController {
   static buildPackages(brainInput) {
     log(
-  "gpu","[Analyst] buildPackages() — starting",
+      "gpu",
+      "[Analyst] buildPackages() — starting",
       "color:#03A9F4;",
       {
         schemaVersion: brainInput.schemaVersion,
@@ -430,7 +444,8 @@ class PulseGPUBrainController {
     };
 
     log(
-  "gpu","[Analyst] buildPackages() — complete",
+      "gpu",
+      "[Analyst] buildPackages() — complete",
       "color:#4CAF50;",
       { schemaVersion: packageSet.schemaVersion }
     );
@@ -448,14 +463,16 @@ class PulseGPUBrainExport {
 
   static buildAndStore(brainInput) {
     log(
-  "gpu","[Analyst] buildAndStore()",
+      "gpu",
+      "[Analyst] buildAndStore()",
       "color:#03A9F4;"
     );
 
     this.packageSet = PulseGPUBrainController.buildPackages(brainInput);
 
     log(
-  "gpu","[Analyst] packageSet stored",
+      "gpu",
+      "[Analyst] packageSet stored",
       "color:#4CAF50;"
     );
 
@@ -464,7 +481,8 @@ class PulseGPUBrainExport {
 
   static exportToRuntime() {
     log(
-  "gpu","[Analyst] exportToRuntime()",
+      "gpu",
+      "[Analyst] exportToRuntime()",
       "color:#03A9F4;",
       { hasPackageSet: !!this.packageSet }
     );
@@ -472,6 +490,7 @@ class PulseGPUBrainExport {
     return this.packageSet;
   }
 }
+
 // ------------------------------------------------------
 // EXPORTS
 // ------------------------------------------------------
