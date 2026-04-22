@@ -210,6 +210,19 @@ export const VitalsLogger = {
     version: "9.3"
   }
 };
+export const logger = {
+  log,
+  warn,
+  error,
+  critical,
+  group,
+  groupEnd,
+  makeTelemetryPacket,
+  meta: {
+    layer: "PulseLogger",
+    version: "9.3"
+  }
+};
 
 // ============================================================================
 //  GLOBAL BROADCAST — Makes primitives available to all subsystems
