@@ -25,6 +25,9 @@
 //  Prevents import binding death. Does NOT define routes.
 //  The CNS will build routes dynamically AFTER boot.
 // ============================================================================
+// ============================================================================
+//  v9.3 — FRONTEND SENSORY-INTELLIGENCE LOCK + PAGE SCANNER HOOK
+// ============================================================================
 (function () {
   const seen = new Set();
   const orig = Object.defineProperty;
@@ -34,7 +37,24 @@
     seen.add(key);
     return orig(obj, key, desc);
   };
+
+  // Page-level scanner: catch errors → route → heal
+  window.addEventListener("error", (event) => {
+    try {
+      if (!window.Pulse || !window.Pulse.Router) return;
+      window.Pulse.Router.route("pageError", {
+        message: event.message,
+        source: event.filename,
+        line: event.lineno,
+        column: event.colno,
+        error: event.error || null,
+        layer: "PageScanner",
+        origin: "PulseUnderstanding"
+      });
+    } catch (_) {}
+  });
 })();
+
 
 
 // Band / Nervous System
