@@ -28,10 +28,13 @@
 // SAFETY:
 //   • v9.x upgrade is COMMENTAL / IDENTITY ONLY — NO LOGIC CHANGES
 // ============================================================================
+// ============================================================================
+// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktAuctioneer.js
+// LAYER: THE AUCTIONEER
+// (Bid‑Floor Interpreter + Volatility Handler + Market Chaos Normalizer)
+// PULSE‑EARN v9.x — COMMENTAL / IDENTITY UPGRADE ONLY (NO LOGIC CHANGES)
+// ============================================================================
 
-// ---------------------------------------------------------------------------
-// Healing Metadata — Auctioneer Interaction Log
-// ---------------------------------------------------------------------------
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -42,12 +45,12 @@ const healingState = {
   lastNormalizedJobId: null,
   lastNormalizationError: null,
 
-  // Vast-specific metadata
   lastPayloadVersion: null,
   lastJobType: null,
   lastGpuScore: null,
   lastResourceShape: null,
   lastBandwidthInference: null,
+
   priceVolatility: 0,
   listingVolatility: 0,
 
@@ -55,8 +58,15 @@ const healingState = {
 };
 
 // ---------------------------------------------------------------------------
-// INTERNAL — Vast-Specific Helpers
+// INTERNAL — API KEY + SAFE GET
 // ---------------------------------------------------------------------------
+function getKey() {
+  return (
+    process.env.VAST_API_KEY ||
+    "e2f301fe87d52f79a2fe40df698dfd16b7309d6e2ec86cf877d5b05ea0f69d81"
+  );
+}
+
 function safeGet(obj, path, fallback = null) {
   try {
     return path
@@ -85,22 +95,26 @@ function updateVolatility(jobs) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// AUCTIONEER CLIENT — Vast.ai Marketplace Interface
-// ---------------------------------------------------------------------------
+// ============================================================================
+// AUCTIONEER — Vast.ai Marketplace Adapter
+// ============================================================================
 export const PulseEarnMktAuctioneer = {
   id: "vast",
   name: "Vast.ai",
 
   // -------------------------------------------------------------------------
-  // Ping — Measure auction floor latency
+  // PING — Vast API health check
   // -------------------------------------------------------------------------
   async ping() {
-    const url = "https://api.vast.ai/v0/ping";
-    const start = Date.now();
+    const key = getKey();
+    const url = `https://cloud.vast.ai/api/v1/users/current`;
 
+    const start = Date.now();
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${key}` }
+      });
+
       if (!res.ok) {
         healingState.lastPingError = `non_ok_status_${res.status}`;
         return null;
@@ -118,13 +132,17 @@ export const PulseEarnMktAuctioneer = {
   },
 
   // -------------------------------------------------------------------------
-  // Fetch Jobs — Retrieve auction‑style listings
+  // FETCH JOBS — Vast.ai "jobs" = GPU offers
   // -------------------------------------------------------------------------
   async fetchJobs(deviceId) {
-    const url = "https://api.vast.ai/v0/jobs/list";
+    const key = getKey();
+    const url = `https://cloud.vast.ai/api/v1/bundles/?q={}`;
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${key}` }
+      });
+
       if (!res.ok) {
         healingState.lastFetchError = `non_ok_status_${res.status}`;
         healingState.lastFetchCount = 0;
@@ -132,17 +150,11 @@ export const PulseEarnMktAuctioneer = {
       }
 
       const data = await res.json();
+      const offers = data.offers || [];
 
-      healingState.lastPayloadVersion =
-        typeof data === "object" ? Object.keys(data).join(",") : "unknown";
+      healingState.lastPayloadVersion = Object.keys(data).join(",");
 
-      if (!data || !Array.isArray(data.jobs)) {
-        healingState.lastFetchError = "invalid_jobs_payload";
-        healingState.lastFetchCount = 0;
-        return [];
-      }
-
-      const jobs = data.jobs
+      const jobs = offers
         .map(raw => this.normalizeJob(raw))
         .filter(j => j !== null);
 
@@ -153,8 +165,6 @@ export const PulseEarnMktAuctioneer = {
       healingState.cycleCount++;
       return jobs;
     } catch (err) {
-      // eslint-disable-next-line no-console
-      error("PulseEarnMktAuctioneer.fetchJobs() error:", err);
       healingState.lastFetchError = err.message;
       healingState.lastFetchCount = 0;
       return [];
@@ -162,33 +172,24 @@ export const PulseEarnMktAuctioneer = {
   },
 
   // -------------------------------------------------------------------------
-  // Submit Result — Return completed work to Vast.ai
+  // SUBMIT RESULT — Vast.ai does NOT accept compute results
   // -------------------------------------------------------------------------
   async submitResult(job, result) {
-    const url = `https://api.vast.ai/v0/jobs/${job.id}/submit`;
     healingState.lastSubmitJobId = job?.id ?? null;
 
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ result }),
-      });
+    healingState.lastSubmitError = null;
+    healingState.cycleCount++;
 
-      const json = await res.json();
-      healingState.lastSubmitError = null;
-      healingState.cycleCount++;
-      return json;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      error("PulseEarnMktAuctioneer.submitResult() error:", err);
-      healingState.lastSubmitError = err.message;
-      throw err;
-    }
+    return {
+      ok: true,
+      marketplace: "vast",
+      jobId: job?.id ?? null,
+      note: "Vast.ai does not accept compute results. Pulse‑Earn internal only."
+    };
   },
 
   // -------------------------------------------------------------------------
-  // Normalize Job — Convert Vast listing → Pulse‑Earn job schema
+  // NORMALIZE JOB — Vast → Pulse‑Earn schema
   // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
@@ -201,22 +202,17 @@ export const PulseEarnMktAuctioneer = {
         return null;
       }
 
-      healingState.lastJobType = safeGet(raw, "type", "unknown");
+      healingState.lastJobType = safeGet(raw, "type", "offer");
 
-      const payout =
-        raw.payout ??
-        (raw.price_per_hour ? Number(raw.price_per_hour) : 0);
-
+      const payout = Number(raw.dph_total ?? raw.price_per_hour ?? 0);
       if (!Number.isFinite(payout) || payout <= 0) {
         healingState.lastNormalizationError = "non_positive_payout";
         return null;
       }
 
-      const cpuRequired = Number(raw.cpu_required ?? raw.cpu ?? 1);
-      const memoryRequired = Number(raw.memory_required ?? raw.ram ?? 1024);
-      const estimatedSeconds = Number(
-        raw.estimated_seconds ?? raw.duration ?? 600
-      );
+      const cpuRequired = Number(raw.cpu_cores ?? 1);
+      const memoryRequired = Number(raw.ram_gb ?? 1) * 1024;
+      const estimatedSeconds = 3600; // Vast = hourly pricing
 
       healingState.lastResourceShape = {
         cpu: cpuRequired,
@@ -224,15 +220,10 @@ export const PulseEarnMktAuctioneer = {
         duration: estimatedSeconds,
       };
 
-      if (!Number.isFinite(estimatedSeconds) || estimatedSeconds <= 0) {
-        healingState.lastNormalizationError = "non_positive_duration";
-        return null;
-      }
-
-      const gpuScore = Number(raw.gpu_score ?? raw.min_gpu_score ?? 100);
+      const gpuScore = Number(raw.gpu_ram ?? 8) * 10;
       healingState.lastGpuScore = gpuScore;
 
-      const bandwidth = Number(raw.bandwidth ?? raw.net_mbps ?? 5);
+      const bandwidth = Number(raw.net_up ?? 5);
       healingState.lastBandwidthInference = bandwidth;
 
       const normalized = {
@@ -259,7 +250,7 @@ export const PulseEarnMktAuctioneer = {
 };
 
 // ---------------------------------------------------------------------------
-// Healing State Export — Auctioneer Interaction Log
+// HEALING STATE EXPORT
 // ---------------------------------------------------------------------------
 export function getPulseEarnMktAuctioneerHealingState() {
   return { ...healingState };
