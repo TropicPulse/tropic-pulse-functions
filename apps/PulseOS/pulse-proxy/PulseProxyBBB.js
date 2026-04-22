@@ -4,19 +4,6 @@
 //  PURE VERIFICATION. ZERO IMPORTS. ZERO DRIFT.
 //  CENTRALIZED IDENTITY FOR ALL SUBSYSTEMS.
 // ============================================================================
-//
-//  THIS FILE DEFINES THE SOURCE OF TRUTH FOR:
-//
-//   • Subsystem versions
-//   • Subsystem roles (organ metaphors)
-//   • Subsystem lineage
-//   • Subsystem colors (console identity) [optional, future]
-//   • Identity loader (BBB)
-//   • Offline‑safe identity fallback
-//
-//  NO OTHER FILE DEFINES VERSION / ROLE / LINEAGE.
-//  NO IMPORTS ALLOWED. NO DEPENDENCIES. PURE ORGANISM.
-// ============================================================================
 
 
 // ============================================================================
@@ -43,13 +30,11 @@ export const PulseVersion = {
   marketplaces:  "9.3",
   telemetry:     "9.3",
   limbic:        "9.3",
-
-  // Newer explicit layers (v9.3+)
-  governor:      "9.3",   // PulseOSGovernor
-  understanding: "9.3",   // PulseUnderstanding (kernel opener)
-  proxy:         "9.3",   // Proxy / Adrenal / InstanceOrchestrator
-  earn:          "9.3",   // EarnSystem / EarnReflex / EarnRouter
-  send:          "9.3"    // Transport / PulseSend
+  governor:      "9.3",
+  understanding: "9.3",
+  proxy:         "9.3",
+  earn:          "9.3",
+  send:          "9.3"
 };
 
 
@@ -69,13 +54,11 @@ export const PulseRoles = {
   marketplaces:  "EMBASSY LEDGER",
   telemetry:     "BLOODSTREAM",
   limbic:        "LIMBIC SHADOW",
-
-  // Newer explicit layers (v9.3+)
   governor:      "GLOBAL LOOP GOVERNOR",
   understanding: "CORTICAL OPENER / ORGANISM LOADER",
-  proxy:         "ADRENAL SYSTEM / INSTANCE ORCHESTRATOR",
-  earn:          "ECONOMIC ORGAN / EARN ENGINE",
-  send:          "TRANSPORT / PULSE SEND SYSTEM"
+  proxy:         "ADRENAL SYSTEM",
+  earn:          "ECONOMIC ORGAN",
+  send:          "TRANSPORT SYSTEM"
 };
 
 
@@ -95,8 +78,6 @@ export const PulseLineage = {
   marketplaces:  "embassy-core",
   telemetry:     "bloodstream-core",
   limbic:        "shadow-core",
-
-  // Newer explicit layers (v9.3+)
   governor:      "governor-core",
   understanding: "cortical-opener-core",
   proxy:         "adrenal-core",
@@ -108,6 +89,7 @@ export const PulseLineage = {
 // ============================================================================
 // ⭐ IDENTITY LOADER — BBB Verification Engine (v9.3)
 //  LOCAL-FIRST. REMOTE OPTIONAL. ZERO DEPENDENCY.
+//  TRUSTED DEVICE PERSISTENCE INCLUDED.
 // ============================================================================
 export async function identity() {
   safeLog("[BBB] Identity Request (v9.3)");
@@ -128,8 +110,13 @@ export async function identity() {
 
       if (missing.length === 0) {
         safeLog("[BBB] Local identity validated (offline-capable)");
+
         return {
           ...localIdentity,
+
+          // ⭐ TRUST RESTORED IF SAVED
+          trustedDevice: localIdentity.trustedDevice === true,
+
           lineage: PulseLineage.identity,
           meta: {
             layer: "PulseIdentity",
@@ -154,6 +141,10 @@ export async function identity() {
       uid: null,
       userEmail: null,
       sessionToken: null,
+
+      // ⭐ DEFAULT: NOT TRUSTED
+      trustedDevice: false,
+
       offline: true,
       reason: "No valid local identity and remote verification disabled.",
       lineage: PulseLineage.identity,
@@ -177,6 +168,10 @@ export async function identity() {
       uid: null,
       userEmail: null,
       sessionToken: null,
+
+      // ⭐ DEFAULT: NOT TRUSTED
+      trustedDevice: false,
+
       offline: true,
       reason: "Identity loader crashed; safe offline fallback.",
       lineage: PulseLineage.identity,

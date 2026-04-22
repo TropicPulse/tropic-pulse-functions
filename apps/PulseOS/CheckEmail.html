@@ -776,250 +776,277 @@ text-align: center;
     div.textContent = `🔥 JS ERROR:\n${msg}\n${src}:${line}:${col}`;
     document.body.appendChild(div);
   };
-log("🌞 Script loaded, attaching visibility listener…");
+
+  function log(...args) { try { console.log(...args); } catch {} }
+
+  log("🌞 Script loaded, attaching visibility listener…");
+
+  // ============================================================================  
+  // LOGIN PAGE — PULSE OS v6  
   // ============================================================================
-// LOGIN PAGE — PULSE OS v6
-// Pure UI + Identity Bootstrap + Send PIN + Verify PIN
-// NO PulseBand system, NO PulseGPU system, NO PageScanner, NO timers.
-// ============================================================================
 
-// -----------------------------
-// GLOBAL ELEMENTS
-// -----------------------------
-const authMsg        = document.getElementById("authMsg");
-const pinSection     = document.getElementById("pinSection");
-const emailSection   = document.getElementById("emailSection");
-const rememberSection = document.getElementById("rememberSection");
+  const authMsg        = document.getElementById("authMsg");
+  const pinSection     = document.getElementById("pinSection");
+  const emailSection   = document.getElementById("emailSection");
+  const rememberSection = document.getElementById("rememberSection");
 
-const pinInput       = document.getElementById("pinInput");
-const emailInput     = document.getElementById("emailInput");
-const staySignedIn   = document.getElementById("staySignedIn");
+  const pinInput       = document.getElementById("pinInput");
+  const emailInput     = document.getElementById("emailInput");
+  const staySignedIn   = document.getElementById("staySignedIn");
 
-const params   = new URLSearchParams(window.location.search);
-const returnTo = params.get("returnTo");
+  const params   = new URLSearchParams(window.location.search);
+  const returnTo = params.get("returnTo");
 
-// -----------------------------
-// DEBUG MARKER
-// -----------------------------
-function mark(msg) {
-  log("[LOGIN]", msg);
-}
-
-// -----------------------------
-// LOADER UI
-// -----------------------------
-function showTPLoader() {
-  const el = document.getElementById("t-loading");
-  if (!el) return;
-  el.style.display = "flex";
-  requestAnimationFrame(() => el.classList.add("show"));
-}
-
-function hideTPLoader() {
-  const el = document.getElementById("t-loading");
-  if (!el) return;
-
-  el.classList.remove("show");
-  setTimeout(() => {
-    el.style.display = "none";
-  }, 150);
-}
-
-// -----------------------------
-// SHOW LOGIN UI
-// -----------------------------
-function showLoginUI() {
-  emailSection.style.display = "block";
-  rememberSection.style.display = "block";
-  pinSection.style.display = "none";
-  authMsg.style.display = "none";
-}
-
-// ============================================================================
-// 1) LOGIN BOOTSTRAP — Only checks if identity exists (NO identity())
-// ============================================================================
-async function loginBootstrap() {
-  showTPLoader();
-  log("[LOGIN DOM] BOOTSTRAP START");
-
-  const id = window.PulseIdentity || null;
-
-  if (!id) {
-    hideTPLoader();
-    showLoginUI();
-    return;
+  function showTPLoader() {
+    const el = document.getElementById("t-loading");
+    if (!el) return;
+    el.style.display = "flex";
+    requestAnimationFrame(() => el.classList.add("show"));
   }
 
-  hideTPLoader();
-  window.location.href = returnTo || "/dashboard.html";
-}
+  function hideTPLoader() {
+    const el = document.getElementById("t-loading");
+    if (!el) return;
+    el.classList.remove("show");
+    setTimeout(() => el.style.display = "none", 150);
+  }
 
-// ============================================================================
-// 2) SEND PIN — SINGLE GUARDED HANDLER
-// ============================================================================
-if (!window.__sendPinBound) {
-  window.__sendPinBound = true;
+  function showLoginUI() {
+    emailSection.style.display = "block";
+    rememberSection.style.display = "block";
+    pinSection.style.display = "none";
+    authMsg.style.display = "none";
+  }
 
-  document.getElementById("sendBtn").addEventListener("click", async () => {
-    const email = emailInput.value.trim().toLowerCase();
+  // ============================================================================  
+  // 1) LOGIN BOOTSTRAP  
+  // ============================================================================
+  async function loginBootstrap() {
     showTPLoader();
+    log("[LOGIN DOM] BOOTSTRAP START");
 
-    if (!email || !email.includes("@")) {
+    const id = window.PulseIdentity || null;
+
+    if (!id) {
       hideTPLoader();
-      authMsg.textContent = "Please Enter a Valid Email!";
-      authMsg.className = "msg error";
-      authMsg.style.display = "block";
       showLoginUI();
-      emailInput.focus();
       return;
     }
 
-    authMsg.style.display = "none";
+    hideTPLoader();
+    window.location.href = returnTo || "/dashboard.html";
+  }
 
-    try {
-      const data = await getHook({ type: "sendPin", email });
-      hideTPLoader();
+  // ============================================================================  
+  // 2) SEND PIN  
+  // ============================================================================
+  if (!window.__sendPinBound) {
+    window.__sendPinBound = true;
 
-      if (data.success) {
-        authMsg.className = "msg success";
-        authMsg.textContent = "PIN Sent! Check your Email!";
-        authMsg.style.display = "block";
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const email = emailInput.value.trim().toLowerCase();
+      showTPLoader();
 
-        emailSection.style.display = "none";
-        rememberSection.style.display = "none";
-        pinSection.style.display = "block";
-        pinInput.focus();
-      } else {
+      if (!email || !email.includes("@")) {
+        hideTPLoader();
+        authMsg.textContent = "Please Enter a Valid Email!";
         authMsg.className = "msg error";
-        authMsg.textContent = "Could not Send PIN. Try again!";
+        authMsg.style.display = "block";
+        showLoginUI();
+        emailInput.focus();
+        return;
+      }
+
+      authMsg.style.display = "none";
+
+      try {
+        const data = await getHook({ type: "sendPin", email });
+        hideTPLoader();
+
+        if (data.success) {
+          authMsg.className = "msg success";
+          authMsg.textContent = "PIN Sent! Check your Email!";
+          authMsg.style.display = "block";
+
+          emailSection.style.display = "none";
+          rememberSection.style.display = "none";
+          pinSection.style.display = "block";
+          pinInput.focus();
+        } else {
+          authMsg.className = "msg error";
+          authMsg.textContent = "Could not Send PIN. Try again!";
+          authMsg.style.display = "block";
+          showLoginUI();
+          emailInput.focus();
+        }
+      } catch (err) {
+        hideTPLoader();
+        authMsg.className = "msg error";
+        authMsg.textContent = "Network error. Try again!";
         authMsg.style.display = "block";
         showLoginUI();
         emailInput.focus();
       }
-    } catch (err) {
-      hideTPLoader();
-      authMsg.className = "msg error";
-      authMsg.textContent = "Network error. Try again!";
-      authMsg.style.display = "block";
-      showLoginUI();
-      emailInput.focus();
-    }
-  });
-}
-
-// ============================================================================
-// 3) VERIFY PIN — SINGLE GUARDED HANDLER
-// ============================================================================
-if (!window.__verifyPinBound) {
-  window.__verifyPinBound = true;
-
-  document.getElementById("verifyBtn").addEventListener("click", async () => {
-    const email = emailInput.value.trim().toLowerCase();
-    const pin = pinInput.value.trim();
-    showTPLoader();
-
-    if (pin.length !== 6) {
-      hideTPLoader();
-      authMsg.className = "msg error";
-      authMsg.textContent = "PIN must be 6 digits!";
-      authMsg.style.display = "block";
-      pinInput.focus();
-      return;
-    }
-
-    authMsg.style.display = "none";
-
-    try {
-      const data = await getHook({
-        type: "verifyPin",
-        email,
-        pin,
-        purpose: "login"
-      });
-
-      hideTPLoader();
-
-      if (data.success && data.token && data.identity) {
-        localStorage.setItem("tp_token_v4", data.token);
-        localStorage.setItem("tp_identity_v4", JSON.stringify(data.identity));
-        localStorage.setItem("tp_device_token_v4", "1");
-
-        if (staySignedIn.checked) {
-          localStorage.setItem("tp_stay_signed_v4", "1");
-        } else {
-          localStorage.removeItem("tp_stay_signed_v4");
-        }
-
-        window.location.href = returnTo || "/dashboard.html";
-        return;
-      }
-
-      authMsg.className = "msg error";
-      authMsg.textContent = "Invalid PIN. Try again!";
-      authMsg.style.display = "block";
-      pinInput.focus();
-
-    } catch (err) {
-      hideTPLoader();
-      authMsg.className = "msg error";
-      authMsg.textContent = "Network error. Try again!";
-      authMsg.style.display = "block";
-      pinInput.focus();
-    }
-  });
-}
-
-// ============================================================================
-// 4) PULSEBAND BADGE ONLY (UI-only, NO system layers)
-// ============================================================================
-if (!window.__pulsebandListenersAttached) {
-  window.__pulsebandListenersAttached = true;
-
-  window.addEventListener("load", () => {
-    const disabled = localStorage.getItem("pulseband_disabled") === "1";
-    window.isIdle = disabled;
-  });
-
-  document.getElementById("pb-mini-badge")?.addEventListener("click", () => {
-    const disabled = localStorage.getItem("pulseband_disabled") === "1";
-
-    if (disabled) {
-      localStorage.removeItem("pulseband_disabled");
-      window.isIdle = false;
-    } else {
-      localStorage.setItem("pulseband_disabled", "1");
-      window.isIdle = true;
-    }
-  });
-}
-
-// ============================================================================
-// 5) DOM WRAPPER — NO pipelines, NO system layers
-// ============================================================================
-(async () => {
-  log("[LOGIN DOM] DOM LOAD START");
-
-  await loginBootstrap();
-
-  const badge = document.getElementById("pulseband-badge");
-  const panel = document.getElementById("pulseband-panel");
-
-  if (badge && panel) {
-    badge.onclick = (e) => {
-      e.stopPropagation();
-      panel.style.display = panel.style.display === "block" ? "none" : "block";
-    };
-
-    document.addEventListener("click", (e) => {
-      const inside = panel.contains(e.target);
-      const onBadge = badge.contains(e.target);
-      if (!inside && !onBadge) panel.style.display = "none";
     });
   }
 
-  log("[LOGIN DOM] DOM LOAD END");
-})();
+  // ============================================================================  
+  // 3) VERIFY PIN — UPGRADED TRUST + IDENTITY PERSISTENCE  
+  // ============================================================================
+  if (!window.__verifyPinBound) {
+    window.__verifyPinBound = true;
 
+    document.getElementById("verifyBtn").addEventListener("click", async () => {
+      const email = emailInput.value.trim().toLowerCase();
+      const pin = pinInput.value.trim();
+      showTPLoader();
+
+      if (pin.length !== 6) {
+        hideTPLoader();
+        authMsg.className = "msg error";
+        authMsg.textContent = "PIN must be 6 digits!";
+        authMsg.style.display = "block";
+        pinInput.focus();
+        return;
+      }
+
+      authMsg.style.display = "none";
+
+      try {
+        const data = await getHook({
+          type: "verifyPin",
+          email,
+          pin,
+          purpose: "login"
+        });
+
+        hideTPLoader();
+
+        if (data.success && data.token && data.identity) {
+
+          // ------------------------------
+          // ⭐ BUILD CANONICAL IDENTITY
+          // ------------------------------
+          const canonical = {
+            ...data.identity,
+            trustedDevice: true
+          };
+
+          // ------------------------------
+          // ⭐ SAVE CANONICAL v9 IDENTITY
+          // ------------------------------
+          try {
+            localStorage.setItem("tp_identity_v9", JSON.stringify(canonical));
+          } catch (e) {}
+
+          // ------------------------------
+          // ⭐ MIRROR FOR v4 COMPATIBILITY
+          // ------------------------------
+          try {
+            const mirror = {
+              uid: canonical.uid || null,
+              userEmail: canonical.userEmail || null,
+              sessionToken: canonical.sessionToken || null,
+              trustedDevice: true
+            };
+            localStorage.setItem("tp_identity_v4", JSON.stringify(mirror));
+            localStorage.setItem("tp_device_token_v4", "1");
+            localStorage.setItem("tp_device_token_v9", "1");
+          } catch (e) {}
+
+          // ------------------------------
+          // ⭐ SAVE TOKEN (existing behavior)
+          // ------------------------------
+          try {
+            localStorage.setItem("tp_token_v4", data.token);
+          } catch (e) {}
+
+          // ------------------------------
+          // ⭐ STAY SIGNED IN FLAG
+          // ------------------------------
+          if (staySignedIn.checked) {
+            localStorage.setItem("tp_stay_signed_v4", "1");
+          } else {
+            localStorage.removeItem("tp_stay_signed_v4");
+          }
+
+          // ------------------------------
+          // ⭐ EXPOSE IDENTITY IMMEDIATELY
+          // ------------------------------
+          window.PulseIdentity = canonical;
+
+          // ------------------------------
+          // ⭐ REDIRECT
+          // ------------------------------
+          window.location.href = returnTo || "/dashboard.html";
+          return;
+        }
+
+        authMsg.className = "msg error";
+        authMsg.textContent = "Invalid PIN. Try again!";
+        authMsg.style.display = "block";
+        pinInput.focus();
+
+      } catch (err) {
+        hideTPLoader();
+        authMsg.className = "msg error";
+        authMsg.textContent = "Network error. Try again!";
+        authMsg.style.display = "block";
+        pinInput.focus();
+      }
+    });
+  }
+
+  // ============================================================================  
+  // 4) PULSEBAND BADGE (UI ONLY)  
+  // ============================================================================
+  if (!window.__pulsebandListenersAttached) {
+    window.__pulsebandListenersAttached = true;
+
+    window.addEventListener("load", () => {
+      const disabled = localStorage.getItem("pulseband_disabled") === "1";
+      window.isIdle = disabled;
+    });
+
+    document.getElementById("pb-mini-badge")?.addEventListener("click", () => {
+      const disabled = localStorage.getItem("pulseband_disabled") === "1";
+
+      if (disabled) {
+        localStorage.removeItem("pulseband_disabled");
+        window.isIdle = false;
+      } else {
+        localStorage.setItem("pulseband_disabled", "1");
+        window.isIdle = true;
+      }
+    });
+  }
+
+  // ============================================================================  
+  // 5) DOM WRAPPER  
+  // ============================================================================
+  (async () => {
+    log("[LOGIN DOM] DOM LOAD START");
+
+    await loginBootstrap();
+
+    const badge = document.getElementById("pulseband-badge");
+    const panel = document.getElementById("pulseband-panel");
+
+    if (badge && panel) {
+      badge.onclick = (e) => {
+        e.stopPropagation();
+        panel.style.display = panel.style.display === "block" ? "none" : "block";
+      };
+
+      document.addEventListener("click", (e) => {
+        const inside = panel.contains(e.target);
+        const onBadge = badge.contains(e.target);
+        if (!inside && !onBadge) panel.style.display = "none";
+      });
+    }
+
+    log("[LOGIN DOM] DOM LOAD END");
+  })();
 </script>
 </body>
 </html>
