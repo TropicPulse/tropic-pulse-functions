@@ -44,6 +44,7 @@ import * as PulseSend from "./pulse-send/PulseSendSystem.js";
 
 // Router / CNS nervous system
 import * as PulseRouter from "./pulse-router/PulseRouterEvolutionaryThought.js";
+import { attachScanner } from "./PULSE-OS/PulseOSSkinReflex.js";
 
 
 // ============================================================================
@@ -98,7 +99,7 @@ const PulseIdentity = {
   deviceId: getOrCreateDeviceId(),
   userId: getUserId()
 };
-
+attachScanner(PulseIdentity.userId);
 
 // ============================================================================
 //  ENVIRONMENT SNAPSHOT (NO NETWORK)
