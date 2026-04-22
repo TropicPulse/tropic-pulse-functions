@@ -6,58 +6,33 @@
 //
 //  ROLE:
 //    • Single entrypoint for the entire organism in the browser
-//    • Loads OS, GPU, Earn, Mesh, Proxy Client, PulseSend, Band, Synapse
-//    • Loads Logger, Router, Healers (client-visible), Identity + Device
+//    • Loads Nervous System, GPU, Earn, Mesh, Transport, Router
+//    • Provides Identity + Environment snapshot
 //    • Exposes a unified, stable API on window.Pulse
-//
-//  SAFETY CONTRACT (v9.2):
-//    • No backend calls during module evaluation
-//    • No Firebase initialization here
-//    • No heavy compute
-//    • Pure composition + identity surface
 // ============================================================================
 
 
 // ============================================================================
-//  IMPORTS — FRONTEND BARREL (paths may be adjusted per repo layout)
+//  IMPORTS — FRONTEND BARREL (adjust paths per repo layout)
 // ============================================================================
 
-// Logger (console identity + telemetry packet formatter)
-import {
-  logger,
-  log,
-  warn,
-  error,
-  critical,
-  makeTelemetryPacket
-} from "./PulseLogger.js";
-
-// Synapse / connectivity math + pulse-once
-import { PulseNet } from "./PulseNet.js";
-
-// Band / Nervous System (if you already have a PulseBand frontend organ)
-import { PulseBand } from "./PulseBand.js";
+// Band / Nervous System
+import { pulseband } from "./pulse-proxy/PulseProxyPNSNervousSystem.js";
 
 // GPU OS (astral nervous system)
-import { PulseGPU } from "./PulseGPU.js";
+import * as PulseGPU from "./pulse-gpu/PulseGPUBrain.js";
 
 // Earn Engine (frontend-facing hooks, if present)
-import { PulseEarn } from "./PulseEarn.js";
+import * as PulseEarn from "./pulse-earn/PulseEarn.js";
 
 // Mesh / routing / overlay (if present)
-import { PulseMesh } from "./PulseMesh.js";
+import * as PulseMesh from "./pulse-mesh/PulseMeshCortex.js";
 
-// PulseSend (v1+ transport organ)
-import { PulseSend } from "./PulseSend.js";
+// PulseSend (transport organ)
+import * as PulseSend from "./pulse-send/PulseSend.js";
 
-// Proxy client (browser-side helper for /TPProxy)
-import { PulseProxyClient } from "./PulseProxyClient.js";
-
-// Router / CNS nervous system (if you have a frontend router organ)
-import { PulseRouter } from "./PulseRouter.js";
-
-// OS Brainstem (frontend-visible control surface, not backend brain)
-import { PulseOS } from "./PulseOSFrontend.js";
+// Router / CNS nervous system
+import * as PulseRouter from "./pulse-router/PulseRouterEvolutionaryThought.js";
 
 
 // ============================================================================
@@ -153,36 +128,17 @@ function buildPulseKernel() {
     environment: PulseEnvironment
   };
 
-  // Optional: tiny telemetry packet for other organs to send later
-  const bootPacket = makeTelemetryPacket("identity", "kernel_boot", {
-    deviceId: PulseIdentity.deviceId,
-    userId: PulseIdentity.userId,
-    environment: PulseEnvironment,
-    version: PULSE_UNDERSTANDING_CONTEXT.version
-  });
-
-  log("identity", "PulseUnderstanding kernel_boot", {
-    deviceId: PulseIdentity.deviceId,
-    userId: PulseIdentity.userId,
-    envRuntime: PulseEnvironment.runtime
-  });
-
   // Unified organism surface
   const Pulse = {
     // Meta
     meta,
-    bootPacket,
 
     // Identity
     Identity: PulseIdentity,
     Environment: PulseEnvironment,
 
-    // Core OS / Brainstem (frontend surface)
-    OS: PulseOS || null,
-
-    // Nervous system + synapse
-    Band: PulseBand || null,
-    Synapse: PulseNet || null,
+    // Nervous system
+    Band: pulseband || null,
 
     // GPU / Astral nervous system
     GPU: PulseGPU || null,
@@ -196,18 +152,8 @@ function buildPulseKernel() {
     // Transport
     Send: PulseSend || null,
 
-    // Proxy client
-    Proxy: PulseProxyClient || null,
-
     // Routing
-    Router: PulseRouter || null,
-
-    // Logger
-    Logger: logger,
-    log,
-    warn,
-    error,
-    critical
+    Router: PulseRouter || null
   };
 
   return Pulse;
@@ -220,19 +166,12 @@ const PulseKernel = buildPulseKernel();
 //  GLOBAL BROADCAST — MAKE KERNEL AVAILABLE TO FRONTEND
 // ============================================================================
 if (typeof window !== "undefined") {
-  // Non-destructive: only set if not already present
   if (!window.Pulse) {
     window.Pulse = PulseKernel;
   } else {
-    // If something already set it, we at least expose our meta + logger
     window.Pulse = {
       ...window.Pulse,
-      meta: PulseKernel.meta,
-      Logger: PulseKernel.Logger,
-      log: PulseKernel.log,
-      warn: PulseKernel.warn,
-      error: PulseKernel.error,
-      critical: PulseKernel.critical
+      meta: PulseKernel.meta
     };
   }
 }
