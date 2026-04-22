@@ -39,7 +39,7 @@ export const PulseRole = {
   subsystem: "OS",
   layer: "Brainstem",
   version: "9.3",
-  identity: "PulseOSKernel",
+  identity: "PulseKernel",
 
   evo: {
     deterministicBoot: true,
@@ -71,7 +71,7 @@ const KernelState = {
   bootTs: null,
   ready: false,
   version: "9.3",
-  organ: "PulseOSKernel",
+  organ: "PulseKernel",
   role: "Brainstem"
 };
 
@@ -85,10 +85,10 @@ const error = console.error;
 //  KERNEL BOOT SEQUENCE (v9.3)
 //  PURE BOOT: no fetch, no Firebase, no backend, no network.
 // ============================================================================
-export async function PulseOSKernelBoot() {
+export async function PulseKernelBoot() {
   KernelState.bootTs = Date.now();
   log(
-    "%c[PulseOSKernel] v9.3 — Boot sequence started",
+    "%c[PulseKernel] v9.3 — Boot sequence started",
     "color:#66BB6A; font-weight:bold;"
   );
 
@@ -111,7 +111,7 @@ export async function PulseOSKernelBoot() {
     // 2. MARK READY
     KernelState.ready = true;
     log(
-      "%c[PulseOSKernel] v9.3 — Boot complete",
+      "%c[PulseKernel] v9.3 — Boot complete",
       "color:#66BB6A; font-weight:bold;"
     );
 
@@ -119,7 +119,7 @@ export async function PulseOSKernelBoot() {
 
   } catch (err) {
     error(
-      "%c[PulseOSKernel] v9.3 — Kernel boot failure",
+      "%c[PulseKernel] v9.3 — Kernel boot failure",
       "color:#EF5350; font-weight:bold;",
       err
     );
@@ -131,8 +131,8 @@ export async function PulseOSKernelBoot() {
 // ============================================================================
 //  KERNEL STATUS API
 // ============================================================================
-export const PulseOSKernel = {
-  boot: PulseOSKernelBoot,
+export const PulseKernel = {
+  boot: PulseKernelBoot,
   state: KernelState,
   isReady: () => KernelState.ready,
   role: PulseRole
@@ -142,4 +142,4 @@ export const PulseOSKernel = {
 // ============================================================================
 //  AUTO-BOOT ON IMPORT (Autonomic Brainstem)
 // ============================================================================
-PulseOSKernelBoot();
+PulseKernelBoot();

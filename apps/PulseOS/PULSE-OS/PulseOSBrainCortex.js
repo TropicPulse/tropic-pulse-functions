@@ -54,7 +54,7 @@ export function createPulseBrainCortex({
   SHELL_STATES,
   determineShellState,
   guardPulseBand,
-  PulseOSKernel,
+  PulseKernel,
   getLocalIdentity,   // optional
   log                 // optional
 }) {
@@ -118,8 +118,8 @@ export function createPulseBrainCortex({
       BrainState.bootTs = Date.now();
     }
 
-    if (!PulseOSKernel.isReady()) {
-      await PulseOSKernel.boot();
+    if (!PulseKernel.isReady()) {
+      await PulseKernel.boot();
     }
 
     updateBrainFromContext({

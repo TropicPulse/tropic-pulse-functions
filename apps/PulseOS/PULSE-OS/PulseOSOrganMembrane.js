@@ -33,7 +33,7 @@
 // ============================================================================
 
 import { PulseOrganismMap } from "/apps/PulseOS/PulseBrainMap.js";
-PulseOSBrain.map = PulseOrganismMap;
+PulseOSBrain.PulseOrganismMap = PulseOrganismMap;
 
 const LAYER_ID   = "MESH-REFLEX";
 const LAYER_NAME = "THE ORGAN MEMBRANE";

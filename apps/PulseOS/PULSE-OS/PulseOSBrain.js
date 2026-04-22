@@ -10,7 +10,7 @@
 //  • Layer: BRAINSTEM + LOW CORTEX
 //  • Biological Analog: Medulla + Pons + Thalamus (NOT Neocortex)
 //  • System Role:
-//      - Attach IQ (PulseIQ.js)
+//      - Attach IQ (PulseIQMap.js)
 //      - Validate organ identity
 //      - Route CNS-level decisions
 //      - Provide evolution access
@@ -42,7 +42,7 @@
 //
 //  WHAT THIS ORGAN IS NOT:
 //  ------------------------
-//  ✘ NOT the IQ cortex (PulseIQ.js is the cortex)
+//  ✘ NOT the IQ cortex (PulseIQMap.js is the cortex)
 //  ✘ NOT a reflex layer
 //  ✘ NOT a membrane
 //  ✘ NOT a GPU organ
@@ -53,8 +53,8 @@
 //
 //  SAFETY CONTRACT (v10.0):
 //  -------------------------
-//  • This file may import ONLY PulseIQ.js
-//  • All other imports must live inside PulseIQ.js
+//  • This file may import ONLY PulseIQMap.js
+//  • All other imports must live inside PulseIQMap.js
 //  • Never mutate IQ modules
 //  • Never expose raw IQ modules directly to organs
 //  • Always validate PulseRole identity
@@ -63,10 +63,12 @@
 //
 // ============================================================================
 //  IMPORTS — v10 LAW: BRAIN MAY IMPORT ONLY PULSEIQ
+import { boot } from "./PulseOSBrainCortex.js";
+
 // ============================================================================
-import { PulseIQ } from "./PulseIQ.js";
-import { PulseOrganismMap } from "/apps/PulseOS/PulseBrainMap.js";
-PulseOSBrain.map = PulseOrganismMap;
+PulseOSBrain.PulseIntentMap = PulseIntentMap;
+PulseOSBrain.PulseIQMap = PulseIQMap;
+PulseOSBrain.PulseOrganismMap = PulseOrganismMap;
 
 // ============================================================================
 // 0) BRAIN IDENTITY (PulseRole) — v10.0
@@ -197,7 +199,7 @@ export const Brain = {
   // Core infrastructure
   firebase: PulseIQ.firebase,
   BBB: PulseIQ.BBB,
-  PulseOSKernel: PulseIQ.PulseOSKernel,
+  PulseKernel: PulseIQ.PulseKernel,
   LongTermMemory: PulseIQ.LongTermMemory,
   evolveRaw: PulseIQ.evolveRaw,
   loadOrganByDesign,

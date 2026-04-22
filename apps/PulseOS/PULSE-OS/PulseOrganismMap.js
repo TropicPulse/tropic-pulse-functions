@@ -259,7 +259,7 @@ export const PulseOrganismMap = {
     // pulse-os — Core CNS, Reflex, Memory, Immune, Membranes, Survival
     // ======================================================================
     PulseBrainInstincts:        { bio: "CNS / Instinct Cortex",          system: "pulse-os", file: "pulse-os/PulseBrainInstincts.js" },
-    PulseIQ:                    { bio: "CNS / Intelligence Core",        system: "pulse-os", file: "pulse-os/PulseIQ.js" },
+    PulseIQ:                    { bio: "CNS / Intelligence Core",        system: "pulse-os", file: "pulse-os/PulseIQMap.js" },
     PulseOSBBB:                 { bio: "Membrane / Blood-Brain Barrier", system: "pulse-os", file: "pulse-os/PulseOSBBB.js" },
     PulseOSBrain:               { bio: "CNS / Brain",                    system: "pulse-os", file: "pulse-os/PulseOSBrain.js" },
     PulseOSBrainCortex:         { bio: "CNS / Cortex",                   system: "pulse-os", file: "pulse-os/PulseOSBrainCortex.js" },

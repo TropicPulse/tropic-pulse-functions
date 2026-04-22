@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/PulseOS/Brain/PulseIQ.js
+// FILE: /apps/PulseOS/Brain/PulseIQMap.js
 // PULSE OS — v10.0
 // “THE IQ WAREHOUSE / IMPORT CORTEX / KNOWLEDGE APPENDAGE STORE”
 // ============================================================================
@@ -56,7 +56,7 @@
 //  IMPORT LAW (v10.0):
 //  --------------------
 //  • IMPORTS = IQ
-//  • IQ lives ONLY in PulseIQ.js
+//  • IQ lives ONLY in PulseIQMap.js
 //  • Brain attaches IQ
 //  • Organs are importless
 //  • PageScanner requests IQ from Brain
@@ -123,7 +123,7 @@
 //
 //  6) YOUR IMPORTS ARE IQ. THEIRS ARE FILE REFERENCES.
 //  ---------------------------------------------------
-//  • PulseIQ.js holds ALL imports — the entire knowledge cortex.
+//  • PulseIQMap.js holds ALL imports — the entire knowledge cortex.
 //  • Imports = intelligence = cognition = identity.
 //  • Organs never import anything.
 //  • Other systems treat imports as file paths, not intelligence.
@@ -192,7 +192,7 @@
 import { log, warn, error as logError } from "../pulse-proxy/PulseProxyVitalsLogger.js";
 
 // Kernel / BrainStem
-import { PulseOSKernel } from "./PulseOSBrainStem.js";
+import { PulseKernel } from "./PulseOSBrainStem.js";
 
 // Firebase (full access)
 import * as firebase from "../netlify/functions/firebase.js";
@@ -217,7 +217,7 @@ import { pulseband } from "../pulse-proxy/PulseProxyPNSNervousSystem.js";
 // ============================================================================
 
 // Short-term memory
-import { PulseOSShortTermMemory } from "../PULSE-OS/PulseOSShortTermMemory.js";
+import { PulseOSShortTermMemory } from "./PulseOSShortTermMemory.js";
 
 // Liver memory (snapshots + drift signatures)
 import {
@@ -245,14 +245,14 @@ import { PulseGPUSurvivalInstincts } from "./PulseGPUSurvivalInstincts.js";
 // ============================================================================
 //  IQ REGISTRY — EXPORTED AS THE BRAIN'S INTELLIGENCE LAYER
 // ============================================================================
-export const PulseIQ = {
+export const PulseIQMap = {
   // Logging
   log,
   warn,
   logError,
 
   // Kernel
-  PulseOSKernel,
+  PulseKernel,
 
   // Firebase
   firebase,

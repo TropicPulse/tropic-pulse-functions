@@ -70,6 +70,10 @@ const PulseIdentity = {
 // ============================================================================
 //  IMPORTS — FRONTEND BARREL (ALL ORGANS ROUTE THROUGH HERE)
 // ============================================================================
+import { PulseIntentMap } from "./PulseIntentMap";
+import { PulseIQMap } from "./PulseIQMap.js";
+import { PulseOrganismMap } from "./PulseOrganismMap";
+import { cognitiveBootstrap } from "./PULSE-OS/PulseOSBrain.js";
 import { VitalsMonitor } from "./pulse-proxy/PulseProxyVitalsMonitor.js";
 import { pulseband } from "./pulse-proxy/PulseProxyPNSNervousSystem.js";
 import * as PulseRouter from "./pulse-router/PulseRouterEvolutionaryThought.js";
@@ -181,6 +185,27 @@ function buildPulseKernel() {
 }
 
 const PulseKernel = buildPulseKernel();
+
+// ============================================================================
+//  COGNITIVE BOOTSTRAP — Understanding boots the Brain
+// ============================================================================
+const Brain = cognitiveBootstrap({
+  intent: PulseIntentMap,
+  organism: PulseOrganismMap,
+  iqMap: PulseIQMap,          // optional, if Brain wants it
+  understanding: {
+    maps: {
+      intent: PulseIntentMap,
+      iq: PulseIQMap,
+      organism: PulseOrganismMap
+    },
+    context: PULSE_UNDERSTANDING_CONTEXT
+  }
+});
+
+// Optionally expose Brain on the kernel
+PulseKernel.Brain = Brain;
+
 
 
 // ============================================================================

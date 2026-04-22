@@ -28,9 +28,9 @@
 //  • generation: v9
 // ============================================================================
 
-import { boot } from "./PulseOSBrainCortex.js";
+import { Brain,BrainIntel } from "./PulseOSBrain.js";
 import { PulseOrganismMap } from "/apps/PulseOS/PulseBrainMap.js";
-PulseOSBrain.map = PulseOrganismMap;
+PulseOSBrain.PulseOrganismMap = PulseOrganismMap;
 
 // ============================================================================
 //  PulseRole — Evolution Engine Identity (for CNS awareness)

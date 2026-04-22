@@ -51,7 +51,7 @@
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
 import { PulseOrganismMap } from "/apps/PulseOS/PulseBrainMap.js";
-PulseOSBrain.map = PulseOrganismMap;
+PulseOSBrain.PulseOrganismMap = PulseOrganismMap;
 
 const LAYER_ID   = "LAYER-REFLEX";
 const LAYER_NAME = "THE TISSUE MEMBRANE";
