@@ -1,10 +1,10 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/pulsebandCleanup.js
-// PULSEBAND CLEANUP — VERSION 7.1+
-// “THE PURIFIER / SANITY LAYER / ORDER‑KEEPER”
+// PULSEBAND CLEANUP — VERSION 9.3
+// “THE PURIFIER++ / SANITY LAYER++ / ORDER‑KEEPER”
 // ============================================================================
 //
-// ROLE (v7.1+):
+// ROLE (v9.3):
 //   pulsebandCleanup is the **PURIFIER** of the PulseBand subsystem.
 //   It is the **SANITY LAYER / ORDER‑KEEPER** — the organ that removes
 //   expired sessions, chunks, errors, and redownload logs before they
@@ -13,10 +13,10 @@
 //   • Eliminates stale or expired kinetic data
 //   • Maintains structural integrity of PulseBand storage
 //   • Ensures deterministic, stable, predictable behavior
-//   • Runs automatically via heartbeat (Heart.js)
-//   • Fully aligned with PulseOS v7.1+ stability + organism contracts
+//   • Runs automatically via heartbeat (Heart.js / OSKernel)
+//   • Aligned with PulseBand Nervous System v9.2+ + CheckBand v9.3
 //
-// WHAT THIS FILE *IS* (v7.1+):
+// WHAT THIS FILE *IS* (v9.3):
 //   • A deterministic cleanup organ
 //   • A backend purification + waste‑removal layer
 //   • A zero‑drift, zero‑ambiguity subsystem
@@ -29,7 +29,7 @@
 //   • NOT a user-facing endpoint
 //   • NOT a dynamic or self‑modifying subsystem
 //
-// SAFETY CONTRACT (v7.1+):
+// SAFETY CONTRACT (v9.3):
 //   • Fail-open: errors are logged, never fatal
 //   • No randomness in cleanup logic
 //   • No mutation outside intended collections
@@ -38,13 +38,10 @@
 //   • No cross-subsystem mutations
 //   • Deterministic cleanup order
 //
-// STRUCTURE RULES (v7.1+):
+// STRUCTURE RULES (v9.3):
 //   • Cleanup order must remain deterministic
 //   • No new collections without architectural approval
 //   • No drift from the PulseBand storage contract
-//
-// VERSION TAG:
-//   version: 7.1+
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -56,7 +53,7 @@ if (!admin.apps.length) {
 const db = getFirestore();
 
 // ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP (v7.1+)
+// HUMAN‑READABLE CONTEXT MAP (v9.3)
 // ------------------------------------------------------------
 const CLEANUP_CONTEXT = {
   label: "PULSEBAND_CLEANUP",
@@ -64,11 +61,26 @@ const CLEANUP_CONTEXT = {
   role: "Purifier / Sanity Layer / Order‑Keeper",
   purpose: "PulseBand Session + Error Cleanup",
   context: "Removes expired sessions, chunks, errors, and redownload logs",
-  version: "7.1+"
+  version: "9.3"
+};
+
+const CLEANUP_DIAGNOSTICS_ENABLED =
+  process.env.PULSE_BAND_CLEANUP_DIAGNOSTICS === "true" ||
+  process.env.PULSE_DIAGNOSTICS === "true";
+
+const logCleanup = (stage, details = {}) => {
+  if (!CLEANUP_DIAGNOSTICS_ENABLED) return;
+
+  log(
+    `[PULSEBAND_CLEANUP] ${stage} :: ${JSON.stringify({
+      ...CLEANUP_CONTEXT,
+      ...details
+    })}`
+  );
 };
 
 // ============================================================================
-// BACKEND ENTRY POINT (CALLED BY HEARTBEAT)
+// BACKEND ENTRY POINT (CALLED BY HEARTBEAT / OSKernel)
 // ============================================================================
 export async function pulsebandCleanup() {
   const runId = `PB_CLEANUP_${Date.now()}`;
@@ -78,6 +90,7 @@ export async function pulsebandCleanup() {
     `%c🧹 START PURIFIER CLEANUP → ${runId}`,
     "color:#03A9F4; font-weight:bold;"
   );
+  logCleanup("START", { runId });
 
   try {
     // ---------------------------------------------------------
@@ -95,6 +108,7 @@ export async function pulsebandCleanup() {
           `%c🟨 DELETE SESSION → ${s.id}`,
           "color:#FFC107; font-weight:bold;"
         );
+        logCleanup("DELETE_SESSION", { sessionId: s.id });
 
         const chunksSnap = await s.ref.collection("chunks").get();
         for (const c of chunksSnap.docs) {
@@ -119,6 +133,7 @@ export async function pulsebandCleanup() {
           `%c🟨 DELETE ERROR → ${e.id}`,
           "color:#FFC107; font-weight:bold;"
         );
+        logCleanup("DELETE_ERROR", { errorId: e.id });
         await e.ref.delete();
       }
     }
@@ -136,6 +151,7 @@ export async function pulsebandCleanup() {
           `%c🟨 DELETE REDOWNLOAD → ${r.id}`,
           "color:#FFC107; font-weight:bold;"
         );
+        logCleanup("DELETE_REDOWNLOAD", { redownloadId: r.id });
         await r.ref.delete();
       }
     }
@@ -154,6 +170,7 @@ export async function pulsebandCleanup() {
       `%c🟩 PURIFIER CLEANUP COMPLETE → ${runId}`,
       "color:#4CAF50; font-weight:bold;"
     );
+    logCleanup("COMPLETE", { runId });
 
     return { ok: true, runId, ...CLEANUP_CONTEXT };
 
@@ -163,6 +180,7 @@ export async function pulsebandCleanup() {
       "color:#FF5252; font-weight:bold;",
       err
     );
+    logCleanup("FATAL_ERROR", { runId, error: String(err) });
 
     await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}FATAL`).set({
       fn: "pulsebandCleanup",

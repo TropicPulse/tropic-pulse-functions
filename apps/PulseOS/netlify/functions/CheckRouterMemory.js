@@ -1,22 +1,20 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/CheckRouterMemory.js
-// PULSE NETWORK MEMORY HEALER — v7.1
-// “THE NETWORK HEALER+ / B‑LAYER LOG INTAKE + REPAIR ENGINE”
+// PULSE NETWORK MEMORY HEALER — v9.3
+// “THE NETWORK HEALER++ / B‑LAYER LOG INTAKE + REPAIR ENGINE”
 // ============================================================================
 //
-// ROLE (v7.1):
-//   • Backend intake + validator for RouterMemory flushes
-//   • Dual‑mode: works identically in offline + online environments
-//   • Normalizes all v7.1 RouterMemory fields (context, lineage, version)
+// ROLE (v9.3):
+//   • Backend intake + validator for RouterMemory v9.x flushes
+//   • Normalizes ALL v9.3 log fields (routeTrace, lineage, evo, importConflict)
 //   • Detects structural drift + malformed entries
 //   • Preserves lineage + timestamps
 //   • Returns authoritative, organism‑safe log batch
 //
-// CONTRACT (v7.1):
+// CONTRACT (v9.3):
 //   • Never mutate original input
 //   • Fail‑open: invalid payload → empty safe array
-//   • Always return structurally complete log entries
-//   • Always AND: internal + external compatible
+//   • Always return structurally complete v9.3 log entries
 //   • Lymbic escalation must NEVER throw
 //   • Deterministic, loggable, replayable
 // ============================================================================
@@ -26,9 +24,9 @@
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
 const LAYER_ID   = "NETWORK-LAYER";
-const LAYER_NAME = "THE NETWORK HEALER+";
+const LAYER_NAME = "THE NETWORK HEALER++";
 const LAYER_ROLE = "B-LAYER MEMORY INTAKE + REPAIR";
-const LAYER_VER  = "7.1";
+const LAYER_VER  = "9.3";
 
 const NETWORK_DIAGNOSTICS_ENABLED =
   process.env.PULSE_NETWORK_DIAGNOSTICS === "true" ||
@@ -36,12 +34,6 @@ const NETWORK_DIAGNOSTICS_ENABLED =
 
 const logNetworkHealer = (stage, details = {}) => {
   if (!NETWORK_DIAGNOSTICS_ENABLED) return;
-
-  log(
-    `%c(${LAYER_NAME} ${LAYER_ROLE}) %c${stage}`,
-    "color:#00eaff;font-weight:bold;",
-    "color:#fff;font-weight:bold;"
-  );
 
   log(JSON.stringify({
     pulseLayer: LAYER_ID,
@@ -67,10 +59,9 @@ const MEMORY_CONTEXT = {
 
 
 // ============================================================================
-// HELPERS — SAFE PARSE + NORMALIZE LOG BATCH (v7.1)
+// HELPERS — SAFE PARSE + NORMALIZE LOG BATCH (v9.3)
 // ============================================================================
 
-// Safe JSON parse
 function safeParseBody(body) {
   if (!body) return null;
 
@@ -83,7 +74,7 @@ function safeParseBody(body) {
 }
 
 
-// Normalize a single log entry to v7.1 shape
+// Normalize a single log entry to v9.3 shape
 function normalizeLogEntry(entry) {
   if (!entry || typeof entry !== "object") return null;
 
@@ -96,13 +87,31 @@ function normalizeLogEntry(entry) {
   const safeNum = (v, d = Date.now()) =>
     typeof v === "number" ? v : d;
 
+  const safeArr = (v, d = []) =>
+    Array.isArray(v) ? v : d;
+
   return {
+    // Core event
     eventType: safeStr(entry.eventType),
     data: safeObj(entry.data),
+
+    // Route trace (v9.3)
+    routeTrace: safeArr(entry.routeTrace),
+
+    // Import conflict lineage (v9.3)
+    evo: safeObj(entry.evo),
+
+    // Page + frames (v9.3)
+    page: safeStr(entry.page),
+    frames: safeArr(entry.frames),
+
+    // Timestamp
     timestamp: safeNum(entry.timestamp),
 
-    // v7.1 lineage + context
+    // Versioning + lineage
     memoryVersion: entry.memoryVersion || LAYER_VER,
+
+    // Context injection
     ...MEMORY_CONTEXT
   };
 }
@@ -138,7 +147,7 @@ function healLogBatch(raw) {
 
 
 // ============================================================================
-// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL (v7.1)
+// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL (v9.3)
 // ============================================================================
 async function notifyLymbicOnFatal(err) {
   try {
@@ -163,7 +172,7 @@ async function notifyLymbicOnFatal(err) {
 
 
 // ============================================================================
-// BACKEND ENTRY POINT — “THE NETWORK HEALER+”
+// BACKEND ENTRY POINT — “THE NETWORK HEALER++”
 // ============================================================================
 export const handler = async (event, context) => {
   logNetworkHealer("INTAKE_START", {
@@ -180,9 +189,6 @@ export const handler = async (event, context) => {
       };
     }
 
-    // ----------------------------------------------------
-    // ⭐ 1. Parse incoming body
-    // ----------------------------------------------------
     const parsed = safeParseBody(event.body);
 
     if (!parsed || typeof parsed !== "object") {
@@ -196,14 +202,8 @@ export const handler = async (event, context) => {
     const rawLogs = Array.isArray(parsed.logs) ? parsed.logs : [];
     logNetworkHealer("PAYLOAD_RECEIVED", { rawCount: rawLogs.length });
 
-    // ----------------------------------------------------
-    // ⭐ 2. Heal + normalize log batch
-    // ----------------------------------------------------
     const healedLogs = healLogBatch(rawLogs);
 
-    // ----------------------------------------------------
-    // ⭐ 3. Return authoritative batch
-    // ----------------------------------------------------
     logNetworkHealer("RETURN_BATCH", { finalCount: healedLogs.length });
 
     return {
@@ -216,7 +216,6 @@ export const handler = async (event, context) => {
 
     logNetworkHealer("FATAL_ERROR", { message: err?.message });
 
-    // ⭐ Lymbic escalation — MUST NOT throw
     await notifyLymbicOnFatal(err);
 
     return {

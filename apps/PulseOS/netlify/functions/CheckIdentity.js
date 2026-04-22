@@ -1,25 +1,22 @@
 // ============================================================================
 // FILE: netlify/functions/CheckIdentity.js
-// PULSE IDENTITY ENGINE — v7.1
-// “THE SELF+ / IDENTITY ENGINE / SENSE‑OF‑SELF LAYER”
+// PULSE IDENTITY ENGINE — v9.3
+// “THE SELF++ / CANONICAL IDENTITY ENGINE / SENSE‑OF‑SELF LAYER”
 // ============================================================================
 //
-// ROLE (v7.1):
+// ROLE (v9.3):
 //   • Canonical identity validator + self-repair engine
-//   • Dual‑mode: works identically in offline + online environments
-//   • Preserves lineage, version, drift markers
-//   • Returns authoritative identity snapshot when online
-//   • Supports offline-first frontend identity survival
-//   • No external identity authorities (Pulse-only)
+//   • Preserves lineage, drift markers, session state, trusted device flags
+//   • Supports offline-first identity survival
+//   • Returns authoritative v9.3 identity snapshot
+//   • Zero randomness, deterministic, replayable
 //
-// CONTRACT (v7.1):
-//   • No randomness in identity logic
-//   • Fail-open: invalid identity → null (frontend handles offline fallback)
-//   • Never trust external identity providers
+// CONTRACT (v9.3):
+//   • Fail-open: invalid identity → null (frontend handles fallback)
 //   • Never mutate original input
-//   • Always return structurally complete identity
-//   • Always AND: internal + external compatible
-//   • Deterministic, loggable, replayable
+//   • Always return structurally complete v9.3 identity
+//   • Never trust external identity providers
+//   • Deterministic, loggable, lineage-safe
 // ============================================================================
 
 
@@ -27,9 +24,9 @@
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
 const LAYER_ID   = "IDENTITY-LAYER";
-const LAYER_NAME = "THE SELF+";
+const LAYER_NAME = "THE SELF++";
 const LAYER_ROLE = "SENSE-OF-SELF ENGINE";
-const LAYER_VER  = "7.1";
+const LAYER_VER  = "9.3";
 
 const IDENTITY_DIAGNOSTICS_ENABLED =
   process.env.PULSE_IDENTITY_DIAGNOSTICS === "true" ||
@@ -50,10 +47,8 @@ const logSelf = (stage, details = {}) => {
 
 
 // ============================================================================
-// HELPERS — SAFE TOKEN + IDENTITY NORMALIZATION (v7.1)
+// HELPERS — NORMALIZE IDENTITY TO v9.3 SHAPE
 // ============================================================================
-
-// Normalize identity structure to v7.1 shape
 function normalizeIdentity(raw) {
   if (!raw || typeof raw !== "object") return null;
 
@@ -66,30 +61,43 @@ function normalizeIdentity(raw) {
   const safeObj = (v, d = {}) =>
     typeof v === "object" && v !== null ? v : d;
 
+  const safeNum = (v, d = 0) =>
+    typeof v === "number" && !isNaN(v) ? v : d;
+
   return {
+    // Core identity
     uid: safeStr(raw.uid),
     email: safeStr(raw.email),
     name: safeStr(raw.name),
     roles: Array.isArray(raw.roles) ? raw.roles : [],
 
-    // Identity health + drift markers
+    // Identity health + drift markers (v9.3)
     identityHealth: safeStr(raw.identityHealth, "Unknown"),
     drift: safeObj(raw.drift, {}),
+
+    // Lineage + versioning (v9.3)
+    identityVersion: LAYER_VER,
+    lineage: safeObj(raw.lineage, {}),
+    repairMode: safeStr(raw.repairMode, "none"),
+
+    // Session + device (v9.3)
+    trustedDevice: safeBool(raw.trustedDevice, false),
+    sessionAge: safeNum(raw.sessionAge, 0),
+    lastVaultVisit: safeNum(raw.lastVaultVisit, 0),
 
     // Timestamps
     createdAt: raw.createdAt || Date.now(),
     updatedAt: Date.now(),
 
-    // v7.1 context injection
-    identityVersion: LAYER_VER,
+    // Context injection
     layer: LAYER_NAME,
-    context: "Canonical backend identity snapshot"
+    context: "Canonical backend identity snapshot (v9.3)"
   };
 }
 
 
 // ============================================================================
-// BACKEND ENTRY POINT — “THE SELF+”
+// BACKEND ENTRY POINT — “THE SELF++”
 // ============================================================================
 export const handler = async (event, context) => {
   logSelf("INTAKE_START", {
@@ -130,7 +138,7 @@ export const handler = async (event, context) => {
     });
 
     // ----------------------------------------------------
-    // ⭐ 4. Normalize to v7.1 identity shape
+    // ⭐ 4. Normalize to v9.3 identity shape
     // ----------------------------------------------------
     const normalized = normalizeIdentity(repaired);
 

@@ -1,46 +1,27 @@
 // ============================================================================
 // FILE: /apps/netlify/functions/pulseHistoryRepair.js
-// PULSE HISTORY REPAIR — VERSION 7.1+
-// “THE SHORT‑TERM MEMORY LAYER / WORKING MEMORY REPAIR ENGINE+”
+// PULSE HISTORY REPAIR — VERSION 9.3
+// “THE SHORT‑TERM MEMORY LAYER++ / WORKING MEMORY REPAIR ENGINE++”
 // ============================================================================
 //
-// ROLE (v7.1+):
+// ROLE (v9.3):
 //   pulseHistoryRepair is the **SHORT‑TERM MEMORY LAYER** of PulseOS.
-//   It is the **WORKING MEMORY REPAIR ENGINE+** — the organ responsible for
-//   keeping recent history coherent, normalized, and evolution‑safe.
+//   It is the **WORKING MEMORY REPAIR ENGINE++** — the organ responsible for
+//   keeping recent history coherent, normalized, lineage‑safe, and evolution‑safe.
 //
 //   • Repairs missing or malformed fields in recent history
 //   • Prunes expired or dead entries older than 30 days
 //   • Ensures deterministic lineage for scoring + insights
-//   • Runs automatically via heartbeat (Heart.js)
-//   • Fully aligned with PulseOS v7.1+ evolutionary memory contracts
+//   • Runs automatically via heartbeat (Heart.js / OSKernel)
+//   • Fully aligned with PulseOS v9.3 evolutionary memory contracts
 //
-// WHAT THIS FILE *IS* (v7.1+):
-//   • A deterministic short‑term memory repair organ
-//   • A cleanup + normalization layer for active history
-//   • A biological analog to hippocampal working‑memory correction
-//   • A zero‑drift, zero‑ambiguity subsystem
-//
-// WHAT THIS FILE *IS NOT*:
-//   • NOT long‑term memory (index.js)
-//   • NOT personality (SettingsMemory)
-//   • NOT identity (CheckIdentity)
-//   • NOT purification (pulsebandCleanup)
-//
-// SAFETY CONTRACT (v7.1+):
+// SAFETY CONTRACT (v9.3):
 //   • Fail‑open: errors logged, never fatal
 //   • No randomness in repair logic
 //   • No mutation outside intended collections
 //   • Always logs repairs + deletions for traceability
 //   • No cross‑subsystem writes
-//
-// STRUCTURE RULES (v7.1+):
-//   • Repair → Normalize → Prune → Log
-//   • No new fields without architectural approval
-//   • No reclassification logic inside this organ
-//
-// VERSION TAG:
-//   version: 7.1+
+//   • Deterministic cleanup + repair order
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -52,7 +33,7 @@ if (!admin.apps.length) {
 const db = getFirestore();
 
 // ------------------------------------------------------------
-// ⭐ HUMAN‑READABLE CONTEXT MAP (v7.1+)
+// HUMAN‑READABLE CONTEXT MAP (v9.3)
 // ------------------------------------------------------------
 const REPAIR_CONTEXT = {
   label: "PULSE_HISTORY_REPAIR",
@@ -60,11 +41,11 @@ const REPAIR_CONTEXT = {
   role: "Short‑Term Memory Repair",
   purpose: "Pulse History Normalization + Cleanup",
   context: "Repairs missing fields, prunes dead entries, ensures deterministic lineage",
-  version: "7.1+"
+  version: "9.3"
 };
 
 // ============================================================================
-// BACKEND ENTRY POINT (CALLED BY HEARTBEAT)
+// BACKEND ENTRY POINT (CALLED BY HEARTBEAT / OSKernel)
 // ============================================================================
 export async function pulseHistoryRepair() {
   const runId = `PB_REPAIR_${Date.now()}`;
@@ -83,7 +64,7 @@ export async function pulseHistoryRepair() {
 
     // ---------------------------------------------------------
     // ⭐ REPAIR: pulse_history (normalize + prune)
-    // ---------------------------------------------------------
+// ---------------------------------------------------------
     const histSnap = await db.collection("pulse_history").get();
 
     for (const h of histSnap.docs) {
@@ -111,23 +92,41 @@ export async function pulseHistoryRepair() {
         const updates = {};
 
         // ---------------------------------------------------------
-        // ⭐ NORMALIZE MISSING FIELDS (evolutionary repair)
+        // ⭐ NORMALIZE MISSING FIELDS (v9.3 evolutionary repair)
 // ---------------------------------------------------------
+
+        // v9.3 identity unification
         if (!data.userId && data.uid) {
           updates.userId = data.uid;
         }
 
+        // v9.3 status contract
         if (!data.status) {
           updates.status = "unknown";
         }
 
+        // v9.3 source contract
         if (!data.source) {
           updates.source = "legacy";
         }
 
-        // v7.1+: ensure lineage metadata exists
-        if (!data.lineage) {
-          updates.lineage = "v7.1+";
+        // v9.3 lineage contract
+        if (!data.lineage || typeof data.lineage !== "object") {
+          updates.lineage = {
+            version: "9.3",
+            repairedBy: "pulseHistoryRepair",
+            repairRunId: runId
+          };
+        }
+
+        // v9.3 timestamp contract
+        if (!data.timestamp) {
+          updates.timestamp = admin.firestore.FieldValue.serverTimestamp();
+        }
+
+        // v9.3 drift markers
+        if (!data.drift) {
+          updates.drift = { repaired: true, version: "9.3" };
         }
 
         if (Object.keys(updates).length > 0) {
