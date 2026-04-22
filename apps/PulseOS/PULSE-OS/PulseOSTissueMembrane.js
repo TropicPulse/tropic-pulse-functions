@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /apps/PulseOS/Organs/Barriers/PulseOSTissueMembrane.js
-// PULSE OS — v9.2
+// PULSE OS — v10.0
 // “THE TISSUE MEMBRANE / MID‑LAYER EPITHELIAL REFLEX”
 // A2 REFLEX LAYER • MID‑LAYER SENTINEL • ZERO TIMING • ZERO STATE
 // ============================================================================
 //
-// ORGAN IDENTITY (v9.2):
+// ORGAN IDENTITY (v10.0):
 //   • Organ Type: Barrier / Reflex Membrane
 //   • Layer: A2 (Mid‑Layer Reflex)
 //   • Biological Analog: Tissue membrane between skin + organs
@@ -15,9 +15,10 @@
 //   ✔ Catch mid‑layer JS errors (A → A2 → A3 chain)
 //   ✔ Detect import drift, recursion, env mismatches
 //   ✔ Build dynamic route traces (same as PageScanner)
-//   ✔ Forward lineage + context to Router (nervous system)
+//   ✔ Track route degradation (healthScore, degraded flag)
+//   ✔ Forward lineage + context + degradation to Router (nervous system)
 //   ✔ Prevent mid‑layer failures from reaching Mesh (organ layer)
-//   ✔ Trigger healing via Router
+//   ✔ Trigger healing via Router without blocking forward progress
 //
 // WHAT THIS ORGAN IS:
 //   ✔ A tissue‑level epithelial membrane
@@ -33,13 +34,14 @@
 //   ✘ NOT a state machine
 //   ✘ NOT a timing system
 //
-// SAFETY CONTRACT (v9.2):
+// SAFETY CONTRACT (v10.0):
 //   • Never run timers, loops, or scheduling
 //   • Never store state (except ephemeral route memory)
 //   • Never mutate payloads
 //   • Never block Mesh or Cortex
 //   • Always forward reflexes to Router (nervous system)
 //   • Always classify errors before healing
+//   • Never stop routing: mark degraded, route around, move forward
 // ============================================================================
 
 
@@ -49,7 +51,7 @@
 const LAYER_ID   = "LAYER-REFLEX";
 const LAYER_NAME = "THE TISSUE MEMBRANE";
 const LAYER_ROLE = "MID-LAYER ERROR GUARDIAN & HEALING TRIGGER";
-const LAYER_VER  = "9.2";
+const LAYER_VER  = "10.0";
 
 const LAYER_DIAGNOSTICS_ENABLED =
   window.PULSE_LAYER_DIAGNOSTICS === "true" ||
@@ -72,7 +74,7 @@ const logLayer = (stage, details = {}) => {
 
 
 // ============================================================================
-// ROUTE MEMORY (living map — same as PageScanner)
+// ROUTE MEMORY (living map — same as PageScanner, now with degradation)
 // ============================================================================
 const LayerRouteMemory = {
   store: {},
@@ -82,18 +84,38 @@ const LayerRouteMemory = {
     return message + "::" + top;
   },
 
-  remember(message, frames, routeTrace) {
+  remember(message, frames, routeTrace, overrides = {}) {
     const key = this.makeKey(message, frames);
     this.store[key] = {
       ts: Date.now(),
       message,
       frames,
-      routeTrace
+      routeTrace,
+      degraded: false,
+      healthScore: 1.0, // 1.0 = perfect, 0.0 = unusable
+      ...overrides
     };
 
     logLayer("ROUTE_MEMORY_SAVED", {
       key,
-      frames: frames.length
+      frames: frames.length,
+      degraded: this.store[key].degraded,
+      healthScore: this.store[key].healthScore
+    });
+  },
+
+  markDegraded(message, frames, healthScore = 0.85) {
+    const key = this.makeKey(message, frames);
+    const entry = this.store[key];
+
+    if (!entry) return;
+
+    entry.degraded = true;
+    entry.healthScore = healthScore;
+
+    logLayer("ROUTE_MEMORY_DEGRADED", {
+      key,
+      healthScore
     });
   },
 
@@ -105,10 +127,17 @@ const LayerRouteMemory = {
 
     logLayer("ROUTE_MEMORY_HIT", {
       key,
-      frames: entry.frames.length
+      frames: entry.frames.length,
+      degraded: entry.degraded,
+      healthScore: entry.healthScore
     });
 
     return entry.routeTrace;
+  },
+
+  getEntry(message, frames) {
+    const key = this.makeKey(message, frames);
+    return this.store[key] || null;
   }
 };
 
@@ -153,38 +182,11 @@ window.addEventListener(
     const stack = event.error?.stack || "";
 
     // Only intercept errors originating from the mid‑layer
-    if (!stack.includes("/Layer/") && !stack.includes("layer")) {
+    if (!stack.includes("/Layer/") && !stack.toLowerCase().includes("layer")) {
       return;
     }
 
     logLayer("LAYER_ERROR_INTERCEPTED", { message: msg });
-
-    // ------------------------------------------------------------------------
-    // MID‑LAYER CLASSIFICATION
-    // ------------------------------------------------------------------------
-    if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
-      logLayer("LAYER_IMPORT_CONFLICT", {
-        error: "layerImportConflict",
-        details: msg
-      });
-      return;
-    }
-
-    if (msg.includes("process is not defined")) {
-      logLayer("LAYER_ENV_MISMATCH", {
-        error: "layerEnvMismatch",
-        hint: "Replace process.env.* with window.PULSE_*"
-      });
-      return;
-    }
-
-    if (msg.includes("Maximum call stack size exceeded")) {
-      logLayer("LAYER_RECURSION_LOOP", {
-        error: "layerRecursionLoop",
-        details: msg
-      });
-      return;
-    }
 
     // ------------------------------------------------------------------------
     // STACK + ROUTE TRACE
@@ -215,17 +217,61 @@ window.addEventListener(
     }
 
     // ------------------------------------------------------------------------
+    // MID‑LAYER CLASSIFICATION → MARK DEGRADATION, NEVER BLOCK
+    // ------------------------------------------------------------------------
+    if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
+      logLayer("LAYER_IMPORT_CONFLICT", {
+        error: "layerImportConflict",
+        details: msg
+      });
+
+      LayerRouteMemory.markDegraded(msg, rawFrames, 0.85);
+    }
+
+    if (msg.includes("process is not defined")) {
+      logLayer("LAYER_ENV_MISMATCH", {
+        error: "layerEnvMismatch",
+        hint: "Replace process.env.* with window.PULSE_*"
+      });
+
+      LayerRouteMemory.markDegraded(msg, rawFrames, 0.7);
+    }
+
+    if (msg.includes("Maximum call stack size exceeded")) {
+      logLayer("LAYER_RECURSION_LOOP", {
+        error: "layerRecursionLoop",
+        details: msg
+      });
+
+      LayerRouteMemory.markDegraded(msg, rawFrames, 0.5);
+    }
+
+    const memoryEntry = LayerRouteMemory.getEntry(msg, rawFrames);
+    const degraded = memoryEntry?.degraded || false;
+    const healthScore = memoryEntry?.healthScore ?? 1.0;
+
+    // ------------------------------------------------------------------------
     // HEALING LOGIC (A2 reflex → Router)
     // ------------------------------------------------------------------------
     const parsed = parseMissingField(msg);
     if (!parsed) {
-      logLayer("NO_MISSING_FIELD", {});
+      logLayer("NO_MISSING_FIELD", {
+        degraded,
+        healthScore
+      });
+      // Still prevent default so the organism handles it, but we don't heal a specific field
+      event.preventDefault();
       return;
     }
 
     const { table, field } = parsed;
 
-    logLayer("LAYER_HEALING_TRIGGERED", { table, field });
+    logLayer("LAYER_HEALING_TRIGGERED", {
+      table,
+      field,
+      degraded,
+      healthScore
+    });
 
     layerHealing = true;
 
@@ -236,7 +282,9 @@ window.addEventListener(
         message: msg,
         routeTrace,
         table,
-        field
+        field,
+        degraded,
+        healthScore
       });
 
       await route("fetchField", {
@@ -245,12 +293,23 @@ window.addEventListener(
         message: msg,
         reflexOrigin: "LayerScanner",
         layer: "A2",
-        routeTrace
+        routeTrace,
+        degraded,
+        healthScore
       });
 
-      logLayer("LAYER_HEALING_SUCCESS", { table, field });
+      logLayer("LAYER_HEALING_SUCCESS", {
+        table,
+        field,
+        degraded,
+        healthScore
+      });
     } catch (err) {
-      logLayer("LAYER_HEALING_FAILED", { error: String(err) });
+      logLayer("LAYER_HEALING_FAILED", {
+        error: String(err),
+        degraded,
+        healthScore
+      });
       error("[LayerScanner] Router fetch failed:", err);
     }
 
@@ -281,5 +340,5 @@ function parseMissingField(message) {
 }
 
 // ============================================================================
-// END OF FILE — THE TISSUE MEMBRANE / MID‑LAYER EPITHELIAL REFLEX  [v9.2]
+// END OF FILE — THE TISSUE MEMBRANE / MID‑LAYER EPITHELIAL REFLEX  [v10.0]
 // ============================================================================
