@@ -226,11 +226,25 @@ window.addEventListener(
     // ------------------------------------------------------------------------
     // PAGE-LEVEL CLASSIFICATION (router-style guards)
     // ------------------------------------------------------------------------
+    // v9.3 — Full Import Identity (no symbol-level conflicts)
     if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
-      logProtector("PAGE_IMPORT_CONFLICT", { error: "importConflict", details: msg });
-      await route("logError", { type: "importConflict", message: msg, frames: rawFrames });
-      return;
+      logProtector("PAGE_IMPORT_CONFLICT_DETECTED", {
+        error: "importConflict",
+        details: msg
+      });
+
+      // escalate to CNS for full-import identity resolution
+      await route("importConflict", {
+        message: msg,
+        frames: rawFrames,
+        reflexOrigin: "SkinReflex",
+        layer: "A1",
+        mode: "full-import"
+      });
+
+      // DO NOT return — allow organism to continue
     }
+
 
     if (msg.includes("process is not defined")) {
       logProtector("PAGE_ENV_MISMATCH", {
