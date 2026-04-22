@@ -78,17 +78,6 @@ const healingState = {
   mode: "online"
 };
 
-// ============================================================================
-//  IMPORTS — (unchanged, allowed for Spine)
-// ============================================================================
-import express from "express";
-import fetch from "node-fetch";
-import crypto from "crypto";
-import nodemailer from "nodemailer";
-import { createClient } from "redis";
-import { getFirestore } from "firebase-admin/firestore";
-import dotenv from "dotenv";
-dotenv.config();
 
 // Packet Engine (PulseEarn organ)
 import {
@@ -104,7 +93,7 @@ import { updateUserMetrics as recordUserMetrics } from "./pulse-os/PulseUserMetr
 import startPulseTimer from "./PulseProxyHeart.js";
 import startPulseOS from "./pulse-os/PulseOS.js";
 import startPulseOSHealer from "./pulse-os/PulseOSHealer.js";
-import startGlobalHealer from "./pulse-os/GlobalHealer.js";
+import startGlobalHealer from "../pulse-os/GlobalHealer.js";
 
 // ============================================================================
 //  SINGLE‑BOOT GUARDS — unchanged

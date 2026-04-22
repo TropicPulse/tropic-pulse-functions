@@ -23,8 +23,8 @@
 // GLOBAL IMPORTS (ALL ACCESS) — PRESERVED FOR IQ (NO DELETIONS)
 // ---------------------------------------------------------------------------
 import { log, warn, error as logError } from "../pulse-proxy/PulseProxyVitalsLogger.js";
-import { readdirSync, statSync } from "fs";
-import { join } from "path";
+
+
 
 // Kernel / BrainStem (OS kernel lives here, Brain only routes to it)
 import { PulseOSKernel } from "./PulseOSBrainStem.js";
@@ -43,9 +43,22 @@ import { evolveRaw } from "./PulseOSBrainEvolution.js";
 
 // Any other global utilities
 import { nanoid } from "nanoid";
+
+
+// ============================================================================
+//  IMPORTS — (unchanged, allowed for Spine)
+// ============================================================================
+import express from "express";
+import fetch from "node-fetch";
 import crypto from "crypto";
+import nodemailer from "nodemailer";
+import { createClient } from "redis";
+import { getFirestore } from "firebase-admin/firestore";
+import dotenv from "dotenv";
+dotenv.config();
 
-
+import { readdirSync, statSync } from "fs";
+import { join } from "path";
 // ============================================================================
 // 0) BRAIN IDENTITY (PulseRole) — v9.2
 // ============================================================================

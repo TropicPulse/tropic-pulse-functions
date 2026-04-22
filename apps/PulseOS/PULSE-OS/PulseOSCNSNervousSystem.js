@@ -112,7 +112,7 @@ const Transport = {
     // ONLINE MODE
     logCNS("TRANSPORT_ONLINE_CALL", { type });
 
-    const res = await fetch("/.netlify/functions/endpoint", {
+    const res = await fetch("/pulse-proxy/endpoint", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, payload })
@@ -130,7 +130,7 @@ const Transport = {
       return null;
     }
 
-    const res = await fetch("/.netlify/functions/CheckRouterMemory", {
+    const res = await fetch("/pulse-proxy/CheckRouterMemory", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ logs })
@@ -146,7 +146,7 @@ const Transport = {
       return;
     }
 
-    await fetch("/.netlify/functions/RouteDownAlert", {
+    await fetch("/pulse-router/RouteDownAlert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error, type })

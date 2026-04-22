@@ -28,9 +28,7 @@
 //  • generation: v9
 // ============================================================================
 
-import { readdirSync, statSync } from "fs";
-import { join } from "path";
-import { validatePulseRole, structuralError } from "./PulseOSBrain.js";
+import { boot } from "./PulseOSBrainCortex.js";
 
 // ============================================================================
 //  PulseRole — Evolution Engine Identity (for CNS awareness)
