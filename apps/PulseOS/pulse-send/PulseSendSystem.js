@@ -24,8 +24,6 @@ import { createLegacyPulse, legacyPulseFromImpulse } from "../pulse-send/PulseSe
 // Router
 import { PulseRouter } from "../pulse-router/PulseRouterEvolutionaryThought.js";
 
-// Mesh + Send (single, version‑aware organs)
-import { PulseMesh } from "../pulse-mesh/PulseMesh.js";
 import { PulseSend } from "./PulseSend.js";
 
 
