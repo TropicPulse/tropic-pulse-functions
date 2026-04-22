@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/netlify/functions/CheckRouterMemory.js
+// FILE: /apps/pulse-proxy/CheckRouterMemory.js
 // PULSE NETWORK MEMORY HEALER — v9.3
 // “THE NETWORK HEALER++ / B‑LAYER LOG INTAKE + REPAIR ENGINE”
 // ============================================================================
@@ -151,7 +151,7 @@ function healLogBatch(raw) {
 // ============================================================================
 async function notifyLymbicOnFatal(err) {
   try {
-    await fetch("/.netlify/functions/RouteDownAlert", {
+    await fetch("/pulse-router/RouteDownAlert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

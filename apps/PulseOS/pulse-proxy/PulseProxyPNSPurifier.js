@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/netlify/functions/pulsebandCleanup.js
+// FILE: /apps/pulse-proxy/pulsebandCleanup.js
 // PULSEBAND CLEANUP — VERSION 9.3
 // “THE PURIFIER / SANITY LAYER / ORDER‑KEEPER”
 // ============================================================================

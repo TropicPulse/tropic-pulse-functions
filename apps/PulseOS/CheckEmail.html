@@ -890,112 +890,83 @@ text-align: center;
     });
   }
 
-  // ============================================================================  
-  // 3) VERIFY PIN — UPGRADED TRUST + IDENTITY PERSISTENCE  
-  // ============================================================================
-  if (!window.__verifyPinBound) {
-    window.__verifyPinBound = true;
+ // ============================================================================  
+// 3) VERIFY PIN — PulseOS v9.3 (FINAL)  
+// ============================================================================
+if (!window.__verifyPinBound) {
+  window.__verifyPinBound = true;
 
-    document.getElementById("verifyBtn").addEventListener("click", async () => {
-      const email = emailInput.value.trim().toLowerCase();
-      const pin = pinInput.value.trim();
-      showTPLoader();
+  document.getElementById("verifyBtn").addEventListener("click", async () => {
+    const email = emailInput.value.trim().toLowerCase();
+    const pin = pinInput.value.trim();
+    showTPLoader();
 
-      if (pin.length !== 6) {
-        hideTPLoader();
-        authMsg.className = "msg error";
-        authMsg.textContent = "PIN must be 6 digits!";
-        authMsg.style.display = "block";
-        pinInput.focus();
+    if (pin.length !== 6) {
+      hideTPLoader();
+      authMsg.className = "msg error";
+      authMsg.textContent = "PIN must be 6 digits!";
+      authMsg.style.display = "block";
+      pinInput.focus();
+      return;
+    }
+
+    authMsg.style.display = "none";
+
+    try {
+      const data = await getHook({
+        type: "verifyPin",
+        email,
+        pin,
+        purpose: "login"
+      });
+
+      hideTPLoader();
+
+      if (data.success && data.identity) {
+
+        // ------------------------------
+        // ⭐ BUILD CANONICAL IDENTITY
+        // ------------------------------
+        const canonical = {
+          ...data.identity,
+          trustedDevice: true
+        };
+
+        // ------------------------------
+        // ⭐ SAVE CANONICAL v9 IDENTITY
+        // ------------------------------
+        try {
+          localStorage.setItem("tp_identity_v9", JSON.stringify(canonical));
+          localStorage.setItem("tp_device_token_v9", "1");
+        } catch (e) {}
+
+        // ------------------------------
+        // ⭐ EXPOSE IDENTITY IMMEDIATELY
+        // ------------------------------
+        window.PulseIdentity = canonical;
+
+        // ------------------------------
+        // ⭐ REDIRECT
+        // ------------------------------
+        window.location.href = returnTo || "/dashboard.html";
         return;
       }
 
-      authMsg.style.display = "none";
+      authMsg.className = "msg error";
+      authMsg.textContent = "Invalid PIN. Try again!";
+      authMsg.style.display = "block";
+      pinInput.focus();
 
-      try {
-        const data = await getHook({
-          type: "verifyPin",
-          email,
-          pin,
-          purpose: "login"
-        });
+    } catch (err) {
+      hideTPLoader();
+      authMsg.className = "msg error";
+      authMsg.textContent = "Network error. Try again!";
+      authMsg.style.display = "block";
+      pinInput.focus();
+    }
+  });
+}
 
-        hideTPLoader();
-
-        if (data.success && data.token && data.identity) {
-
-          // ------------------------------
-          // ⭐ BUILD CANONICAL IDENTITY
-          // ------------------------------
-          const canonical = {
-            ...data.identity,
-            trustedDevice: true
-          };
-
-          // ------------------------------
-          // ⭐ SAVE CANONICAL v9 IDENTITY
-          // ------------------------------
-          try {
-            localStorage.setItem("tp_identity_v9", JSON.stringify(canonical));
-          } catch (e) {}
-
-          // ------------------------------
-          // ⭐ MIRROR FOR v4 COMPATIBILITY
-          // ------------------------------
-          try {
-            const mirror = {
-              uid: canonical.uid || null,
-              userEmail: canonical.userEmail || null,
-              sessionToken: canonical.sessionToken || null,
-              trustedDevice: true
-            };
-            localStorage.setItem("tp_identity_v4", JSON.stringify(mirror));
-            localStorage.setItem("tp_device_token_v4", "1");
-            localStorage.setItem("tp_device_token_v9", "1");
-          } catch (e) {}
-
-          // ------------------------------
-          // ⭐ SAVE TOKEN (existing behavior)
-          // ------------------------------
-          try {
-            localStorage.setItem("tp_token_v4", data.token);
-          } catch (e) {}
-
-          // ------------------------------
-          // ⭐ STAY SIGNED IN FLAG
-          // ------------------------------
-          if (staySignedIn.checked) {
-            localStorage.setItem("tp_stay_signed_v4", "1");
-          } else {
-            localStorage.removeItem("tp_stay_signed_v4");
-          }
-
-          // ------------------------------
-          // ⭐ EXPOSE IDENTITY IMMEDIATELY
-          // ------------------------------
-          window.PulseIdentity = canonical;
-
-          // ------------------------------
-          // ⭐ REDIRECT
-          // ------------------------------
-          window.location.href = returnTo || "/dashboard.html";
-          return;
-        }
-
-        authMsg.className = "msg error";
-        authMsg.textContent = "Invalid PIN. Try again!";
-        authMsg.style.display = "block";
-        pinInput.focus();
-
-      } catch (err) {
-        hideTPLoader();
-        authMsg.className = "msg error";
-        authMsg.textContent = "Network error. Try again!";
-        authMsg.style.display = "block";
-        pinInput.focus();
-      }
-    });
-  }
 
   // ============================================================================  
   // 4) PULSEBAND BADGE (UI ONLY)  

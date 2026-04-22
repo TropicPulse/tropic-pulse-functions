@@ -17,7 +17,6 @@
 
 <!-- Backend Connector Layer -->
 <script type="module">
-import { log, warn, error, critical, logger, VitalsLogger } from "./pulse-proxy/PulseProxyVitalsLogger.js";
 import "/PulseUnderstanding.js";
 
   window.dataLayer = window.dataLayer || [];
@@ -1001,15 +1000,11 @@ import "/PulseUnderstanding.js";
     </div>
   </div>
     <script type="module">
-     // ============================================================================
-// DASHBOARD — TOP OF SCRIPT (Pulse‑OS‑v5 Compliant)
-// UI‑safe utilities only. No identity/session globals allowed.
-// ============================================================================
-
-// -----------------------------------------
-// ⭐ SERVER TIME OFFSET HELPERS
-// -----------------------------------------
-
+/* ============================================================================
+   DASHBOARD — TOP OF SCRIPT (Pulse‑OS‑v9.3)
+   Understanding‑Only • No imports • No caches • No v4 logic
+   Pure UI + Page Door + Identity + Hero Animation
+============================================================================ */
 
 // -----------------------------------------
 // ⭐ UI STATE (ALLOWED ON FRONTEND)
@@ -1022,13 +1017,36 @@ let resizeTimeout = null;   // UI-only
 // ⭐ MARKER (CLEAN + SAFE)
 // -----------------------------------------
 let lastTime = null;
+function mark(label, absolute = false) {
+  const now = nowMs();
+  const diff = lastTime ? now - lastTime : 0;
+  log(
+    absolute
+      ? `${label}: @${now.toFixed(1)}ms`
+      : `${label}: +${diff.toFixed(1)}ms`
+  );
+  lastTime = now;
+}
 
+// -----------------------------------------
+// ⭐ PAGE DOOR — TRUST CHECK ONLY
+// -----------------------------------------
+async function sessionCheck() {
+  const id = await identity(); // Understanding layer
 
+  if (!id.trustedDevice) {
+    const here = encodeURIComponent(location.pathname + location.search);
+    window.location.href = `/login.html?returnTo=${here}`;
+    return false;
+  }
+
+  return true;
+}
 
 // -----------------------------------------
 // ⭐ HERO HEADER ENTRANCE ANIMATION
 // -----------------------------------------
-export async function runHeroHeaderEntrance() {
+async function runHeroHeaderEntrance() {
   if (window.__heroHeaderPlayed) return;
   window.__heroHeaderPlayed = true;
 
@@ -1065,14 +1083,11 @@ export async function runHeroHeaderEntrance() {
   document.body.appendChild(top);
   document.body.appendChild(bottom);
 
-  // Paint frame
   await new Promise(requestAnimationFrame);
   await new Promise(requestAnimationFrame);
 
-  // Cinematic pause
   await new Promise(res => setTimeout(res, 600));
 
-  // Reveal animation
   bottom.style.height = "0";
   top.style.height = "115px";
 
@@ -1086,162 +1101,13 @@ export async function runHeroHeaderEntrance() {
 }
 
 // -----------------------------------------
-// ⭐ NORMALIZE USER RECORD (SAFE, NON‑DESTRUCTIVE)
-// -----------------------------------------
-function normalizeUserRecord(user = {}) {
-  const clean = (v, fallback = null) => {
-    if (v === undefined || v === null) return fallback;
-    const s = String(v).trim();
-    if (
-      s === "" ||
-      s.includes("{{") ||
-      s.includes("add_more_field") ||
-      s.includes("fieldLebal") ||
-      s.includes("fieldValue") ||
-      s.includes("*")
-    ) return fallback;
-    return s;
-  };
-
-  const normalizeBool = (v, fallback = false) => {
-    if (v === undefined || v === null) return fallback;
-    const s = String(v).toLowerCase().trim();
-    return s === "true" || s === "1";
-  };
-
-  const normalizeNumber = (v, fallback = 0) => {
-    const n = Number(v);
-    return isNaN(n) ? fallback : n;
-  };
-
-  const normalizeDateMs = (value) => {
-    if (!value) return null;
-
-    if (value.toMillis) return value.toMillis();
-    if (value instanceof Date) return value.getTime();
-
-    if (typeof value === "object" && typeof value._seconds === "number") {
-      return value._seconds * 1000 + Math.floor((value._nanoseconds || 0) / 1e6);
-    }
-
-    if (typeof value === "string") {
-      let ms = Date.parse(value);
-      if (!isNaN(ms)) return ms;
-
-      const cleaned = value.replace(" at ", " ").replace("UTC", "GMT");
-      ms = Date.parse(cleaned);
-      if (!isNaN(ms)) return ms;
-
-      return null;
-    }
-
-    if (typeof value === "number") return value > 0 ? value : null;
-
-    return null;
-  };
-
-  const mergeMap = (existing = {}, incoming = {}) => {
-    return { ...existing, ...incoming };
-  };
-
-  // Referral code
-  let referralCode =
-    clean(user.TPIdentity?.referralCode) ||
-    clean(user.referralCode) ||
-    null;
-
-  if (!referralCode) {
-    const base = clean(user.TPIdentity?.name || user.Name || user.name, "USER")
-      .split(" ")[0]
-      .toUpperCase();
-    referralCode = `${base}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-  }
-
-  // Build patch
-  const patch = {
-    Name: clean(user.Name || user.name, user.Name || user.name || ""),
-    Email: clean(user.Email || user.email, user.Email || user.email || ""),
-    DisplayName: clean(user.DisplayName || user.displayName, user.DisplayName || user.displayName || ""),
-
-    TPIdentity: {
-      name: clean(user.TPIdentity?.name || user.Name || user.name, user.TPIdentity?.name),
-      displayName: clean(user.TPIdentity?.displayName || user.DisplayName || user.displayName, user.TPIdentity?.displayName),
-      email: clean(user.TPIdentity?.email || user.Email || user.email, user.TPIdentity?.email),
-      phone: clean(user.TPIdentity?.phone || user.Phone || user.phone, user.TPIdentity?.phone),
-      country: clean(user.TPIdentity?.country || user.Country || user.country, user.TPIdentity?.country),
-      role: clean(user.TPIdentity?.role || user.Role || user.role, user.TPIdentity?.role),
-      photoURL: clean(
-        user.TPIdentity?.photoURL ||
-        user.photoURL ||
-        user.PhotoURL,
-        user.TPIdentity?.photoURL
-      ),
-      stripeAccountID: clean(
-        user.TPIdentity?.stripeAccountID ||
-        user.stripeAccountID ||
-        user.stripeId ||
-        user.stripe_account_id,
-        user.TPIdentity?.stripeAccountID
-      ),
-      referralCode,
-      createdAt: normalizeDateMs(user.TPIdentity?.createdAt || user.createdAt),
-      updatedAt: normalizeDateMs(user.TPIdentity?.updatedAt || user.updatedAt)
-    },
-
-    TPLoyalty: {
-      pointsBalance: normalizeNumber(user.TPLoyalty?.pointsBalance ?? user.pointsBalance ?? user.pulsepoints, user.TPLoyalty?.pointsBalance),
-      lifetimePoints: normalizeNumber(user.TPLoyalty?.lifetimePoints ?? user.lifetimePoints, user.TPLoyalty?.lifetimePoints),
-      streakCount: normalizeNumber(user.TPLoyalty?.streakCount ?? user.streakCount, user.TPLoyalty?.streakCount),
-      streakMultiplier: normalizeNumber(user.TPLoyalty?.streakMultiplier ?? user.streakMultiplier, user.TPLoyalty?.streakMultiplier),
-      lastEarnedDate: normalizeDateMs(user.TPLoyalty?.lastEarnedDate ?? user.lastEarnedDate),
-      lastVaultVisit: normalizeDateMs(user.TPLoyalty?.lastVaultVisit ?? user.lastVaultVisit),
-      referralCode,
-      updatedAt: normalizeDateMs(user.TPLoyalty?.updatedAt ?? user.updatedAt)
-    },
-
-    TPNotifications: {
-      smsOptIn: normalizeBool(user.TPNotifications?.smsOptIn ?? user.smsOptIn ?? user.receiveSMS, user.TPNotifications?.smsOptIn),
-      emailOptIn: normalizeBool(user.TPNotifications?.emailOptIn ?? user.emailOptIn ?? user.receiveMassEmails, user.TPNotifications?.emailOptIn),
-      freeMassNotificationsUsed: normalizeNumber(user.TPNotifications?.freeMassNotificationsUsed ?? user.freeMassNotificationsUsed, user.TPNotifications?.freeMassNotificationsUsed),
-      freeMassNotificationsLimit: normalizeNumber(user.TPNotifications?.freeMassNotificationsLimit ?? user.freeMassNotificationsLimit, user.TPNotifications?.freeMassNotificationsLimit),
-      paidMassNotificationCredits: normalizeNumber(user.TPNotifications?.paidMassNotificationCredits ?? user.paidMassNotificationCredits, user.TPNotifications?.paidMassNotificationCredits),
-      updatedAt: normalizeDateMs(user.TPNotifications?.updatedAt ?? user.updatedAt)
-    },
-
-    TPWallet: {
-      payouts: mergeMap(
-        user.TPWallet?.payouts,
-        {
-          frequency: clean(user.TPWallet?.payouts?.frequency ?? user.payoutFrequency, user.TPWallet?.payouts?.frequency),
-          day: clean(user.TPWallet?.payouts?.day ?? user.payoutDay, user.TPWallet?.payouts?.day),
-          updatedAt: normalizeDateMs(user.TPWallet?.payouts?.updatedAt ?? user.updatedAt)
-        }
-      ),
-      updatedAt: normalizeDateMs(user.TPWallet?.updatedAt ?? user.updatedAt)
-    },
-
-    TPSecurity: {
-      lastActive: normalizeDateMs(user.TPSecurity?.lastActive ?? user.lastActive),
-      lastVaultVisit: normalizeDateMs(user.TPSecurity?.lastVaultVisit ?? user.lastVaultVisit),
-      updatedAt: normalizeDateMs(user.TPSecurity?.updatedAt ?? user.updatedAt)
-    }
-  };
-
-  return patch;
-}
-// ============================================================================
-// DASHBOARD — LOWER BLOCK (CLEANED FOR PULSE OS v5)
-// ============================================================================
-
-// -----------------------------------------
 // ⭐ SIMPLE LOCAL LOGOUT (UI-ONLY)
 // -----------------------------------------
 function safeLogout() {
-  localStorage.removeItem("tp_token_v4");
-  localStorage.removeItem("tp_device_token_v4");
-  localStorage.removeItem("tp_identity_v4");
-  log("[DASHBOARD] SAFE LOGOUT");
-  window.location.replace("/CheckEmail.html");
+  // v9.3 logout = remove trust + identity
+  localStorage.removeItem("tp_identity_v9");
+  localStorage.removeItem("tp_device_token_v9");
+  window.location.replace("/login.html");
 }
 
 // -----------------------------------------
@@ -1253,13 +1119,13 @@ function hideTPLoader() {
   el.classList.add("hide");
   setTimeout(() => el.remove(), 700);
 }
-
 // -----------------------------------------
 // ⭐ DASHBOARD POP ANIMATION
 // -----------------------------------------
-function applyDashboardPop(identity, trusted) {
+function applyDashboardPop(identity) {
   const header = document.querySelector(".tp-dashboard-header");
   const nameEl = document.querySelector(".tp-dashboard-greeting-name");
+  const trustBadge = document.querySelector(".tp-trusted-badge");
 
   if (header) {
     header.classList.add("tp-dashboard-header-pop");
@@ -1272,20 +1138,16 @@ function applyDashboardPop(identity, trusted) {
     setTimeout(() => nameEl.classList.remove("tp-greeting-pop"), 800);
   }
 
-  const trustBadge = document.querySelector(".tp-trusted-badge");
   if (trustBadge) {
-    trustBadge.textContent = trusted ? "Trusted Device" : "Untrusted Device";
-    trustBadge.classList.toggle("trusted", !!trusted);
+    trustBadge.textContent = identity.trustedDevice ? "Trusted Device" : "Untrusted Device";
+    trustBadge.classList.toggle("trusted", identity.trustedDevice);
   }
 }
 
 // -----------------------------------------
-// ⭐ MAIN DASHBOARD RENDER
+// ⭐ MAIN DASHBOARD RENDER (PulseOS v9.3)
 // -----------------------------------------
-// identity: from PulseIdentity.identity()
-// trusted:  boolean from localStorage ("tp_device_token_v4" === "1")
-// user:     optional cached user record (if you have it)
-async function renderDashboard(identity, trusted, user) {
+async function renderDashboard(identity) {
   const shimmer = document.getElementById("shimmer");
   const img = document.getElementById("profilePhoto");
   const info = document.getElementById("info");
@@ -1303,17 +1165,16 @@ async function renderDashboard(identity, trusted, user) {
     <div class="info-row"><span class="label">Email:</span>  <span class="textA">${identity.email || "Unknown"}</span></div>
     <div class="info-row"><span class="label">Role:</span>  <span class="textA">${identity.role || "Deliverer"}</span></div>
     <div class="info-row"><span class="label">Stripe Account:</span>  <span class="textA">${identity.stripeAccountID || "Not linked"}</span></div>
-    <div class="info-row"><span class="label">Trusted Device:</span>  <span class="textA">${trusted ? "Yes" : "No"}</span></div>
+    <div class="info-row"><span class="label">Trusted Device:</span>  <span class="textA">${identity.trustedDevice ? "Yes" : "No"}</span></div>
   `;
 
-  applyDashboardPop(identity, trusted);
+  applyDashboardPop(identity);
 
   // -----------------------------------------
   // PHOTO LOADING (DETERMINISTIC)
   // -----------------------------------------
   let photo =
     (identity.photoURL && identity.photoURL.trim() !== "" && identity.photoURL) ||
-    (user?.photoURL || null) ||
     "https://www.tropicpulse.bz/Frustrated.png";
 
   img.src = photo;
@@ -1321,13 +1182,6 @@ async function renderDashboard(identity, trusted, user) {
   img.onload = () => {
     shimmer.style.display = "none";
     img.style.display = "block";
-
-    // If cache had photo but identity didn't → update identity cache
-    if (!identity.photoURL && user?.photoURL) {
-      identity.photoURL = user.photoURL;
-      localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-      log("[DASHBOARD] IDENTITY PHOTO UPDATED FROM CACHE");
-    }
   };
 
   img.onerror = () => {
@@ -1347,12 +1201,10 @@ async function renderDashboard(identity, trusted, user) {
   const stripeBtn = document.getElementById("stripeBtn");
   const updateBtn = document.getElementById("updateBtn");
 
-  if (logoutBtn) {
-    logoutBtn.onclick = () => safeLogout();
-  }
+  if (logoutBtn) logoutBtn.onclick = () => safeLogout();
 
   if (adminBtn) {
-    if (identity.role && identity.role.toLowerCase() === "admin") {
+    if (identity.role?.toLowerCase() === "admin") {
       adminBtn.style.display = "block";
     }
     adminBtn.onclick = () => {
@@ -1372,31 +1224,11 @@ async function renderDashboard(identity, trusted, user) {
     };
   }
 
-  // -----------------------------------------
-  // STAY SIGNED IN TOGGLE
-  // -----------------------------------------
-  const stayToggle = document.getElementById("stayToggle");
-  if (stayToggle) {
-    const stay = localStorage.getItem("tp_stay_signed_v4");
-    stayToggle.checked = stay === "1";
-
-    stayToggle.addEventListener("change", () => {
-      if (stayToggle.checked) {
-        localStorage.setItem("tp_stay_signed_v4", "1");
-      } else {
-        localStorage.removeItem("tp_stay_signed_v4");
-      }
-    });
-  }
-
-  // Done → hide loader if present
   hideTPLoader();
 }
+
 // -----------------------------
-// DASHBOARD BOOTSTRAP (NEW, SAFE, FINAL)
-// -----------------------------
-// -----------------------------
-// DASHBOARD BOOTSTRAP (NEW, SAFE, FINAL)
+// DASHBOARD BOOTSTRAP — PulseOS v9.3 (UNDERSTANDING-ONLY)
 // -----------------------------
 (async () => {
   // Minimal timing marker (no firstTime dependency)
@@ -1419,66 +1251,39 @@ async function renderDashboard(identity, trusted, user) {
   const panel = document.getElementById("pulseband-panel");
 
   // -----------------------------------------
-  // 1. LOAD IDENTITY (SINGLE SOURCE OF TRUTH)
+  // 1. PAGE DOOR — TRUST CHECK ONLY
   // -----------------------------------------
-  mark("DASHBOARD: STARTING IDENTITY()");
-  const id = await identity(); // PulseIdentity.js
-
-  if (!id) {
-    // No identity → back to login
-    window.location.replace("/CheckEmail.html");
-    return;
-  }
-
-  const userID = id.uid;
-  const trusted = localStorage.getItem("tp_device_token_v4") === "1";
+  mark("DASHBOARD: sessionCheck()");
+  const ok = await sessionCheck();
+  if (!ok) return; // redirected to login if not trusted
 
   // -----------------------------------------
-  // 2. WARM CACHES (FAST, PARALLEL, NO FIRESTORE ON PAGE)
+  // 2. LOAD IDENTITY FROM BBB (SINGLE SOURCE OF TRUTH)
   // -----------------------------------------
-  mark("DASHBOARD: WARMING CACHES");
-
-  await Promise.all([
-    ensureUsersCache(),
-    ensureBusinessCache(),
-    ensureEventCache(),
-    ensureOrdersCache(),
-    ensureHistoryCache(),
-    ensureSettingsCache()
-  ]);
-
-  mark("DASHBOARD: CACHES READY");
+  mark("DASHBOARD: identity()");
+  const id = await identity();
 
   // -----------------------------------------
-  // 3. GET USER FROM CACHE (NO DIRECT FIRESTORE)
-  // -----------------------------------------
-  const user = getUsersCache().find(u => u.id === userID);
-
-  if (!user) {
-    warn("[DASHBOARD] User missing in cache, rendering with identity only");
-  }
-
-  // -----------------------------------------
-  // 4. UI PREP
+  // 3. UI PREP
   // -----------------------------------------
   document.body.classList.add("hero-header-intro");
   hideTPLoader();
 
   // -----------------------------------------
-  // 5. HERO HEADER ANIMATION
+  // 4. HERO HEADER ANIMATION
   // -----------------------------------------
   mark("DASHBOARD: STARTING HERO ENTRANCE");
   await runHeroHeaderEntrance();
 
   // -----------------------------------------
-  // 6. RENDER DASHBOARD
+  // 5. RENDER DASHBOARD (IDENTITY-ONLY INPUT)
   // -----------------------------------------
   mark("DASHBOARD: STARTING RENDER DASHBOARD");
-  await renderDashboard(id, trusted, user || null);
+  await renderDashboard(id);
 
   // -----------------------------------------
-  // ⭐ PULSEBAND INITIAL RESTORE (NO LOOPS)
-  // -----------------------------------------
+  // ⭐ PULSEBAND INITIAL RESTORE (NO LOOPS, UI-ONLY)
+// -----------------------------------------
   if (!window.__pulsebandListenersAttached) {
     window.__pulsebandListenersAttached = true;
 
@@ -1486,8 +1291,6 @@ async function renderDashboard(identity, trusted, user) {
     window.addEventListener("load", () => {
       const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
       window.isIdle = !!inactiveFlag;
-
-      
     });
 
     // Badge toggle listener (mini badge)
@@ -1506,7 +1309,6 @@ async function renderDashboard(identity, trusted, user) {
           localStorage.setItem("pulseband_disabled", "1");
           window.isIdle = true;
         }
-
       });
     }
   }
@@ -1514,6 +1316,7 @@ async function renderDashboard(identity, trusted, user) {
   mark("DASHBOARD: ENDING DOM BOOTSTRAP");
   mark("DASHBOARD: ENDING DOM LOAD", true);
 })();
+
 
 
   </script>

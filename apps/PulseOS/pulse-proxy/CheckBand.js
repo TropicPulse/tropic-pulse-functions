@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/netlify/functions/CheckBand.js
+// FILE: /apps/pulse-proxy/CheckBand.js
 // PULSE BAND HEALER — v9.3
 // “THE MUSCLE CLINIC++ / KINETIC ORGAN HEALER”
 // ============================================================================

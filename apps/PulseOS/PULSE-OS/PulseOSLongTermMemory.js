@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/netlify/functions/index.js
+// FILE: /apps/pulse-proxy/index.js
 // PULSE BACKEND ARCHIVE v6.3
 // “THE LONG‑TERM MEMORY / ANCESTRAL KNOWLEDGE LAYER”
 // ============================================================================

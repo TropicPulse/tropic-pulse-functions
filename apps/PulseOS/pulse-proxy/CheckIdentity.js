@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: netlify/functions/CheckIdentity.js
+// FILE: pulse-proxy/CheckIdentity.js
 // PULSE IDENTITY ENGINE — v9.3
 // “THE SELF++ / CANONICAL IDENTITY ENGINE / SENSE‑OF‑SELF LAYER”
 // ============================================================================

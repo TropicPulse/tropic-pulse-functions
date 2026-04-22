@@ -17,7 +17,6 @@
 
 <!-- Backend Connector Layer -->
 <script type="module">
-import { log, warn, error, critical, logger, VitalsLogger } from "./pulse-proxy/PulseProxyVitalsLogger.js";
 import "/PulseUnderstanding.js";
 
   window.dataLayer = window.dataLayer || [];
@@ -2109,517 +2108,325 @@ input::placeholder {
 </div>
 <div id="floatingScrollUp" class="floating-scroll-up">▲</div>
 <script type="module">
-  
-    
 
-  let persistenceEnabled = true;
-  let lastTime = null;
-  let firstTime = null;
+// ============================================================================
+// BUSINESS PAGE — PulseOS v9.3 (Understanding‑Only)
+// Pure UI + Page Door + Identity
+// ============================================================================
 
+// -----------------------------------------
+// ⭐ UI STATE (ALLOWED)
+// -----------------------------------------
+let isIdle = true;
+let resizeTimeout = null;
 
-  let token = null;
-  let resizeTimeout = null;
-  let identity = null;
-  let trusted = null;
-  let autologin = null;
-  let loggedIn = false;
-  let userName = null;
-  let userEmail = null;
-  let userID = null;
-  let loyalty = null;
-  let settings = null;
-  
-  
-
-  let tpPriceRating = null;
-  let tpGoogleRating = null;
-  let tpRatingCount = null;
-  let tpFinalScore = null;
-  let tpEnv = null;
-  let tpOpenNow = null;
-  let tpSearch = null;
-  let activeSearch = null;
-  let activeMy = false;
-  let activeAll = false;
-  let activeEnv = null;
-  let activeOpenNow = null;
-  let activeDistance = null;
-  let activeFinalScore = null;
-  let activeRatingCount = null;
-  let activeGoogleRating = null;
-  let activePriceRating = null;
-  let activeBizCategory = null;
-  let activeBizSubcategory = null;
-  let activeBizCategoryIcon = null;
-  let activeBizSubcategoryIcon = null;
-  let currentUserLocation = null;
-  let categoriesMode = true;
-
-  let currentList = null;
-  let showingSaved = false;
-  let emptyStateIndex = 0;
-  
-  let bizCategories = JSON.parse(localStorage.getItem("bizCategories") || "[]");
-  let bizSubcategories = JSON.parse(localStorage.getItem("bizSubcategories") || "[]");
-  let bizCategoryIconMap = JSON.parse(localStorage.getItem("bizCategoryIconMap") || "{}");
-  let bizSubcategoryIconMap = JSON.parse(localStorage.getItem("bizSubcategoryIconMap") || "{}");
-  let allBusinesses = [];
-  let savedBusinesses = [];
-  let sortPriority = [];
-  let filterHistory = [];
-  let lastActivatedFilter = null;
-
-  
-  const allBtn = document.getElementById("allBtn");
-  const myBtn = document.getElementById("myBtn");
-  const distancewrapper = document.querySelector(".distance-wrapper");
-  const distanceselect = document.querySelector(".distance-select");
-  const searchwrapper = document.querySelector(".t-search-wrapper");
-
-  const filterwrapper = document.querySelector(".t-filter-wrapper");
-  const bookmarkHeaderBtn = document.getElementById("bookmarkHeaderBtn");
-  /* FILTER BUTTONS */
-  const businessesDiv = document.getElementById("businesses");
-  const distanceFilter = document.getElementById("distanceFilter");
-  const businessshell = document.querySelector(".business-shell");
-  const tpFilterBtn = document.getElementById("tpFilterBtn");
-  const tpFilterPanel = document.getElementById("tpFilterPanel");
-  const filterLabel = document.getElementById("filterLabel");
-  
-  const searchLabel = document.getElementById("searchLabel");
-  const tpSearchBtn = document.getElementById("tpSearchBtn");
-  const tpSearchGo = document.getElementById("tpSearchGo");
-  const tpSearchClear = document.getElementById("tpSearchClear");
-  const tpSearchPanel = document.getElementById("tpSearchPanel");
-  const tpSearchInput = document.getElementById("tpSearchInput");
-  const floatingCategoryBubble= document.getElementById("floatingCategoryBubble");
-  
-  const BADGE_CLASSES = [
-    "diamond", "tier-3", "tier-2", "tier-1",
-    "fivestar-pulse",
-    "ratingcount-pulse", "ratingcount-pulseover1000",
-    "fire-3", "fire-2", "fire-1",
-    "ice-1", "ice-2", "ice-3",
-    "env-indoor", "env-outdoor", "env-both",
-    "urgency-red", "urgency-green", "urgency-pulse",
-    "walk-pulse", "drive-pulse"
-  ];
-
-  const BusLazyObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-
-      const img = entry.target;
-      const realSrc = img.dataset.src;
-
-      if (realSrc) {
-        img.src = realSrc;
-        img.onload = () => img.classList.add("loaded");
-      }
-
-      observer.unobserve(img);
-    });
-  }, {
-    rootMargin: "300px 0px",
-    threshold: 0
-  });
-
-function safeLogout() {
-  localStorage.removeItem("tp_token_v4");
-  localStorage.removeItem("tp_device_token_v4");
-  mark("SAFE LOGOUT");
-}
-async function reportDanger(reason) {
-  try {
-    await getHook({
-      type: "danger",
-      payload: {
-        reason,
-        identitySnapshot: identity || null,
-        tokenSnapshot: token || null,
-        userAgent: navigator.userAgent,
-        ts: nowMs()
-      }
-    });
-  } catch (err) {
-    warn("Failed to report danger:", err);
-  }
-}
-async function hardLogout(reason) {
-  try {
-    mark("HARD LOGOUT: " + (reason || "unknown"));
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-    await reportDanger(reason || "hardLogout");
-  } catch (err) {
-    mark("HARD LOGOUT ERROR: " + err);
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-  } finally {
-    window.location.replace("/CheckEmail.html");
-  }
-}
-
+// -----------------------------------------
+// ⭐ MARKER (UI-only)
+// -----------------------------------------
+let lastTime = null;
 function mark(label) {
-    log("[CHECKEMAIL]", label);
-  }
+  log("[BUSINESS]", label);
+  lastTime = nowMs();
+}
 
-/************************************************************
- * SESSION CHECK (ALL PAGES EXCEPT LOGIN)
- ************************************************************/
+// -----------------------------------------
+// ⭐ PAGE DOOR — TRUST CHECK ONLY
+// -----------------------------------------
 async function sessionCheck() {
-  mark("sessionCheck");
+  const id = await identity(); // Provided by Understanding
 
-  // -----------------------------------------
-  // 1. LOAD LOCAL VARIABLES
-  // -----------------------------------------
-  autologin = localStorage.getItem("tp_stay_signed_v4") === "1";
-  trusted   = localStorage.getItem("tp_device_token_v4") === "1";
-
-  try {
-    identity = JSON.parse(localStorage.getItem("tp_identity_v4") || "{}");
-  } catch {
-    identity = null;
-  }
-
-  token     = localStorage.getItem("tp_token_v4");
-  userID    = identity?.uid   || null;
-  userEmail = identity?.email || null;
-  userName  = identity?.displayName || null;
-
-  // -----------------------------------------
-  // 2. IDENTITY + TOKEN MUST EXIST
-  // -----------------------------------------
-  if (!identity || !userID || !token) {
-    mark("Missing identity or token → HARD LOGOUT");
-    hardLogout("missing_identity_or_token");
+  if (!id.trustedDevice) {
+    const here = encodeURIComponent(location.pathname + location.search);
+    window.location.href = `/login.html?returnTo=${here}`;
     return false;
   }
-
-  // -----------------------------------------
-  // 3. LOCAL INACTIVITY CHECK
-  // -----------------------------------------
-  const now       = nowMs();
-  const lastLocal = Number(localStorage.getItem("tp_last_active_v4")) || 0;
-  const diff      = now - lastLocal;
-
-  const inactive15 = diff > 15 * 60 * 1000; // > 15 minutes
-
-  if (inactive15 && !trusted) {
-    if (!autologin) {
-      mark("Inactive >15 min AND not autologin/trusted → HARD LOGOUT");
-      hardLogout("inactive_and_not_remembered");
-    } else {
-      mark("Inactive >15 min AND autologin → SOFT LOGOUT");
-      safeLogout();
-    }
-    return false;
-  }
-
-  // -----------------------------------------
-  // 4. BACKEND AUTH REFRESH (THE ONLY REAL STEP)
-  // -----------------------------------------
-  const data = await getAuth(token);
-
-  if (data.hardLogout) {
-    mark("Backend flagged danger → HARD LOGOUT");
-    hardLogout("backend_danger_flag");
-    return false;
-  }
-
-  if (!data.identity) {
-    mark("Backend returned no identity → HARD LOGOUT");
-    hardLogout("missing_identity_from_backend");
-    return false;
-  }
-
-  // Update JWT lineage if provided
-  if (data.newJwtToken) {
-    token = data.newJwtToken;
-    localStorage.setItem("tp_token_v4", token);
-    mark("Updated JWT lineage from backend");
-  }
-
-  // Update identity cache
-  identity = data.identity;
-  localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-
-  // -----------------------------------------
-  // 5. UPDATE LAST ACTIVE
-  // -----------------------------------------
-  localStorage.setItem("tp_last_active_v4", now);
 
   return true;
 }
 
-  function saveLocation(lat, lng) {
-    localStorage.setItem(
-      "lastKnownLocation",
-      JSON.stringify({ lat, lng, ts: nowMs() })
-    );
-  }
+// -----------------------------------------
+// ⭐ BUSINESS PAGE GLOBALS (UI-only)
+// -----------------------------------------
+let activeSearch = null;
+let activeMy = false;
+let activeAll = false;
+let activeEnv = null;
+let activeOpenNow = null;
+let activeDistance = null;
+let activeFinalScore = null;
+let activeRatingCount = null;
+let activeGoogleRating = null;
+let activePriceRating = null;
+let activeBizCategory = null;
+let activeBizSubcategory = null;
+let activeBizCategoryIcon = null;
+let activeBizSubcategoryIcon = null;
+let currentUserLocation = null;
+let categoriesMode = true;
 
-  function getSavedLocation() {
-    try {
-      const raw = localStorage.getItem("lastKnownLocation");
-      if (!raw) return null;
+let currentList = null;
+let showingSaved = false;
+let emptyStateIndex = 0;
 
-      const obj = JSON.parse(raw);
-      if (!obj.lat || !obj.lng) return null;
+// -----------------------------------------
+// ⭐ BUSINESS CATEGORY STORAGE (UI-only)
+// -----------------------------------------
+let bizCategories = JSON.parse(localStorage.getItem("bizCategories") || "[]");
+let bizSubcategories = JSON.parse(localStorage.getItem("bizSubcategories") || "[]");
+let bizCategoryIconMap = JSON.parse(localStorage.getItem("bizCategoryIconMap") || "{}");
+let bizSubcategoryIconMap = JSON.parse(localStorage.getItem("bizSubcategoryIconMap") || "{}");
 
-      return obj;
-    } catch {
-      return null;
+let allBusinesses = [];
+let savedBusinesses = [];
+let sortPriority = [];
+let filterHistory = [];
+let lastActivatedFilter = null;
+
+// -----------------------------------------
+// ⭐ DOM REFERENCES (UI-only)
+// -----------------------------------------
+const allBtn = document.getElementById("allBtn");
+const myBtn = document.getElementById("myBtn");
+const distancewrapper = document.querySelector(".distance-wrapper");
+const distanceselect = document.querySelector(".distance-select");
+const searchwrapper = document.querySelector(".t-search-wrapper");
+
+const filterwrapper = document.querySelector(".t-filter-wrapper");
+const bookmarkHeaderBtn = document.getElementById("bookmarkHeaderBtn");
+
+const businessesDiv = document.getElementById("businesses");
+const distanceFilter = document.getElementById("distanceFilter");
+const businessshell = document.querySelector(".business-shell");
+const tpFilterBtn = document.getElementById("tpFilterBtn");
+const tpFilterPanel = document.getElementById("tpFilterPanel");
+const filterLabel = document.getElementById("filterLabel");
+
+const searchLabel = document.getElementById("searchLabel");
+const tpSearchBtn = document.getElementById("tpSearchBtn");
+const tpSearchGo = document.getElementById("tpSearchGo");
+const tpSearchClear = document.getElementById("tpSearchClear");
+const tpSearchPanel = document.getElementById("tpSearchPanel");
+const tpSearchInput = document.getElementById("tpSearchInput");
+const floatingCategoryBubble = document.getElementById("floatingCategoryBubble");
+
+// -----------------------------------------
+// ⭐ BADGE CLASSES (UI-only)
+// -----------------------------------------
+const BADGE_CLASSES = [
+  "diamond", "tier-3", "tier-2", "tier-1",
+  "fivestar-pulse",
+  "ratingcount-pulse", "ratingcount-pulseover1000",
+  "fire-3", "fire-2", "fire-1",
+  "ice-1", "ice-2", "ice-3",
+  "env-indoor", "env-outdoor", "env-both",
+  "urgency-red", "urgency-green", "urgency-pulse",
+  "walk-pulse", "drive-pulse"
+];
+
+// -----------------------------------------
+// ⭐ LAZY LOADER (UI-only)
+// -----------------------------------------
+const BusLazyObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+
+    const img = entry.target;
+    const realSrc = img.dataset.src;
+
+    if (realSrc) {
+      img.src = realSrc;
+      img.onload = () => img.classList.add("loaded");
     }
-  }
 
-  function normalizeDistanceSymbol(distanceMiles) {
-  if (distanceMiles == null || isNaN(distanceMiles)) return "";
+    observer.unobserve(img);
+  });
+}, {
+  rootMargin: "300px 0px",
+  threshold: 0
+});
+// ============================================================================
+// BUSINESS PAGE — PulseOS v9.3 (UI + Proxy-fed categories)
+// ============================================================================
 
-  if (distanceMiles < 0.15) return "👣";   // Very close
-  if (distanceMiles < 0.75) return "🚶";   // Walkable
-  if (distanceMiles < 2)    return "🚗";   // Short drive
-  return "🧭";                             // Far
+// -----------------------------------------
+// ⭐ LOCATION HELPERS (UNCHANGED)
+// -----------------------------------------
+function saveLocation(lat, lng) {
+  localStorage.setItem(
+    "lastKnownLocation",
+    JSON.stringify({ lat, lng, ts: nowMs() })
+  );
 }
 
-  function normalizePriceSymbol(symbol) {
-  if (!symbol) return "";
+function getSavedLocation() {
+  try {
+    const raw = localStorage.getItem("lastKnownLocation");
+    if (!raw) return null;
 
-  // Convert $$$ → 💲💲💲
+    const obj = JSON.parse(raw);
+    if (!obj.lat || !obj.lng) return null;
+
+    return obj;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeDistanceSymbol(distanceMiles) {
+  if (distanceMiles == null || isNaN(distanceMiles)) return "";
+  if (distanceMiles < 0.15) return "👣";
+  if (distanceMiles < 0.75) return "🚶";
+  if (distanceMiles < 2)    return "🚗";
+  return "🧭";
+}
+
+function normalizePriceSymbol(symbol) {
+  if (!symbol) return "";
   return symbol.replace(/\$/g, "💲");
 }
 
-  function fetchLowAccuracyInBackground(onUpdate) {
+function fetchLowAccuracyInBackground(onUpdate) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      log("Background low accuracy:", loc);
+      saveLocation(loc.lat, loc.lng);
+      onUpdate(loc);
+    },
+    err => {
+      warn("Background low accuracy failed:", err);
+      setTimeout(() => {
+        navigator.geolocation.getCurrentPosition(
+          pos2 => {
+            const loc2 = { lat: pos2.coords.latitude, lng: pos2.coords.longitude };
+            log("Retry low accuracy:", loc2);
+            saveLocation(loc2.lat, loc2.lng);
+            onUpdate(loc2);
+          },
+          err2 => warn("Retry low accuracy failed:", err2),
+          { enableHighAccuracy: false, timeout: 5000 }
+        );
+      }, 2000);
+    },
+    { enableHighAccuracy: false, timeout: 5000 }
+  );
+}
+
+async function getInstantLocationWithBackgroundUpdate(onSignificantChange) {
+  const saved = getSavedLocation();
+
+  if (saved) {
+    log("Using cached location:", saved);
+    setTimeout(() => {
+      fetchLowAccuracyInBackground(newLoc => {
+        const dist = getDistanceMiles(saved, newLoc);
+        if (dist > 50) {
+          log("📍 Significant movement:", dist, "m");
+          onSignificantChange(newLoc);
+        }
+      });
+    }, 0);
+    return saved;
+  }
+
+  return new Promise(resolve => {
     navigator.geolocation.getCurrentPosition(
       pos => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        log("Background low accuracy:", loc);
+        log("Initial low accuracy:", loc);
         saveLocation(loc.lat, loc.lng);
-        onUpdate(loc);
+        resolve(loc);
+
+        fetchLowAccuracyInBackground(newLoc => {
+          const dist = getDistanceMiles(loc, newLoc);
+          if (dist > 50) onSignificantChange(newLoc);
+        });
       },
       err => {
-        warn("Background low accuracy failed:", err);
+        warn("Initial low accuracy failed:", err);
+        resolve(null);
 
-        // Retry once after 2 seconds
-        setTimeout(() => {
-          navigator.geolocation.getCurrentPosition(
-            pos2 => {
-              const loc2 = { lat: pos2.coords.latitude, lng: pos2.coords.longitude };
-              log("Retry low accuracy:", loc2);
-              saveLocation(loc2.lat, loc2.lng);
-              onUpdate(loc2);
-            },
-            err2 => {
-              warn("Retry low accuracy failed:", err2);
-            },
-            { enableHighAccuracy: false, timeout: 5000 }
-          );
-        }, 2000);
-      },
-      { enableHighAccuracy: false, timeout: 5000 }
-    );
-  }
-
-  async function getInstantLocationWithBackgroundUpdate(onSignificantChange) {
-    const saved = getSavedLocation();
-
-    // 1️⃣ Return cached location immediately
-    if (saved) {
-      log("Using cached location:", saved);
-      setTimeout(() => {
         fetchLowAccuracyInBackground(newLoc => {
-          const dist = getDistanceMiles(saved, newLoc);
-          if (dist > 50) {
-            log("📍 Significant movement:", dist, "m");
-            onSignificantChange(newLoc);
-          }
+          onSignificantChange(newLoc);
         });
-      }, 0);
-      return saved;
-    }
-
-    // 2️⃣ No saved location → try low accuracy immediately
-    return new Promise(resolve => {
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          log("Initial low accuracy:", loc);
-          saveLocation(loc.lat, loc.lng);
-          resolve(loc);
-
-          // Background refresh
-          fetchLowAccuracyInBackground(newLoc => {
-            const dist = getDistanceMiles(loc, newLoc);
-            if (dist > 50) onSignificantChange(newLoc);
-          });
-        },
-        err => {
-          warn("Initial low accuracy failed:", err);
-          resolve(null);
-
-          // Still try background update
-          fetchLowAccuracyInBackground(newLoc => {
-            onSignificantChange(newLoc);
-          });
-        },
-        { enableHighAccuracy: false, timeout: 7000 }
-      );
-    });
-  }
-  
-  const emptyStateImages = [
-    "https://www.tropicpulse.bz/Disheveled.png",
-    "https://www.tropicpulse.bz/Disheveled2.png",
-    "https://www.tropicpulse.bz/Disheveled3.png",
-    "https://www.tropicpulse.bz/Disheveled4.png",
-    "https://www.tropicpulse.bz/Disheveled5.png",
-    "https://www.tropicpulse.bz/Disheveled6.png",
-    "https://www.tropicpulse.bz/DisheveledExhausted1.png"
-  ];
-
-  
-  function updateBusinessClearFilterVisibility() {
-    const btn = document.getElementById("clearFilterBtn");
-
-    if (activeBizCategory || activeBizSubcategory || activeMy || activePriceRating || activeRatingCount || activeFinalScore || activeGoogleRating || activeSearch || activeOpenNow || activeEnv || activeAll || activeDistance || showingSaved) {
-      btn.style.display = "inline-block";
-    } else {
-      btn.style.display = "none";
-    }
-  }
-
-  function getNextToucan() {
-    const img = emptyStateImages[emptyStateIndex];
-    emptyStateIndex = (emptyStateIndex + 1) % emptyStateImages.length;
-    return img;
-  }
-
-  function hideTPLoader() {
-    const el = document.getElementById("t-loading");
-    if (!el) return;
-    el.classList.add("hide");
-    setTimeout(() => el.remove(), 700);
-  }
-
-async function loadBusinessCategoryLists() {
-  const q = query(
-    collection(db, "CategoryIconCache"),
-    where("source", "array-contains", "businesses")
-  );
-
-  const snap = await getDocs(q);
-
-  snap.forEach(doc => {
-    const data = doc.data() || {};
-
-    const category = (data.category || "").toLowerCase().trim();
-    const icon = data.migratedUrl || data.icon || null;
-    const isSub = data.subcategory === true;
-    const parent = data.parentCategory
-      ? data.parentCategory.toLowerCase().trim()
-      : null;
-
-    const entry = {
-      category,
-      icon,
-      subcategory: isSub,
-      parentCategory: parent
-    };
-
-    if (isSub) {
-      bizSubcategories.push(entry);
-      if (icon) bizSubcategoryIconMap[category] = icon;
-    } else {
-      bizCategories.push(entry);
-      if (icon) bizCategoryIconMap[category] = icon;
-    }
+      },
+      { enableHighAccuracy: false, timeout: 7000 }
+    );
   });
-
-  // Sort for UI
-  bizCategories.sort((a, b) => a.category.localeCompare(b.category));
-  bizSubcategories.sort((a, b) => a.category.localeCompare(b.category));
 }
 
-async function CategoryListCache(action) {
-  action = (action || "").toLowerCase().trim();
+// -----------------------------------------
+// ⭐ EMPTY STATE IMAGES (UNCHANGED)
+// -----------------------------------------
+const emptyStateImages = [
+  "https://www.tropicpulse.bz/Disheveled.png",
+  "https://www.tropicpulse.bz/Disheveled2.png",
+  "https://www.tropicpulse.bz/Disheveled3.png",
+  "https://www.tropicpulse.bz/Disheveled4.png",
+  "https://www.tropicpulse.bz/Disheveled5.png",
+  "https://www.tropicpulse.bz/Disheveled6.png",
+  "https://www.tropicpulse.bz/DisheveledExhausted1.png"
+];
 
-  // -----------------------------
-  // READ FROM LOCALSTORAGE
-  // -----------------------------
-  if (action === "read") {
-    // Optional: rebuild maps from arrays if needed
-    bizCategoryIconMap = {};
-    bizSubcategoryIconMap = {};
-
-    for (const item of bizCategories) {
-      const category = (item.category || "").toLowerCase().trim();
-      if (item.icon) bizCategoryIconMap[category] = item.icon;
-    }
-
-    for (const item of bizSubcategories) {
-      const category = (item.category || "").toLowerCase().trim();
-      if (item.icon) bizSubcategoryIconMap[category] = item.icon;
-    }
-
-    return {
-      bizCategories,
-      bizSubcategories,
-      bizCategoryIconMap,
-      bizSubcategoryIconMap
-    };
-  }
-
-  // -----------------------------
-  // WRITE TO LOCALSTORAGE
-  // -----------------------------
-  if (action === "write") {
-
-    // Prevent writing empty arrays (first load)
-    if (!bizCategories.length && !bizSubcategories.length) {
-      warn("CategoryListCache: refusing to write empty arrays");
-      return false;
-    }
-
-    localStorage.setItem("bizCategories", JSON.stringify(bizCategories));
-    localStorage.setItem("bizSubcategories", JSON.stringify(bizSubcategories));
-    localStorage.setItem("bizCategoryIconMap", JSON.stringify(bizCategoryIconMap));
-    localStorage.setItem("bizSubcategoryIconMap", JSON.stringify(bizSubcategoryIconMap));
-    return true;
-  }
-
-  warn("CategoryListCache: Unknown action:", action);
-  return false;
+function getNextToucan() {
+  const img = emptyStateImages[emptyStateIndex];
+  emptyStateIndex = (emptyStateIndex + 1) % emptyStateImages.length;
+  return img;
 }
 
-  async function loadBusinessCategories() {
-      
-    const cachedCategories = localStorage.getItem("bizCategories");
-    const cachedSubcategories = localStorage.getItem("bizSubcategories");
-    const cachedCat = localStorage.getItem("bizCategoryIconMap");
-    const cachedSub = localStorage.getItem("bizSubcategoryIconMap");
+// -----------------------------------------
+// ⭐ FILTER VISIBILITY (UNCHANGED)
+// -----------------------------------------
+function updateBusinessClearFilterVisibility() {
+  const btn = document.getElementById("clearFilterBtn");
 
-    const hasCategories =
-      cachedCategories &&
-      cachedCategories !== "[]" &&
-      cachedSubcategories &&
-      cachedSubcategories !== "[]";
-
-    const hasMaps =
-      cachedCat &&
-      cachedCat !== "{}" &&
-      cachedSub &&
-      cachedSub !== "{}";
-
-    if (hasCategories && hasMaps) {
-      mark("Cached CategoryList available");
-      CategoryListCache("read");
-    } else {
-        // MUST rebuild from Firestore
-      mark("SETTING CategoryList Cache");
-      await loadBusinessCategoryLists();
-      CategoryListCache("write");
-    }
+  if (
+    activeBizCategory || activeBizSubcategory || activeMy ||
+    activePriceRating || activeRatingCount || activeFinalScore ||
+    activeGoogleRating || activeSearch || activeOpenNow ||
+    activeEnv || activeAll || activeDistance || showingSaved
+  ) {
+    btn.style.display = "inline-block";
+  } else {
+    btn.style.display = "none";
   }
+}
+
+// -----------------------------------------
+// ⭐ LOADER (UNCHANGED)
+// -----------------------------------------
+function hideTPLoader() {
+  const el = document.getElementById("t-loading");
+  if (!el) return;
+  el.classList.add("hide");
+  setTimeout(() => el.remove(), 700);
+}
+
+// ============================================================================
+// ⭐ CATEGORY LOADING — PulseOS v9.3 (NO FIRESTORE)
+// ============================================================================
+async function loadBusinessCategories() {
+  // Read categories written by Proxy / Business Embassy
+  bizCategories = JSON.parse(localStorage.getItem("bizCategories") || "[]");
+  bizSubcategories = JSON.parse(localStorage.getItem("bizSubcategories") || "[]");
+  bizCategoryIconMap = JSON.parse(localStorage.getItem("bizCategoryIconMap") || "{}");
+  bizSubcategoryIconMap = JSON.parse(localStorage.getItem("bizSubcategoryIconMap") || "{}");
+
+  // If missing, request refresh from Proxy
+  if (!bizCategories.length || !bizSubcategories.length) {
+    log("Requesting category refresh from Proxy...");
+    await getHook({ type: "refreshBusinessCategories" });
+
+    // Re-read after Proxy writes them
+    bizCategories = JSON.parse(localStorage.getItem("bizCategories") || "[]");
+    bizSubcategories = JSON.parse(localStorage.getItem("bizSubcategories") || "[]");
+    bizCategoryIconMap = JSON.parse(localStorage.getItem("bizCategoryIconMap") || "{}");
+    bizSubcategoryIconMap = JSON.parse(localStorage.getItem("bizSubcategoryIconMap") || "{}");
+  }
+
+  log("Categories loaded:", bizCategories.length, "categories,", bizSubcategories.length, "subcategories");
+}
+
 
   function showFloatingCategoryIcon(catKey) {
     const icon = bizCategoryIconMap[catKey];
@@ -3419,6 +3226,31 @@ async function CategoryListCache(action) {
   return `<span style="color:${color};">${stars}</span>`;
 }
 
+
+function recalcAllDistances() {
+  if (!currentUserLocation) return;
+
+  // Update distances
+  for (const b of allBusinesses) {
+    if (b.lat && b.lng) {
+      b.distanceMiles = getDistanceMiles(
+        currentUserLocation.lat,
+        currentUserLocation.lng,
+        b.lat,
+        b.lng
+      );
+    } else {
+      b.distanceMiles = null;
+    }
+  }
+
+  // Sort a copy
+  currentList = [...allBusinesses].sort((a, b) => {
+    if (a.distanceMiles == null) return 1;
+    if (b.distanceMiles == null) return -1;
+    return a.distanceMiles - b.distanceMiles;
+  });
+}
 async function loadBusinesses() {
   try {
     mark("BUSINESSES: REQUESTING FROM CACHE MANAGER");
@@ -3449,36 +3281,14 @@ async function loadBusinesses() {
   }
 }
 
-function recalcAllDistances() {
-  if (!currentUserLocation) return;
-
-  // Update distances
-  for (const b of allBusinesses) {
-    if (b.lat && b.lng) {
-      b.distanceMiles = getDistanceMiles(
-        currentUserLocation.lat,
-        currentUserLocation.lng,
-        b.lat,
-        b.lng
-      );
-    } else {
-      b.distanceMiles = null;
-    }
-  }
-
-  // Sort a copy
-  currentList = [...allBusinesses].sort((a, b) => {
-    if (a.distanceMiles == null) return 1;
-    if (b.distanceMiles == null) return -1;
-    return a.distanceMiles - b.distanceMiles;
-  });
-}
-
 async function loadSavedBusinesses() {
-  if (!userEmail) return;
+  // ⭐ v9.3 identity — no globals
+  const id = await identity();
+  const email = id?.email;
+  if (!email) return;
 
   // 1️⃣ Pull saved IDs from PulseBusCacheManager
-  const savedIDs = await PulseBusCacheManager.getSavedBusinessIDs(userEmail);
+  const savedIDs = await PulseBusCacheManager.getSavedBusinessIDs(email);
 
   // 2️⃣ Filter from canonical list
   const list = allBusinesses.filter(b => savedIDs.includes(b.id));
@@ -3506,6 +3316,7 @@ async function loadSavedBusinesses() {
     return a.distanceMiles - b.distanceMiles;
   });
 }
+
 
   function getOpeningHoursRange(biz, dayIndex, todayName) {
   let raw = null;
@@ -5129,8 +4940,7 @@ function getSelectedSearchFields() {
       shield.remove();
     };
   }
-
-  function refreshDistances() {
+function refreshDistances() {
   if (!currentUserLocation) {
     mark("⏳ No location yet → skip distance refresh");
     return;
@@ -5175,8 +4985,7 @@ function getSelectedSearchFields() {
   updateBusinessClearFilterVisibility();
 }
 
-  
-  function scrollToTopSmooth() {
+function scrollToTopSmooth() {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -5184,96 +4993,92 @@ function getSelectedSearchFields() {
   });
 }
 
-  // ---------------------------------
-  // OPTIONAL: WAKE SESSION ON DEMAND
-  // ---------------------------------
-  async function runWakeUpHeartbeat() {
-    // Let the global sessionCheck own all logic (identity, tokens, danger, etc.)
-    await sessionCheck();
+// ---------------------------------
+// OPTIONAL: WAKE SESSION ON DEMAND
+// ---------------------------------
+async function runWakeUpHeartbeat() {
+  // ❗ v9.3: DO NOT re-run sessionCheck here
+  // It already runs at bootstrap and on visibilitychange.
+  return;
+}
+
+// -----------------------------
+// BUSINESSES BOOTSTRAP
+// -----------------------------
+(async () => {
+  function mark(label, position = false) {
+    const now = nowMs();
+    if (position) {
+      log(`${label}: +${(now - firstTime).toFixed(1)}ms`);
+    } else {
+      log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
+    }
+    lastTime = now;
   }
 
-  // -----------------------------
-  // BUSINESSES BOOTSTRAP
-  // -----------------------------
-  (async () => {
-    function mark(label, position = false) {
-      const now = nowMs();
-      if (position) {
-        log(`${label}: +${(now - firstTime).toFixed(1)}ms`);
-      } else {
-        log(`${label}: +${(now - lastTime).toFixed(1)}ms`);
+  // Visibility → re-run sessionCheck
+  if (!document.__businessesVisibilityBound) {
+    document.__businessesVisibilityBound = true;
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        setTimeout(async () => await sessionCheck(), 250);
+        mark("✅ VisibilityChange RERAN SESSIONCHECK AND LET THE FUNCTION DO THE LOGIC");
       }
-      lastTime = now;
-    }
-
-    // Visibility → re-run sessionCheck (same pattern as other pages)
-    if (!document.__businessesVisibilityBound) {
-      document.__businessesVisibilityBound = true;
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-          setTimeout(async () => await sessionCheck(), 250);
-          mark("✅ VisibilityChange RERAN SESSIONCHECK AND LET THE FUNCTION DO THE LOGIC");
-        }
-      });
-    }
-
-    mark("BUSINESSES DOM STARTS");
-
-    // ---------------------------------
-    // 1) SESSION CHECK (IDENTITY/TRUTH)
-    // ---------------------------------
-    mark("BUSINESSES: STARTING SESSIONCHECK");
-    await sessionCheck();
-    mark("BUSINESSES: SESSIONCHECK COMPLETE");
-
-    // ---------------------------------
-    // 2) LOAD BUSINESSES (CACHE-FIRST)
-    // ---------------------------------
-    mark("BUSINESSES DOM loadBusinesses START");
-    await loadBusinesses();
-    mark("BUSINESSES DOM loadBusinesses LOADED");
-
-    // ---------------------------------
-    // 3) LOCATION ENGINE
-    // ---------------------------------
-    // Optionally: dev fake location
-    // currentUserLocation = {
-    //   lat: 17.915,
-    //   lng: -87.965
-    // };
-
-    currentUserLocation = await getInstantLocationWithBackgroundUpdate(newLoc => {
-      mark("SETTING CURRENT LOCATION IF AVAILABLE");
-      currentUserLocation = newLoc;
-      refreshDistances(); // only updates distances + resort, render handles itself
     });
+  }
 
-    mark("BUSINESSES LOCATION READY");
+  mark("BUSINESSES DOM STARTS");
 
-    // ---------------------------------
-    // 4) (OPTIONAL) WAKE SESSION HEARTBEAT
-    // ---------------------------------
-    await runWakeUpHeartbeat();
-    mark("BUSINESSES HEARTBEAT STARTED");
+  // ---------------------------------
+  // 1) SESSION CHECK
+  // ---------------------------------
+  mark("BUSINESSES: STARTING SESSIONCHECK");
+  await sessionCheck();
+  mark("BUSINESSES: SESSIONCHECK COMPLETE");
 
-    // ---------------------------------
-    // 5) LOAD CATEGORIES
-    // ---------------------------------
-    await loadBusinessCategories();
-    mark("BUSINESSES CATEGORIES LOADED");
+  // ---------------------------------
+  // 2) LOAD BUSINESSES
+  // ---------------------------------
+  mark("BUSINESSES DOM loadBusinesses START");
+  await loadBusinesses();
+  mark("BUSINESSES DOM loadBusinesses LOADED");
 
-    // ---------------------------------
-    // 6) INITIAL DISTANCE REFRESH + RENDER
-    // ---------------------------------
+  // ---------------------------------
+  // 3) LOCATION ENGINE
+  // ---------------------------------
+  currentUserLocation = await getInstantLocationWithBackgroundUpdate(newLoc => {
+    mark("SETTING CURRENT LOCATION IF AVAILABLE");
+    currentUserLocation = newLoc;
     refreshDistances();
-    mark("BUSINESSES DISTANCES REFRESHED");
+  });
 
-    renderBusinessCategoryCards();
-    mark("BUSINESSES CATEGORIES RENDERED");
+  mark("BUSINESSES LOCATION READY");
 
-    showBusinessFilters();
-    mark("BUSINESSES FILTERS/BUTTONS LOADED");
-    // -----------------------------
+  // ---------------------------------
+  // 4) (OPTIONAL) WAKE SESSION HEARTBEAT
+  // ---------------------------------
+  await runWakeUpHeartbeat();
+  mark("BUSINESSES HEARTBEAT STARTED");
+
+  // ---------------------------------
+  // 5) LOAD CATEGORIES
+  // ---------------------------------
+  await loadBusinessCategories();
+  mark("BUSINESSES CATEGORIES LOADED");
+
+  // ---------------------------------
+  // 6) INITIAL DISTANCE REFRESH + RENDER
+  // ---------------------------------
+  refreshDistances();
+  mark("BUSINESSES DISTANCES REFRESHED");
+
+  renderBusinessCategoryCards();
+  mark("BUSINESSES CATEGORIES RENDERED");
+
+  showBusinessFilters();
+  mark("BUSINESSES FILTERS/BUTTONS LOADED");
+
+  // -----------------------------
   // LIVE PULSEBAND UPDATE LOOP
   // -----------------------------
   setInterval(async () => {
@@ -5309,16 +5114,18 @@ function getSelectedSearchFields() {
       lastSyncSeconds: seconds
     });
   }, 1000);
-    // ---------------------------------
-    // 7) FINAL UI SNAP
-    // ---------------------------------
-    hideTPLoader();
 
-    showFloatingCategoryIcon("businesses");
-    mark("showFloatingCategoryIcon LOADED");
+  // ---------------------------------
+  // 7) FINAL UI SNAP
+  // ---------------------------------
+  hideTPLoader();
 
-    mark("BUSINESSES DOM ENDS", true);
-  })();
+  showFloatingCategoryIcon("businesses");
+  mark("showFloatingCategoryIcon LOADED");
+
+  mark("BUSINESSES DOM ENDS", true);
+})();
+
 </script>
 
 

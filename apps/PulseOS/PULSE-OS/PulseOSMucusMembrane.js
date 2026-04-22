@@ -72,7 +72,7 @@ export function PulseOSMucusMembrane() {
   }
 
   // ONLINE MODE — safe, one-way signal
-  fetch("/.netlify/functions/timer", {
+  fetch("/pulse-proxy/PulseProxyHeart", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)

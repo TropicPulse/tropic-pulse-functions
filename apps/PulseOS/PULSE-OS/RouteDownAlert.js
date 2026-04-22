@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /netlify/functions/RouteDownAlert.js
+// FILE: /pulse-proxy/RouteDownAlert.js
 // PULSE OS — v7.1+
 // “IMMUNE ALERT NODE / ROUTE FAILURE SENTINEL”
 // ============================================================================

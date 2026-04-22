@@ -1077,35 +1077,21 @@ body::before {
 
 <div id="tpToast"><span class="icon">📥</span><span id="tpToastMsg"></span></div>
 <script type="module">
-  
-  
-  let persistenceEnabled = true;
+    let persistenceEnabled = true;
   let lastTime = null;
   let firstTime = null;
 
   let currentUserLocation = null;
 
-
   const params = new URLSearchParams(window.location.search);
   const businessID = params.get("id");
   // const auth = firebase.auth();    // ❌ remove this line
   function el(id){ return document.getElementById(id) || null; }
+
   /* -------------------------------------------------
    0. GLOBALS (declare only — do NOT load yet)
   -------------------------------------------------- */
-  let token = localStorage.getItem("tp_token_v4") || null;
-  let identity = null;
-  let trusted = null;
-  let autologin = null;
-  let loggedIn = false;
-  let userName = null;
-  let userEmail = null;
-  let userID = null;
-  let loyalty = null;
-  let settings = null;
-  
-  
-
+  // v9.3 — no identity globals, no tokens, no v4 ghosts
   let existingShortCode = null;
   let carouselImages = [];
   let currentIndex = 0;
@@ -1117,195 +1103,99 @@ body::before {
   let bizCategoryIconMap = JSON.parse(localStorage.getItem("bizCategoryIconMap") || "{}");
   let bizSubcategoryIconMap = JSON.parse(localStorage.getItem("bizSubcategoryIconMap") || "{}");
   
-const wrapperCarousel = el("mainImage");
+  const wrapperCarousel = el("mainImage");
+
   /* -------------------------------------------------
    4. MASS EMAIL CONFIRM UI (idempotent)
--------------------------------------------------- */
+  -------------------------------------------------- */
 
-const businessHeader     = el("businessHeader");
-const title = el("title");
+  const businessHeader = el("businessHeader");
+  const title = el("title");
 
-const originalHeader = businessHeader.textContent;
-const originalOffsetTop = businessHeader.offsetTop; // ⭐ THIS IS WHAT YOU WERE MISSING
-const triggerPoint = originalOffsetTop - 45;
+  const originalHeader = businessHeader.textContent;
+  const originalOffsetTop = businessHeader.offsetTop; 
+  const triggerPoint = originalOffsetTop - 45;
 
-let isShowingTitle = false;
+  let isShowingTitle = false;
 
-function safeLogout() {
-  localStorage.removeItem("tp_token_v4");
-  localStorage.removeItem("tp_device_token_v4");
-  mark("SAFE LOGOUT");
-}
-async function reportDanger(reason) {
-  try {
-    await getHook({
-      type: "danger",
-      payload: {
-        reason,
-        identitySnapshot: identity || null,
-        tokenSnapshot: token || null,
-        userAgent: navigator.userAgent,
-        ts: nowMs()
-      }
-    });
-  } catch (err) {
-    warn("Failed to report danger:", err);
-  }
-}
-async function hardLogout(reason) {
-  try {
-    mark("HARD LOGOUT: " + (reason || "unknown"));
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-    await reportDanger(reason || "hardLogout");
-  } catch (err) {
-    mark("HARD LOGOUT ERROR: " + err);
-    localStorage.removeItem("tp_token_v4");
-    localStorage.removeItem("tp_device_token_v4");
-  } finally {
-    window.location.replace("/CheckEmail.html");
-  }
-}
-
-function mark(label) {
+  function mark(label) {
     log("[CHECKEMAIL]", label);
   }
   
-/************************************************************
- * SESSION CHECK (ALL PAGES EXCEPT LOGIN)
- ************************************************************/
-async function sessionCheck() {
-  mark("sessionCheck");
+  /************************************************************
+   * SESSION CHECK — PulseOS v9.3 (immune synapse)
+   ************************************************************/
+  async function sessionCheck() {
+    mark("sessionCheck");
 
-  // -----------------------------------------
-  // 1. LOAD LOCAL VARIABLES
-  // -----------------------------------------
-  autologin = localStorage.getItem("tp_stay_signed_v4") === "1";
-  trusted   = localStorage.getItem("tp_device_token_v4") === "1";
+    // Identity is illusion — only trustedDevice matters
+    const id = await identity();
 
-  try {
-    identity = JSON.parse(localStorage.getItem("tp_identity_v4") || "{}");
-  } catch {
-    identity = null;
-  }
-
-  token     = localStorage.getItem("tp_token_v4");
-  userID    = identity?.uid   || null;
-  userEmail = identity?.email || null;
-  userName  = identity?.displayName || null;
-
-  // -----------------------------------------
-  // 2. IDENTITY + TOKEN MUST EXIST
-  // -----------------------------------------
-  if (!identity || !userID || !token) {
-    mark("Missing identity or token → HARD LOGOUT");
-    hardLogout("missing_identity_or_token");
-    return false;
-  }
-
-  // -----------------------------------------
-  // 3. LOCAL INACTIVITY CHECK
-  // -----------------------------------------
-  const now       = nowMs();
-  const lastLocal = Number(localStorage.getItem("tp_last_active_v4")) || 0;
-  const diff      = now - lastLocal;
-
-  const inactive15 = diff > 15 * 60 * 1000; // > 15 minutes
-
-  if (inactive15 && !trusted) {
-    if (!autologin) {
-      mark("Inactive >15 min AND not autologin/trusted → HARD LOGOUT");
-      hardLogout("inactive_and_not_remembered");
-    } else {
-      mark("Inactive >15 min AND autologin → SOFT LOGOUT");
-      safeLogout();
+    if (!id.trustedDevice) {
+      const here = encodeURIComponent(location.pathname + location.search);
+      window.location.href = `/login.html?returnTo=${here}`;
+      return false;
     }
-    return false;
+
+    // v9.3 — set globals once, never re-check identity again
+    window.userEmail = id.email || null;
+    window.userName  = id.displayName || null;
+    window.tpNotifications = id.notifications || {};
+
+    return true;
   }
 
-  // -----------------------------------------
-  // 4. BACKEND AUTH REFRESH (THE ONLY REAL STEP)
-  // -----------------------------------------
-  const data = await getAuth(token);
+  /************************************************************
+   * CAROUSEL OVERLAYS (UNCHANGED)
+   ************************************************************/
+  function initializeOverlays() {
+    if (window.__tp_carousel_handlers_bound) return;
+    window.__tp_carousel_handlers_bound = true;
 
-  if (data.hardLogout) {
-    mark("Backend flagged danger → HARD LOGOUT");
-    hardLogout("backend_danger_flag");
-    return false;
-  }
+    const leftArrow  = el('leftArrow');
+    const rightArrow = el('rightArrow');
+    const wrapper    = el('mainImage');
 
-  if (!data.identity) {
-    mark("Backend returned no identity → HARD LOGOUT");
-    hardLogout("missing_identity_from_backend");
-    return false;
-  }
-
-  // Update JWT lineage if provided
-  if (data.newJwtToken) {
-    token = data.newJwtToken;
-    localStorage.setItem("tp_token_v4", token);
-    mark("Updated JWT lineage from backend");
-  }
-
-  // Update identity cache
-  identity = data.identity;
-  localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
-
-  // -----------------------------------------
-  // 5. UPDATE LAST ACTIVE
-  // -----------------------------------------
-  localStorage.setItem("tp_last_active_v4", now);
-
-  return true;
-}
-
-function initializeOverlays() {
-  if (window.__tp_carousel_handlers_bound) return;
-  window.__tp_carousel_handlers_bound = true;
-
-  const leftArrow  = el('leftArrow');
-  const rightArrow = el('rightArrow');
-  const wrapper    = el('mainImage');
-
-  if (leftArrow) {
-    leftArrow.addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-        updateCarousel();
-      }
-    });
-  }
-
-  if (rightArrow) {
-    rightArrow.addEventListener('click', () => {
-      if (currentIndex < carouselImages.length - 1) {
-        currentIndex++;
-        updateCarousel();
-      }
-    });
-  }
-
-  if (wrapper) {
-    wrapper.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX;
-    });
-
-    wrapper.addEventListener('touchend', e => {
-      const endX = e.changedTouches[0].clientX;
-      const diff = endX - startX;
-
-      if (Math.abs(diff) > 50) {
-        if (diff < 0 && currentIndex < carouselImages.length - 1) {
-          currentIndex++;
-        } else if (diff > 0 && currentIndex > 0) {
+    if (leftArrow) {
+      leftArrow.addEventListener('click', () => {
+        if (currentIndex > 0) {
           currentIndex--;
+          updateCarousel();
         }
-        updateCarousel();
-      }
-    });
+      });
+    }
+
+    if (rightArrow) {
+      rightArrow.addEventListener('click', () => {
+        if (currentIndex < carouselImages.length - 1) {
+          currentIndex++;
+          updateCarousel();
+        }
+      });
+    }
+
+    if (wrapper) {
+      wrapper.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+      });
+
+      wrapper.addEventListener('touchend', e => {
+        const endX = e.changedTouches[0].clientX;
+        const diff = endX - startX;
+
+        if (Math.abs(diff) > 50) {
+          if (diff < 0 && currentIndex < carouselImages.length - 1) {
+            currentIndex++;
+          } else if (diff > 0 && currentIndex > 0) {
+            currentIndex--;
+          }
+          updateCarousel();
+        }
+      });
+    }
   }
 
-  /* -------------------------------------------------
+/* -------------------------------------------------
    4. GLOBAL CLICK HANDLER (idempotent)
 -------------------------------------------------- */
 if (!window.__tp_global_click_installed) {
@@ -1322,61 +1212,53 @@ if (!window.__tp_global_click_installed) {
 }
 
 if (!document.__loyaltyVisibilityBound) {
-      document.__loyaltyVisibilityBound = true;
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-          setTimeout(async () => await sessionCheck(), 250);
-          mark("✅ VisibilityChange RERAN SESSIONCHECK AND LET THE FUNCTION DO THE LOGIC");
-        }
-      });
+  document.__loyaltyVisibilityBound = true;
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      setTimeout(async () => await sessionCheck(), 250);
+      mark("✅ VisibilityChange RERAN SESSIONCHECK AND LET THE FUNCTION DO THE LOGIC");
     }
+  });
+}
+
 // -----------------------------------------
-  // ⭐ PREVENT DUPLICATE LISTENERS
-  // -----------------------------------------
-  if (!window.__pulsebandListenersAttached) {
-    window.__pulsebandListenersAttached = true;
+// ⭐ PREVENT DUPLICATE LISTENERS
+// -----------------------------------------
+if (!window.__pulsebandListenersAttached) {
+  window.__pulsebandListenersAttached = true;
 
-    // ⭐ 1. Restore state on load (runs ONCE)
-    window.addEventListener("load", () => {
-      const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-      const disabled = (window.isIdle === true && inactiveFlag === true);
+  // ⭐ 1. Restore state on load (runs ONCE)
+  window.addEventListener("load", () => {
+    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
+    const disabled = (window.isIdle === true && inactiveFlag === true);
 
-      if (disabled) {
-        window.isIdle = true;
-        
-      } else {
-        window.isIdle = false; // active by default
-        
-      }
+    if (disabled) {
+      window.isIdle = true;
+    } else {
+      window.isIdle = false;
+    }
+  });
 
-      
-    });
+  // ⭐ 2. Badge toggle listener
+  document.getElementById("pb-mini-badge").addEventListener("click", () => {
+    const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
+    const disabled = (window.isIdle === true && inactiveFlag === true);
 
-    // ⭐ 2. Badge toggle listener
-    document.getElementById("pb-mini-badge").addEventListener("click", () => {
-      const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
-      const disabled = (window.isIdle === true && inactiveFlag === true);
+    if (disabled) {
+      localStorage.removeItem("pulseband_disabled");
+      window.isIdle = false;
+    } else {
+      localStorage.setItem("pulseband_disabled", "1");
+      window.isIdle = true;
+    }
+  });
+}
 
-      if (disabled) {
-        // Turn ON
-        localStorage.removeItem("pulseband_disabled");
-        window.isIdle = false;
-        
-      } else {
-        // Turn OFF
-        localStorage.setItem("pulseband_disabled", "1");
-        window.isIdle = true;
-        
-      }
-
-      
-    });
-  }
 // If user didn't come from the list, rebuild history
 if (!history.state || !history.state.fromList) {
   history.replaceState({ fromList: true }, "", location.href);
 }
-}
+
 
 /* -------------------------------------------------
    5. CATEGORY NORMALIZATION
@@ -1402,7 +1284,7 @@ function normalizeCategory(str) {
 }
 
 /* -------------------------------------------------
-   6. CATEGORY ICON LOOKUP
+   6. CATEGORY ICON LOOKUP (v9.3 — LOCAL ONLY)
 -------------------------------------------------- */
 async function getBusCategoryIcon(b) {
   if (!b) return null;
@@ -1423,127 +1305,102 @@ async function getBusCategoryIcon(b) {
     return bizSubcategoryIconMap[firstSub];
   }
 
-  try {
-    if (firstCat) {
-      const snap = await 
-        collection(db, "CategoryIconCache")
-        .where("category", "==", firstCat)
-        .where("source", "array-contains", "businesses")
-        .limit(1)
-        .get();
-
-      if (!snap.empty) {
-        const doc = snap.docs[0].data();
-        if (doc.migratedUrl) return doc.migratedUrl;
-      }
-    }
-  } catch (err) {
-    error("CategoryIconCache lookup failed:", err);
-  }
-
   return null;
 }
 
 function saveLocation(lat, lng) {
-    localStorage.setItem(
-      "lastKnownLocation",
-      JSON.stringify({ lat, lng, ts: nowMs() })
-    );
+  localStorage.setItem(
+    "lastKnownLocation",
+    JSON.stringify({ lat, lng, ts: nowMs() })
+  );
+}
+
+function getSavedLocation() {
+  try {
+    const raw = localStorage.getItem("lastKnownLocation");
+    if (!raw) return null;
+
+    const obj = JSON.parse(raw);
+    if (!obj.lat || !obj.lng) return null;
+
+    return obj;
+  } catch {
+    return null;
+  }
+}
+
+function fetchLowAccuracyInBackground(onUpdate) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      log("Background low accuracy:", loc);
+      saveLocation(loc.lat, loc.lng);
+      onUpdate(loc);
+    },
+    err => {
+      warn("Background low accuracy failed:", err);
+
+      setTimeout(() => {
+        navigator.geolocation.getCurrentPosition(
+          pos2 => {
+            const loc2 = { lat: pos2.coords.latitude, lng: pos2.coords.longitude };
+            log("Retry low accuracy:", loc2);
+            saveLocation(loc2.lat, loc2.lng);
+            onUpdate(loc2);
+          },
+          err2 => {
+            warn("Retry low accuracy failed:", err2);
+          },
+          { enableHighAccuracy: false, timeout: 5000 }
+        );
+      }, 2000);
+    },
+    { enableHighAccuracy: false, timeout: 5000 }
+  );
+}
+
+async function getInstantLocationWithBackgroundUpdate(onSignificantChange) {
+  const saved = getSavedLocation();
+
+  if (saved) {
+    log("Using cached location:", saved);
+    setTimeout(() => {
+      fetchLowAccuracyInBackground(newLoc => {
+        const dist = getDistanceMiles(saved, newLoc);
+        if (dist > 50) {
+          log("📍 Significant movement:", dist, "m");
+          onSignificantChange(newLoc);
+        }
+      });
+    }, 0);
+    return saved;
   }
 
-  function getSavedLocation() {
-    try {
-      const raw = localStorage.getItem("lastKnownLocation");
-      if (!raw) return null;
-
-      const obj = JSON.parse(raw);
-      if (!obj.lat || !obj.lng) return null;
-
-      return obj;
-    } catch {
-      return null;
-    }
-  }
-
-  function fetchLowAccuracyInBackground(onUpdate) {
+  return new Promise(resolve => {
     navigator.geolocation.getCurrentPosition(
       pos => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        log("Background low accuracy:", loc);
+        log("Initial low accuracy:", loc);
         saveLocation(loc.lat, loc.lng);
-        onUpdate(loc);
+        resolve(loc);
+
+        fetchLowAccuracyInBackground(newLoc => {
+          const dist = getDistanceMiles(loc, newLoc);
+          if (dist > 50) onSignificantChange(newLoc);
+        });
       },
       err => {
-        warn("Background low accuracy failed:", err);
+        warn("Initial low accuracy failed:", err);
+        resolve(null);
 
-        // Retry once after 2 seconds
-        setTimeout(() => {
-          navigator.geolocation.getCurrentPosition(
-            pos2 => {
-              const loc2 = { lat: pos2.coords.latitude, lng: pos2.coords.longitude };
-              log("Retry low accuracy:", loc2);
-              saveLocation(loc2.lat, loc2.lng);
-              onUpdate(loc2);
-            },
-            err2 => {
-              warn("Retry low accuracy failed:", err2);
-            },
-            { enableHighAccuracy: false, timeout: 5000 }
-          );
-        }, 2000);
-      },
-      { enableHighAccuracy: false, timeout: 5000 }
-    );
-  }
-
-async function getInstantLocationWithBackgroundUpdate(onSignificantChange) {
-    const saved = getSavedLocation();
-
-    // 1️⃣ Return cached location immediately
-    if (saved) {
-      log("Using cached location:", saved);
-      setTimeout(() => {
         fetchLowAccuracyInBackground(newLoc => {
-          const dist = getDistanceMiles(saved, newLoc);
-          if (dist > 50) {
-            log("📍 Significant movement:", dist, "m");
-            onSignificantChange(newLoc);
-          }
+          onSignificantChange(newLoc);
         });
-      }, 0);
-      return saved;
-    }
-
-    // 2️⃣ No saved location → try low accuracy immediately
-    return new Promise(resolve => {
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          log("Initial low accuracy:", loc);
-          saveLocation(loc.lat, loc.lng);
-          resolve(loc);
-
-          // Background refresh
-          fetchLowAccuracyInBackground(newLoc => {
-            const dist = getDistanceMiles(loc, newLoc);
-            if (dist > 50) onSignificantChange(newLoc);
-          });
-        },
-        err => {
-          warn("Initial low accuracy failed:", err);
-          resolve(null);
-
-          // Still try background update
-          fetchLowAccuracyInBackground(newLoc => {
-            onSignificantChange(newLoc);
-          });
-        },
-        { enableHighAccuracy: false, timeout: 7000 }
-      );
-    });
-  }
-
-  
+      },
+      { enableHighAccuracy: false, timeout: 7000 }
+    );
+  });
+}
 
 /* -------------------------------------------------
    7. CAROUSEL PRELOAD
@@ -1563,7 +1420,6 @@ function attachMapOverlayHandler(name, iconUrl = null) {
   const mapImage = el("mapImage");
   if (!mapImage) return;
 
-  // prevent duplicate onload handlers
   mapImage.onload = null;
 
   if (mapImage.complete) {
@@ -1575,11 +1431,11 @@ function attachMapOverlayHandler(name, iconUrl = null) {
     applyTropicOverlay(name, iconUrl);
   };
 }
+
 async function regenerateMap(biz) {
   try {
     const venue = biz.resolvedAddress || biz.address || "";
 
-    // ⭐ NEW — call connector instead of backend URL
     const data = await getMap(venue, biz.id);
 
     if (!data.success) {
@@ -1587,11 +1443,10 @@ async function regenerateMap(biz) {
       return;
     }
 
-    // Update UI with fresh map
     const mapImage = el("mapImage");
     const mapLink  = el("mapLink");
 
-    mapImage.onerror = null; // prevent loops
+    mapImage.onerror = null;
     mapImage.src = `${data.mapImageUrl}?t=${nowMs()}`;
     mapLink.href = data.mapsWebUrl;
 
@@ -1599,6 +1454,7 @@ async function regenerateMap(biz) {
     error("Regenerate map error:", err);
   }
 }
+
 
 /* -------------------------------------------------
    9. CREDITS LOADER
@@ -1610,7 +1466,6 @@ async function lazyLoadCreditsForBusiness(biz) {
   const { freeRemaining, paidRemaining } = await fetchUserCredits(userEmail);
   updateMassEmailBadge(freeRemaining + paidRemaining);
 }
-
 /* -------------------------------------------------
    10. MAP LOADER (idempotent)
 -------------------------------------------------- */
@@ -1652,17 +1507,14 @@ async function loadMapForBusiness(biz) {
 
     mapAddress.textContent = cleanAddress || "";
 
-    // Clear old handlers
     mapImage.onload = null;
     mapImage.onerror = null;
 
-    // If cached map fails → regenerate
     mapImage.onerror = async () => {
       warn("Cached map failed, regenerating…");
       await regenerateMap(biz);
     };
 
-    // Load cached map
     mapImage.src = `${biz.mapImageUrl}?t=${nowMs()}`;
     mapLink.href = biz.mapsWebUrl;
 
@@ -1681,10 +1533,9 @@ async function loadMapForBusiness(biz) {
   }
 
   // -------------------------------------------------
-  // 2. NO CACHED MAP → CALL BACKEND THROUGH CONNECTOR
+  // 2. NO CACHED MAP → CALL CONNECTOR
   // -------------------------------------------------
   try {
-    // ⭐ NEW — use connector instead of Cloud Function URL
     const data = await getMap(cleanAddress, biz.id);
 
     if (!data.success) {
@@ -1709,7 +1560,6 @@ async function loadMapForBusiness(biz) {
       biz.address ||
       "";
 
-    // prevent duplicate onload handlers
     mapImage.onload = null;
     mapImage.src = `${data.mapImageUrl}?t=${nowMs()}`;
     mapLink.href = data.mapsWebUrl;
@@ -1731,12 +1581,11 @@ async function loadMapForBusiness(biz) {
   }
 }
 
-  /* -------------------------------------------------
+/* -------------------------------------------------
    11. AUTHORIZED FETCH WRAPPER
 -------------------------------------------------- */
 async function tpFetch(url, opts = {}) {
-  opts.headers = opts.headers || {};
-  if (token) opts.headers["Authorization"] = `Bearer ${token}`;
+  // v9.3 — no tokens, no Authorization header
   return fetch(url, opts);
 }
 
@@ -1785,22 +1634,35 @@ function updateMassEmailBadge(total) {
   btn.title = `Mass Email (${total} credits remaining)`;
 }
 
+/* -------------------------------------------------
+   15. FETCH USER CREDITS (v9.3 — LOCAL ONLY)
+-------------------------------------------------- */
 async function fetchUserCredits(email) {
-  const q = query(collection(db, "Users"), where("TPIdentity.email", "==", email), limit(1));
-  const snap = await getDocs(q);
-  const notif = snap.empty ? {} : (snap.docs[0].data().TPNotifications || {});
+  // v9.3 — credits come from sessionCheck() identity snapshot
+  const notif = window.tpNotifications || {};
 
   return {
-    freeRemaining: Math.max(0, (notif.freeMassNotificationsLimit ?? 2) - (notif.freeMassNotificationsUsed ?? 0)),
+    freeRemaining: Math.max(
+      0,
+      (notif.freeMassNotificationsLimit ?? 2) -
+      (notif.freeMassNotificationsUsed ?? 0)
+    ),
     paidRemaining: notif.paidMassNotificationCredits ?? 0
   };
 }
+
 /* -------------------------------------------------
-   16. LOAD BUSINESS (idempotent, uses localStorage cache + versioning)
+   16. LOAD BUSINESS (idempotent)
 -------------------------------------------------- */
 async function loadBusiness() {
   try {
-    const b = await PulseBusCacheManager.getBusinessById(businessID);
+    // v9.3 — NO CACHE MANAGER, NO FIRESTORE, NO BACKEND
+    const b = window.__pulseBusiness || null;
+
+    if (!b) {
+      error("loadBusiness error: business not preloaded");
+      return;
+    }
 
     existingShortCode = b.shortCode || null;
     renderBusiness(b);
@@ -1834,7 +1696,6 @@ function updateDots() {
     dots.appendChild(d);
   });
 }
-
 /* -------------------------------------------------
    19. BUSINESS SANITIZER
 -------------------------------------------------- */
@@ -1929,8 +1790,6 @@ function updateCarousel() {
     const rightArrow = el("rightArrow");
 
     mainImage.style.opacity = 0;
-
-    // prevent duplicate onload handlers
     mainImage.onload = null;
 
     mainImage.onload = () => {
@@ -2052,31 +1911,29 @@ function showToast(message, duration = 3000) {
     toast.classList.remove("show");
   }, duration);
 }
+
 /* -------------------------------------------------
    25. SAVED BUSINESS CHECK (MODULE, CORRECT)
 -------------------------------------------------- */
 async function isBusinessSaved(businessID, userEmail) {
-  if (!userEmail) return false;
-
-  const ref = doc(db, "UserSaved", userEmail, "Businesses", businessID);
-  const snap = await getDoc(ref);
-
-  return snap.exists();
+  // v9.3 — NO FIRESTORE, NO DB, NO BACKEND
+  const saved = JSON.parse(localStorage.getItem("tp_saved_businesses") || "{}");
+  return !!saved[businessID];
 }
 
 function getDistanceMiles(lat1, lon1, lat2, lon2) {
-    const R = 3958.8; // Earth radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+  const R = 3958.8;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
 
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
 
-    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-  }
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
 
 /* -------------------------------------------------
    26. BOOKMARK TOGGLER (MODULE, IDEMPOTENT)
@@ -2087,20 +1944,21 @@ async function toggleBusinessBookmark(biz, btn) {
     return;
   }
 
-  const ref = doc(db, "UserSaved", userEmail, "Businesses", biz.id);
-  const saved = await isBusinessSaved(biz.id, userEmail);
+  const saved = JSON.parse(localStorage.getItem("tp_saved_businesses") || "{}");
 
-  if (saved) {
-    await deleteDoc(ref);
+  if (saved[biz.id]) {
+    delete saved[biz.id];
     btn.classList.remove("saved");
     btn.textContent = "☆";
     showToast("Removed from Saved");
   } else {
-    await setDoc(ref, { saved: true, timestamp: nowMs() });
+    saved[biz.id] = { saved: true, ts: nowMs() };
     btn.classList.add("saved");
     btn.textContent = "★";
     showToast("Saved!");
   }
+
+  localStorage.setItem("tp_saved_businesses", JSON.stringify(saved));
 }
 
 /* -------------------------------------------------
@@ -2135,6 +1993,7 @@ function renderLabeledIcon(key, isSub = false) {
 
   return `${iconImg}<span>${label}</span>`;
 }
+
 async function renderBusiness(biz) {
   log("RENDER BUSINESS RAN");
 

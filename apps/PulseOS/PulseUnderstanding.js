@@ -208,7 +208,7 @@ export function wireCheckBandHealer() {
     if (!canUseBackend()) return;
 
     try {
-      const res = await fetch("/.netlify/functions/CheckBand", {
+      const res = await fetch("/pulse-proxy/CheckBand", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ band: status })
@@ -227,7 +227,7 @@ export async function wireCheckIdentityHealer() {
   if (!canUseBackend()) return;
 
   try {
-    const res = await fetch("/.netlify/functions/CheckIdentity", {
+    const res = await fetch("/pulse-proxy/CheckIdentity", {
       method: "POST",
       credentials: "include"
     });
@@ -254,7 +254,7 @@ export function wireCheckRouterMemoryHealer() {
     if (!canUseBackend()) return;
 
     try {
-      await fetch("/.netlify/functions/CheckRouterMemory", {
+      await fetch("/pulse-proxy/CheckRouterMemory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ logs })
