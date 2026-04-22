@@ -35,7 +35,6 @@
 // ORGAN IMPORTS — COMPLETE THE CONNECTION (Membranes → CNS)
 // ============================================================================
 import { RouterMemory } from "../PULSE-OS/PulseOSShortTermMemory.js";
-import { GateHeartbeat } from "../PULSE-OS/PulseOSCNSNervousSystem.js";
 
 
 // ============================================================================
