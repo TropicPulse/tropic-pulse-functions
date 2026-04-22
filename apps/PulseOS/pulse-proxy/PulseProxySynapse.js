@@ -24,9 +24,20 @@
 //   • Deterministic math + deterministic classification
 // ============================================================================
 
-const db    = global.db;
-const log   = global.log   || console.log;
-const error = global.error || console.error;
+// ⭐ Universal global resolver — works in browser + node + workers
+const G = typeof globalThis !== "undefined"
+  ? globalThis
+  : typeof window !== "undefined"
+  ? window
+  : typeof global !== "undefined"
+  ? global
+  : {};
+
+// ⭐ Safe fallbacks — never break the page
+const db    = G.db;
+const log   = G.log   || console.log;
+const error = G.error || console.error;
+
 
 // ============================================================================
 // ⭐ OS‑v9.3 CONTEXT METADATA — Synapse Identity

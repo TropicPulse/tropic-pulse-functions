@@ -4,13 +4,22 @@
 //  Backend‑Only • Deterministic • Drift‑Proof • No IQ
 // ============================================================================
 
+// ============================================================================
+// GLOBAL WIRING — v10.2 (Safe, backend-only, no global.* dependency)
+// ============================================================================
 
-// ============================================================================
-// GLOBAL WIRING — provided by OSKernel (backend environment)
-// ============================================================================
-const db    = global.db;
-const log   = global.log   || console.log;
-const error = global.error || console.error;
+// Universal global resolver (works in Node, Workers, Serverless)
+const G = typeof globalThis !== "undefined"
+  ? globalThis
+  : typeof global !== "undefined"
+  ? global
+  : {};
+
+// Safe fallbacks — backend-only organ, but never break if wiring incomplete
+const db    = G.db    || null;
+const log   = G.log   || console.log;
+const error = G.error || console.error;
+
 
 
 // ============================================================================
