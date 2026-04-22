@@ -12,6 +12,8 @@
 //    • Exposes FAST, ADAPTIVE hooks to attach backend healers
 //      (CheckBand, CheckIdentity, CheckRouterMemory) AFTER the door/lock decide
 //      it’s safe.
+//    • Exposes a GOVERNED execution surface (PulseOSGovernor) so all organs
+//      can run under loop + multi-instance law.
 // ============================================================================
 
 
@@ -77,6 +79,9 @@ import * as PulseSend from "./pulse-send/PulseSendSystem.js";
 import { VitalsMonitor } from "./pulse-proxy/PulseProxyVitalsMonitor.js";
 import { VitalsLogger } from "./pulse-proxy/PulseProxyVitalsLogger.js";
 
+// ⭐ Global loop + multi-instance governor (frontend-safe)
+import { withOrganGuard } from "./PULSE-OS/PulseOSGovernor.js";
+
 
 // ⭐ Attach the Skin Reflex with the FULL identity object (door sees identity)
 attachScanner(PulseIdentity);
@@ -133,6 +138,19 @@ const hasFetch = typeof fetch === "function";
 
 
 // ============================================================================
+//  GOVERNED EXECUTION — Run any organ through PulseOSGovernor
+//  This does NOT auto-run anything; it just exposes a safe wrapper.
+// ============================================================================
+
+function runThroughGovernor(organName, pulseOrImpulse, fn) {
+  return withOrganGuard(organName, pulseOrImpulse, (instanceContext) => {
+    // fn gets instanceContext so it can slice work if it wants
+    return fn(instanceContext);
+  });
+}
+
+
+// ============================================================================
 //  KERNEL BOOTSTRAP — PURE WIRING, NO BACKEND CALLS ON LOAD
 // ============================================================================
 function buildPulseKernel() {
@@ -172,6 +190,11 @@ function buildPulseKernel() {
     Vitals: {
       Monitor: VitalsMonitor || null,
       Logger: VitalsLogger || null
+    },
+
+    // ⭐ Governed execution surface (global loop + multi-instance law)
+    Governed: {
+      run: runThroughGovernor
     }
   };
 
@@ -305,7 +328,9 @@ if (hasWindow) {
   } else {
     window.Pulse = {
       ...window.Pulse,
-      meta: PulseKernel.meta
+      meta: PulseKernel.meta,
+      // ensure Governed is present even if Pulse existed before
+      Governed: PulseKernel.Governed
     };
   }
 
@@ -330,7 +355,9 @@ export const PulseUnderstanding = {
   wireHealers: wirePulseHealers,
   wireCheckBandHealer,
   wireCheckIdentityHealer,
-  wireCheckRouterMemoryHealer
+  wireCheckRouterMemoryHealer,
+  // ⭐ expose governed runner for direct use
+  runThroughGovernor
 };
 
 export default PulseKernel;
