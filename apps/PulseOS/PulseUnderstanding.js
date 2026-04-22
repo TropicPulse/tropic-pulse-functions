@@ -87,7 +87,7 @@ import { VitalsMonitor } from "./pulse-proxy/PulseProxyVitalsMonitor.js";
 import { pulseband } from "./pulse-proxy/PulseProxyPNSNervousSystem.js";
 
 // CNS / Router nervous system (if needed)
-import * as route from "./pulse-router/PulseRouterEvolutionaryThought.js";
+import * as PulseRouter from "./pulse-router/PulseRouterEvolutionaryThought.js";
 
 // Skin reflex (PageScanner / door)
 import { attachScanner } from "./PULSE-OS/PulseOSSkinReflex.js";

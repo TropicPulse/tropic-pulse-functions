@@ -174,3 +174,27 @@ export function createPulseRouter({ log } = {}) {
     remember
   };
 }
+// ============================================================================
+//  ORGAN EXPORT — ⭐ PulseRouter (v3.1)
+//  Provides BOTH:
+//    • createPulseRouter() factory
+//    • Unified organ object (PulseRouter) for PulseKernel
+// ============================================================================
+export const PulseRouter = {
+  PulseRole,
+
+  // Placeholder until wired by PulseUnderstanding
+  route(...args) {
+    throw new Error(
+      "[PulseRouter-v3.1] PulseRouter.route() was called before initialization. " +
+      "Use createPulseRouter(...) to wire dependencies."
+    );
+  },
+
+  remember(...args) {
+    throw new Error(
+      "[PulseRouter-v3.1] PulseRouter.remember() was called before initialization. " +
+      "Use createPulseRouter(...) to wire dependencies."
+    );
+  }
+};
