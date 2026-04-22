@@ -224,26 +224,34 @@ window.addEventListener(
     logProtector("ERROR_INTERCEPTED", { message: msg });
 
     // ------------------------------------------------------------------------
-    // PAGE-LEVEL CLASSIFICATION (router-style guards)
+    // PAGE-LEVEL CLASSIFICATION (v9.3 evolutionary import law)
     // ------------------------------------------------------------------------
-    // v9.3 — Full Import Identity (no symbol-level conflicts)
-    if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
+
+    // v9.3 — Only treat TRUE missing modules as import conflicts
+    if (msg.includes("Cannot find module")) {
       logProtector("PAGE_IMPORT_CONFLICT_DETECTED", {
         error: "importConflict",
         details: msg
       });
 
-      // escalate to CNS for full-import identity resolution
+      // Escalate to CNS for full-import identity resolution
       await route("importConflict", {
         message: msg,
         frames: rawFrames,
         reflexOrigin: "SkinReflex",
         layer: "A1",
-        mode: "full-import"
+        mode: "full-import",
+        evo: {
+          identity: "organ-level",
+          importLaw: "v9.3",
+          behavior: "full-import",
+          driftProof: true
+        }
       });
 
       // DO NOT return — allow organism to continue
     }
+
 
 
     if (msg.includes("process is not defined")) {
