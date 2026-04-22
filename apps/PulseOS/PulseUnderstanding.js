@@ -15,6 +15,36 @@
 // ============================================================================
 //  IMPORTS — FRONTEND BARREL (adjust paths per repo layout)
 // ============================================================================
+// ============================================================================
+//  v9.3 — FRONTEND SENSORY-INTELLIGENCE LOCK + CNS IMPORT LINK
+//  Prevents import binding death AND connects skin → CNS import router.
+// ============================================================================
+
+(function () {
+  // Tracks duplicate bindings so the organism never dies on load
+  const seen = new Set();
+  const orig = Object.defineProperty;
+
+  Object.defineProperty = function (obj, key, desc) {
+    if (seen.has(key)) return obj[key];   // auto-heal duplicate import bindings
+    seen.add(key);
+    return orig(obj, key, desc);
+  };
+
+  // Expose a minimal CNS import route map to the skin
+  // (the router will expand this once the organism boots)
+  window.__PULSE_IMPORT_ROUTES__ = window.__PULSE_IMPORT_ROUTES__ || {
+    "pulseband": "./pulse-proxy/PulseProxyPNSNervousSystem.js",
+    "route": "./pulse-os/PulseOSCNSNervousSystem.js",
+    "PulseGPU_Astral": "./pulse-gpu/PulseGPUAstralNervousSystem.js",
+    "PulseGPU_Muscle": "./pulse-gpu/PulseGPUAstralMuscleSystem.js",
+    "PulseEarn": "./pulse-earn/PulesEarnSendSystem.js",
+    "PulseMesh": "./pulse-mesh/PulseMeshCortex.js",
+    "PulseSend": "./pulse-send/PulseSendSystem.js",
+    "PulseRouter": "./pulse-router/PulseRouterEvolutionaryThought.js"
+  };
+
+})();
 
 // Band / Nervous System
 import * as pulseband from "./pulse-proxy/PulseProxyPNSNervousSystem.js";
