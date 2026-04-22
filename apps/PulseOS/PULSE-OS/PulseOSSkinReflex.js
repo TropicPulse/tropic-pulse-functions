@@ -58,8 +58,8 @@
 //   • Always classify errors before healing when possible
 //   • Always remain frontend-only (no direct backend wiring outside Router)
 // ============================================================================
-import { VitalsMonitor } from "./PulseProxyVitalsMonitor.js";
-import { VitalsLogger } from "./PulseProxyVitalsLogger.js";
+import { VitalsMonitor } from "../pulse-proxy/PulseProxyVitalsMonitor.js";
+import { VitalsLogger } from "../pulse-proxy/PulseProxyVitalsLogger.js";
 
 
 // ============================================================================
