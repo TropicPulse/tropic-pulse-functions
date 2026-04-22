@@ -57,9 +57,9 @@
         "function": "getStripeDashboardLink"
       },
 
-      { "source": "/proxy", "destination": "/proxy/PulseBand.html" },
-      { "source": "/proxy/", "destination": "/proxy/PulseBand.html" },
-      { "source": "/proxy/**", "destination": "/proxy" },
+      { "source": "/proxy", "destination": "/pulse-proxy/PulseBand.html" },
+      { "source": "/pulse-proxy/", "destination": "/pulse-proxy/PulseBand.html" },
+      { "source": "/pulse-proxy/**", "destination": "/proxy" },
 
       { "source": "/emailopen", "function": "emailOpened" },
       { "source": "/unsubscribe", "function": "unsubscribe" },

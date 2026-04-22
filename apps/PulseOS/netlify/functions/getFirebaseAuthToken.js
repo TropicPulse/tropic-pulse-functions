@@ -4,7 +4,7 @@
 // ⭐ FOLDER CONTEXT (C LAYER: BACKEND ACTIONS)
 // Project root:
 //   /tropic-pulse/                 ← frontend app
-//     /proxy/                      ← A layer (frontend pages / UI)
+//     /pulse-proxy/                      ← A layer (frontend pages / UI)
 //     /lib/
 //       /Connectors/               ← B layer (frontend → backend bridge)
 //         getAuth.js               ← calls this backend action
