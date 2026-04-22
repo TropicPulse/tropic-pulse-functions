@@ -380,5 +380,12 @@ export const PulseUnderstanding = {
   // ⭐ expose governed runner for direct use
   runThroughGovernor
 };
+global.log    = VitalsLogger.log;
+global.warn   = VitalsLogger.warn;
+global.error  = VitalsLogger.error;
+global.critical = VitalsLogger.critical;
+global.group  = VitalsLogger.group;
+global.groupEnd = VitalsLogger.groupEnd;
+global.makeTelemetryPacket = VitalsLogger.makeTelemetryPacket;
 
 export default PulseKernel;
