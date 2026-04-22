@@ -231,18 +231,25 @@ window.addEventListener(
 
     // v9.3 — Only treat TRUE missing modules as import conflicts
     if (msg.includes("Cannot find module")) {
+      // extract the module path the browser actually tried
+      let attemptedPath = null;
+      const m = msg.match(/Cannot find module ['"]([^'"]+)['"]/);
+      if (m && m[1]) attemptedPath = m[1];
+
       logProtector("PAGE_IMPORT_CONFLICT_DETECTED", {
         error: "importConflict",
-        details: msg
+        details: msg,
+        attemptedPath
       });
 
       // Escalate to CNS for full-import identity resolution
+      // CNS will scan ALL folders; this page does NOT hardcode or repair.
       await route("importConflict", {
         message: msg,
         frames: rawFrames,
         reflexOrigin: "SkinReflex",
         layer: "A1",
-        mode: "full-import",
+        attemptedPath,
         evo: {
           identity: "organ-level",
           importLaw: "v9.3",
