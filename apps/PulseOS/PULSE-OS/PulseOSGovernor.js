@@ -1,9 +1,10 @@
 // ============================================================================
-//  PulseOSGovernor.js — Global Loop, Re-entry & Multi-Instance Governor (v3.0)
+//  PulseOSGovernor.js — Global Loop, Re-entry & Multi-Instance Governor (v3.1)
 //  - No imports
 //  - No routing
 //  - No sending
 //  - Pure guards + dynamic multi-instance slicing context
+//  - Optional EarnReflex hook (if window.PulseEarnReflex is present)
 // ============================================================================
 
 const activeOrgans     = new Set();   // e.g. "EarnSystem", "PulseSendSystem"
@@ -54,6 +55,19 @@ function getInstanceKey(organName, pulseOrImpulse) {
   return `${organName}::${pulseId}`;
 }
 
+// Optional: side-attach EarnReflex if present on window
+async function maybeEmitEarnReflex(event, pulseOrImpulse, instanceContext) {
+  try {
+    if (typeof window === "undefined") return;
+    const reflex = window.PulseEarnReflex;
+    if (!reflex || typeof reflex.fromGovernorEvent !== "function") return;
+
+    await reflex.fromGovernorEvent(event, pulseOrImpulse, instanceContext);
+  } catch {
+    // fail-open: governor must never break
+  }
+}
+
 // ---------------------------------------------------------------------------
 //  Organ-level guard: re-entry, per-pulse visits, multi-instance context
 // ---------------------------------------------------------------------------
@@ -70,9 +84,9 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
   }
   state.count += 1;
 
-  const instanceIndex    = state.count - 1; // 0-based index
-  const totalInstances   = state.count;     // current known count for this key
-  const instanceContext  = {
+  const instanceIndex   = state.count - 1; // 0-based index
+  const totalInstances  = state.count;     // current known count for this key
+  const instanceContext = {
     organ: organName,
     pulseId,
     instanceKey,
@@ -80,16 +94,24 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
     totalInstances
   };
 
-  // 1. Block organ re-entry (stack-based)
-  if (activeOrgans.has(organName)) {
+  // Helper to build a governor event object
+  function buildEvent(reason, extra = {}) {
     return {
       ok: false,
       blocked: true,
-      reason: "organ_reentry",
+      reason,
       organ: organName,
       pulseId,
-      instanceContext
+      instanceContext,
+      ...extra
     };
+  }
+
+  // 1. Block organ re-entry (stack-based)
+  if (activeOrgans.has(organName)) {
+    const event = buildEvent("organ_reentry");
+    await maybeEmitEarnReflex(event, pulseOrImpulse, instanceContext);
+    return event;
   }
 
   // 2. Block per-pulse per-organ re-visits
@@ -98,54 +120,31 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
     visits = new Set();
     pulseVisits.set(pulseId, visits);
   } else if (visits.has(organName)) {
-    return {
-      ok: false,
-      blocked: true,
-      reason: "organ_already_visited_for_pulse",
-      organ: organName,
-      pulseId,
-      instanceContext
-    };
+    const event = buildEvent("organ_already_visited_for_pulse");
+    await maybeEmitEarnReflex(event, pulseOrImpulse, instanceContext);
+    return event;
   }
 
   // 3. Lineage / returnTo / fallback depth guards
   const lineageDepth = getLineageDepth(pulseOrImpulse);
   if (lineageDepth > MAX_LINEAGE_DEPTH) {
-    return {
-      ok: false,
-      blocked: true,
-      reason: "lineage_depth_exceeded",
-      organ: organName,
-      pulseId,
-      lineageDepth,
-      instanceContext
-    };
+    const event = buildEvent("lineage_depth_exceeded", { lineageDepth });
+    await maybeEmitEarnReflex(event, pulseOrImpulse, instanceContext);
+    return event;
   }
 
   const returnToDepth = getReturnToDepth(pulseOrImpulse);
   if (returnToDepth > MAX_RETURN_TO_DEPTH) {
-    return {
-      ok: false,
-      blocked: true,
-      reason: "return_to_depth_exceeded",
-      organ: organName,
-      pulseId,
-      returnToDepth,
-      instanceContext
-    };
+    const event = buildEvent("return_to_depth_exceeded", { returnToDepth });
+    await maybeEmitEarnReflex(event, pulseOrImpulse, instanceContext);
+    return event;
   }
 
   const fallbackDepth = getFallbackDepth(pulseOrImpulse);
   if (fallbackDepth > MAX_FALLBACK_DEPTH) {
-    return {
-      ok: false,
-      blocked: true,
-      reason: "fallback_depth_exceeded",
-      organ: organName,
-      pulseId,
-      fallbackDepth,
-      instanceContext
-    };
+    const event = buildEvent("fallback_depth_exceeded", { fallbackDepth });
+    await maybeEmitEarnReflex(event, pulseOrImpulse, instanceContext);
+    return event;
   }
 
   // 4. Mark organ active + visited
@@ -153,8 +152,6 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
   visits.add(organName);
 
   try {
-    // fn receives instanceContext so it can slice packets/work:
-    // e.g. use instanceIndex + totalInstances to divide total packets.
     const result = await fn(instanceContext);
     return {
       ok: true,
