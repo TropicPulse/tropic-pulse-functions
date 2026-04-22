@@ -47,33 +47,28 @@
 //   • Errors are signals, not fatal stops — reflex must always continue forward
 //   • ⭐ Local diagnostics must never depend on routing or backend
 // ============================================================================
+// ============================================================================
+// OWNER MODULE RESOLUTION — v10.3 (Brain-map based, no degradation)
+// ============================================================================
+import { PulseOrganismMap } from "/apps/PulseOS/PulseBrainMap.js";
+
+function resolveOwnerModule(symbol) {
+  try {
+    if (typeof symbol !== "string") return null;
+
+    const organ = PulseOrganismMap.organs[symbol];
+    if (!organ) return null;
+
+    return organ.system || null;
+  } catch {
+    return null;
+  }
+}
 
 console.log(
   "%c[PulseOSSkinReflex v10.3] Loaded — A1 Surface Membrane Active",
   "color:#4CAF50; font-weight:bold;"
 );
-
-// ============================================================================
-// SYMBOL → OWNER MODULE RESOLUTION
-// ============================================================================
-function resolveOwnerModule(symbol) {
-  try {
-    const subsystems = window?.PULSE_SUBSYSTEMS;
-    if (!subsystems) return null;
-
-    for (const [moduleName, moduleExports] of Object.entries(subsystems)) {
-      if (moduleExports && typeof moduleExports === "object") {
-        if (symbol in moduleExports) {
-          return moduleName;
-        }
-      }
-    }
-  } catch (err) {
-    logProtector("OWNER_RESOLUTION_FAILED", { error: String(err) });
-  }
-
-  return null;
-}
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
