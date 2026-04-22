@@ -26,7 +26,7 @@
 // ============================================================================
 
 import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUCommandments.js";
-import { PulseGPUSettingsMemory } from "./PulseGPUSurvivalInstincts.js";
+import { PulseGPUSurvivalInstincts } from "./PulseGPUSurvivalInstincts.js";
 
 // ============================================================================
 // DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC
