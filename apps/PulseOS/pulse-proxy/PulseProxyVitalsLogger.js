@@ -91,15 +91,21 @@ function normalizeArgs(args) {
     return { subsystem: args[0], message: args[1], rest: args.slice(2), raw: false };
   }
 
-  // object logs
+  // object logs — FIXED (v10.2)
   if (typeof args[0] === "object") {
     const obj = args[0];
 
     if (obj.pulseLayer === "NERVOUS-SYSTEM") subsystem = "band";
     if (obj.schemaVersion && obj.textures !== undefined) subsystem = "gpu";
 
-    return { subsystem, message: JSON.stringify(obj), rest: [], raw: false };
+    return {
+      subsystem,
+      message: "",
+      rest: [obj],   // ⭐ PASS THE OBJECT DIRECTLY
+      raw: false
+    };
   }
+
 
   // single arg
   if (args.length === 1) {
