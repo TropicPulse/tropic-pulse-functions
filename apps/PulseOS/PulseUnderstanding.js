@@ -6,32 +6,43 @@
 // ============================================================================
 //  IMPORTS — FRONTEND BARREL (ALL ORGANS ROUTE THROUGH HERE)
 // ============================================================================
+
+// Core OS Maps (unchanged)
 import { PulseIntentMap } from "./PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
 import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
 import { PulseIdentity } from "./PULSE-OS/PulseIdentity.js";
 
-import { PulseOSEvolution } from "./PULSE-OS/PulseOSEvolution.js";
+// OS Brain + Evolution
+import { PulseOSEvolution } from "./PULSE-OS/PulseOSBrainEvolution.js";
 import { PulseOSBrain } from "./PULSE-OS/PulseOSBrain.js";
 
+// Reflex + Vitals
 import { VitalsMonitor } from "./pulse-proxy/PulseProxyVitalsMonitor.js";
 import { attachScanner } from "./PULSE-OS/PulseOSSkinReflex.js";
 
-import * as PulseRouter from "./pulse-router/PulseRouterEvolutionaryThought.js";
+// Router (v10.4)
+import * as PulseRouter from "./pulse-router/PulseRouter-v10.4.js";
+
+// GPU (v10.4)
 import * as PulseGPU from "./pulse-gpu/PulseGPU-v10.4.js";
 
+// Send System
 import { PulseSendSystem } from "./pulse-send/PulseSendSystem.js";
 
+// Earn System
 import * as PulseEarn from "./pulse-earn/PulseEarn.js";
 import { PulseEarnSendSystem } from "./pulse-earn/PulseEarnSendSystem.js";
 import { PulseEarnContinuancePulse } from "./pulse-earn/PulseEarnContinuancePulse.js";
 
-import { createPulseSDN } from "./pulse-sdn/PulseSDN.js";
+// ⭐ NEW — OS Spinal Cord (replaces SDN)
+import { createPulseOSSpinalCord } from "./PULSE-OS/PulseOSSpinalCord.js";
 
+// Governor
 import { withOrganGuard } from "./PULSE-OS/PulseOSGovernor.js";
 
-// ⭐ NEW — Logging organ (frontend-safe)
-import { createDiagnosticsWriteAPI } from "./aiDiagnosticsWrite.js";
+// Diagnostics
+import { createDiagnosticsWriteAPI } from "./pulse-ai/aiDiagnosticsWrite.js";
 
 
 // ============================================================================
@@ -90,15 +101,13 @@ const PulseEnvironment = buildEnvironmentSnapshot();
 
 
 // ============================================================================
-//  GOVERNED EXECUTION — NOW WITH GLOBAL AI LOGGING
+//  GOVERNED EXECUTION — GLOBAL AI LOGGING
 // ============================================================================
 function runThroughGovernor(organName, pulseOrImpulse, fn) {
   return withOrganGuard(organName, pulseOrImpulse, async (instanceContext) => {
 
-    // Execute organ logic
     const result = await fn(instanceContext);
 
-    // ⭐ NEW: Global AI Logging (Option A)
     try {
       const timestamp = Date.now();
       const docId = `${organName}-${timestamp}`;
@@ -114,7 +123,6 @@ function runThroughGovernor(organName, pulseOrImpulse, fn) {
         result
       };
 
-      // Write to AI_LOGS
       await instanceContext?.organs?.diagnosticsWrite?.writeRun({
         docId,
         payload: safe
@@ -157,7 +165,7 @@ function buildPulseKernel() {
       Monitor: VitalsMonitor
     },
 
-    SDN: null,
+    SDN: null, // will become SpinalCord
 
     Governed: {
       run: runThroughGovernor
@@ -170,9 +178,9 @@ function buildPulseKernel() {
 const PulseKernel = buildPulseKernel();
 
 
-// ============================================================================
-//  EVOLUTION BOOTSTRAP
-// ============================================================================
+// ============================================================================  
+//  EVOLUTION BOOTSTRAP  
+// ============================================================================  
 const Evolution = PulseOSEvolution({
   intent: PulseIntentMap,
   organism: PulseOrganismMap,
@@ -185,9 +193,9 @@ PulseKernel.Brain = Brain;
 
 
 // ============================================================================
-//  SDN BOOTSTRAP
+//  SPINAL CORD BOOTSTRAP (formerly SDN)
 // ============================================================================
-PulseKernel.SDN = createPulseSDN({
+PulseKernel.SDN = createPulseOSSpinalCord({
   Router: PulseRouter,
   EventBus: PulseKernel.Earn?.Organism?.EventBus || null,
   Brain,

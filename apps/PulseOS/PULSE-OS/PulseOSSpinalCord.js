@@ -1,12 +1,12 @@
 // ============================================================================
-// FILE: /apps/pulse-sdn/PulseSDN.js
-// PULSE SDN — v10.4
-// “SOFTWARE‑DEFINED NERVOUS SYSTEM”
+// FILE: /PULSE-OS/PulseOSSpinalCord.js
+// PULSE OS SPINAL CORD — v10.4
+// “CENTRAL NERVOUS SYSTEM WIRING LAYER”
 // ============================================================================
 //
 // ROLE (v10.4):
 // -------------
-// • Unified nervous system for the entire organism.
+// • Unified spinal cord for the entire Pulse organism.
 // • Receives impulses from UI, GPU, Mesh, Earn, OS organs.
 // • Routes impulses to Router, Cortex, Brain, and Organs.
 // • Emits nervous‑system events onto the EventBus.
@@ -19,15 +19,15 @@
 // • No direct backend calls (backend is reached via Router/route only).
 // • Deterministic routing behavior (no random branching).
 // • No mutation of external modules (Brain, Router, EventBus).
-// • SDN is wiring only — no cognition, no business logic.
+// • Spinal Cord is wiring only — no cognition, no business logic.
 // ============================================================================
 
 export const PulseRole = {
   type: "NervousSystem",
   subsystem: "OS",
-  layer: "SDN",
+  layer: "SpinalCord",
   version: "10.4",
-  identity: "PulseSDN",
+  identity: "PulseOSSpinalCord",
 
   evo: {
     deterministicNeuron: true,
@@ -51,7 +51,7 @@ export const PulseRole = {
 // ============================================================================
 // FACTORY — All dependencies are injected by CNS Brain / Cortex
 // ============================================================================
-export function createPulseSDN({
+export function createPulseOSSpinalCord({
   Router,        // expected to expose: route(type, payload)
   EventBus,      // expected to expose: emit(event, payload)
   Brain,         // PulseOSBrain (for logging + context)
@@ -63,7 +63,7 @@ export function createPulseSDN({
   // --------------------------------------------------------------------------
   // INTERNAL STATE
   // --------------------------------------------------------------------------
-  const SDNState = {
+  const SpinalState = {
     receptors: {},          // { source: Set<handler> }
     impulseCount: 0,
     lastImpulseTs: null,
@@ -72,33 +72,33 @@ export function createPulseSDN({
 
 
   // --------------------------------------------------------------------------
-  // RECEPTOR REGISTRATION — sources that can emit impulses into SDN
+  // RECEPTOR REGISTRATION — sources that can emit impulses into Spinal Cord
   // --------------------------------------------------------------------------
   function registerReceptor(source, handler) {
     if (!source || typeof handler !== "function") return;
 
-    if (!SDNState.receptors[source]) {
-      SDNState.receptors[source] = new Set();
+    if (!SpinalState.receptors[source]) {
+      SpinalState.receptors[source] = new Set();
     }
 
-    SDNState.receptors[source].add(handler);
+    SpinalState.receptors[source].add(handler);
 
-    Evolution?.recordLineage?.(`sdn-register-receptor:${source}`);
-    log("[PulseSDN] Receptor registered:", source);
+    Evolution?.recordLineage?.(`spinal-register-receptor:${source}`);
+    log("[PulseOSSpinalCord] Receptor registered:", source);
   }
 
 
   function unregisterReceptor(source, handler) {
-    const set = SDNState.receptors[source];
+    const set = SpinalState.receptors[source];
     if (!set) return;
 
     set.delete(handler);
     if (set.size === 0) {
-      delete SDNState.receptors[source];
+      delete SpinalState.receptors[source];
     }
 
-    Evolution?.recordLineage?.(`sdn-unregister-receptor:${source}`);
-    log("[PulseSDN] Receptor unregistered:", source);
+    Evolution?.recordLineage?.(`spinal-unregister-receptor:${source}`);
+    log("[PulseOSSpinalCord] Receptor unregistered:", source);
   }
 
 
@@ -106,93 +106,92 @@ export function createPulseSDN({
   // IMPULSE EMISSION — entrypoint from UI / GPU / Mesh / Earn / OS
   // --------------------------------------------------------------------------
   function emitImpulse(source, impulse) {
-    SDNState.impulseCount += 1;
-    SDNState.lastImpulseTs = Date.now();
+    SpinalState.impulseCount += 1;
+    SpinalState.lastImpulseTs = Date.now();
 
-    EventBus?.emit?.("sdn:impulse", { source, impulse, ts: SDNState.lastImpulseTs });
+    EventBus?.emit?.("spinal:impulse", { source, impulse, ts: SpinalState.lastImpulseTs });
 
-    const set = SDNState.receptors[source];
+    const set = SpinalState.receptors[source];
     if (set && set.size > 0) {
       for (const handler of set) {
         try {
           handler(impulse);
         } catch (err) {
-          warn("[PulseSDN] Receptor handler error:", source, err);
+          warn("[PulseOSSpinalCord] Receptor handler error:", source, err);
         }
       }
     }
 
-    Evolution?.recordLineage?.("sdn-impulse");
+    Evolution?.recordLineage?.("spinal-impulse");
   }
 
 
   // --------------------------------------------------------------------------
-  // ROUTING HELPERS — SDN → Router → Organs / Backend
+  // ROUTING HELPERS — Spinal Cord → Router → Organs / Backend
   // --------------------------------------------------------------------------
   async function routeToOrgan(routeType, payload = {}) {
-    Evolution?.recordLineage?.("sdn-route-organ");
+    Evolution?.recordLineage?.("spinal-route-organ");
 
     if (!Router?.route) {
-      warn("[PulseSDN] Router missing route() — cannot route to organ.");
+      warn("[PulseOSSpinalCord] Router missing route() — cannot route to organ.");
       return { error: "routerMissing", details: "Router.route not available" };
     }
 
     const res = await Router.route(routeType, {
       ...payload,
-      sdnContext: {
-        impulseCount: SDNState.impulseCount,
-        lastImpulseTs: SDNState.lastImpulseTs
+      spinalContext: {
+        impulseCount: SpinalState.impulseCount,
+        lastImpulseTs: SpinalState.lastImpulseTs
       }
     });
 
-    EventBus?.emit?.("sdn:route:organ", { routeType, payload, res });
+    EventBus?.emit?.("spinal:route:organ", { routeType, payload, res });
     return res;
   }
 
 
   async function routeToBackend(endpointType, payload = {}) {
-    // SDN never calls backend directly — it always goes through Router.
-    Evolution?.recordLineage?.("sdn-route-backend");
+    Evolution?.recordLineage?.("spinal-route-backend");
 
     if (!Router?.route) {
-      warn("[PulseSDN] Router missing route() — cannot route to backend.");
+      warn("[PulseOSSpinalCord] Router missing route() — cannot route to backend.");
       return { error: "routerMissing", details: "Router.route not available" };
     }
 
     const res = await Router.route(endpointType, {
       ...payload,
-      sdnContext: {
-        impulseCount: SDNState.impulseCount,
-        lastImpulseTs: SDNState.lastImpulseTs
+      spinalContext: {
+        impulseCount: SpinalState.impulseCount,
+        lastImpulseTs: SpinalState.lastImpulseTs
       }
     });
 
-    EventBus?.emit?.("sdn:route:backend", { endpointType, payload, res });
+    EventBus?.emit?.("spinal:route:backend", { endpointType, payload, res });
     return res;
   }
 
 
   // --------------------------------------------------------------------------
-  // HEALTH ENGINE — SDN health reporting for Evolution / BrainIntel
+  // HEALTH ENGINE — Spinal Cord health reporting for Evolution / BrainIntel
   // --------------------------------------------------------------------------
   function updateHealth(score) {
-    SDNState.healthScore = score;
-    EventBus?.emit?.("sdn:health:update", { score, ts: Date.now() });
-    Evolution?.updateOrganHealth?.("PulseSDN", score);
+    SpinalState.healthScore = score;
+    EventBus?.emit?.("spinal:health:update", { score, ts: Date.now() });
+    Evolution?.updateOrganHealth?.("PulseOSSpinalCord", score);
   }
 
 
   function getHealth() {
-    return SDNState.healthScore;
+    return SpinalState.healthScore;
   }
 
 
   // --------------------------------------------------------------------------
-  // PUBLIC SDN SURFACE
+  // PUBLIC SPINAL CORD SURFACE
   // --------------------------------------------------------------------------
-  const PulseSDN = {
+  const PulseOSSpinalCord = {
     PulseRole,
-    SDNState,
+    SpinalState,
 
     // Receptors
     registerReceptor,
@@ -210,8 +209,8 @@ export function createPulseSDN({
     getHealth
   };
 
-  Brain?.log?.("[PulseSDN v10.4] Initialized nervous system.");
-  Evolution?.recordLineage?.("sdn-init");
+  Brain?.log?.("[PulseOSSpinalCord v10.4] Initialized spinal cord.");
+  Evolution?.recordLineage?.("spinal-init");
 
-  return PulseSDN;
+  return PulseOSSpinalCord;
 }
