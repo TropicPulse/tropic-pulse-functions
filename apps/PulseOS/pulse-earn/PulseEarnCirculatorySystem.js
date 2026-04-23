@@ -33,10 +33,6 @@
 //   • Deterministic job selection only.
 // ============================================================================
 
-import { scoreJobForDevice } from "./PulseEarnSurvivalInstincts.js";
-import { getDeviceProfile } from "./PulseEarnSkeletalSystem.js";
-import { getMarketplaceReputation } from "./PulseEarnEndocrineSystem.js";
-
 // ---------------------------------------------------------------------------
 // Healing Metadata — Circulatory Reflex Log
 // ---------------------------------------------------------------------------

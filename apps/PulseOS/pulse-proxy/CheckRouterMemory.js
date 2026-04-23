@@ -1,24 +1,25 @@
 // ============================================================================
 // FILE: /apps/pulse-proxy/CheckRouterMemory.js
-// PULSE NETWORK MEMORY HEALER — v10.4
+// PULSE NETWORK MEMORY HEALER — v11
 // “THE NETWORK HEALER++ / B‑LAYER LOG INTAKE + REPAIR ENGINE”
 // ============================================================================
 //
-// ROLE (v10.4):
-//   • Backend intake + validator for RouterMemory v10.x flushes
+// ROLE (v11):
+//   • Backend intake + validator for RouterMemory flushes
 //   • Normalizes ALL log fields (routeTrace, lineage, evo, importConflict)
 //   • Detects structural drift + malformed entries
-//   • Preserves lineage + timestamps
+//   • Preserves lineage + timestamps (never invents time)
 //   • Returns authoritative, organism‑safe log batch
 //   • Mode‑aware: can be routed/observed per‑mode (A→B→A compatible)
 //
-// CONTRACT (v10.4):
+// CONTRACT (v11):
 //   • Never mutate original input
 //   • Fail‑open: invalid payload → empty safe array
 //   • Always return structurally complete log entries
 //   • Lymbic escalation must NEVER throw
 //   • Deterministic, loggable, replayable
 //   • No single point of failure: healer must not crash the proxy
+//   • No synthetic timestamps (no Date.now defaults)
 // ============================================================================
 
 
@@ -28,7 +29,7 @@
 const LAYER_ID   = "NETWORK-LAYER";
 const LAYER_NAME = "THE NETWORK HEALER++";
 const LAYER_ROLE = "B-LAYER MEMORY INTAKE + REPAIR";
-const LAYER_VER  = "10.4";
+const LAYER_VER  = "11.0";
 
 const NETWORK_DIAGNOSTICS_ENABLED =
   process.env.PULSE_NETWORK_DIAGNOSTICS === "true" ||
@@ -99,7 +100,7 @@ function buildMemoryContext(mode) {
 
 
 // ============================================================================
-// HELPERS — SAFE PARSE + NORMALIZE LOG BATCH (v10.4)
+// HELPERS — SAFE PARSE + NORMALIZE LOG BATCH (v11)
 // ============================================================================
 function safeParseBody(body) {
   if (!body) return null;
@@ -112,7 +113,7 @@ function safeParseBody(body) {
   }
 }
 
-// Normalize a single log entry to v10.4 shape
+// Normalize a single log entry to v11 shape
 function normalizeLogEntry(entry, mode, memoryContext) {
   if (!entry || typeof entry !== "object") return null;
 
@@ -122,7 +123,7 @@ function normalizeLogEntry(entry, mode, memoryContext) {
   const safeObj = (v, d = {}) =>
     typeof v === "object" && v !== null ? v : d;
 
-  const safeNum = (v, d = Date.now()) =>
+  const safeNum = (v, d = 0) =>
     typeof v === "number" ? v : d;
 
   const safeArr = (v, d = []) =>
@@ -143,8 +144,8 @@ function normalizeLogEntry(entry, mode, memoryContext) {
     page: safeStr(entry.page),
     frames: safeArr(entry.frames),
 
-    // Timestamp
-    timestamp: safeNum(entry.timestamp),
+    // Timestamp (never synthesized; 0 if missing)
+    timestamp: safeNum(entry.timestamp, 0),
 
     // Versioning + lineage
     memoryVersion: entry.memoryVersion || LAYER_VER,
@@ -186,7 +187,7 @@ function healLogBatch(raw, mode, memoryContext) {
 
 
 // ============================================================================
-// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL (v10.4)
+// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL (v11)
 // ============================================================================
 async function notifyLymbicOnFatal(err, mode) {
   try {
@@ -212,9 +213,8 @@ async function notifyLymbicOnFatal(err, mode) {
 
 
 // ============================================================================
-/** BACKEND ENTRY POINT — “THE NETWORK HEALER++” (v10.4)
- *  A→B→A‑safe: mode‑aware, fail‑open, never throws outward.
- */
+// BACKEND ENTRY POINT — “THE NETWORK HEALER++” (v11)
+// A→B→A‑safe: mode‑aware, fail‑open, never throws outward.
 // ============================================================================
 export const handler = async (event, context) => {
   const mode = resolveMode(event);

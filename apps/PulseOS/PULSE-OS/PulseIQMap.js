@@ -82,6 +82,11 @@ export const PulseIQMap = {
   // Brain boot (access only; lets higher layers re‑ignite cortex)
 // -------------------------------------------------------------------------
   boot,
+    meshDeterminism: {
+      cycleCounter: true,
+      timestampFree: true,
+      asyncFree: true
+    },
 
   // -------------------------------------------------------------------------
   // External Service IQ (appendage; not part of organism)

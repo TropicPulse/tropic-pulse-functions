@@ -29,6 +29,8 @@
 
 import { PulseGPUSettingsRestorer } from "./PulseGPUCognitiveLayer.js";
 import { PulseGPUUXBridge } from "./PulseGPUCognitiveIntelligence.js";
+import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
+import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
 
 const GPU_HEALER_CONTEXT = {
   layer: "PulseGPUHealer",
@@ -139,11 +141,13 @@ function filterValidNotifications(notifications) {
 class PulseGPUHealer {
   constructor(options = {}) {
     this.advisor =
-      options.advisor || new PulseGPUPerformanceAdvisor(options.settingsMemory);
+      options.advisor ||
+      new PulseGPUPerformanceAdvisor(options.settingsMemory);
     this.restorer =
       options.restorer || new PulseGPUSettingsRestorer();
     this.autoOptimize =
-      options.autoOptimize || new PulseGPUAutoOptimize(options.userPreferences);
+      options.autoOptimize ||
+      new PulseGPUAutoOptimize(options.userPreferences);
     this.uxBridge =
       options.uxBridge || new PulseGPUUXBridge();
   }

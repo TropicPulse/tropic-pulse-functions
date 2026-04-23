@@ -45,11 +45,7 @@ import { getWorkerExecutionHealingState } from "./PulseEarnMetabolism.js";
 import { getResultSubmissionHealingState } from "./PulseEarnLymphNodes.js";
 
 // Packet Engine (repair target)
-import {
-  getPulseEarnGeneticMemoryHealingState,
-  synthesizePulseEarnGene,
-  writePulseEarnGene
-} from "./PulseEarnGeneticMemory.js";
+import { getPulseEarnGeneticMemoryHealingState, synthesizePulseEarnGene, writePulseEarnGene} from "./PulseEarnGeneticMemory.js";
 
 // Cell
 import { getPulseEarnCellHealingState } from "./PulseEarnCell.js";

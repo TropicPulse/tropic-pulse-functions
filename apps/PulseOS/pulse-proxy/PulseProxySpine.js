@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v10.4 — PULSE PROXY SPINE (BACKEND SPINE)
+//  PULSE OS v11 — PULSE PROXY SPINE (BACKEND SPINE)
 //  Unified TPProxy Gateway • Vitals Pump • OS‑Healer Feed
 //  ORGANISM‑CORRECT BACKEND ORGAN — NO BUSINESS LOGIC.
 // ============================================================================
@@ -9,13 +9,13 @@ const warn  = global.warn  || console.warn;
 const error = global.error || console.error;
 
 // ============================================================================
-//  SPINE IDENTITY — v10.4
+//  SPINE IDENTITY — v11
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "BackendSpine",
-  version: "10.4",
+  version: "11.0",
   identity: "PulseProxySpine",
 
   evo: {
@@ -52,12 +52,12 @@ const PROXY_CONTEXT = {
 };
 
 log(
-  "%c🟦 PulseProxySpine v10.4 online — backend spine + vitals pump active.",
+  "%c🟦 PulseProxySpine v11 online — backend spine + vitals pump active.",
   "color:#03A9F4; font-weight:bold;"
 );
 
 // ============================================================================
-//  HEALING METADATA — OS-visible heartbeat for PulseProxyHealer (v10.4)
+//  HEALING METADATA — OS-visible heartbeat for PulseProxyHealer (v11)
 // ============================================================================
 const healingState = {
   ...PROXY_CONTEXT,
@@ -129,7 +129,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // ============================================================================
-//  ENV + IDENTITY + MODE — v10.4
+//  ENV + IDENTITY + MODE — v11
 // ============================================================================
 const SMTP_PASS = process.env.EMAIL_PASSWORD;
 const ALERT_EMAIL_TO = "FordFamilyDelivery@gmail.com";
@@ -149,7 +149,7 @@ const CLOUD_REGION =
 
 const NODE_ID = process.env.K_REVISION || process.env.HOSTNAME || "Local";
 
-const PULSE_VERSION = "v10.4";
+const PULSE_VERSION = "v11";
 
 const OFFLINE_MODE =
   process.env.PULSE_OFFLINE_MODE === "1" ||
@@ -173,7 +173,7 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================================================
-//  GLOBAL REQUEST MIDDLEWARE — v10.4
+//  GLOBAL REQUEST MIDDLEWARE — v11
 // ============================================================================
 app.use((req, res, next) => {
   res.setHeader("X-Pulse-Version", PULSE_VERSION);
@@ -186,9 +186,8 @@ app.use((req, res, next) => {
 
   next();
 });
-
 // ============================================================================
-//  REDIS — v10.4 (Fail‑open, drift‑proof)
+//  REDIS — v11 (Fail‑open, drift‑proof)
 // ============================================================================
 let redis = null;
 let redisReady = false;
@@ -223,7 +222,7 @@ if (process.env.REDIS_URL) {
 }
 
 // ============================================================================
-//  VAULT PATCH (Lore) — v10.4
+//  VAULT PATCH (Lore) — unchanged (lore versioning is independent)
 // ============================================================================
 export const VAULT_PATCH_TWILIGHT = {
   signature: "Twilight",
@@ -237,7 +236,7 @@ export const VAULT_PATCH_TWILIGHT = {
 };
 
 // ============================================================================
-//  MAILER — v10.4 (Critical alerts only, fail‑open)
+//  MAILER — v11 (Critical alerts only, fail‑open)
 // ============================================================================
 const transporter =
   SMTP_HOST && SMTP_USER && SMTP_PASS
@@ -271,14 +270,11 @@ async function sendCriticalEmail(subject, payload) {
     error("%c[PULSE EMAIL ERROR]", "color:#FF5252; font-weight:bold;", msg);
   }
 }
+
 // ============================================================================
-//  (Next: UNIVERSAL PROXY — TPProxy v10.4 …)
-// ============================================================================
-// ============================================================================
-//  UNIVERSAL PROXY — TPProxy v10.4
+//  UNIVERSAL PROXY — TPProxy v11
 //  Unified Fetch Gateway • Safe Fail‑Open • Vitals Pump • Advantage‑Aware
 // ============================================================================
-
 app.get("/TPProxy", async (req, res) => {
   healingState.lastTPProxyCall = Date.now();
 
@@ -435,7 +431,7 @@ app.get("/TPProxy", async (req, res) => {
 });
 
 // ============================================================================
-//  HEALTH — PROXY VITALS SNAPSHOT (v10.4)
+//  HEALTH — PROXY VITALS SNAPSHOT (v11)
 // ============================================================================
 app.get("/pulse-proxy/health", async (req, res) => {
   const now = Date.now();
@@ -471,7 +467,7 @@ app.get("/pulse-proxy/health", async (req, res) => {
 });
 
 // ============================================================================
-//  METRICS — ICU‑Grade Telemetry (v10.4)
+//  METRICS — ICU‑Grade Telemetry (v11)
 // ============================================================================
 app.get("/pulse-proxy/metrics", async (req, res) => {
   const now = Date.now();
@@ -517,7 +513,7 @@ app.get("/pulse-proxy/metrics", async (req, res) => {
 });
 
 // ============================================================================
-//  NODE INFO — BACKEND BODY CARD (v10.4)
+//  NODE INFO — BACKEND BODY CARD (v11)
 // ============================================================================
 app.get("/pulse-proxy/node", async (req, res) => {
   const now = Date.now();
@@ -554,7 +550,7 @@ app.get("/pulse-proxy/node", async (req, res) => {
 });
 
 // ============================================================================
-//  PING — REFLEX TEST (v10.4)
+//  PING — REFLEX TEST (v11)
 // ============================================================================
 app.get("/pulse-proxy/ping", async (req, res) => {
   const t0 = Date.now();
@@ -570,6 +566,6 @@ app.get("/pulse-proxy/ping", async (req, res) => {
 });
 
 // ============================================================================
-//  EXPORT (v10.4)
+//  EXPORT (v11)
 // ============================================================================
 export default app;

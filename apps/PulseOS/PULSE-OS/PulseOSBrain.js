@@ -1,6 +1,6 @@
 // ============================================================================
-// FILE: /apps/PulseOS/Brain/PulseOSBrain.js
-// PULSE OS — v10.4
+// FILE: /apps/PulseOS/PULSE-OS/PulseOSBrain.js
+// PULSE OS — v10.4 → v11 DESIGN UPGRADE
 // “THE CNS BRAIN / CENTRAL NERVOUS SYSTEM / INTELLIGENCE LAYER 1”
 // ============================================================================
 //
@@ -11,11 +11,11 @@
 //  • Biological Analog: Brain + Executive Cortex
 //  • System Role: Attach IQ, load organs by design, boot Cortex, govern CNS.
 //
-//  PURPOSE (v10.4):
-//  ----------------
-//  ✔ Attach PulseIQ (the only import cortex) to the organism.
+//  PURPOSE (v10.4 → v11 DESIGN):
+//  -----------------------------
+//  ✔ Attach PulseIQ (TEXT + DESIGN ONLY) to the organism.
 //  ✔ Interpret PulseOrganismMap as the genome-level truth.
-//  ✔ Load organs by design identity (deterministic, design-driven).
+//  ✔ Load organs by design identity via Evolution (not IQ).
 //  ✔ Boot the Cortex and initialize nervous system + organs.
 //  ✔ Classify degradation and route around damage (continuance).
 //  ✔ Provide structural error intelligence (drift surface).
@@ -23,7 +23,7 @@
 //  SAFETY CONTRACT (v10.4):
 //  -------------------------
 //  • May import ONLY:
-//      - PulseIQMap (IQ cortex / imports)
+//      - PulseIQMap (IQ cortex / design + logging + appendages)
 //      - PulseOrganismMap (genome map)
 //      - Cortex boot (PulseOSBrainCortex)
 //  • No dynamic imports, no eval, no Function.
@@ -36,8 +36,8 @@
 // ============================================================================
 //  IMPORTS — v10.4 LAW: BRAIN MAY IMPORT ONLY PULSEIQ (+ Cortex wiring)
 // ============================================================================
-import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
-import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
+import { PulseIQMap } from "./PulseIQMap.js";
+import { PulseOrganismMap } from "./PulseOrganismMap.js";
 import { boot } from "./PulseOSBrainCortex.js";
 
 
@@ -90,25 +90,28 @@ export const PulseOSBrain = {
       return score;
     },
 
-    // Fallback to long-term memory (IQ-provided)
+    // Fallback to long-term memory (v11: TEXT/DESIGN hint via IQ)
     fallbackToMemory() {
-      return PulseIQMap.LongTermMemory;
+      const iq = PulseOSBrain.PulseIQMap || PulseIQMap;
+      const route = iq.getRecoveryRoute
+        ? iq.getRecoveryRoute()
+        : "/";
+      const organs = iq.pages && iq.pages[route]
+        ? iq.pages[route]
+        : [];
+      return { route, organs };
     }
   },
 
-  // CNS Infrastructure (wired from IQ)
+  // CNS Infrastructure (wired from IQ — TEXT + LOGGING + APPENDAGES)
   log: PulseIQMap.log,
   warn: PulseIQMap.warn,
   logError: PulseIQMap.logError,
   firebase: PulseIQMap.firebase,
-  BBB: PulseIQMap.BBB,
-  PulseKernel: PulseIQMap.PulseKernel,
-  LongTermMemory: PulseIQMap.LongTermMemory,
-  evolveRaw: PulseIQMap.evolveRaw,
 
   // ⭐ MAP EXPORTS
   PulseIntentMap: null,                 // filled by Evolution / cognitiveBootstrap
-  PulseIQMap: PulseIQMap,               // IQ lives in Brain
+  PulseIQMap: PulseIQMap,               // IQ lives in Brain (design + logging)
   PulseOrganismMap: PulseOrganismMap,   // default; Evolution may override
 
   // ⭐ Cognitive wiring
@@ -155,16 +158,24 @@ export function structuralError(expected, found, extraContext = {}) {
     ...extraContext
   };
 
-  PulseIQMap.warn("[STRUCTURAL_ERROR]", payload);
+  const warnFn = PulseOSBrain.warn || PulseIQMap.warn;
+  warnFn("[STRUCTURAL_ERROR]", payload);
   return payload;
 }
 
 
 // ============================================================================
-// 3) EVOLUTION + ORGAN LOADING — Design-Driven CNS Logic (still uses IQMap)
+// 3) EVOLUTION + ORGAN LOADING — Design-Driven CNS Logic (v11: via Evolution)
 // ============================================================================
 export async function loadOrganByDesign(designIdentity, expectedType, expectedSubsys) {
-  const raw = await PulseIQMap.evolveRaw(designIdentity);
+  const evolveRaw =
+    PulseOSBrain.evolution?.evolveRaw ||
+    PulseOSBrain.evolution?.evolveOrganRaw;
+
+  const raw = typeof evolveRaw === "function"
+    ? await evolveRaw(designIdentity)
+    : [];
+
   const expected = { type: expectedType, subsystem: expectedSubsys };
 
   const candidates = raw.filter(({ module }) =>
@@ -173,7 +184,8 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 
   if (candidates.length > 0) {
     const chosen = candidates[0];
-    PulseIQMap.log(`🧠 [PulseOSBrain] Attached organ from ${chosen.path}`);
+    const logFn = PulseOSBrain.log || PulseIQMap.log;
+    logFn(`🧠 [PulseOSBrain] Attached organ from ${chosen.path}`);
     return chosen.module;
   }
 
@@ -183,7 +195,7 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 
 // ============================================================================
 // 4) COGNITIVE BOOTSTRAP — Evolution → PulseOSBrain → Cortex
-//    (Evolution calls this; Understanding does NOT boot Brain directly in v10.4)
+//    (Evolution calls this; Understanding does NOT boot Brain directly)
 // ============================================================================
 export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
@@ -199,6 +211,12 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
   if (iqMap) {
     PulseOSBrain.PulseIQMap = iqMap;
+
+    // v11: rewire CNS infrastructure to injected IQ
+    if (iqMap.log) PulseOSBrain.log = iqMap.log;
+    if (iqMap.warn) PulseOSBrain.warn = iqMap.warn;
+    if (iqMap.logError) PulseOSBrain.logError = iqMap.logError;
+    if (iqMap.firebase) PulseOSBrain.firebase = iqMap.firebase;
   }
 
   PulseOSBrain.understanding = understanding;
@@ -217,6 +235,7 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
   PulseOSBrain.evolution?.recordLineage?.("brain-cognitive-bootstrap");
   PulseOSBrain.evolution?.scanDrift?.(PulseOSBrain);
 
-  PulseIQMap.log("🧠 [PulseOSBrain] cognitiveBootstrap complete.");
+  const logFn = PulseOSBrain.log || PulseIQMap.log;
+  logFn("🧠 [PulseOSBrain] cognitiveBootstrap complete.");
   return PulseOSBrain;
 }

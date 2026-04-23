@@ -1,13 +1,13 @@
 // ============================================================================
 // FILE: PulseMeshSpine.js
-// PULSE OS — v9.2
+// PULSE OS — v11-ready
 // COMMUNITY_SPINE_LAYER  // teal
 // Distributed Routing Spine • Reflex + Cortex + Tendons + Signal Factoring
 // Metadata-Only • Deterministic • Drift-Proof • Local-First
 // ============================================================================
 //
-// IDENTITY — THE SPINE (v9.2):
-// ----------------------------
+// IDENTITY — THE SPINE:
+// ---------------------
 // • Routes impulses between nodes (devices, services, earners).
 // • Applies 1/0 reflex at each hop (instinct-style filtering).
 // • Applies cortex shaping (risk, novelty, cooperation, load).
@@ -16,26 +16,17 @@
 // • Accumulates mesh metadata: hops, score, energy, routeHint.
 // • Emits drift + flow + factoring signals to Mesh Immune / GlobalHealer.
 // • NEVER mutates payload data, NEVER performs compute.
-// • v9.2: deterministic-field, mesh-pressure-aware, aura-pressure-aware.
+// • Deterministic-field, mesh-pressure-aware, aura-pressure-aware.
 //
-// THEME:
-// • Color: Teal (conduction, routing, distributed coherence).
-// • Subtheme: Flow, traversal, organism-wide conduction.
-// • Factoring Subtheme: White-Gold (signal reduction, purity).
-//
-// SAFETY CONTRACT (v9.2):
+// SAFETY CONTRACT (v11-ready):
 // • Metadata-only.
 // • No payload access.
 // • No compute.
 // • No autonomy.
+// • No async, no timestamps, no randomness.
 // • Deterministic, drift-proof routing behavior.
 // • Local-first; internet paths are explicit, not default.
 // • Healing only via routed healers / directives, never inline.
-//
-// ADVANTAGE CASCADE (v9.2):
-// • Inherits ANY advantage from ANY organ automatically.
-// • Unified-advantage-field: ALL advantages ON unless unsafe.
-// • Deterministic-field: same mesh + same impulse → same route.
 // ============================================================================
 
 import { createCommunityReflex } from "./CommunityReflex.js";
@@ -59,6 +50,9 @@ export const MeshMemory = {
   factoringDepth: [],
   factoringBias: []
 };
+
+// Deterministic cycle counter (replaces timestamps)
+let meshCycle = 0;
 
 // ============================================================================
 // Mesh Factory
@@ -122,18 +116,18 @@ export function registerMeshNode(mesh, nodeConfig) {
 }
 
 // ============================================================================
-// Flow Recorder (metadata-only)
+// Flow Recorder (metadata-only, deterministic)
 // ============================================================================
 function recordFlow(mesh, from, to) {
   MeshMemory.flow.push({
-    ts: Date.now(),
+    cycle: meshCycle,
     from,
     to
   });
 }
 
 // ============================================================================
-// Factoring Recorder (metadata-only)
+// Factoring Recorder (metadata-only, deterministic)
 // ============================================================================
 function recordFactoring(impulse) {
   const flags = impulse.flags || {};
@@ -143,31 +137,31 @@ function recordFactoring(impulse) {
 
   if (!factored && depth === 0 && bias === 0) return;
 
-  const ts = Date.now();
-
   MeshMemory.factoring.push({
-    ts,
+    cycle: meshCycle,
     depth,
     bias,
     factored
   });
 
   MeshMemory.factoringDepth.push({
-    ts,
+    cycle: meshCycle,
     depth
   });
 
   MeshMemory.factoringBias.push({
-    ts,
+    cycle: meshCycle,
     bias
   });
 }
 
 // ============================================================================
-// Routing Entry Point (v9.2)
+// Routing Entry Point (v11-ready)
 // Metadata-only • Deterministic • Local-first
 // ============================================================================
-export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
+export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
+  meshCycle++;
+
   impulse.flags = impulse.flags || {};
   impulse.flags.mesh_meta = mesh.meta;
   impulse.flags.mesh_route_started = true;
@@ -184,7 +178,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     // DRIFT: Missing node
     // -------------------------------------------------------
     if (!node) {
-      await recordMeshDriftEvent({
+      recordMeshDriftEvent({
         driftType: "missing_node",
         severity: "warning",
         meshNodeId: currentNodeId,
@@ -195,7 +189,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
       });
 
       MeshMemory.drift.push({
-        ts: Date.now(),
+        cycle: meshCycle,
         type: "missing_node",
         node: currentNodeId
       });
@@ -210,22 +204,24 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     // HOPS + LINEAGE
     // -------------------------------------------------------
     impulse.hops = (impulse.hops || 0) + 1;
-    MeshMemory.hops.push({ ts: Date.now(), node: node.id });
+
+    MeshMemory.hops.push({ cycle: meshCycle, node: node.id });
+
     MeshMemory.lineage.push({
-      ts: Date.now(),
+      cycle: meshCycle,
       node: node.id,
       trust: node.trustLevel ?? 0.5,
       load: node.load ?? 0.0
     });
 
     MeshMemory.trust.push({
-      ts: Date.now(),
+      cycle: meshCycle,
       node: node.id,
       trust: node.trustLevel ?? 0.5
     });
 
     MeshMemory.load.push({
-      ts: Date.now(),
+      cycle: meshCycle,
       node: node.id,
       load: node.load ?? 0.0
     });
@@ -233,7 +229,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     if (impulse.hops > MAX_HOPS) {
       impulse.flags.mesh_max_hops_exceeded = true;
 
-      await recordMeshDriftEvent({
+      recordMeshDriftEvent({
         driftType: "routing_stall",
         severity: "warning",
         meshNodeId: node.id,
@@ -244,7 +240,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
       });
 
       MeshMemory.drift.push({
-        ts: Date.now(),
+        cycle: meshCycle,
         type: "routing_stall",
         node: node.id
       });
@@ -265,13 +261,13 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 
     // -------------------------------------------------------
     // 1. REFLEX (1/0 instinct)
-// -------------------------------------------------------
+    // -------------------------------------------------------
     const decision = node.reflex(impulse, node);
 
     if (decision === 0) {
       impulse.flags[`reflex_drop_at_${node.id}`] = true;
 
-      await recordMeshDriftEvent({
+      recordMeshDriftEvent({
         driftType: "reflex_drop",
         severity: "info",
         meshNodeId: node.id,
@@ -282,7 +278,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
       });
 
       MeshMemory.drift.push({
-        ts: Date.now(),
+        cycle: meshCycle,
         type: "reflex_drop",
         node: node.id
       });
@@ -292,7 +288,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 
     // -------------------------------------------------------
     // 2. CORTEX (strategic shaping)
-// -------------------------------------------------------
+    // -------------------------------------------------------
     applyPulseCortex(impulse, {
       ...context,
       globalLoad: node.load,
@@ -301,12 +297,12 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 
     // -------------------------------------------------------
     // 3. TENDONS (intent + routeHint + energy shaping)
-// -------------------------------------------------------
+    // -------------------------------------------------------
     applyPulseMeshTendons(impulse);
 
     // -------------------------------------------------------
     // 4. Energy decay (instinctive fatigue)
-// -------------------------------------------------------
+    // -------------------------------------------------------
     impulse.energy =
       typeof impulse.energy === "number" ? impulse.energy * 0.9 : 0.9;
 
@@ -317,13 +313,13 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 
     // -------------------------------------------------------
     // 4.5 SIGNAL FACTORING (1/0, metadata-only)
-// -------------------------------------------------------
+    // -------------------------------------------------------
     applyMeshSignalFactoring(impulse);
     recordFactoring(impulse);
 
     // -------------------------------------------------------
     // 5. Earner delivery check
-// -------------------------------------------------------
+    // -------------------------------------------------------
     if (node.kind === "earner" && shouldDeliverToEarner(impulse, node)) {
       impulse.flags[`delivered_to_${node.id}`] = true;
       impulse.flags.reached_earn_engine = true;
@@ -332,14 +328,14 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 
     // -------------------------------------------------------
     // 6. Next hop selection (factoring + load + locality aware)
-// -------------------------------------------------------
+    // -------------------------------------------------------
     const nextId = selectNextHop(mesh, node, visited, impulse);
 
     // DRIFT: Routing stall
     if (!nextId) {
       impulse.flags[`stalled_at_${node.id}`] = true;
 
-      await recordMeshDriftEvent({
+      recordMeshDriftEvent({
         driftType: "routing_stall",
         severity: "warning",
         meshNodeId: node.id,
@@ -350,7 +346,7 @@ export async function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
       });
 
       MeshMemory.drift.push({
-        ts: Date.now(),
+        cycle: meshCycle,
         type: "routing_stall",
         node: node.id
       });
@@ -468,7 +464,6 @@ export function getMeshReachSnapshot(mesh) {
   if (estimatedHops >= 3 && estimatedHops < 6) mode = "cluster";
   if (estimatedHops >= 6) mode = "wide";
 
-  // v9.2: local-first hint — if most nodes are local, treat as local mesh
   const locals = Array.from(mesh.nodes.values()).filter(
     (n) => (n.locality || "local") === "local"
   ).length;

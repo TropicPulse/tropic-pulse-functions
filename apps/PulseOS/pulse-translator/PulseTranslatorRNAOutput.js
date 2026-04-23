@@ -1,26 +1,26 @@
 // ============================================================================
 // FILE: /apps/pulse-translator/PulseTranslatorRNAOutput.js
-// [pulse:translator] PULSE_TRANSLATOR_RNA_OUTPUT v10.4  // gold‑white
+// [pulse:translator] PULSE_TRANSLATOR_RNA_OUTPUT v11.0  // gold‑white
 // Pulse → Firestore Output RNA • Deterministic • Drift‑Proof • Genome‑Driven
 // PURE TRANSLATOR — NO IO • NO NETWORK • NO FIRESTORE EXECUTION
 // ============================================================================
 //
-// IDENTITY — THE RNA OUTPUT TRANSLATOR (v10.4):
+// IDENTITY — THE RNA OUTPUT TRANSLATOR (v11.0):
 //  --------------------------------------------
 //  • Converts PulseField definitions + values → Firestore‑safe payloads.
 //  • Converts PulseField schemas → Firestore document objects.
-//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v10.4) as the source of truth.
+//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v11.0) as the source of truth.
 //  • Deterministic, safe, drift‑proof, read‑only.
 //  • Zero Firestore execution — only produces plain JS objects.
 //
-// ROLE IN THE ORGANISM (v10.4):
+// ROLE IN THE ORGANISM (v11.0):
 //  -----------------------------
-//  • DNA → PulseSpecsDNAGenome.js (v10.4 gold‑white genome)
+//  • DNA → PulseSpecsDNAGenome.js (v11.0 gold‑white genome)
 //  • RNA Intake → PulseTranslatorRNAIntake.js
 //  • RNA Output → THIS FILE (Pulse → Firestore)
 //  • Proteins → actual Firestore documents written by the system
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11.0):
 //  ------------------------
 //  • Read‑only — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.
@@ -80,7 +80,7 @@ export function translatePulseFieldToFirestore(field, value) {
 
   // --------------------------------------------------------------------------
   // PERCENT → number (0–100 or normalized)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   if (field.type === PulseFieldTypes.PERCENT) {
     const num = Number(value);
     if (isNaN(num)) return 0;
@@ -92,7 +92,7 @@ export function translatePulseFieldToFirestore(field, value) {
 
   // --------------------------------------------------------------------------
   // BASE TYPE MAPPING (Genome → Firestore)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   const fsType = PulseToFirestore[field.type] || "string";
 
   switch (fsType) {
@@ -110,7 +110,8 @@ export function translatePulseFieldToFirestore(field, value) {
       if (value instanceof Date) return value;
       if (typeof value === "number") return new Date(value);
       if (typeof value === "string") return new Date(value);
-      return new Date();
+      // Deterministic fallback: Unix epoch
+      return new Date(0);
 
     case "array":
       return Array.isArray(value) ? value : [];

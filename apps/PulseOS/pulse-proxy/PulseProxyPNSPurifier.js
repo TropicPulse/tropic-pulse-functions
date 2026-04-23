@@ -155,7 +155,6 @@ async function cleanupSessionsBefore(cutoffMs, runId, errorPrefix) {
 
   return deletedCount;
 }
-
 async function cleanupErrorsBefore(cutoffMs, runId, errorPrefix) {
   let deletedCount = 0;
   let lastDoc = null;

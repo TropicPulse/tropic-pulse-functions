@@ -1,24 +1,25 @@
 // ============================================================================
-// CENTRAL NERVOUS SYSTEM — PulseOSCNSNervousSystem — v10.4
+// CENTRAL NERVOUS SYSTEM — PulseOSCNSNervousSystem — v10.4 → v11 DESIGN
 // “THE CENTRAL NERVOUS SYSTEM / COMMUNICATION INTELLIGENCE ORGAN”
 // ============================================================================
 //
-// ROLE IN THE ORGANISM (v10.4):
-// -----------------------------
+// ROLE IN THE ORGANISM (v11 DESIGN):
+// ----------------------------------
 // • B‑Layer CNS: frontend ↔ backend communication organ.
 // • Sends structured requests to backend via Proxy Spine gateway.
 // • Records route events into RouterMemory for healing + drift analysis.
 // • Triggers router healing and route‑down alerts when degradation appears.
 // • Respects offline mode and local endpoints (local‑first, network as injection).
 //
-// SAFETY CONTRACT (v10.4):
-// ------------------------
+// SAFETY CONTRACT (v11 DESIGN):
+// -----------------------------
 // • No dynamic eval.
 // • No direct filesystem access.
 // • Network only via well‑defined proxy endpoints.
 // • Deterministic routing behavior (no random branching).
 // • RouterMemory is the single source of CNS event history.
 // • CNS never hard‑kills the organism; it reports, retries, and alerts.
+// • Guarded access to globals (window, fetch) for environment‑agnostic behavior.
 // ============================================================================
 
 
@@ -36,12 +37,17 @@ const LAYER_NAME = "THE CENTRAL NERVOUS SYSTEM";
 const LAYER_ROLE = "COMMUNICATION INTELLIGENCE ORGAN";
 const LAYER_VER  = "10.4";
 
+const hasWindow = typeof window !== "undefined";
+
 const CNS_DIAGNOSTICS_ENABLED =
-  window.PULSE_CNS_DIAGNOSTICS === "true" ||
-  window.PULSE_DIAGNOSTICS === "true";
+  hasWindow &&
+  (window.PULSE_CNS_DIAGNOSTICS === "true" ||
+    window.PULSE_DIAGNOSTICS === "true");
 
 const logCNS = (stage, details = {}) => {
   if (!CNS_DIAGNOSTICS_ENABLED) return;
+  if (typeof log !== "function") return;
+
   log(JSON.stringify({
     pulseLayer: LAYER_ID,
     pulseName:  LAYER_NAME,
@@ -69,24 +75,31 @@ const CNS_CONTEXT = {
   layer: "B‑Layer",
   purpose: "Frontend → Backend Communication Organ",
   context: "Sends structured requests to backend via Proxy Spine gateway",
-  version: "10.4"
+  version: LAYER_VER
 };
 
 
 // ============================================================================
-// TRANSPORT LAYER — OFFLINE + ONLINE
+// TRANSPORT LAYER — OFFLINE + ONLINE (GUARDED GLOBALS)
 // ============================================================================
 const Transport = {
   async callEndpoint(type, payload) {
-    const offlineMode = window.PULSE_OFFLINE_MODE === true;
+    const offlineMode =
+      hasWindow && window.PULSE_OFFLINE_MODE === true;
 
     // OFFLINE MODE
     if (offlineMode) {
       logCNS("TRANSPORT_OFFLINE_MODE", { type });
 
-      if (window.PulseLocalEndpoint?.handle) {
+      const localEndpoint =
+        hasWindow && window.PulseLocalEndpoint &&
+        typeof window.PulseLocalEndpoint.handle === "function"
+          ? window.PulseLocalEndpoint
+          : null;
+
+      if (localEndpoint) {
         try {
-          const result = await window.PulseLocalEndpoint.handle({ type, payload });
+          const result = await localEndpoint.handle({ type, payload });
           logCNS("TRANSPORT_OFFLINE_RESPONSE", { type });
           return result;
         } catch (err) {
@@ -102,6 +115,11 @@ const Transport = {
     // ONLINE MODE
     logCNS("TRANSPORT_ONLINE_CALL", { type });
 
+    if (typeof fetch !== "function") {
+      logCNS("TRANSPORT_ONLINE_NO_FETCH", { type });
+      return { error: "Fetch API not available in this environment" };
+    }
+
     const res = await fetch("/pulse-proxy/endpoint", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -114,9 +132,16 @@ const Transport = {
   },
 
   async callCheckRouterMemory(logs) {
-    const offlineMode = window.PULSE_OFFLINE_MODE === true;
+    const offlineMode =
+      hasWindow && window.PULSE_OFFLINE_MODE === true;
+
     if (offlineMode) {
       logCNS("HEAL_SKIP_OFFLINE", { count: logs.length });
+      return null;
+    }
+
+    if (typeof fetch !== "function") {
+      logCNS("HEAL_NO_FETCH", { count: logs.length });
       return null;
     }
 
@@ -130,9 +155,16 @@ const Transport = {
   },
 
   async callRouteDownAlert(error, type) {
-    const offlineMode = window.PULSE_OFFLINE_MODE === true;
+    const offlineMode =
+      hasWindow && window.PULSE_OFFLINE_MODE === true;
+
     if (offlineMode) {
       logCNS("ALERT_SKIP_OFFLINE", { error, type });
+      return;
+    }
+
+    if (typeof fetch !== "function") {
+      logCNS("ALERT_NO_FETCH", { error, type });
       return;
     }
 
@@ -149,6 +181,11 @@ const Transport = {
 // ROUTER MEMORY HEALING
 // ============================================================================
 async function healRouterMemoryIfNeeded() {
+  if (!RouterMemory || typeof RouterMemory.getAll !== "function") {
+    logCNS("HEAL_SKIP_NO_ROUTER_MEMORY");
+    return;
+  }
+
   const logs = RouterMemory.getAll();
   if (!logs || logs.length === 0) {
     logCNS("HEAL_SKIP_EMPTY");
@@ -190,7 +227,7 @@ async function triggerRouteDownAlert(error, type) {
 
 
 // ============================================================================
-// UNIVERSAL SYS‑CALL FUNCTION — CNS v10.4
+// UNIVERSAL SYS‑CALL FUNCTION — CNS v10.4 → v11 DESIGN
 // ============================================================================
 let routingInProgress = false;
 
@@ -251,12 +288,14 @@ export async function route(type, payload = {}) {
 
     // Env mismatch
     if (msg.includes("process is not defined")) {
-      RouterMemory.push({
-        eventType: "frontendEnvMismatch",
-        repairHint: "Replace process.env.* with window.PULSE_*",
-        timestamp: Date.now(),
-        signature
-      });
+      if (RouterMemory && typeof RouterMemory.push === "function") {
+        RouterMemory.push({
+          eventType: "frontendEnvMismatch",
+          repairHint: "Replace process.env.* with window.PULSE_*",
+          timestamp: ++routerEventSeq,
+          signature
+        });
+      }
       routingInProgress = false;
       return { error: "frontendEnvMismatch", details: msg, signature };
     }
@@ -268,7 +307,8 @@ export async function route(type, payload = {}) {
     }
 
     // Retry logic
-    const offlineMode = window.PULSE_OFFLINE_MODE === true;
+    const offlineMode =
+      hasWindow && window.PULSE_OFFLINE_MODE === true;
 
     if (!offlineMode && routeFailureCount === 1) {
       logCNS("ROUTE_RETRY", { type });
@@ -311,22 +351,33 @@ export async function route(type, payload = {}) {
 // ============================================================================
 // LOGGING ENTRY POINT
 // ============================================================================
+let routerEventSeq = 0;
+
 export async function logEvent(eventType, data) {
   logCNS("LOG_EVENT", { eventType });
 
-  RouterMemory.push({
-    eventType,
-    data,
-    page: window.location.pathname,
-    timestamp: Date.now()
-  });
+  const page =
+    hasWindow && window.location
+      ? window.location.pathname
+      : null;
+
+  if (RouterMemory && typeof RouterMemory.push === "function") {
+    RouterMemory.push({
+      eventType,
+      data,
+      page,
+      timestamp: ++routerEventSeq
+    });
+  }
 
   logCNS("LOG_PUSHED", { eventType });
 
   await healRouterMemoryIfNeeded();
 
-  GateHeartbeat();
-  logCNS("GATE_HEARTBEAT_SIGNAL_SENT");
+  if (typeof GateHeartbeat === "function") {
+    GateHeartbeat();
+    logCNS("GATE_HEARTBEAT_SIGNAL_SENT");
+  }
 }
 
 

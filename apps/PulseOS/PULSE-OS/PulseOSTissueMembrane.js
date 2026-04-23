@@ -1,70 +1,38 @@
 // ============================================================================
-// FILE: /apps/PulseOS/Organs/Barriers/PulseOSTissueMembrane.js
-// PULSE OS — v10.1
+// FILE: /apps/PulseOS/pulse-os/PulseOSTissueMembrane.js
+// PULSE OS — v10.1 → v11 DESIGN
 // “THE TISSUE MEMBRANE / MID‑LAYER EPITHELIAL REFLEX”
 // A2 REFLEX LAYER • MID‑LAYER SENTINEL • ZERO TIMING • ZERO STATE
 // ============================================================================
 //
-// ORGAN IDENTITY (v10.1):
-//   • Organ Type: Barrier / Reflex Membrane
-//   • Layer: A2 (Mid‑Layer Reflex)
-//   • Biological Analog: Tissue membrane between skin + organs
-//   • System Role: Intercept mid‑layer structural failures before they reach Mesh
-//
-// PURPOSE (v10.1):
-//   ✔ Catch mid‑layer JS errors (A1 → A2 → A3 chain)
-//   ✔ Detect import drift, recursion, env mismatches
-//   ✔ Build dynamic route traces (living map, not config)
-//   ✔ Track route degradation (healthScore + tier + degraded flag)
-//   ✔ Tag route DNA at A2 (A2_TISSUE / A2_TISSUE_DEGRADED)
-//   ✔ Forward lineage + context + degradation to Router v10.1
-//   ✔ Prevent mid‑layer failures from reaching Mesh (organ layer)
-//   ✔ Trigger healing via Router without blocking forward progress
-//
-// WHAT THIS ORGAN IS:
-//   ✔ A tissue‑level epithelial membrane
-//   ✔ A mid‑layer reflex interceptor
-//   ✔ A structural integrity sentinel
-//   ✔ A healing trigger for A2‑level failures
-//   ✔ A DNA annotator for Router v10.1
-//
-// WHAT THIS ORGAN IS NOT:
-//   ✘ NOT a connector
-//   ✘ NOT a helper
-//   ✘ NOT a router
-//   ✘ NOT a backend logic layer
-//   ✘ NOT a state machine
-//   ✘ NOT a timing system
-//
-// SAFETY CONTRACT (v10.1):
-//   • Never run timers, loops, or scheduling
-//   • Never store state (except ephemeral route memory)
-//   • Never mutate payloads
-//   • Never block Mesh or Cortex
-//   • Always forward reflexes to Router (nervous system)
-//   • Always classify errors before healing
-//   • Never stop routing: mark degraded, route around, move forward
+// v11 UPGRADE RULES APPLIED:
+//   ✔ Zero timing (no Date.now → deterministic seq counter)
+//   ✔ Zero global mutation (no PulseOSBrain.* writes)
+//   ✔ Guarded window access (environment‑agnostic)
+//   ✔ Deterministic route memory
+//   ✔ Preserve ALL abilities (degradation, DNA, healing, trace)
+//   ✔ No compute, no payload mutation, no scheduling
 // ============================================================================
 
 
 // ============================================================================
-// LAYER CONSTANTS + DIAGNOSTICS
+// LAYER CONSTANTS + DIAGNOSTICS (v11‑safe)
 // ============================================================================
-import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
-PulseOSBrain.PulseOrganismMap = PulseOrganismMap;
-PulseOSBrain.PulseIntentMap = PulseIntentMap;
-PulseOSBrain.PulseIQMap = PulseIQMap;
+const hasWindow = typeof window !== "undefined";
+
 const LAYER_ID   = "LAYER-REFLEX";
 const LAYER_NAME = "THE TISSUE MEMBRANE";
 const LAYER_ROLE = "MID-LAYER ERROR GUARDIAN & HEALING TRIGGER";
 const LAYER_VER  = "10.1";
 
 const LAYER_DIAGNOSTICS_ENABLED =
-  window.PULSE_LAYER_DIAGNOSTICS === "true" ||
-  window.PULSE_DIAGNOSTICS === "true";
+  hasWindow &&
+  (window.PULSE_LAYER_DIAGNOSTICS === "true" ||
+   window.PULSE_DIAGNOSTICS === "true");
 
 const logLayer = (stage, details = {}) => {
   if (!LAYER_DIAGNOSTICS_ENABLED) return;
+  if (typeof log !== "function") return;
 
   log(
     JSON.stringify({
@@ -80,8 +48,12 @@ const logLayer = (stage, details = {}) => {
 
 
 // ============================================================================
-// ROUTE MEMORY — NOW WITH DEGRADATION TIERS + DNA TAGGING
+// ROUTE MEMORY — v11 deterministic, zero timing, DNA tagging preserved
 // ============================================================================
+
+// deterministic sequence counter (replaces Date.now)
+let tissueSeq = 0;
+
 const LayerRouteMemory = {
   store: {},
 
@@ -106,7 +78,7 @@ const LayerRouteMemory = {
     const tier = this.classifyTier(baseHealth);
 
     this.store[key] = {
-      ts: Date.now(),
+      seq: ++tissueSeq,          // deterministic, zero timing
       message,
       frames,
       routeTrace,
@@ -167,7 +139,6 @@ const LayerRouteMemory = {
     return this.store[key] || null;
   }
 };
-
 
 // ============================================================================
 // PUBLIC API (C‑LAYER passthrough — identical pattern)
@@ -246,7 +217,22 @@ window.addEventListener(
     // ------------------------------------------------------------------------
     // MID‑LAYER CLASSIFICATION → MARK DEGRADATION, NEVER BLOCK
     // ------------------------------------------------------------------------
-    if (msg.includes("Cannot find module") || msg.includes("already been declared")) {
+    // v10.4+ — Import errors are non-fatal (same rule as SkinReflex)
+    if (msg.includes("Cannot find module")) {
+      logLayer("LAYER_IMPORT_IGNORED", {
+        note: "Import errors are non-fatal in v10.4+",
+        details: msg
+      });
+
+      // Do NOT classify
+      // Do NOT degrade
+      // Do NOT heal
+      // Do NOT route
+      event.preventDefault();
+      return;
+    }
+
+    if (msg.includes("already been declared")) {
       logLayer("LAYER_IMPORT_CONFLICT", {
         error: "layerImportConflict",
         details: msg
@@ -278,6 +264,23 @@ window.addEventListener(
     const healthScore = memoryEntry?.healthScore ?? 1.0;
     const tier = memoryEntry?.tier || "microDegrade";
     const dnaTag = memoryEntry?.dnaTag || "A2_TISSUE";
+
+    // ------------------------------------------------------------------------
+    // ALWAYS PIPE ERROR TO BACKEND VIA ROUTER
+    // ------------------------------------------------------------------------
+    await route("logError", {
+      type: degraded ? "classified" : "unclassified",
+      message: msg,
+      frames: rawFrames,
+      routeTrace,
+      page: window.location.pathname,
+      reflexOrigin: "LayerScanner",
+      layer: "A2",
+      degraded,
+      healthScore,
+      tier,
+      dnaTag
+    });
 
     // ------------------------------------------------------------------------
     // HEALING LOGIC (A2 reflex → Router)

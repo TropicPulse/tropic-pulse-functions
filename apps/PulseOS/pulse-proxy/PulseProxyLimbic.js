@@ -1,10 +1,10 @@
 // ============================================================================
-//  PULSE OS v10.4 — THE LIMBIC SHADOW
+//  PULSE OS v10.5 — THE LIMBIC SHADOW
 //  Unified Projection Layer • Instinct Surface • Meta‑Facade
 //  PURE FACADE. NO LOGIC. NO STATE. NO SIDE‑EFFECTS.
 // ============================================================================
 //
-//  WHAT THIS LAYER IS (v10.4):
+//  WHAT THIS LAYER IS (v10.5):
 //  ---------------------------
 //  • The illusion of a single Pulse organ.
 //  • A merged silhouette of PulseNet + PulseClient (no PulseUpdate in v10+).
@@ -26,7 +26,7 @@
 //  • NOT a dynamic importer
 //  • NOT allowed to mutate anything
 //
-//  SAFETY CONTRACT (v10.4):
+//  SAFETY CONTRACT (v10.5):
 //  ------------------------
 //  • No logic
 //  • No state
@@ -38,12 +38,12 @@
 
 
 // ============================================================================
-//  LIMBIC SHADOW CONTEXT — v10.4
+//  LIMBIC SHADOW CONTEXT — v10.5
 // ============================================================================
 export const LIMBIC_SHADOW_CONTEXT = {
   layer: "LimbicShadow",
   role: "UNIFIED_PROJECTION_INSTINCT",
-  version: "10.4",
+  version: "10.5",
   purpose: "Unified projection + instinct surface for Pulse organs",
   evo: {
     driftProof: true,
@@ -90,7 +90,7 @@ logShadow("SHADOW_INIT");
 
 
 // ============================================================================
-//  PURE RE‑EXPORTS — THE SHADOW PROJECTION (v10.4)
+//  PURE RE‑EXPORTS — THE SHADOW PROJECTION (v10.5)
 //  NO LOGIC. NO STATE. NO SIDE‑EFFECTS.
 // ============================================================================
 

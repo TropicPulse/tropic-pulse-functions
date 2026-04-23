@@ -3,10 +3,7 @@
 // Pulse‑Earn v10.4
 // ============================================================================
 
-import {
-  PulseEarnMktAuctioneer,
-  getPulseEarnMktAuctioneerHealingState
-} from "./PulseEarnMktAuctioneer.js";
+import { PulseEarnMktAuctioneer, getPulseEarnMktAuctioneerHealingState} from "./PulseEarnMktAuctioneer.js";
 
 function run() {
   console.log("==============================================");

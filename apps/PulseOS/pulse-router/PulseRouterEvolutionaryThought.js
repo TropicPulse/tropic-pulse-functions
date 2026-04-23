@@ -1,6 +1,6 @@
 // ============================================================================
-//  EvolutionaryThought.js — v10.4‑Evo
-//  PulseRouter v10.4 • Pattern Brainstem • Degradation + Route DNA Router
+//  EvolutionaryThought.js — v11‑Evo
+//  PulseRouter v11 • Pattern Brainstem • Degradation + Route DNA Router
 // ============================================================================
 //
 //  WHAT THIS ORGAN IS:
@@ -22,8 +22,8 @@
 //  • Not a GPU/Earn/OS organ.
 //  • Not an IQ/import organ (it only routes + derives).
 //
-//  SAFETY CONTRACT (v10.4‑Evo):
-//  ----------------------------
+//  SAFETY CONTRACT (v11‑Evo):
+//  --------------------------
 //  • No imports.
 //  • No network.
 //  • No randomness.
@@ -37,14 +37,14 @@
 
 
 // ============================================================================
-// ⭐ PulseRole — identifies this as the PulseRouter v10.4‑Evo Organ
+// ⭐ PulseRole — identifies this as the PulseRouter v11‑Evo Organ
 // ============================================================================
 export const PulseRole = {
   type: "Router",
   subsystem: "PulseRouter",
   layer: "Brainstem",
-  version: "10.4",
-  identity: "PulseRouter-v10.4-Evo",
+  version: "11.0",
+  identity: "PulseRouter-v11-Evo",
 
   evo: {
     driftProof: true,
@@ -54,7 +54,7 @@ export const PulseRole = {
     memoryReady: true,
     deterministicImpulseFlow: true,
     unifiedAdvantageField: true,
-    pulseRouter10Ready: true,
+    pulseRouter11Ready: true,
     degradationAware: true,
     routeAroundReady: true,
     routeDNAReady: true,
@@ -64,20 +64,20 @@ export const PulseRole = {
     pageInheritanceReady: true
   },
 
-  // Contract alignment for OS‑v10.4 unified organism
+  // Contract alignment for OS‑v11 unified organism
   pulseContract: "Pulse-v-unified",      // v1/v2/v3 shape‑compatible
-  sendContract: "PulseSend-v10.4",
-  meshContract: "PulseMesh-v10.4",
-  gpuOrganContract: "PulseGPU-v10",
-  earnCompatibility: "PulseEarn-v10"
+  sendContract: "PulseSend-v11",
+  meshContract: "PulseMesh-v11",
+  gpuOrganContract: "PulseGPU-v11",
+  earnCompatibility: "PulseEarn-v11"
 };
 
 
 // ============================================================================
-//  INTERNAL HELPERS — tiny, deterministic, pure (v10.4‑Evo)
+//  INTERNAL HELPERS — tiny, deterministic, pure (v11‑Evo)
 // ============================================================================
 
-const ROUTER_VERSION = "10.4-Evo";
+const ROUTER_VERSION = "11.0-Evo";
 
 // ⭐ Build a routing key from pattern + lineage depth (+ optional pageId)
 function buildRouteKey(pulse) {
@@ -234,20 +234,17 @@ function updateStabilityOnFailure(entry) {
   }
 }
 
-
 // ============================================================================
 //  PAGE INHERITANCE LAYER — pattern + lineage + pageId aware
 //  • Pulls imports/settings from last page + skipped pages until next page
 //  • Purely internal, deterministic, no external mutation
 // ============================================================================
-
 // ⭐ Build a page key from pattern + pageId
 function buildPageKey(pulse) {
   const pattern = pulse.pattern || "";
   const pageId = pulse.pageId || "NO_PAGE";
   return `${pattern}::p${pageId}`;
 }
-
 // ⭐ Internal page memory: pageKey → { imports, settings, lineageSignature, patternAncestry }
 function ensurePageEntry(pageMemory, pulse, context = {}) {
   const key = buildPageKey(pulse);
@@ -285,7 +282,6 @@ function ensurePageEntry(pageMemory, pulse, context = {}) {
 
   return entry;
 }
-
 // ⭐ Resolve inherited imports/settings from:
 //    • current page (if any)
 //    • previous lineage pages (in order)
@@ -350,11 +346,8 @@ function resolveInheritedPageContext(pageMemory, pulse) {
     settings: mergedSettings
   };
 }
-
-
-
 // ============================================================================
-//  FACTORY — createPulseRouter (v10.4‑Evo)
+//  FACTORY — createPulseRouter (v11‑Evo)
 //  Pulse‑agnostic (v1/v2/v3), deterministic, degradation‑aware brainstem
 // ============================================================================
 export function createPulseRouter({ log } = {}) {
@@ -416,7 +409,6 @@ export function createPulseRouter({ log } = {}) {
 
     return { key, entry };
   }
-
   // --------------------------------------------------------------------------
   //  route(pulse, context)
   //  • Main routing decision
@@ -425,7 +417,7 @@ export function createPulseRouter({ log } = {}) {
   // --------------------------------------------------------------------------
   function route(pulse, context = {}) {
     if (!pulse || typeof pulse !== "object") {
-      throw new Error("[PulseRouter-v10.4-Evo] route() requires a Pulse organism");
+      throw new Error("[PulseRouter-v11-Evo] route() requires a Pulse organism");
     }
 
     const healthScore = deriveHealthScore(pulse, context);
@@ -458,7 +450,7 @@ export function createPulseRouter({ log } = {}) {
 
     if (typeof log === "function") {
       log({
-        type: "PulseRouter-v10.4-Evo:route",
+        type: "PulseRouter-v11-Evo:route",
         pulsePattern: pulse.pattern,
         routeKey: key,
         targetOrgan,
@@ -470,7 +462,6 @@ export function createPulseRouter({ log } = {}) {
 
     return result;
   }
-
   // --------------------------------------------------------------------------
   //  recordSuccess(pulse, context)
   //  • Reflex arc reinforcement
@@ -483,7 +474,7 @@ export function createPulseRouter({ log } = {}) {
 
     if (typeof log === "function") {
       log({
-        type: "PulseRouter-v10.4-Evo:success",
+        type: "PulseRouter-v11-Evo:success",
         routeKey: key,
         mode: entry.mode,
         tier: entry.tier,
@@ -498,7 +489,6 @@ export function createPulseRouter({ log } = {}) {
       healingScore: entry.healingScore
     };
   }
-
   // --------------------------------------------------------------------------
   //  recordFailure(pulse, context)
   //  • Avoidance arc reinforcement
@@ -511,7 +501,7 @@ export function createPulseRouter({ log } = {}) {
 
     if (typeof log === "function") {
       log({
-        type: "PulseRouter-v10.4-Evo:failure",
+        type: "PulseRouter-v11-Evo:failure",
         routeKey: key,
         mode: entry.mode,
         tier: entry.tier,
@@ -526,7 +516,6 @@ export function createPulseRouter({ log } = {}) {
       healingScore: entry.healingScore
     };
   }
-
   // --------------------------------------------------------------------------
   //  getRouteDNA(pulse)
   //  • Introspect route DNA for a given pulse
@@ -558,7 +547,6 @@ export function createPulseRouter({ log } = {}) {
       bypassHistory: entry.bypassHistory.slice()
     };
   }
-
   // --------------------------------------------------------------------------
   //  getMemorySnapshot()
   //  • Returns a shallow snapshot of all route DNA entries
@@ -583,11 +571,10 @@ export function createPulseRouter({ log } = {}) {
     }
     return out;
   }
-
   // --------------------------------------------------------------------------
   //  getPageInheritanceSnapshot()
   //  • Introspect page‑level inheritance memory (for debugging/verification)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function getPageInheritanceSnapshot() {
     const out = {};
     for (const [key, entry] of Object.entries(pageMemory)) {
@@ -602,7 +589,6 @@ export function createPulseRouter({ log } = {}) {
     }
     return out;
   }
-
   return {
     PulseRole,
     version: ROUTER_VERSION,

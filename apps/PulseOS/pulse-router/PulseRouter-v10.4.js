@@ -1,5 +1,5 @@
 // ============================================================================
-//  PulseRouter-v10.4-Evo-A2 — EVOLUTION ROUTER
+//  PulseRouter-v11-Evo-A2 — EVOLUTION ROUTER
 //  Deterministic Routing Spine • Pulse-Agnostic • Evolution-Aware
 //  Pattern/Lineage/Page-Ancestry + Loop-Theory Aware
 // ============================================================================
@@ -23,8 +23,8 @@
 //  • Not a healer or brain.
 //  • Not a network layer.
 //
-//  SAFETY CONTRACT (v10.4-Evo-A2):
-//  -------------------------------
+//  SAFETY CONTRACT (v11-Evo-A2):
+//  -----------------------------
 //  • No imports.
 //  • No randomness.
 //  • No timestamps.
@@ -34,14 +34,14 @@
 
 
 // ============================================================================
-// ⭐ PulseRole — identifies this as the PulseRouter Organ (v10.4-Evo-A2)
+// ⭐ PulseRole — identifies this as the PulseRouter Organ (v11-Evo-A2)
 // ============================================================================
 export const PulseRole = {
   type: "Router",
   subsystem: "PulseRouter",
   layer: "RoutingSpine",
-  version: "10.4",
-  identity: "PulseRouter-v10.4-Evolution-A2",
+  version: "11.0",
+  identity: "PulseRouter-v11-Evolution-A2",
 
   evo: {
     driftProof: true,
@@ -55,7 +55,7 @@ export const PulseRole = {
     futureEvolutionReady: true,
 
     unifiedAdvantageField: true,
-    pulseRouter10Ready: true,
+    pulseRouter11Ready: true,
     commandmentsAware: true,
     instinctsAware: true,
     designAware: true,
@@ -71,8 +71,8 @@ export const PulseRole = {
   },
 
   pulseContract: "Pulse-v1/v2/v3",
-  meshContract: "PulseMesh-v10.4",
-  sendContract: "PulseSend-v10.4"
+  meshContract: "PulseMesh-v11",
+  sendContract: "PulseSend-v11"
 };
 
 
@@ -97,17 +97,6 @@ function rememberFailure(pattern, target) {
 
 // ============================================================================
 //  INTERNAL: Fallback deterministic routing algorithm (legacy spine)
-// ============================================================================
-//
-//  Inputs:
-//    • pattern
-//    • lineageDepth
-//    • mode
-//    • advantageField (if present)
-//    • healthScore (if present)
-//
-//  Output:
-//    • targetOrgan (string)
 // ============================================================================
 function fallbackRouteTarget(pulse) {
   const pattern = pulse.pattern || "UNKNOWN_PATTERN";
@@ -181,8 +170,6 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
   }
   return (hash >>> 0).toString(16);
 }
-
-
 // ============================================================================
 //  INTERNAL: Evolution-aware routing decision
 //  Priority:
@@ -327,7 +314,7 @@ function evolutionAwareRouteTarget(pulse) {
 
 
 // ============================================================================
-//  PUBLIC API — PulseRouter (v10.4 Evolution-A2)
+//  PUBLIC API — PulseRouter (v11 Evolution-A2)
 // ============================================================================
 export const PulseRouter = {
 

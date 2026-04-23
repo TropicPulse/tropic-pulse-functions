@@ -27,13 +27,9 @@
 //   • Deterministic job intake + result forwarding only.
 // ============================================================================
 
-import {
-  updateMarketplaceReputation,
-  computeReputationSignals
-} from "./PulseEarnEndocrineSystem.js";
+import {updateMarketplaceReputation, computeReputationSignals} from "./PulseEarnEndocrineSystem.js";
 
 import { getNextJob } from "./PulseEarnCirculatorySystem.js";
-import { PulseJobSchema } from "./PulseEarnGenome.js";
 import { getPulseEarnDeviceProfile } from "./PulseEarnSkeletalSystem.js";
 import { marketplaces } from "./RegisteredMarketplaces.js";
 import { sendResultToMarketplace } from "./PulseEarnLymphNodes.js";

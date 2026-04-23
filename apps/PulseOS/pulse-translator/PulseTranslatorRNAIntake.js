@@ -1,26 +1,26 @@
 // ============================================================================
 // FILE: /apps/pulse-translator/PulseTranslatorRNAIntake.js
-// [pulse:translator] PULSE_TRANSLATOR_RNA_INTAKE v10.4  // gold‑white
+// [pulse:translator] PULSE_TRANSLATOR_RNA_INTAKE v11.0  // gold‑white
 // Firestore → Pulse Intake RNA • Deterministic • Drift‑Proof • Genome‑Driven
 // PURE TRANSLATOR — NO IO • NO NETWORK • NO FIRESTORE EXECUTION
 // ============================================================================
 //
-// IDENTITY — THE RNA INTAKE TRANSLATOR (v10.4):
+// IDENTITY — THE RNA INTAKE TRANSLATOR (v11.0):
 //  --------------------------------------------
 //  • Converts Firestore runtime values → canonical PulseField types.
 //  • Converts Firestore document snapshots → PulseField schemas.
-//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v10.4) as the source of truth.
+//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v11.0) as the source of truth.
 //  • Deterministic, safe, drift‑proof, read‑only.
 //  • Zero Firestore execution — only interprets raw JS objects.
 //
-// ROLE IN THE ORGANISM (v10.4):
+// ROLE IN THE ORGANISM (v11.0):
 //  -----------------------------
-//  • DNA → PulseSpecsDNAGenome.js (v10.4 gold‑white genome)
+//  • DNA → PulseSpecsDNAGenome.js (v11.0 gold‑white genome)
 //  • RNA Intake → THIS FILE (Firestore → Pulse)
 //  • RNA Output → PulseTranslatorRNAOutput.js (Pulse → Firestore)
 //  • Proteins → actual data structures in the organism
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11.0):
 //  ------------------------
 //  • Read‑only — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.
@@ -110,7 +110,7 @@ export function translateFirestoreDocument(docData = {}) {
 // ============================================================================
 export function translateFirestoreSnapshot(snapshot) {
   if (!snapshot || typeof snapshot.data !== "function") {
-    throw new Error("PulseTranslatorRNAIntake-v10.4: invalid snapshot");
+    throw new Error("PulseTranslatorRNAIntake-v11.0: invalid snapshot");
   }
 
   const data = snapshot.data() || {};

@@ -1,15 +1,15 @@
 // ============================================================================
 // FILE: /apps/pulse-proxy/pulseHistoryRepair.js
-// PULSE HISTORY REPAIR — VERSION 10.4
+// PULSE HISTORY REPAIR — VERSION 11.0
 // “THE SHORT‑TERM MEMORY LAYER++ / WORKING MEMORY REPAIR ENGINE++”
 // ============================================================================
 //
-// ROLE (v10.4):
+// ROLE (v11.0):
 //   pulseHistoryRepair is the SHORT‑TERM MEMORY LAYER of PulseProxy.
 //   It is the WORKING MEMORY REPAIR ENGINE — responsible for keeping
 //   recent history coherent, normalized, lineage‑safe, and drift‑safe.
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11.0):
 //   • Fail‑open: errors logged, never fatal
 //   • No randomness in repair logic
 //   • No mutation outside intended collections
@@ -29,13 +29,13 @@
 // const db = getFirestore();
 
 // ============================================================================
-// ORGAN IDENTITY — v10.4
+// ORGAN IDENTITY — v11.0
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "ShortTermMemory",
-  version: "10.4",
+  version: "11.0",
   identity: "PulseHistoryRepair",
 
   evo: {
@@ -55,7 +55,7 @@ export const PulseRole = {
 };
 
 // ------------------------------------------------------------
-// HUMAN‑READABLE CONTEXT MAP (v10.4)
+// HUMAN‑READABLE CONTEXT MAP (v11.0)
 // ------------------------------------------------------------
 const REPAIR_CONTEXT = {
   label: "PULSE_HISTORY_REPAIR",
@@ -89,7 +89,7 @@ export async function pulseHistoryRepair() {
     let lastDoc = null;
 
     // ---------------------------------------------------------
-    // ⭐ BOUNDED SCAN: pulse_history (v10.4)
+    // ⭐ BOUNDED SCAN: pulse_history (v11.0)
     // ---------------------------------------------------------
     while (true) {
       let query = db
@@ -127,7 +127,7 @@ export async function pulseHistoryRepair() {
           const updates = {};
 
           // ---------------------------------------------------------
-          // ⭐ NORMALIZE MISSING FIELDS (v10.4 deterministic repair)
+          // ⭐ NORMALIZE MISSING FIELDS (v11.0 deterministic repair)
           // ---------------------------------------------------------
 
           if (!data.userId && data.uid) {
@@ -144,7 +144,7 @@ export async function pulseHistoryRepair() {
 
           if (!data.lineage || typeof data.lineage !== "object") {
             updates.lineage = {
-              version: "10.4",
+              version: "11.0",
               repairedBy: "pulseHistoryRepair",
               repairRunId: runId
             };
@@ -155,7 +155,7 @@ export async function pulseHistoryRepair() {
           }
 
           if (!data.drift) {
-            updates.drift = { repaired: true, version: "10.4" };
+            updates.drift = { repaired: true, version: "11.0" };
           }
 
           if (Object.keys(updates).length > 0) {

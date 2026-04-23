@@ -52,11 +52,7 @@ export const PULSE_OS_ROLE       = "immune_command_organ";
 export const PULSE_OS_GENERATION = "v9";
 export const PULSE_OS_ORGAN      = "Thymus";
 
-import {
-  saveSnapshot,
-  recordDriftSignature,
-  createRestorePoint
-} from "./PulseOSLiverMemory.js";
+import {saveSnapshot, recordDriftSignature, createRestorePoint} from "./PulseOSLiverMemory.js";
 
 // ⭐ Thymus identity block (v9.2 organism identity)
 const THYMUS_CONTEXT = {

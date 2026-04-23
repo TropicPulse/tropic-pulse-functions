@@ -1,11 +1,11 @@
 // ============================================================================
-//  PULSE OS v9.3 — PNS NERVOUS SYSTEM (PULSEBAND)
+//  PULSE OS v10.4 — PNS NERVOUS SYSTEM (PULSEBAND)
 //  Sensorimotor Integration • Connectivity Mirror • GPU Warmup Control
 //  PURE NERVOUS SYSTEM ORGAN — NO MARKETPLACE, NO BUSINESS LOGIC
 // ============================================================================
 //
-//  WHAT THIS ORGAN IS (v9.2):
-//  --------------------------
+//  WHAT THIS ORGAN IS (v10.4):
+//  ---------------------------
 //  • The Peripheral Nervous System (PNS) of PulseOS for the shell.
 //  • Maintains live/snapshot/gpuPerformance mirrors for the UI.
 //  • Bridges GPU brain (astral nervous system) and limbic shadow facade.
@@ -21,8 +21,8 @@
 //  • NOT a healing organ.
 //  • NOT a place for dynamic imports or eval.
 //
-//  IDENTITY + IMPORT CONTRACT (v9.2):
-//  ----------------------------------
+//  IDENTITY + IMPORT CONTRACT (v10.4):
+//  -----------------------------------
 //  • Only imports from:
 //      – Impulse traveler (local organ)
 //      – Astral Nervous System (GPU brain)
@@ -30,7 +30,7 @@
 //  • All deeper identity + lineage live in the BBB / Brain.
 //  • No new imports outside the Brain/Heart law.
 //
-//  SAFETY CONTRACT (v9.2):
+//  SAFETY CONTRACT (v10.4):
 //  ------------------------
 //  • No console.* — diagnostics go through PULSE_LOG hook only.
 //  • No global mutation outside this organ’s own state.
@@ -42,17 +42,19 @@ import { Impulse } from "./PulseProxyImpulse.js";
 import * as PulseGPU from "../pulse-gpu/PulseGPUAstralNervousSystem.js";
 import * as Pulse from "./PulseProxyLimbic.js"; // facade side-effects only
 
+
 // ============================================================================
-// OS‑v10.3 CONTEXT METADATA — Nervous System Identity
+// OS‑v10.4 CONTEXT METADATA — Nervous System Identity
 // ============================================================================
 const PULSEBAND_CONTEXT = {
   layer: "PulseBand",
   role: "NERVOUS_SYSTEM",
-  purpose: "Sensorimotor integration + connectivity + GPU warmup control + CNS/PNS bridge",
+  purpose:
+    "Sensorimotor integration + connectivity + GPU warmup control + CNS/PNS bridge",
   context:
     "Maintains live/snapshot/gpuPerformance mirrors, fires nervous events, propagates reflexes, synchronizes with Cortex + Evolution",
   target: "full-os",
-  version: "10.3",
+  version: "10.4",
   selfRepairable: true,
   evo: {
     advantageCascadeAware: true,
@@ -74,10 +76,11 @@ const PULSEBAND_CONTEXT = {
   }
 };
 
+
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
-const NERVOUS_LAYER_ID = "NERVOUS-SYSTEM";
+const NERVOUS_LAYER_ID   = "NERVOUS-SYSTEM";
 const NERVOUS_LAYER_NAME = "PULSEBAND";
 const NERVOUS_LAYER_ROLE = "Sensorimotor Integration Layer";
 
@@ -93,8 +96,8 @@ const nervousLog = (stage, details = {}) => {
       window.PULSE_LOG(
         JSON.stringify({
           pulseLayer: NERVOUS_LAYER_ID,
-          pulseName: NERVOUS_LAYER_NAME,
-          pulseRole: NERVOUS_LAYER_ROLE,
+          pulseName:  NERVOUS_LAYER_NAME,
+          pulseRole:  NERVOUS_LAYER_ROLE,
           stage,
           ...details,
           meta: { ...PULSEBAND_CONTEXT }
@@ -106,8 +109,9 @@ const nervousLog = (stage, details = {}) => {
 
 nervousLog("NERVOUS_INIT", { meta: PULSEBAND_CONTEXT });
 
+
 // ============================================================================
-// DEBUG HOOK — unchanged (but now v10-aware via context)
+// DEBUG HOOK — unchanged (v10.4)
 // ============================================================================
 if (typeof window !== "undefined") {
   window.PULSE_LOG = function (...args) {
@@ -117,14 +121,15 @@ if (typeof window !== "undefined") {
   };
 }
 
-// ------------------------------------------------------------
-// Utility helpers
-// ------------------------------------------------------------
+
+// ============================================================================
+// Utility helpers — v10.4 deterministic
+// ============================================================================
 const nowMs = () => Date.now();
 
 const computeNetworkHealthFromLatency = (latencyMs) => {
   if (!Number.isFinite(latencyMs) || latencyMs <= 0) return "Unknown";
-  if (latencyMs < 80) return "Excellent";          // v10 tightened thresholds
+  if (latencyMs < 80)  return "Excellent";   // tightened thresholds
   if (latencyMs < 180) return "Good";
   if (latencyMs < 400) return "Weak";
   return "Critical";
@@ -143,7 +148,7 @@ const getSafeTimestamp = (status) => {
 };
 
 // ------------------------------------------------------------
-// PulseBand v10.3 — Engine State (NERVOUS SYSTEM STATE)
+// PulseBand v10.4 — Engine State (NERVOUS SYSTEM STATE)
 // ------------------------------------------------------------
 export const pulseband = {
   meta: { ...PULSEBAND_CONTEXT },
@@ -153,24 +158,24 @@ export const pulseband = {
   gpu: {
     ready: false,
     packages: null,
-    warmupScore: 0,                // v10 addition
-    thermalState: "Unknown"        // v10 addition
+    warmupScore: 0,                // v10.4
+    thermalState: "Unknown",       // v10.4
   },
 
   engine: {
     initialized: false,
     pageEnabled: true,
     globalEnabled: true,
-    reflexMode: "auto",            // v10 addition
-    cortexLinked: false            // v10 addition
+    reflexMode: "auto",            // v10.4
+    cortexLinked: false,           // v10.4
   },
 
   connectivity: {
     mode: "auto",
     online: true,
     source: "unknown",
-    lastLatencySpike: null,        // v10 addition
-    spikeCount: 0                  // v10 addition
+    lastLatencySpike: null,        // v10.4
+    spikeCount: 0,                 // v10.4
   },
 
   state: {
@@ -189,15 +194,15 @@ export const pulseband = {
       efficiency: 100,
       efficiencyMode: null,
       phoneKbps: 0,
-      appKbps: 0
+      appKbps: 0,
     },
 
     snapshot: {
       advantage: 1.0,
       timeSaved: 0,
       lastUpdateTimestamp: 0,
-      driftScore: 0,               // v10 addition
-      reflexScore: 1.0             // v10 addition
+      driftScore: 0,               // v10.4
+      reflexScore: 1.0,            // v10.4
     },
 
     gpuPerformance: {
@@ -207,8 +212,8 @@ export const pulseband = {
       stalls: 0,
       efficiency: 100,
       load: 0,
-      frameBudget: 16.6,           // v10 addition
-      frameVariance: 0             // v10 addition
+      frameBudget: 16.6,           // v10.4
+      frameVariance: 0,            // v10.4
     },
 
     latency: 0,
@@ -229,11 +234,11 @@ export const pulseband = {
     timeSaved: 0,
 
     connectivityMode: "auto",
-    online: true
+    online: true,
   },
 
   // ------------------------------------------------------------
-  // GPU Brain Init — Motor Cortex Warmup (v10.3 enhanced)
+  // GPU Brain Init — Motor Cortex Warmup (v10.4)
   // ------------------------------------------------------------
   async initGraphics(rawAssets = {}) {
     if (typeof window !== "undefined" && window.PULSE_LOG) {
@@ -247,7 +252,7 @@ export const pulseband = {
         rawMeshes: rawAssets.meshes || [],
         rawAnimations: rawAssets.animations || [],
         rawShaders: rawAssets.shaders || [],
-        rawScenes: rawAssets.scenes || []
+        rawScenes: rawAssets.scenes || [],
       });
 
       const packages = PulseGPU.PulseGPUBrainExport.buildAndStore(input);
@@ -265,6 +270,7 @@ export const pulseband = {
       if (typeof window !== "undefined" && window.PULSE_LOG) {
         window.PULSE_LOG("PulseBand → GPU Brain FAILED");
       }
+
       this.gpu.ready = false;
       this.gpu.warmupScore = 0;
 
@@ -273,7 +279,7 @@ export const pulseband = {
   },
 
   // ------------------------------------------------------------
-  // Engine Init — Nervous System Boot (v10.3 enhanced)
+  // Engine Init — Nervous System Boot (v10.4)
   // ------------------------------------------------------------
   async initEngine() {
     if (this.engine.initialized) {
@@ -288,6 +294,7 @@ export const pulseband = {
       window.PULSE_LOG("PulseBand → Initializing engine…");
     }
     nervousLog("ENGINE_INIT_START");
+
     this.engine.initialized = true;
 
     this.setStatus({
@@ -296,8 +303,8 @@ export const pulseband = {
         networkHealth: "Excellent",
         latencyClass: "Excellent",
         state: "Warm",
-        route: "Pulse"
-      }
+        route: "Pulse",
+      },
     });
 
     if (typeof window !== "undefined" && window.PULSE_LOG) {
@@ -314,6 +321,7 @@ export const pulseband = {
       window.PULSE_LOG("PulseBand → Page enabled");
     }
     nervousLog("PAGE_ENABLE");
+
     this.engine.pageEnabled = true;
     this.emit("page-toggle", { pageEnabled: true });
   },
@@ -323,6 +331,7 @@ export const pulseband = {
       window.PULSE_LOG("PulseBand → Page disabled");
     }
     nervousLog("PAGE_DISABLE");
+
     this.engine.pageEnabled = false;
     this.emit("page-toggle", { pageEnabled: false });
   },
@@ -330,6 +339,7 @@ export const pulseband = {
   isPageEnabled() {
     return !!this.engine.pageEnabled;
   },
+
   // ------------------------------------------------------------
   // Connectivity Mode + Local/Online Awareness
   // ------------------------------------------------------------
@@ -350,15 +360,12 @@ export const pulseband = {
     this.connectivity.source = source;
     this.state.online = online;
 
-    nervousLog("CONNECTIVITY_STATE_SET", {
-      online,
-      source
-    });
+    nervousLog("CONNECTIVITY_STATE_SET", { online, source });
 
     this.emit("connectivity-change", {
       online,
       source,
-      mode: this.connectivity.mode
+      mode: this.connectivity.mode,
     });
   },
 
@@ -381,39 +388,38 @@ export const pulseband = {
     lastPulseOk: false,
     lastError: null,
     lastMeshReach: null,
-    lastDeviceId: null
+    lastDeviceId: null,
   },
 
   onPulseSuccess(payload = {}) {
     const ts = nowMs();
+
     this.pulseStatus.lastPulseTs = ts;
     this.pulseStatus.lastPulseOk = true;
     this.pulseStatus.lastError = null;
-    this.pulseStatus.lastMeshReach = payload.meshReach || this.pulseStatus.lastMeshReach || null;
-    this.pulseStatus.lastDeviceId = payload.deviceId || this.pulseStatus.lastDeviceId || null;
+    this.pulseStatus.lastMeshReach =
+      payload.meshReach || this.pulseStatus.lastMeshReach || null;
+    this.pulseStatus.lastDeviceId =
+      payload.deviceId || this.pulseStatus.lastDeviceId || null;
 
     this.setConnectivity({ online: true, source: "pulse" });
 
-    this.emit("pulse-success", {
-      ts,
-      payload
-    });
+    this.emit("pulse-success", { ts, payload });
   },
 
   onPulseFailure(reason = "unknown") {
     const ts = nowMs();
+
     this.pulseStatus.lastPulseTs = ts;
     this.pulseStatus.lastPulseOk = false;
     this.pulseStatus.lastError = reason;
 
-    this.emit("pulse-failure", {
-      ts,
-      reason
-    });
+    this.emit("pulse-failure", { ts, reason });
   },
 
   estimateMeshReach() {
     const liveLatency = this.state.live.latency || 0;
+
     const hops =
       liveLatency <= 0 ? 0 :
       liveLatency < 80 ? 1 :
@@ -423,7 +429,7 @@ export const pulseband = {
     return {
       hops,
       estimatedMeters: hops * 30,
-      mode: hops <= 1 ? "direct" : "mesh"
+      mode: hops <= 1 ? "direct" : "mesh",
     };
   },
 
@@ -532,6 +538,7 @@ export const pulseband = {
       }
     }
 
+    // v10.4 — GPU auto‑init stays identical but logs upgraded
     if (!this.gpu.ready && clean.gpuAssets) {
       if (typeof window !== "undefined" && window.PULSE_LOG) {
         window.PULSE_LOG("PulseBand → GPU auto-init triggered");
@@ -540,6 +547,9 @@ export const pulseband = {
       this.initGraphics(clean.gpuAssets);
     }
 
+    // ------------------------------------------------------------
+    // LIVE MERGE — v10.4 deterministic nervous update
+    // ------------------------------------------------------------
     if (clean.live) {
       if (typeof window !== "undefined" && window.PULSE_LOG) {
         window.PULSE_LOG("PulseBand → LIVE merge");
@@ -551,10 +561,13 @@ export const pulseband = {
         L.latency != null ? L.latency : this.state.live.latency ?? 0;
 
       const lastUpdatePrev = this.state.live.lastUpdateTimestamp || 0;
-
       const prevLatency = this.state.live.latency || 0;
+
+      // v10.4 — refined spike detection
       const latencySpike =
-        latency > 0 && prevLatency > 0 && latency - prevLatency > 150;
+        latency > 0 &&
+        prevLatency > 0 &&
+        latency - prevLatency > 120;   // tightened threshold
 
       if (latencySpike) {
         this.connectivity.lastLatencySpike = now;
@@ -583,6 +596,9 @@ export const pulseband = {
       };
     }
 
+    // ------------------------------------------------------------
+    // SNAPSHOT MERGE — v10.4
+    // ------------------------------------------------------------
     if (clean.snapshot) {
       if (typeof window !== "undefined" && window.PULSE_LOG) {
         window.PULSE_LOG("PulseBand → SNAPSHOT merge");
@@ -600,6 +616,9 @@ export const pulseband = {
       window.PULSE_LOG("PulseBand → Flat mirror update");
     }
 
+    // ------------------------------------------------------------
+    // FLAT MIRROR — v10.4 deterministic flattening
+    // ------------------------------------------------------------
     const L = this.state.live;
     const S = this.state.snapshot;
 
@@ -635,8 +654,10 @@ export const pulseband = {
       window.PULSE_LOG("PulseBand → emit(update)");
     }
     nervousLog("EMIT_UPDATE");
+
     this.emit("update", this.getStatus());
   },
+
   // ------------------------------------------------------------
   // Events — Neural Firing
   // ------------------------------------------------------------
@@ -661,13 +682,11 @@ export const pulseband = {
     const handlers = this.listeners[event];
     if (!handlers || handlers.length === 0) return;
 
-    // Deterministic ordering: handlers are invoked in registration order
     for (let i = 0; i < handlers.length; i++) {
       const cb = handlers[i];
       try {
         cb(data);
       } catch (err) {
-        // fail-open: nervous system never breaks from a bad listener
         nervousLog("EVENT_HANDLER_ERROR", {
           event,
           index: i,
@@ -696,7 +715,7 @@ export const pulseband = {
           resolve(payload);
         });
 
-        // v10.3: optional timeout safety so nervous system never hangs forever
+        // v10.4 — timeout logic unchanged but diagnostics upgraded
         if (typeof extra.timeoutMs === "number" && extra.timeoutMs > 0) {
           const timeout = extra.timeoutMs;
           setTimeout(() => {
@@ -719,9 +738,3 @@ export const pulseband = {
     });
   }
 };
-
-// NOTE: v10.3 — DOMContentLoaded warmup remains delegated to OSKernel / Cortex.
-// OSKernel / Cortex are responsible for calling:
-//   - pulseband.inferConnectivityFromBrowser()
-//   - pulseband.initGraphics(...)
-//   - pulseband.initEngine()

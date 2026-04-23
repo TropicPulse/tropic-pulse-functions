@@ -1,12 +1,12 @@
 // ============================================================================
-//  PULSE OS v10.4 — ADRENAL SYSTEM
+//  PULSE OS v11 — ADRENAL SYSTEM
 //  PulseInstanceOrchestrator — Fight‑or‑Flight Scaling Layer
 //  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
 //  Backend‑Only Organ (Proxy Spine)
 // ============================================================================
 //
-//  ROLE (v10.4):
-//  ------------
+//  ROLE (v11):
+//  -----------
 //  • Backend reflex organ that scales worker “cells” per user.
 //  • Reads UserScores → computes deterministic instance counts.
 //  • Launches or reabsorbs workers.
@@ -14,8 +14,8 @@
 //  • Mode‑aware: routes behavior via orchestratorMode (NORMAL / EARN_STRESS / DRAIN).
 //  • Ready to be wrapped by PulseOSGovernor (multi‑instance law).
 //
-//  SAFETY CONTRACT (v10.4):
-//  ------------------------
+//  SAFETY CONTRACT (v11):
+//  ----------------------
 //  • Imports allowed (backend‑only).
 //  • No eval / Function().
 //  • No dynamic imports.
@@ -38,13 +38,13 @@ const db = getFirestore();
 
 
 // ============================================================================
-//  PULSE ROLE — v10.4 Identity
+//  PULSE ROLE — v11 Identity
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "AdrenalSystem",
-  version: "10.4",
+  version: "11.0",
   identity: "PulseInstanceOrchestrator",
 
   evo: {
@@ -63,7 +63,7 @@ export const PulseRole = {
 
 
 // ============================================================================
-//  ORGAN CONTEXT — v10.4
+//  ORGAN CONTEXT — v11
 // ============================================================================
 const ADRENAL_CONTEXT = {
   layer: PulseRole.layer,
@@ -75,7 +75,7 @@ const ADRENAL_CONTEXT = {
 
 
 // ============================================================================
-//  MODES — Orchestrator routing modes (v10.4)
+//  MODES — Orchestrator routing modes (v11)
 // ============================================================================
 export const ORCHESTRATOR_MODES = {
   NORMAL: "normal",
@@ -85,7 +85,7 @@ export const ORCHESTRATOR_MODES = {
 
 
 // ============================================================================
-//  CONFIG — Physiological Limits (v10.4)
+//  CONFIG — Physiological Limits (v11, drift‑proof)
 // ============================================================================
 export const NORMAL_MAX     = 4;
 export const UPGRADED_MAX   = 8;
@@ -102,46 +102,57 @@ export const INSTANCE_LOG_COLLECTION = "UserInstanceLogs";
 
 // ============================================================================
 //  INTERNAL STATE — Active “cells” per user
+//  • Only legal mutable registry in this organ
 // ============================================================================
 const activeWorkers = new Map(); // userId -> worker[]
 
 
 // ============================================================================
-//  DEVICE TIER → MAX INSTANCES
+//  DEVICE TIER → MAX INSTANCES (deterministic, v11)
 // ============================================================================
 function getDeviceMax(deviceTier, testEarnActive, orchestratorMode) {
-  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) return 1;
-  if (testEarnActive) return TEST_EARN_MAX;
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) {
+    return 1;
+  }
+
+  if (testEarnActive) {
+    return TEST_EARN_MAX;
+  }
 
   switch (deviceTier) {
-    case "upgraded": return UPGRADED_MAX;
-    case "highend":  return HIGHEND_MAX;
-    default:         return NORMAL_MAX;
+    case "upgraded":
+      return UPGRADED_MAX;
+    case "highend":
+      return HIGHEND_MAX;
+    default:
+      return NORMAL_MAX;
   }
 }
-
-
 // ============================================================================
-//  COMPUTE FINAL INSTANCE COUNT — Deterministic v10.4
+//  COMPUTE FINAL INSTANCE COUNT — Deterministic v11
 // ============================================================================
 function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orchestratorMode) {
   let final = base;
 
-  // Mode‑aware routing
+  // Mode-aware routing (deterministic)
   if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) {
     final = 1;
   } else {
     if (deviceTier === "upgraded") final *= UPGRADED_MULT;
     if (deviceTier === "highend")  final *= HIGHEND_MULT;
 
-    if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
+    if (earnMode) {
+      final = Math.floor(final * EARN_MODE_MULT);
+    }
 
     if (orchestratorMode === ORCHESTRATOR_MODES.EARN_STRESS) {
-      // Stress mode: push to deterministic ceiling, but still bounded
+      // Stress mode: deterministic ceiling, no randomness
       final = Math.max(final, base * 2);
     }
 
-    if (testEarnActive) final = TEST_EARN_MAX;
+    if (testEarnActive) {
+      final = TEST_EARN_MAX;
+    }
   }
 
   const max = getDeviceMax(deviceTier, testEarnActive, orchestratorMode);
@@ -150,8 +161,12 @@ function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orche
 
 
 // ============================================================================
-//  LOG USER SNAPSHOT — v10.4
+//  LOG USER SNAPSHOT — v11 (deterministic, immune-safe)
+//  • No Date.now()
+//  • No nondeterministic timestamps
 // ============================================================================
+let adrenalSeq = 0;
+
 async function logUserInstanceSnapshot(userId, snapshot) {
   if (!ENABLE_INSTANCE_LOGGING) return;
 
@@ -159,7 +174,7 @@ async function logUserInstanceSnapshot(userId, snapshot) {
     await db.collection(INSTANCE_LOG_COLLECTION).add({
       ...ADRENAL_CONTEXT,
       userId,
-      ts: Date.now(),
+      seq: ++adrenalSeq,   // deterministic, replaces Date.now()
       ...snapshot
     });
   } catch (err) {
@@ -169,7 +184,9 @@ async function logUserInstanceSnapshot(userId, snapshot) {
 
 
 // ============================================================================
-//  LAUNCH WORKER — Spawn a new “cell”
+//  LAUNCH WORKER — v11 (no timers, no intervals, no Date.now)
+//  • Workers become pure metadata objects
+//  • Heartbeats removed (timers forbidden in v11)
 // ============================================================================
 function launchWorker(userId, workerIndex, orchestratorMode) {
   const workerName = `${userId}-instance-${workerIndex}`;
@@ -186,27 +203,26 @@ function launchWorker(userId, workerIndex, orchestratorMode) {
     userId,
     index: workerIndex,
     mode: orchestratorMode,
-    started: Date.now(),
-    interval: setInterval(() => {
-      logger.log("adrenal", "worker_heartbeat", { workerName, mode: orchestratorMode });
-    }, 5000)
+    seq: ++adrenalSeq   // deterministic creation marker
   };
 }
 
 
 // ============================================================================
-//  KILL WORKER — Reabsorb a “cell”
+//  KILL WORKER — v11 (no intervals to clear)
 // ============================================================================
 function killWorker(worker) {
-  logger.log("adrenal", "shutdown", { worker: worker.name, mode: worker.mode });
-  clearInterval(worker.interval);
+  logger.log("adrenal", "shutdown", {
+    worker: worker.name,
+    mode: worker.mode
+  });
+  // No timers to clear in v11
 }
 
 
 // ============================================================================
-//  MAIN ORCHESTRATOR LOOP — v10.4
-//  Optional pulse envelope for future Governor wrapping:
-//    pulse = { jobId, lineage, meta..., mode }
+//  MAIN ORCHESTRATOR LOOP — v11
+//  Deterministic • Drift‑Proof • No timing • No intervals
 // ============================================================================
 export async function runInstanceOrchestrator(pulse) {
   const orchestratorMode =
@@ -257,7 +273,7 @@ export async function runInstanceOrchestrator(pulse) {
     });
 
     // ------------------------------------------------------------
-    // SCALE UP — Fight‑or‑Flight Reflex
+    // SCALE UP — Fight‑or‑Flight Reflex (deterministic)
     // ------------------------------------------------------------
     if (currentWorkers.length < finalInstances) {
       const needed = finalInstances - currentWorkers.length;
@@ -278,7 +294,7 @@ export async function runInstanceOrchestrator(pulse) {
     }
 
     // ------------------------------------------------------------
-    // SCALE DOWN — Recovery Reflex
+    // SCALE DOWN — Recovery Reflex (deterministic)
     // ------------------------------------------------------------
     if (currentWorkers.length > finalInstances) {
       const extra = currentWorkers.length - finalInstances;
@@ -298,7 +314,7 @@ export async function runInstanceOrchestrator(pulse) {
     }
 
     // ------------------------------------------------------------
-    // SNAPSHOT — Immune‑Safe Logging
+    // SNAPSHOT — Immune‑Safe Logging (deterministic)
     // ------------------------------------------------------------
     await logUserInstanceSnapshot(userId, {
       baseInstances,
@@ -307,7 +323,7 @@ export async function runInstanceOrchestrator(pulse) {
       earnMode,
       testEarnActive,
       currentWorkers: currentWorkers.length,
-      lastUpdated: Date.now(),
+      seq: adrenalSeq,
       mode: orchestratorMode
     });
   }

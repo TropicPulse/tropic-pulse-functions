@@ -1,215 +1,347 @@
 // ============================================================================
-// FILE: /apps/tropic-pulse/lib/Connectors/PulseClient.js
-// LAYER: CIRCULATORY SYSTEM (Arterial Fetch Layer) — v10.4
+//  PULSE OS v10.4 — ADRENAL SYSTEM
+//  PulseProxyAdrenalSystem — Fight‑or‑Flight Scaling Layer
+//  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
+//  Backend‑Only Organ (Proxy Spine)
 // ============================================================================
 //
-// ROLE (v10.4):
-//   THE CIRCULATORY SYSTEM — Arterial Fetch Layer
-//   • Arterial path: accelerated PULSE proxy route
-//   • Venous path: direct PHONE fallback
-//   • Moves oxygenated data outward through the organism
-//   • Returns deterministic { data, meta } packets
+//  ROLE (v10.4):
+//  ------------
+//  • Backend reflex organ that scales worker “cells” per user.
+//  • Reads UserScores → computes deterministic instance counts.
+//  • Launches or reabsorbs workers.
+//  • Logs snapshots for admin dashboards.
+//  • Ready for PulseOSGovernor wrapping (multi‑instance law, A→B→A routing).
 //
-// CONTRACT (v10.4):
-//   • No PulseBand imports
-//   • No PulseNet imports
-//   • No global state
-//   • No side effects
-//   • Pure circulatory subsystem
-//
-// SAFETY (v10.4):
-//   • No console.*
-//   • All diagnostics routed through PulseProxyBloodStream
-//   • Deterministic, drift‑proof, AND‑architecture aligned
-//   • No mutation of external state
-//   • No routing logic beyond arterial→venous fallback
+//  SAFETY CONTRACT (v10.4):
+//  ------------------------
+//  • Imports allowed (backend‑only).
+//  • No eval / Function().
+//  • No dynamic imports.
+//  • No mutation outside worker registry.
+//  • Deterministic scaling only.
+//  • Drift‑proof instance counts.
+//  • Immune‑safe logging.
 // ============================================================================
-
-import { emitTelemetry } from "./PulseProxyBloodStream.js";
 
 
 // ============================================================================
-// ⭐ OS‑v10.4 CONTEXT METADATA — Circulatory Identity
+//  OSKernel imports (backend‑safe)
+// ============================================================================
+import { logger } from "../OSKernel/PulseLogger.js";
+import { PulseLineage } from "../OSKernel/PulseIdentity.js";
+
+// Firestore (backend‑only)
+import { getFirestore } from "firebase-admin/firestore";
+const db = getFirestore();
+
+
+// ============================================================================
+//  PULSE ROLE — v10.4 Identity
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
-  subsystem: "PulseClient",
-  layer: "CirculatorySystem",
+  subsystem: "PulseProxy",
+  layer: "AdrenalSystem",
   version: "10.4",
-  identity: "PulseClientArterialLayer",
+  identity: "PulseProxyAdrenalSystem",
 
   evo: {
-    driftProof: true,
+    dualMode: true,                 // local + cloud aware
+    localAware: true,
+    internetAware: true,
+    advantageCascadeAware: true,
     pulseEfficiencyAware: true,
-    unifiedAdvantageField: true,
+    driftProof: true,
     multiInstanceReady: true,
-    parallelSafe: true,
-    fanOutScaling: 1.0,
-    clusterCoherence: true,
-    zeroDriftCloning: true,
-    reflexPropagation: 1.0,
-    dualModeEvolution: true,
-    organismClusterBoost: 1.0,
-    cognitiveComputeLink: true,
+    unifiedAdvantageField: true,
     pulseSendAware: true,
+    governorReady: true,            // ready for PulseOSGovernor wrapping
+    reflexSafe: true,               // no IQ, no decisions beyond scaling math
+    backendOnly: true,
     futureEvolutionReady: true
   }
 };
 
-const CIRCULATION_CONTEXT = {
+
+// ============================================================================
+//  ORGAN CONTEXT — v10.4
+// ============================================================================
+const ADRENAL_CONTEXT = {
   layer: PulseRole.layer,
-  role: "CIRCULATORY_SYSTEM",
-  purpose: "Arterial fetch layer + venous fallback",
-  context: "Moves data outward through organism with deterministic routing",
-  target: "full-os",
+  role: "ADRENAL_SYSTEM",
   version: PulseRole.version,
-  selfRepairable: true,
-  evo: PulseRole.evo
+  // Adrenal lives in the Proxy lineage, not optimizer
+  lineage: PulseLineage.proxy,
+  evo: PulseRole.evo,
+  mode: "backend-only"
 };
 
 
 // ============================================================================
-// SUBSYSTEM IDENTITY
+//  MODES — Orchestrator routing modes (v10.4)
 // ============================================================================
-const SUBSYSTEM = "circulation";
-
-
-// ============================================================================
-// DIAGNOSTICS (v10.4)
-// ============================================================================
-const CIRCULATION_DIAGNOSTICS_ENABLED =
-  (typeof window !== "undefined" &&
-    (window.PULSE_BLOODFLOW_DIAGNOSTICS === true ||
-     window.PULSE_DIAGNOSTICS === true)) ||
-  false;
-
-const circulationLog = (stage, details = {}) => {
-  if (!CIRCULATION_DIAGNOSTICS_ENABLED) return;
-
-  emitTelemetry(SUBSYSTEM, stage, {
-    pulseLayer: PulseRole.layer,
-    pulseName: "THE CIRCULATORY SYSTEM",
-    pulseRole: "Arterial Fetch Layer",
-    meta: { ...CIRCULATION_CONTEXT },
-    ...details
-  });
+export const ORCHESTRATOR_MODES = {
+  NORMAL: "normal",
+  EARN_STRESS: "earn-stress",
+  DRAIN: "drain"
 };
 
-circulationLog("CIRCULATION_INIT");
+
+// ============================================================================
+//  CONFIG — Physiological Limits (v10.4)
+// ============================================================================
+export const NORMAL_MAX     = 4;
+export const UPGRADED_MAX   = 8;
+export const HIGHEND_MAX    = 8;
+export const TEST_EARN_MAX  = 16;
+
+export const UPGRADED_MULT  = 2;
+export const HIGHEND_MULT   = 2;
+export const EARN_MODE_MULT = 1.5;
+
+export const ENABLE_INSTANCE_LOGGING = true;
+export const INSTANCE_LOG_COLLECTION = "UserInstanceLogs";
+
+const INSTANCE_HEARTBEAT_MS = 5000;
 
 
 // ============================================================================
-// CONSTANTS
+//  INTERNAL STATE — Active “cells” per user
 // ============================================================================
-const PULSE_PROXY_URL = "https://www.tropicpulse.bz";
-
-
-// ============================================================================
-// DEVICE METADATA
-// ============================================================================
-function getDeviceInfo() {
-  const info = {
-    ua: navigator.userAgent || "",
-    platform: navigator.platform || "",
-    language: navigator.language || ""
-  };
-
-  circulationLog("DEVICE_INFO_COLLECTED", info);
-  return info;
-}
+const activeWorkers = new Map(); // userId -> worker[]
 
 
 // ============================================================================
-// CORE FETCH WRAPPER — ARTERIAL FLOW (v10.4)
+//  DEVICE TIER → MAX INSTANCES
 // ============================================================================
-async function pulseFetch(url) {
-  circulationLog("FETCH_START", { url });
+function getDeviceMax(deviceTier, testEarnActive, orchestratorMode) {
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) return 1;
+  if (testEarnActive) return TEST_EARN_MAX;
 
-  const device = getDeviceInfo();
-  const start = performance.now();
-
-  try {
-    // ---------------------------------------------------------
-    // ARTERIAL ATTEMPT — PULSE ROUTE
-    // ---------------------------------------------------------
-    circulationLog("ARTERIAL_ATTEMPT", { url });
-
-    const res = await fetch(
-      `${PULSE_PROXY_URL}/TPProxy?url=${encodeURIComponent(url)}`,
-      {
-        method: "GET",
-        headers: {
-          "x-pulse-device": JSON.stringify(device),
-          "x-pulse-context": JSON.stringify(CIRCULATION_CONTEXT)
-        }
-      }
-    );
-
-    const durationMs = performance.now() - start;
-
-    if (!res.ok) {
-      circulationLog("ARTERIAL_FAIL", { status: res.status });
-      throw new Error("Pulse route failed: " + res.status);
-    }
-
-    const contentType = res.headers.get("content-type") || "";
-    const bytes = Number(res.headers.get("x-pulse-bytes") ?? "0");
-
-    let data;
-    if (contentType.includes("application/json")) data = await res.json();
-    else if (contentType.startsWith("text/")) data = await res.text();
-    else data = await res.arrayBuffer();
-
-    circulationLog("ARTERIAL_SUCCESS", { durationMs, bytes });
-
-    return {
-      data,
-      meta: {
-        route: "Pulse",
-        bytes,
-        durationMs,
-        context: CIRCULATION_CONTEXT
-      }
-    };
-
-  } catch (err) {
-    // ---------------------------------------------------------
-    // VENOUS FALLBACK — PHONE ROUTE
-    // ---------------------------------------------------------
-    circulationLog("ARTERIAL_EXCEPTION", { error: String(err) });
-
-    const fbStart = performance.now();
-    const fbRes = await fetch(url);
-    const fbDuration = performance.now() - fbStart;
-
-    const contentType = fbRes.headers.get("content-type") || "";
-    const bytes = Number(fbRes.headers.get("content-length") ?? "0");
-
-    let data;
-    if (contentType.includes("application/json")) data = await fbRes.json();
-    else if (contentType.startsWith("text/")) data = await fbRes.text();
-    else data = await fbRes.arrayBuffer();
-
-    circulationLog("VENOUS_SUCCESS", { durationMs: fbDuration, bytes });
-
-    return {
-      data,
-      meta: {
-        route: "Phone",
-        bytes,
-        durationMs: fbDuration,
-        context: CIRCULATION_CONTEXT
-      }
-    };
+  switch (deviceTier) {
+    case "upgraded": return UPGRADED_MAX;
+    case "highend":  return HIGHEND_MAX;
+    default:         return NORMAL_MAX;
   }
 }
 
 
 // ============================================================================
-// PUBLIC API — CIRCULATORY SYSTEM v10.4
+//  COMPUTE FINAL INSTANCE COUNT — Deterministic v10.4
 // ============================================================================
-export const PulseClient = {
-  get: pulseFetch,
-  meta: { ...CIRCULATION_CONTEXT },
-  PulseRole
-};
+function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orchestratorMode) {
+  let final = base || 1;
+
+  // Mode‑aware routing
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) {
+    final = 1;
+  } else {
+    if (deviceTier === "upgraded") final *= UPGRADED_MULT;
+    if (deviceTier === "highend")  final *= HIGHEND_MULT;
+
+    if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
+
+    if (orchestratorMode === ORCHESTRATOR_MODES.EARN_STRESS) {
+      // Stress mode: push to deterministic ceiling, but still bounded
+      final = Math.max(final, (base || 1) * 2);
+    }
+
+    if (testEarnActive) final = TEST_EARN_MAX;
+  }
+
+  const max = getDeviceMax(deviceTier, testEarnActive, orchestratorMode);
+  return Math.max(1, Math.min(final, max));
+}
+
+
+// ============================================================================
+//  LOG USER SNAPSHOT — v10.4
+// ============================================================================
+async function logUserInstanceSnapshot(userId, snapshot) {
+  if (!ENABLE_INSTANCE_LOGGING) return;
+
+  try {
+    await db.collection(INSTANCE_LOG_COLLECTION).add({
+      ...ADRENAL_CONTEXT,
+      userId,
+      ts: Date.now(),
+      ...snapshot
+    });
+  } catch (err) {
+    logger.error("adrenal", "snapshot_log_failed", { error: String(err) });
+  }
+}
+
+
+// ============================================================================
+//  LAUNCH WORKER — Spawn a new “cell”
+// ============================================================================
+function launchWorker(userId, workerIndex, orchestratorMode) {
+  const workerName = `${userId}-instance-${workerIndex}`;
+
+  logger.log("adrenal", "launch", {
+    userId,
+    workerName,
+    workerIndex,
+    mode: orchestratorMode,
+    context: ADRENAL_CONTEXT
+  });
+
+  const interval = setInterval(() => {
+    logger.log("adrenal", "worker_heartbeat", {
+      workerName,
+      userId,
+      index: workerIndex,
+      mode: orchestratorMode
+    });
+  }, INSTANCE_HEARTBEAT_MS);
+
+  return {
+    name: workerName,
+    userId,
+    index: workerIndex,
+    started: Date.now(),
+    mode: orchestratorMode,
+    interval
+  };
+}
+
+
+// ============================================================================
+//  KILL WORKER — Reabsorb a “cell”
+// ============================================================================
+function killWorker(worker) {
+  if (!worker) return;
+
+  logger.log("adrenal", "shutdown", {
+    worker: worker.name,
+    userId: worker.userId,
+    index: worker.index,
+    mode: worker.mode
+  });
+
+  try {
+    clearInterval(worker.interval);
+  } catch {
+    // ignore
+  }
+}
+
+
+// ============================================================================
+//  MAIN ORCHESTRATOR LOOP — v10.4
+//  Optional pulse envelope for Governor wrapping:
+//    pulse = { jobId, lineage, mode, meta... } (not required)
+// ============================================================================
+export async function runInstanceOrchestrator(pulse) {
+  const orchestratorMode =
+    pulse?.mode && Object.values(ORCHESTRATOR_MODES).includes(pulse.mode)
+      ? pulse.mode
+      : ORCHESTRATOR_MODES.NORMAL;
+
+  logger.log("adrenal", "tick_start", {
+    ...ADRENAL_CONTEXT,
+    pulseId: pulse?.jobId || pulse?.id || null,
+    pulseLineage: pulse?.lineage || null,
+    pulseMode: orchestratorMode
+  });
+
+  const snap = await db.collection("UserScores").get();
+
+  for (const doc of snap.docs) {
+    const userId = doc.id;
+    const data = doc.data() || {};
+
+    const baseInstances   = data.instances ?? 1;
+    const deviceTier      = data.deviceTier ?? "normal";
+    const earnMode        = data.earnMode ?? false;
+    const testEarnActive  = data.testEarnActive ?? false;
+
+    const finalInstances = computeFinalInstances(
+      baseInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      orchestratorMode
+    );
+
+    if (!activeWorkers.has(userId)) {
+      activeWorkers.set(userId, []);
+    }
+
+    const currentWorkers = activeWorkers.get(userId);
+
+    logger.log("adrenal", "state", {
+      userId,
+      baseInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      current: currentWorkers.length,
+      final: finalInstances,
+      mode: orchestratorMode
+    });
+
+    // ------------------------------------------------------------
+    // SCALE UP — Fight‑or‑Flight Reflex
+    // ------------------------------------------------------------
+    if (currentWorkers.length < finalInstances) {
+      const needed = finalInstances - currentWorkers.length;
+
+      logger.log("adrenal", "scale_up", {
+        userId,
+        needed,
+        from: currentWorkers.length,
+        to: finalInstances,
+        mode: orchestratorMode
+      });
+
+      for (let i = 0; i < needed; i++) {
+        const workerIndex = currentWorkers.length;
+        const worker = launchWorker(userId, workerIndex, orchestratorMode);
+        currentWorkers.push(worker);
+      }
+    }
+
+    // ------------------------------------------------------------
+    // SCALE DOWN — Recovery Reflex
+    // ------------------------------------------------------------
+    if (currentWorkers.length > finalInstances) {
+      const extra = currentWorkers.length - finalInstances;
+
+      logger.log("adrenal", "scale_down", {
+        userId,
+        extra,
+        from: currentWorkers.length,
+        to: finalInstances,
+        mode: orchestratorMode
+      });
+
+      for (let i = 0; i < extra; i++) {
+        const worker = currentWorkers.pop();
+        killWorker(worker);
+      }
+    }
+
+    // ------------------------------------------------------------
+    // SNAPSHOT — Immune‑Safe Logging
+    // ------------------------------------------------------------
+    await logUserInstanceSnapshot(userId, {
+      baseInstances,
+      finalInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      currentWorkers: currentWorkers.length,
+      lastUpdated: Date.now(),
+      mode: orchestratorMode
+    });
+  }
+
+  logger.log("adrenal", "tick_complete", {
+    mode: orchestratorMode
+  });
+
+  return true;
+}

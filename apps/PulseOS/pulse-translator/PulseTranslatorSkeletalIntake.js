@@ -1,27 +1,27 @@
 // ============================================================================
 // FILE: /apps/pulse-translator/PulseTranslatorSkeletalIntake.js
-// [pulse:translator] PULSE_TRANSLATOR_SKELETAL_INTAKE v10.4  // bone‑gold
+// [pulse:translator] PULSE_TRANSLATOR_SKELETAL_INTAKE v11.0  // bone‑gold
 // SQL → Pulse Skeletal Intake • Deterministic • Genome‑Driven • Zero IO
 // PURE TRANSLATOR — NO SQL EXECUTION • NO NETWORK • NO MUTATION
 // ============================================================================
 //
-// IDENTITY — THE SKELETAL INTAKE TRANSLATOR (v10.4):
+// IDENTITY — THE SKELETAL INTAKE TRANSLATOR (v11.0):
 //  --------------------------------------------------
 //  • Reads SQL column definitions → PulseField objects.
 //  • Reads SQL schemas → PulseField schema maps.
 //  • Reads SQL SELECT queries → PulseField usage maps.
-//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v10.4) as the source of truth.
+//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v11.0) as the source of truth.
 //  • Deterministic, drift‑proof, read‑only.
 //
-// ROLE IN THE ORGANISM (v10.4):
+// ROLE IN THE ORGANISM (v11.0):
 //  -----------------------------
-//  • DNA → PulseSpecsDNAGenome.js (v10.4 gold‑white genome)
+//  • DNA → PulseSpecsDNAGenome.js (v11.0 gold‑white genome)
 //  • RNA Intake → Firestore → Pulse
 //  • RNA Output → Pulse → Firestore
 //  • Skeleton Intake → SQL → Pulse (THIS FILE)
 //  • Skeleton Output → Pulse → SQL (PulseTranslatorSkeletal.js)
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11.0):
 //  ------------------------
 //  • Read‑only — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.
@@ -58,7 +58,7 @@ function normalizeSQLType(sqlType = "") {
 // ============================================================================
 export function translateSQLColumn(sqlType, columnName) {
   if (!sqlType || !columnName) {
-    throw new Error("PulseTranslatorSkeletalIntake-v10.4: missing sqlType or columnName");
+    throw new Error("PulseTranslatorSkeletalIntake-v11.0: missing sqlType or columnName");
   }
 
   const normalizedType = normalizeSQLType(sqlType);

@@ -1,6 +1,6 @@
 // ============================================================================
 //  PULSE OS v10.4 — ADRENAL SYSTEM
-//  PulseInstanceOrchestrator — Fight‑or‑Flight Scaling Layer
+//  PulseProxyAdrenalSystem — Fight‑or‑Flight Scaling Layer
 //  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
 //  Backend‑Only Organ (Proxy Spine)
 // ============================================================================
@@ -44,7 +44,7 @@ export const PulseRole = {
   subsystem: "PulseProxy",
   layer: "AdrenalSystem",
   version: "10.4",
-  identity: "PulseInstanceOrchestrator",
+  identity: "PulseProxyAdrenalSystem",
 
   evo: {
     dualMode: true,                 // local + cloud aware
@@ -79,6 +79,16 @@ const ADRENAL_CONTEXT = {
 
 
 // ============================================================================
+//  MODES — Orchestrator routing modes (v10.4)
+// ============================================================================
+export const ORCHESTRATOR_MODES = {
+  NORMAL: "normal",
+  EARN_STRESS: "earn-stress",
+  DRAIN: "drain"
+};
+
+
+// ============================================================================
 //  CONFIG — Physiological Limits (v10.4)
 // ============================================================================
 export const NORMAL_MAX     = 4;
@@ -105,7 +115,8 @@ const activeWorkers = new Map(); // userId -> worker[]
 // ============================================================================
 //  DEVICE TIER → MAX INSTANCES
 // ============================================================================
-function getDeviceMax(deviceTier, testEarnActive) {
+function getDeviceMax(deviceTier, testEarnActive, orchestratorMode) {
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) return 1;
   if (testEarnActive) return TEST_EARN_MAX;
 
   switch (deviceTier) {
@@ -119,17 +130,26 @@ function getDeviceMax(deviceTier, testEarnActive) {
 // ============================================================================
 //  COMPUTE FINAL INSTANCE COUNT — Deterministic v10.4
 // ============================================================================
-function computeFinalInstances(base, deviceTier, earnMode, testEarnActive) {
+function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orchestratorMode) {
   let final = base || 1;
 
-  if (deviceTier === "upgraded") final *= UPGRADED_MULT;
-  if (deviceTier === "highend")  final *= HIGHEND_MULT;
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) {
+    final = 1;
+  } else {
+    if (deviceTier === "upgraded") final *= UPGRADED_MULT;
+    if (deviceTier === "highend")  final *= HIGHEND_MULT;
 
-  if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
+    if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
 
-  if (testEarnActive) final = TEST_EARN_MAX;
+    if (orchestratorMode === ORCHESTRATOR_MODES.EARN_STRESS) {
+      // Stress mode: push to deterministic ceiling, but still bounded
+      final = Math.max(final, (base || 1) * 2);
+    }
 
-  const max = getDeviceMax(deviceTier, testEarnActive);
+    if (testEarnActive) final = TEST_EARN_MAX;
+  }
+
+  const max = getDeviceMax(deviceTier, testEarnActive, orchestratorMode);
   return Math.max(1, Math.min(final, max));
 }
 
@@ -156,13 +176,14 @@ async function logUserInstanceSnapshot(userId, snapshot) {
 // ============================================================================
 //  LAUNCH WORKER — Spawn a new “cell”
 // ============================================================================
-function launchWorker(userId, workerIndex) {
+function launchWorker(userId, workerIndex, orchestratorMode) {
   const workerName = `${userId}-instance-${workerIndex}`;
 
   logger.log("adrenal", "launch", {
     userId,
     workerName,
     workerIndex,
+    mode: orchestratorMode,
     context: ADRENAL_CONTEXT
   });
 
@@ -170,7 +191,8 @@ function launchWorker(userId, workerIndex) {
     logger.log("adrenal", "worker_heartbeat", {
       workerName,
       userId,
-      index: workerIndex
+      index: workerIndex,
+      mode: orchestratorMode
     });
   }, INSTANCE_HEARTBEAT_MS);
 
@@ -178,6 +200,7 @@ function launchWorker(userId, workerIndex) {
     name: workerName,
     userId,
     index: workerIndex,
+    mode: orchestratorMode,
     started: Date.now(),
     interval
   };
@@ -193,7 +216,8 @@ function killWorker(worker) {
   logger.log("adrenal", "shutdown", {
     worker: worker.name,
     userId: worker.userId,
-    index: worker.index
+    index: worker.index,
+    mode: worker.mode
   });
 
   try {
@@ -210,11 +234,17 @@ function killWorker(worker) {
 //    pulse = { jobId, lineage, mode, meta... } (not required)
 // ============================================================================
 export async function runInstanceOrchestrator(pulse) {
+  const requestedMode = pulse?.mode;
+  const orchestratorMode =
+    requestedMode && Object.values(ORCHESTRATOR_MODES).includes(requestedMode)
+      ? requestedMode
+      : ORCHESTRATOR_MODES.NORMAL;
+
   logger.log("adrenal", "tick_start", {
     ...ADRENAL_CONTEXT,
     pulseId: pulse?.jobId || pulse?.id || null,
     pulseLineage: pulse?.lineage || null,
-    pulseMode: pulse?.mode || "direct"
+    pulseMode: orchestratorMode
   });
 
   const snap = await db.collection("UserScores").get();
@@ -232,7 +262,8 @@ export async function runInstanceOrchestrator(pulse) {
       baseInstances,
       deviceTier,
       earnMode,
-      testEarnActive
+      testEarnActive,
+      orchestratorMode
     );
 
     if (!activeWorkers.has(userId)) {
@@ -248,7 +279,8 @@ export async function runInstanceOrchestrator(pulse) {
       earnMode,
       testEarnActive,
       current: currentWorkers.length,
-      final: finalInstances
+      final: finalInstances,
+      mode: orchestratorMode
     });
 
     // ------------------------------------------------------------
@@ -261,12 +293,13 @@ export async function runInstanceOrchestrator(pulse) {
         userId,
         needed,
         from: currentWorkers.length,
-        to: finalInstances
+        to: finalInstances,
+        mode: orchestratorMode
       });
 
       for (let i = 0; i < needed; i++) {
         const workerIndex = currentWorkers.length;
-        const worker = launchWorker(userId, workerIndex);
+        const worker = launchWorker(userId, workerIndex, orchestratorMode);
         currentWorkers.push(worker);
       }
     }
@@ -281,7 +314,8 @@ export async function runInstanceOrchestrator(pulse) {
         userId,
         extra,
         from: currentWorkers.length,
-        to: finalInstances
+        to: finalInstances,
+        mode: orchestratorMode
       });
 
       for (let i = 0; i < extra; i++) {
@@ -300,12 +334,13 @@ export async function runInstanceOrchestrator(pulse) {
       earnMode,
       testEarnActive,
       currentWorkers: currentWorkers.length,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
+      mode: orchestratorMode
     });
   }
 
   logger.log("adrenal", "tick_complete", {
-    mode: pulse?.mode || "direct"
+    mode: orchestratorMode
   });
 
   return true;

@@ -1,27 +1,27 @@
 // ============================================================================
 // FILE: /apps/pulse-translator/PulseTranslatorSkeletal.js
-// [pulse:translator] PULSE_TRANSLATOR_SKELETAL v10.4  // bone‑gold
+// [pulse:translator] PULSE_TRANSLATOR_SKELETAL v11.0  // bone‑gold
 // Pulse → SQL Skeletal Translator • Deterministic • Genome‑Driven • Zero IO
 // PURE TRANSLATOR — NO SQL EXECUTION • NO NETWORK • NO MUTATION
 // ============================================================================
 //
-// IDENTITY — THE SKELETAL TRANSLATOR (v10.4):
+// IDENTITY — THE SKELETAL TRANSLATOR (v11.0):
 //  ------------------------------------------
 //  • Converts PulseField definitions → SQL column definitions.
 //  • Converts PulseField schemas → SQL CREATE TABLE statements.
 //  • Converts PulseField changes → SQL migration fragments.
-//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v10.4) as the source of truth.
+//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v11.0) as the source of truth.
 //  • Deterministic, drift‑proof, read‑only.
 //
-// ROLE IN THE ORGANISM (v10.4):
+// ROLE IN THE ORGANISM (v11.0):
 //  -----------------------------
-//  • DNA → PulseSpecsDNAGenome.js (v10.4 gold‑white genome)
+//  • DNA → PulseSpecsDNAGenome.js (v11.0 gold‑white genome)
 //  • RNA Intake → Firestore → Pulse
 //  • RNA Output → Pulse → Firestore
 //  • Skeleton → Pulse → SQL (THIS FILE)
 //  • Bones → SQL tables, columns, migrations
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11.0):
 //  ------------------------
 //  • Read‑only — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.

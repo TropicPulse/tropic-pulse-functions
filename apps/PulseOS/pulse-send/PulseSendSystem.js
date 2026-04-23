@@ -1,5 +1,5 @@
 // ============================================================================
-//  PulseSendSystem.js — Nervous System Conductor (v10.4‑Evo + SDN‑Aware)
+//  PulseSendSystem.js — Nervous System Conductor (v11‑Evo + SDN‑Aware)
 //  Impulse → Pulse v3 → Pulse v2 → Pulse v1 → Router → Mesh → Send
 // ============================================================================
 //
@@ -28,8 +28,8 @@ import { createPulseV2 } from "../pulse-send/PulseV2EvolutionEngine.js";
 import { createLegacyPulse } from "../pulse-send/PulseSendLegacyPulse.js";
 
 // Router + Mesh + Send
-import { PulseRouter } from "../pulse-router/PulseRouter-v10.4.js";
-import { PulseMesh } from "../pulse-mesh/PulseMesh-v10.4.js";
+import { PulseRouter } from "../pulse-router/PulseRouter-v11.js";
+import { PulseMesh } from "../pulse-mesh/PulseMesh-v11.js";
 import { createPulseSend } from "./pulse-send/PulseSend.js";
 
 
@@ -123,8 +123,8 @@ export function createPulseSendSystem({
   }
 
   // ========================================================================
-  //  PUBLIC API — PulseSendSystem (v10.4‑Evo + SDN‑Aware)
-  // ========================================================================
+  //  PUBLIC API — PulseSendSystem (v11‑Evo + SDN‑Aware)
+// ========================================================================
   return {
     async send(impulse) {
       emitSDN("sendSystem:begin", { impulse });
