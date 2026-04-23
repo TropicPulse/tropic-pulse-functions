@@ -340,20 +340,21 @@ window.addEventListener(
     // ------------------------------------------------------------------------
     let classified = false;
 
+    // v10.4 — Import errors are no longer degradations
     if (msg.includes("Cannot find module")) {
-      let attemptedPath = null;
-      const m = msg.match(/Cannot find module ['"]([^'"]+)['"]/);
-      if (m && m[1]) attemptedPath = m[1];
-
-      logProtector("PAGE_IMPORT_DEGRADATION", {
-        error: "importDegradation",
-        details: msg,
-        attemptedPath
+      logProtector("IMPORT_IGNORED", {
+        note: "Import errors are non-fatal in v10.4+",
+        details: msg
       });
 
-      RouteMemory.markDegraded(msg, rawFrames, 0.85);
-      classified = true;
+      // Do NOT classify
+      // Do NOT degrade
+      // Do NOT heal
+      // Do NOT route
+      event.preventDefault();
+      return;
     }
+
 
     if (msg.includes("process is not defined")) {
       logProtector("PAGE_ENV_MISMATCH", {
