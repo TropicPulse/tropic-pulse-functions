@@ -1,22 +1,24 @@
 // ============================================================================
 // FILE: pulse-proxy/CheckIdentity.js
-// PULSE IDENTITY ENGINE — v9.3
-// “THE SELF++ / CANONICAL IDENTITY ENGINE / SENSE‑OF‑SELF LAYER”
+// PULSE IDENTITY ENGINE — v10.4
+// “THE SELF+++ / CANONICAL IDENTITY ENGINE / SENSE‑OF‑SELF LAYER”
 // ============================================================================
 //
-// ROLE (v9.3):
-//   • Canonical identity validator + self-repair engine
+// ROLE (v10.4):
+//   • Canonical identity validator + deterministic self‑repair engine
 //   • Preserves lineage, drift markers, session state, trusted device flags
 //   • Supports offline-first identity survival
-//   • Returns authoritative v9.3 identity snapshot
+//   • Mode-aware (A→B→A routing safe)
+//   • Returns authoritative v10.4 identity snapshot
 //   • Zero randomness, deterministic, replayable
 //
-// CONTRACT (v9.3):
+// CONTRACT (v10.4):
 //   • Fail-open: invalid identity → null (frontend handles fallback)
 //   • Never mutate original input
-//   • Always return structurally complete v9.3 identity
+//   • Always return structurally complete v10.4 identity
 //   • Never trust external identity providers
 //   • Deterministic, loggable, lineage-safe
+//   • No single point of failure
 // ============================================================================
 
 
@@ -24,18 +26,21 @@
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
 const LAYER_ID   = "IDENTITY-LAYER";
-const LAYER_NAME = "THE SELF++";
+const LAYER_NAME = "THE SELF+++";
 const LAYER_ROLE = "SENSE-OF-SELF ENGINE";
-const LAYER_VER  = "9.3";
+const LAYER_VER  = "10.4";
 
 const IDENTITY_DIAGNOSTICS_ENABLED =
   process.env.PULSE_IDENTITY_DIAGNOSTICS === "true" ||
   process.env.PULSE_DIAGNOSTICS === "true";
 
+function safeLog(...args)  { try { console.log(...args); } catch {} }
+function safeError(...args){ try { console.error(...args); } catch {} }
+
 const logSelf = (stage, details = {}) => {
   if (!IDENTITY_DIAGNOSTICS_ENABLED) return;
 
-  log(JSON.stringify({
+  safeLog(JSON.stringify({
     pulseLayer: LAYER_ID,
     pulseName:  LAYER_NAME,
     pulseRole:  LAYER_ROLE,
@@ -47,9 +52,26 @@ const logSelf = (stage, details = {}) => {
 
 
 // ============================================================================
-// HELPERS — NORMALIZE IDENTITY TO v9.3 SHAPE
+// MODE RESOLUTION — A/B/A routing metadata
 // ============================================================================
-function normalizeIdentity(raw) {
+function resolveMode(event) {
+  try {
+    const headers = event?.headers || {};
+    return (
+      headers["x-pulse-mode"] ||
+      headers["X-Pulse-Mode"] ||
+      "identity"
+    ).toString();
+  } catch {
+    return "identity";
+  }
+}
+
+
+// ============================================================================
+// HELPERS — NORMALIZE IDENTITY TO v10.4 SHAPE
+// ============================================================================
+function normalizeIdentity(raw, mode) {
   if (!raw || typeof raw !== "object") return null;
 
   const safeStr = (v, d = "") =>
@@ -71,16 +93,16 @@ function normalizeIdentity(raw) {
     name: safeStr(raw.name),
     roles: Array.isArray(raw.roles) ? raw.roles : [],
 
-    // Identity health + drift markers (v9.3)
+    // Identity health + drift markers
     identityHealth: safeStr(raw.identityHealth, "Unknown"),
     drift: safeObj(raw.drift, {}),
 
-    // Lineage + versioning (v9.3)
+    // Lineage + versioning
     identityVersion: LAYER_VER,
     lineage: safeObj(raw.lineage, {}),
     repairMode: safeStr(raw.repairMode, "none"),
 
-    // Session + device (v9.3)
+    // Session + device
     trustedDevice: safeBool(raw.trustedDevice, false),
     sessionAge: safeNum(raw.sessionAge, 0),
     lastVaultVisit: safeNum(raw.lastVaultVisit, 0),
@@ -91,17 +113,21 @@ function normalizeIdentity(raw) {
 
     // Context injection
     layer: LAYER_NAME,
-    context: "Canonical backend identity snapshot (v9.3)"
+    context: "Canonical backend identity snapshot (v10.4)",
+    mode
   };
 }
 
 
 // ============================================================================
-// BACKEND ENTRY POINT — “THE SELF++”
+// BACKEND ENTRY POINT — “THE SELF+++”
 // ============================================================================
 export const handler = async (event, context) => {
+  const mode = resolveMode(event);
+
   logSelf("INTAKE_START", {
-    hasCookie: !!event?.headers?.cookie
+    hasCookie: !!event?.headers?.cookie,
+    mode
   });
 
   try {
@@ -109,7 +135,7 @@ export const handler = async (event, context) => {
     // ⭐ 1. Load token (identity seed)
     // ----------------------------------------------------
     const token = event.headers.cookie || "";
-    logSelf("TOKEN_LOADED", { tokenLength: token.length });
+    logSelf("TOKEN_LOADED", { tokenLength: token.length, mode });
 
     // ----------------------------------------------------
     // ⭐ 2. Validate token → load identity
@@ -117,7 +143,7 @@ export const handler = async (event, context) => {
     const identity = await validateAndLoadIdentity(token);
 
     if (!identity) {
-      logSelf("IDENTITY_INVALID");
+      logSelf("IDENTITY_INVALID", { mode });
       return {
         statusCode: 401,
         body: JSON.stringify(null)
@@ -125,7 +151,8 @@ export const handler = async (event, context) => {
     }
 
     logSelf("IDENTITY_LOADED", {
-      uid: identity?.uid || null
+      uid: identity?.uid || null,
+      mode
     });
 
     // ----------------------------------------------------
@@ -134,24 +161,27 @@ export const handler = async (event, context) => {
     const repaired = await repairIdentity(identity);
 
     logSelf("IDENTITY_REPAIRED", {
-      uid: repaired?.uid || null
+      uid: repaired?.uid || null,
+      mode
     });
 
     // ----------------------------------------------------
-    // ⭐ 4. Normalize to v9.3 identity shape
+    // ⭐ 4. Normalize to v10.4 identity shape
     // ----------------------------------------------------
-    const normalized = normalizeIdentity(repaired);
+    const normalized = normalizeIdentity(repaired, mode);
 
     logSelf("IDENTITY_NORMALIZED", {
       uid: normalized?.uid || null,
-      version: normalized?.identityVersion
+      version: normalized?.identityVersion,
+      mode
     });
 
     // ----------------------------------------------------
     // ⭐ 5. Return final, authoritative identity
     // ----------------------------------------------------
     logSelf("RETURN_SELF", {
-      uid: normalized?.uid || null
+      uid: normalized?.uid || null,
+      mode
     });
 
     return {
@@ -160,10 +190,11 @@ export const handler = async (event, context) => {
     };
 
   } catch (err) {
-    error("CheckIdentity error:", err);
+    safeError("CheckIdentity error:", err);
 
     logSelf("FATAL_ERROR", {
-      message: err?.message || "Unknown error"
+      message: err?.message || "Unknown error",
+      mode
     });
 
     return {

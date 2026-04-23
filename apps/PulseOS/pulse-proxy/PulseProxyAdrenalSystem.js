@@ -1,19 +1,19 @@
 // ============================================================================
-//  PULSE OS v9.3 — ADRENAL SYSTEM
+//  PULSE OS v10.4 — ADRENAL SYSTEM
 //  PulseInstanceOrchestrator — Fight‑or‑Flight Scaling Layer
 //  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
 //  Backend‑Only Organ (Proxy Spine)
 // ============================================================================
 //
-//  ROLE (v9.3):
+//  ROLE (v10.4):
 //  ------------
 //  • Backend reflex organ that scales worker “cells” per user.
 //  • Reads UserScores → computes deterministic instance counts.
 //  • Launches or reabsorbs workers.
 //  • Logs snapshots for admin dashboards.
-//  • Ready to be wrapped by PulseOSGovernor (multi‑instance law) if desired.
+//  • Ready for PulseOSGovernor wrapping (multi‑instance law, A→B→A routing).
 //
-//  SAFETY CONTRACT (v9.3):
+//  SAFETY CONTRACT (v10.4):
 //  ------------------------
 //  • Imports allowed (backend‑only).
 //  • No eval / Function().
@@ -37,17 +37,17 @@ const db = getFirestore();
 
 
 // ============================================================================
-//  PULSE ROLE — v9.3 Identity
+//  PULSE ROLE — v10.4 Identity
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "AdrenalSystem",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseInstanceOrchestrator",
 
   evo: {
-    dualMode: true,
+    dualMode: true,                 // local + cloud aware
     localAware: true,
     internetAware: true,
     advantageCascadeAware: true,
@@ -56,25 +56,30 @@ export const PulseRole = {
     multiInstanceReady: true,
     unifiedAdvantageField: true,
     pulseSendAware: true,
+    governorReady: true,            // ready for PulseOSGovernor wrapping
+    reflexSafe: true,               // no IQ, no decisions beyond scaling math
+    backendOnly: true,
     futureEvolutionReady: true
   }
 };
 
 
 // ============================================================================
-//  ORGAN CONTEXT — v9.3
+//  ORGAN CONTEXT — v10.4
 // ============================================================================
 const ADRENAL_CONTEXT = {
   layer: PulseRole.layer,
   role: "ADRENAL_SYSTEM",
   version: PulseRole.version,
-  lineage: PulseLineage.optimizer,
-  evo: PulseRole.evo
+  // Adrenal lives in the Proxy lineage, not optimizer
+  lineage: PulseLineage.proxy,
+  evo: PulseRole.evo,
+  mode: "backend-only"
 };
 
 
 // ============================================================================
-//  CONFIG — Physiological Limits (v9.3)
+//  CONFIG — Physiological Limits (v10.4)
 // ============================================================================
 export const NORMAL_MAX     = 4;
 export const UPGRADED_MAX   = 8;
@@ -87,6 +92,8 @@ export const EARN_MODE_MULT = 1.5;
 
 export const ENABLE_INSTANCE_LOGGING = true;
 export const INSTANCE_LOG_COLLECTION = "UserInstanceLogs";
+
+const INSTANCE_HEARTBEAT_MS = 5000;
 
 
 // ============================================================================
@@ -110,10 +117,10 @@ function getDeviceMax(deviceTier, testEarnActive) {
 
 
 // ============================================================================
-//  COMPUTE FINAL INSTANCE COUNT — Deterministic v9.3
+//  COMPUTE FINAL INSTANCE COUNT — Deterministic v10.4
 // ============================================================================
 function computeFinalInstances(base, deviceTier, earnMode, testEarnActive) {
-  let final = base;
+  let final = base || 1;
 
   if (deviceTier === "upgraded") final *= UPGRADED_MULT;
   if (deviceTier === "highend")  final *= HIGHEND_MULT;
@@ -128,7 +135,7 @@ function computeFinalInstances(base, deviceTier, earnMode, testEarnActive) {
 
 
 // ============================================================================
-//  LOG USER SNAPSHOT — v9.3
+//  LOG USER SNAPSHOT — v10.4
 // ============================================================================
 async function logUserInstanceSnapshot(userId, snapshot) {
   if (!ENABLE_INSTANCE_LOGGING) return;
@@ -152,16 +159,27 @@ async function logUserInstanceSnapshot(userId, snapshot) {
 function launchWorker(userId, workerIndex) {
   const workerName = `${userId}-instance-${workerIndex}`;
 
-  logger.log("adrenal", "launch", { userId, workerName, workerIndex });
+  logger.log("adrenal", "launch", {
+    userId,
+    workerName,
+    workerIndex,
+    context: ADRENAL_CONTEXT
+  });
+
+  const interval = setInterval(() => {
+    logger.log("adrenal", "worker_heartbeat", {
+      workerName,
+      userId,
+      index: workerIndex
+    });
+  }, INSTANCE_HEARTBEAT_MS);
 
   return {
     name: workerName,
     userId,
     index: workerIndex,
     started: Date.now(),
-    interval: setInterval(() => {
-      logger.log("adrenal", "worker_heartbeat", { workerName });
-    }, 5000)
+    interval
   };
 }
 
@@ -170,27 +188,40 @@ function launchWorker(userId, workerIndex) {
 //  KILL WORKER — Reabsorb a “cell”
 // ============================================================================
 function killWorker(worker) {
-  logger.log("adrenal", "shutdown", { worker: worker.name });
-  clearInterval(worker.interval);
+  if (!worker) return;
+
+  logger.log("adrenal", "shutdown", {
+    worker: worker.name,
+    userId: worker.userId,
+    index: worker.index
+  });
+
+  try {
+    clearInterval(worker.interval);
+  } catch {
+    // ignore
+  }
 }
 
 
 // ============================================================================
-//  MAIN ORCHESTRATOR LOOP — v9.3
-//  Optional pulse envelope for future Governor wrapping:
-//    pulse = { jobId, lineage, meta... } (not required)
+//  MAIN ORCHESTRATOR LOOP — v10.4
+//  Optional pulse envelope for Governor wrapping:
+//    pulse = { jobId, lineage, mode, meta... } (not required)
 // ============================================================================
 export async function runInstanceOrchestrator(pulse) {
   logger.log("adrenal", "tick_start", {
     ...ADRENAL_CONTEXT,
-    pulseId: pulse?.jobId || pulse?.id || null
+    pulseId: pulse?.jobId || pulse?.id || null,
+    pulseLineage: pulse?.lineage || null,
+    pulseMode: pulse?.mode || "direct"
   });
 
   const snap = await db.collection("UserScores").get();
 
   for (const doc of snap.docs) {
     const userId = doc.id;
-    const data = doc.data();
+    const data = doc.data() || {};
 
     const baseInstances   = data.instances ?? 1;
     const deviceTier      = data.deviceTier ?? "normal";
@@ -273,6 +304,9 @@ export async function runInstanceOrchestrator(pulse) {
     });
   }
 
-  logger.log("adrenal", "tick_complete");
+  logger.log("adrenal", "tick_complete", {
+    mode: pulse?.mode || "direct"
+  });
+
   return true;
 }

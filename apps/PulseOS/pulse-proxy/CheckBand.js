@@ -1,199 +1,317 @@
 // ============================================================================
-// FILE: /apps/pulse-proxy/CheckBand.js
-// PULSE BAND HEALER — v9.3
-// “THE MUSCLE CLINIC++ / KINETIC ORGAN HEALER”
+//  PULSE OS v10.4 — ADRENAL SYSTEM
+//  PulseInstanceOrchestrator — Fight‑or‑Flight Scaling Layer
+//  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
+//  Backend‑Only Organ (Proxy Spine)
 // ============================================================================
 //
-// ROLE (v9.3):
-//   • Backend validator + healer for PulseBand v9.x kinetic subsystem
-//   • Normalizes ALL v9.3 fields (physics, sampler, GPU, network, advantage)
-//   • Detects structural drift + missing fields
-//   • Preserves lineage + timestamps
-//   • Returns authoritative, organism‑safe kinetic snapshot
+//  ROLE (v10.4):
+//  ------------
+//  • Backend reflex organ that scales worker “cells” per user.
+//  • Reads UserScores → computes deterministic instance counts.
+//  • Launches or reabsorbs workers.
+//  • Logs snapshots for admin dashboards.
+//  • Mode‑aware: routes behavior via orchestratorMode (NORMAL / EARN_STRESS / DRAIN).
+//  • Ready to be wrapped by PulseOSGovernor (multi‑instance law).
 //
-// CONTRACT (v9.3):
-//   • Never mutate original input
-//   • Fail‑open with safe defaults
-//   • Always return structurally complete v9.3 band state
-//   • No physics simulation, no timing loops
+//  SAFETY CONTRACT (v10.4):
+//  ------------------------
+//  • Imports allowed (backend‑only).
+//  • No eval / Function().
+//  • No dynamic imports.
+//  • No mutation outside worker registry.
+//  • Deterministic scaling only.
+//  • Drift‑proof instance counts.
+//  • Immune‑safe logging.
 // ============================================================================
 
 
 // ============================================================================
-// LAYER CONSTANTS + DIAGNOSTICS
+//  OSKernel imports (backend‑safe)
 // ============================================================================
-const LAYER_ID   = "MUSCLE-LAYER";
-const LAYER_NAME = "THE MUSCLE CLINIC++";
-const LAYER_ROLE = "KINETIC ORGAN HEALER";
-const LAYER_VER  = "9.3";
+import { logger } from "../OSKernel/PulseLogger.js";
+import { PulseLineage } from "../OSKernel/PulseIdentity.js";
 
-const BAND_DIAGNOSTICS_ENABLED =
-  process.env.PULSE_BAND_DIAGNOSTICS === "true" ||
-  process.env.PULSE_DIAGNOSTICS === "true";
+// Firestore (backend‑only)
+import { getFirestore } from "firebase-admin/firestore";
+const db = getFirestore();
 
-const logBandHealer = (stage, details = {}) => {
-  if (!BAND_DIAGNOSTICS_ENABLED) return;
 
-  log(JSON.stringify({
-    pulseLayer: LAYER_ID,
-    pulseName:  LAYER_NAME,
-    pulseRole:  LAYER_ROLE,
-    pulseVer:   LAYER_VER,
-    stage,
-    ...details
-  }));
+// ============================================================================
+//  PULSE ROLE — v10.4 Identity
+// ============================================================================
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseProxy",
+  layer: "AdrenalSystem",
+  version: "10.4",
+  identity: "PulseInstanceOrchestrator",
+
+  evo: {
+    dualMode: true,
+    localAware: true,
+    internetAware: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    unifiedAdvantageField: true,
+    pulseSendAware: true,
+    futureEvolutionReady: true
+  }
 };
 
 
 // ============================================================================
-// HUMAN‑READABLE CONTEXT MAP (MIRROR OF FRONTEND BAND CONTEXT)
+//  ORGAN CONTEXT — v10.4
 // ============================================================================
-const BAND_CONTEXT = {
-  label: "PULSEBAND",
-  layer: "Kinetic Layer",
-  purpose: "Motion + Physics Subsystem",
-  context: "Frontend kinetic engine state",
-  healerVersion: LAYER_VER
+const ADRENAL_CONTEXT = {
+  layer: PulseRole.layer,
+  role: "ADRENAL_SYSTEM",
+  version: PulseRole.version,
+  lineage: PulseLineage.optimizer,
+  evo: PulseRole.evo
 };
 
 
 // ============================================================================
-// HELPERS — SAFE PARSE + NORMALIZE BAND STATE (v9.3)
+//  MODES — Orchestrator routing modes (v10.4)
 // ============================================================================
+export const ORCHESTRATOR_MODES = {
+  NORMAL: "normal",
+  EARN_STRESS: "earn-stress",
+  DRAIN: "drain"
+};
 
-function safeParseBody(body) {
-  if (!body) return null;
 
-  try {
-    return JSON.parse(body);
-  } catch (err) {
-    logBandHealer("BODY_PARSE_ERROR", { message: err?.message });
-    return null;
+// ============================================================================
+//  CONFIG — Physiological Limits (v10.4)
+// ============================================================================
+export const NORMAL_MAX     = 4;
+export const UPGRADED_MAX   = 8;
+export const HIGHEND_MAX    = 8;
+export const TEST_EARN_MAX  = 16;
+
+export const UPGRADED_MULT  = 2;
+export const HIGHEND_MULT   = 2;
+export const EARN_MODE_MULT = 1.5;
+
+export const ENABLE_INSTANCE_LOGGING = true;
+export const INSTANCE_LOG_COLLECTION = "UserInstanceLogs";
+
+
+// ============================================================================
+//  INTERNAL STATE — Active “cells” per user
+// ============================================================================
+const activeWorkers = new Map(); // userId -> worker[]
+
+
+// ============================================================================
+//  DEVICE TIER → MAX INSTANCES
+// ============================================================================
+function getDeviceMax(deviceTier, testEarnActive, orchestratorMode) {
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) return 1;
+  if (testEarnActive) return TEST_EARN_MAX;
+
+  switch (deviceTier) {
+    case "upgraded": return UPGRADED_MAX;
+    case "highend":  return HIGHEND_MAX;
+    default:         return NORMAL_MAX;
   }
 }
 
-function normalizeBandState(raw) {
-  if (!raw || typeof raw !== "object") return null;
 
-  const safeNum = (v, d = 0) =>
-    typeof v === "number" && !isNaN(v) ? v : d;
+// ============================================================================
+//  COMPUTE FINAL INSTANCE COUNT — Deterministic v10.4
+// ============================================================================
+function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orchestratorMode) {
+  let final = base;
 
-  const safeBool = (v, d = false) =>
-    typeof v === "boolean" ? v : d;
+  // Mode‑aware routing
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) {
+    final = 1;
+  } else {
+    if (deviceTier === "upgraded") final *= UPGRADED_MULT;
+    if (deviceTier === "highend")  final *= HIGHEND_MULT;
 
-  const safeStr = (v, d = "UNKNOWN") =>
-    typeof v === "string" ? v : d;
+    if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
 
-  const safeObj = (v, d = {}) =>
-    typeof v === "object" && v !== null ? v : d;
+    if (orchestratorMode === ORCHESTRATOR_MODES.EARN_STRESS) {
+      // Stress mode: push to deterministic ceiling, but still bounded
+      final = Math.max(final, base * 2);
+    }
+
+    if (testEarnActive) final = TEST_EARN_MAX;
+  }
+
+  const max = getDeviceMax(deviceTier, testEarnActive, orchestratorMode);
+  return Math.max(1, Math.min(final, max));
+}
+
+
+// ============================================================================
+//  LOG USER SNAPSHOT — v10.4
+// ============================================================================
+async function logUserInstanceSnapshot(userId, snapshot) {
+  if (!ENABLE_INSTANCE_LOGGING) return;
+
+  try {
+    await db.collection(INSTANCE_LOG_COLLECTION).add({
+      ...ADRENAL_CONTEXT,
+      userId,
+      ts: Date.now(),
+      ...snapshot
+    });
+  } catch (err) {
+    logger.error("adrenal", "snapshot_log_failed", { error: String(err) });
+  }
+}
+
+
+// ============================================================================
+//  LAUNCH WORKER — Spawn a new “cell”
+// ============================================================================
+function launchWorker(userId, workerIndex, orchestratorMode) {
+  const workerName = `${userId}-instance-${workerIndex}`;
+
+  logger.log("adrenal", "launch", {
+    userId,
+    workerName,
+    workerIndex,
+    mode: orchestratorMode
+  });
 
   return {
-    // Core kinetic flags
-    active: safeBool(raw.active, false),
-    mode: safeStr(raw.mode, "IDLE"),
-
-    // Bars + signal
-    pulsebandBars: safeNum(raw.pulsebandBars, 0),
-    phoneBars: safeNum(raw.phoneBars, 0),
-
-    // Latency + stability
-    latency: safeNum(raw.latency, 0),
-    stabilityScore: safeNum(raw.stabilityScore, 0),
-    latencyClass: safeStr(raw.latencyClass, "UNKNOWN"),
-
-    // Network health (v9.3)
-    networkHealth: safeStr(raw.networkHealth, "UNKNOWN"),
-
-    // Advantage + efficiency (v9.3)
-    advantage: safeNum(raw.advantage, 0),
-    baselineAdvantage: safeNum(raw.baselineAdvantage, 0),
-    efficiencyMode: safeStr(raw.efficiencyMode, "NORMAL"),
-    burstMode: safeStr(raw.burstMode, "OFF"),
-
-    // Route + state
-    route: safeStr(raw.route, "UNKNOWN"),
-    state: safeStr(raw.state, "IDLE"),
-
-    // Sync + timing
-    lastSyncSeconds: safeNum(raw.lastSyncSeconds, 0),
-    lastSyncTimestamp: safeNum(raw.lastSyncTimestamp, Date.now()),
-
-    // Physics + kinetic metrics (v9.3)
-    phoneKbps: safeNum(raw.phoneKbps, 0),
-    appKbps: safeNum(raw.appKbps, 0),
-    lastChunkKbps: safeNum(raw.lastChunkKbps, 0),
-    lastChunkDurationMs: safeNum(raw.lastChunkDurationMs, 0),
-    lastChunkSizeKB: safeNum(raw.lastChunkSizeKB, 0),
-    lastChunkIndex: safeNum(raw.lastChunkIndex, 0),
-
-    // GPU + sampler flags (v9.3)
-    microWindowActive: safeBool(raw.microWindowActive, false),
-    engineDisabled: safeBool(raw.engineDisabled, false),
-
-    // Estimated timing (v9.3)
-    estimatedPhoneSeconds: safeNum(raw.estimatedPhoneSeconds, 0),
-    pulseSeconds: safeNum(raw.pulseSeconds, 0),
-
-    // Metrics container
-    metrics: safeObj(raw.metrics, {}),
-
-    // Timestamp normalization
-    timestamp: raw.timestamp || Date.now(),
-
-    // Context injection
-    ...BAND_CONTEXT
+    name: workerName,
+    userId,
+    index: workerIndex,
+    mode: orchestratorMode,
+    started: Date.now(),
+    interval: setInterval(() => {
+      logger.log("adrenal", "worker_heartbeat", { workerName, mode: orchestratorMode });
+    }, 5000)
   };
 }
 
 
 // ============================================================================
-// BACKEND ENTRY POINT — “THE MUSCLE CLINIC++”
+//  KILL WORKER — Reabsorb a “cell”
 // ============================================================================
-export const handler = async (event, context) => {
-  logBandHealer("INTAKE_START", {
-    method: event?.httpMethod || "UNKNOWN",
-    hasBody: !!event?.body
+function killWorker(worker) {
+  logger.log("adrenal", "shutdown", { worker: worker.name, mode: worker.mode });
+  clearInterval(worker.interval);
+}
+
+
+// ============================================================================
+//  MAIN ORCHESTRATOR LOOP — v10.4
+//  Optional pulse envelope for future Governor wrapping:
+//    pulse = { jobId, lineage, meta..., mode }
+// ============================================================================
+export async function runInstanceOrchestrator(pulse) {
+  const orchestratorMode =
+    pulse?.mode && Object.values(ORCHESTRATOR_MODES).includes(pulse.mode)
+      ? pulse.mode
+      : ORCHESTRATOR_MODES.NORMAL;
+
+  logger.log("adrenal", "tick_start", {
+    ...ADRENAL_CONTEXT,
+    pulseId: pulse?.jobId || pulse?.id || null,
+    mode: orchestratorMode
   });
 
-  try {
-    if (event.httpMethod !== "POST") {
-      logBandHealer("INVALID_METHOD", { method: event.httpMethod });
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ band: null })
-      };
+  const snap = await db.collection("UserScores").get();
+
+  for (const doc of snap.docs) {
+    const userId = doc.id;
+    const data = doc.data();
+
+    const baseInstances   = data.instances ?? 1;
+    const deviceTier      = data.deviceTier ?? "normal";
+    const earnMode        = data.earnMode ?? false;
+    const testEarnActive  = data.testEarnActive ?? false;
+
+    const finalInstances = computeFinalInstances(
+      baseInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      orchestratorMode
+    );
+
+    if (!activeWorkers.has(userId)) {
+      activeWorkers.set(userId, []);
     }
 
-    const parsed = safeParseBody(event.body);
+    const currentWorkers = activeWorkers.get(userId);
 
-    if (!parsed || typeof parsed !== "object") {
-      logBandHealer("PAYLOAD_INVALID");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ band: null })
-      };
+    logger.log("adrenal", "state", {
+      userId,
+      baseInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      current: currentWorkers.length,
+      final: finalInstances,
+      mode: orchestratorMode
+    });
+
+    // ------------------------------------------------------------
+    // SCALE UP — Fight‑or‑Flight Reflex
+    // ------------------------------------------------------------
+    if (currentWorkers.length < finalInstances) {
+      const needed = finalInstances - currentWorkers.length;
+
+      logger.log("adrenal", "scale_up", {
+        userId,
+        needed,
+        from: currentWorkers.length,
+        to: finalInstances,
+        mode: orchestratorMode
+      });
+
+      for (let i = 0; i < needed; i++) {
+        const workerIndex = currentWorkers.length;
+        const worker = launchWorker(userId, workerIndex, orchestratorMode);
+        currentWorkers.push(worker);
+      }
     }
 
-    const rawBand = parsed.band || null;
-    logBandHealer("PAYLOAD_RECEIVED", { hasBand: !!rawBand });
+    // ------------------------------------------------------------
+    // SCALE DOWN — Recovery Reflex
+    // ------------------------------------------------------------
+    if (currentWorkers.length > finalInstances) {
+      const extra = currentWorkers.length - finalInstances;
 
-    const healedBand = normalizeBandState(rawBand);
+      logger.log("adrenal", "scale_down", {
+        userId,
+        extra,
+        from: currentWorkers.length,
+        to: finalInstances,
+        mode: orchestratorMode
+      });
 
-    logBandHealer("STATE_HEALED", { healed: !!healedBand });
+      for (let i = 0; i < extra; i++) {
+        const worker = currentWorkers.pop();
+        killWorker(worker);
+      }
+    }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ band: healedBand })
-    };
-
-  } catch (err) {
-    error("CheckBand error:", err);
-
-    logBandHealer("FATAL_ERROR", { message: err?.message });
-
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ band: null })
-    };
+    // ------------------------------------------------------------
+    // SNAPSHOT — Immune‑Safe Logging
+    // ------------------------------------------------------------
+    await logUserInstanceSnapshot(userId, {
+      baseInstances,
+      finalInstances,
+      deviceTier,
+      earnMode,
+      testEarnActive,
+      currentWorkers: currentWorkers.length,
+      lastUpdated: Date.now(),
+      mode: orchestratorMode
+    });
   }
-};
+
+  logger.log("adrenal", "tick_complete", { mode: orchestratorMode });
+  return true;
+}

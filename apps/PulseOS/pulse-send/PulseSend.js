@@ -1,48 +1,26 @@
 // ============================================================================
-//  PulseSend.js — v3.0
-//  Pattern‑Native Transport Organ • Identity‑Aware • Memory‑Aware
+//  PulseSend.js — v10.4
+//  Pulse‑Agnostic Transport Organ • Evolution‑Aware • Mode‑Aware
 // ============================================================================
 //
-//  WHAT THIS ORGAN IS:
-//  --------------------
-//  • The full PulseSend v3 organism.
-//  • Pure transport intelligence (NOT routing).
-//  • Reads Pulse v2 pattern + lineage.
-//  • Asks PulseRouter v3 for routing decisions.
-//  • Asks PulseMesh v3 for pathway style.
-//  • Moves pulses deterministically.
-//  • Handles return arcs.
-//  • Stamps lineage memory.
-//
-//  WHAT THIS ORGAN IS NOT:
-//  ------------------------
-//  • Not a router (PulseRouter v3 handles routing).
-//  • Not a wiring layer (PulseMesh v3 handles pathways).
-//  • Not a compute engine.
-//  • Not a network layer.
-//  • Not a healer or brain.
-//  • Not a miner.
-//  • Not a GPU/Earn/OS organ.
-//
-//  SAFETY CONTRACT (v3.0):
-//  ------------------------
-//  • No imports.
-//  • No network.
-//  • No compute.
-//  • Pure deterministic movement.
-//  • Zero randomness.
-//  • Zero timestamps.
-//  • Zero mutation outside instance.
-//  • Pattern‑aware, lineage‑aware, identity‑aware.
+//  NEW BEHAVIOR (v10.4‑Evo):
+//  -------------------------
+//  • Try Pulse v3 (unified organism).
+//  • If v3 creation fails → try Pulse v2 (evolution engine).
+//  • If v2 creation fails → try Pulse v1 (stable fallback).
+//  • Always succeed.
 // ============================================================================
 
-// ⭐ PulseRole — identifies this as the PulseSend Organ Wrapper
+
+// ============================================================================
+// ⭐ PulseRole — identifies this as the PulseSend Organ Wrapper (v10.4)
+// ============================================================================
 export const PulseRole = {
   type: "Messenger",
   subsystem: "PulseSend",
-  layer: "Organ",
-  version: "3.0",
-  identity: "PulseSend-v3",
+  layer: "TransportSystem",
+  version: "10.4",
+  identity: "PulseSend-v10.4",
 
   evo: {
     driftProof: true,
@@ -53,139 +31,156 @@ export const PulseRole = {
     patternAware: true,
     lineageAware: true,
     memoryAware: true,
+    modeAware: true,
+    deterministicImpulseFlow: true,
     futureEvolutionReady: true,
 
-    // v9.3 unified advantage + PulseSend‑3.0 identity
     unifiedAdvantageField: true,
-    pulseSend3Ready: true
+    pulseSend10Ready: true
   },
 
-  routingContract: "PulseRouter-v3",
-  meshContract: "PulseMesh-v3",
-  pulseContract: "Pulse-v2",
-  gpuOrganContract: "PulseGPU-v9.2",
-  earnCompatibility: "PulseEarn-v9"
+  routingContract: "PulseRouter-v10.4",
+  meshContract: "PulseMesh-v10.4",
+  pulseContract: "Pulse-v1/v2/v3",
+  gpuOrganContract: "PulseGPU-v10",
+  earnCompatibility: "PulseEarn-v10"
 };
 
-// ============================================================================
-//  FACTORY — Build the Full PulseSend v3 Organism
-// ============================================================================
-//
-//  Dependencies injected:
-//    • createPulse (Pulse v2)
-//    • pulseRouter (PulseRouter v3)
-//    • pulseMesh (PulseMesh v3)
-//    • createPulseSendMover
-//    • createPulseSendImpulse
-//    • createPulseSendReturn
-//    • log (optional)
-//
-//  Returns:
-//    • send() → the full PulseSend v3 chain
-// ============================================================================
 
+// ============================================================================
+//  FACTORY — Build the Full PulseSend v10.4 Organism
+// ============================================================================
 export function createPulseSend({
-  createPulse,          // Pulse v2
-  pulseRouter,          // PulseRouter v3
-  pulseMesh,            // PulseMesh v3
+  createPulseV3,         // ⭐ NEW: Pulse v3 creator
+  createPulseV2,         // ⭐ NEW: Pulse v2 creator
+  createPulseV1,         // ⭐ NEW: Pulse v1 creator
+  pulseRouter,
+  pulseMesh,
   createPulseSendMover,
   createPulseSendImpulse,
   createPulseSendReturn,
   log
 }) {
   // ⭐ Build sub‑organs
-  const mover = createPulseSendMover({
-    pulseMesh,
-    log
-  });
-
-  const impulse = createPulseSendImpulse({
-    mover,
-    log
-  });
-
-  const returnArc = createPulseSendReturn({
-    impulse,
-    log
-  });
+  const mover = createPulseSendMover({ pulseMesh, log });
+  const impulse = createPulseSendImpulse({ mover, log });
+  const returnArc = createPulseSendReturn({ impulse, pulseRouter, pulseMesh, log });
 
   // ========================================================================
   //  PUBLIC API — send()
   // ========================================================================
-  //
-  //  Steps:
-  //    1. Create Pulse v2 organism
-  //    2. Ask PulseRouter v3 for routing target
-  //    3. Ask PulseMesh v3 for pathway style
-  //    4. Fire impulse (movement)
-  //    5. Handle return arc
-  //    6. Stamp lineage memory
-  //
-  // ========================================================================
+  function send({
+    jobId,
+    pattern,
+    payload = {},
+    priority = "normal",
+    returnTo = null,
+    mode = "normal"
+  }) {
 
-  function send({ jobId, pattern, payload = {}, priority = "normal", returnTo = null }) {
-    // ⭐ Step 1 — create Pulse v2 organism
-    const pulse = createPulse({
-      jobId,
-      pattern,
-      payload,
-      priority,
-      returnTo
-    });
+    let pulse = null;
+    let pulseType = null;
 
-    // ⭐ Step 2 — ask PulseRouter v3 for routing target
+    // ================================================================
+    // ⭐ Tier 1 — Try Pulse v3 (Unified Organism)
+    // ================================================================
+    try {
+      pulse = createPulseV3({
+        jobId, pattern, payload, priority, returnTo, mode
+      });
+      pulseType = "Pulse-v3";
+    } catch (errV3) {
+      log && log("[PulseSend-v10.4] Pulse v3 failed, falling back to v2", { errV3 });
+    }
+
+    // ================================================================
+    // ⭐ Tier 2 — Try Pulse v2 (Evolution Engine)
+    // ================================================================
+    if (!pulse) {
+      try {
+        pulse = createPulseV2({
+          jobId, pattern, payload, priority, returnTo, mode
+        });
+        pulseType = "Pulse-v2";
+      } catch (errV2) {
+        log && log("[PulseSend-v10.4] Pulse v2 failed, falling back to v1", { errV2 });
+      }
+    }
+
+    // ================================================================
+    // ⭐ Tier 3 — Fallback to Pulse v1 (Stable Organism)
+    // ================================================================
+    if (!pulse) {
+      pulse = createPulseV1({
+        jobId, pattern, payload, priority, returnTo, mode
+      });
+      pulseType = "Pulse-v1";
+      log && log("[PulseSend-v10.4] Using Pulse v1 fallback", { jobId, pattern });
+    }
+
+    // ================================================================
+    // ⭐ Continue normal transport chain
+    // ================================================================
+
+    // Step 2 — route
     const targetOrgan = pulseRouter.route(pulse);
 
-    // ⭐ Step 3 — ask PulseMesh v3 for pathway style
-    const pathway = pulseMesh.pathwayFor(targetOrgan);
+    // Step 3 — pathway
+    const pathway = pulseMesh.pathwayFor(targetOrgan, mode);
 
-    log && log("[PulseSend-v3] Routing pulse", {
+    log && log("[PulseSend-v10.4] Routing pulse", {
       jobId,
       pattern,
       targetOrgan,
-      pathway
+      pathway,
+      mode,
+      pulseType
     });
 
-    // ⭐ Step 4 — fire impulse (movement)
+    // Step 4 — movement
     const movement = impulse.fire({
       pulse,
       targetOrgan,
-      pathway
+      pathway,
+      mode
     });
 
-    // ⭐ Step 5 — handle return arc
-    const result = returnArc.handle(movement.packet);
+    // Step 5 — return arc
+    const result = returnArc.handle(movement.packet, mode);
 
-    // ⭐ Step 6 — stamp lineage memory
-    pulseRouter.remember(pulse, targetOrgan);
+    // Step 6 — memory
+    pulseRouter.remember(
+      pulse,
+      targetOrgan,
+      "success",
+      pulse.healthScore || 1
+    );
 
     return {
       PulseRole,
       movement,
-      result
+      result,
+      mode,
+      pulseType
     };
   }
 
-  // ⭐ Expose the unified organ
   return {
     PulseRole,
     send
   };
 }
-// ============================================================================
-//  ORGAN EXPORT — ⭐ PulseSend (v3.0)
-//  Provides BOTH:
-//    • createPulseSend() factory
-//    • Unified organ object (PulseSend) for PulseKernel
-// ============================================================================
 
+
+// ============================================================================
+//  ORGAN EXPORT — ⭐ PulseSend (v10.4)
+// ============================================================================
 export const PulseSend = {
   PulseRole,
 
-  // Placeholder until wired by PulseUnderstanding or PulseSendSystem
   send(...args) {
     throw new Error(
-      "[PulseSend-v3] PulseSend.send() was called before initialization. " +
+      "[PulseSend-v10.4] PulseSend.send() was called before initialization. " +
       "Use createPulseSend(...) to wire dependencies."
     );
   }

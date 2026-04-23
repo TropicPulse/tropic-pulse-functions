@@ -1,27 +1,27 @@
 // ============================================================================
 // FILE: /apps/pulse-translator/PulseTranslatorRNAIntake.js
-// [pulse:translator] PULSE_TRANSLATOR_RNA_INTAKE v9.1  // silver-blue
+// [pulse:translator] PULSE_TRANSLATOR_RNA_INTAKE v10.4  // gold‑white
 // Firestore → Pulse Intake RNA • Deterministic • Drift‑Proof • Genome‑Driven
 // PURE TRANSLATOR — NO IO • NO NETWORK • NO FIRESTORE EXECUTION
 // ============================================================================
 //
-// IDENTITY — THE RNA INTAKE TRANSLATOR:
-//  ------------------------------------
+// IDENTITY — THE RNA INTAKE TRANSLATOR (v10.4):
+//  --------------------------------------------
 //  • Converts Firestore runtime values → canonical PulseField types.
 //  • Converts Firestore document snapshots → PulseField schemas.
-//  • Uses the OS DNA Genome (PulseSpecsDNAGenome) as the source of truth.
+//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v10.4) as the source of truth.
 //  • Deterministic, safe, drift‑proof, read‑only.
 //  • Zero Firestore execution — only interprets raw JS objects.
 //
-// ROLE IN THE ORGANISM (v9.1):
-//  ----------------------------
-//  • DNA → PulseSpecsDNAGenome.js
+// ROLE IN THE ORGANISM (v10.4):
+//  -----------------------------
+//  • DNA → PulseSpecsDNAGenome.js (v10.4 gold‑white genome)
 //  • RNA Intake → THIS FILE (Firestore → Pulse)
 //  • RNA Output → PulseTranslatorRNAOutput.js (Pulse → Firestore)
-//  • Proteins → actual data structures in the system
+//  • Proteins → actual data structures in the organism
 //
-// SAFETY CONTRACT:
-//  ----------------
+// SAFETY CONTRACT (v10.4):
+//  ------------------------
 //  • Read‑only — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.
 //  • No network calls.
@@ -34,6 +34,7 @@ import {
   PulseFieldTypes,
   validatePulseField
 } from "../pulse-specs/PulseSpecsDNAGenome.js";
+
 
 // ============================================================================
 //  inferPulseTypeFromFirestore(value)
@@ -61,6 +62,7 @@ export function inferPulseTypeFromFirestore(value) {
   return PulseFieldTypes.JSON;
 }
 
+
 // ============================================================================
 //  translateFirestoreField(fieldName, value)
 //  Converts a Firestore field → canonical PulseField object.
@@ -86,6 +88,7 @@ export function translateFirestoreField(fieldName, value) {
   return field;
 }
 
+
 // ============================================================================
 //  translateFirestoreDocument(docData)
 //  Converts a plain Firestore JS object → PulseField schema map.
@@ -100,18 +103,20 @@ export function translateFirestoreDocument(docData = {}) {
   return out;
 }
 
+
 // ============================================================================
 //  translateFirestoreSnapshot(snapshot)
 //  Accepts a Firestore DocumentSnapshot (read‑only).
 // ============================================================================
 export function translateFirestoreSnapshot(snapshot) {
   if (!snapshot || typeof snapshot.data !== "function") {
-    throw new Error("PulseTranslatorRNAIntake: invalid snapshot");
+    throw new Error("PulseTranslatorRNAIntake-v10.4: invalid snapshot");
   }
 
   const data = snapshot.data() || {};
   return translateFirestoreDocument(data);
 }
+
 
 // ============================================================================
 //  Helpers

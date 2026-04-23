@@ -1,22 +1,24 @@
 // ============================================================================
 // FILE: /apps/pulse-proxy/CheckRouterMemory.js
-// PULSE NETWORK MEMORY HEALER — v9.3
+// PULSE NETWORK MEMORY HEALER — v10.4
 // “THE NETWORK HEALER++ / B‑LAYER LOG INTAKE + REPAIR ENGINE”
 // ============================================================================
 //
-// ROLE (v9.3):
-//   • Backend intake + validator for RouterMemory v9.x flushes
-//   • Normalizes ALL v9.3 log fields (routeTrace, lineage, evo, importConflict)
+// ROLE (v10.4):
+//   • Backend intake + validator for RouterMemory v10.x flushes
+//   • Normalizes ALL log fields (routeTrace, lineage, evo, importConflict)
 //   • Detects structural drift + malformed entries
 //   • Preserves lineage + timestamps
 //   • Returns authoritative, organism‑safe log batch
+//   • Mode‑aware: can be routed/observed per‑mode (A→B→A compatible)
 //
-// CONTRACT (v9.3):
+// CONTRACT (v10.4):
 //   • Never mutate original input
 //   • Fail‑open: invalid payload → empty safe array
-//   • Always return structurally complete v9.3 log entries
+//   • Always return structurally complete log entries
 //   • Lymbic escalation must NEVER throw
 //   • Deterministic, loggable, replayable
+//   • No single point of failure: healer must not crash the proxy
 // ============================================================================
 
 
@@ -26,30 +28,39 @@
 const LAYER_ID   = "NETWORK-LAYER";
 const LAYER_NAME = "THE NETWORK HEALER++";
 const LAYER_ROLE = "B-LAYER MEMORY INTAKE + REPAIR";
-const LAYER_VER  = "9.3";
+const LAYER_VER  = "10.4";
 
 const NETWORK_DIAGNOSTICS_ENABLED =
   process.env.PULSE_NETWORK_DIAGNOSTICS === "true" ||
   process.env.PULSE_DIAGNOSTICS === "true";
 
+function safeLog(...args) {
+  try { console.log(...args); } catch {}
+}
+function safeError(...args) {
+  try { console.error(...args); } catch {}
+}
+
 const logNetworkHealer = (stage, details = {}) => {
   if (!NETWORK_DIAGNOSTICS_ENABLED) return;
 
-  log(JSON.stringify({
-    pulseLayer: LAYER_ID,
-    pulseName:  LAYER_NAME,
-    pulseRole:  LAYER_ROLE,
-    pulseVer:   LAYER_VER,
-    stage,
-    ...details
-  }));
+  safeLog(
+    JSON.stringify({
+      pulseLayer: LAYER_ID,
+      pulseName:  LAYER_NAME,
+      pulseRole:  LAYER_ROLE,
+      pulseVer:   LAYER_VER,
+      stage,
+      ...details
+    })
+  );
 };
 
 
 // ============================================================================
 // HUMAN‑READABLE CONTEXT MAP (MIRROR OF FRONTEND MEMORY CONTEXT)
 // ============================================================================
-const MEMORY_CONTEXT = {
+const BASE_MEMORY_CONTEXT = {
   label: "MEMORY",
   layer: "B‑Layer",
   purpose: "Log Buffer + Healing Support",
@@ -59,9 +70,37 @@ const MEMORY_CONTEXT = {
 
 
 // ============================================================================
-// HELPERS — SAFE PARSE + NORMALIZE LOG BATCH (v9.3)
+// MODE RESOLUTION — A/B/A‑safe routing metadata
 // ============================================================================
+function resolveMode(event) {
+  try {
+    const headers = (event && event.headers) || {};
+    const qs = (event && event.queryStringParameters) || {};
 
+    const headerMode =
+      headers["x-pulse-mode"] ||
+      headers["X-Pulse-Mode"] ||
+      headers["x-pulse-router-mode"];
+
+    const queryMode = qs.mode || qs.routerMode;
+
+    return (headerMode || queryMode || "router-memory").toString();
+  } catch {
+    return "router-memory";
+  }
+}
+
+function buildMemoryContext(mode) {
+  return {
+    ...BASE_MEMORY_CONTEXT,
+    mode
+  };
+}
+
+
+// ============================================================================
+// HELPERS — SAFE PARSE + NORMALIZE LOG BATCH (v10.4)
+// ============================================================================
 function safeParseBody(body) {
   if (!body) return null;
 
@@ -73,9 +112,8 @@ function safeParseBody(body) {
   }
 }
 
-
-// Normalize a single log entry to v9.3 shape
-function normalizeLogEntry(entry) {
+// Normalize a single log entry to v10.4 shape
+function normalizeLogEntry(entry, mode, memoryContext) {
   if (!entry || typeof entry !== "object") return null;
 
   const safeStr = (v, d = "UNKNOWN") =>
@@ -95,13 +133,13 @@ function normalizeLogEntry(entry) {
     eventType: safeStr(entry.eventType),
     data: safeObj(entry.data),
 
-    // Route trace (v9.3)
+    // Route trace
     routeTrace: safeArr(entry.routeTrace),
 
-    // Import conflict lineage (v9.3)
+    // Import conflict lineage / evo
     evo: safeObj(entry.evo),
 
-    // Page + frames (v9.3)
+    // Page + frames
     page: safeStr(entry.page),
     frames: safeArr(entry.frames),
 
@@ -111,14 +149,14 @@ function normalizeLogEntry(entry) {
     // Versioning + lineage
     memoryVersion: entry.memoryVersion || LAYER_VER,
 
-    // Context injection
-    ...MEMORY_CONTEXT
+    // Mode + context injection
+    memoryMode: mode,
+    ...memoryContext
   };
 }
 
-
 // Heal entire batch
-function healLogBatch(raw) {
+function healLogBatch(raw, mode, memoryContext) {
   if (!Array.isArray(raw)) {
     logNetworkHealer("BATCH_INVALID_TYPE", { receivedType: typeof raw });
     return [];
@@ -128,7 +166,7 @@ function healLogBatch(raw) {
   let dropped = 0;
 
   for (const entry of raw) {
-    const normalized = normalizeLogEntry(entry);
+    const normalized = normalizeLogEntry(entry, mode, memoryContext);
     if (!normalized) {
       dropped++;
       continue;
@@ -139,7 +177,8 @@ function healLogBatch(raw) {
   logNetworkHealer("BATCH_HEALED", {
     inputCount: raw.length,
     outputCount: healed.length,
-    dropped
+    dropped,
+    mode
   });
 
   return healed;
@@ -147,9 +186,9 @@ function healLogBatch(raw) {
 
 
 // ============================================================================
-// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL (v9.3)
+// LYMBIC ESCALATION HOOK — SAFE, OPTIONAL (v10.4)
 // ============================================================================
-async function notifyLymbicOnFatal(err) {
+async function notifyLymbicOnFatal(err, mode) {
   try {
     await fetch("/pulse-router/RouteDownAlert", {
       method: "POST",
@@ -158,6 +197,7 @@ async function notifyLymbicOnFatal(err) {
         error: err?.message || String(err),
         type: "CheckRouterMemoryFatal",
         source: "CheckRouterMemory",
+        mode,
         extra: {
           layer: LAYER_ID,
           role: LAYER_ROLE,
@@ -166,23 +206,29 @@ async function notifyLymbicOnFatal(err) {
       })
     });
   } catch (e) {
-    logNetworkHealer("LYMBIC_NOTIFY_FAILED", { message: String(e) });
+    logNetworkHealer("LYMBIC_NOTIFY_FAILED", { message: String(e), mode });
   }
 }
 
 
 // ============================================================================
-// BACKEND ENTRY POINT — “THE NETWORK HEALER++”
+/** BACKEND ENTRY POINT — “THE NETWORK HEALER++” (v10.4)
+ *  A→B→A‑safe: mode‑aware, fail‑open, never throws outward.
+ */
 // ============================================================================
 export const handler = async (event, context) => {
+  const mode = resolveMode(event);
+  const memoryContext = buildMemoryContext(mode);
+
   logNetworkHealer("INTAKE_START", {
     method: event?.httpMethod || "UNKNOWN",
-    hasBody: !!event?.body
+    hasBody: !!event?.body,
+    mode
   });
 
   try {
     if (event.httpMethod !== "POST") {
-      logNetworkHealer("INVALID_METHOD", { method: event.httpMethod });
+      logNetworkHealer("INVALID_METHOD", { method: event.httpMethod, mode });
       return {
         statusCode: 405,
         body: JSON.stringify({ logs: [] })
@@ -192,7 +238,7 @@ export const handler = async (event, context) => {
     const parsed = safeParseBody(event.body);
 
     if (!parsed || typeof parsed !== "object") {
-      logNetworkHealer("PAYLOAD_INVALID");
+      logNetworkHealer("PAYLOAD_INVALID", { mode });
       return {
         statusCode: 400,
         body: JSON.stringify({ logs: [] })
@@ -200,11 +246,14 @@ export const handler = async (event, context) => {
     }
 
     const rawLogs = Array.isArray(parsed.logs) ? parsed.logs : [];
-    logNetworkHealer("PAYLOAD_RECEIVED", { rawCount: rawLogs.length });
+    logNetworkHealer("PAYLOAD_RECEIVED", { rawCount: rawLogs.length, mode });
 
-    const healedLogs = healLogBatch(rawLogs);
+    const healedLogs = healLogBatch(rawLogs, mode, memoryContext);
 
-    logNetworkHealer("RETURN_BATCH", { finalCount: healedLogs.length });
+    logNetworkHealer("RETURN_BATCH", {
+      finalCount: healedLogs.length,
+      mode
+    });
 
     return {
       statusCode: 200,
@@ -212,11 +261,14 @@ export const handler = async (event, context) => {
     };
 
   } catch (err) {
-    error("CheckRouterMemory error:", err);
+    safeError("CheckRouterMemory error:", err);
 
-    logNetworkHealer("FATAL_ERROR", { message: err?.message });
+    logNetworkHealer("FATAL_ERROR", {
+      message: err?.message,
+      mode
+    });
 
-    await notifyLymbicOnFatal(err);
+    await notifyLymbicOnFatal(err, mode);
 
     return {
       statusCode: 500,

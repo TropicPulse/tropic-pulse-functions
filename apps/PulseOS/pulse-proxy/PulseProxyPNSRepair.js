@@ -1,39 +1,41 @@
 // ============================================================================
 // FILE: /apps/pulse-proxy/pulseHistoryRepair.js
-// PULSE HISTORY REPAIR — VERSION 9.3
+// PULSE HISTORY REPAIR — VERSION 10.4
 // “THE SHORT‑TERM MEMORY LAYER++ / WORKING MEMORY REPAIR ENGINE++”
 // ============================================================================
 //
-// ROLE (v9.3):
-//   pulseHistoryRepair is the SHORT‑TERM MEMORY LAYER of PulseOS.
-//   It is the WORKING MEMORY REPAIR ENGINE — the organ responsible for
-//   keeping recent history coherent, normalized, lineage‑safe, and evolution‑safe.
+// ROLE (v10.4):
+//   pulseHistoryRepair is the SHORT‑TERM MEMORY LAYER of PulseProxy.
+//   It is the WORKING MEMORY REPAIR ENGINE — responsible for keeping
+//   recent history coherent, normalized, lineage‑safe, and drift‑safe.
 //
-// SAFETY CONTRACT (v9.3):
+// SAFETY CONTRACT (v10.4):
 //   • Fail‑open: errors logged, never fatal
 //   • No randomness in repair logic
 //   • No mutation outside intended collections
 //   • Always logs repairs + deletions for traceability
 //   • No cross‑subsystem writes
 //   • Deterministic cleanup + repair order
+//   • Bounded scans for multi‑instance safety
+//   • No IQ, no routing, no OS imports
 // ============================================================================
 
-import * as admin from "firebase-admin";
-import { getFirestore } from "firebase-admin/firestore";
+// import * as admin from "firebase-admin";
+// import { getFirestore } from "firebase-admin/firestore";
 
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
-const db = getFirestore();
+// if (!admin.apps.length) {
+//   admin.initializeApp();
+// }
+// const db = getFirestore();
 
 // ============================================================================
-// ORGAN IDENTITY — v9.3
+// ORGAN IDENTITY — v10.4
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "ShortTermMemory",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseHistoryRepair",
 
   evo: {
@@ -46,12 +48,14 @@ export const PulseRole = {
     multiInstanceReady: true,
     memoryRepairEngine: true,
     lineageSafe: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+    boundedScan: true,
+    timerSafe: true
   }
 };
 
 // ------------------------------------------------------------
-// HUMAN‑READABLE CONTEXT MAP (v9.3)
+// HUMAN‑READABLE CONTEXT MAP (v10.4)
 // ------------------------------------------------------------
 const REPAIR_CONTEXT = {
   label: "PULSE_HISTORY_REPAIR",
@@ -62,6 +66,8 @@ const REPAIR_CONTEXT = {
   version: PulseRole.version,
   evo: PulseRole.evo
 };
+
+const MAX_BATCH = 500;
 
 // ============================================================================
 // BACKEND ENTRY POINT (CALLED BY HEARTBEAT / OSKernel)
@@ -80,104 +86,112 @@ export async function pulseHistoryRepair() {
 
   try {
     const cutoff30d = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    let lastDoc = null;
 
     // ---------------------------------------------------------
-    // ⭐ REPAIR: pulse_history (normalize + prune)
+    // ⭐ BOUNDED SCAN: pulse_history (v10.4)
     // ---------------------------------------------------------
-    const histSnap = await db.collection("pulse_history").get();
+    while (true) {
+      let query = db
+        .collection("pulse_history")
+        .orderBy("createdAt", "asc")
+        .limit(MAX_BATCH);
 
-    for (const h of histSnap.docs) {
-      const id = h.id;
+      if (lastDoc) query = query.startAfter(lastDoc);
 
-      try {
-        const data = h.data() || {};
-        const createdAt = data.createdAt?.toMillis?.() || 0;
+      const histSnap = await query.get();
+      if (histSnap.empty) break;
 
-        // ---------------------------------------------------------
-        // ⭐ DELETE: expired + dead entries
-        // ---------------------------------------------------------
-        if (createdAt && createdAt < cutoff30d && data.status === "dead") {
-          await h.ref.delete();
-          deletedDocs.push(id);
+      for (const h of histSnap.docs) {
+        const id = h.id;
 
-          log(
-            `%c🟨 PRUNED (expired memory) → ${id}`,
-            "color:#FFC107; font-weight:bold;"
+        try {
+          const data = h.data() || {};
+          const createdAt = data.createdAt?.toMillis?.() || 0;
+
+          // ---------------------------------------------------------
+          // ⭐ DELETE: expired + dead entries
+          // ---------------------------------------------------------
+          if (createdAt && createdAt < cutoff30d && data.status === "dead") {
+            await h.ref.delete();
+            deletedDocs.push(id);
+
+            log(
+              `%c🟨 PRUNED (expired memory) → ${id}`,
+              "color:#FFC107; font-weight:bold;"
+            );
+
+            continue;
+          }
+
+          const updates = {};
+
+          // ---------------------------------------------------------
+          // ⭐ NORMALIZE MISSING FIELDS (v10.4 deterministic repair)
+          // ---------------------------------------------------------
+
+          if (!data.userId && data.uid) {
+            updates.userId = data.uid;
+          }
+
+          if (!data.status) {
+            updates.status = "unknown";
+          }
+
+          if (!data.source) {
+            updates.source = "legacy";
+          }
+
+          if (!data.lineage || typeof data.lineage !== "object") {
+            updates.lineage = {
+              version: "10.4",
+              repairedBy: "pulseHistoryRepair",
+              repairRunId: runId
+            };
+          }
+
+          if (!data.timestamp) {
+            updates.timestamp = admin.firestore.FieldValue.serverTimestamp();
+          }
+
+          if (!data.drift) {
+            updates.drift = { repaired: true, version: "10.4" };
+          }
+
+          if (Object.keys(updates).length > 0) {
+            updates.repairedAt = admin.firestore.FieldValue.serverTimestamp();
+            updates.repairRunId = runId;
+
+            await h.ref.set(updates, { merge: true });
+            repairedDocs.push(id);
+
+            log(
+              `%c🟩 REPAIRED MEMORY → ${id}`,
+              "color:#4CAF50; font-weight:bold;"
+            );
+          }
+
+        } catch (err) {
+          error(
+            `%c🟥 MEMORY ERROR (doc) → ${id}`,
+            "color:#FF5252; font-weight:bold;",
+            err
           );
 
-          continue;
+          await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${id}`).set({
+            fn: "pulseHistoryRepair",
+            stage: "history_doc",
+            docId: id,
+            error: String(err),
+            runId,
+            ...REPAIR_CONTEXT,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+          });
         }
-
-        const updates = {};
-
-        // ---------------------------------------------------------
-        // ⭐ NORMALIZE MISSING FIELDS (v9.3 evolutionary repair)
-        // ---------------------------------------------------------
-
-        // v9.3 identity unification
-        if (!data.userId && data.uid) {
-          updates.userId = data.uid;
-        }
-
-        // v9.3 status contract
-        if (!data.status) {
-          updates.status = "unknown";
-        }
-
-        // v9.3 source contract
-        if (!data.source) {
-          updates.source = "legacy";
-        }
-
-        // v9.3 lineage contract
-        if (!data.lineage || typeof data.lineage !== "object") {
-          updates.lineage = {
-            version: "9.3",
-            repairedBy: "pulseHistoryRepair",
-            repairRunId: runId
-          };
-        }
-
-        // v9.3 timestamp contract
-        if (!data.timestamp) {
-          updates.timestamp = admin.firestore.FieldValue.serverTimestamp();
-        }
-
-        // v9.3 drift markers
-        if (!data.drift) {
-          updates.drift = { repaired: true, version: "9.3" };
-        }
-
-        if (Object.keys(updates).length > 0) {
-          updates.repairedAt = admin.firestore.FieldValue.serverTimestamp();
-          updates.repairRunId = runId;
-
-          await h.ref.set(updates, { merge: true });
-          repairedDocs.push(id);
-
-          log(
-            `%c🟩 REPAIRED MEMORY → ${id}`,
-            "color:#4CAF50; font-weight:bold;"
-          );
-        }
-
-      } catch (err) {
-        error(
-          `%c🟥 MEMORY ERROR (doc) → ${id}`,
-          "color:#FF5252; font-weight:bold;",
-          err
-        );
-
-        await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${id}`).set({
-          fn: "pulseHistoryRepair",
-          stage: "history_doc",
-          docId: id,
-          error: String(err),
-          runId,
-          ...REPAIR_CONTEXT,
-          createdAt: admin.firestore.FieldValue.serverTimestamp()
-        });
       }
+
+      lastDoc = histSnap.docs[histSnap.docs.length - 1];
+      if (histSnap.size < MAX_BATCH) break;
     }
 
     // ---------------------------------------------------------

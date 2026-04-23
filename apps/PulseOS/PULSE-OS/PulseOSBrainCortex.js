@@ -1,36 +1,26 @@
 // ============================================================================
-//  FILE: /apps/pulse-os/PulseOSBrainCortex.js
-//  PULSE OS BRAIN v9.2 — CORTEX ORGAN
-//  High‑Level Cognition • Shell Orchestration • Nervous System Supervisor
-//  PURE FRONTEND INTELLIGENCE. NO IMPORTS. NO BACKEND. NO NETWORK CALLS.
+// FILE: /apps/pulse-os/PulseOSCortex.js
+// PULSE OS — v10.1
+// “THE CORTEX ORGAN — HIGH‑LEVEL COGNITION + ORGAN SUPERVISOR”
 // ============================================================================
 //
-//  IDENTITY — PULSE BRAIN (CORTEX) v9.2:
-//  -------------------------------------
-//  • The conscious layer of PulseOS (cortex).
-//  • Interprets environment + identity into OS‑level understanding.
-//  • Orchestrates shell state, PulseBand permission, and identity access.
-//  • Sits behind the Outer BBB and above the Kernel (brainstem).
-//  • Purely local: no backend, no TPProxy, no network dependency.
-//  • Single source of truth for “what the OS thinks is happening”.
-//
-//  SAFETY CONTRACT (v9.2):
-//  ------------------------
-//  • No backend calls.
-//  • No TPProxy usage.
-//  • No DOM manipulation.
-//  • No dynamic imports or eval.
-//  • Pure, deterministic state transitions only.
-//  • Local‑only cognition based on route + identity.
+// ROLE (v10.1):
+// -------------
+// • Receives PulseOSBrain (CNS) directly
+// • Reads Intent, IQ, OrganismMap from Brain
+// • Reads Evolution from Brain.evolution
+// • Initializes Nervous System + Organs
+// • Reports lineage + drift to Evolution
+// • Maintains OS‑level conscious state
+// • Pure frontend, deterministic, no backend
 // ============================================================================
 
-// ⭐ PulseRole — organism identity for CNS attachment
 export const PulseRole = {
   type: "Brain",
   subsystem: "OS",
   layer: "Cortex",
-  version: "9.2",
-  identity: "PulseOSBrainCortex",
+  version: "10.1",
+  identity: "PulseOSCortex",
 
   evo: {
     deterministicNeuron: true,
@@ -38,118 +28,89 @@ export const PulseRole = {
     multiInstanceReady: true,
     advantageCascadeAware: true,
     unifiedAdvantageField: true,
-    pulseEfficiencyAware: true,
-
-    // Conceptual compatibility (no logic impact)
-    routingContract: "PulseSend-v9.2",
-    osOrganContract: "PulseOS-v9.2",
-    earnCompatibility: "PulseEarn-v9.2"
+    pulseEfficiencyAware: true
   }
 };
 
+
 // ============================================================================
-//  FACTORY — ALL DEPENDENCIES ARE INJECTED BY THE CNS BRAIN
+//  FACTORY — Cortex receives the CNS Brain directly
 // ============================================================================
-export function createPulseBrainCortex({
-  SHELL_STATES,
-  determineShellState,
-  guardPulseBand,
-  PulseKernel,
-  getLocalIdentity,   // optional
-  log                 // optional
-}) {
-  const BrainState = {
+export function createPulseOSCortex({ Brain }) {
+
+  if (!Brain) {
+    throw new Error("PulseOSCortex: Missing CNS Brain injection.");
+  }
+
+  const Evolution = Brain.evolution || null;
+
+  // Cortex State
+  const CortexState = {
     bootTs: null,
     ready: false,
-    routeName: null,
+    routeName: "main",
     hasIdentity: false,
-    shellState: SHELL_STATES?.ANON_SHELL,
-    allowPulseBand: true,
-    allowIdentity: false
+
+    // Pull maps directly from CNS Brain
+    IntentMap: Brain.PulseIntentMap,
+    IQMap: Brain.PulseIQMap,
+    OrganismMap: Brain.PulseOrganismMap,
+
+    // Understanding context
+    understanding: Brain.understanding || null
   };
 
-  // ----------------------------------------------------------
-  // Identity resolution (local-only, deterministic)
-  // ----------------------------------------------------------
-  function computeIdentityFlag(explicitHasIdentity) {
-    if (typeof explicitHasIdentity === "boolean") {
-      return explicitHasIdentity;
-    }
-    if (typeof getLocalIdentity === "function") {
-      try {
-        const id = getLocalIdentity();
-        return !!id;
-      } catch {
-        return false;
-      }
-    }
-    return false;
-  }
 
-  // ----------------------------------------------------------
-  // Core cognition: interpret route + identity → shell + permissions
-  // ----------------------------------------------------------
-  function updateBrainFromContext({ routeName, hasIdentity }) {
-    const route = routeName || "";
-    const identityFlag = computeIdentityFlag(hasIdentity);
-
-    const shellState = determineShellState({
-      routeName: route,
-      hasIdentity: identityFlag
-    });
-
-    const { allowPulseBand, allowIdentity } = guardPulseBand({
-      routeName: route,
-      hasIdentity: identityFlag
-    });
-
-    BrainState.routeName = route;
-    BrainState.hasIdentity = identityFlag;
-    BrainState.shellState = shellState;
-    BrainState.allowPulseBand = allowPulseBand;
-    BrainState.allowIdentity = allowIdentity;
-  }
-
-  // ----------------------------------------------------------
-  // BOOT — Cortex comes online after Kernel readiness
-  // ----------------------------------------------------------
-  async function PulseBrainBoot(initialCtx = {}) {
-    if (!BrainState.bootTs) {
-      BrainState.bootTs = Date.now();
+  // ========================================================================
+  //  BOOT — Cortex comes online AFTER PulseOSBrain
+  // ========================================================================
+  async function bootCortex() {
+    if (!CortexState.bootTs) {
+      CortexState.bootTs = Date.now();
     }
 
-    if (!PulseKernel.isReady()) {
-      await PulseKernel.boot();
+    // Evolution lineage
+    Evolution?.recordLineage?.("cortex-boot");
+
+    // Initialize Nervous System if Brain provided it
+    if (Brain.cortex?.initializeNervousSystem) {
+      Brain.cortex.initializeNervousSystem();
     }
 
-    updateBrainFromContext({
-      routeName: initialCtx.routeName || "main",
-      hasIdentity: initialCtx.hasIdentity
-    });
+    // Initialize Organs if Brain provided it
+    if (Brain.cortex?.initializeOrgans) {
+      Brain.cortex.initializeOrgans();
+    }
 
-    BrainState.ready = true;
-    log && log("[Cortex v9.2] Boot complete", { state: BrainState });
-    return BrainState;
+    CortexState.ready = true;
+
+    // Evolution drift scan
+    Evolution?.scanDrift?.(Brain);
+
+    Brain.log("[Cortex v10.1] Boot complete", { CortexState });
+    return CortexState;
   }
 
-  // ----------------------------------------------------------
-  // UPDATE — Route or identity changed
-  // ----------------------------------------------------------
-  function PulseBrainUpdateContext(ctx = {}) {
-    updateBrainFromContext({
-      routeName: ctx.routeName ?? BrainState.routeName,
-      hasIdentity: ctx.hasIdentity ?? BrainState.hasIdentity
-    });
-    return BrainState;
+
+  // ========================================================================
+  //  UPDATE — Route or identity changed
+  // ========================================================================
+  function updateCortex(ctx = {}) {
+    CortexState.routeName = ctx.routeName ?? CortexState.routeName;
+    CortexState.hasIdentity = ctx.hasIdentity ?? CortexState.hasIdentity;
+
+    Evolution?.recordLineage?.("cortex-update");
+    return CortexState;
   }
 
-  // ----------------------------------------------------------
-  // PUBLIC API
-  // ----------------------------------------------------------
+
+  // ========================================================================
+  //  PUBLIC API
+  // ========================================================================
   return {
-    boot: PulseBrainBoot,
-    updateContext: PulseBrainUpdateContext,
-    state: BrainState,
-    isReady: () => BrainState.ready
+    boot: bootCortex,
+    update: updateCortex,
+    state: CortexState,
+    isReady: () => CortexState.ready
   };
 }

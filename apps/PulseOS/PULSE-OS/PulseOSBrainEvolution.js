@@ -1,128 +1,160 @@
 // ============================================================================
-// PulseOS Evolution Engine — v9.2
-// “Evolution that evolves itself”
+// PulseOS Evolution Engine — v10
+// “Evolution that evolves the organism, not the filesystem”
 // ============================================================================
 //
-//  ROLE IN THE ORGANISM (v9.2):
-//  ----------------------------
-//  • Discovers pulse-* organs across the filesystem
-//  • Exposes raw organ candidates to the CNS Brain
-//  • Lets the CNS perform final PulseRole validation + attachment
-//  • Provides deterministic, drift‑proof organ evolution
-//  • Zero compute, zero AI, zero autonomy
+// ROLE IN THE ORGANISM (v10):
+// ---------------------------
+// • FIRST organ after Understanding
+// • Attaches Intent, OrganismMap, IQMap to Brain
+// • Attaches Evolution to Brain
+// • Boots the Brain (which boots Cortex)
+// • Provides drift detection + lineage tracking
+// • Provides organ evolution + organism evolution
+// • Provides CNS evolution + structural drift scanning
+// • Pure frontend, deterministic, zero network, zero filesystem
 //
-//  SAFETY CONTRACT (v9.2):
-//  ------------------------
-//  • No dynamic eval
-//  • No arbitrary execution
-//  • No backend calls
-//  • No network
-//  • Deterministic scanning + importing only
+// SAFETY CONTRACT (v10):
+// -----------------------
+// • No dynamic eval
+// • No backend calls
+// • No filesystem access
+// • No import.meta.glob
+// • Deterministic, drift‑proof wiring only
 //
-//  IDENTITY (v9.2):
-//  ----------------
-//  • organ: EvolutionEngine
-//  • layer: CNS
-//  • subsystem: OS
-//  • version: 9.2
-//  • generation: v9
+// IDENTITY (v10):
+// ---------------
+// • organ: Evolution
+// • layer: CNS
+// • subsystem: OS
+// • version: 10.0
 // ============================================================================
 
-import { Brain,BrainIntel } from "./PulseOSBrain.js";
-import { PulseOrganismMap } from "/apps/PulseOS/PulseBrainMap.js";
-PulseOSBrain.PulseOrganismMap = PulseOrganismMap;
-
-// ============================================================================
-//  PulseRole — Evolution Engine Identity (for CNS awareness)
-// ============================================================================
 export const PulseRole = {
-  type: "EvolutionEngine",
+  type: "Evolution",
   subsystem: "OS",
   layer: "CNS",
-  version: "9.2",
-  identity: "PulseOSEvolutionEngine",
+  version: "10.0",
+  identity: "PulseOSEvolution",
 
   evo: {
-    deterministicScan: true,
+    deterministic: true,
     driftProof: true,
     multiInstanceReady: true,
-    advantageCascadeAware: true,
     unifiedAdvantageField: true,
-    zeroNetwork: true
+    zeroNetwork: true,
+    zeroFilesystem: true
   }
 };
 
-// ---------------------------------------------------------------------------
-// 1. AUTO-DISCOVER ALL pulse-* FOLDERS
-// ---------------------------------------------------------------------------
-function discoverPulseFolders(rootDir) {
-  const entries = readdirSync(rootDir);
-  const pulseFolders = [];
 
-  for (const entry of entries) {
-    if (!entry.startsWith("pulse-")) continue;
+// ============================================================================
+//  EVOLUTION ENGINE — The CNS growth organ
+// ============================================================================
+export function PulseOSEvolution({ intent, organism, iq, understanding }) {
 
-    const fullPath = join(rootDir, entry);
-    if (!statSync(fullPath).isDirectory()) continue;
+  // Internal drift + lineage state
+  const DriftState = {
+    lineage: [],
+    driftEvents: [],
+    organHealth: {},
+    organismHealth: 1.0,
+    lastScan: null
+  };
 
-    const functionsPath = join(fullPath, "functions");
-    pulseFolders.push(functionsPath);
+
+  // --------------------------------------------------------------------------
+  // DRIFT SCANNER — Detect structural drift in maps + Brain surface
+  // --------------------------------------------------------------------------
+  function scanDrift(Brain) {
+    const drift = [];
+
+    if (!Brain.PulseIntentMap) drift.push("missing-intent-map");
+    if (!Brain.PulseOrganismMap) drift.push("missing-organism-map");
+    if (!Brain.PulseIQMap) drift.push("missing-iq-map");
+
+    DriftState.lastScan = Date.now();
+    DriftState.driftEvents.push(...drift);
+
+    return drift;
   }
 
-  return pulseFolders;
-}
 
-// ---------------------------------------------------------------------------
-// 2. RAW EVOLUTIONARY DISCOVERY (NO FILTERING)
-//    Returns all candidate modules whose filenames match designIdentity.
-//    CNS Brain is responsible for PulseRole validation + selection.
-// ---------------------------------------------------------------------------
-export async function evolveRaw(designIdentity) {
-  const id = designIdentity?.toLowerCase() || null;
-
-  const PULSE_FOLDERS = discoverPulseFolders(join(process.cwd(), "apps"));
-  const candidates = [];
-
-  for (const folder of PULSE_FOLDERS) {
-    try {
-      const files = await import.meta.glob(`${folder}/*.js`);
-
-      for (const path in files) {
-        const filename = path.toLowerCase();
-
-        if (id && !filename.includes(id)) continue;
-
-        const module = await files[path]();
-        candidates.push({ path, module });
-      }
-    } catch {
-      // fail‑open: a bad folder never blocks evolution
-      continue;
-    }
+  // --------------------------------------------------------------------------
+  // LINEAGE ENGINE — Track organism evolution lineage
+  // --------------------------------------------------------------------------
+  function recordLineage(event) {
+    DriftState.lineage.push({
+      ts: Date.now(),
+      event
+    });
   }
 
-  return candidates;
-}
 
-// ---------------------------------------------------------------------------
-// 3. LEGACY HELPER — evolveOrgan (filtered, single organ)
-//    Kept for backward compatibility. New CNS uses evolveRaw().
-// ---------------------------------------------------------------------------
-export async function evolveOrgan(designIdentity, expectedType, expectedSubsystem) {
-  const expected = { type: expectedType, subsystem: expectedSubsystem };
-  const raw = await evolveRaw(designIdentity);
-
-  const filtered = raw.filter(({ module }) =>
-    validatePulseRole(module, expected.type, expected.subsystem)
-  );
-
-  if (filtered.length > 0) {
-    return filtered[0].module;
+  // --------------------------------------------------------------------------
+  // ORGAN HEALTH ENGINE — Track health of each organ
+  // --------------------------------------------------------------------------
+  function updateOrganHealth(organName, score) {
+    DriftState.organHealth[organName] = score;
   }
 
-  return structuralError(
-    expected,
-    { type: null, subsystem: null },
-    { designIdentity }
-  );
+
+  // --------------------------------------------------------------------------
+  // ORGANISM HEALTH ENGINE — Aggregate organ health
+  // --------------------------------------------------------------------------
+  function computeOrganismHealth() {
+    const values = Object.values(DriftState.organHealth);
+    if (values.length === 0) return 1.0;
+
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    DriftState.organismHealth = avg;
+    return avg;
+  }
+
+
+  // --------------------------------------------------------------------------
+  // EVOLUTION → BRAIN BOOTSTRAP
+  // --------------------------------------------------------------------------
+  function bootBrain(Brain) {
+
+    // Attach maps to Brain
+    Brain.PulseIntentMap = intent;
+    Brain.PulseOrganismMap = organism;
+    Brain.PulseIQMap = iq;
+
+    // Attach Evolution organ to Brain
+    Brain.evolution = Evolution;
+
+    // Record lineage
+    recordLineage("brain-boot");
+
+    // Boot Brain (this boots Cortex internally)
+    const bootedBrain = Brain.cognitiveBootstrap({
+      intent,
+      organism,
+      iqMap: iq,
+      understanding
+    });
+
+    // Initial drift scan
+    scanDrift(bootedBrain);
+
+    return bootedBrain;
+  }
+
+
+  // --------------------------------------------------------------------------
+  // PUBLIC EVOLUTION ORGAN SURFACE
+  // --------------------------------------------------------------------------
+  const Evolution = {
+    PulseRole,
+    DriftState,
+    scanDrift,
+    recordLineage,
+    updateOrganHealth,
+    computeOrganismHealth,
+    bootBrain
+  };
+
+  return Evolution;
 }

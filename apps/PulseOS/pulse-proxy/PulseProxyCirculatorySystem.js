@@ -1,40 +1,41 @@
 // ============================================================================
 // FILE: /apps/tropic-pulse/lib/Connectors/PulseClient.js
-// LAYER: CIRCULATORY SYSTEM (Arterial Fetch Layer) — v9.3
+// LAYER: CIRCULATORY SYSTEM (Arterial Fetch Layer) — v10.4
 // ============================================================================
 //
-// ROLE (v9.3):
+// ROLE (v10.4):
 //   THE CIRCULATORY SYSTEM — Arterial Fetch Layer
-//   • Moves data outward through the organism
-//   • Attempts accelerated PULSE route first (arterial path)
-//   • Falls back to PHONE route if needed (venous path)
-//   • Returns clean { data, meta } packets (oxygenated payloads)
+//   • Arterial path: accelerated PULSE proxy route
+//   • Venous path: direct PHONE fallback
+//   • Moves oxygenated data outward through the organism
+//   • Returns deterministic { data, meta } packets
 //
-// CONTRACT (v9.3):
+// CONTRACT (v10.4):
 //   • No PulseBand imports
 //   • No PulseNet imports
 //   • No global state
 //   • No side effects
 //   • Pure circulatory subsystem
 //
-// SAFETY (v9.3):
+// SAFETY (v10.4):
 //   • No console.*
-//   • All logs routed through PulseProxyVitalsLogger
-//   • All metrics routed through PulseProxyBloodStream
+//   • All diagnostics routed through PulseProxyBloodStream
 //   • Deterministic, drift‑proof, AND‑architecture aligned
+//   • No mutation of external state
+//   • No routing logic beyond arterial→venous fallback
 // ============================================================================
 
 import { emitTelemetry } from "./PulseProxyBloodStream.js";
 
 
 // ============================================================================
-// ⭐ OS‑v9.3 CONTEXT METADATA — Circulatory Identity
+// ⭐ OS‑v10.4 CONTEXT METADATA — Circulatory Identity
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseClient",
   layer: "CirculatorySystem",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseClientArterialLayer",
 
   evo: {
@@ -74,7 +75,7 @@ const SUBSYSTEM = "circulation";
 
 
 // ============================================================================
-// DIAGNOSTICS
+// DIAGNOSTICS (v10.4)
 // ============================================================================
 const CIRCULATION_DIAGNOSTICS_ENABLED =
   (typeof window !== "undefined" &&
@@ -85,15 +86,13 @@ const CIRCULATION_DIAGNOSTICS_ENABLED =
 const circulationLog = (stage, details = {}) => {
   if (!CIRCULATION_DIAGNOSTICS_ENABLED) return;
 
-  log(SUBSYSTEM, stage, {
+  emitTelemetry(SUBSYSTEM, stage, {
     pulseLayer: PulseRole.layer,
     pulseName: "THE CIRCULATORY SYSTEM",
     pulseRole: "Arterial Fetch Layer",
     meta: { ...CIRCULATION_CONTEXT },
     ...details
   });
-
-  emitTelemetry(SUBSYSTEM, stage, details);
 };
 
 circulationLog("CIRCULATION_INIT");
@@ -121,7 +120,7 @@ function getDeviceInfo() {
 
 
 // ============================================================================
-// CORE FETCH WRAPPER — ARTERIAL FLOW (v9.3)
+// CORE FETCH WRAPPER — ARTERIAL FLOW (v10.4)
 // ============================================================================
 async function pulseFetch(url) {
   circulationLog("FETCH_START", { url });
@@ -130,6 +129,9 @@ async function pulseFetch(url) {
   const start = performance.now();
 
   try {
+    // ---------------------------------------------------------
+    // ARTERIAL ATTEMPT — PULSE ROUTE
+    // ---------------------------------------------------------
     circulationLog("ARTERIAL_ATTEMPT", { url });
 
     const res = await fetch(
@@ -171,6 +173,9 @@ async function pulseFetch(url) {
     };
 
   } catch (err) {
+    // ---------------------------------------------------------
+    // VENOUS FALLBACK — PHONE ROUTE
+    // ---------------------------------------------------------
     circulationLog("ARTERIAL_EXCEPTION", { error: String(err) });
 
     const fbStart = performance.now();
@@ -201,7 +206,7 @@ async function pulseFetch(url) {
 
 
 // ============================================================================
-// PUBLIC API — CIRCULATORY SYSTEM v9.3
+// PUBLIC API — CIRCULATORY SYSTEM v10.4
 // ============================================================================
 export const PulseClient = {
   get: pulseFetch,

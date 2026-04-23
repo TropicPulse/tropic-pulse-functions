@@ -1,20 +1,22 @@
 // ============================================================================
-//  PULSE OS v10.2 — THE HEART
+//  PULSE OS v10.4 — THE HEART
 //  PulseProxyHeart — Cardiac Pacemaker Engine
 //  ONE IMPORT ONLY (Pacemaker / SA Node)
 //  Backend‑Only • Deterministic • Drift‑Proof • No IQ
+//  PURE WRAPPER. NO LOGIC. NO ROUTING. NO BUSINESS STATE.
 // ============================================================================
 
 import * as heartbeat from "./PulseProxyHeartBeat.js";
 
+
 // ============================================================================
-// HEART IDENTITY — v10.2
+// HEART IDENTITY — v10.4
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "Heart",
-  version: "10.2",
+  version: "10.4",
   identity: "PulseProxyHeart",
 
   evo: {
@@ -26,6 +28,9 @@ export const PulseRole = {
     noCompute: true,
     backendOnly: true,
     multiInstanceReady: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    organismClockOrchestrator: true,
     futureEvolutionReady: true
   }
 };
@@ -35,15 +40,16 @@ const HEART_CONTEXT = {
   role: "CARDIAC_PACEMAKER_ENGINE",
   version: PulseRole.version,
   pacemaker: {
-    source: "heartbeat.js",
-    version: heartbeat?.VERSION || "10.2",
+    source: "PulseProxyHeartBeat.js",
+    version: heartbeat?.VERSION || "10.3",
     label: heartbeat?.LABEL || "HEARTBEAT_PACEMAKER"
   },
   evo: PulseRole.evo
 };
 
+
 // ============================================================================
-// HEART LOGGER — logs only, no control
+// HEART LOGGER — logs only, no control, no routing
 // ============================================================================
 let HEART_EVENT_SEQ = 0;
 
@@ -66,9 +72,14 @@ async function logHeart(stage, details = {}) {
   } catch (_) {}
 }
 
+
 // ============================================================================
 // MAIN HANDLER — “THE HEARTBEAT”
 //  Pure wrapper around the pacemaker. Nothing else.
+//  • Does NOT compute
+//  • Does NOT route
+//  • Does NOT mutate business state
+//  • Only calls heartbeat.beat() and returns its result
 // ============================================================================
 export const handler = async () => {
   const runId = `HB_${Date.now()}`;
@@ -77,6 +88,7 @@ export const handler = async () => {
 
   try {
     // ⭐ The ONLY thing the Heart does:
+    //    Delegate to the pacemaker organ (Heartbeat).
     const beatResult = await heartbeat.beat();
 
     await logHeart("BEAT_COMPLETE", { runId });

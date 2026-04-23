@@ -1,7 +1,7 @@
 // ============================================================================
-//  PULSE OS v9.3 — VITALS LOGGER (RENDERER ONLY)
+//  PULSE OS v10.3 — VITALS LOGGER (RENDERER ONLY)
 //  Subsystem Identity • Connection Vitals • Zero Drift • No Backend
-//  PURE RENDERING. NO NETWORK. NO STORAGE. NO COMPUTE.
+//  PURE RENDERING. NO NETWORK. NO STORAGE. NO EXTRA STATEFUL COMPUTE.
 // ============================================================================
 
 // ============================================================================
@@ -10,21 +10,21 @@
 const _c = { ...console };
 
 // ============================================================================
-//  VERSION MAP — The Genome of PulseOS (v9.3)
+//  VERSION MAP — The Genome of PulseOS (v10.3)
 // ============================================================================
 export const PulseVersion = {
-  identity: "9.3",
-  brain: "9.3",
-  gpu: "9.3",
-  orchestrator: "9.3",
-  engine: "9.3",
-  optimizer: "9.3",
-  synapse: "9.3",
-  band: "9.3",
-  router: "9.3",
-  marketplaces: "9.3",
-  telemetry: "9.3",
-  limbic: "9.3"
+  identity: "10.3",
+  brain: "10.3",
+  gpu: "10.3",
+  orchestrator: "10.3",
+  engine: "10.3",
+  optimizer: "10.3",
+  synapse: "10.3",
+  band: "10.3",
+  router: "10.3",
+  marketplaces: "10.3",
+  telemetry: "10.3",
+  limbic: "10.3"
 };
 
 // ============================================================================
@@ -46,7 +46,7 @@ export const PulseRoles = {
 };
 
 // ============================================================================
-//  COLOR MAP — Console Identity Palette (v9.3)
+//  COLOR MAP — Console Identity Palette (v10.3)
 // ============================================================================
 export const PulseColors = {
   identity: "#4DD0E1",
@@ -65,16 +65,36 @@ export const PulseColors = {
 };
 
 // ============================================================================
+//  ICON MAP — Ultra Logger Glyphs (v10.3)
+// ============================================================================
+export const PulseIcons = {
+  identity: "🧬",
+  brain: "🧠",
+  gpu: "✨",
+  orchestrator: "🧵",
+  engine: "⚙️",
+  optimizer: "🛡️",
+  synapse: "⚡",
+  band: "📡",
+  router: "🛰️",
+  marketplaces: "🏛️",
+  telemetry: "🩸",
+  limbic: "🌒",
+  legacy: "⬡"
+};
+
+// ============================================================================
 //  INTERNAL — Format a subsystem log prefix
 // ============================================================================
 function formatPrefix(subsystem) {
   const role = PulseRoles[subsystem] || "SUBSYSTEM";
-  const version = PulseVersion[subsystem] || "9.x";
-  return `${role} v${version}`;
+  const version = PulseVersion[subsystem] || "10.x";
+  const icon = PulseIcons[subsystem] || PulseIcons.legacy;
+  return `${icon} ${role} v${version}`;
 }
 
 // ============================================================================
-//  ARGUMENT NORMALIZER — HYBRID MODE (v9.3)
+//  ARGUMENT NORMALIZER — HYBRID MODE (v10.3)
 // ============================================================================
 function normalizeArgs(args) {
   let subsystem = "legacy";
@@ -91,7 +111,7 @@ function normalizeArgs(args) {
     return { subsystem: args[0], message: args[1], rest: args.slice(2), raw: false };
   }
 
-  // object logs — FIXED (v10.2)
+  // object logs — GPU / Band / generic payloads
   if (typeof args[0] === "object") {
     const obj = args[0];
 
@@ -101,11 +121,10 @@ function normalizeArgs(args) {
     return {
       subsystem,
       message: "",
-      rest: [obj],   // ⭐ PASS THE OBJECT DIRECTLY
+      rest: [obj],
       raw: false
     };
   }
-
 
   // single arg
   if (args.length === 1) {
@@ -117,7 +136,7 @@ function normalizeArgs(args) {
 }
 
 // ============================================================================
-//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v9.3)
+//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v10.3)
 // ============================================================================
 export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
@@ -130,21 +149,33 @@ export function log(...args) {
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
-  _c.log(`%c${prefix} — ${message}`, `color:${color}; font-weight:bold;`, ...rest);
+  _c.log(
+    `%c${prefix} — ${message}`,
+    `color:${color}; font-weight:bold;`,
+    ...rest
+  );
 }
 
 export function warn(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  _c.warn(`%c${prefix} [WARN] — ${message}`, "color:#FFEE58; font-weight:bold;", ...rest);
+  _c.warn(
+    `%c${prefix} ⚠️ [WARN] — ${message}`,
+    "color:#FFEE58; font-weight:bold;",
+    ...rest
+  );
 }
 
 export function error(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  _c.error(`%c${prefix} [ERROR] — ${message}`, "color:#EF5350; font-weight:bold;", ...rest);
+  _c.error(
+    `%c${prefix} 🟥 [ERROR] — ${message}`,
+    "color:#EF5350; font-weight:bold;",
+    ...rest
+  );
 }
 
 export function critical(...args) {
@@ -152,7 +183,7 @@ export function critical(...args) {
   const prefix = formatPrefix(subsystem);
 
   _c.groupCollapsed(
-    `%c${prefix} [CRITICAL] — ${message}`,
+    `%c${prefix} 💀 [CRITICAL] — ${message}`,
     "color:#D32F2F; font-weight:bold; font-size:14px;"
   );
   _c.error(`%c${message}`, "color:#D32F2F; font-weight:bold;", ...rest);
@@ -160,13 +191,16 @@ export function critical(...args) {
 }
 
 // ============================================================================
-//  GROUPING HELPERS — v9.3
+//  GROUPING HELPERS — v10.3
 // ============================================================================
 export function group(subsystem, label) {
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
-  _c.groupCollapsed(`%c${prefix} — ${label}`, `color:${color}; font-weight:bold;`);
+  _c.groupCollapsed(
+    `%c${prefix} — ${label}`,
+    `color:${color}; font-weight:bold;`
+  );
 }
 
 export function groupEnd() {
@@ -174,19 +208,20 @@ export function groupEnd() {
 }
 
 // ============================================================================
-//  TELEMETRY PACKET FORMATTER (v9.3)
+//  TELEMETRY PACKET FORMATTER (v10.3)
 // ============================================================================
 export function makeTelemetryPacket(subsystem, event, data = {}) {
   return {
     ts: Date.now(),
     subsystem,
-    version: PulseVersion[subsystem] || "9.x",
+    version: PulseVersion[subsystem] || "10.x",
     role: PulseRoles[subsystem] || "SUBSYSTEM",
+    icon: PulseIcons[subsystem] || PulseIcons.legacy,
     event,
     data,
     meta: {
       layer: "PulseLogger",
-      version: "9.3",
+      version: "10.3",
       subsystem,
       event
     }
@@ -194,7 +229,7 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
 }
 
 // ============================================================================
-//  LEGACY CONSOLE REDIRECTS (SAFE — no recursion)
+// –  LEGACY CONSOLE REDIRECTS (SAFE — no recursion)
 // ============================================================================
 console.log = (...args) => log(...args);
 console.warn = (...args) => warn(...args);
@@ -213,9 +248,10 @@ export const VitalsLogger = {
   makeTelemetryPacket,
   meta: {
     layer: "PulseLogger",
-    version: "9.3"
+    version: "10.3"
   }
 };
+
 export const logger = {
   log,
   warn,
@@ -226,7 +262,7 @@ export const logger = {
   makeTelemetryPacket,
   meta: {
     layer: "PulseLogger",
-    version: "9.3"
+    version: "10.3"
   }
 };
 

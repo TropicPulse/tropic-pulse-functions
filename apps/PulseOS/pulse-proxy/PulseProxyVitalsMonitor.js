@@ -1,8 +1,7 @@
 // ============================================================================
-//  PULSE OS v9.3 — USER METRICS (VITALS MONITOR) — SAFE UPGRADE
-//  “The Vitals Monitor / Circulatory Telemetry Layer”
-//  PURE MEASUREMENT. NO HEALING. NO COMMAND. NO SCALING.
-//  SAFE IN ANY RUNTIME: NODE (REAL) / BROWSER (NO-OP, NO CRASH)
+//  PULSE OS v10.4 — USER METRICS (VITALS MONITOR ULTRA LOGGER)
+//  “Circulatory Telemetry Layer / Bloodstream Diagnostics / Route Map Renderer”
+//  PURE MEASUREMENT. PURE LOGGING. ZERO HEALING. ZERO COMMAND. ZERO ROUTING.
 // ============================================================================
 
 // ============================================================================
@@ -24,13 +23,13 @@ const warn  = g.warn  || console.warn;
 const error = g.error || console.error;
 
 // ============================================================================
-//  ORGAN IDENTITY — v9.3
+//  ORGAN IDENTITY — v10.4
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "VitalsMonitor",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseUserMetrics",
 
   evo: {
@@ -49,7 +48,7 @@ export const PulseRole = {
 };
 
 // ============================================================================
-//  ORGAN CONTEXT — v9.3
+//  ORGAN CONTEXT — v10.4
 // ============================================================================
 const VITALS_CONTEXT = {
   layer: PulseRole.layer,
@@ -58,6 +57,91 @@ const VITALS_CONTEXT = {
   lineage: "interface-core",
   evo: PulseRole.evo
 };
+
+// ============================================================================
+//  ICONS — Circulatory Telemetry Glyphs (v10.4)
+// ============================================================================
+const ICON = {
+  update: "🩸",
+  trust: "🧪",
+  phase: "📊",
+  hub: "🛰️",
+  alloc: "⚙️",
+  warn: "⚠️",
+  error: "🟥",
+  ok: "🟢"
+};
+
+// ============================================================================
+//  ROUTE MAP ICONS — Organism Route Layer (v10.4)
+// ============================================================================
+const ORG = {
+  brain:      "🧠",
+  synapse:    "⚡",
+  spine:      "🧵",
+  heart:      "🫀",
+  band:       "📡",
+  router:     "🛰️",
+  proxy:      "🌐",
+  vitals:     "🩸",
+  history:    "📜",
+  purifier:   "🧹",
+  unknown:    "⬡"
+};
+
+// ============================================================================
+//  ROUTE HEALTH SYMBOLS
+// ============================================================================
+const HEALTH = {
+  healthy:   "|",
+  stable:    "|",
+  degrading: "~",
+  critical:  "X",
+  unknown:   "?"
+};
+
+// ============================================================================
+//  ROUTE MAP RENDERER
+// ============================================================================
+function makeHealthBar(status) {
+  const sym = HEALTH[status] || HEALTH.unknown;
+
+  switch (status) {
+    case "healthy":   return `${sym} OK`;
+    case "stable":    return `${sym} STABLE`;
+    case "degrading": return `${sym} DEGRADED`;
+    case "critical":  return `${sym} BROKEN`;
+    default:          return `${sym} UNKNOWN`;
+  }
+}
+
+function renderRouteNode(name, icon, status, color) {
+  const bar = makeHealthBar(status);
+  console.log(
+    `%c${icon}  ${name.padEnd(14)} → ${bar}`,
+    `color:${color}; font-weight:bold;`
+  );
+}
+
+export function printRouteScan(route = {}) {
+  console.groupCollapsed(
+    "%c🔍 ROUTE SCAN — PulseOS v10.4",
+    "color:#03A9F4; font-weight:bold;"
+  );
+
+  renderRouteNode("Brain",     ORG.brain,    route.brain,    "#7C4DFF");
+  renderRouteNode("Synapse",   ORG.synapse,  route.synapse,  "#42A5F5");
+  renderRouteNode("Spine",     ORG.spine,    route.spine,    "#26A69A");
+  renderRouteNode("Heart",     ORG.heart,    route.heart,    "#E53935");
+  renderRouteNode("PulseBand", ORG.band,     route.band,     "#EC407A");
+  renderRouteNode("Router",    ORG.router,   route.router,   "#26C6DA");
+  renderRouteNode("Proxy",     ORG.proxy,    route.proxy,    "#29B6F6");
+  renderRouteNode("Vitals",    ORG.vitals,   route.vitals,   "#FF7043");
+  renderRouteNode("History",   ORG.history,  route.history,  "#BDBDBD");
+  renderRouteNode("Purifier",  ORG.purifier, route.purifier, "#8D6E63");
+
+  console.groupEnd();
+}
 
 // ============================================================================
 //  CONFIG — Physiological Limits (unchanged behavior)
@@ -75,21 +159,24 @@ export const ENABLE_PERFORMANCE_LOGGING = true;
 export const PERFORMANCE_LOG_COLLECTION = "UserPerformanceLogs";
 
 // ============================================================================
-//  updateUserMetrics() — PURE MEASUREMENT
+//  updateUserMetrics() — PURE MEASUREMENT + ULTRA LOGGING
 // ============================================================================
 export async function updateUserMetrics(userId, data = {}) {
-  // If db is not present, we’re in a non-backend runtime → clean no-op
   if (!db) return;
   if (!userId || userId === "anonymous") return;
 
-  log("vitals", "update", {
-    userId,
-    bytes: data.bytes ?? 0,
-    durationMs: data.durationMs ?? 0,
-    meshRelay: !!data.meshRelay,
-    meshPing: !!data.meshPing,
-    hubFlag: !!data.hubFlag
-  });
+  log(
+    "vitals",
+    `${ICON.update} update`,
+    {
+      userId,
+      bytes: data.bytes ?? 0,
+      durationMs: data.durationMs ?? 0,
+      meshRelay: !!data.meshRelay,
+      meshPing: !!data.meshPing,
+      hubFlag: !!data.hubFlag
+    }
+  );
 
   const ref = db.collection("UserMetrics").doc(userId);
   const now = Date.now();
@@ -148,15 +235,15 @@ export async function updateUserMetrics(userId, data = {}) {
         hubFlag: data.hubFlag ?? false
       });
 
-      log("vitals", "snapshot_logged", { userId });
+      log("vitals", `${ICON.ok} snapshot_logged`, { userId });
     } catch (err) {
-      error("vitals", "snapshot_failed", { error: String(err) });
+      error("vitals", `${ICON.error} snapshot_failed`, { error: String(err) });
     }
   }
 }
 
 // ============================================================================
-//  calculateTrustScore() — unchanged logic
+//  calculateTrustScore() — unchanged logic + ULTRA LOGGING
 // ============================================================================
 export function calculateTrustScore(metrics) {
   if (!metrics) return 0;
@@ -173,7 +260,7 @@ export function calculateTrustScore(metrics) {
 
   const final = Math.min(score, 100);
 
-  log("vitals", "trust_score", {
+  log("vitals", `${ICON.trust} trust_score`, {
     userId: metrics.userId ?? "?",
     score: final
   });
@@ -182,7 +269,7 @@ export function calculateTrustScore(metrics) {
 }
 
 // ============================================================================
-//  calculatePhase() — unchanged logic
+//  calculatePhase() — unchanged logic + ULTRA LOGGING
 // ============================================================================
 export function calculatePhase(trustScore) {
   let phase = 1;
@@ -192,13 +279,13 @@ export function calculatePhase(trustScore) {
   else if (trustScore < 75) phase = 3;
   else phase = 4;
 
-  log("vitals", "phase", { trustScore, phase });
+  log("vitals", `${ICON.phase} phase`, { trustScore, phase });
 
   return phase;
 }
 
 // ============================================================================
-//  isHub() — unchanged logic
+//  isHub() — unchanged logic + ULTRA LOGGING
 // ============================================================================
 export function isHub(metrics) {
   if (!metrics) return false;
@@ -209,7 +296,7 @@ export function isHub(metrics) {
     metrics.totalRequests > 500;
 
   if (hub) {
-    warn("vitals", "hub_detected", {
+    warn("vitals", `${ICON.hub} hub_detected`, {
       userId: metrics.userId ?? "?",
       relays: metrics.meshRelays,
       hubSignals: metrics.hubSignals,
@@ -221,7 +308,7 @@ export function isHub(metrics) {
 }
 
 // ============================================================================
-//  allocateInstances() — unchanged logic
+//  allocateInstances() — unchanged logic + ULTRA LOGGING
 // ============================================================================
 export function allocateInstances(
   phase,
@@ -249,7 +336,7 @@ export function allocateInstances(
 
   const final = Math.max(1, Math.min(base, max));
 
-  log("vitals", "instance_allocation", {
+  log("vitals", `${ICON.alloc} instance_allocation`, {
     phase,
     hubFlag,
     deviceTier,
@@ -262,19 +349,19 @@ export function allocateInstances(
 }
 
 // ============================================================================
-//  ORGAN EXPORT — ⭐ VitalsMonitor (v9.3)
+//  ORGAN EXPORT — ⭐ VitalsMonitor (v10.4)
 // ============================================================================
 export const VitalsMonitor = {
   PulseRole,
 
-  // Core measurement functions
   updateUserMetrics,
   calculateTrustScore,
   calculatePhase,
   isHub,
   allocateInstances,
 
-  // Constants
+  printRouteScan,
+
   NORMAL_MAX,
   UPGRADED_MAX,
   HIGHEND_MAX,
@@ -285,7 +372,6 @@ export const VitalsMonitor = {
   ENABLE_PERFORMANCE_LOGGING,
   PERFORMANCE_LOG_COLLECTION,
 
-  // Metadata
   meta: {
     layer: PulseRole.layer,
     subsystem: PulseRole.subsystem,

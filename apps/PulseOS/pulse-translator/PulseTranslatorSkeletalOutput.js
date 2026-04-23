@@ -1,28 +1,28 @@
 // ============================================================================
 // FILE: /apps/pulse-translator/PulseTranslatorSkeletal.js
-// [pulse:translator] PULSE_TRANSLATOR_SKELETAL v9.1  // bone-white
+// [pulse:translator] PULSE_TRANSLATOR_SKELETAL v10.4  // bone‑gold
 // Pulse → SQL Skeletal Translator • Deterministic • Genome‑Driven • Zero IO
 // PURE TRANSLATOR — NO SQL EXECUTION • NO NETWORK • NO MUTATION
 // ============================================================================
 //
-// IDENTITY — THE SKELETAL TRANSLATOR:
-//  ----------------------------------
+// IDENTITY — THE SKELETAL TRANSLATOR (v10.4):
+//  ------------------------------------------
 //  • Converts PulseField definitions → SQL column definitions.
 //  • Converts PulseField schemas → SQL CREATE TABLE statements.
 //  • Converts PulseField changes → SQL migration fragments.
-//  • Uses the OS DNA Genome (PulseSpecsDNAGenome) as the source of truth.
+//  • Uses the OS DNA Genome (PulseSpecsDNAGenome v10.4) as the source of truth.
 //  • Deterministic, drift‑proof, read‑only.
 //
-// ROLE IN THE ORGANISM (v9.1):
-//  ----------------------------
-//  • DNA → PulseSpecsDNAGenome.js
+// ROLE IN THE ORGANISM (v10.4):
+//  -----------------------------
+//  • DNA → PulseSpecsDNAGenome.js (v10.4 gold‑white genome)
 //  • RNA Intake → Firestore → Pulse
 //  • RNA Output → Pulse → Firestore
 //  • Skeleton → Pulse → SQL (THIS FILE)
 //  • Bones → SQL tables, columns, migrations
 //
-// SAFETY CONTRACT:
-//  ----------------
+// SAFETY CONTRACT (v10.4):
+//  ------------------------
 //  • Read‑only — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.
 //  • No SQL execution — only string generation.
@@ -36,6 +36,7 @@ import {
   PulseFieldTypes,
   validatePulseField
 } from "../pulse-specs/PulseSpecsDNAGenome.js";
+
 
 // ============================================================================
 //  translatePulseField(field)
@@ -81,6 +82,7 @@ export function translatePulseField(field) {
   return `${columnName} ${sqlType}`;
 }
 
+
 // ============================================================================
 //  translatePulseSchema(schemaObject)
 //  Converts a PulseField schema → array of SQL column definitions.
@@ -94,6 +96,7 @@ export function translatePulseSchema(schemaObject = {}) {
 
   return columns;
 }
+
 
 // ============================================================================
 //  generateCreateTable(tableName, schemaObject)
@@ -109,6 +112,7 @@ CREATE TABLE ${normalized} (
 );`.trim();
 }
 
+
 // ============================================================================
 //  generateAddColumn(tableName, field)
 //  Produces a SQL migration fragment for adding a column (bone growth).
@@ -122,6 +126,7 @@ export function generateAddColumn(tableName, field) {
   return `ALTER TABLE ${normalized} ADD COLUMN ${columnDef};`;
 }
 
+
 // ============================================================================
 //  generateDropColumn(tableName, columnName)
 //  Produces a SQL migration fragment for removing a column (bone removal).
@@ -132,6 +137,7 @@ export function generateDropColumn(tableName, columnName) {
 
   return `ALTER TABLE ${normalized} DROP COLUMN ${col};`;
 }
+
 
 // ============================================================================
 //  Helpers

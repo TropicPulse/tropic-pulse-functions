@@ -20,6 +20,9 @@ const db    = G.db    || null;
 const log   = G.log   || console.log;
 const error = G.error || console.error;
 
+// Firestore Timestamp (optional, backend-only)
+const Timestamp = G.Timestamp || null;
+
 // ============================================================================
 //  ORGAN IDENTITY — v9.3
 // ============================================================================
@@ -56,6 +59,17 @@ const WBC_CONTEXT = {
   evo: PulseRole.evo
 };
 
+// Lightweight immune heartbeat (for OS‑level healers / dashboards)
+const ImmuneState = {
+  lastHealthScanTs: null,
+  lastMetricsScanTs: null,
+  lastScoresScanTs: null,
+  lastHealthError: null,
+  lastMetricsError: null,
+  lastScoresError: null,
+  status: "idle"
+};
+
 // ============================================================================
 //  IMMUNE CONFIG — unchanged
 // ============================================================================
@@ -79,14 +93,16 @@ export const FUNCTION_LOGS_COLLECTION     = "FUNCTION_LOGS";
 export const PROXY_HEALER_LOGS_COLLECTION = "ProxyHealerLogs";
 
 // ============================================================================
-//  IMMUNE LOGGING HELPERS — unchanged
+//  IMMUNE LOGGING HELPERS — drift‑proof, backend‑safe
 // ============================================================================
 async function writeFunctionLog(entry) {
+  if (!db) return; // backend‑only organ, fail‑open if db missing
+
   try {
     await db.collection(FUNCTION_LOGS_COLLECTION).add({
       ...WBC_CONTEXT,
       ...entry,
-      createdAt: Timestamp.now(),
+      createdAt: Timestamp ? Timestamp.now() : Date.now(),
       processed: false
     });
   } catch (err) {
@@ -95,6 +111,8 @@ async function writeFunctionLog(entry) {
 }
 
 async function writeHealerLog(entry) {
+  if (!db) return; // backend‑only organ, fail‑open if db missing
+
   try {
     await db.collection(PROXY_HEALER_LOGS_COLLECTION).add({
       ...WBC_CONTEXT,
@@ -107,9 +125,11 @@ async function writeHealerLog(entry) {
 }
 
 // ============================================================================
-//  HEALTH + METRICS SCAN — unchanged
+//  HEALTH + METRICS SCAN — immune patrol over proxy spine
 // ============================================================================
 async function checkProxyHealthAndMetrics() {
+  ImmuneState.status = "scanning";
+  ImmuneState.lastHealthScanTs = Date.now();
   log("wbc", "scan_start");
 
   let health = null;
@@ -119,22 +139,29 @@ async function checkProxyHealthAndMetrics() {
     const res = await fetch(PROXY_HEALTH_URL);
     health = await res.json().catch(() => null);
   } catch (err) {
-    error("wbc", "health_fetch_failed", { error: String(err) });
-    await writeHealerLog({ type: "health_error", error: String(err), url: PROXY_HEALTH_URL });
+    const msg = String(err);
+    ImmuneState.lastHealthError = msg;
+    error("wbc", "health_fetch_failed", { error: msg });
+    await writeHealerLog({ type: "health_error", error: msg, url: PROXY_HEALTH_URL });
   }
 
   try {
     const res = await fetch(PROXY_METRICS_URL);
     metrics = await res.json().catch(() => null);
   } catch (err) {
-    error("wbc", "metrics_fetch_failed", { error: String(err) });
-    await writeHealerLog({ type: "metrics_error", error: String(err), url: PROXY_METRICS_URL });
+    const msg = String(err);
+    ImmuneState.lastMetricsError = msg;
+    error("wbc", "metrics_fetch_failed", { error: msg });
+    await writeHealerLog({ type: "metrics_error", error: msg, url: PROXY_METRICS_URL });
   }
 
   if (!metrics) {
     log("wbc", "metrics_unavailable");
+    ImmuneState.status = "degraded";
     return;
   }
+
+  ImmuneState.lastMetricsScanTs = Date.now();
 
   const cpuPercent     = metrics.cpu?.percent ?? null;
   const memPressure    = metrics.memory?.pressure ?? null;
@@ -142,11 +169,13 @@ async function checkProxyHealthAndMetrics() {
 
   const warnings = [];
 
-  if (cpuPercent     > CPU_PRESSURE_WARN)     warnings.push("cpu_high");
-  if (memPressure    > MEM_PRESSURE_WARN)     warnings.push("memory_high");
-  if (eventLoopLagMs > EVENT_LOOP_LAG_WARN)   warnings.push("event_loop_lag_high");
+  if (cpuPercent     > CPU_PRESSURE_WARN)   warnings.push("cpu_high");
+  if (memPressure    > MEM_PRESSURE_WARN)   warnings.push("memory_high");
+  if (eventLoopLagMs > EVENT_LOOP_LAG_WARN) warnings.push("event_loop_lag_high");
 
   if (warnings.length) {
+    ImmuneState.status = "warning";
+
     log("wbc", "pressure_warning", { warnings });
 
     await writeHealerLog({
@@ -157,17 +186,33 @@ async function checkProxyHealthAndMetrics() {
       warnings
     });
   } else {
+    ImmuneState.status = "healthy";
     log("wbc", "pressure_normal");
   }
 }
 
 // ============================================================================
-//  USER SCORES SCAN — unchanged
+//  USER SCORES SCAN — immune hints for instance allocation
 // ============================================================================
 async function scanUserScoresForInstanceHints() {
+  if (!db) {
+    log("wbc", "scores_scan_skipped_no_db");
+    return;
+  }
+
+  ImmuneState.lastScoresScanTs = Date.now();
   log("wbc", "scores_scan_start");
 
-  const snap = await db.collection("UserScores").get();
+  let snap;
+  try {
+    snap = await db.collection("UserScores").get();
+  } catch (err) {
+    const msg = String(err);
+    ImmuneState.lastScoresError = msg;
+    error("wbc", "scores_fetch_failed", { error: msg });
+    await writeHealerLog({ type: "scores_fetch_error", error: msg });
+    return;
+  }
 
   for (const doc of snap.docs) {
     const s = doc.data();
@@ -239,22 +284,33 @@ async function scanUserScoresForInstanceHints() {
 }
 
 // ============================================================================
-//  PUBLIC: startPulseProxyHealer() — unchanged
+//  PUBLIC: startPulseProxyHealer() — immune patrol loop
 // ============================================================================
 export default function startPulseProxyHealer() {
   log("wbc", "immune_patrol_start", WBC_CONTEXT);
 
+  // Continuous proxy health + metrics patrol
   setInterval(() => {
     checkProxyHealthAndMetrics().catch(err =>
       error("wbc", "health_loop_error", { error: String(err) })
     );
   }, HEALTH_INTERVAL_MS);
 
+  // Continuous user score scan for instance hints
   setInterval(() => {
     scanUserScoresForInstanceHints().catch(err =>
       error("wbc", "scores_loop_error", { error: String(err) })
     );
   }, SCORES_SCAN_INTERVAL_MS);
 
-  log("wbc", "immune_patrol_active_v9_3");
+  log("wbc", "immune_patrol_active_v9_3", {
+    ...WBC_CONTEXT,
+    healthIntervalMs: HEALTH_INTERVAL_MS,
+    scoresIntervalMs: SCORES_SCAN_INTERVAL_MS
+  });
+}
+
+// Optional: export immune state for OS‑level dashboards / healers
+export function getProxyImmuneState() {
+  return { ...ImmuneState, context: { ...WBC_CONTEXT } };
 }

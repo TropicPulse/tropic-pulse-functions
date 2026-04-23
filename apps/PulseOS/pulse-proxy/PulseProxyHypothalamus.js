@@ -1,35 +1,41 @@
 // ============================================================================
-//  PULSE OS v9.3 — HYPOTHALAMUS
+//  PULSE OS v10.4 — HYPOTHALAMUS
 //  PulseUserScoring — Homeostasis Regulation Organ
 //  Backend‑Only • Deterministic • Drift‑Proof • No IQ
 // ============================================================================
+// ============================================================================
+//  PULSE OS v10.4 — HYPOTHALAMUS
+//  Homeostasis Regulator • Deterministic Scoring Organ
+//  PURE SCORING. NO ROUTING. NO AI. NO MUTATION OUTSIDE SCORES.
+// ============================================================================
 
 // ============================================================================
-// GLOBAL WIRING — v10.2 (Safe, backend-only, no global.* dependency)
+//  GLOBAL WIRING — backend‑only, safe resolver
 // ============================================================================
+const G =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof global !== "undefined"
+    ? global
+    : {};
 
-// Universal global resolver (works in Node, Workers, Serverless)
-const G = typeof globalThis !== "undefined"
-  ? globalThis
-  : typeof global !== "undefined"
-  ? global
-  : {};
-
-// Safe fallbacks — backend-only organ, but never break if wiring incomplete
 const db    = G.db    || null;
 const log   = G.log   || console.log;
 const error = G.error || console.error;
 
-
+const Timestamp =
+  (G.firebaseAdmin && G.firebaseAdmin.firestore.Timestamp) ||
+  G.Timestamp ||
+  null;
 
 // ============================================================================
-// LAYER IDENTITY — v9.3
+//  ORGAN IDENTITY — v10.4
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "Hypothalamus",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseUserScoring",
 
   evo: {
@@ -39,6 +45,8 @@ export const PulseRole = {
     backendOnly: true,
     multiInstanceReady: true,
     pulseSendAware: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
     futureEvolutionReady: true
   }
 };
@@ -50,12 +58,11 @@ const HYPOTHALAMUS_CONTEXT = {
   evo: PulseRole.evo
 };
 
-
 // ============================================================================
-// LAYER STATE (backend health)
+//  LAYER STATE (backend health)
 // ============================================================================
-global.PULSE_LAYER_STATE = global.PULSE_LAYER_STATE || {};
-global.PULSE_LAYER_STATE[4] = {
+G.PULSE_LAYER_STATE = G.PULSE_LAYER_STATE || {};
+G.PULSE_LAYER_STATE[4] = {
   name: "Hypothalamus",
   ok: true,
   role: HYPOTHALAMUS_CONTEXT.role,
@@ -63,12 +70,11 @@ global.PULSE_LAYER_STATE[4] = {
 };
 
 if (!db) {
-  log("hypothalamus", "WARNING: global.db missing — scoring disabled until wiring completes.");
+  log("hypothalamus", "WARNING: db missing — scoring disabled until wiring completes.");
 }
 
-
 // ============================================================================
-// CONFIG — Instance Formula Limits (unchanged, but v9.3 aligned)
+//  CONFIG — deterministic scoring limits
 // ============================================================================
 export const NORMAL_MAX    = 4;
 export const UPGRADED_MAX  = 8;
@@ -82,9 +88,8 @@ export const EARN_MODE_MULT = 1.5;
 export const ENABLE_SCORING_LOGGING = true;
 export const SCORING_LOG_COLLECTION = "UserScoringLogs";
 
-
 // ============================================================================
-// TRUST SCORE — deterministic (unchanged)
+//  TRUST SCORE — deterministic
 // ============================================================================
 function calculateTrustScore(m) {
   if (!m) return 0;
@@ -109,9 +114,8 @@ function calculateTrustScore(m) {
   return final;
 }
 
-
 // ============================================================================
-// MESH SCORE — deterministic (unchanged)
+//  MESH SCORE — deterministic
 // ============================================================================
 function calculateMeshScore(m) {
   if (!m) return 0;
@@ -134,9 +138,8 @@ function calculateMeshScore(m) {
   return final;
 }
 
-
 // ============================================================================
-// PHASE — deterministic (unchanged)
+//  PHASE — deterministic
 // ============================================================================
 function calculatePhase(trustScore) {
   const t = Number(trustScore || 0);
@@ -151,9 +154,8 @@ function calculatePhase(trustScore) {
   return phase;
 }
 
-
 // ============================================================================
-// HUB DETECTION — deterministic (unchanged)
+//  HUB DETECTION — deterministic
 // ============================================================================
 function isHub(m) {
   if (!m) return false;
@@ -177,9 +179,8 @@ function isHub(m) {
   return hub;
 }
 
-
 // ============================================================================
-// INSTANCE FORMULA — deterministic (unchanged)
+//  INSTANCE FORMULA — deterministic
 // ============================================================================
 function allocateInstances(
   phase,
@@ -215,9 +216,8 @@ function allocateInstances(
   return final;
 }
 
-
 // ============================================================================
-// SNAPSHOT LOGGING — unchanged
+//  SNAPSHOT LOGGING — backend‑safe
 // ============================================================================
 async function logScoringSnapshot(userId, snapshot) {
   if (!ENABLE_SCORING_LOGGING || !db) return;
@@ -236,17 +236,16 @@ async function logScoringSnapshot(userId, snapshot) {
   }
 }
 
-
 // ============================================================================
-// MAIN PASS — runUserScoring() (unchanged logic)
+//  MAIN PASS — runUserScoring()
 // ============================================================================
 export async function runUserScoring() {
   log("hypothalamus", "Running homeostasis scoring pass…");
 
   if (!db) {
-    error("hypothalamus", "runUserScoring called but global.db is missing.");
-    global.PULSE_LAYER_STATE[4].ok = false;
-    global.PULSE_LAYER_STATE[4].lastError = "db_missing";
+    error("hypothalamus", "runUserScoring called but db is missing.");
+    G.PULSE_LAYER_STATE[4].ok = false;
+    G.PULSE_LAYER_STATE[4].lastError = "db_missing";
     return { ok: false, error: "db_missing" };
   }
 
@@ -256,8 +255,8 @@ export async function runUserScoring() {
   } catch (err) {
     const msg = String(err);
     error("hypothalamus", "Failed to read UserMetrics", msg);
-    global.PULSE_LAYER_STATE[4].ok = false;
-    global.PULSE_LAYER_STATE[4].lastError = msg;
+    G.PULSE_LAYER_STATE[4].ok = false;
+    G.PULSE_LAYER_STATE[4].lastError = msg;
     return { ok: false, error: "read_UserMetrics_failed" };
   }
 
@@ -327,21 +326,20 @@ export async function runUserScoring() {
   try {
     await batch.commit();
     log("hypothalamus", `Homeostasis scoring pass complete. Processed=${processed}`);
-    global.PULSE_LAYER_STATE[4].ok = true;
-    global.PULSE_LAYER_STATE[4].lastError = null;
+    G.PULSE_LAYER_STATE[4].ok = true;
+    G.PULSE_LAYER_STATE[4].lastError = null;
     return { ok: true, processed };
   } catch (err) {
     const msg = String(err);
     error("hypothalamus", "Failed to commit UserScores batch", msg);
-    global.PULSE_LAYER_STATE[4].ok = false;
-    global.PULSE_LAYER_STATE[4].lastError = msg;
+    G.PULSE_LAYER_STATE[4].ok = false;
+    G.PULSE_LAYER_STATE[4].lastError = msg;
     return { ok: false, error: "commit_UserScores_failed" };
   }
 }
 
-
 // ============================================================================
-// PUBLIC EXPORTS
+//  PUBLIC EXPORTS
 // ============================================================================
 export {
   calculateTrustScore,

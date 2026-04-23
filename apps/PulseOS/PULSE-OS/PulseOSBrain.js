@@ -3,14 +3,10 @@
 // PULSE OS — v10.0
 // “THE CNS BRAIN / CENTRAL NERVOUS SYSTEM / INTELLIGENCE LAYER 1”
 // ============================================================================
-//
-//  (HEADER UNCHANGED — AS YOU REQUESTED)
-// ============================================================================
 
 
 // ============================================================================
-//  IMPORTS — v10 LAW: BRAIN MAY IMPORT ONLY PULSEIQ
-//  (UNCHANGED — AS YOU REQUESTED)
+//  IMPORTS — v10 LAW: BRAIN MAY IMPORT ONLY PULSEIQ (+ Cortex wiring)
 // ============================================================================
 import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
 import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
@@ -71,15 +67,15 @@ export const PulseOSBrain = {
   LongTermMemory: PulseIQMap.LongTermMemory,
   evolveRaw: PulseIQMap.evolveRaw,
 
-  // ⭐ MAP EXPORTS (THE 3 MAPS YOU WANT)
-  PulseIntentMap: null,          // filled by cognitiveBootstrap
-  PulseIQMap: PulseIQMap,        // IQ lives in Brain
-  PulseOrganismMap: PulseOrganismMap, // all 4 layers load their own too
+  // ⭐ MAP EXPORTS
+  PulseIntentMap: null,                 // filled by Evolution / cognitiveBootstrap
+  PulseIQMap: PulseIQMap,               // IQ lives in Brain
+  PulseOrganismMap: PulseOrganismMap,   // default; Evolution may override
 
-  // ⭐ Cognitive wiring (filled by cognitiveBootstrap)
+  // ⭐ Cognitive wiring
   intent: null,
   understanding: null,
-  evolution: null,
+  evolution: null,   // attached by Evolution
   cortex: null
 };
 
@@ -126,7 +122,7 @@ export function structuralError(expected, found, extraContext = {}) {
 
 
 // ============================================================================
-// 3) EVOLUTION + ORGAN LOADING — Design-Driven CNS Logic
+/* 3) EVOLUTION + ORGAN LOADING — Design-Driven CNS Logic (still uses IQMap) */
 // ============================================================================
 export async function loadOrganByDesign(designIdentity, expectedType, expectedSubsys) {
   const raw = await PulseIQMap.evolveRaw(designIdentity);
@@ -147,27 +143,40 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 
 
 // ============================================================================
-// 4) COGNITIVE BOOTSTRAP — Understanding → PulseOSBrain → Cortex
+// 4) COGNITIVE BOOTSTRAP — Evolution → PulseOSBrain → Cortex
+//    (Evolution calls this; Understanding never does directly)
 // ============================================================================
-export function cognitiveBootstrap({ intent, understanding }) {
+export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
-  // Attach intent + understanding
-  PulseOSBrain.intent = intent;
+  // Attach intent + understanding to Brain surface
+  if (intent) {
+    PulseOSBrain.intent = intent;
+    PulseOSBrain.PulseIntentMap = intent;
+  }
+
+  if (organism) {
+    PulseOSBrain.PulseOrganismMap = organism;
+  }
+
+  if (iqMap) {
+    PulseOSBrain.PulseIQMap = iqMap;
+  }
+
   PulseOSBrain.understanding = understanding;
 
-  // ⭐ EXPORT INTENT MAP ON PulseOSBrain
-  PulseOSBrain.PulseIntentMap = intent;
-
-  // IQ + Organism maps already wired via imports:
-  // PulseOSBrain.PulseIQMap
-  // PulseOSBrain.PulseOrganismMap
+  // Evolution is attached by PulseOSEvolution before this is called:
+  // PulseOSBrain.evolution = Evolution;
 
   // Boot Cortex with PulseOSBrain as CNS parent
   PulseOSBrain.cortex = boot({ Brain: PulseOSBrain });
 
-  // Optional: let Cortex initialize NS + organs
+  // Let Cortex initialize Nervous System + organs if it exposes hooks
   PulseOSBrain.cortex?.initializeNervousSystem?.();
   PulseOSBrain.cortex?.initializeOrgans?.();
+
+  // Let Evolution observe the boot + scan drift + record lineage
+  PulseOSBrain.evolution?.recordLineage?.("brain-cognitive-bootstrap");
+  PulseOSBrain.evolution?.scanDrift?.(PulseOSBrain);
 
   PulseIQMap.log("🧠 [PulseOSBrain] cognitiveBootstrap complete.");
   return PulseOSBrain;

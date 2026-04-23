@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v9.3 — CIRCULATION MONITOR
+//  PULSE OS v10.4 — CIRCULATION MONITOR
 //  “Blood Pressure + Blood Flow Sensor”
 //  Measures latency (pressure) and speed (flow) and sends simple vital signs.
 //  PURE SENSOR. NO THINKING. NO DECISIONS. NO GLOBAL STATE.
@@ -7,38 +7,33 @@
 //
 //  WHAT THIS ORGAN DOES (simple terms):
 //  ------------------------------------
-//  • Checks how “hard” the network is pushing (latency = blood pressure)
-//  • Checks how “fast” data is moving (kbps = blood flow)
-//  • Gives a simple health rating (Excellent / Good / Weak / Poor)
-//  • Builds a clean vital‑signs packet for the Nervous System (PulseBand)
+//  • Measures network “pressure” (latency)
+//  • Measures network “flow” (kbps)
+//  • Classifies simple health (Excellent / Good / Weak / Poor)
+//  • Builds stable vital‑sign packets for the Nervous System (PulseBand)
 //  • Never makes decisions — only measures and reports
 //
-//  SAFETY RULES (v9.3):
+//  SAFETY RULES (v10.4):
 //  ---------------------
 //  • No PulseBand imports
 //  • No PulseNet imports
 //  • No global state (beyond this file’s sensor context)
-//  • No console.* (uses PulseLogger)
+//  • No console.* (uses logger + emitTelemetry)
 //  • No backend calls except the ping endpoint
 //  • No compute, no AI, no mutation
 // ============================================================================
 
 
 // ============================================================================
-//  Logger + Telemetry (heartbeat‑safe, no IQ)
-//  (logger / emitTelemetry expected as safe globals in this environment)
-// ============================================================================
-
-
-// ============================================================================
-//  ORGAN IDENTITY — v9.3
+//  ORGAN IDENTITY — v10.4
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseBand",
   layer: "CirculationMonitor",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseCirculationMonitor",
+
   evo: {
     driftProof: true,
     pulseEfficiencyAware: true,
@@ -59,7 +54,6 @@ const CIRCULATION_CONTEXT = {
   evo: PulseRole.evo
 };
 
-// Subsystem name for logs + telemetry
 const SUBSYSTEM = "circulation";
 
 
@@ -172,7 +166,7 @@ async function getPulseTelemetry() {
 
   diag("TELEMETRY_CLASSIFIED", { bars, health });
 
-  // Snapshot = stable record
+  // Stable snapshot
   const snapshot = {
     lastChunkDurationMs: latency,
     lastChunkKbps: kbps ?? null,
@@ -208,7 +202,7 @@ async function getPulseTelemetry() {
 
 
 // ============================================================================
-//  EXPORT — CIRCULATION MONITOR v9.3
+//  EXPORT — CIRCULATION MONITOR v10.4
 // ============================================================================
 export const PulseUpdate = {
   measureLatency,

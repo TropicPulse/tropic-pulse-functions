@@ -1,29 +1,3 @@
-// ============================================================================
-// FILE: /apps/lib/Connectors/PulseNet.js
-// LAYER: THE SYNAPSE + PULSE-ONCE CONNECTIVITY ORGAN — v9.3
-// ============================================================================
-//
-// ROLE (v9.3):
-//   THE SYNAPSE — Neural Signal Routing Layer
-//   • Receives electrical signal from Nervous System (PulseBand)
-//   • Computes signalScore + signalSlope (signal strength + trend)
-//   • Classifies route health (neural path integrity)
-//   • Emits pulse updates to the OS (neural firing)
-//
-//   PULSE-ONCE CONNECTIVITY ORGAN — Tiny Sync + Offline-First
-//   • Attempts one tiny connectivity pulse using any legal path
-//   • Syncs identity + config + jobs (1–2 KB)
-//   • Stores everything locally for fully offline operation
-//   • Does NOT require continuous internet
-//
-// SAFETY (v9.3):
-//   • No PulseBand imports
-//   • No PulseClient imports
-//   • No PulseUpdate imports
-//   • Pure subsystem module (browser APIs only)
-//   • Deterministic math + deterministic classification
-// ============================================================================
-
 // ⭐ Universal global resolver — works in browser + node + workers
 const G = typeof globalThis !== "undefined"
   ? globalThis
@@ -40,13 +14,13 @@ const error = G.error || console.error;
 
 
 // ============================================================================
-// ⭐ OS‑v9.3 CONTEXT METADATA — Synapse Identity
+// ⭐ OS‑v10.3 CONTEXT METADATA — Synapse Identity
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseNet",
   layer: "Synapse",
-  version: "9.3",
+  version: "10.3",
   identity: "PulseNetSynapse",
 
   evo: {
@@ -211,7 +185,7 @@ function buildPulseNetSnapshot(rawSignal, previousSignal, meta = {}) {
   const update = buildPulseUpdate({ rawSignal, previousSignal, meta });
 
   return {
-    version: "9.3", // ⭐ upgraded
+    version: "10.3", // ⭐ upgraded
     layerId: PULSE_LAYER_ID,
     layerName: PULSE_LAYER_NAME,
     layerRole: PULSE_LAYER_ROLE,
@@ -375,7 +349,7 @@ function getPulseNetState() {
 }
 
 // ============================================================================
-// EXPORTED SYNAPSE + PULSE‑ONCE API — v9.3
+// EXPORTED SYNAPSE + PULSE‑ONCE API — v10.3
 // ============================================================================
 export const PulseNet = {
   PULSE_LAYER_ID,

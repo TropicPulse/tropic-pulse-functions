@@ -1,13 +1,13 @@
 // ============================================================================
-//  PULSE OS v9.3 — THE LIMBIC SHADOW
+//  PULSE OS v10.4 — THE LIMBIC SHADOW
 //  Unified Projection Layer • Instinct Surface • Meta‑Facade
 //  PURE FACADE. NO LOGIC. NO STATE. NO SIDE‑EFFECTS.
 // ============================================================================
 //
-//  WHAT THIS LAYER IS (v9.3):
-//  --------------------------
+//  WHAT THIS LAYER IS (v10.4):
+//  ---------------------------
 //  • The illusion of a single Pulse organ.
-//  • A merged silhouette of PulseNet, PulseClient, and PulseUpdate.
+//  • A merged silhouette of PulseNet + PulseClient (no PulseUpdate in v10+).
 //  • Provides ONE unified import surface for the entire frontend.
 //  • Hides subsystem boundaries behind a single conceptual doorway.
 //  • Acts as the OS’s “limbic projection” — instinctual meta‑layer.
@@ -26,7 +26,7 @@
 //  • NOT a dynamic importer
 //  • NOT allowed to mutate anything
 //
-//  SAFETY CONTRACT (v9.3):
+//  SAFETY CONTRACT (v10.4):
 //  ------------------------
 //  • No logic
 //  • No state
@@ -38,12 +38,12 @@
 
 
 // ============================================================================
-//  LIMBIC SHADOW CONTEXT — v9.3
+//  LIMBIC SHADOW CONTEXT — v10.4
 // ============================================================================
 export const LIMBIC_SHADOW_CONTEXT = {
   layer: "LimbicShadow",
   role: "UNIFIED_PROJECTION_INSTINCT",
-  version: "9.3",
+  version: "10.4",
   purpose: "Unified projection + instinct surface for Pulse organs",
   evo: {
     driftProof: true,
@@ -90,11 +90,16 @@ logShadow("SHADOW_INIT");
 
 
 // ============================================================================
-//  PURE RE‑EXPORTS — THE SHADOW PROJECTION (v9.3)
+//  PURE RE‑EXPORTS — THE SHADOW PROJECTION (v10.4)
 //  NO LOGIC. NO STATE. NO SIDE‑EFFECTS.
 // ============================================================================
-export { PulseNet }    from "./PulseProxySynapse.js";        // Synapse Layer
-export { PulseClient } from "./PulseProxyCirculatorySystem.js";              // Circulatory System
+
+// Synapse Layer (PulseNet)
+export { PulseNet } from "./PulseProxySynapse.js";
+
+// Circulatory System (PulseClient)
+export { PulseClient } from "./PulseProxyCirculatorySystem.js";
+
 
 // ============================================================================
 //  OPTIONAL META EXPORT — SAFE FOR INTROSPECTION

@@ -1,41 +1,34 @@
 // ============================================================================
-//  PulseSendAdapter.js — v3.0
-//  Pattern‑Shape Adapter • Organ‑Aware Translator • Pre‑Delivery Adapter
+//  PulseSendAdapter.js — v10.4‑Evo
+//  Pattern‑Shape Adapter • Pulse‑Agnostic Translator • Pre‑Delivery Adapter
 // ============================================================================
 //
 //  WHAT THIS ORGAN IS:
 //  --------------------
-//  • Takes a Pulse v2 organism.
+//  • Takes a Pulse v1/v2/v3 organism.
 //  • Adapts it into the shape the target organ expects.
 //  • Pure deterministic translation.
-//  • Pattern‑aware, identity‑aware, lineage‑aware.
+//  • Pattern‑aware, identity‑aware, lineage‑aware, mode‑aware.
+//  • Zero compute, zero mutation, zero randomness.
 //
 //  WHAT THIS ORGAN IS NOT:
 //  ------------------------
-//  • Not a router (PulseRouter v3 handles routing).
-//  • Not a wiring layer (PulseMesh v3 handles pathways).
+//  • Not a router.
+//  • Not a mesh layer.
 //  • Not a compute engine.
-//  • Not a messenger cell.
 //  • Not a healer or brain.
-//
-//  SAFETY CONTRACT (v3.0):
-//  ------------------------
-//  • No imports.
-//  • No network.
-//  • No compute.
-//  • Pure deterministic translation only.
-//  • Zero randomness.
-//  • Zero timestamps.
-//  • Zero mutation outside instance.
 // ============================================================================
 
-// ⭐ PulseRole — identifies this as the PulseSend Adapter Organ
+
+// ============================================================================
+// ⭐ PulseRole — identifies this as the PulseSend Adapter Organ (v10.4‑Evo)
+// ============================================================================
 export const PulseRole = {
   type: "Messenger",
   subsystem: "PulseSend",
   layer: "Adapter",
-  version: "3.0",
-  identity: "PulseSendAdapter-v3",
+  version: "10.4‑Evo",
+  identity: "PulseSendAdapter-v10.4‑Evo",
 
   evo: {
     driftProof: true,
@@ -43,85 +36,107 @@ export const PulseRole = {
     multiOrganReady: true,
     patternAware: true,
     lineageAware: true,
+    modeAware: true,
+    identityAware: true,
     selfTranslationReady: true,
+    deterministicImpulseFlow: true,
     futureEvolutionReady: true,
 
     unifiedAdvantageField: true,
-    pulseSend3Ready: true
+    pulseSend10Ready: true
   },
 
-  routingContract: "PulseRouter-v3",
-  meshContract: "PulseMesh-v3",
-  pulseContract: "Pulse-v2",
-  gpuOrganContract: "PulseGPU-v9.2",
-  earnCompatibility: "PulseEarn-v9"
+  routingContract: "PulseRouter-v10.4",
+  meshContract: "PulseMesh-v10.4",
+
+  // ⭐ Pulse‑agnostic
+  pulseContract: "Pulse-v1/v2/v3",
+
+  gpuOrganContract: "PulseGPU-v10",
+  earnCompatibility: "PulseEarn-v10"
 };
 
+
 // ============================================================================
-//  ADAPTER RULES — how each organ wants to receive a Pulse v2 organism
+//  ADAPTER RULES — how each organ wants to receive a Pulse organism
 // ============================================================================
 //
-//  Each organ has its own “coat” or “shape”.
-//  The adapter wraps the Pulse v2 organism into the correct shape.
+//  Each organ has its own “coat” or “shape.”
+//  The adapter wraps the Pulse organism into the correct shape.
+//  Pulse‑agnostic, mode‑aware, lineage‑aware, pattern‑aware.
 // ============================================================================
 
 const ORGAN_ADAPTERS = {
-  GPU: (pulse, targetOrgan) => ({
+  GPU: (pulse, targetOrgan, mode) => ({
     target: targetOrgan,
     jobId: pulse.jobId,
     pattern: pulse.pattern,
     payload: pulse.payload,
     priority: pulse.priority,
     lineage: pulse.lineage,
+    mode,
+    pulseType: pulse.pulseType,
+    advantageField: pulse.advantageField,
     gpuReady: true
   }),
 
-  Earn: (pulse, targetOrgan) => ({
+  Earn: (pulse, targetOrgan, mode) => ({
     target: targetOrgan,
     jobId: pulse.jobId,
     pattern: pulse.pattern,
     payload: pulse.payload,
     priority: pulse.priority,
     lineage: pulse.lineage,
+    mode,
+    pulseType: pulse.pulseType,
+    advantageField: pulse.advantageField,
     earnReady: true
   }),
 
-  OS: (pulse, targetOrgan) => ({
+  OS: (pulse, targetOrgan, mode) => ({
     target: targetOrgan,
     jobId: pulse.jobId,
     pattern: pulse.pattern,
     payload: pulse.payload,
     priority: pulse.priority,
     lineage: pulse.lineage,
+    mode,
+    pulseType: pulse.pulseType,
+    advantageField: pulse.advantageField,
     osReady: true
   }),
 
-  Mesh: (pulse, targetOrgan) => ({
+  Mesh: (pulse, targetOrgan, mode) => ({
     target: targetOrgan,
     jobId: pulse.jobId,
     pattern: pulse.pattern,
     payload: pulse.payload,
     priority: pulse.priority,
     lineage: pulse.lineage,
+    mode,
+    pulseType: pulse.pulseType,
+    advantageField: pulse.advantageField,
     meshReady: true
   })
 };
 
-// ============================================================================
-//  FACTORY — Create an Adapter for a Pulse v2 organism
-// ============================================================================
-//
-//  Takes a Pulse v2 organism and returns a shape‑shifted version
-//  for the target organ.
-//
-//  If the organ has no adapter, it returns a neutral packet.
-// ============================================================================
 
-export function adaptPulseSendPacket(pulse, targetOrgan) {
+// ============================================================================
+//  FACTORY — Create an Adapter for ANY Pulse organism (v1/v2/v3)
+// ============================================================================
+export function adaptPulseSendPacket(pulse, targetOrgan, mode = "normal") {
   const adapter = ORGAN_ADAPTERS[targetOrgan];
 
+  // ⭐ Extract identity + advantage
+  const pulseType = pulse?.pulseType || pulse?.PulseRole?.identity || "UNKNOWN_PULSE_TYPE";
+  const advantageField = pulse?.advantageField || null;
+
   if (typeof adapter === "function") {
-    return adapter(pulse, targetOrgan);
+    return adapter(
+      { ...pulse, pulseType, advantageField },
+      targetOrgan,
+      mode
+    );
   }
 
   // ⭐ fallback: neutral shape
@@ -132,6 +147,9 @@ export function adaptPulseSendPacket(pulse, targetOrgan) {
     payload: pulse.payload,
     priority: pulse.priority,
     lineage: pulse.lineage,
+    mode,
+    pulseType,
+    advantageField,
     neutral: true
   };
 }

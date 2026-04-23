@@ -333,3 +333,6 @@ export const Impulse = {
     }
   }
 };
+
+export const IMPULSE_META = { ...IMPULSE_CONTEXT };
+

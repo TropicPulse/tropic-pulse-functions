@@ -1,60 +1,59 @@
 // ============================================================================
 // FILE: /apps/specs/PulseSpecsDNAGenome.js
-// [pulse:specs] PULSE_SPECS_DNA_GENOME v9.1  // silver-gold
+// [pulse:specs] PULSE_SPECS_DNA_GENOME v10.4  // gold‑white
 // OS Data Genome • Canonical Field Language • Deterministic Translation Spec
 // PURE SPEC — NO IO • NO NETWORK • NO AI • NO RUNTIME
 // ============================================================================
 //
-// IDENTITY — THE OS DNA GENOME:
+// IDENTITY — THE OS DNA GENOME (v10.4):
+//  ------------------------------------
+//  • Immutable genetic blueprint of Pulse OS.
+//  • Canonical PulseField language for all v10.4 subsystems.
+//  • Source of truth for SQL ↔ Pulse ↔ Firestore mappings.
+//  • Validation rulebook for translators + healers.
+//  • Schema cortex foundation for AI reasoning + component generation.
+//  • Drift‑proof, deterministic, backwards‑compatible, evolution‑safe.
+//
+// ROLE IN THE ORGANISM (v10.4):
 //  -----------------------------
-//  • The genetic blueprint of Pulse OS.
-//  • Defines the canonical PulseField language for every subsystem.
-//  • The source of truth for SQL ↔ Pulse ↔ Firestore mappings.
-//  • The validation rulebook for translators + healers.
-//  • The schema cortex for AI reasoning + component generation.
-//  • Immutable, deterministic, drift-proof, backwards-compatible.
-//
-// ROLE IN THE ORGANISM (v9.1):
-//  ----------------------------
 //  • DNA → canonical data genome (this file)
-//  • RNA → translators (sqlToPulse, pulseToSQL, etc.)
-//  • Proteins → actual data structures in the system
+//  • RNA → translators (sqlToPulse, pulseToSQL, firestoreToPulse, etc.)
+//  • Proteins → actual data structures in the organism
 //  • Healers → mutation correction + schema drift repair
-//  • Cortex → uses genome to reason about structure
+//  • Cortex → uses genome to reason about structure + generate components
 //
-// SAFETY CONTRACT:
-//  ----------------
-//  • Read-only spec — no writes, no mutation.
+// SAFETY CONTRACT (v10.4):
+//  ------------------------
+//  • Read‑only spec — no writes, no mutation.
 //  • No eval(), no Function(), no dynamic imports.
 //  • No network calls.
 //  • Deterministic, stable output only.
-//  • Backwards-compatible evolution only.
+//  • Backwards‑compatible evolution only.
 //  • All new types must degrade safely to existing primitives.
 //  • Frozen snapshot — cannot be modified at runtime.
 //
 // THEME:
-//  • Color: Silver-Gold (genetic law + canonical truth).
-//  • Subtheme: Determinism, lineage, schema purity.
-//
+//  • Color: Gold‑White (genetic law + organism‑wide purity).
+//  • Subtheme: Determinism, lineage, schema purity, evolutionary stability.
 // ============================================================================
-//  OS CONTEXT METADATA — GENOME HEADER
-// ============================================================================
+
 export const PULSE_FIELDS_CONTEXT = {
   layer: "PulseSpecs",
   role: "OS_DATA_GENOME",
   purpose: "Define canonical PulseField types, rules, and mappings",
   context: "Deterministic data language for all Pulse subsystems",
-  version: 1.3,
+  version: 10.4,
   target: "os-core",
   selfRepairable: false,
 
-  // Evolution lineage — genetic history
   evolution: {
     "1.1": "Base genome: core types + SQL/Firestore mappings.",
     "1.2": "Extended numeric semantics (currency/percent) and enum support.",
-    "1.3": "Explicit null handling + stricter URL/email patterns + frozen spec snapshot."
+    "1.3": "Explicit null handling + stricter URL/email patterns + frozen spec snapshot.",
+    "10.4": "Identity uplift, organism alignment, gold‑white genome header, v10.4 contract sync."
   }
 };
+
 
 // ============================================================================
 //  PulseField Types — the universal data language (GENETIC ALPHABET)

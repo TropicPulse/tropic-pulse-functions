@@ -1,15 +1,15 @@
-
 // ============================================================================
-//  PULSE OS v9.3 — THE HEARTBEAT
-//  PulseProxyHeartbeat
-//  Backend‑Only • Deterministic • Drift‑Proof • No IQ
+//  PULSE OS v10.4 — THE HEARTBEAT
+//  PulseProxyHeartbeat — Pacemaker Timer Engine
+//  Backend‑Only • Deterministic • Drift‑Proof • No IQ • No Routing • No Compute
+//  ROLE: Central Timer Organ (Logout + PulseHistory Repair)
 // ============================================================================
 
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "HeartBeat",
-  version: "9.3",
+  version: "10.4",
   identity: "PulseProxyHeartbeat",
 
   evo: {
@@ -25,6 +25,12 @@ export const PulseRole = {
   }
 };
 
+// ============================================================================
+//  TIMER: LOGOUT + HISTORY REPAIR
+//  • Runs every 5 minutes
+//  • Logs all changes + all failures
+//  • Deterministic, no routing, no compute
+// ============================================================================
 export const timerLogout = onSchedule("every 5 minutes", async () => {
   const runId = crypto.randomUUID();
   const logId = `LOGOUT_${runId}`;
@@ -175,7 +181,9 @@ export const timerLogout = onSchedule("every 5 minutes", async () => {
             } catch (err) {
               pulseChanges[entryKey] = "LogoutNOCHANGE";
 
-              await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${entryKey.replace("/", "_")}`).set({
+              await db.collection("FUNCTION_ERRORS").doc(
+                `${errorPrefix}${entryKey.replace("/", "_")}`
+              ).set({
                 fn: "timerLogout",
                 stage: "pulsehistory_fix",
                 uid,
@@ -234,6 +242,14 @@ export const timerLogout = onSchedule("every 5 minutes", async () => {
   }
 });
 
+
+// ============================================================================
+//  PULSE OS v10.4 — SECURITY SWEEP (PART 1/2)
+//  PulseProxyHeartbeat — Identity Integrity Engine
+//  Backend‑Only • Deterministic • Drift‑Proof • No IQ • No Routing • No Compute
+//  ROLE: Identity Rotation • Danger Detection • Token Lifecycle Enforcement
+// ============================================================================
+
 export const securitySweep = onSchedule("every 24 hours", async () => {
   const runId = crypto.randomUUID();
   const logId = `SECURE_${runId}`;
@@ -256,7 +272,12 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
     const usersSnap = await db.collection("Users").get();
 
     // ---------------------------------------------------------
-    // ⭐ 1. IDENTITY SWEEP (wrapped in its own try/catch)
+    // ⭐ 1. IDENTITY SWEEP (isolated try/catch)
+    //    • Normalize timestamps
+    //    • Detect danger flags
+    //    • Detect IP/device jumps
+    //    • Rotate session tokens (never root)
+    //    • Log identity lineage
     // ---------------------------------------------------------
     try {
       for (const doc of usersSnap.docs) {
@@ -327,13 +348,9 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
           if (!needs30DayRefresh && !needsEarlyRefresh) continue;
 
           // -----------------------------
-          // ROOT TOKEN (PERMANENT)
+          // TOKENS
           // -----------------------------
-          const rootResendToken = u.UserToken || null;
-
-          // -----------------------------
-          // SESSION TOKEN (ROTATING)
-          // -----------------------------
+          const rootResendToken = u.UserToken || null; // permanent root token
           const oldSessionToken = TPIdentity.resendToken || null;
 
           let newSessionToken;
@@ -446,9 +463,12 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
     }
-
     // ---------------------------------------------------------
-    // ⭐ 2. PULSEBAND CLEANUP (its own try/catch)
+    // ⭐ 2. PULSEBAND CLEANUP (isolated try/catch)
+    //    • Deletes expired sessions (>24h)
+    //    • Deletes chunks tied to expired sessions
+    //    • Deletes errors + redownload logs older than 7 days
+    //    • Always logs cleanup summary
     // ---------------------------------------------------------
     try {
       const cutoff24h = Date.now() - 24 * 60 * 60 * 1000;
@@ -518,6 +538,8 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
 
     // ---------------------------------------------------------
     // ⭐ 3. TIMER LOG (always runs)
+    //    • Records rotation + flags
+    //    • Weekly / biweekly metadata
     // ---------------------------------------------------------
     await db.collection("TIMER_LOGS").doc(logId).set({
       fn: "securitySweep",
@@ -541,172 +563,3 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
     });
   }
 });
-
-export const refreshEnvironmentSmart = onSchedule(
-  {
-    schedule: "every 30 minutes",
-    timeZone: "America/Belize",
-    region: "us-central1",
-    timeoutSeconds: 540,
-    memory: "1GiB"
-  },
-  async () => {
-    const runId = Date.now();
-    const logId = `ENV_${runId}`;
-    const errorPrefix = `ERR_${runId}_`;
-
-    const envRef = db.collection("environment");
-    const nowTs = admin.firestore.Timestamp.now();
-    const nowMs = nowTs.toMillis();
-
-    const refreshed = [];
-    const skipped = [];
-    const failed = [];
-
-    // ---------------------------------------------------------
-    // SAFE WRAPPER
-    // ---------------------------------------------------------
-    async function safeMaybeUpdate(docName, intervalMs, fn) {
-      try {
-        await maybeUpdate(docName, intervalMs, fn);
-      } catch (err) {
-        failed.push(docName);
-
-        await db.collection("FUNCTION_ERRORS")
-          .doc(`${errorPrefix}${docName}_outer`)
-          .set({
-            fn: "refreshEnvironmentSmart",
-            stage: "maybeUpdate_outer",
-            docName,
-            error: String(err),
-            runId,
-            createdAt: admin.firestore.FieldValue.serverTimestamp()
-          });
-
-        try {
-          await envRef.doc(docName).set(
-            {
-              updatedAt: nowTs,
-              success: false,
-              raw: { error: "Outer failure: " + err.message },
-              runId
-            },
-            { merge: true }
-          );
-        } catch (_) {}
-      }
-    }
-
-    // ---------------------------------------------------------
-    // CORE maybeUpdate
-    // ---------------------------------------------------------
-    async function maybeUpdate(docName, intervalMs, fn) {
-      const snap = await envRef.doc(docName).get();
-      const data = snap.data() || {};
-
-      let last = 0;
-      const rawUpdated = data.updatedAt;
-
-      if (typeof rawUpdated === "number") last = rawUpdated;
-      else if (rawUpdated?.toMillis) last = rawUpdated.toMillis();
-
-      const force =
-        !data.success ||
-        data.raw?.error ||
-        !rawUpdated ||
-        last > nowMs ||
-        Object.keys(data.raw || {}).length === 0;
-
-      if (!force && nowMs - last < intervalMs) {
-        skipped.push(docName);
-        return;
-      }
-
-      try {
-        // ⭐ CALL INTERNAL BACKEND FUNCTION DIRECTLY
-        await fn(); // fetchWeather(), fetchWaves(), etc.
-
-        // Helper already wrote to Firestore + history
-        refreshed.push(docName);
-
-      } catch (err) {
-        failed.push(docName);
-
-        await db.collection("FUNCTION_ERRORS")
-          .doc(`${errorPrefix}${docName}`)
-          .set({
-            fn: "refreshEnvironmentSmart",
-            stage: "update_error",
-            docName,
-            error: String(err),
-            runId,
-            createdAt: admin.firestore.FieldValue.serverTimestamp()
-          });
-
-        await envRef.doc(docName).set(
-          {
-            updatedAt: nowTs,
-            success: false,
-            raw: { error: err.message },
-            runId
-          },
-          { merge: true }
-        );
-      }
-    }
-
-    // ---------------------------------------------------------
-    // CALL ALL HELPERS DIRECTLY (NO HTTP ANYWHERE)
-    // ---------------------------------------------------------
-    await safeMaybeUpdate("weather",       30 * 60 * 1000, fetchWeather);
-    await safeMaybeUpdate("heatIndex",     30 * 60 * 1000, fetchHeatIndex);
-    await safeMaybeUpdate("waves",          2 * 60 * 60 * 1000, fetchWaves);
-    await safeMaybeUpdate("sargassum",      6 * 60 * 60 * 1000, fetchSargassum);
-    await safeMaybeUpdate("moon",          24 * 60 * 60 * 1000, fetchMoonPhase);
-    await safeMaybeUpdate("wildlife",      24 * 60 * 60 * 1000, fetchWildlife);
-    await safeMaybeUpdate("storms",         1 * 60 * 60 * 1000, fetchStorms);
-    await safeMaybeUpdate("powerUpdates",   5 * 60 * 1000, updateSanPedroPower);
-    await safeMaybeUpdate("power",         15 * 60 * 1000, fetchPowerOutages);
-
-    // ---------------------------------------------------------
-    // TIMER LOG
-    // ---------------------------------------------------------
-    try {
-      await db.collection("TIMER_LOGS").doc(logId).set({
-        fn: "refreshEnvironmentSmart",
-        runId,
-        refreshed,
-        skipped,
-        failed,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-    } catch (err) {
-      await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}timerlog`).set({
-        fn: "refreshEnvironmentSmart",
-        stage: "timer_log",
-        error: String(err),
-        runId,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-    }
-
-    return "Smart Environment Refresh Complete.";
-  }
-);
-
-export const scheduledUserScoring = onSchedule(
-  {
-    schedule: "every 5 minutes",
-    timeZone: "America/Belize"
-  },
-  async () => {
-    console.log("Running scheduled user scoring…");
-
-    try {
-      await runUserScoring();
-      console.log("User scoring completed.");
-    } catch (err) {
-      console.error("User scoring failed:", err);
-    }
-  }
-);

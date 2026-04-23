@@ -5,44 +5,71 @@
 //  PURE NEGOTIATION. NO COMPUTE. NO MARKETPLACE LOGIC. NO STATE MUTATION.
 // ============================================================================
 
+// ============================================================================
+//  GLOBAL WIRING — v10.2 (Safe, backend‑first, no hard global dependency)
+// ============================================================================
+const G =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof global !== "undefined"
+    ? global
+    : typeof window !== "undefined"
+    ? window
+    : {};
 
-// ============================================================================
-//  GLOBAL WIRING — provided by OSKernel / Brain
-// ============================================================================
-const log   = (global && global.log)   || console.log;
-const error = (global && global.error) || console.error;
+// Safe fallbacks — boundary organ, but never break if wiring incomplete
+const log   = G.log   || console.log;
+const error = G.error || console.error;
 
 const fetchFn =
-  (typeof global !== "undefined" && global.fetch) ||
-  (typeof globalThis !== "undefined" && globalThis.fetch) ||
+  (typeof G.fetch === "function" && G.fetch) ||
   null;
 
+// ============================================================================
+//  ORGAN IDENTITY — v9.3
+// ============================================================================
+export const PulseRole = {
+  type: "Organ",
+  subsystem: "PulseProxy",
+  layer: "OuterAgent",
+  version: "9.3",
+  identity: "PulseProxyOuterAgent",
+
+  evo: {
+    driftProof: true,
+    deterministic: true,
+    boundaryOrgan: true,
+    externalNegotiator: true,
+    marketplaceBoundary: true,
+    backendPreferred: true,
+    noIQ: true,
+    noRouting: true,
+    noCompute: true,
+    multiInstanceReady: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    futureEvolutionReady: true
+  }
+};
 
 // ============================================================================
-//  LAYER CONSTANTS + DIAGNOSTICS (v9.3)
+//  LAYER CONSTANTS + CONTEXT (v9.3)
 // ============================================================================
 const AGENT_LAYER_ID   = "PROXY-OUTER-AGENT";
 const AGENT_LAYER_NAME = "THE OUTER AGENT";
 const AGENT_LAYER_ROLE = "External Interface + Job Courier";
 
 export const PROXY_OUTER_AGENT_CONTEXT = {
-  layer: "PulseProxyOuterAgent",
-  role: "OUTER_AGENT",
-  version: "9.3",
+  layer: PulseRole.layer,
+  role: PulseRole.identity,
+  version: PulseRole.version,
   purpose: "External interface + job courier + credit sync",
-  evo: {
-    driftProof: true,
-    deterministic: true,
-    boundaryOrgan: true,
-    marketplaceBoundary: true,
-    multiInstanceReady: true,
-    futureEvolutionReady: true
-  }
+  evo: PulseRole.evo
 };
 
 const AGENT_DIAGNOSTICS_ENABLED =
-  (typeof global !== "undefined" && global.PULSE_AGENT_DIAGNOSTICS === true) ||
-  (typeof global !== "undefined" && global.PULSE_DIAGNOSTICS === true) ||
+  (typeof G.PULSE_AGENT_DIAGNOSTICS === "boolean" && G.PULSE_AGENT_DIAGNOSTICS === true) ||
+  (typeof G.PULSE_DIAGNOSTICS === "boolean" && G.PULSE_DIAGNOSTICS === true) ||
   false;
 
 function agentLog(stage, details = {}) {
@@ -65,7 +92,6 @@ function agentLog(stage, details = {}) {
 
 agentLog("AGENT_INIT");
 
-
 // ============================================================================
 //  OUTER AGENT CLASS — External Negotiator (v9.3)
 // ============================================================================
@@ -76,7 +102,7 @@ export class PulseProxyOuterAgent {
 
     this.baseUrl =
       baseUrl ||
-      (typeof global !== "undefined" && global.PULSE_PROXY_BASE_URL) ||
+      (typeof G.PULSE_PROXY_BASE_URL === "string" && G.PULSE_PROXY_BASE_URL) ||
       "https://www.tropicpulse.bz/proxy";
 
     agentLog("AGENT_CONSTRUCTED", {

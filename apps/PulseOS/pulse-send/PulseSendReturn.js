@@ -1,11 +1,11 @@
 // ============================================================================
-//  PulseSendReturn.js — v3.0
-//  Return Arc • Pattern‑Aware Bounce‑Back Organ • Handles returnTo Logic
+//  PulseSendReturn.js — v10.4
+//  Return Arc • Pulse‑Agnostic Bounce‑Back Organ • Handles returnTo Logic
 // ============================================================================
 //
 //  WHAT THIS ORGAN IS:
 //  --------------------
-//  • Looks at the final Pulse v2 packet.
+//  • Works with Pulse v1, Pulse v2, Pulse v3 organisms.
 //  • Checks if returnTo is set.
 //  • If yes → asks Router + Mesh for return routing.
 //  • Fires a new Impulse back to the return organ.
@@ -14,103 +14,117 @@
 //
 //  WHAT THIS ORGAN IS NOT:
 //  ------------------------
-//  • Not a router (PulseRouter v3 handles routing).
+//  • Not a router.
 //  • Not a mover.
 //  • Not a mesh layer.
 //  • Not a compute engine.
 //  • Not a healer or brain.
 //  • Not a messenger cell.
 //
-//  SAFETY CONTRACT (v3.0):
+//  SAFETY CONTRACT (v10.4):
 //  ------------------------
 //  • No imports.
 //  • No network.
 //  • No compute.
-//  • Pure deterministic return logic.
 //  • Zero randomness.
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
 // ============================================================================
 
-// ⭐ PulseRole — identifies this as the PulseSend Return Organ
+
+// ============================================================================
+// ⭐ PulseRole — identifies this as the PulseSend Return Organ (v10.4)
+// ============================================================================
 export const PulseRole = {
   type: "Messenger",
   subsystem: "PulseSend",
   layer: "Return",
-  version: "3.0",
-  identity: "PulseSendReturn-v3",
+  version: "10.4",
+  identity: "PulseSendReturn-v10.4",
 
   evo: {
     driftProof: true,
     returnArcReady: true,
     patternAware: true,
     lineageAware: true,
+    modeAware: true,
     multiOrganReady: true,
+    deterministicImpulseFlow: true,
     futureEvolutionReady: true,
 
     unifiedAdvantageField: true,
-    pulseSend3Ready: true
+    pulseSend10Ready: true
   },
 
-  routingContract: "PulseRouter-v3",
-  meshContract: "PulseMesh-v3",
-  pulseContract: "Pulse-v2",
-  gpuOrganContract: "PulseGPU-v9.2",
-  earnCompatibility: "PulseEarn-v9"
+  routingContract: "PulseRouter-v10.4",
+  meshContract: "PulseMesh-v10.4",
+  pulseContract: "Pulse-v1/v2/v3",   // ⭐ Pulse‑agnostic
+  gpuOrganContract: "PulseGPU-v10",
+  earnCompatibility: "PulseEarn-v10"
 };
 
-// ============================================================================
-//  FACTORY — Create the Return Organ
-// ============================================================================
-//
-//  Dependencies injected:
-//    • impulse      → to fire the return movement
-//    • pulseRouter  → to determine return target
-//    • pulseMesh    → to determine return pathway
-//    • log          → optional logging
-//
-//  Behavior:
-//    • If pulse.returnTo exists → route + return
-//    • If not → end of chain
-// ============================================================================
 
+// ============================================================================
+//  FACTORY — Create the Return Organ (v10.4)
+// ============================================================================
 export function createPulseSendReturn({ impulse, pulseRouter, pulseMesh, log }) {
   return {
     PulseRole,
 
     handle(pulse) {
-      const { returnTo } = pulse;
+      const {
+        returnTo,
+        mode = "normal",
+        pattern = "UNKNOWN_PATTERN",
+        lineage = []
+      } = pulse;
+
+      const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
+      const pulseType = pulse.PulseRole?.identity || "UNKNOWN_PULSE_TYPE";
 
       // ⭐ No return target → end of chain
       if (!returnTo) {
-        log && log("[PulseSendReturn-v3] No returnTo target — chain complete", {
+        log && log("[PulseSendReturn-v10.4] No returnTo target — chain complete", {
           jobId: pulse.jobId,
-          pattern: pulse.pattern
+          pattern,
+          lineageDepth,
+          mode,
+          pulseType
         });
+
         return { completed: true, returned: false, pulse };
       }
 
       // ⭐ Return target exists → route the return pulse
-      log && log("[PulseSendReturn-v3] Returning pulse", {
+      log && log("[PulseSendReturn-v10.4] Returning pulse", {
         jobId: pulse.jobId,
-        pattern: pulse.pattern,
-        returnTo
+        pattern,
+        returnTo,
+        lineageDepth,
+        mode,
+        pulseType
       });
 
       // ⭐ Step 1 — determine return target via Router
-      const targetOrgan = returnTo;
+      const targetOrgan = pulseRouter.route({
+        ...pulse,
+        targetHint: returnTo,
+        mode
+      });
 
       // ⭐ Step 2 — determine pathway via Mesh
-      const pathway = pulseMesh.pathwayFor(targetOrgan);
+      const pathway = pulseMesh.pathwayFor(targetOrgan, mode);
 
       // ⭐ Step 3 — fire impulse back
       const movement = impulse.fire({
         pulse: {
           ...pulse,
-          returnTo: null // ⭐ prevent infinite loops
+          returnTo: null, // ⭐ prevent infinite loops
+          mode
         },
         targetOrgan,
-        pathway
+        pathway,
+        mode
       });
 
       return {
