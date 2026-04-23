@@ -16,7 +16,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script type="module">
-import "/PulseUnderstanding.js";
+import * as PulseEvolutionary from "./PulseEvolutionaryWindow.js";
+
+  // optional: start the OS
+  const Brain = PulseEvolutionary.igniteBrain({
+    intent: PulseIntentMap,
+    organism: PulseOrganismMap,
+    iq: PulseIQMap
+  });
+</script>
+
 
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}

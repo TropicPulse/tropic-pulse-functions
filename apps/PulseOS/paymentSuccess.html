@@ -12,7 +12,16 @@
 
 <!-- Backend Connector Layer -->
 <script type="module">
-import "/PulseUnderstanding.js";
+import * as PulseEvolutionary from "./PulseEvolutionaryWindow.js";
+
+  // optional: start the OS
+  const Brain = PulseEvolutionary.igniteBrain({
+    intent: PulseIntentMap,
+    organism: PulseOrganismMap,
+    iq: PulseIQMap
+  });
+</script>
+
 
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}

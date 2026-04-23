@@ -1478,7 +1478,16 @@ nav a:hover::after {
    No timers. No random. No arrhythmia.
    ============================================================ */
 
-import "/PulseUnderstanding.js";
+import * as PulseEvolutionary from "./PulseEvolutionaryWindow.js";
+
+  // optional: start the OS
+  const Brain = PulseEvolutionary.igniteBrain({
+    intent: PulseIntentMap,
+    organism: PulseOrganismMap,
+    iq: PulseIQMap
+  });
+</script>
+
 
 /* ============================================================
    1. OS BOOT — LOADING SCREEN (CSS-driven, no timers)

@@ -686,7 +686,16 @@ input[type="file"] {
 
 <!-- Backend Connector Layer -->
 <script type="module">
-import "/PulseUnderstanding.js";
+import * as PulseEvolutionary from "./PulseEvolutionaryWindow.js";
+
+  // optional: start the OS
+  const Brain = PulseEvolutionary.igniteBrain({
+    intent: PulseIntentMap,
+    organism: PulseOrganismMap,
+    iq: PulseIQMap
+  });
+</script>
+
 
 // THE REAL IMPORT YOU WANT — ALL METRICS COME FROM HERE
 const metrics = await callHelper("earn:getSnapshot");

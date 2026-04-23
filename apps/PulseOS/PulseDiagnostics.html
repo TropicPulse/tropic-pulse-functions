@@ -320,7 +320,16 @@ input[type="file"] {
 <!-- Backend Connector Layer -->
  
  <script type="module">
-import "/PulseUnderstanding.js";
+import * as PulseEvolutionary from "./PulseEvolutionaryWindow.js";
+
+  // optional: start the OS
+  const Brain = PulseEvolutionary.igniteBrain({
+    intent: PulseIntentMap,
+    organism: PulseOrganismMap,
+    iq: PulseIQMap
+  });
+</script>
+
 
 // ⭐ ADDED — Immune Commander
 import { PulseSurgeonGeneral } from "./organs/immune/PulseSurgeonGeneral.js";
