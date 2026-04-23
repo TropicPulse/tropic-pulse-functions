@@ -11,7 +11,7 @@
 import { PulseIntentMap } from "./PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
 import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
-import { PulseIdentity } from "./PULSE-OS/PulseIdentity.js";
+import { PulseIdentity } from "./PULSE-OS/PulseProxyBBB.js";
 
 // OS Brain + Evolution
 import { PulseOSEvolution } from "./PULSE-OS/PulseOSBrainEvolution.js";

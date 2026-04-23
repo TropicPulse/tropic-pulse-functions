@@ -448,7 +448,7 @@ export const PulseOrganismMap = {
 
       PulseIdentity: {
         old: ["PulseIdentity.js", "PulseIdentity"],
-        now: ["CheckIdentity", "PulseOSOrganMembrane"],
+        now: ["PulseProxyBBB.js", "PulseProxyBBB"],
         note: "Identity → Membrane + validator"
       }
     },
