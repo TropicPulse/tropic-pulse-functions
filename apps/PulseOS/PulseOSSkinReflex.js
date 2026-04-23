@@ -129,7 +129,7 @@ const logProtector = (stage, details = {}) => {
 // ============================================================================
 // PULSE OS v10.3 — SKIN REFLEX (A1 → A2 → Router → Backend)
 // ============================================================================
-import { route } from "./PulseOSCNSNervousSystem.js";
+import { route } from "./PULSE-OS/PulseOSCNSNervousSystem.js";
 
 // ============================================================================
 // ROUTE MEMORY — LIVING MAP, WITH DEGRADATION + TIER + DNA TAG (v11 upgrade)

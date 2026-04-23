@@ -16,7 +16,7 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PULSE-OS/PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
@@ -29,7 +29,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
     organism: PulseOrganismMap,
     iq: PulseIQMap
   });
-  
+
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
