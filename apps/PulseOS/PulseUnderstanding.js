@@ -21,12 +21,15 @@
 import { PulseIntentMap } from "./PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
 import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
+// ADD THIS LINE:
+import { PulseIdentity } from "./PULSE-OS/PulseIdentity.js";
 
 // OS Evolution + Brain
 import { PulseOSEvolution } from "./PULSE-OS/PulseOSEvolution.js";
 import { PulseOSBrain } from "./PULSE-OS/PulseOSBrain.js";
 
 // Reflex + Vitals
+
 import { VitalsMonitor } from "./pulse-proxy/PulseProxyVitalsMonitor.js";
 import { attachScanner } from "./PULSE-OS/PulseOSSkinReflex.js";
 
