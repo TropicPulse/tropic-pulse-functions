@@ -19,7 +19,7 @@
 // ============================================================================
 //  SAFE LOGGING (ACCESS IMPORT)
 // ============================================================================
-import { log, warn, error as logError } from "../pulse-proxy/PulseProxyVitalsLogger.js";
+import { log, warn, error as logError } from "../PulseProofLogger.js";
 
 
 // ============================================================================

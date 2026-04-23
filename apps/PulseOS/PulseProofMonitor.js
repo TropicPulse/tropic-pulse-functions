@@ -1,8 +1,32 @@
 // ============================================================================
-//  PULSE OS v10.4 — USER METRICS (VITALS MONITOR ULTRA LOGGER)
-//  “Circulatory Telemetry Layer / Bloodstream Diagnostics / Route Map Renderer”
-//  PURE MEASUREMENT. PURE LOGGING. ZERO HEALING. ZERO COMMAND. ZERO ROUTING.
+//  PULSE OS — PROOF MONITOR (v11)
+//  “Verification Layer / Proof-of-Evolution / Stability Witness / Load Auditor”
+//
+//  METAPHOR:
+//  - This organ is the organism’s PROOF OF LIFE MONITOR.
+//  - It verifies that the organism is alive, stable, and evolving under load.
+//  - It does NOT heal, route, compute, or influence the organism.
+//  - It simply measures and confirms.
+//
+//  - ProofMonitor = the external witness that validates:
+//        • our evolution is real
+//        • our stability is measurable
+//        • our performance is observable
+//        • our growth is trackable
+//        • our routing pathways are healthy
+//
+//  - It sits beside Understanding and ProofLogger in the TOP LAYER,
+//    forming the “Visibility → Contact → Verification → Evidence” chain.
+//
+//  - Outsiders can SEE our evolution through the Window,
+//    they can MEET us through Understanding,
+//    they can VERIFY us through ProofMonitor,
+//    and they can TRUST us because ProofLogger records the proof.
+//
+//  - Pure measurement. Pure verification. Pure proof.
+//  - Zero routing. Zero healing. Zero mutation. Zero influence.
 // ============================================================================
+
 
 // ============================================================================
 //  UNIVERSAL GLOBAL RESOLVER — NEVER THROWS
@@ -27,10 +51,10 @@ const error = g.error || console.error;
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
-  subsystem: "PulseProxy",
-  layer: "VitalsMonitor",
-  version: "10.4",
-  identity: "PulseUserMetrics",
+  subsystem: "ProofLayer",
+  layer: "ProofMonitor",
+  version: "11.0",
+  identity: "PulseProofMonitor",
 
   evo: {
     driftProof: true,
@@ -47,16 +71,18 @@ export const PulseRole = {
   }
 };
 
+
 // ============================================================================
 //  ORGAN CONTEXT — v10.4
 // ============================================================================
-const VITALS_CONTEXT = {
+const PROOF_CONTEXT = {
   layer: PulseRole.layer,
   role: PulseRole.identity,
   version: PulseRole.version,
-  lineage: "interface-core",
+  lineage: "proof-core",
   evo: PulseRole.evo
 };
+
 
 // ============================================================================
 //  ICONS — Circulatory Telemetry Glyphs (v10.4)

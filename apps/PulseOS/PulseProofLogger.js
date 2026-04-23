@@ -1,7 +1,30 @@
 // ============================================================================
-//  PULSE OS v10.3 — VITALS LOGGER (RENDERER ONLY)
-//  Subsystem Identity • Connection Vitals • Zero Drift • No Backend
-//  PURE RENDERING. NO NETWORK. NO STORAGE. NO EXTRA STATEFUL COMPUTE.
+//  PULSE OS — PROOF LOGGER (v11)
+//  “Record Layer / Proof Printer / Evolution Ledger / External Witness”
+//
+//  METAPHOR:
+//  - This organ is the organism’s EVIDENCE PRINTER.
+//  - It records every pulse, every signal, every heartbeat of the system.
+//  - It does NOT influence the organism — it only documents it.
+//  - It is the black box recorder of Pulse OS.
+//
+//  - ProofLogger = the ledger that prints:
+//        • stability snapshots
+//        • performance signatures
+//        • relay counts
+//        • latency pulses
+//        • subsystem events
+//
+//  - It sits beside Understanding and ProofMonitor in the TOP LAYER,
+//    forming the “Visibility → Contact → Verification → Evidence” chain.
+//
+//  - Outsiders can SEE our evolution through the Window,
+//    they can MEET us through Understanding,
+//    they can VERIFY us through ProofMonitor,
+//    and they can TRUST us because ProofLogger records the proof.
+//
+//  - Pure logging. Pure record. Pure truth.
+//  - Zero routing. Zero healing. Zero compute. Zero mutation.
 // ============================================================================
 
 // ============================================================================
@@ -12,76 +35,46 @@ const _c = { ...console };
 // ============================================================================
 //  VERSION MAP — The Genome of PulseOS (v10.3)
 // ============================================================================
+// ============================================================================
+//  VERSION MAP — Proof Layer Genome (v11)
+// ============================================================================
 export const PulseVersion = {
-  identity: "10.3",
-  brain: "10.3",
-  gpu: "10.3",
-  orchestrator: "10.3",
-  engine: "10.3",
-  optimizer: "10.3",
-  synapse: "10.3",
-  band: "10.3",
-  router: "10.3",
-  marketplaces: "10.3",
-  telemetry: "10.3",
-  limbic: "10.3"
+  proof: "11.0",
+  logger: "11.0",
+  renderer: "11.0",
+  legacy: "10.x"
 };
 
 // ============================================================================
-//  ROLE MAP — Organ Metaphors (Subsystem Identity)
+//  ROLE MAP — Proof Layer Identity (v11)
 // ============================================================================
 export const PulseRoles = {
-  identity: "BLOOD–BRAIN BARRIER (BBB)",
-  brain: "ANALYST CORTEX",
-  gpu: "ASTRAL NERVOUS SYSTEM",
-  orchestrator: "BRAINSTEM",
-  engine: "MOTOR CORTEX",
-  optimizer: "GUARDIAN",
-  synapse: "ELECTRICAL JUNCTION",
-  band: "BODY INTERFACE",
-  router: "CONSULATE",
-  marketplaces: "EMBASSY LEDGER",
-  telemetry: "BLOODSTREAM",
-  limbic: "LIMBIC SHADOW"
+  proof: "PROOF MONITOR",
+  logger: "PROOF LOGGER",
+  renderer: "RENDERER",
+  legacy: "LEGACY SUBSYSTEM"
 };
 
 // ============================================================================
-//  COLOR MAP — Console Identity Palette (v10.3)
+//  COLOR MAP — Proof Layer Palette (v11)
 // ============================================================================
 export const PulseColors = {
-  identity: "#4DD0E1",
-  brain: "#7C4DFF",
-  gpu: "#29B6F6",
-  orchestrator: "#66BB6A",
-  engine: "#FFA726",
-  optimizer: "#26C6DA",
-  synapse: "#42A5F5",
-  band: "#EC407A",
-  router: "#26A69A",
-  marketplaces: "#26C281",
-  telemetry: "#FF7043",
-  limbic: "#AB47BC",
+  proof: "#4DD0E1",
+  logger: "#FF7043",
+  renderer: "#29B6F6",
   legacy: "#BDBDBD"
 };
 
 // ============================================================================
-//  ICON MAP — Ultra Logger Glyphs (v10.3)
+//  ICON MAP — Proof Layer Glyphs (v11)
 // ============================================================================
 export const PulseIcons = {
-  identity: "🧬",
-  brain: "🧠",
-  gpu: "✨",
-  orchestrator: "🧵",
-  engine: "⚙️",
-  optimizer: "🛡️",
-  synapse: "⚡",
-  band: "📡",
-  router: "🛰️",
-  marketplaces: "🏛️",
-  telemetry: "🩸",
-  limbic: "🌒",
+  proof: "📜",
+  logger: "🖨️",
+  renderer: "✨",
   legacy: "⬡"
 };
+
 
 // ============================================================================
 //  INTERNAL — Format a subsystem log prefix
