@@ -1,34 +1,36 @@
 // ============================================================================
-// FILE: pulse-proxy/CheckIdentity.js
-// PULSE IDENTITY ENGINE — v10.4
-// “THE SELF+++ / CANONICAL IDENTITY ENGINE / SENSE‑OF‑SELF LAYER”
+// FILE: PULSE-proxy/CheckIdentity-v11-EVO-BINARY.js
+// PULSE IDENTITY ENGINE — v11‑EVO‑BINARY
+// “THE SELF++++ / BINARY‑FIRST IDENTITY ENGINE / DUALBAND SENSE‑OF‑SELF”
 // ============================================================================
 //
-// ROLE (v10.4):
-//   • Canonical identity validator + deterministic self‑repair engine
-//   • Preserves lineage, drift markers, session state, trusted device flags
-//   • Supports offline-first identity survival
-//   • Mode-aware (A→B→A routing safe)
-//   • Returns authoritative v10.4 identity snapshot
-//   • Zero randomness, deterministic, replayable
+// ROLE (v11‑EVO‑BINARY):
+//   • Canonical identity validator for a binary‑first organism
+//   • Dualband identity engine (Symbolic A → Binary B → Symbolic A)
+//   • No middlemen: identity flows directly into binary nervous system
+//   • Preserves lineage, drift markers, binary signatures, device trust
+//   • Supports offline‑first survival + binary compression
+//   • Deterministic, replayable, lineage‑safe, drift‑aware
+//   • Returns authoritative v11‑EVO‑BINARY identity snapshot
 //
-// CONTRACT (v10.4):
-//   • Fail-open: invalid identity → null (frontend handles fallback)
+// CONTRACT (v11‑EVO‑BINARY):
+//   • Fail‑open: invalid identity → null (frontend handles fallback)
 //   • Never mutate original input
-//   • Always return structurally complete v10.4 identity
+//   • Always return structurally complete v11 identity
 //   • Never trust external identity providers
-//   • Deterministic, loggable, lineage-safe
-//   • No single point of failure
+//   • No astral layers, no legacy PNS, no translator cores
+//   • Binary‑first nervous system compliance
+//   • Dualband compression required
 // ============================================================================
 
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS
 // ============================================================================
-const LAYER_ID   = "IDENTITY-LAYER";
-const LAYER_NAME = "THE SELF+++";
-const LAYER_ROLE = "SENSE-OF-SELF ENGINE";
-const LAYER_VER  = "10.4";
+const LAYER_ID   = "IDENTITY-LAYER-BINARY";
+const LAYER_NAME = "THE SELF++++";
+const LAYER_ROLE = "BINARY-FIRST SENSE-OF-SELF ENGINE";
+const LAYER_VER  = "11-EVO-BINARY";
 
 const IDENTITY_DIAGNOSTICS_ENABLED =
   process.env.PULSE_IDENTITY_DIAGNOSTICS === "true" ||
@@ -69,7 +71,30 @@ function resolveMode(event) {
 
 
 // ============================================================================
-// HELPERS — NORMALIZE IDENTITY TO v10.4 SHAPE
+// BINARY SIGNATURE — v11‑EVO‑BINARY
+// ============================================================================
+function computeBinarySignature(identity) {
+  try {
+    const seed = JSON.stringify({
+      uid: identity.uid,
+      lineage: identity.lineage,
+      drift: identity.drift
+    });
+
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    }
+
+    return "BIN-" + hash.toString(16).padStart(8, "0");
+  } catch {
+    return "BIN-00000000";
+  }
+}
+
+
+// ============================================================================
+// HELPERS — NORMALIZE IDENTITY TO v11‑EVO‑BINARY SHAPE
 // ============================================================================
 function normalizeIdentity(raw, mode) {
   if (!raw || typeof raw !== "object") return null;
@@ -86,7 +111,7 @@ function normalizeIdentity(raw, mode) {
   const safeNum = (v, d = 0) =>
     typeof v === "number" && !isNaN(v) ? v : d;
 
-  return {
+  const normalized = {
     // Core identity
     uid: safeStr(raw.uid),
     email: safeStr(raw.email),
@@ -113,14 +138,41 @@ function normalizeIdentity(raw, mode) {
 
     // Context injection
     layer: LAYER_NAME,
-    context: "Canonical backend identity snapshot (v10.4)",
+    context: "Canonical backend identity snapshot (v11‑EVO‑BINARY)",
     mode
+  };
+
+  // Attach binary signature
+  normalized.binarySignature = computeBinarySignature(normalized);
+
+  return normalized;
+}
+
+
+// ============================================================================
+// DUALBAND IDENTITY REPAIR — A → B → A
+// ============================================================================
+async function dualbandRepair(identity) {
+  // Symbolic repair pass (A)
+  const symbolic = await repairIdentity(identity);
+
+  // Binary compression pass (B)
+  const binary = {
+    ...symbolic,
+    binaryCompressed: true,
+    binarySignature: computeBinarySignature(symbolic)
+  };
+
+  // Symbolic merge pass (A)
+  return {
+    ...binary,
+    repairMode: "dualband"
   };
 }
 
 
 // ============================================================================
-// BACKEND ENTRY POINT — “THE SELF+++”
+// BACKEND ENTRY POINT — “THE SELF++++”
 // ============================================================================
 export const handler = async (event, context) => {
   const mode = resolveMode(event);
@@ -156,9 +208,9 @@ export const handler = async (event, context) => {
     });
 
     // ----------------------------------------------------
-    // ⭐ 3. Repair identity drift (Sense-of-Self correction)
+    // ⭐ 3. Dualband repair (A → B → A)
     // ----------------------------------------------------
-    const repaired = await repairIdentity(identity);
+    const repaired = await dualbandRepair(identity);
 
     logSelf("IDENTITY_REPAIRED", {
       uid: repaired?.uid || null,
@@ -166,7 +218,7 @@ export const handler = async (event, context) => {
     });
 
     // ----------------------------------------------------
-    // ⭐ 4. Normalize to v10.4 identity shape
+    // ⭐ 4. Normalize to v11‑EVO‑BINARY identity shape
     // ----------------------------------------------------
     const normalized = normalizeIdentity(repaired, mode);
 
@@ -190,7 +242,7 @@ export const handler = async (event, context) => {
     };
 
   } catch (err) {
-    safeError("CheckIdentity error:", err);
+    safeError("CheckIdentity v11‑EVO‑BINARY error:", err);
 
     logSelf("FATAL_ERROR", {
       message: err?.message || "Unknown error",

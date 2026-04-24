@@ -1,14 +1,37 @@
 // ============================================================================
-// PulseOrganismMap.js — v11‑EVO‑MAX
-// FULL GENOME BLUEPRINT (Legacy + v11 + Binary + EVO)
-// Deterministic • Static • Zero‑Call • Zero‑Discovery
+// FILE: /apps/PulseOS/Brain/PulseOrganismMap.js
+// PULSE ORGANISM MAP — v11‑EVO‑BINARY‑MAX
+// “DESIGNED ORGANISM / NO MIDDLEMEN / BINARY‑FIRST NERVOUS SYSTEM”
+// ============================================================================
+//
+//  ROLE:
+//  -----
+//  • Single source of truth for the organism layout
+//  • Text‑only blueprint: NO imports, NO execution, NO dynamic logic
+//  • Describes systems, organs, aliases, and route chains
+//
+//  v11‑EVO‑BINARY‑MAX DIRECTION:
+//  -----------------------------
+//  • Binary‑first nervous system — BinaryRouter / BinaryProxy / Mesh / Send / Pulse
+//  • No middlemen between intent and machine — no translator cores
+//  • Pulse‑* (backend) folders = repairable backend organs
+//  • Non‑Pulse‑* folders = frontend / UX / surface
+//  • Proxy Spine v11 = unified backend spine + vitals pump (no business logic)
+//  • New repair organs: PulseHistoryRepair (short‑term memory repair),
+//    PulseBandCleanup (pulseband session/error cleanup)
+//
+//  CONTRACT:
+//  ---------
+//  • This file is DESIGN‑ONLY, not executable logic
+//  • Must stay deterministic, static, and text‑only
+//  • Must align with PulseIntentMap (v11‑EVO‑BINARY) and PulseIQMap
 // ============================================================================
 
 export const PulseOrganismMap = {
-  version: "11‑EVO‑MAX",
+  version: "11‑EVO‑BINARY‑MAX",
 
   // ========================================================================
-  // SYSTEMS — Compact, but complete
+  // SYSTEMS — Compact, but complete (backend = pulse‑* roots)
   // ========================================================================
   systems: {
 
@@ -48,12 +71,14 @@ export const PulseOrganismMap = {
 
     // ----------------------------------------------------------------------
     // BINARY NERVOUS SYSTEM — Pure binary + fallback tiers
+    //  • First‑class binary organism on binary‑designed hardware
+    //  • No translator core between binary nerves and CPU
     // ----------------------------------------------------------------------
     "pulse-binary": {
       role: "Binary Nervous System / Pure Binary Nerves / Tiered Fallback",
       root: "pulse-binary",
       organs: [
-        // Pure binary nerves
+        // Pure binary nerves (no middlemen)
         "BinaryProxy-v11-PURE-EVO","BinaryRouter-v11-PURE-EVO",
         "BinaryMesh-v11-PURE-EVO","BinarySend-v11-PURE-EVO","BinaryPulse-v11-PURE-EVO",
 
@@ -74,7 +99,7 @@ export const PulseOrganismMap = {
     },
 
     // ----------------------------------------------------------------------
-    // DESIGN SYSTEM — Repo / Manifest / Translation
+    // DESIGN SYSTEM — Repo / Manifest / Translation (text‑side only)
     // ----------------------------------------------------------------------
     "pulse-design": {
       role: "Design / Repo / Manifest / Translation",
@@ -125,6 +150,8 @@ export const PulseOrganismMap = {
 
     // ----------------------------------------------------------------------
     // PROXY SYSTEM — Edge / Pressure / Vitals / Spine / Blood
+    //  • Backend spine (PulseProxySpine v11) is organism‑correct, no business logic
+    //  • New repair organs live here: PulseHistoryRepair, PulseBandCleanup
     // ----------------------------------------------------------------------
     "pulse-proxy": {
       role: "Proxy / Edge / Pressure / Vitals / Spine / Blood",
@@ -138,8 +165,9 @@ export const PulseOrganismMap = {
         "PulseProxyOuterAgent","PulseProxySpine","PulseProxySynapse",
         "PulseProxyVitalsLogger","PulseProxyVitalsMonitor","PulseProxyWBCells",
 
-        // v11‑EVO proxy
-        "PulseProxy-v11-Evo","BinaryProxyFallbackTier"
+        // v11‑EVO proxy spine + repair
+        "PulseProxy-v11-Evo","BinaryProxyFallbackTier",
+        "PulseHistoryRepair","PulseBandCleanup"
       ]
     },
 
@@ -189,8 +217,9 @@ export const PulseOrganismMap = {
     },
 
     // ----------------------------------------------------------------------
-    // DYNAMIC PAGE SYSTEM — Evolutionary UI
-    // ----------------------------------------------------------------------
+    // DYNAMIC PAGE SYSTEM — Evolutionary UI (front‑of‑organism)
+//  Text/UI layer; binary stays underneath as nervous system.
+// ----------------------------------------------------------------------
     "pulse-dynamic": {
       role: "Dynamic Page System / Evolutionary UI",
       root: "pulse-dynamic",
@@ -200,26 +229,57 @@ export const PulseOrganismMap = {
 
   // ========================================================================
   // ALIASES — Compact but complete (legacy → v11 → binary)
-  // ========================================================================
+//  NOTE: These are TEXT‑ONLY mappings; execution lives in Pulse‑* folders.
+// ========================================================================
   aliases: {
     base: {
-      PulseBand: { old:["PulseBand"], now:["PulseOSSkinReflex","PulseOSSensoryCortex","PulseProxyImpulse"] },
-      PulseNet:  { old:["PulseNet"],  now:["PulseSDN"] },
-      PulseClient:{ old:["PulseClient"], now:["PulseProxyImpulse","PulseProxySpine"] },
-      PulseUpdate:{ old:["PulseUpdate"], now:["PulseOSBrainEvolution","PulseIQ"] },
-      PulseIdentity:{ old:["PulseIdentity"], now:["PulseProxyBBB"] }
+      PulseBand: {
+        old: ["PulseBand"],
+        now: ["PulseOSSkinReflex","PulseOSSensoryCortex","PulseProxyImpulse"]
+      },
+      PulseNet:  {
+        old: ["PulseNet"],
+        now: ["PulseSDN"]
+      },
+      PulseClient: {
+        old: ["PulseClient"],
+        now: ["PulseProxyImpulse","PulseProxySpine"]
+      },
+      PulseUpdate: {
+        old: ["PulseUpdate"],
+        now: ["PulseOSBrainEvolution","PulseIQ"]
+      },
+      PulseIdentity: {
+        old: ["PulseIdentity"],
+        now: ["PulseProxyBBB"]
+      }
     },
 
     routing: {
-      Router:{ old:["router.js","PulseRouter"], now:["PulseRouterEvolutionaryThought"] },
-      RouterMemory:{ old:["RouterMemory"], now:["PulseOSShortTermMemory","PulseOSTissueMembrane"] },
-      BackendEndpoint:{ old:["Endpoint"], now:["PulseProxyOuterAgent"] },
-      BackendRouter:{ old:["BackendRouter"], now:["PulseProxySpine"] }
+      Router: {
+        old: ["router.js","PulseRouter"],
+        now: ["PulseRouterEvolutionaryThought"]
+      },
+      RouterMemory: {
+        old: ["RouterMemory"],
+        now: ["PulseOSShortTermMemory","PulseOSTissueMembrane"]
+      },
+      BackendEndpoint: {
+        old: ["Endpoint"],
+        now: ["PulseProxyOuterAgent"]
+      },
+      BackendRouter: {
+        old: ["BackendRouter"],
+        now: ["PulseProxySpine"]
+      }
     },
 
+    // --------------------------------------------------------------------
+    // LEGACY ROUTE CHAIN — Text‑first historical path (for reference only)
+    // --------------------------------------------------------------------
     routeChain: {
-      old:["PulseBand","PulseNet","PulseClient","router.js","organ","PulseSend","backend"],
-      now:[
+      old: ["PulseBand","PulseNet","PulseClient","router.js","organ","PulseSend","backend"],
+      now: [
         "PulseOSSkinReflex / PulseOSSensoryCortex",
         "PulseSDN",
         "PulseProxyImpulse",
@@ -228,6 +288,29 @@ export const PulseOrganismMap = {
         "PulseSendSystem",
         "PulseProxySpine"
       ]
+    },
+
+    // --------------------------------------------------------------------
+    // BINARY ROUTE CHAIN — v11‑EVO‑BINARY (no middlemen)
+//  This is the “game‑change” path: binary‑first, binary‑on‑binary hardware.
+// --------------------------------------------------------------------
+    binaryRouteChain: {
+      old: [],
+      now: [
+        "PulseOSSkinReflex / PulseOSSensoryCortex",
+        "PulseSDN",
+        "BinaryRouter-v11-PURE-EVO",
+        "BinaryProxy-v11-PURE-EVO",
+        "BinaryMesh-v11-PURE-EVO",
+        "BinarySend-v11-PURE-EVO",
+        "BinaryPulse-v11-PURE-EVO"
+      ]
     }
   }
 };
+
+// ============================================================================
+// END OF FILE — PULSE ORGANISM MAP / v11‑EVO‑BINARY‑MAX
+// Text‑only blueprint of a binary‑first organism on binary‑designed hardware.
+// All backend repair targets live in pulse‑* (PULSE‑*) folders.
+// ============================================================================

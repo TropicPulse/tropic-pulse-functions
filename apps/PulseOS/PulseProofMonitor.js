@@ -29,7 +29,40 @@
 
 
 // ============================================================================
+// FILE: /apps/PulseOS/Surface/PulseProofMonitor.js
+// PULSE PROOF MONITOR — v11‑EVO‑BINARY‑MAX
+// VITALS TELEMETRY • READ‑ONLY METRICS • BINARY‑FIRST AWARE • NO MIDDLEMEN
+// ============================================================================
+//
+// ROLE (SURFACE VITALS LAYER):
+// ----------------------------
+//  - Read‑only vitals monitor for the organism.
+//  - Observes traffic, pressure, and stability — NEVER controls it.
+//  - No routing, no identity, no evolution, no organ mutation.
+//  - Pure telemetry: bytes, latency, mesh relays, hub signals, stability.
+//
+// BINARY INTENT (v11‑EVO‑BINARY‑MAX):
+// -----------------------------------
+//  - Binary organism is primary; this layer only WATCHES its behavior.
+//  - Metrics are advisory, not authoritative — they never steer the core.
+//  - All calculations are deterministic, replayable, and loggable.
+//  - No randomness, no async nervous system, no hidden timers.
+//
+// CONTRACT:
+// ---------
+//  - Never throw (universal resolver + defensive guards).
+//  - Never mutate external inputs.
+//  - Never synthesize “truth” about the organism — only record observations.
+//  - Firestore timestamps (Date.now) are allowed as OBSERVATION TIME ONLY,
+//    not as organism time or contract time.
+//  - No routing, no identity, no organ imports.
+// ============================================================================
+
+
+// ============================================================================
 //  UNIVERSAL GLOBAL RESOLVER — NEVER THROWS
+//  - Works in backend Node, browser, or test harness.
+//  - db is ONLY valid on backend; front‑layer calls become no‑ops.
 // ============================================================================
 const g =
   typeof global !== "undefined"
@@ -40,14 +73,15 @@ const g =
     ? window
     : {};
 
-// Backend-only globals (db only exists on backend)
-const db    = g.db || null;
+// Backend‑only globals (db only exists on backend)
+const db    = g.db    || null;
 const log   = g.log   || console.log;
 const warn  = g.warn  || console.warn;
 const error = g.error || console.error;
 
+
 // ============================================================================
-//  ORGAN IDENTITY — v10.4
+//  ORGAN IDENTITY — v11‑EVO‑BINARY‑MAX
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
@@ -60,10 +94,18 @@ export const PulseRole = {
     driftProof: true,
     deterministicVitals: true,
     zeroDriftAverages: true,
-    backendOnly: true,
-    noIQ: true,
-    noRouting: true,
-    noCompute: true,
+
+    backendOnly: true,          // Only meaningful when db is present
+    noIQ: true,                 // No design brain here
+    noRouting: true,            // No router control
+    noIdentity: true,           // No identity control
+    noOrgans: true,             // No organ imports
+
+    metricsOnly: true,          // Pure telemetry, no actuation
+    binaryAware: true,          // Knows about binary organism, never controls it
+    dualBandAware: true,        // Aware of text + binary, but only as metrics
+    proxyTierAware: true,       // Can log which proxy tier was used
+
     multiInstanceReady: true,
     unifiedAdvantageField: true,
     pulseEfficiencyAware: true,
@@ -71,53 +113,48 @@ export const PulseRole = {
   }
 };
 
-
-// ============================================================================
-//  ORGAN CONTEXT — v10.4
-// ============================================================================
 const PROOF_CONTEXT = {
-  layer: PulseRole.layer,
-  role: PulseRole.identity,
+  layer:   PulseRole.layer,
+  role:    PulseRole.identity,
   version: PulseRole.version,
   lineage: "proof-core",
-  evo: PulseRole.evo
+  evo:     PulseRole.evo
+};
+
+const VITALS_CONTEXT = {
+  ...PROOF_CONTEXT,
+  organ: "VitalsMonitor"
 };
 
 
 // ============================================================================
-//  ICONS — Circulatory Telemetry Glyphs (v10.4)
+//  ICONS / GLYPHS — PURELY COSMETIC (NO LOGIC)
 // ============================================================================
 const ICON = {
   update: "🩸",
-  trust: "🧪",
-  phase: "📊",
-  hub: "🛰️",
-  alloc: "⚙️",
-  warn: "⚠️",
-  error: "🟥",
-  ok: "🟢"
+  trust:  "🧪",
+  phase:  "📊",
+  hub:    "🛰️",
+  alloc:  "⚙️",
+  warn:   "⚠️",
+  error:  "🟥",
+  ok:     "🟢"
 };
 
-// ============================================================================
-//  ROUTE MAP ICONS — Organism Route Layer (v10.4)
-// ============================================================================
 const ORG = {
-  brain:      "🧠",
-  synapse:    "⚡",
-  spine:      "🧵",
-  heart:      "🫀",
-  band:       "📡",
-  router:     "🛰️",
-  proxy:      "🌐",
-  vitals:     "🩸",
-  history:    "📜",
-  purifier:   "🧹",
-  unknown:    "⬡"
+  brain:    "🧠",
+  synapse:  "⚡",
+  spine:    "🧵",
+  heart:    "🫀",
+  band:     "📡",
+  router:   "🛰️",
+  proxy:    "🌐",
+  vitals:   "🩸",
+  history:  "📜",
+  purifier: "🧹",
+  unknown:  "⬡"
 };
 
-// ============================================================================
-//  ROUTE HEALTH SYMBOLS
-// ============================================================================
 const HEALTH = {
   healthy:   "|",
   stable:    "|",
@@ -126,9 +163,6 @@ const HEALTH = {
   unknown:   "?"
 };
 
-// ============================================================================
-//  ROUTE MAP RENDERER
-// ============================================================================
 function makeHealthBar(status) {
   const sym = HEALTH[status] || HEALTH.unknown;
 
@@ -149,9 +183,13 @@ function renderRouteNode(name, icon, status, color) {
   );
 }
 
+
+// ============================================================================
+//  ROUTE SCAN — READ‑ONLY VISUALIZATION (NO CONTROL)
+// ============================================================================
 export function printRouteScan(route = {}) {
   console.groupCollapsed(
-    "%c🔍 ROUTE SCAN — PulseOS v10.4",
+    "%c🔍 ROUTE SCAN — PulseOS v11‑EVO‑BINARY‑MAX",
     "color:#03A9F4; font-weight:bold;"
   );
 
@@ -169,8 +207,11 @@ export function printRouteScan(route = {}) {
   console.groupEnd();
 }
 
+
 // ============================================================================
-//  CONFIG — Physiological Limits (unchanged behavior)
+//  INSTANCE LIMIT HINTS — ADVISORY ONLY (NO HARD LAW)
+//  - These are hints for CheckBand / orchestrators.
+//  - They do NOT directly control the organism here.
 // ============================================================================
 export const NORMAL_MAX     = 4;
 export const UPGRADED_MAX   = 8;
@@ -184,8 +225,11 @@ export const EARN_MODE_MULT = 1.5;
 export const ENABLE_PERFORMANCE_LOGGING = true;
 export const PERFORMANCE_LOG_COLLECTION = "UserPerformanceLogs";
 
+
 // ============================================================================
-//  updateUserMetrics() — PURE MEASUREMENT + ULTRA LOGGING
+//  updateUserMetrics — BACKEND‑ONLY VITALS UPDATE
+//  - No db → silent no‑op.
+//  - Uses Date.now ONLY as observation timestamps, not organism time.
 // ============================================================================
 export async function updateUserMetrics(userId, data = {}) {
   if (!db) return;
@@ -205,55 +249,59 @@ export async function updateUserMetrics(userId, data = {}) {
   );
 
   const ref = db.collection("UserMetrics").doc(userId);
-  const now = Date.now();
+  const now = Date.now(); // observation time only
 
-  await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const existing = snap.exists ? snap.data() : {};
+  try {
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const existing = snap.exists ? snap.data() : {};
 
-    const totalRequests = (existing.totalRequests || 0) + 1;
-    const totalBytes    = (existing.totalBytes || 0) + (data.bytes || 0);
+      const totalRequests = (existing.totalRequests || 0) + 1;
+      const totalBytes    = (existing.totalBytes || 0) + (data.bytes || 0);
 
-    let avgLatency = existing.avgLatency || 0;
-    if (data.durationMs != null) {
-      if (!existing.totalRequests) {
-        avgLatency = data.durationMs;
-      } else {
-        avgLatency =
-          (avgLatency * existing.totalRequests + data.durationMs) /
-          totalRequests;
+      let avgLatency = existing.avgLatency || 0;
+      if (data.durationMs != null) {
+        if (!existing.totalRequests) {
+          avgLatency = data.durationMs;
+        } else {
+          avgLatency =
+            (avgLatency * existing.totalRequests + data.durationMs) /
+            totalRequests;
+        }
       }
-    }
 
-    const meshRelays     = (existing.meshRelays || 0) + (data.meshRelay ? 1 : 0);
-    const meshPings      = (existing.meshPings || 0) + (data.meshPing ? 1 : 0);
-    const hubSignals     = (existing.hubSignals || 0) + (data.hubFlag ? 1 : 0);
-    const stabilityScore = existing.stabilityScore || 0;
+      const meshRelays     = (existing.meshRelays || 0) + (data.meshRelay ? 1 : 0);
+      const meshPings      = (existing.meshPings || 0) + (data.meshPing ? 1 : 0);
+      const hubSignals     = (existing.hubSignals || 0) + (data.hubFlag ? 1 : 0);
+      const stabilityScore = existing.stabilityScore || 0;
 
-    tx.set(
-      ref,
-      {
-        userId,
-        totalRequests,
-        totalBytes,
-        avgLatency,
-        meshRelays,
-        meshPings,
-        hubSignals,
-        stabilityScore,
-        lastSeen: now,
-        updatedAt: now
-      },
-      { merge: true }
-    );
-  });
+      tx.set(
+        ref,
+        {
+          userId,
+          totalRequests,
+          totalBytes,
+          avgLatency,
+          meshRelays,
+          meshPings,
+          hubSignals,
+          stabilityScore,
+          lastSeen: now,
+          updatedAt: now
+        },
+        { merge: true }
+      );
+    });
+  } catch (err) {
+    error("vitals", `${ICON.error} metrics_update_failed`, { error: String(err) });
+  }
 
   if (ENABLE_PERFORMANCE_LOGGING) {
     try {
       await db.collection(PERFORMANCE_LOG_COLLECTION).add({
         ...VITALS_CONTEXT,
         userId,
-        ts: Date.now(),
+        ts: Date.now(), // observation time only
         bytes: data.bytes ?? null,
         durationMs: data.durationMs ?? null,
         meshRelay: data.meshRelay ?? false,
@@ -268,17 +316,18 @@ export async function updateUserMetrics(userId, data = {}) {
   }
 }
 
+
 // ============================================================================
-//  calculateTrustScore() — unchanged logic + ULTRA LOGGING
+//  TRUST SCORE — PURE FUNCTION, DETERMINISTIC
 // ============================================================================
 export function calculateTrustScore(metrics) {
   if (!metrics) return 0;
 
   let score = 0;
 
-  score += Math.min(metrics.totalRequests / 100, 20);
-  score += Math.min(metrics.meshRelays / 10, 20);
-  score += Math.min(metrics.hubSignals / 5, 20);
+  score += Math.min((metrics.totalRequests || 0) / 100, 20);
+  score += Math.min((metrics.meshRelays || 0) / 10, 20);
+  score += Math.min((metrics.hubSignals || 0) / 5, 20);
 
   if (metrics.avgLatency && metrics.avgLatency < 150) score += 20;
 
@@ -294,32 +343,34 @@ export function calculateTrustScore(metrics) {
   return final;
 }
 
+
 // ============================================================================
-//  calculatePhase() — unchanged logic + ULTRA LOGGING
+//  PHASE CALCULATION — PURE FUNCTION, DETERMINISTIC
 // ============================================================================
 export function calculatePhase(trustScore) {
   let phase = 1;
 
-  if (trustScore < 25) phase = 1;
+  if (trustScore < 25)       phase = 1;
   else if (trustScore < 50) phase = 2;
   else if (trustScore < 75) phase = 3;
-  else phase = 4;
+  else                      phase = 4;
 
   log("vitals", `${ICON.phase} phase`, { trustScore, phase });
 
   return phase;
 }
 
+
 // ============================================================================
-//  isHub() — unchanged logic + ULTRA LOGGING
+//  HUB DETECTION — PURE OBSERVATION, NO CONTROL
 // ============================================================================
 export function isHub(metrics) {
   if (!metrics) return false;
 
   const hub =
-    metrics.meshRelays > 50 ||
-    metrics.hubSignals > 20 ||
-    metrics.totalRequests > 500;
+    (metrics.meshRelays || 0) > 50 ||
+    (metrics.hubSignals || 0) > 20 ||
+    (metrics.totalRequests || 0) > 500;
 
   if (hub) {
     warn("vitals", `${ICON.hub} hub_detected`, {
@@ -333,8 +384,11 @@ export function isHub(metrics) {
   return hub;
 }
 
+
 // ============================================================================
-//  allocateInstances() — unchanged logic + ULTRA LOGGING
+//  INSTANCE ALLOCATION HINT — ADVISORY ONLY
+//  - This does NOT directly spin workers here.
+//  - CheckBand / backend orchestrators consume this as a hint.
 // ============================================================================
 export function allocateInstances(
   phase,
@@ -374,8 +428,9 @@ export function allocateInstances(
   return final;
 }
 
+
 // ============================================================================
-//  ORGAN EXPORT — ⭐ VitalsMonitor (v10.4)
+//  EXPORT — VITALS MONITOR SURFACE
 // ============================================================================
 export const VitalsMonitor = {
   PulseRole,
@@ -399,9 +454,9 @@ export const VitalsMonitor = {
   PERFORMANCE_LOG_COLLECTION,
 
   meta: {
-    layer: PulseRole.layer,
+    layer:     PulseRole.layer,
     subsystem: PulseRole.subsystem,
-    version: PulseRole.version,
-    identity: PulseRole.identity
+    version:   PulseRole.version,
+    identity:  PulseRole.identity
   }
 };

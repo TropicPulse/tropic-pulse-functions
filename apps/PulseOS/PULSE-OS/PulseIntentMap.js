@@ -1,7 +1,7 @@
 // ============================================================
-//  PULSE INTENT MAP — FOUNDER CONTRACT (v11‑EVO)
+//  PULSE INTENT MAP — FOUNDER CONTRACT (v11‑EVO‑BINARY)
 //  Deterministic. Static. Non‑evolvable. Loaded FIRST.
-//  Identity‑only + binary‑only upgrade: NO dynamic logic here.
+//  Identity‑only + binary‑first upgrade: NO dynamic logic here.
 // ============================================================
 
 export const PulseIntentMap = {
@@ -16,18 +16,24 @@ export const PulseIntentMap = {
     immutableIntentMap: true,
 
     // v11‑EVO organism identity
-    version: "11-EVO",
+    version: "11-EVO-BINARY",
     deterministicOrganism: true,
     noAstralLayers: true,            // ❌ Astral Nervous System forbidden
-    noLegacyPNS: true,               // ❌ Old PNS forbidden
+    noLegacyPNS: true,               // ❌ Old PNS forbidden as core nerve
     sdnRequired: true,               // ✔ Must use Software‑Defined Nervous System
     gpuV11Required: true,            // ✔ Must use GPU‑v11 organ
     continuanceAware: true,          // ✔ ContinuancePulse fallback required
 
-    // NEW — binary organism identity
+    // BINARY ORGANISM IDENTITY — GAME CHANGE
     binaryOrganismRequired: true,    // ✔ Binary organism must exist
-    pureBinaryNerveRequired: true,   // ✔ BinaryProxy / BinaryRouter / Mesh / Send / Pulse
-    noTextFirstPaths: true           // ❌ No text‑first nervous paths for core organism
+    pureBinaryNerveRequired: true,   // ✔ BinaryRouter / BinaryProxy / Mesh / Send / Pulse
+    noTextFirstPaths: true,          // ❌ No text‑first nervous paths for core organism
+
+    // NEW — NO MIDDLEMEN CONTRACT
+    noMiddleLayerNervousSystem: true, // ❌ No extra translation layers between intent and machine
+    binaryNativeDesign: true,         // ✔ Designed as binary‑native, not text‑first retrofitted
+    binaryOnBinaryHardware: true,     // ✔ First‑class binary program on binary‑designed hardware
+    forbidTranslatorCore: true        // ❌ No “translator core” between organism and CPU
   },
 
   // ------------------------------------------------------------
@@ -47,9 +53,11 @@ export const PulseIntentMap = {
     allowContinuanceFallback: true,     // ✔ Earn v1 fallback allowed ONLY via ContinuancePulse
     forbidLegacyFallback: true,         // ❌ No legacyPulseFromImpulse
 
-    // NEW — binary evolution boundaries
+    // BINARY EVOLUTION BOUNDARIES
     binaryFirstEvolution: true,         // ✔ Evolution must respect binary organism first
-    forbidNonBinaryCore: true           // ❌ No non‑binary core evolution paths
+    forbidNonBinaryCore: true,          // ❌ No non‑binary core evolution paths
+    forbidMiddleLayerEvolution: true,   // ❌ No new “middleware brains” between binary core + hardware
+    requireBinaryContractLock: true     // ✔ Binary contracts must be explicit + locked
   },
 
   // ------------------------------------------------------------
@@ -65,9 +73,10 @@ export const PulseIntentMap = {
     // v11‑EVO fallback rule
     useContinuancePulseOnFailure: true, // ✔ Deterministic fallback path
 
-    // NEW — binary fail‑open
+    // BINARY FAIL‑OPEN
     preferBinaryRouteFirst: true,       // ✔ Try binary path before any legacy
-    allowProxyFallbackTiered: true      // ✔ Binary → Proxy‑v11‑Evo → Continuance
+    allowProxyFallbackTiered: true,     // ✔ Binary → Proxy‑v11‑Evo → Continuance
+    forbidTextOnlyCoreFallback: true    // ❌ No fallback that bypasses binary core entirely
   },
 
   // ------------------------------------------------------------
@@ -84,9 +93,11 @@ export const PulseIntentMap = {
     forbidNonDeterministicGPU: true,
     forbidAsyncNervousSystem: true,
 
-    // NEW — binary safety
+    // BINARY SAFETY
     forbidBinaryCorruption: true,       // ❌ No silent binary corruption
-    requireBinaryValidation: true       // ✔ Binary paths must validate bits
+    requireBinaryValidation: true,      // ✔ Binary paths must validate bits
+    requireBinaryTraceability: true,    // ✔ Binary decisions must be traceable to contracts
+    forbidBinaryShadowPaths: true       // ❌ No hidden binary paths outside organism map
   },
 
   // ------------------------------------------------------------
@@ -102,9 +113,10 @@ export const PulseIntentMap = {
     sdnOptimized: true,
     gpuV11Optimized: true,
 
-    // NEW — binary performance hints
+    // BINARY PERFORMANCE HINTS
     binaryArteryOptimized: true,       // ✔ Optimize BinaryRouter/Mesh/Send/Pulse
-    preferBinaryShortPaths: true       // ✔ Shortest binary route wins when safe
+    preferBinaryShortPaths: true,      // ✔ Shortest safe binary route wins
+    forbidRedundantTranslation: true   // ❌ No repeated encode/decode between text and binary
   },
 
   // ------------------------------------------------------------
@@ -122,9 +134,11 @@ export const PulseIntentMap = {
     detectLegacyGPUUsage: true,
     detectLegacyFallbackUsage: true,
 
-    // NEW — binary drift boundaries
+    // BINARY DRIFT BOUNDARIES
     detectNonBinaryCoreUsage: true,    // ✔ Detect if core paths bypass binary organism
-    detectProxyBypass: true            // ✔ Detect if BinaryProxy is skipped
+    detectProxyBypass: true,           // ✔ Detect if BinaryProxy is skipped
+    detectMiddleLayerInsertion: true,  // ✔ Detect if new “middlemen” appear between core + hardware
+    detectTextFirstRegression: true    // ✔ Detect if system regresses to text‑first nervous paths
   },
 
   // ------------------------------------------------------------
@@ -140,8 +154,9 @@ export const PulseIntentMap = {
     forbidAstralFailClose: true,
     forbidLegacyFailClose: true,
 
-    // NEW — binary fail‑close boundaries
-    forbidBinarySilentFail: true       // ❌ No silent binary fail‑close
+    // BINARY FAIL‑CLOSE BOUNDARIES
+    forbidBinarySilentFail: true,      // ❌ No silent binary fail‑close
+    requireBinaryContextSnapshot: true // ✔ Capture full binary context on fail‑close
   },
 
   // ------------------------------------------------------------
@@ -157,9 +172,10 @@ export const PulseIntentMap = {
     includeSDNState: true,
     includeGPUState: true,
 
-    // NEW — binary context
+    // BINARY CONTEXT
     includeBinaryOrganismState: true,  // ✔ Include binary organs + arteries
-    includeProxyFallbackState: true    // ✔ Include which tier was used
+    includeProxyFallbackState: true,   // ✔ Include which tier was used
+    includeMiddleLayerState: true      // ✔ Include any detected middlemen / translators
   },
 
   // ------------------------------------------------------------
@@ -174,8 +190,9 @@ export const PulseIntentMap = {
     seamlessContinuance: true,        // ✔ ContinuancePulse must feel native
     forbidAstralArtifacts: true,      // ❌ No astral metaphors or UI remnants
 
-    // NEW — binary UX laws
+    // BINARY UX LAWS
     seamlessBinaryPaths: true,        // ✔ Binary routing must feel invisible
-    forbidBinaryLeakage: true         // ❌ No raw binary leaking into UX
+    forbidBinaryLeakage: true,        // ❌ No raw binary leaking into UX
+    forbidTranslatorUX: true          // ❌ No UX that reveals “middleman” translation layers
   }
 };

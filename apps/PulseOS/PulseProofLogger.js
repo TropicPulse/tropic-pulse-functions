@@ -1,6 +1,6 @@
 // ============================================================================
-//  PULSE OS — PROOF LOGGER (v11)
-//  “Record Layer / Proof Printer / Evolution Ledger / External Witness”
+//  PulseProofLogger.js — v11‑EVO
+//  PROOF LOGGER • RECORD LAYER • EVOLUTION LEDGER • EXTERNAL WITNESS
 //
 //  METAPHOR:
 //  - This organ is the organism’s EVIDENCE PRINTER.
@@ -8,35 +8,23 @@
 //  - It does NOT influence the organism — it only documents it.
 //  - It is the black box recorder of Pulse OS.
 //
-//  - ProofLogger = the ledger that prints:
-//        • stability snapshots
-//        • performance signatures
-//        • relay counts
-//        • latency pulses
-//        • subsystem events
-//
-//  - It sits beside Understanding and ProofMonitor in the TOP LAYER,
-//    forming the “Visibility → Contact → Verification → Evidence” chain.
-//
-//  - Outsiders can SEE our evolution through the Window,
-//    they can MEET us through Understanding,
-//    they can VERIFY us through ProofMonitor,
-//    and they can TRUST us because ProofLogger records the proof.
-//
-//  - Pure logging. Pure record. Pure truth.
-//  - Zero routing. Zero healing. Zero compute. Zero mutation.
+//  v11‑EVO UPGRADE:
+//  - Binary‑aware: can log binary arteries (BinaryProxy / BinaryRouter / Mesh / Send / Pulse).
+//  - Dual‑band: understands legacy + v11‑EVO subsystems without changing behavior.
+//  - Deterministic formatting: no randomness, no hidden branches.
+//  - Telemetry packets are pure records, safe to persist or replay.
+//  - Still ZERO routing, ZERO healing, ZERO compute, ZERO mutation.
 // ============================================================================
+
 
 // ============================================================================
 //  CAPTURE ORIGINAL CONSOLE (prevents recursion)
 // ============================================================================
 const _c = { ...console };
 
+
 // ============================================================================
-//  VERSION MAP — The Genome of PulseOS (v10.3)
-// ============================================================================
-// ============================================================================
-//  VERSION MAP — Proof Layer Genome (v11)
+//  VERSION MAP — Proof Layer Genome (v11‑EVO)
 // ============================================================================
 export const PulseVersion = {
   proof: "11.0",
@@ -45,8 +33,9 @@ export const PulseVersion = {
   legacy: "10.x"
 };
 
+
 // ============================================================================
-//  ROLE MAP — Proof Layer Identity (v11)
+//  ROLE MAP — Proof Layer Identity (v11‑EVO)
 // ============================================================================
 export const PulseRoles = {
   proof: "PROOF MONITOR",
@@ -55,8 +44,9 @@ export const PulseRoles = {
   legacy: "LEGACY SUBSYSTEM"
 };
 
+
 // ============================================================================
-//  COLOR MAP — Proof Layer Palette (v11)
+//  COLOR MAP — Proof Layer Palette (v11‑EVO)
 // ============================================================================
 export const PulseColors = {
   proof: "#4DD0E1",
@@ -65,8 +55,9 @@ export const PulseColors = {
   legacy: "#BDBDBD"
 };
 
+
 // ============================================================================
-//  ICON MAP — Proof Layer Glyphs (v11)
+//  ICON MAP — Proof Layer Glyphs (v11‑EVO)
 // ============================================================================
 export const PulseIcons = {
   proof: "📜",
@@ -86,15 +77,16 @@ function formatPrefix(subsystem) {
   return `${icon} ${role} v${version}`;
 }
 
+
 // ============================================================================
-//  ARGUMENT NORMALIZER — HYBRID MODE (v10.3)
+//  ARGUMENT NORMALIZER — v11‑EVO (binary‑aware, legacy‑safe)
 // ============================================================================
 function normalizeArgs(args) {
   let subsystem = "legacy";
   let message = "";
   let rest = [];
 
-  // Raw %c logs
+  // Raw %c logs (already formatted)
   if (typeof args[0] === "string" && args[0].startsWith("%c")) {
     return { subsystem, message: args[0], rest: args.slice(1), raw: true };
   }
@@ -104,12 +96,18 @@ function normalizeArgs(args) {
     return { subsystem: args[0], message: args[1], rest: args.slice(2), raw: false };
   }
 
-  // object logs — GPU / Band / generic payloads
-  if (typeof args[0] === "object") {
+  // object logs — GPU / Band / generic payloads / binary arteries
+  if (typeof args[0] === "object" && args[0] !== null) {
     const obj = args[0];
 
+    // Nervous system / band
     if (obj.pulseLayer === "NERVOUS-SYSTEM") subsystem = "band";
+
+    // GPU payloads
     if (obj.schemaVersion && obj.textures !== undefined) subsystem = "gpu";
+
+    // Binary arteries (BinaryProxy / BinaryRouter / Mesh / Send / Pulse)
+    if (obj.binaryArtery === true) subsystem = "logger";
 
     return {
       subsystem,
@@ -128,8 +126,9 @@ function normalizeArgs(args) {
   return { subsystem, message: args.join(" "), rest, raw: false };
 }
 
+
 // ============================================================================
-//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v10.3)
+//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v11‑EVO)
 // ============================================================================
 export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
@@ -183,8 +182,9 @@ export function critical(...args) {
   _c.groupEnd();
 }
 
+
 // ============================================================================
-//  GROUPING HELPERS — v10.3
+//  GROUPING HELPERS — v11‑EVO
 // ============================================================================
 export function group(subsystem, label) {
   const color = PulseColors[subsystem] || "#fff";
@@ -200,8 +200,11 @@ export function groupEnd() {
   _c.groupEnd();
 }
 
+
 // ============================================================================
-//  TELEMETRY PACKET FORMATTER (v10.3)
+//  TELEMETRY PACKET FORMATTER — v11‑EVO
+//  • Date.now() is allowed here as a pure record timestamp.
+//  • Packets are safe to persist, replay, or ship to proof storage.
 // ============================================================================
 export function makeTelemetryPacket(subsystem, event, data = {}) {
   return {
@@ -213,13 +216,14 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
     event,
     data,
     meta: {
-      layer: "PulseLogger",
-      version: "10.3",
+      layer: "PulseProofLogger",
+      version: "11.0",
       subsystem,
       event
     }
   };
 }
+
 
 // ============================================================================
 // –  LEGACY CONSOLE REDIRECTS (SAFE — no recursion)
@@ -228,8 +232,9 @@ console.log = (...args) => log(...args);
 console.warn = (...args) => warn(...args);
 console.error = (...args) => error(...args);
 
+
 // ============================================================================
-//  LOGGER EXPORT — ⭐ THIS IS WHAT VITALS MONITOR NEEDS
+//  LOGGER EXPORT — USED BY VITALS MONITOR + BACKEND ORGANS
 // ============================================================================
 export const VitalsLogger = {
   log,
@@ -240,8 +245,8 @@ export const VitalsLogger = {
   groupEnd,
   makeTelemetryPacket,
   meta: {
-    layer: "PulseLogger",
-    version: "10.3"
+    layer: "PulseProofLogger",
+    version: "11.0"
   }
 };
 
@@ -254,13 +259,15 @@ export const logger = {
   groupEnd,
   makeTelemetryPacket,
   meta: {
-    layer: "PulseLogger",
-    version: "10.3"
+    layer: "PulseProofLogger",
+    version: "11.0"
   }
 };
 
+
 // ============================================================================
 //  GLOBAL BROADCAST — Makes primitives available to all subsystems
+//  • Frontend sees formatted logs only; no access to internals.
 // ============================================================================
 if (typeof window !== "undefined") {
   window.log = log;

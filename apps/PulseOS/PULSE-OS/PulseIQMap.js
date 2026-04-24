@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /apps/PulseOS/Brain/PulseIQMap.js
-// PULSE OS — v11‑EVO DESIGN UPGRADE
+// PULSE OS — v11‑EVO ORGANISM IQ MAP
 // “THE IQ WAREHOUSE / IMPORT CORTEX / KNOWLEDGE APPENDAGE STORE”
 // ============================================================================
 //
-//  v11‑EVO DIRECTION:
-//  ------------------
+//  v11‑EVO DIRECTION (LOCKED CONTRACT):
+//  ------------------------------------
 //  IQ is now:
 //    • TEXT‑ONLY
 //    • DESIGN‑ONLY
@@ -14,7 +14,7 @@
 //    • NO page imports
 //    • NO dynamic loading
 //
-//  IQ ONLY imports:
+//  IQ ONLY imports (ACCESS APPENDAGES):
 //    • logger   → brain must always speak
 //    • boot     → brain must always re‑ignite
 //    • firebase → external appendage (allowed)
@@ -25,17 +25,16 @@
 //    • import routers
 //    • import binary organs
 //
-//  IQ DEFINES:
+//  IQ DEFINES (BLUEPRINT‑ONLY):
 //    • organism expectations (text only)
 //    • page expectations (text only)
-//    • routing hints
-//    • fallback routes
-//    • drift metadata
-//    • version map
-//    • binary organism awareness
-//    • proxy tier awareness
-//    • mesh/send/pulse expectations
+//    • routing hints + fallbacks
+//    • drift / repair metadata
+//    • version map (symbolic + binary awareness)
+//    • proxy tier + spine awareness
+//    • mesh / send / pulse expectations
 //    • dynamic wrapper page expectations
+//    • new v11‑EVO organs: PulseBand, Cleanup, HistoryRepair, Spine
 //
 //  IQ IS THE “DESIGN BRAIN” — NOT THE EXECUTION BRAIN.
 // ============================================================================
@@ -44,7 +43,7 @@
 // ============================================================================
 //  SAFE LOGGING (ACCESS IMPORT)
 // ============================================================================
-import { log, warn, error as logError } from "../PulseProofLogger.js";
+import { log, warn, error as logError } from "../PULSEProofLogger.js";
 
 
 // ============================================================================
@@ -61,8 +60,10 @@ import * as firebase from "../netlify/functions/firebase.js";
 
 // ============================================================================
 //  VERSION MAP — v11‑EVO ORGANISM BLUEPRINT
+//  Symbolic + Binary Awareness (TEXT‑ONLY)
 // ============================================================================
 const VERSION_MAP = {
+  // Core organism
   organism: "v11‑EVO",
   iq: "v11‑EVO",
   router: "v11‑EVO",
@@ -70,8 +71,20 @@ const VERSION_MAP = {
   send: "v11‑EVO",
   pulse: "v11‑EVO",
   proxy: "v11‑EVO",
-  gpu: "v11",
-  sdn: "v11",
+
+  // Compute / nervous system
+  gpu: "v11.0",
+  sdn: "v11.0",
+  pnsNervousSystem: "v11.0",          // PulseBand (PNS)
+  pnsNervousSystemBinary: "v11‑BINARY",
+
+  // Backend spine + proxy
+  proxySpine: "v11.0",                // PulseProxySpine (backend spine)
+  proxySpineBinary: "v11‑BINARY",     // future binary spine partner (design‑only)
+  proxyCleanup: "v11.0",              // PulseBandCleanup
+  proxyHistoryRepair: "v11.0",        // PulseHistoryRepair
+
+  // Dynamic systems
   binaryNervousSystem: "v11‑PURE",
   dynamicPageSystem: "v11‑EVO",
   fallbackSystem: "ContinuancePulse‑v2"
@@ -80,6 +93,7 @@ const VERSION_MAP = {
 
 // ============================================================================
 //  TOP‑LEVEL ROUTING DESIGN (TEXT‑ONLY)
+//  High‑level page families + fallbacks
 // ============================================================================
 const TOP_LEVEL_ROUTES = {
   root: "/",
@@ -90,6 +104,8 @@ const TOP_LEVEL_ROUTES = {
   settings: "/settings",
   organism: "/organism",
   scanner: "/scanner",
+  forms: "/forms",
+  proxy: "/proxy",
   fallback: "/"
 };
 
@@ -98,11 +114,13 @@ function inferTopLevelFromPath(path = "") {
 
   const lower = path.toLowerCase();
 
-  if (lower.startsWith("/send")) return TOP_LEVEL_ROUTES.send;
-  if (lower.startsWith("/earn")) return TOP_LEVEL_ROUTES.earn;
-  if (lower.startsWith("/settings")) return TOP_LEVEL_ROUTES.settings;
-  if (lower.startsWith("/organism")) return TOP_LEVEL_ROUTES.organism;
-  if (lower.startsWith("/scanner")) return TOP_LEVEL_ROUTES.scanner;
+  if (lower.startsWith("/send"))      return TOP_LEVEL_ROUTES.send;
+  if (lower.startsWith("/earn"))      return TOP_LEVEL_ROUTES.earn;
+  if (lower.startsWith("/settings"))  return TOP_LEVEL_ROUTES.settings;
+  if (lower.startsWith("/organism"))  return TOP_LEVEL_ROUTES.organism;
+  if (lower.startsWith("/scanner"))   return TOP_LEVEL_ROUTES.scanner;
+  if (lower.startsWith("/forms"))     return TOP_LEVEL_ROUTES.forms;
+  if (lower.startsWith("/proxy"))     return TOP_LEVEL_ROUTES.proxy;
   if (lower.startsWith("/dash") || lower.startsWith("/home"))
     return TOP_LEVEL_ROUTES.dashboard;
 
@@ -116,8 +134,8 @@ function inferTopLevelFromPath(path = "") {
 export const PulseIQMap = {
 
   // -------------------------------------------------------------------------
-  // ACCESS UTILITIES
-  // -------------------------------------------------------------------------
+  // ACCESS UTILITIES (ALLOWED IMPORTS)
+// -------------------------------------------------------------------------
   log,
   warn,
   logError,
@@ -126,13 +144,14 @@ export const PulseIQMap = {
 
   // -------------------------------------------------------------------------
   // VERSION MAP (TEXT‑ONLY)
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
   version: VERSION_MAP,
 
   // -------------------------------------------------------------------------
   // ORGANISM EXPECTATIONS (TEXT‑ONLY)
 // -------------------------------------------------------------------------
   organs: {
+    // Core OS
     kernel: ["PulseKernel"],
     identity: ["BBB"],
 
@@ -144,12 +163,28 @@ export const PulseIQMap = {
       "createRestorePoint"
     ],
 
-    evolution: ["evolveRaw", "boot"],
+    evolution: [
+      "EvolutionEngine",
+      "evolveRaw",
+      "boot"
+    ],
 
-    nervousSystem: ["PulseSDN"],
+    // Nervous systems
+    nervousSystem: [
+      "PulseSDN",          // software‑defined nervous system
+      "PulseBand"          // PNS nervous system (shell)
+    ],
 
-    gpu: ["PulseGPU"],
+    nervousSystemBinary: [
+      "PulseBandBinary"    // binary PNS partner (design‑only awareness)
+    ],
 
+    gpu: [
+      "PulseGPU",
+      "PulseGPUAstralNervousSystem"
+    ],
+
+    // Routing / mesh / pulse
     router: [
       "PulseRouter",
       "BinaryRouter",
@@ -174,10 +209,38 @@ export const PulseIQMap = {
       "BinaryPulseFallbackTier"
     ],
 
+    // Proxy + backend spine
     proxy: [
       "PulseProxy-v11-Evo",
       "BinaryProxy-v11-PURE",
       "BinaryProxyFallbackTier"
+    ],
+
+    proxySpine: [
+      "PulseProxySpine",          // backend spine (v11)
+      "PulseProxySpineBinary"     // future binary spine (design‑only)
+    ],
+
+    // Cleanup + repair (backend organs)
+    purifier: [
+      "PulseBandCleanup"          // PulseBandPurifier / cleanup organ
+    ],
+
+    shortTermMemoryRepair: [
+      "PulseHistoryRepair"        // Short‑Term Memory Repair Engine
+    ],
+
+    // Healers / immune system
+    healers: [
+      "PulseOSHealer",
+      "GlobalHealer",
+      "PulseProxyHealer"
+    ],
+
+    timers: [
+      "PulseProxyHeart",
+      "PulseTimer",
+      "PulseOSKernelTimer"
     ],
 
     scanner: [
@@ -204,13 +267,69 @@ export const PulseIQMap = {
   // PAGE EXPECTATIONS (TEXT‑ONLY)
 // -------------------------------------------------------------------------
   pages: {
+    // Core shell
     "/": ["PulseRouter", "PulseKernel"],
     "/dashboard": ["PulseRouter", "PulseGPU", "LongTermMemory"],
-    "/send": ["PulseSendSystem", "BinarySend"],
-    "/earn": ["PulseEarn", "PulseEarnSendSystem", "PulseEarnContinuancePulse"],
-    "/settings": ["BBB", "LongTermMemory", "PulseOSShortTermMemory"],
-    "/organism": ["BinaryProxy", "BinaryRouter", "BinaryMesh", "BinaryPulse"],
-    "/scanner": ["BinaryMRI", "BinaryWaveScanner", "BinaryLoopScanner"]
+
+    // Send / earn flows (forms + working memory)
+    "/send": [
+      "PulseSendSystem",
+      "BinarySend",
+      "PulseOSShortTermMemory"
+    ],
+    "/forms/send": [
+      "PulseSendSystem",
+      "PulseEvolutionaryPage",
+      "DynamicWrapperPage"
+    ],
+    "/earn": [
+      "PulseEarn",
+      "PulseEarnSendSystem",
+      "PulseEarnContinuancePulse"
+    ],
+
+    // Settings / identity / memory
+    "/settings": [
+      "BBB",
+      "LongTermMemory",
+      "PulseOSShortTermMemory"
+    ],
+
+    // Organism view — now includes backend spine + PNS nervous system
+    "/organism": [
+      "PulseProxySpine",
+      "PulseBand",
+      "PulseBandCleanup",
+      "PulseHistoryRepair",
+      "BinaryRouter",
+      "BinaryMesh",
+      "BinaryPulse"
+    ],
+
+    // Scanner / diagnostics
+    "/scanner": [
+      "BinaryMRI",
+      "BinaryWaveScanner",
+      "BinaryLoopScanner"
+    ],
+
+    // Proxy / backend observability (front‑of‑house views)
+    "/proxy": [
+      "PulseProxySpine",
+      "PulseProxyHealer",
+      "PulseEvolutionaryPage"
+    ],
+    "/proxy/health": [
+      "PulseProxySpine",
+      "PulseProxyHealer"
+    ],
+    "/proxy/metrics": [
+      "PulseProxySpine",
+      "PulseProxyHealer"
+    ],
+    "/proxy/node": [
+      "PulseProxySpine"
+    ]
   },
 
   // -------------------------------------------------------------------------
@@ -219,12 +338,19 @@ export const PulseIQMap = {
   drift: {
     lastScan: null,
     lastRepair: null,
-    signatures: []
+    signatures: [],
+    repairOrgans: [
+      "PulseBandCleanup",
+      "PulseHistoryRepair",
+      "PulseOSHealer",
+      "GlobalHealer",
+      "PulseProxyHealer"
+    ]
   },
 
   // -------------------------------------------------------------------------
-  // ROUTING HELPERS
-  // -------------------------------------------------------------------------
+  // ROUTING HELPERS (TEXT‑ONLY)
+// -------------------------------------------------------------------------
   topLevelRoutes: TOP_LEVEL_ROUTES,
 
   getTopLevelRouteFor(path) {
