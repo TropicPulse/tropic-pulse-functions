@@ -1,10 +1,10 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUSurvivalInstincts.js
-// PULSE GPU SURVIVAL INSTINCTS v10.4 — THE EVOLUTION CORE
+// PULSE GPU SURVIVAL INSTINCTS v11-Evo-binary — THE EVOLUTION CORE
 // Adaptive Identity Layer • Genetic Memory • Best‑Self Preservation Engine
 // ============================================================================
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11-Evo-binary):
 //  ------------------------
 //  • No randomness
 //  • No timestamps
@@ -15,11 +15,13 @@
 //  • Fail-open: malformed metrics/settings → safe defaults
 //  • Self-repair-ready: entries include OS metadata
 //  • Deterministic: same inputs → same evolutionary memory
+//  • Legacy-safe: v10.4 callers still behave identically
 // ============================================================================
 
+import { SCORE_CONSTANTS } from "./PulseGPUConfig.js";
 
 // ------------------------------------------------------------
-// ⭐ OS‑v10.4 CONTEXT METADATA — Survival Instincts Identity
+// ⭐ OS‑v11-Evo-binary CONTEXT METADATA — Survival Instincts Identity
 // ------------------------------------------------------------
 const SURVIVAL_CONTEXT = {
   layer: "PulseGPUSurvivalInstincts",
@@ -28,10 +30,11 @@ const SURVIVAL_CONTEXT = {
   context:
     "Stores best-known configs, metrics, traces, and supports regression detection",
   target: "full-gpu",
-  version: 10.4,
+  version: "11.0-Evo-binary",
   selfRepairable: true,
 
   evo: {
+    // Advantage cascade
     advantageCascadeAware: true,
     pulseEfficiencyAware: true,
     driftProof: true,
@@ -39,9 +42,20 @@ const SURVIVAL_CONTEXT = {
     unifiedAdvantageField: true,
     pulseSend10Ready: true,
 
-    routingContract: "PulseSend-v10.4",
-    gpuOrganContract: "PulseGPU-v10.4",
-    earnCompatibility: "Earn-v2"
+    // Binary / dual-mode awareness
+    binaryMemoryReady: true,
+    dualModeEvolution: true,
+    organismClusterBoost: 1.0,
+    cognitiveComputeLink: true,
+
+    // PulseSend / Earn contracts (current + legacy, conceptual only)
+    routingContract: "PulseSend-v11",
+    gpuOrganContract: "PulseGPU-v11-Evo",
+    earnCompatibility: "Earn-v3",
+
+    legacyRoutingContract: "PulseSend-v10.4",
+    legacyGPUOrganContract: "PulseGPU-v10.4",
+    legacyEarnCompatibility: "Earn-v2"
   }
 };
 
@@ -90,7 +104,7 @@ function computeSettingsHash(settings) {
 
 
 // ------------------------------------------------------------
-// Session scoring — Evolutionary Fitness Score
+// Session scoring — Evolutionary Fitness Score (Commandments‑aligned)
 // ------------------------------------------------------------
 function clamp(value, min, max) {
   if (typeof value !== "number" || Number.isNaN(value)) return min;
@@ -102,16 +116,22 @@ function clamp(value, min, max) {
 function scoreSession(metrics = {}) {
   if (!metrics || typeof metrics !== "object") return 0;
 
+  // v10.4 compatibility: accept both camelCase and legacy keys
   const {
-    avgFPS = 0,
-    minFPS = 0,
-    stutterCount = 0,
+    avgFPS,
+    minFPS,
+    stutterCount,
     crashFlag = false
   } = metrics;
 
-  const safeAvg = clamp(avgFPS, 0, SCORE_CONSTANTS.MAX_FPS);
-  const safeMin = clamp(minFPS, 0, SCORE_CONSTANTS.MAX_FPS);
-  const safeStutters = clamp(stutterCount, 0, SCORE_CONSTANTS.MAX_STUTTERS);
+  const avg = typeof metrics.avgFps === "number" ? metrics.avgFps : avgFPS || 0;
+  const min = typeof metrics.minFps === "number" ? metrics.minFps : minFPS || 0;
+  const stutters =
+    typeof metrics.stutters === "number" ? metrics.stutters : stutterCount || 0;
+
+  const safeAvg = clamp(avg, 0, SCORE_CONSTANTS.MAX_FPS);
+  const safeMin = clamp(min, 0, SCORE_CONSTANTS.MAX_FPS);
+  const safeStutters = clamp(stutters, 0, SCORE_CONSTANTS.MAX_STUTTERS);
 
   const avgScore = safeAvg / SCORE_CONSTANTS.MAX_FPS;
   const minScore = safeMin / SCORE_CONSTANTS.MAX_FPS;
@@ -178,7 +198,8 @@ function buildCompositeKey(
   gameProfile,
   hardwareProfile,
   tierProfile,
-  settingsHash
+  settingsHash,
+  binaryMode
 ) {
   const gameKey = buildGameKey(gameProfile);
   const hwKey = buildHardwareKey(hardwareProfile);
@@ -187,7 +208,8 @@ function buildCompositeKey(
     gameKey,
     hwKey,
     tierKey,
-    settingsHash
+    settingsHash,
+    binaryMode: binaryMode || "auto"
   });
   return simpleHash(base);
 }
@@ -212,14 +234,17 @@ class PulseGPUSurvivalInstinctsStore {
     tierProfile,
     settings,
     metrics,
-    trace
+    trace,
+    binaryMode = "auto",          // "auto" | "binary" | "non-binary"
+    executionContext = null       // optional, observational
   }) {
     const settingsHash = computeSettingsHash(settings);
     const key = buildCompositeKey(
       gameProfile,
       hardwareProfile,
       tierProfile,
-      settingsHash
+      settingsHash,
+      binaryMode
     );
 
     const score = scoreSession(metrics);
@@ -236,6 +261,8 @@ class PulseGPUSurvivalInstinctsStore {
         bestMetrics: metrics || {},
         bestScore: score,
         bestTrace: Array.isArray(trace) ? trace.slice() : null,
+        binaryMode,
+        executionContext: executionContext || null,
         meta: { ...SURVIVAL_CONTEXT }
       };
       this.entries.set(key, entry);
@@ -244,10 +271,11 @@ class PulseGPUSurvivalInstinctsStore {
     return this.entries.get(key);
   }
 
-  getBestSettingsFor(gameProfile, hardwareProfile, tierProfile) {
+  getBestSettingsFor(gameProfile, hardwareProfile, tierProfile, opts = {}) {
     const gameKey = buildGameKey(gameProfile);
     const hwKey = buildHardwareKey(hardwareProfile);
     const tierKey = tierProfile ? buildTierKey(tierProfile) : null;
+    const preferredBinaryMode = opts.binaryMode || null;
 
     let bestEntry = null;
 
@@ -255,6 +283,14 @@ class PulseGPUSurvivalInstinctsStore {
       if (buildGameKey(entry.gameProfile) !== gameKey) continue;
       if (buildHardwareKey(entry.hardwareProfile) !== hwKey) continue;
       if (tierKey && buildTierKey(entry.tierProfile) !== tierKey) continue;
+
+      if (
+        preferredBinaryMode &&
+        entry.binaryMode &&
+        entry.binaryMode !== preferredBinaryMode
+      ) {
+        continue;
+      }
 
       if (!bestEntry || entry.bestScore > bestEntry.bestScore) {
         bestEntry = entry;
@@ -295,6 +331,8 @@ class PulseGPUSurvivalInstinctsStore {
         bestScore:
           typeof entry.bestScore === "number" ? entry.bestScore : 0,
         bestTrace: Array.isArray(entry.bestTrace) ? entry.bestTrace : null,
+        binaryMode: entry.binaryMode || "auto",
+        executionContext: entry.executionContext || null,
         meta: { ...SURVIVAL_CONTEXT }
       };
 
@@ -317,11 +355,12 @@ class PulseGPUSurvivalInstincts {
     return this.store.recordSession(session);
   }
 
-  getBestSettingsFor(gameProfile, hardwareProfile, tierProfile) {
+  getBestSettingsFor(gameProfile, hardwareProfile, tierProfile, opts) {
     return this.store.getBestSettingsFor(
       gameProfile,
       hardwareProfile,
-      tierProfile
+      tierProfile,
+      opts
     );
   }
 

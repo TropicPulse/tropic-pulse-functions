@@ -1,27 +1,7 @@
 // ============================================================================
-//  PULSE OS v10.4 — ADRENAL SYSTEM
-//  PulseProxyAdrenalSystem — Fight‑or‑Flight Scaling Layer
-//  Deterministic • Drift‑Proof • Device‑Aware • Reflex‑Safe
-//  Backend‑Only Organ (Proxy Spine)
-// ============================================================================
-//
-//  ROLE (v10.4):
-//  ------------
-//  • Backend reflex organ that scales worker “cells” per user.
-//  • Reads UserScores → computes deterministic instance counts.
-//  • Launches or reabsorbs workers.
-//  • Logs snapshots for admin dashboards.
-//  • Ready for PulseOSGovernor wrapping (multi‑instance law, A→B→A routing).
-//
-//  SAFETY CONTRACT (v10.4):
-//  ------------------------
-//  • Imports allowed (backend‑only).
-//  • No eval / Function().
-//  • No dynamic imports.
-//  • No mutation outside worker registry.
-//  • Deterministic scaling only.
-//  • Drift‑proof instance counts.
-//  • Immune‑safe logging.
+//  PULSE OS v11‑Evo — ADRENAL SYSTEM (Instance Circulation Organ)
+//  Backend‑only • Reflex‑Safe Scaling • Instance “Blood Flow” Regulator
+//  PURE SCALING MATH. NO IQ. NO ROUTING. NO AI.
 // ============================================================================
 
 
@@ -37,14 +17,14 @@ const db = getFirestore();
 
 
 // ============================================================================
-//  PULSE ROLE — v10.4 Identity
+//  PULSE ROLE — v11‑Evo Identity
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "AdrenalSystem",
-  version: "10.4",
-  identity: "PulseProxyAdrenalSystem",
+  version: "11-Evo",
+  identity: "PulseProxyAdrenalSystem-v11-Evo",
 
   evo: {
     dualMode: true,                 // local + cloud aware
@@ -59,19 +39,23 @@ export const PulseRole = {
     governorReady: true,            // ready for PulseOSGovernor wrapping
     reflexSafe: true,               // no IQ, no decisions beyond scaling math
     backendOnly: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // v11‑Evo circulatory awareness
+    circulationAware: true,
+    stressFieldAware: true,
+    capacityFieldAware: true
   }
 };
 
 
 // ============================================================================
-//  ORGAN CONTEXT — v10.4
+//  ORGAN CONTEXT — v11‑Evo
 // ============================================================================
 const ADRENAL_CONTEXT = {
   layer: PulseRole.layer,
   role: "ADRENAL_SYSTEM",
   version: PulseRole.version,
-  // Adrenal lives in the Proxy lineage, not optimizer
   lineage: PulseLineage.proxy,
   evo: PulseRole.evo,
   mode: "backend-only"
@@ -79,7 +63,7 @@ const ADRENAL_CONTEXT = {
 
 
 // ============================================================================
-//  MODES — Orchestrator routing modes (v10.4)
+//  MODES — Orchestrator routing modes (v11‑Evo)
 // ============================================================================
 export const ORCHESTRATOR_MODES = {
   NORMAL: "normal",
@@ -89,7 +73,7 @@ export const ORCHESTRATOR_MODES = {
 
 
 // ============================================================================
-//  CONFIG — Physiological Limits (v10.4)
+//  CONFIG — Physiological Limits (v11‑Evo)
 // ============================================================================
 export const NORMAL_MAX     = 4;
 export const UPGRADED_MAX   = 8;
@@ -113,6 +97,69 @@ const activeWorkers = new Map(); // userId -> worker[]
 
 
 // ============================================================================
+//  v11‑Evo CIRCULATORY HELPERS
+// ============================================================================
+let adrenalCycle = 0;
+
+function computeHash(str) {
+  let h = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `h${h}`;
+}
+
+function buildAdrenalCycleSignature(cycle) {
+  return computeHash(`ADRENAL_CYCLE::${cycle}`);
+}
+
+function buildCapacityField(deviceTier, finalInstances) {
+  const tierScore =
+    deviceTier === "highend" ? 3 :
+    deviceTier === "upgraded" ? 2 :
+    1;
+
+  const capacityScore = tierScore * Math.max(1, finalInstances);
+  const saturation = Math.min(1, finalInstances / TEST_EARN_MAX);
+
+  return {
+    deviceTier,
+    finalInstances,
+    tierScore,
+    capacityScore,
+    saturation,
+    capacitySignature: computeHash(
+      `CAPACITY::${deviceTier}::${finalInstances}::${tierScore}`
+    )
+  };
+}
+
+function buildStressField(orchestratorMode, earnMode, testEarnActive) {
+  let base = 0;
+
+  if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) base += 0.2;
+  if (orchestratorMode === ORCHESTRATOR_MODES.EARN_STRESS) base += 0.5;
+  if (earnMode) base += 0.2;
+  if (testEarnActive) base += 0.3;
+
+  const stressIndex = Math.max(0, Math.min(1, base));
+
+  let band = "rest";
+  if (stressIndex >= 0.7) band = "surge";
+  else if (stressIndex >= 0.4) band = "elevated";
+
+  return {
+    stressIndex,
+    band,
+    stressSignature: computeHash(
+      `STRESS::${orchestratorMode}::${earnMode}::${testEarnActive}::${stressIndex}`
+    )
+  };
+}
+
+
+// ============================================================================
 //  DEVICE TIER → MAX INSTANCES
 // ============================================================================
 function getDeviceMax(deviceTier, testEarnActive, orchestratorMode) {
@@ -128,12 +175,11 @@ function getDeviceMax(deviceTier, testEarnActive, orchestratorMode) {
 
 
 // ============================================================================
-//  COMPUTE FINAL INSTANCE COUNT — Deterministic v10.4
+//  COMPUTE FINAL INSTANCE COUNT — Deterministic v11‑Evo
 // ============================================================================
 function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orchestratorMode) {
   let final = base || 1;
 
-  // Mode‑aware routing
   if (orchestratorMode === ORCHESTRATOR_MODES.DRAIN) {
     final = 1;
   } else {
@@ -143,7 +189,6 @@ function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orche
     if (earnMode) final = Math.floor(final * EARN_MODE_MULT);
 
     if (orchestratorMode === ORCHESTRATOR_MODES.EARN_STRESS) {
-      // Stress mode: push to deterministic ceiling, but still bounded
       final = Math.max(final, (base || 1) * 2);
     }
 
@@ -156,7 +201,7 @@ function computeFinalInstances(base, deviceTier, earnMode, testEarnActive, orche
 
 
 // ============================================================================
-//  LOG USER SNAPSHOT — v10.4
+//  LOG USER SNAPSHOT — v11‑Evo
 // ============================================================================
 async function logUserInstanceSnapshot(userId, snapshot) {
   if (!ENABLE_INSTANCE_LOGGING) return;
@@ -230,21 +275,27 @@ function killWorker(worker) {
 
 
 // ============================================================================
-//  MAIN ORCHESTRATOR LOOP — v10.4
+//  MAIN ORCHESTRATOR LOOP — v11‑Evo
 //  Optional pulse envelope for Governor wrapping:
 //    pulse = { jobId, lineage, mode, meta... } (not required)
 // ============================================================================
 export async function runInstanceOrchestrator(pulse) {
+  adrenalCycle++;
+
   const orchestratorMode =
     pulse?.mode && Object.values(ORCHESTRATOR_MODES).includes(pulse.mode)
       ? pulse.mode
       : ORCHESTRATOR_MODES.NORMAL;
 
+  const adrenalCycleSignature = buildAdrenalCycleSignature(adrenalCycle);
+
   logger.log("adrenal", "tick_start", {
     ...ADRENAL_CONTEXT,
     pulseId: pulse?.jobId || pulse?.id || null,
     pulseLineage: pulse?.lineage || null,
-    pulseMode: orchestratorMode
+    pulseMode: orchestratorMode,
+    adrenalCycle,
+    adrenalCycleSignature
   });
 
   const snap = await db.collection("UserScores").get();
@@ -272,6 +323,13 @@ export async function runInstanceOrchestrator(pulse) {
 
     const currentWorkers = activeWorkers.get(userId);
 
+    const capacityField = buildCapacityField(deviceTier, finalInstances);
+    const stressField = buildStressField(
+      orchestratorMode,
+      earnMode,
+      testEarnActive
+    );
+
     logger.log("adrenal", "state", {
       userId,
       baseInstances,
@@ -280,7 +338,11 @@ export async function runInstanceOrchestrator(pulse) {
       testEarnActive,
       current: currentWorkers.length,
       final: finalInstances,
-      mode: orchestratorMode
+      mode: orchestratorMode,
+      adrenalCycle,
+      adrenalCycleSignature,
+      capacityField,
+      stressField
     });
 
     // ------------------------------------------------------------
@@ -325,8 +387,8 @@ export async function runInstanceOrchestrator(pulse) {
     }
 
     // ------------------------------------------------------------
-    // SNAPSHOT — Immune‑Safe Logging
-    // ------------------------------------------------------------
+    // SNAPSHOT — Immune‑Safe Logging (v11‑Evo circulatory fields)
+// ------------------------------------------------------------
     await logUserInstanceSnapshot(userId, {
       baseInstances,
       finalInstances,
@@ -335,12 +397,18 @@ export async function runInstanceOrchestrator(pulse) {
       testEarnActive,
       currentWorkers: currentWorkers.length,
       lastUpdated: Date.now(),
-      mode: orchestratorMode
+      mode: orchestratorMode,
+      adrenalCycle,
+      adrenalCycleSignature,
+      capacityField,
+      stressField
     });
   }
 
   logger.log("adrenal", "tick_complete", {
-    mode: orchestratorMode
+    mode: orchestratorMode,
+    adrenalCycle,
+    adrenalCycleSignature
   });
 
   return true;

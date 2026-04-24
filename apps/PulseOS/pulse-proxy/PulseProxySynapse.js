@@ -1,4 +1,19 @@
-// ⭐ Universal global resolver — works in browser + node + workers
+```js
+// ============================================================================
+//  PULSE OS v11 — PULSENET SYNAPSE
+//  Neural Signal Routing Organ • Binary Core + Symbolic Wrapper
+//  Dual-Mode: Binary (pure, deterministic) + Unbinary (browser / fetch / storage)
+//  SAFETY:
+//    • Binary core: no window, no fetch, no JSON, no timestamps, no globals.
+//    • Symbolic wrapper: browser-aware, diagnostics, tiny-sync, storage.
+//    • No randomness. No autonomous routing. No business logic.
+// ============================================================================
+
+
+// ============================================================================
+//  UNIVERSAL GLOBAL RESOLVER — symbolic layer only
+//  (Binary core never touches this; it is passed data only.)
+// ============================================================================
 const G = typeof globalThis !== "undefined"
   ? globalThis
   : typeof window !== "undefined"
@@ -7,20 +22,19 @@ const G = typeof globalThis !== "undefined"
   ? global
   : {};
 
-// ⭐ Safe fallbacks — never break the page
 const db    = G.db;
 const log   = G.log   || console.log;
 const error = G.error || console.error;
 
 
 // ============================================================================
-// ⭐ OS‑v10.3 CONTEXT METADATA — Synapse Identity
+//  ORGAN IDENTITY — v11 Synapse
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseNet",
   layer: "Synapse",
-  version: "10.3",
+  version: "11.0",
   identity: "PulseNetSynapse",
 
   evo: {
@@ -28,15 +42,18 @@ export const PulseRole = {
     deterministic: true,
     synapticIntegrity: true,
     deterministicImpulseFlow: true,
+
+    dualModeEvolution: true,       // binary + symbolic
+    binaryFirst: true,             // binary core is source of truth
     offlineFirst: true,
     tinySyncReady: true,
+
     multiInstanceReady: true,
     unifiedAdvantageField: true,
     pulseEfficiencyAware: true,
     clusterCoherence: true,
     zeroDriftCloning: true,
     reflexPropagation: 1.0,
-    dualModeEvolution: true,
     organismClusterBoost: 1.0,
     cognitiveComputeLink: true,
     futureEvolutionReady: true
@@ -54,9 +71,134 @@ const PULSENET_CONTEXT = {
   evo: PulseRole.evo
 };
 
+
 // ============================================================================
-// DIAGNOSTICS — unchanged
+//  BINARY CORE — v11+
+//  Pure, deterministic, no window, no fetch, no JSON, no timestamps.
+//  This is the compression / canonical logic for Synapse.
 // ============================================================================
+
+// NOTE: all helpers here must be pure and side-effect free.
+
+function normalizeSignalBinary(rawValue, opts) {
+  const cfg = opts || {};
+  const min = typeof cfg.min === "number" ? cfg.min : 0;
+  const max = typeof cfg.max === "number" ? cfg.max : 100;
+  const clamp = cfg.clamp !== false;
+
+  if (rawValue == null || Number.isNaN(rawValue)) return 0;
+
+  let v = Number(rawValue);
+  const span = max - min || 1;
+  let score = (v - min) / span;
+
+  if (clamp) {
+    if (score < 0) score = 0;
+    if (score > 1) score = 1;
+  }
+
+  return score;
+}
+
+function computeSlopeBinary(prevValue, nextValue, opts) {
+  const cfg = opts || {};
+  const epsilon = typeof cfg.epsilon === "number" ? cfg.epsilon : 1e-6;
+
+  if (prevValue == null || nextValue == null) return 0;
+
+  const a = Number(prevValue);
+  const b = Number(nextValue);
+
+  const delta = b - a;
+  if (Math.abs(delta) < epsilon) return 0;
+
+  return delta;
+}
+
+function classifyRouteHealthBinary(signalScore, signalSlope) {
+  const score = Number(signalScore ?? 0);
+  const slope = Number(signalSlope ?? 0);
+
+  if (score >= 0.8 && slope >= 0)      return "healthy";
+  if (score >= 0.5 && slope >= -0.1)   return "stable";
+  if (score >= 0.3 && slope >= -0.3)   return "degrading";
+  if (score < 0.3 && slope < -0.1)     return "critical";
+
+  return "unknown";
+}
+
+function buildPulseUpdateBinary(input) {
+  const rawSignal      = input && "rawSignal" in input ? input.rawSignal : null;
+  const previousSignal = input && "previousSignal" in input ? input.previousSignal : null;
+  const meta           = (input && input.meta) || {};
+
+  const signalScore = normalizeSignalBinary(rawSignal, meta.normalize || {});
+  const signalSlope = computeSlopeBinary(previousSignal, rawSignal, meta.slope || {});
+  const routeHealth = classifyRouteHealthBinary(signalScore, signalSlope);
+
+  // Binary core does NOT attach timestamps or external context.
+  return {
+    layerId: "SYNAPSE-LAYER",
+    layerName: "THE SYNAPSE",
+    layerRole: "Neural Signal Routing Layer",
+
+    rawSignal: rawSignal ?? null,
+    previousSignal: previousSignal ?? null,
+
+    signalScore,
+    signalSlope,
+    routeHealth,
+
+    meta: { ...meta } // symbolic wrapper can enrich with PULSENET_CONTEXT
+  };
+}
+
+function processPulseSignalBinary(rawSignal, previousSignal, meta) {
+  return buildPulseUpdateBinary({ rawSignal, previousSignal, meta: meta || {} });
+}
+
+function buildPulseNetSnapshotBinary(rawSignal, previousSignal, meta) {
+  const update = buildPulseUpdateBinary({ rawSignal, previousSignal, meta: meta || {} });
+
+  return {
+    version: "11-binary",
+    layerId: update.layerId,
+    layerName: update.layerName,
+    layerRole: update.layerRole,
+
+    signal: {
+      raw: update.rawSignal,
+      previous: update.previousSignal,
+      score: update.signalScore,
+      slope: update.signalSlope,
+      routeHealth: update.routeHealth
+    },
+
+    meta: { ...update.meta }
+  };
+}
+
+export const PulseNetBinary = {
+  normalizeSignal: normalizeSignalBinary,
+  computeSlope: computeSlopeBinary,
+  classifyRouteHealth: classifyRouteHealthBinary,
+  buildPulseUpdate: buildPulseUpdateBinary,
+  processPulseSignal: processPulseSignalBinary,
+  buildPulseNetSnapshot: buildPulseNetSnapshotBinary,
+  meta: { ...PULSENET_CONTEXT, mode: "binary-core" }
+};
+
+
+// ============================================================================
+//  SYMBOLIC WRAPPER — v11 (browser / diagnostics / tiny-sync)
+//  Wraps binary core, adds:
+//    • Diagnostics logging
+//    • Timestamps
+//    • Connectivity reachout
+//    • Local storage tiny-sync
+// ============================================================================
+
+// Diagnostics toggle is symbolic-only (window-aware).
 const PULSE_LAYER_ID   = "SYNAPSE-LAYER";
 const PULSE_LAYER_NAME = "THE SYNAPSE";
 const PULSE_LAYER_ROLE = "Neural Signal Routing Layer";
@@ -85,82 +227,49 @@ const pulseLog = (stage, details = {}) => {
 
 pulseLog("SYNAPSE_INIT", {});
 
-// ============================================================================
-// CORE PURE HELPERS — unchanged
-// ============================================================================
+
+// ---------------------------------------------------------------------------
+// Symbolic wrappers around binary helpers
+// ---------------------------------------------------------------------------
 function normalizeSignal(rawValue, opts = {}) {
-  const { min = 0, max = 100, clamp = true } = opts;
-
-  if (rawValue == null || Number.isNaN(rawValue)) return 0;
-
-  let v = Number(rawValue);
-  const span = max - min || 1;
-  let score = (v - min) / span;
-
-  if (clamp) {
-    if (score < 0) score = 0;
-    if (score > 1) score = 1;
-  }
-
-  return score;
+  return PulseNetBinary.normalizeSignal(rawValue, opts);
 }
 
 function computeSlope(prevValue, nextValue, opts = {}) {
-  const { epsilon = 1e-6 } = opts;
-
-  if (prevValue == null || nextValue == null) return 0;
-
-  const a = Number(prevValue);
-  const b = Number(nextValue);
-
-  const delta = b - a;
-  if (Math.abs(delta) < epsilon) return 0;
-
-  return delta;
+  return PulseNetBinary.computeSlope(prevValue, nextValue, opts);
 }
 
 function classifyRouteHealth(signalScore, signalSlope) {
-  const score = Number(signalScore ?? 0);
-  const slope = Number(signalSlope ?? 0);
-
-  if (score >= 0.8 && slope >= 0) return "healthy";
-  if (score >= 0.5 && slope >= -0.1) return "stable";
-  if (score >= 0.3 && slope >= -0.3) return "degrading";
-  if (score < 0.3 && slope < -0.1) return "critical";
-
-  return "unknown";
+  return PulseNetBinary.classifyRouteHealth(signalScore, signalSlope);
 }
 
 function buildPulseUpdate({ rawSignal, previousSignal, meta = {} } = {}) {
-  const signalScore = normalizeSignal(rawSignal, meta.normalize || {});
-  const signalSlope = computeSlope(previousSignal, rawSignal, meta.slope || {});
-  const routeHealth = classifyRouteHealth(signalScore, signalSlope);
+  const enrichedMeta = {
+    ...meta,
+    context: PULSENET_CONTEXT
+  };
 
-  const update = {
-    layerId: PULSE_LAYER_ID,
-    layerName: PULSE_LAYER_NAME,
-    layerRole: PULSE_LAYER_ROLE,
+  const update = PulseNetBinary.buildPulseUpdate({
+    rawSignal,
+    previousSignal,
+    meta: enrichedMeta
+  });
 
-    rawSignal: rawSignal ?? null,
-    previousSignal: previousSignal ?? null,
+  const ts = new Date().toISOString();
 
-    signalScore,
-    signalSlope,
-    routeHealth,
-
-    meta: { ...meta, context: PULSENET_CONTEXT },
-
-    ts: new Date().toISOString()
+  const withTs = {
+    ...update,
+    ts
   };
 
   pulseLog("SYNAPSE_PULSE_UPDATE", {
-    routeHealth,
-    signalScore,
-    signalSlope,
+    routeHealth: withTs.routeHealth,
+    signalScore: withTs.signalScore,
+    signalSlope: withTs.signalSlope,
     meta
   });
 
-  return update;
+  return withTs;
 }
 
 function processPulseSignal(rawSignal, previousSignal, meta = {}) {
@@ -185,7 +294,7 @@ function buildPulseNetSnapshot(rawSignal, previousSignal, meta = {}) {
   const update = buildPulseUpdate({ rawSignal, previousSignal, meta });
 
   return {
-    version: "10.3", // ⭐ upgraded
+    version: "11.0",
     layerId: PULSE_LAYER_ID,
     layerName: PULSE_LAYER_NAME,
     layerRole: PULSE_LAYER_ROLE,
@@ -203,9 +312,12 @@ function buildPulseNetSnapshot(rawSignal, previousSignal, meta = {}) {
   };
 }
 
+
 // ============================================================================
-// PULSE‑ONCE CONNECTIVITY ORGAN — unchanged
+//  PULSE-ONCE CONNECTIVITY ORGAN — symbolic only
+//  Tiny sync, browser-only, uses fetch + storage, never touches binary core.
 // ============================================================================
+
 const PulseNetState = {
   lastPulseTs: null,
   lastPulseOk: false,
@@ -310,13 +422,13 @@ async function pulseOnce(deviceId) {
     try {
       if (typeof localStorage !== "undefined") {
         if (payload.identity) {
-          localStorage.setItem("tp_identity_v9", JSON.stringify(payload.identity));
+          localStorage.setItem("tp_identity_v11", JSON.stringify(payload.identity));
         }
         if (payload.config) {
-          localStorage.setItem("tp_earn_config_v9", JSON.stringify(payload.config));
+          localStorage.setItem("tp_earn_config_v11", JSON.stringify(payload.config));
         }
         if (payload.jobs) {
-          localStorage.setItem("tp_jobs_seed_v9", JSON.stringify(payload.jobs));
+          localStorage.setItem("tp_jobs_seed_v11", JSON.stringify(payload.jobs));
         }
       }
     } catch (storageErr) {
@@ -348,17 +460,22 @@ function getPulseNetState() {
   return { ...PulseNetState };
 }
 
+
 // ============================================================================
-// EXPORTED SYNAPSE + PULSE‑ONCE API — v10.3
+//  EXPORTED SYNAPSE API — v11
+//  Binary + Symbolic, clearly separated, organism-aware.
 // ============================================================================
 export const PulseNet = {
+  // identity
   PULSE_LAYER_ID,
   PULSE_LAYER_NAME,
   PULSE_LAYER_ROLE,
 
+  // diagnostics
   PULSE_DIAGNOSTICS_ENABLED,
   pulseLog,
 
+  // binary-compatible helpers (symbolic wrappers)
   normalizeSignal,
   computeSlope,
   classifyRouteHealth,
@@ -367,8 +484,14 @@ export const PulseNet = {
   processPulseSignal,
   buildPulseNetSnapshot,
 
+  // connectivity
   pulseOnce,
   getPulseNetState,
 
-  meta: { ...PULSENET_CONTEXT }
+  // meta
+  meta: { ...PULSENET_CONTEXT },
+
+  // expose binary core for other organs (GPU, Cortex, Mesh)
+  binary: PulseNetBinary
 };
+```

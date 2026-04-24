@@ -1,28 +1,23 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnCustomReceptor-v11-Evo.js
-// LAYER: THE GENETIC REGULATOR (v11-Evo)
+// LAYER: THE GENETIC REGULATOR (v11-Evo A‑B‑A)
 // (Deterministic Marketplace Interpreter + Receptor Builder)
 // ============================================================================
 //
-// ROLE (v11-Evo):
+// ROLE (v11-Evo A‑B‑A):
 //   THE GENETIC REGULATOR — deterministic marketplace interpreter.
 //   • Reads receptor DNA from static deterministic config (no network).
 //   • Expresses that DNA into a functional receptor phenotype.
 //   • Enforces the universal interface (ping, fetchJobs, submitResult).
 //   • Emits v11‑Evo receptor signatures + lineage metadata.
-//
-// PURPOSE (v11-Evo):
-//   • Provide a deterministic, drift‑proof dynamic marketplace adapter.
-//   • Remove all nondeterministic behavior (no async, no fetch, no Firestore).
-//   • Guarantee safe receptor behavior for Earn v11‑Evo.
-//   • Preserve genetic lineage + receptor evolution (conceptual only).
+//   • Emits A‑B‑A bandSignature + binaryField + waveField surfaces.
 //
 // CONTRACT (v11-Evo):
-//   • PURE RECEPTOR — no network, no async, no timestamps.
-//   • READ‑ONLY except deterministic config caching.
+//   • PURE RECEPTOR — deterministic, drift‑proof.
+//   • NO async, NO network, NO randomness, NO timestamps.
 //   • NO eval(), NO Function(), NO dynamic imports.
-//   • NO executing user code.
-//   • Deterministic receptor behavior only.
+//   • NEVER mutate job objects.
+//   • READ‑ONLY except deterministic config caching.
 // ============================================================================
 
 
@@ -38,15 +33,22 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
 
 // ============================================================================
-// Deterministic Genetic DNA — v11-Evo
+// Deterministic Genetic DNA — v11-Evo A‑B‑A
 // ============================================================================
 const DETERMINISTIC_RECEPTOR_DNA = {
   id: "CUSTOM",
   name: "Custom Marketplace",
   version: "11-Evo",
   healthScore: 1.0,
+
+  band: "symbolic", // symbolic | binary
 
   endpoints: {
     ping: "PING_OK",
@@ -56,7 +58,6 @@ const DETERMINISTIC_RECEPTOR_DNA = {
 
   headers: {},
 
-  // v11‑Evo receptor identity
   lineage: "Receptor-GeneticRegulator-v11-Evo",
   phenotype: "MarketplaceReceptor"
 };
@@ -72,6 +73,7 @@ function loadMarketplaceDNA() {
 
   cachedDNA = {
     ...DETERMINISTIC_RECEPTOR_DNA,
+    band: normalizeBand(DETERMINISTIC_RECEPTOR_DNA.band),
     endpoints: { ...DETERMINISTIC_RECEPTOR_DNA.endpoints }
   };
 
@@ -80,10 +82,55 @@ function loadMarketplaceDNA() {
 
 
 // ============================================================================
-// Signature Builders — v11-Evo
+// A‑B‑A Binary + Wave Surfaces (v11‑Evo)
+// ============================================================================
+function buildBinaryField(dna) {
+  const patternLen =
+    String(dna.id).length + String(dna.name).length;
+
+  const density =
+    patternLen +
+    (dna.endpoints.jobs?.length || 0) +
+    (dna.healthScore * 100);
+
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: computeHash(`BRECEPTOR::${surface}`),
+    binarySurfaceSignature: computeHash(`BRECEPTOR_SURF::${surface}`),
+    binarySurface: {
+      patternLen,
+      density,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(dna) {
+  const amplitude = (dna.healthScore || 1) * 100;
+  const wavelength = (dna.endpoints.jobs?.length || 0) + 1;
+  const phase = (dna.id.charCodeAt(0) || 1) % 16;
+  const band = normalizeBand(dna.band);
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+}
+
+
+// ============================================================================
+// Signature Builders — v11-Evo A‑B‑A
 // ============================================================================
 function buildReceptorSignature(dna) {
-  return computeHash(`RECEPTOR::${dna.id}::${dna.version}`);
+  return computeHash(
+    `RECEPTOR::${dna.id}::${dna.version}::${normalizeBand(dna.band)}`
+  );
 }
 
 function buildPingSignature(latency) {
@@ -96,6 +143,10 @@ function buildJobListSignature(jobs) {
 
 function buildSubmissionSignature(jobId, status) {
   return computeHash(`SUBMIT::${jobId}::${status}`);
+}
+
+function buildBandSignature(dna) {
+  return computeHash(`RECEPTOR_BAND::${normalizeBand(dna.band)}::${dna.id}`);
 }
 
 
@@ -114,7 +165,10 @@ function ping() {
   return {
     latency,
     receptorId: dna.id,
-    signature: buildPingSignature(latency)
+    signature: buildPingSignature(latency),
+    bandSignature: buildBandSignature(dna),
+    binaryField: buildBinaryField(dna),
+    waveField: buildWaveField(dna)
   };
 }
 
@@ -130,7 +184,10 @@ function fetchJobs() {
   return {
     jobs: expressed,
     receptorId: dna.id,
-    signature: buildJobListSignature(expressed)
+    signature: buildJobListSignature(expressed),
+    bandSignature: buildBandSignature(dna),
+    binaryField: buildBinaryField(dna),
+    waveField: buildWaveField(dna)
   };
 }
 
@@ -142,7 +199,10 @@ function submitResult(job, result) {
       success: false,
       error: "invalid_job",
       receptorId: dna.id,
-      signature: buildSubmissionSignature("NONE", "INVALID")
+      signature: buildSubmissionSignature("NONE", "INVALID"),
+      bandSignature: buildBandSignature(dna),
+      binaryField: buildBinaryField(dna),
+      waveField: buildWaveField(dna)
     };
   }
 
@@ -154,13 +214,16 @@ function submitResult(job, result) {
     jobId: job.id,
     result,
     status,
-    signature: buildSubmissionSignature(job.id, status)
+    signature: buildSubmissionSignature(job.id, status),
+    bandSignature: buildBandSignature(dna),
+    binaryField: buildBinaryField(dna),
+    waveField: buildWaveField(dna)
   };
 }
 
 
 // ============================================================================
-// Export — The Genetic Regulator Adapter (v11-Evo)
+// Export — The Genetic Regulator Adapter (v11-Evo A‑B‑A)
 // ============================================================================
 export const PulseEarnCustomReceptor = {
   id: "CUSTOM",
@@ -169,6 +232,10 @@ export const PulseEarnCustomReceptor = {
   lineage: "Receptor-GeneticRegulator-v11-Evo",
 
   receptorSignature: buildReceptorSignature(DETERMINISTIC_RECEPTOR_DNA),
+  bandSignature: buildBandSignature(DETERMINISTIC_RECEPTOR_DNA),
+
+  binaryField: () => buildBinaryField(loadMarketplaceDNA()),
+  waveField: () => buildWaveField(loadMarketplaceDNA()),
 
   ping,
   fetchJobs,

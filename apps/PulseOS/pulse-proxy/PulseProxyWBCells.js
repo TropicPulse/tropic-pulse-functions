@@ -1,14 +1,15 @@
 // ============================================================================
-//  PULSE OS v9.3 — PROXY HEALER
+//  PULSE OS v11 — PROXY HEALER
 //  “WHITE BLOOD CELL LAYER / IMMUNE PATROL”
 //  Deterministic • Drift‑Proof • Proxy‑Only Healing Layer
-//  PURE DETECTION. NO AI. NO COMPUTE. NO MUTATION.
-// ============================================================================
-// ============================================================================
-// GLOBAL WIRING — v10.2 (Safe, backend-only, no global.* dependency)
+//  PURE DETECTION. NO AI. NO BUSINESS MUTATION.
+//  BINARY CORE + SYMBOLIC WRAPPER
 // ============================================================================
 
-// Universal global resolver (works in Node, Workers, Serverless)
+
+// ============================================================================
+// GLOBAL WIRING — backend-only, no global.* hard dependency
+// ============================================================================
 const G = typeof globalThis !== "undefined"
   ? globalThis
   : typeof global !== "undefined"
@@ -21,16 +22,19 @@ const log   = G.log   || console.log;
 const error = G.error || console.error;
 
 // Firestore Timestamp (optional, backend-only)
-const Timestamp = G.Timestamp || null;
+const Timestamp = (G.firebaseAdmin && G.firebaseAdmin.firestore.Timestamp) ||
+                  G.Timestamp ||
+                  null;
+
 
 // ============================================================================
-//  ORGAN IDENTITY — v9.3
+//  ORGAN IDENTITY — v11
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "ImmuneLayer",
-  version: "9.3",
+  version: "11.0",
   identity: "PulseProxyHealer",
 
   evo: {
@@ -40,16 +44,19 @@ export const PulseRole = {
     backendOnly: true,
     noIQ: true,
     noRouting: true,
-    noCompute: true,
+    noCompute: true,          // no business compute; only threshold checks
     multiInstanceReady: true,
     unifiedAdvantageField: true,
     pulseEfficiencyAware: true,
+    binaryCore: true,
+    symbolicWrapper: true,
     futureEvolutionReady: true
   }
 };
 
+
 // ============================================================================
-//  ORGAN CONTEXT — v9.3
+//  ORGAN CONTEXT — v11
 // ============================================================================
 const WBC_CONTEXT = {
   layer: PulseRole.layer,
@@ -70,8 +77,9 @@ const ImmuneState = {
   status: "idle"
 };
 
+
 // ============================================================================
-//  IMMUNE CONFIG — unchanged
+//  IMMUNE CONFIG — unchanged thresholds
 // ============================================================================
 export const PROXY_HEALTH_URL  =
   process.env.PULSE_PROXY_HEALTH_URL  || "http://localhost:8080/pulse-proxy/health";
@@ -92,17 +100,122 @@ export const MAX_INSTANCES = 32;
 export const FUNCTION_LOGS_COLLECTION     = "FUNCTION_LOGS";
 export const PROXY_HEALER_LOGS_COLLECTION = "ProxyHealerLogs";
 
+
+// ============================================================================
+//  SHARED HELPERS — deterministic, no randomness
+// ============================================================================
+function nowMs() {
+  return Date.now();
+}
+
+
+// ============================================================================
+//  BINARY CORE — v11 (no fetch, no timers, no window)
+//  Pure classification + hint engine
+// ============================================================================
+
+function classifyPressureBinary(metrics) {
+  if (!metrics || typeof metrics !== "object") {
+    return {
+      status: "unknown",
+      warnings: [],
+      cpuPercent: null,
+      memPressure: null,
+      eventLoopLagMs: null
+    };
+  }
+
+  const cpuPercent     = metrics.cpu?.percent ?? null;
+  const memPressure    = metrics.memory?.pressure ?? null;
+  const eventLoopLagMs = metrics.eventLoopLagMs ?? null;
+
+  const warnings = [];
+
+  if (cpuPercent     != null && cpuPercent     > CPU_PRESSURE_WARN)   warnings.push("cpu_high");
+  if (memPressure    != null && memPressure    > MEM_PRESSURE_WARN)   warnings.push("memory_high");
+  if (eventLoopLagMs != null && eventLoopLagMs > EVENT_LOOP_LAG_WARN) warnings.push("event_loop_lag_high");
+
+  const status =
+    warnings.length === 0
+      ? "healthy"
+      : "warning";
+
+  return {
+    status,
+    warnings,
+    cpuPercent,
+    memPressure,
+    eventLoopLagMs
+  };
+}
+
+function evaluateUserScoreBinary(scoreDoc) {
+  if (!scoreDoc || typeof scoreDoc !== "object") {
+    return {
+      outOfBounds: false,
+      upgradeHint: false,
+      reviewHint: false
+    };
+  }
+
+  const trustScore = scoreDoc.trustScore ?? 0;
+  const meshScore  = scoreDoc.meshScore ?? 0; // currently unused, but preserved
+  const phase      = scoreDoc.phase ?? 1;     // currently unused, but preserved
+  const hub        = !!scoreDoc.hub;          // currently unused, but preserved
+  const instances  = scoreDoc.instances ?? 1;
+
+  const outOfBounds =
+    instances < MIN_INSTANCES || instances > MAX_INSTANCES;
+
+  const upgradeHint =
+    !outOfBounds && trustScore > 80 && instances < 4;
+
+  const reviewHint =
+    !outOfBounds && trustScore < 20 && instances > 4;
+
+  return {
+    outOfBounds,
+    upgradeHint,
+    reviewHint,
+    trustScore,
+    meshScore,
+    phase,
+    hub,
+    instances
+  };
+}
+
+function buildImmuneSnapshotBinary({ healthResult, scoreHints, ts }) {
+  return {
+    ts,
+    status: healthResult?.status ?? "unknown",
+    warnings: healthResult?.warnings ?? [],
+    cpuPercent: healthResult?.cpuPercent ?? null,
+    memPressure: healthResult?.memPressure ?? null,
+    eventLoopLagMs: healthResult?.eventLoopLagMs ?? null,
+    scoreHints,
+    meta: { ...WBC_CONTEXT }
+  };
+}
+
+export const ProxyHealerBinary = {
+  classifyPressure: classifyPressureBinary,
+  evaluateUserScore: evaluateUserScoreBinary,
+  buildSnapshot: buildImmuneSnapshotBinary
+};
+
+
 // ============================================================================
 //  IMMUNE LOGGING HELPERS — drift‑proof, backend‑safe
 // ============================================================================
 async function writeFunctionLog(entry) {
-  if (!db) return; // backend‑only organ, fail‑open if db missing
+  if (!db) return;
 
   try {
     await db.collection(FUNCTION_LOGS_COLLECTION).add({
       ...WBC_CONTEXT,
       ...entry,
-      createdAt: Timestamp ? Timestamp.now() : Date.now(),
+      createdAt: Timestamp ? Timestamp.now() : nowMs(),
       processed: false
     });
   } catch (err) {
@@ -111,25 +224,29 @@ async function writeFunctionLog(entry) {
 }
 
 async function writeHealerLog(entry) {
-  if (!db) return; // backend‑only organ, fail‑open if db missing
+  if (!db) return;
 
   try {
     await db.collection(PROXY_HEALER_LOGS_COLLECTION).add({
       ...WBC_CONTEXT,
       ...entry,
-      ts: Date.now()
+      ts: nowMs()
     });
   } catch (err) {
     error("wbc", "healer_log_failed", { error: String(err) });
   }
 }
 
+
 // ============================================================================
-//  HEALTH + METRICS SCAN — immune patrol over proxy spine
+//  SYMBOLIC WRAPPER — v10.4–11 (fetch + db + intervals)
+//  Uses binary core for all decisions
 // ============================================================================
+
+// HEALTH + METRICS SCAN — immune patrol over proxy spine
 async function checkProxyHealthAndMetrics() {
   ImmuneState.status = "scanning";
-  ImmuneState.lastHealthScanTs = Date.now();
+  ImmuneState.lastHealthScanTs = nowMs();
   log("wbc", "scan_start");
 
   let health = null;
@@ -161,29 +278,21 @@ async function checkProxyHealthAndMetrics() {
     return;
   }
 
-  ImmuneState.lastMetricsScanTs = Date.now();
+  ImmuneState.lastMetricsScanTs = nowMs();
 
-  const cpuPercent     = metrics.cpu?.percent ?? null;
-  const memPressure    = metrics.memory?.pressure ?? null;
-  const eventLoopLagMs = metrics.eventLoopLagMs ?? null;
+  const healthResult = ProxyHealerBinary.classifyPressure(metrics);
 
-  const warnings = [];
-
-  if (cpuPercent     > CPU_PRESSURE_WARN)   warnings.push("cpu_high");
-  if (memPressure    > MEM_PRESSURE_WARN)   warnings.push("memory_high");
-  if (eventLoopLagMs > EVENT_LOOP_LAG_WARN) warnings.push("event_loop_lag_high");
-
-  if (warnings.length) {
+  if (healthResult.warnings.length) {
     ImmuneState.status = "warning";
 
-    log("wbc", "pressure_warning", { warnings });
+    log("wbc", "pressure_warning", { warnings: healthResult.warnings });
 
     await writeHealerLog({
       type: "proxy_pressure_warning",
-      cpuPercent,
-      memPressure,
-      eventLoopLagMs,
-      warnings
+      cpuPercent: healthResult.cpuPercent,
+      memPressure: healthResult.memPressure,
+      eventLoopLagMs: healthResult.eventLoopLagMs,
+      warnings: healthResult.warnings
     });
   } else {
     ImmuneState.status = "healthy";
@@ -191,16 +300,14 @@ async function checkProxyHealthAndMetrics() {
   }
 }
 
-// ============================================================================
-//  USER SCORES SCAN — immune hints for instance allocation
-// ============================================================================
+// USER SCORES SCAN — immune hints for instance allocation
 async function scanUserScoresForInstanceHints() {
   if (!db) {
     log("wbc", "scores_scan_skipped_no_db");
     return;
   }
 
-  ImmuneState.lastScoresScanTs = Date.now();
+  ImmuneState.lastScoresScanTs = nowMs();
   log("wbc", "scores_scan_start");
 
   let snap;
@@ -215,26 +322,22 @@ async function scanUserScoresForInstanceHints() {
   }
 
   for (const doc of snap.docs) {
-    const s = doc.data();
+    const s = doc.data() || {};
     const userId = doc.id;
 
-    const trustScore = s.trustScore ?? 0;
-    const meshScore  = s.meshScore ?? 0;
-    const phase      = s.phase ?? 1;
-    const hub        = !!s.hub;
-    const instances  = s.instances ?? 1;
+    const hint = ProxyHealerBinary.evaluateUserScore(s);
 
-    if (instances < MIN_INSTANCES || instances > MAX_INSTANCES) {
-      log("wbc", "instance_out_of_bounds", { userId, instances });
+    if (hint.outOfBounds) {
+      log("wbc", "instance_out_of_bounds", { userId, instances: hint.instances });
 
       await writeHealerLog({
         type: "instance_out_of_bounds",
         userId,
-        instances,
-        trustScore,
-        meshScore,
-        phase,
-        hub
+        instances: hint.instances,
+        trustScore: hint.trustScore,
+        meshScore: hint.meshScore,
+        phase: hint.phase,
+        hub: hint.hub
       });
 
       await writeFunctionLog({
@@ -249,33 +352,33 @@ async function scanUserScoresForInstanceHints() {
       continue;
     }
 
-    if (trustScore > 80 && instances < 4) {
+    if (hint.upgradeHint) {
       log("wbc", "upgrade_hint", { userId });
 
       await writeHealerLog({
         type: "instance_upgrade_hint",
         userId,
         reason: "high_trust_low_instances",
-        trustScore,
-        meshScore,
-        phase,
-        hub,
-        instances
+        trustScore: hint.trustScore,
+        meshScore: hint.meshScore,
+        phase: hint.phase,
+        hub: hint.hub,
+        instances: hint.instances
       });
     }
 
-    if (trustScore < 20 && instances > 4) {
+    if (hint.reviewHint) {
       log("wbc", "review_hint", { userId });
 
       await writeHealerLog({
         type: "instance_review_hint",
         userId,
         reason: "low_trust_high_instances",
-        trustScore,
-        meshScore,
-        phase,
-        hub,
-        instances
+        trustScore: hint.trustScore,
+        meshScore: hint.meshScore,
+        phase: hint.phase,
+        hub: hint.hub,
+        instances: hint.instances
       });
     }
   }
@@ -283,8 +386,9 @@ async function scanUserScoresForInstanceHints() {
   log("wbc", "scores_scan_complete");
 }
 
+
 // ============================================================================
-//  PUBLIC: startPulseProxyHealer() — immune patrol loop
+//  PUBLIC: startPulseProxyHealer() — immune patrol loop (symbolic wrapper)
 // ============================================================================
 export default function startPulseProxyHealer() {
   log("wbc", "immune_patrol_start", WBC_CONTEXT);
@@ -303,7 +407,7 @@ export default function startPulseProxyHealer() {
     );
   }, SCORES_SCAN_INTERVAL_MS);
 
-  log("wbc", "immune_patrol_active_v9_3", {
+  log("wbc", "immune_patrol_active_v11", {
     ...WBC_CONTEXT,
     healthIntervalMs: HEALTH_INTERVAL_MS,
     scoresIntervalMs: SCORES_SCAN_INTERVAL_MS

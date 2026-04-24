@@ -1,7 +1,8 @@
 // ============================================================================
-//  PulseSend-v11-Evo.js — PulseSend Organism v11.0
+//  PulseSend-v11-Evo.js — PulseSend Organism v11.0 (Symbolic Edition)
 //  Evolutionary Transport Organ • Pattern + Lineage + Shape • SDN-Aware
 //  11.0: Fallback Surface + Movement Surface + Route Surface + Diagnostics
+//  NOTE: This is the SYMBOLIC (pre-binary) top-level PulseSend.
 // ============================================================================
 //
 //  SAFETY CONTRACT (v11-Evo):
@@ -59,6 +60,13 @@ export const PulseRole = {
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, pure
 // ============================================================================
+function computeHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h + str.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `h${h}`;
+}
 
 function buildFallbackSurface(type, error) {
   return {
@@ -76,14 +84,6 @@ function buildSendDiagnostics({ jobId, pattern, mode, pulseType }) {
     patternHash: computeHash(pattern),
     modeHash: computeHash(mode)
   };
-}
-
-function computeHash(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h + str.charCodeAt(i) * (i + 1)) % 100000;
-  }
-  return `h${h}`;
 }
 
 function buildMovementSurface(movement) {
@@ -128,7 +128,7 @@ function buildReturnSurface(result) {
 
 
 // ============================================================================
-//  FACTORY — Build the Full PulseSend v11 Organism (SDN‑aware)
+//  FACTORY — Build the Full PulseSend v11 Organism (Symbolic Edition)
 // ============================================================================
 export function createPulseSend({
   createPulseV3,
@@ -142,18 +142,16 @@ export function createPulseSend({
   log,
   sdn
 }) {
-  // Build sub‑organs
   const mover = createPulseSendMover({ pulseMesh, log });
   const impulse = createPulseSendImpulse({ mover, log });
   const returnArc = createPulseSendReturn({ impulse, pulseRouter, pulseMesh, log });
 
-  // Safe SDN emission
   function emitSDN(source, payload) {
     if (!sdn || typeof sdn.emitImpulse !== "function") return;
     try {
       sdn.emitImpulse(source, payload);
     } catch (e) {
-      log && log("[PulseSend-v11] SDN emit failed (non‑fatal)", { source, error: e });
+      log && log("[PulseSend-v11] SDN emit failed (non-fatal)", { source, error: e });
     }
   }
 
@@ -175,9 +173,7 @@ export function createPulseSend({
 
     emitSDN("send:begin", { jobId, pattern, priority, returnTo, mode });
 
-    // ================================================================
-    // ⭐ Tier 1 — Try Pulse v3
-    // ================================================================
+    // ⭐ Tier 1 — Pulse v3
     try {
       pulse = createPulseV3({ jobId, pattern, payload, priority, returnTo, mode });
       pulseType = "Pulse-v3";
@@ -186,9 +182,7 @@ export function createPulseSend({
       emitSDN("send:pulse-fallback", { jobId, pattern, from: "v3", to: "v2", error: String(errV3) });
     }
 
-    // ================================================================
-    // ⭐ Tier 2 — Try Pulse v2
-    // ================================================================
+    // ⭐ Tier 2 — Pulse v2
     if (!pulse) {
       try {
         pulse = createPulseV2({ jobId, pattern, payload, priority, returnTo, mode });
@@ -199,9 +193,7 @@ export function createPulseSend({
       }
     }
 
-    // ================================================================
-    // ⭐ Tier 3 — Fallback to Pulse v1
-    // ================================================================
+    // ⭐ Tier 3 — Pulse v1
     if (!pulse) {
       pulse = createPulseV1({ jobId, pattern, payload, priority, returnTo, mode });
       pulseType = "Pulse-v1";
@@ -211,23 +203,17 @@ export function createPulseSend({
 
     emitSDN("send:pulse-created", { jobId, pattern, mode, pulseType });
 
-    // ================================================================
     // ⭐ Route
-    // ================================================================
     const targetOrgan = pulseRouter.route(pulse);
     const routeSurface = buildRouteSurface(targetOrgan);
 
-    // ================================================================
     // ⭐ Pathway
-    // ================================================================
     const pathway = pulseMesh.pathwayFor(targetOrgan, mode);
     const pathwaySurface = buildPathwaySurface(pathway);
 
     emitSDN("send:routed", { jobId, pattern, targetOrgan, pathway, mode, pulseType });
 
-    // ================================================================
     // ⭐ Movement
-    // ================================================================
     const movement = impulse.fire({ pulse, targetOrgan, pathway, mode });
     const movementSurface = buildMovementSurface(movement);
 
@@ -241,9 +227,7 @@ export function createPulseSend({
       movementMeta: movementSurface
     });
 
-    // ================================================================
     // ⭐ Return Arc
-    // ================================================================
     const result = returnArc.handle(movement.packet, mode);
     const returnSurface = buildReturnSurface(result);
 
@@ -255,16 +239,12 @@ export function createPulseSend({
       resultMeta: returnSurface
     });
 
-    // ================================================================
     // ⭐ Memory
-    // ================================================================
     pulseRouter.remember(pulse, targetOrgan, "success", pulse.healthScore || 1);
 
     emitSDN("send:complete", { jobId, pattern, targetOrgan, mode, pulseType });
 
-    // ================================================================
     // ⭐ Return full telemetry
-    // ================================================================
     return {
       PulseRole,
       movement,
@@ -278,7 +258,12 @@ export function createPulseSend({
       movementSurface,
       returnSurface,
 
-      diagnostics: buildSendDiagnostics({ jobId, pattern, mode, pulseType })
+      diagnostics: buildSendDiagnostics({
+        jobId,
+        pattern,
+        mode,
+        pulseType
+      })
     };
   }
 

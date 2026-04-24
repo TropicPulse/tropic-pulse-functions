@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUSettingsRestorer.js
-// PULSE GPU SETTINGS RESTORER v10.4
+// PULSE GPU SETTINGS RESTORER v11-Evo
 // “COGNITIVE RECOGNITION LAYER / RESTORATION PLANNER”
 // ============================================================================
 //
@@ -10,12 +10,14 @@
 //   and recognizes what concrete action should be taken.
 //
 //   • Consumes advisor insights (Drive Center) + memory entries (Evolution Core)
+//   • Can also consume GPU dispatch/memory hints (Brain/Spine/History)
 //   • Recognizes whether to restore, apply optimal, upgrade tier, or noop
 //   • Produces deterministic restoration plans for the Healer + Orchestrator
-//   • PulseSend‑10.4‑ready: plans can be routed by the compute router
-//   • Earn‑ready: compatible with Earn-v2 job payloads
+//   • PulseSend‑v11‑ready: plans can be routed by the compute router
+//   • Earn‑ready: compatible with Earn-v3 job payloads
+//   • Binary-aware, symbolic-aware, dispatch-aware, memory-aware
 //
-// SAFETY CONTRACT (v10.4):
+// SAFETY CONTRACT (v11-Evo):
 //   • No randomness
 //   • No timestamps
 //   • No GPU calls
@@ -28,16 +30,16 @@
 // ============================================================================
 
 // ------------------------------------------------------------
-// ⭐ OS‑v10.4 CONTEXT METADATA
+// ⭐ OS‑v11-Evo CONTEXT METADATA
 // ------------------------------------------------------------
 const RESTORER_CONTEXT = {
   layer: "PulseGPUSettingsRestorer",
   role: "GPU_SETTINGS_RESTORER",
   purpose: "Deterministic planner for GPU settings restoration",
   context:
-    "Consumes advisor insights + memory entries to produce restoration plans",
+    "Consumes advisor insights + memory entries + GPU hints to produce restoration plans",
   target: "full-gpu",
-  version: 10.4,
+  version: "11.0-Evo",
   selfRepairable: true,
 
   evo: {
@@ -46,24 +48,33 @@ const RESTORER_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    pulseSend10Ready: true,
+    pulseSend11Ready: true,
+
+    // v11-Evo awareness
+    binaryAware: true,
+    symbolicAware: true,
+    gpuDispatchAware: true,
+    gpuMemoryAware: true,
+    gpuAdvantageAware: true,
 
     // PulseSend / Earn contracts (conceptual only)
-    routingContract: "PulseSend-v10.4",
-    gpuOrganContract: "PulseGPU-v10.4",
-    earnCompatibility: "Earn-v2"
+    routingContract: "PulseSend-v11",
+    gpuOrganContract: "PulseGPU-v11-Evo",
+    binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+    earnCompatibility: "Earn-v3"
   }
 };
 
 // ------------------------------------------------------------
-// Restoration plan builder (v10.4 + OS‑v10.4 metadata)
+// Restoration plan builder (v11-Evo + OS‑v11-Evo metadata)
 // ------------------------------------------------------------
 function buildPlan({
   action,
   reason,
   targetSettings = null,
   baselineSettings = null,
-  extra = null
+  extra = null,
+  gpuContext = null
 }) {
   return {
     action,
@@ -71,6 +82,7 @@ function buildPlan({
     targetSettings,
     baselineSettings,
     extra,
+    gpuContext: gpuContext || null,
     meta: { ...RESTORER_CONTEXT }
   };
 }
@@ -87,7 +99,7 @@ function validatePlan(plan) {
 }
 
 // ------------------------------------------------------------
-// PulseGPUSettingsRestorer v10.4 — Cognitive Recognition Layer
+// PulseGPUSettingsRestorer v11-Evo — Cognitive Recognition Layer
 // ------------------------------------------------------------
 class PulseGPUSettingsRestorer {
   constructor() {}
@@ -97,12 +109,14 @@ class PulseGPUSettingsRestorer {
   // ----------------------------------------------------
   // Main entry point:
   //   Takes an array of advice objects → returns a plan.
+  //   Optionally includes GPU context (dispatch/memory/advantage).
   // ----------------------------------------------------
-  buildRestorePlan(adviceList = []) {
+  buildRestorePlan(adviceList = [], gpuContext = null) {
     if (!Array.isArray(adviceList) || adviceList.length === 0) {
       return buildPlan({
         action: "noop",
-        reason: "No advice available."
+        reason: "No advice available.",
+        gpuContext
       });
     }
 
@@ -120,7 +134,8 @@ class PulseGPUSettingsRestorer {
     if (sorted.length === 0) {
       return buildPlan({
         action: "noop",
-        reason: "No valid advice available."
+        reason: "No valid advice available.",
+        gpuContext
       });
     }
 
@@ -128,21 +143,22 @@ class PulseGPUSettingsRestorer {
 
     switch (top.type) {
       case "regression":
-        return this.buildRestorePlanForRegression(top);
+        return this.buildRestorePlanForRegression(top, gpuContext);
 
       case "suboptimal":
-        return this.buildRestorePlanForSuboptimal(top);
+        return this.buildRestorePlanForSuboptimal(top, gpuContext);
 
       case "tier-upgrade-opportunity":
-        return this.buildRestorePlanForTierUpgrade(top);
+        return this.buildRestorePlanForTierUpgrade(top, gpuContext);
 
       case "improvement":
-        return this.buildRestorePlanForImprovement(top);
+        return this.buildRestorePlanForImprovement(top, gpuContext);
 
       default:
         return buildPlan({
           action: "noop",
-          reason: "Advice type not recognized."
+          reason: "Advice type not recognized.",
+          gpuContext
         });
     }
   }
@@ -150,7 +166,9 @@ class PulseGPUSettingsRestorer {
   // ----------------------------------------------------
   // Regression → restore baseline settings
   // ----------------------------------------------------
-  buildRestorePlanForRegression(advice) {
+  buildRestorePlanForRegression(advice, gpuContext) {
+    const gpuCtx = this._buildGpuContextFromAdvice(advice, gpuContext);
+
     return buildPlan({
       action: "restore",
       reason: "Performance regressed compared to best-known configuration.",
@@ -161,14 +179,17 @@ class PulseGPUSettingsRestorer {
         baselineMetrics: advice.extra?.baselineMetrics,
         repairHint:
           advice.extra?.repairHint || "restore-baseline-settings"
-      }
+      },
+      gpuContext: gpuCtx
     });
   }
 
   // ----------------------------------------------------
   // Suboptimal → apply optimal baseline settings
   // ----------------------------------------------------
-  buildRestorePlanForSuboptimal(advice) {
+  buildRestorePlanForSuboptimal(advice, gpuContext) {
+    const gpuCtx = this._buildGpuContextFromAdvice(advice, gpuContext);
+
     return buildPlan({
       action: "apply-optimal",
       reason: "Current settings are below best-known performance.",
@@ -179,14 +200,17 @@ class PulseGPUSettingsRestorer {
         baselineMetrics: advice.extra?.baselineMetrics,
         repairHint:
           advice.extra?.repairHint || "suggest-baseline-settings"
-      }
+      },
+      gpuContext: gpuCtx
     });
   }
 
   // ----------------------------------------------------
   // Tier upgrade opportunity → apply new-tier optimal settings
   // ----------------------------------------------------
-  buildRestorePlanForTierUpgrade(advice) {
+  buildRestorePlanForTierUpgrade(advice, gpuContext) {
+    const gpuCtx = this._buildGpuContextFromAdvice(advice, gpuContext);
+
     return buildPlan({
       action: "upgrade-tier",
       reason:
@@ -199,14 +223,17 @@ class PulseGPUSettingsRestorer {
         newTierProfile: advice.extra?.newTierProfile,
         newTierMetrics: advice.extra?.newTierMetrics,
         repairHint: advice.extra?.repairHint || "upgrade-tier"
-      }
+      },
+      gpuContext: gpuCtx
     });
   }
 
   // ----------------------------------------------------
   // Improvement → no action needed
   // ----------------------------------------------------
-  buildRestorePlanForImprovement(advice) {
+  buildRestorePlanForImprovement(advice, gpuContext) {
+    const gpuCtx = this._buildGpuContextFromAdvice(advice, gpuContext);
+
     return buildPlan({
       action: "noop",
       reason: "Performance improved; no restoration needed.",
@@ -216,8 +243,33 @@ class PulseGPUSettingsRestorer {
         deltaPercent: advice.deltaPercent,
         repairHint:
           advice.extra?.repairHint || "promote-current-to-baseline"
-      }
+      },
+      gpuContext: gpuCtx
     });
+  }
+
+  // ----------------------------------------------------
+  // Internal: build GPU context snapshot from advice + external gpuContext
+  // ----------------------------------------------------
+  _buildGpuContextFromAdvice(advice, gpuContext) {
+    const base = gpuContext && typeof gpuContext === "object"
+      ? { ...gpuContext }
+      : {};
+
+    return {
+      ...base,
+      gpuPattern: advice.gpuPattern || base.gpuPattern || null,
+      gpuShapeSignature:
+        advice.gpuShapeSignature || base.gpuShapeSignature || null,
+      binaryModeObserved:
+        typeof advice.binaryModeObserved === "boolean"
+          ? advice.binaryModeObserved
+          : base.binaryModeObserved || false,
+      symbolicModeObserved:
+        typeof advice.symbolicModeObserved === "boolean"
+          ? advice.symbolicModeObserved
+          : base.symbolicModeObserved || false
+    };
   }
 }
 

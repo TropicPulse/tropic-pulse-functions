@@ -2,13 +2,14 @@
 //  PulseSendAdapter-v11-Evo.js
 //  Pattern‑Shape Adapter • Pulse‑Agnostic Translator • Pre‑Delivery Adapter
 //  v11: Diagnostics + Signatures + Pattern Surface + Lineage Surface
+//  v11-Binary: Binary-Aware Adapter Surface (Optional, Non-Breaking)
 // ============================================================================
 //
 //  SAFETY CONTRACT (v11-Evo):
 //  --------------------------
 //  • No imports.
 //  • No network.
-//  • No compute.
+//  • No compute beyond local helpers.
 //  • Zero randomness.
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
@@ -42,7 +43,10 @@ export const PulseRole = {
 
     diagnosticsReady: true,
     signatureReady: true,
-    adapterSurfaceReady: true
+    adapterSurfaceReady: true,
+
+    // ⭐ NEW: Binary-aware adapter surface
+    binaryAwareAdapterReady: true
   },
 
   routingContract: "PulseRouter-v11",
@@ -56,6 +60,7 @@ export const PulseRole = {
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
 // ============================================================================
+
 function computeHash(str) {
   let h = 0;
   for (let i = 0; i < str.length; i++) {
@@ -64,23 +69,66 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function extractBinarySurfaceFromPulse(pulse) {
+  const payload = pulse?.payload || {};
+
+  const binaryPattern  = payload.binaryPattern || null;
+  const binaryMode     = payload.binaryMode || null;
+  const binaryPayload  = payload.binaryPayload || null;
+  const binaryHints    = payload.binaryHints || null;
+  const binaryStrength = typeof payload.binaryStrength === "number"
+    ? payload.binaryStrength
+    : null;
+
+  const hasBinary =
+    !!binaryPattern ||
+    !!binaryMode ||
+    !!binaryPayload ||
+    !!binaryHints ||
+    binaryStrength !== null;
+
+  return {
+    hasBinary,
+    binaryPattern,
+    binaryMode,
+    binaryPayload,
+    binaryHints,
+    binaryStrength
+  };
+}
+
 function buildAdapterDiagnostics({ pulse, targetOrgan, mode }) {
   const pattern = pulse?.pattern || "NO_PATTERN";
   const lineageDepth = Array.isArray(pulse?.lineage) ? pulse.lineage.length : 0;
   const pulseType = pulse?.pulseType || pulse?.PulseRole?.identity || "UNKNOWN_PULSE_TYPE";
 
+  const binarySurface = extractBinarySurfaceFromPulse(pulse);
+
   return {
+    // Symbolic surface
     pattern,
     lineageDepth,
     pulseType,
     targetOrgan: targetOrgan || "NO_ORGAN",
     mode,
 
+    // Binary surface (optional)
+    binary: binarySurface,
+
+    // Hashes
     patternHash: computeHash(pattern),
     lineageHash: computeHash(String(lineageDepth)),
     pulseTypeHash: computeHash(pulseType),
     organHash: computeHash(String(targetOrgan)),
-    modeHash: computeHash(mode)
+    modeHash: computeHash(mode),
+
+    // Binary hashes
+    binaryPatternHash: binarySurface.binaryPattern
+      ? computeHash(binarySurface.binaryPattern)
+      : null,
+    binaryModeHash: binarySurface.binaryMode
+      ? computeHash(binarySurface.binaryMode)
+      : null
   };
 }
 
@@ -156,12 +204,15 @@ export function adaptPulseSendPacket(pulse, targetOrgan, mode = "normal") {
     mode
   });
 
+  // ⭐ v11 adapter signature (binary-aware)
   const adapterSignature = computeHash(
     diagnostics.pattern +
     "::" +
     diagnostics.targetOrgan +
     "::" +
-    diagnostics.mode
+    diagnostics.mode +
+    "::" +
+    (diagnostics.binary.binaryPattern || "NO_BINARY_PATTERN")
   );
 
   const adapter = ORGAN_ADAPTERS[targetOrgan];

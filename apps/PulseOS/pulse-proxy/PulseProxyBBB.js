@@ -1,8 +1,9 @@
 // ============================================================================
-//  PULSE OS v10.4 — BLOOD–BRAIN BARRIER (BBB)
+//  PULSE OS v11‑Evo — BLOOD–BRAIN BARRIER (BBB)
 //  Identity Gate • Trust Filter • Core Security Organ
 //  PURE VERIFICATION. ZERO IMPORTS. ZERO DRIFT.
 //  CENTRALIZED IDENTITY FOR ALL SUBSYSTEMS.
+//  A‑B‑A BAND + BINARY/WAVE SURFACES + EVO LINEAGE
 // ============================================================================
 
 
@@ -15,94 +16,201 @@ function safeError(...args){ try { console.error(...args); } catch {} }
 
 
 // ============================================================================
-// ⭐ VERSION MAP — The Genome of PulseOS (v10.4)
+// ⭐ VERSION MAP — The Genome of PulseOS (v11‑Evo)
 // ============================================================================
 export const PulseVersion = {
-  identity:      "10.4",
-  brain:         "10.4",
-  gpu:           "10.4",
-  orchestrator:  "10.4",
-  engine:        "10.4",
-  optimizer:     "10.4",
-  synapse:       "10.4",
-  band:          "10.4",
-  router:        "10.4",
-  marketplaces:  "10.4",
-  telemetry:     "10.4",
-  limbic:        "10.4",
-  governor:      "10.4",
-  understanding: "10.4",
-  proxy:         "10.4",
-  earn:          "10.4",
-  send:          "10.4"
+  identity:      "11-Evo",
+  brain:         "11-Evo",
+  gpu:           "11-Evo",
+  orchestrator:  "11-Evo",
+  engine:        "11-Evo",
+  optimizer:     "11-Evo",
+  synapse:       "11-Evo",
+  band:          "11-Evo",
+  router:        "11-Evo",
+  marketplaces:  "11-Evo",
+  telemetry:     "11-Evo",
+  limbic:        "11-Evo",
+  governor:      "11-Evo",
+  understanding: "11-Evo",
+  proxy:         "11-Evo",
+  earn:          "11-Evo",
+  send:          "11-Evo"
 };
 
 
 // ============================================================================
-// ⭐ ROLE MAP — Organ Metaphors (v10.4)
+// ⭐ ROLE MAP — Organ Metaphors (v11‑Evo)
 // ============================================================================
 export const PulseRoles = {
-  identity:      "BLOOD–BRAIN BARRIER (BBB)",
-  brain:         "ANALYST CORTEX",
-  gpu:           "ASTRAL NERVOUS SYSTEM",
-  orchestrator:  "BRAINSTEM",
-  engine:        "MOTOR CORTEX",
-  optimizer:     "GUARDIAN",
-  synapse:       "ELECTRICAL JUNCTION",
-  band:          "BODY INTERFACE",
-  router:        "CONSULATE",
-  marketplaces:  "EMBASSY LEDGER",
-  telemetry:     "BLOODSTREAM",
-  limbic:        "LIMBIC SHADOW",
-  governor:      "GLOBAL LOOP GOVERNOR",
-  understanding: "CORTICAL OPENER / ORGANISM LOADER",
-  proxy:         "ADRENAL SYSTEM",
-  earn:          "ECONOMIC ORGAN",
-  send:          "TRANSPORT SYSTEM"
+  identity:      "BLOOD–BRAIN BARRIER (BBB) — Identity Gate",
+  brain:         "ANALYST CORTEX — Cognitive Engine",
+  gpu:           "ASTRAL NERVOUS SYSTEM — GPU Organ",
+  orchestrator:  "BRAINSTEM — Autonomic Control",
+  engine:        "MOTOR CORTEX — Execution Organ",
+  optimizer:     "GUARDIAN — Safety + Efficiency",
+  synapse:       "ELECTRICAL JUNCTION — Signal Bridge",
+  band:          "BODY INTERFACE — A‑B‑A Surface",
+  router:        "CONSULATE — Routing Intelligence",
+  marketplaces:  "EMBASSY LEDGER — Marketplace Registry",
+  telemetry:     "BLOODSTREAM — Metrics Flow",
+  limbic:        "LIMBIC SHADOW — Emotional Heuristics",
+  governor:      "GLOBAL LOOP GOVERNOR — System Regulator",
+  understanding: "CORTICAL OPENER — Organism Loader",
+  proxy:         "ADRENAL SYSTEM — Reflex Scaling",
+  earn:          "ECONOMIC ORGAN — Marketplace Engine",
+  send:          "TRANSPORT SYSTEM — Outbound Layer"
 };
 
 
 // ============================================================================
-// ⭐ LINEAGE MAP — Evolutionary Identity (v10.4)
+// ⭐ LINEAGE MAP — Evolutionary Identity (v11‑Evo)
 // ============================================================================
 export const PulseLineage = {
-  identity:      "bbb-core",
-  brain:         "analysis-core",
-  gpu:           "astral-core",
-  orchestrator:  "autonomic-core",
-  engine:        "execution-core",
-  optimizer:     "guardian-core",
-  synapse:       "junction-core",
-  band:          "interface-core",
-  router:        "consulate-core",
-  marketplaces:  "embassy-core",
-  telemetry:     "bloodstream-core",
-  limbic:        "shadow-core",
-  governor:      "governor-core",
-  understanding: "cortical-opener-core",
-  proxy:         "adrenal-core",
-  earn:          "economic-core",
-  send:          "transport-core"
+  identity:      "bbb-core-evo",
+  brain:         "analysis-core-evo",
+  gpu:           "astral-core-evo",
+  orchestrator:  "autonomic-core-evo",
+  engine:        "execution-core-evo",
+  optimizer:     "guardian-core-evo",
+  synapse:       "junction-core-evo",
+  band:          "interface-core-evo",
+  router:        "consulate-core-evo",
+  marketplaces:  "embassy-core-evo",
+  telemetry:     "bloodstream-core-evo",
+  limbic:        "shadow-core-evo",
+  governor:      "governor-core-evo",
+  understanding: "cortical-opener-core-evo",
+  proxy:         "adrenal-core-evo",
+  earn:          "economic-core-evo",
+  send:          "transport-core-evo"
 };
 
 
 // ============================================================================
-// ⭐ MODE MAP — A/B/A Routing Modes (v10.4)
-//  A = Local, B = Remote, A = Offline‑safe fallback
+// ⭐ MODE MAP — A/B/A Routing Modes (v11‑Evo)
 // ============================================================================
 const IdentityModes = {
-  LOCAL_ONLY:   "local-only",    // A
-  HYBRID:       "hybrid",        // A → B → A
-  OFFLINE_ONLY: "offline-only"   // A (no remote, immediate offline)
+  LOCAL_ONLY:   "local-only",     // A
+  HYBRID:       "hybrid",         // A → B → A
+  OFFLINE_ONLY: "offline-only"    // A
 };
 
-const IDENTITY_STORAGE_KEYS = ["tp_identity_v10", "tp_identity_v9"];
+
+// ============================================================================
+// ⭐ STORAGE KEYS — v11‑Evo Identity Cache
+// ============================================================================
+const IDENTITY_STORAGE_KEYS = [
+  "tp_identity_v11",
+  "tp_identity_v10",
+  "tp_identity_v9"
+];
 
 
 // ============================================================================
-// ⭐ HELPERS — Local + Remote
+// ⭐ A‑B‑A SURFACES — Identity Band + Binary/Wave Fields
+// ============================================================================
+function buildBand() {
+  // BBB is always symbolic-root
+  return "symbolic-root";
+}
+
+function buildBandSignature() {
+  const raw = "BBB_BAND::symbolic-root";
+  let acc = 0;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `bbb-band-${acc}`;
+}
+
+function buildBinaryField() {
+  const patternLen = 12;
+  const density = 12 + 24;
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: `bbb-binary-pheno-${surface % 99991}`,
+    binarySurfaceSignature: `bbb-binary-surface-${(surface * 7) % 99991}`,
+    binarySurface: { patternLen, density, surface },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField() {
+  const amplitude = 10;
+  const wavelength = amplitude + 4;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band: "symbolic-root",
+    mode: "symbolic-wave"
+  };
+}
+
+function buildIdentityCycleSignature(cycle) {
+  return `bbb-cycle-${(cycle * 7919) % 99991}`;
+}
+// ============================================================================
+// ⭐ HELPERS — Local + Remote (v11‑Evo A‑B‑A)
 // ============================================================================
 
+let identityCycle = 0;
+
+// A‑B‑A surfaces for BBB
+function buildIdentityBand() {
+  return "symbolic-root";
+}
+
+function buildIdentityBandSignature() {
+  const raw = "BBB_BAND::symbolic-root";
+  let acc = 0;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `bbb-band-${acc}`;
+}
+
+function buildIdentityBinaryField() {
+  const patternLen = 12;
+  const density = 12 + 24;
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: `bbb-binary-pheno-${surface % 99991}`,
+    binarySurfaceSignature: `bbb-binary-surface-${(surface * 7) % 99991}`,
+    binarySurface: { patternLen, density, surface },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildIdentityWaveField() {
+  const amplitude = 10;
+  const wavelength = amplitude + 4;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band: "symbolic-root",
+    mode: "symbolic-wave"
+  };
+}
+
+function buildIdentityCycleSignature() {
+  return `bbb-cycle-${(identityCycle * 7919) % 99991}`;
+}
+
+
+// ============================================================================
+// ⭐ LOAD LOCAL IDENTITY — v11‑Evo
+// ============================================================================
 function loadLocalIdentity() {
   if (typeof localStorage === "undefined") return null;
 
@@ -134,6 +242,10 @@ function loadLocalIdentity() {
   return null;
 }
 
+
+// ============================================================================
+// ⭐ REMOTE VERIFY — v11‑Evo (unchanged behavior, upgraded metadata)
+// ============================================================================
 async function verifyRemoteIdentity(localIdentity) {
   if (typeof fetch !== "function") {
     safeWarn("[BBB] Remote verification unavailable (no fetch)");
@@ -143,9 +255,7 @@ async function verifyRemoteIdentity(localIdentity) {
   try {
     const res = await fetch("/api/pulse/identity/verify", {
       method: "POST",
-      headers: {
-        "content-type": "application/json"
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         uid: localIdentity?.uid ?? null,
         sessionToken: localIdentity?.sessionToken ?? null
@@ -167,11 +277,11 @@ async function verifyRemoteIdentity(localIdentity) {
       return null;
     }
 
-    // Optionally refresh local cache (best‑effort, no throw)
+    // Refresh local cache (best‑effort)
     try {
       if (typeof localStorage !== "undefined") {
         localStorage.setItem(
-          "tp_identity_v10",
+          "tp_identity_v11",
           JSON.stringify({
             uid: data.uid,
             userEmail: data.userEmail,
@@ -193,6 +303,10 @@ async function verifyRemoteIdentity(localIdentity) {
   }
 }
 
+
+// ============================================================================
+// ⭐ OFFLINE IDENTITY — v11‑Evo A‑B‑A
+// ============================================================================
 function buildOfflineIdentity(reason, mode) {
   return {
     uid: null,
@@ -202,39 +316,38 @@ function buildOfflineIdentity(reason, mode) {
     offline: true,
     reason,
     lineage: PulseLineage.identity,
+
+    // A‑B‑A surfaces
+    band: buildIdentityBand(),
+    bandSignature: buildIdentityBandSignature(),
+    binaryField: buildIdentityBinaryField(),
+    waveField: buildIdentityWaveField(),
+    identityCycleSignature: buildIdentityCycleSignature(),
+
     meta: {
       layer: "PulseIdentity",
       version: PulseVersion.identity,
-      mode
+      mode,
+      evo: PulseRoles.identity,
+      lineage: PulseLineage.identity
     }
   };
 }
 
 
 // ============================================================================
-// ⭐ IDENTITY LOADER — BBB Verification Engine (v10.4)
-//  A/B/A ROUTING:
-//    A: Local‑first
-//    B: Remote verify (HYBRID only)
-//    A: Offline‑safe fallback
-//  ZERO IMPORTS. TRUSTED DEVICE PERSISTENCE.
+// ⭐ IDENTITY LOADER — BBB Verification Engine (v11‑Evo A‑B‑A)
 // ============================================================================
-//
-//  identity() usage:
-//    • identity()                      → default HYBRID
-//    • identity("local-only")         → A only
-//    • identity("offline-only")       → offline fallback only
-//    • identity({ mode: "hybrid" })   → explicit
-//
 export async function identity(modeOrOptions) {
-  safeLog("[BBB] Identity Request (v10.4)");
+  identityCycle++;
+  safeLog("[BBB] Identity Request (v11‑Evo A‑B‑A)");
 
   let mode = IdentityModes.HYBRID;
 
   if (typeof modeOrOptions === "string") {
     mode = modeOrOptions;
   } else if (modeOrOptions && typeof modeOrOptions === "object") {
-    if (modeOrOptions.mode && typeof modeOrOptions.mode === "string") {
+    if (typeof modeOrOptions.mode === "string") {
       mode = modeOrOptions.mode;
     }
   }
@@ -245,9 +358,9 @@ export async function identity(modeOrOptions) {
   }
 
   try {
-    // ------------------------------------------------------------
-    // A. LOCAL‑FIRST IDENTITY (v10.4)
-    // ------------------------------------------------------------
+    // ============================================================
+    // A‑PATH: LOCAL FIRST
+    // ============================================================
     const localIdentity = loadLocalIdentity();
 
     if (localIdentity) {
@@ -260,25 +373,31 @@ export async function identity(modeOrOptions) {
         userEmail: localIdentity.userEmail,
         sessionToken: localIdentity.sessionToken,
         trustedDevice: localIdentity.trustedDevice,
-        lineage: PulseLineage.identity
+        lineage: PulseLineage.identity,
+
+        // A‑B‑A surfaces
+        band: buildIdentityBand(),
+        bandSignature: buildIdentityBandSignature(),
+        binaryField: buildIdentityBinaryField(),
+        waveField: buildIdentityWaveField(),
+        identityCycleSignature: buildIdentityCycleSignature(),
+
+        meta: {
+          layer: "PulseIdentity",
+          version: PulseVersion.identity,
+          mode: "local"
+        }
       };
 
       // LOCAL_ONLY / OFFLINE_ONLY → return immediately
       if (mode === IdentityModes.LOCAL_ONLY || mode === IdentityModes.OFFLINE_ONLY) {
-        return {
-          ...base,
-          offline: false,
-          meta: {
-            layer: "PulseIdentity",
-            version: PulseVersion.identity,
-            mode: "local"
-          }
-        };
+        return base;
       }
 
-      // HYBRID → attempt remote verify (B‑path)
+      // ============================================================
+      // B‑PATH: REMOTE VERIFY (HYBRID ONLY)
+      // ============================================================
       const remote = await verifyRemoteIdentity(localIdentity);
-
       if (remote) {
         safeLog("[BBB] Remote identity verified (B‑path)");
 
@@ -286,6 +405,13 @@ export async function identity(modeOrOptions) {
           ...remote,
           offline: false,
           lineage: PulseLineage.identity,
+
+          band: buildIdentityBand(),
+          bandSignature: buildIdentityBandSignature(),
+          binaryField: buildIdentityBinaryField(),
+          waveField: buildIdentityWaveField(),
+          identityCycleSignature: buildIdentityCycleSignature(),
+
           meta: {
             layer: "PulseIdentity",
             version: PulseVersion.identity,
@@ -295,10 +421,8 @@ export async function identity(modeOrOptions) {
       }
 
       safeWarn("[BBB] Remote verification failed, staying on local (A‑path)");
-
       return {
         ...base,
-        offline: false,
         meta: {
           layer: "PulseIdentity",
           version: PulseVersion.identity,
@@ -307,14 +431,13 @@ export async function identity(modeOrOptions) {
       };
     }
 
+    // ============================================================
+    // NO LOCAL IDENTITY
+    // ============================================================
     safeWarn("[BBB] No valid local identity found");
 
-    // ------------------------------------------------------------
-    // B. REMOTE OPTIONAL (HYBRID ONLY) (v10.4)
-    // ------------------------------------------------------------
     if (mode === IdentityModes.HYBRID) {
       const remote = await verifyRemoteIdentity(null);
-
       if (remote) {
         safeLog("[BBB] Remote identity obtained without local cache");
 
@@ -322,6 +445,13 @@ export async function identity(modeOrOptions) {
           ...remote,
           offline: false,
           lineage: PulseLineage.identity,
+
+          band: buildIdentityBand(),
+          bandSignature: buildIdentityBandSignature(),
+          binaryField: buildIdentityBinaryField(),
+          waveField: buildIdentityWaveField(),
+          identityCycleSignature: buildIdentityCycleSignature(),
+
           meta: {
             layer: "PulseIdentity",
             version: PulseVersion.identity,
@@ -329,15 +459,12 @@ export async function identity(modeOrOptions) {
           }
         };
       }
-
       safeWarn("[BBB] Remote identity unavailable in HYBRID mode");
-    } else {
-      safeLog("[BBB] Remote verification skipped due to mode", { mode });
     }
 
-    // ------------------------------------------------------------
-    // A. OFFLINE SAFE FALLBACK (final A) (v10.4)
-    // ------------------------------------------------------------
+    // ============================================================
+    // FINAL A‑PATH: OFFLINE SAFE FALLBACK
+    // ============================================================
     const offlineIdentity = buildOfflineIdentity(
       "No valid local identity and remote verification unavailable.",
       "offline-fallback"
@@ -347,9 +474,6 @@ export async function identity(modeOrOptions) {
     return offlineIdentity;
 
   } catch (err) {
-    // ------------------------------------------------------------
-    // HARD FAILURE (v10.4)
-    // ------------------------------------------------------------
     safeError("[BBB] Identity load failed", err);
 
     return buildOfflineIdentity(

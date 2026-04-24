@@ -1,18 +1,19 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktEmbassyLedger.js
-// LAYER: THE EMBASSY LEDGER (v11-Evo)
+// LAYER: THE EMBASSY LEDGER (v11‑Evo A‑B‑A)
 // (Marketplace Registry + Identity Verifier + Diplomatic Roster)
 // ============================================================================
 //
-// ROLE (v11-Evo):
+// ROLE (v11‑Evo A‑B‑A):
 //   THE EMBASSY LEDGER — The official registry of all Pulse‑Earn marketplace
 //   representatives. Maintains a deterministic roster of foreign marketplace
 //   agents (Ambassador, Broker, Forager, Courier, Auctioneer).
 //   • Validates adapter identity + required methods.
-//   • Emits deterministic v11 signatures for roster integrity.
+//   • Validates optional A‑B‑A surfaces (bandSignature, binaryField, waveField).
+//   • Emits deterministic v11‑Evo signatures for roster integrity.
 //   • Remains a PURE registry (no async, no network, no timestamps).
 //
-// CONTRACT (v11-Evo):
+// CONTRACT (v11‑Evo):
 //   • PURE REGISTRY — no AI layers, no translation, no memory model.
 //   • NO async, NO timestamps, NO nondeterminism.
 //   • Deterministic validation only.
@@ -24,14 +25,14 @@
 // Imports — Deterministic Marketplace Representatives
 // ---------------------------------------------------------------------------
 import { PulseEarnMktAmbassador } from "./PulseEarnMktAmbassador.js";   // Akash
-import { PulseEarnMktBroker } from "./PulseEarnMktBroker.js";                     // RunPod
+import { PulseEarnMktBroker } from "./PulseEarnMktBroker.js";           // RunPod
 import { PulseEarnMktForager } from "./PulseEarnMktForager.js";         // Salad
 import { PulseEarnMktCourier } from "./PulseEarnMktCourier.js";         // Spheron
 import { PulseEarnMktAuctioneer } from "./PulseEarnMktAuctioneer.js";   // Vast
 
 
 // ---------------------------------------------------------------------------
-// Deterministic Hash Helper — v11-Evo
+// Deterministic Hash Helper — v11‑Evo
 // ---------------------------------------------------------------------------
 function computeHash(str) {
   let h = 0;
@@ -54,9 +55,14 @@ function buildCycleSignature(cycle) {
   return computeHash(`EMBASSY_CYCLE::${cycle}`);
 }
 
+function buildAbaSignature(adapter) {
+  const band = adapter?.bandSignature || "NO_BAND";
+  return computeHash(`ABA_ADAPTER::${band}`);
+}
+
 
 // ---------------------------------------------------------------------------
-// Healing Metadata — Embassy Ledger Integrity Log (v11-Evo)
+// Healing Metadata — Embassy Ledger Integrity Log (v11‑Evo A‑B‑A)
 // ---------------------------------------------------------------------------
 const embassyHealing = {
   adaptersLoaded: [],
@@ -65,18 +71,20 @@ const embassyHealing = {
   cycleCount: 0,
   lastCycleIndex: null,
 
-  // v11 signatures
+  // v11‑Evo signatures
   lastAdapterSignature: null,
   lastRosterSignature: null,
-  lastCycleSignature: null
+  lastCycleSignature: null,
+
+  // A‑B‑A surfaces
+  lastAbaSignature: null
 };
 
-// Deterministic cycle counter
 let embassyCycle = 0;
 
 
 // ---------------------------------------------------------------------------
-// Adapter Validation — Diplomatic Credential Check
+// Adapter Validation — Diplomatic Credential Check (A‑B‑A aware)
 // ---------------------------------------------------------------------------
 function validateAdapter(name, adapter) {
   embassyCycle++;
@@ -88,6 +96,7 @@ function validateAdapter(name, adapter) {
     return false;
   }
 
+  // Required receptor methods
   const required = ["ping", "fetchJobs", "submitResult"];
   const missing = required.filter(fn => typeof adapter[fn] !== "function");
 
@@ -99,6 +108,10 @@ function validateAdapter(name, adapter) {
     return false;
   }
 
+  // Optional A‑B‑A surfaces (non‑blocking)
+  const abaBand = adapter.bandSignature || null;
+  embassyHealing.lastAbaSignature = buildAbaSignature(adapter);
+
   embassyHealing.adaptersLoaded.push(name);
   embassyHealing.lastAdapterSignature = buildAdapterSignature(name);
   embassyHealing.lastCycleSignature = buildCycleSignature(embassyCycle);
@@ -108,21 +121,21 @@ function validateAdapter(name, adapter) {
 
 
 // ---------------------------------------------------------------------------
-// Validate All Marketplace Representatives (v11-Evo safe)
+// Validate All Marketplace Representatives (v11‑Evo safe)
 // ---------------------------------------------------------------------------
 validateAdapter("PulseEarnMktAmbassador",  PulseEarnMktAmbassador);  // Akash
-validateAdapter("PulseEarnMktBroker",          PulseEarnMktBroker);           // RunPod
-validateAdapter("PulseEarnMktForager",    PulseEarnMktForager);     // Salad
-validateAdapter("PulseEarnMktCourier",    PulseEarnMktCourier);     // Spheron
-validateAdapter("PulseEarnMktAuctioneer", PulseEarnMktAuctioneer);  // Vast
+validateAdapter("PulseEarnMktBroker",      PulseEarnMktBroker);      // RunPod
+validateAdapter("PulseEarnMktForager",     PulseEarnMktForager);     // Salad
+validateAdapter("PulseEarnMktCourier",     PulseEarnMktCourier);     // Spheron
+validateAdapter("PulseEarnMktAuctioneer",  PulseEarnMktAuctioneer);  // Vast
 
 
 // ---------------------------------------------------------------------------
-// Deterministic Marketplace Roster (v11-Evo safe)
+// Deterministic Marketplace Roster (v11‑Evo safe)
 // ---------------------------------------------------------------------------
 const marketplaces = [
   PulseEarnMktAmbassador,   // Akash — Ambassador
-  PulseEarnMktBroker,            // RunPod — Broker
+  PulseEarnMktBroker,       // RunPod — Broker
   PulseEarnMktForager,      // Salad — Forager
   PulseEarnMktCourier,      // Spheron — Courier
   PulseEarnMktAuctioneer    // Vast — Auctioneer
@@ -142,7 +155,7 @@ function getPulseEarnMktEmbassyHealingState() {
 
 
 // ============================================================================
-// Exported API — EMBASSY LEDGER (Diplomatic Roster, v11-Evo)
+// Exported API — EMBASSY LEDGER (Diplomatic Roster, v11‑Evo A‑B‑A)
 // ============================================================================
 export const PulseEarnMktEmbassyLedger = {
   marketplaces,

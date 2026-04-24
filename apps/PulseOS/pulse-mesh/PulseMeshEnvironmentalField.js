@@ -1,18 +1,19 @@
 // ============================================================================
-// [pulse:mesh] PULSE_MESH_ENVIRONMENTAL_FIELD v9.2  // teal
+// [pulse:mesh] PULSE_MESH_ENVIRONMENTAL_FIELD v11-Evo  // teal
 // Internal Weather System • Metadata-Only • Stabilization + Pressure Signals
 // ============================================================================
 //
-// IDENTITY — THE ENVIRONMENTAL FIELD (v9.2):
-// ------------------------------------------
+// IDENTITY — THE ENVIRONMENTAL FIELD (v11-Evo):
+// ---------------------------------------------
 // • The organism’s internal “weather system.”
 // • Aggregates friction, noise, stability, resonance, drift, load, and pressure.
-// • Holds system-pressure indicators for Flow, Aura, Reflex, Mesh, and Factoring.
+// • Holds system-pressure indicators for Flow, Aura, Reflex, Mesh, Factoring,
+//   and now Binary vs Symbolic mode pressure.
 // • Read-only to all organs except trusted CNS Brain writers.
 // • Pure metadata-only stabilization layer — zero compute, zero routing.
 // • NOT blood pressure — this is atmospheric/system pressure.
 //
-// SAFETY CONTRACT (v9.2):
+// SAFETY CONTRACT (v11-Evo):
 // • No payload access.
 // • No compute.
 // • No routing.
@@ -20,12 +21,13 @@
 // • No imports.
 // • Deterministic-field: same inputs → same field state.
 // • Unified-advantage-field: inherits all safe systemic advantages.
-// • Drift-proof, multi-instance-ready, factoring-aware, mesh-pressure-aware.
+// • Drift-proof, multi-instance-ready, factoring-aware, mesh-pressure-aware,
+//   binary-aware, dual-mode-ready.
 // ============================================================================
 
 
 // ============================================================================
-//  FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
+// FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
 // ============================================================================
 export function createPulseField({ log, warn, error }) {
 
@@ -43,14 +45,14 @@ export function createPulseField({ log, warn, error }) {
     loadWave: 0,
     driftPressure: 0,
 
-    // System pressure (v9.2)
+    // System pressure (v11-Evo)
     flowPressure: 0,
     throttleRate: 0,
     auraTension: 0,
     reflexDropRate: 0,
     meshStormPressure: 0,
 
-    // NEW v9.2 — factoring pressure (mesh signal factoring awareness)
+    // Factoring pressure (mesh signal factoring awareness)
     factoringPressure: 0,
 
     // External influence markers
@@ -58,14 +60,21 @@ export function createPulseField({ log, warn, error }) {
     externalStorm: 0,
     externalSignal: 0,
 
+    // v11-Evo: binary vs symbolic mode pressure
+    binaryModePressure: 0,
+    symbolicModePressure: 0,
+    dualModeResonance: 0,
+
     meta: {
       layer: "PulseField",
       role: "ENVIRONMENTAL_FIELD",
-      version: 9.2,
+      version: "11.0-Evo",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
+        binaryAware: true,
+        symbolicAware: true,
         localAware: true,
         internetAware: true,
 
@@ -78,10 +87,15 @@ export function createPulseField({ log, warn, error }) {
         deterministicField: true,
         futureEvolutionReady: true,
 
-        // NEW v9.2 awareness fields
         signalFactoringAware: true,
         meshPressureAware: true,
-        auraPressureAware: true
+        auraPressureAware: true,
+        flowAware: true,
+        driftAware: true,
+
+        zeroCompute: true,
+        zeroMutation: true,
+        zeroRoutingInfluence: true
       }
     }
   };
@@ -105,12 +119,18 @@ export function createPulseField({ log, warn, error }) {
     setReflexDropRate(v) { FieldState.reflexDropRate = clamp01(v); },
     setMeshStormPressure(v) { FieldState.meshStormPressure = clamp01(v); },
 
-    // NEW v9.2
+    // Factoring pressure
     setFactoringPressure(v) { FieldState.factoringPressure = clamp01(v); },
 
+    // External environment
     setExternalHeat(v) { FieldState.externalHeat = clamp01(v); },
     setExternalStorm(v) { FieldState.externalStorm = clamp01(v); },
     setExternalSignal(v) { FieldState.externalSignal = clamp01(v); },
+
+    // v11-Evo: binary vs symbolic mode pressure
+    setBinaryModePressure(v) { FieldState.binaryModePressure = clamp01(v); },
+    setSymbolicModePressure(v) { FieldState.symbolicModePressure = clamp01(v); },
+    setDualModeResonance(v) { FieldState.dualModeResonance = clamp01(v); },
 
     // Bulk update from PulseEnvironment or system pressure snapshot
     applyEnvironmentSnapshot(env = {}) {
@@ -143,12 +163,16 @@ export function createPulseField({ log, warn, error }) {
     getReflexDropRate() { return FieldState.reflexDropRate; },
     getMeshStormPressure() { return FieldState.meshStormPressure; },
 
-    // NEW v9.2
     getFactoringPressure() { return FieldState.factoringPressure; },
 
     getExternalHeat() { return FieldState.externalHeat; },
     getExternalStorm() { return FieldState.externalStorm; },
     getExternalSignal() { return FieldState.externalSignal; },
+
+    // v11-Evo: binary vs symbolic mode pressure
+    getBinaryModePressure() { return FieldState.binaryModePressure; },
+    getSymbolicModePressure() { return FieldState.symbolicModePressure; },
+    getDualModeResonance() { return FieldState.dualModeResonance; },
 
     getMeta() { return FieldState.meta; }
   };

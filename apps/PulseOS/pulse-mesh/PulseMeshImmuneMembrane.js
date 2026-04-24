@@ -1,19 +1,21 @@
 // ============================================================================
-//  PULSE OS v10.4 — IMMUNE MEMBRANE LAYER  // red
+//  PULSE OS v11-Evo — IMMUNE MEMBRANE LAYER  // red
 //  “System Safety Membrane / Structural Validation / Quarantine / Metadata‑Only”
 // ============================================================================
 //
-// IDENTITY — IMMUNE MEMBRANE (v10.4):
-// -----------------------------------
+// IDENTITY — IMMUNE MEMBRANE (v11-Evo):
+// -------------------------------------
 // • First-line safety membrane for all impulses.
 // • Pure structural validation — no pressure gating.
 // • Pure metadata-only — zero payload mutation.
 // • No routing logic, no compute, no shaping.
 // • Quarantines unsafe or malformed impulses deterministically.
-// • SDN-aligned: validates impulses before Router v10.4 receives them.
+// • SDN-aligned: validates impulses before Router v11 receives them.
+// • v11-Evo: binary-aware, dual-mode-ready, deterministic-field,
+//            unified-advantage-field, drift-proof.
 //
-// SAFETY CONTRACT (v10.4):
-// ------------------------
+// SAFETY CONTRACT (v11-Evo):
+// ---------------------------
 // • No payload access.
 // • No score/energy mutation.
 // • No routing override.
@@ -21,6 +23,7 @@
 // • No autonomy.
 // • Deterministic-field, drift-proof.
 // • Unified-advantage-field, multi-instance-ready.
+// • Zero randomness, zero timestamps, zero async.
 // ============================================================================
 
 export function createPulseImmune() {
@@ -28,11 +31,13 @@ export function createPulseImmune() {
   const meta = {
     layer: "PulseImmune",
     role: "IMMUNE_MEMBRANE",
-    version: "10.4",
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
       localAware: true,
       internetAware: true,
 
@@ -47,12 +52,16 @@ export function createPulseImmune() {
 
       signalFactoringAware: true,
       meshPressureAware: true,
-      auraPressureAware: true
+      auraPressureAware: true,
+
+      zeroCompute: true,
+      zeroMutation: true,
+      zeroRoutingInfluence: true
     }
   };
 
   // ---------------------------------------------------------------------------
-  // STRUCTURAL VALIDATION (v10.4)
+  // STRUCTURAL VALIDATION (v11-Evo)
   // Pure structural checks — no pressure gating.
   // ---------------------------------------------------------------------------
   function validateStructure(impulse) {
@@ -70,8 +79,25 @@ export function createPulseImmune() {
   }
 
   // ---------------------------------------------------------------------------
-  // ANOMALY QUARANTINE (v10.4)
-  // Only Cortex anomalies or explicit flags can quarantine.
+  // v11-Evo: MODE SANITY (binary/symbolic/dual)
+  // ---------------------------------------------------------------------------
+  function validateMode(impulse) {
+    const f = impulse.flags || {};
+
+    if (f.binary_mode && f.symbolic_mode) {
+      return fail("conflicting_modes");
+    }
+
+    if (f.binary_mode && typeof impulse.mode !== "string") {
+      return fail("binary_mode_missing_tag");
+    }
+
+    return pass();
+  }
+
+  // ---------------------------------------------------------------------------
+  // ANOMALY QUARANTINE (v11-Evo)
+  // Cortex anomalies or explicit flags can quarantine.
   // ---------------------------------------------------------------------------
   function quarantine(impulse) {
     const f = impulse.flags || {};
@@ -86,11 +112,16 @@ export function createPulseImmune() {
       return fail("factoring_anomaly");
     }
 
+    if (f.cortex_flow_anomaly) {
+      impulse.flags.immune_quarantined = true;
+      return fail("flow_anomaly");
+    }
+
     return pass();
   }
 
   // ---------------------------------------------------------------------------
-  // ROUTE HINT SANITY (v10.4)
+  // ROUTE HINT SANITY (v11-Evo)
   // Still allowed, but simplified — no pressure gating.
   // ---------------------------------------------------------------------------
   function routeSanity(impulse) {
@@ -106,8 +137,8 @@ export function createPulseImmune() {
   }
 
   // ---------------------------------------------------------------------------
-  // ENERGY FLOOR (v10.4)
-  // Same as v9.2 — but no pressure gating.
+  // ENERGY FLOOR (v11-Evo)
+  // Same as v10.4 — but no pressure gating.
   // ---------------------------------------------------------------------------
   function energyFloor(impulse) {
     if (isNaN(impulse.energy)) return fail("energy_nan");
@@ -116,7 +147,7 @@ export function createPulseImmune() {
   }
 
   // ---------------------------------------------------------------------------
-  // IMMUNE ENGINE (v10.4)
+  // IMMUNE ENGINE (v11-Evo)
   // Pure structural validation + anomaly quarantine.
   // No pressure gating. No dynamic thresholds.
   // ---------------------------------------------------------------------------
@@ -127,6 +158,7 @@ export function createPulseImmune() {
     const checks = [
       validateStructure,
       validateFlags,
+      validateMode,
       quarantine,
       routeSanity,
       energyFloor

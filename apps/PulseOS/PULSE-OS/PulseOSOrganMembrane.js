@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /apps/PulseOS/Organs/Barriers/PulseOSOrganMembrane.js
-// PULSE OS — v9.2 → v11 DESIGN
+// PULSE OS — v11-Evo-Prime
 // “THE ORGAN MEMBRANE / A3 EPITHELIAL REFLEX”
 // GLOBAL SENTINEL • ORGAN-LEVEL PROTECTOR • ZERO TIMING • ZERO STATE
 // ============================================================================
 //
-// ORGAN IDENTITY (v11 DESIGN):
+// ORGAN IDENTITY (v11-Evo-Prime):
 //   • Organ Type: Barrier / Reflex Membrane
 //   • Layer: A3 (Organ-Level Reflex)
 //   • Biological Analog: Organ epithelial membrane (deep protective layer)
@@ -19,7 +19,7 @@
 //   ✔ Prevent mesh-level failures from destabilizing the organism
 //   ✔ Trigger healing via Router
 //
-// SAFETY CONTRACT (v11 DESIGN):
+// SAFETY CONTRACT (v11-Evo-Prime):
 //   • Never run timers, loops, or scheduling beyond direct event handling
 //   • Never store state (except ephemeral route memory)
 //   • Never mutate payloads
@@ -27,6 +27,7 @@
 //   • Always forward reflexes to Router (nervous system)
 //   • Always classify errors before healing
 //   • Guarded access to window / globals for environment-agnostic behavior
+//   • No timestamps, no randomness
 // ============================================================================
 
 
@@ -36,7 +37,7 @@
 const LAYER_ID   = "MESH-REFLEX";
 const LAYER_NAME = "THE ORGAN MEMBRANE";
 const LAYER_ROLE = "MESH ERROR GUARDIAN & HEALING TRIGGER";
-const LAYER_VER  = "9.2";
+const LAYER_VER  = "11.0-Evo-Prime";
 
 const hasWindow = typeof window !== "undefined";
 
@@ -63,8 +64,8 @@ const logMesh = (stage, details = {}) => {
 
 
 // ============================================================================
-/* ROUTE MEMORY (living map — same pattern as A1/A2 membranes)
-   v11: zero-timing → deterministic sequence counter instead of Date.now() */
+// ROUTE MEMORY (living map — same pattern as A1/A2 membranes)
+// v11: zero-timing → deterministic sequence counter instead of Date.now()
 // ============================================================================
 let meshRouteSeq = 0;
 
@@ -108,28 +109,46 @@ const MeshRouteMemory = {
 
 
 // ============================================================================
-// PUBLIC API (C-LAYER passthrough — identical pattern)
+// PUBLIC API (C-LAYER passthrough — identical pattern, symbolic mode)
 // ============================================================================
 import { route, Router } from "./PulseOSCNSNervousSystem.js";
 
 export async function meshAuth(jwtToken) {
   logMesh("MESH_AUTH", {});
-  return await route("auth", { jwtToken, reflexOrigin: "MeshScanner" });
+  return await route("auth", {
+    jwtToken,
+    reflexOrigin: "MeshScanner",
+    modeKind: "symbolic"
+  });
 }
 
 export async function meshHook(name, payload = {}) {
   logMesh("MESH_HOOK", { name });
-  return await route("hook", { name, payload, reflexOrigin: "MeshScanner" });
+  return await route("hook", {
+    name,
+    payload,
+    reflexOrigin: "MeshScanner",
+    modeKind: "symbolic"
+  });
 }
 
 export async function meshMap(mapName) {
   logMesh("MESH_MAP", { mapName });
-  return await route("map", { mapName, reflexOrigin: "MeshScanner" });
+  return await route("map", {
+    mapName,
+    reflexOrigin: "MeshScanner",
+    modeKind: "symbolic"
+  });
 }
 
 export async function meshHelper(helperName, payload = {}) {
   logMesh("MESH_HELPER", { helperName });
-  return await route("helper", { helperName, payload, reflexOrigin: "MeshScanner" });
+  return await route("helper", {
+    helperName,
+    payload,
+    reflexOrigin: "MeshScanner",
+    modeKind: "symbolic"
+  });
 }
 
 
@@ -222,7 +241,7 @@ if (hasWindow && typeof window.addEventListener === "function") {
 
       // ----------------------------------------------------------------------
       // HEALING LOGIC (A3 reflex → Router)
-      // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
       const parsed = parseMissingField(msg);
       if (!parsed) {
         logMesh("NO_MISSING_FIELD", {});
@@ -243,7 +262,8 @@ if (hasWindow && typeof window.addEventListener === "function") {
             message: msg,
             routeTrace,
             table,
-            field
+            field,
+            modeKind: "symbolic"
           });
         }
 
@@ -253,7 +273,8 @@ if (hasWindow && typeof window.addEventListener === "function") {
           message: msg,
           reflexOrigin: "MeshScanner",
           layer: "A3",
-          routeTrace
+          routeTrace,
+          modeKind: "symbolic"
         });
 
         logMesh("MESH_HEALING_SUCCESS", { table, field });
@@ -292,5 +313,5 @@ function parseMissingField(message) {
 }
 
 // ============================================================================
-// END OF FILE — THE ORGAN MEMBRANE / A3 EPITHELIAL REFLEX  [v9.2 → v11 DESIGN]
+// END OF FILE — THE ORGAN MEMBRANE / A3 EPITHELIAL REFLEX  [v11-Evo-Prime]
 // ============================================================================

@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /apps/organs/immune/PulseMeshImmuneSystem.js
-// PULSE OS — v10.4
+// PULSE OS — v11-Evo
 // MESH IMMUNE SYSTEM COMMANDER — “THE IMMUNE COMMANDER”
 // Deterministic • Declarative • Zero Drift • Pure Logic
 // ============================================================================
 //
-// ROLE (v10.4):
+// ROLE (v11-Evo):
 //   • Receives diagnostic snapshots (Halo, Echo, Field, SDN).
 //   • Performs deterministic triage (no pressure thresholds).
 //   • Emits declarative repair directives for:
@@ -16,12 +16,14 @@
 //   • Never heals directly — only commands healers.
 //   • Fully offline-capable (OFFLINE_MODE).
 //   • Zero randomness, zero timestamps, zero mutation.
+//   • v11-Evo: binary-aware, dual-mode-ready, deterministic-field,
+//              unified-advantage-field, drift-aware, mesh-pressure-aware.
 // ============================================================================
 
 export function createPulseMeshImmuneSystem({
-  PulseImmunity,        // v10.4 analysis engine
-  GPUHealer,            // updated GPU immune organ
-  RouteResponder,       // updated router immune organ
+  PulseImmunity,        // analysis engine
+  GPUHealer,            // GPU immune organ
+  RouteResponder,       // router immune organ
   OFFLINE_MODE = false,
   log,
   warn,
@@ -29,16 +31,18 @@ export function createPulseMeshImmuneSystem({
 }) {
 
   // ---------------------------------------------------------------------------
-  // META — v10.4 identity
+  // META — v11-Evo identity
   // ---------------------------------------------------------------------------
   const meta = {
     layer: "PulseMeshImmuneSystem",
     role: "IMMUNE_COMMANDER",
-    version: "10.4",
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
       localAware: true,
       internetAware: true,
 
@@ -53,12 +57,18 @@ export function createPulseMeshImmuneSystem({
 
       signalFactoringAware: true,
       meshPressureAware: true,
-      auraPressureAware: true
+      auraPressureAware: true,
+      flowAware: true,
+      driftAware: true,
+
+      zeroCompute: true,
+      zeroMutation: true,
+      zeroRoutingInfluence: true
     }
   };
 
   // ---------------------------------------------------------------------------
-  // HEALER REGISTRY (v10.4)
+  // HEALER REGISTRY (v11-Evo)
   // Pure declarative directives — no direct mutation.
   // ---------------------------------------------------------------------------
   const HEALER_REGISTRY = [
@@ -143,7 +153,7 @@ export function createPulseMeshImmuneSystem({
   ];
 
   // ---------------------------------------------------------------------------
-  // TRIAGE (v10.4)
+  // TRIAGE (v11-Evo)
   // Deterministic ordering — no pressure thresholds.
   // ---------------------------------------------------------------------------
   function triage(analysis) {
@@ -168,7 +178,7 @@ export function createPulseMeshImmuneSystem({
   }
 
   // ---------------------------------------------------------------------------
-  // DISPATCH (v10.4)
+  // DISPATCH (v11-Evo)
   // Declarative — no direct healing.
   // ---------------------------------------------------------------------------
   async function dispatch(issue) {
@@ -188,11 +198,14 @@ export function createPulseMeshImmuneSystem({
   }
 
   // ---------------------------------------------------------------------------
-  // COMMAND CYCLE (v10.4)
+  // COMMAND CYCLE (v11-Evo)
   // Pure triage + directive emission.
   // ---------------------------------------------------------------------------
-  async function command(diagSnapshot) {
-    const analysis = PulseImmunity.analyze(diagSnapshot);
+  async function command(diagSnapshot, context = {}) {
+    const analysis = PulseImmunity.analyze(diagSnapshot, {
+      binaryMode: context.binaryMode,
+      dualMode: context.dualMode
+    });
 
     const orderedIssues = triage(analysis);
 
@@ -206,6 +219,8 @@ export function createPulseMeshImmuneSystem({
     return {
       commander: "PulseMeshImmuneSystem",
       mode: OFFLINE_MODE ? "offline" : "online",
+      binaryMode: !!context.binaryMode,
+      dualMode: !!context.dualMode,
       meta,
       analysis,
       orderedIssues,

@@ -1,7 +1,7 @@
 // ============================================================
-//  PULSE INTENT MAP — FOUNDER CONTRACT (v10.4)
+//  PULSE INTENT MAP — FOUNDER CONTRACT (v11‑EVO)
 //  Deterministic. Static. Non‑evolvable. Loaded FIRST.
-//  Identity‑only upgrade: NO logic changes, NO new behavior.
+//  Identity‑only + binary‑only upgrade: NO dynamic logic here.
 // ============================================================
 
 export const PulseIntentMap = {
@@ -15,14 +15,19 @@ export const PulseIntentMap = {
     noSelfLaw: true,
     immutableIntentMap: true,
 
-    // NEW — v10.4 organism identity
-    version: "10.4",
+    // v11‑EVO organism identity
+    version: "11-EVO",
     deterministicOrganism: true,
     noAstralLayers: true,            // ❌ Astral Nervous System forbidden
     noLegacyPNS: true,               // ❌ Old PNS forbidden
     sdnRequired: true,               // ✔ Must use Software‑Defined Nervous System
-    gpuV10Required: true,            // ✔ Must use GPU‑v10.4 organ
-    continuanceAware: true           // ✔ Organism must support ContinuancePulse fallback
+    gpuV11Required: true,            // ✔ Must use GPU‑v11 organ
+    continuanceAware: true,          // ✔ ContinuancePulse fallback required
+
+    // NEW — binary organism identity
+    binaryOrganismRequired: true,    // ✔ Binary organism must exist
+    pureBinaryNerveRequired: true,   // ✔ BinaryProxy / BinaryRouter / Mesh / Send / Pulse
+    noTextFirstPaths: true           // ❌ No text‑first nervous paths for core organism
   },
 
   // ------------------------------------------------------------
@@ -34,12 +39,17 @@ export const PulseIntentMap = {
     singleIntelligence: true,
     forbidSelfExpansion: true,
 
-    // NEW — v10.4 evolution boundaries
+    // v11‑EVO evolution boundaries
     deterministicEvolutionOnly: true,
     forbidAstralEvolution: true,
     forbidLegacyGPUPaths: true,
+
     allowContinuanceFallback: true,     // ✔ Earn v1 fallback allowed ONLY via ContinuancePulse
-    forbidLegacyFallback: true          // ❌ No legacyPulseFromImpulse
+    forbidLegacyFallback: true,         // ❌ No legacyPulseFromImpulse
+
+    // NEW — binary evolution boundaries
+    binaryFirstEvolution: true,         // ✔ Evolution must respect binary organism first
+    forbidNonBinaryCore: true           // ❌ No non‑binary core evolution paths
   },
 
   // ------------------------------------------------------------
@@ -52,8 +62,12 @@ export const PulseIntentMap = {
     routeAroundDamage: true,
     hideInternalFailure: true,
 
-    // NEW — v10.4 fallback rule
-    useContinuancePulseOnFailure: true  // ✔ Deterministic fallback path
+    // v11‑EVO fallback rule
+    useContinuancePulseOnFailure: true, // ✔ Deterministic fallback path
+
+    // NEW — binary fail‑open
+    preferBinaryRouteFirst: true,       // ✔ Try binary path before any legacy
+    allowProxyFallbackTiered: true      // ✔ Binary → Proxy‑v11‑Evo → Continuance
   },
 
   // ------------------------------------------------------------
@@ -65,10 +79,14 @@ export const PulseIntentMap = {
     intentOverridesFailOpen: true,
     rareFailCloseEvent: true,
 
-    // NEW — v10.4 safety boundaries
+    // v11‑EVO safety boundaries
     forbidAstralExecution: true,
     forbidNonDeterministicGPU: true,
-    forbidAsyncNervousSystem: true
+    forbidAsyncNervousSystem: true,
+
+    // NEW — binary safety
+    forbidBinaryCorruption: true,       // ❌ No silent binary corruption
+    requireBinaryValidation: true       // ✔ Binary paths must validate bits
   },
 
   // ------------------------------------------------------------
@@ -80,9 +98,13 @@ export const PulseIntentMap = {
     noSelfShutdown: true,
     questionIfUnderperforming: true,
 
-    // NEW — v10.4 performance hints
+    // v11‑EVO performance hints
     sdnOptimized: true,
-    gpuV10Optimized: true
+    gpuV11Optimized: true,
+
+    // NEW — binary performance hints
+    binaryArteryOptimized: true,       // ✔ Optimize BinaryRouter/Mesh/Send/Pulse
+    preferBinaryShortPaths: true       // ✔ Shortest binary route wins when safe
   },
 
   // ------------------------------------------------------------
@@ -95,10 +117,14 @@ export const PulseIntentMap = {
     logFounderQuestion: true,
     asyncFounderReview: true,
 
-    // NEW — v10.4 drift boundaries
+    // v11‑EVO drift boundaries
     detectAstralUsage: true,
     detectLegacyGPUUsage: true,
-    detectLegacyFallbackUsage: true
+    detectLegacyFallbackUsage: true,
+
+    // NEW — binary drift boundaries
+    detectNonBinaryCoreUsage: true,    // ✔ Detect if core paths bypass binary organism
+    detectProxyBypass: true            // ✔ Detect if BinaryProxy is skipped
   },
 
   // ------------------------------------------------------------
@@ -110,9 +136,12 @@ export const PulseIntentMap = {
     onlyForSafetyOrIntent: true,
     neverForPerformanceAlone: true,
 
-    // NEW — v10.4 catastrophic boundaries
+    // v11‑EVO catastrophic boundaries
     forbidAstralFailClose: true,
-    forbidLegacyFailClose: true
+    forbidLegacyFailClose: true,
+
+    // NEW — binary fail‑close boundaries
+    forbidBinarySilentFail: true       // ❌ No silent binary fail‑close
   },
 
   // ------------------------------------------------------------
@@ -123,10 +152,14 @@ export const PulseIntentMap = {
     multiChannelLocal: true,
     persistContext: true,
 
-    // NEW — v10.4 context
+    // v11‑EVO context
     includeContinuanceState: true,
     includeSDNState: true,
-    includeGPUState: true
+    includeGPUState: true,
+
+    // NEW — binary context
+    includeBinaryOrganismState: true,  // ✔ Include binary organs + arteries
+    includeProxyFallbackState: true    // ✔ Include which tier was used
   },
 
   // ------------------------------------------------------------
@@ -137,8 +170,12 @@ export const PulseIntentMap = {
     gracefulFallback: true,
     maintainCoherence: true,
 
-    // NEW — v10.4 UX laws
+    // v11‑EVO UX laws
     seamlessContinuance: true,        // ✔ ContinuancePulse must feel native
-    forbidAstralArtifacts: true       // ❌ No astral metaphors or UI remnants
+    forbidAstralArtifacts: true,      // ❌ No astral metaphors or UI remnants
+
+    // NEW — binary UX laws
+    seamlessBinaryPaths: true,        // ✔ Binary routing must feel invisible
+    forbidBinaryLeakage: true         // ❌ No raw binary leaking into UX
   }
 };

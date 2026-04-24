@@ -1,35 +1,14 @@
 // ============================================================================
-//  PULSE GPU PERFORMANCE ADVISOR v10.4 — THE DRIVE CENTER
+//  PULSE GPU PERFORMANCE ADVISOR v11-Evo — THE DRIVE CENTER
 //  Internal Performance Instinct • Deterministic, Pure Logic, Drift‑Proof
-// ============================================================================
-//
-// IDENTITY — THE DRIVE CENTER (v10.4):
-//  -----------------------------------
-//  • The GPU organism’s internal performance instinct.
-//  • Evaluates current performance vs historical best.
-//  • Detects regressions (danger) and improvements (growth).
-//  • Generates structured “pressure signals” to guide adaptation.
-//  • The subsystem that pushes the organism toward optimal function.
-//  • Advantage‑cascade aware: inherits all systemic advantages automatically.
-//
-// SAFETY CONTRACT (v10.4):
-//  ------------------------
-//  • No randomness
-//  • No timestamps
-//  • No GPU calls
-//  • No DOM
-//  • No Node APIs
-//  • No network or filesystem access
-//  • Fail‑open: malformed metrics → safe defaults
-//  • Deterministic: same inputs → same advice
-//  • Self‑repair‑ready: advice includes metadata
+//  Binary-aware • Symbolic-aware • Dispatch-aware • Memory-aware
 // ============================================================================
 
-import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUCommandments.js";
+import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUConfig.js";
 import { PulseGPUSurvivalInstincts } from "./PulseGPUSurvivalInstincts.js";
 
 // ============================================================================
-// DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC
+// DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC (v11-Evo)
 // ============================================================================
 function classifyDelta(deltaPercent) {
   if (typeof deltaPercent !== "number" || Number.isNaN(deltaPercent)) {
@@ -53,7 +32,7 @@ function isRegression(deltaPercent) {
 }
 
 // ============================================================================
-// ADVICE BUILDER — Structured Drive Signals (v10.4)
+// ADVICE BUILDER — Structured Drive Signals (v11-Evo)
 // ============================================================================
 function buildAdvice({
   type,
@@ -67,7 +46,8 @@ function buildAdvice({
   tierProfile,
   settings,
   baselineSettings,
-  extra
+  extra,
+  gpuContext
 }) {
   const advice = {
     type,
@@ -76,7 +56,7 @@ function buildAdvice({
     meta: {
       layer: "PulseGPUPerformanceAdvisor",
       role: "DRIVE_CENTER",
-      version: 10.4,
+      version: "11.0-Evo",
       target: "full-gpu",
       selfRepairable: true,
       evo: {
@@ -85,11 +65,19 @@ function buildAdvice({
         driftProof: true,
         multiInstanceReady: true,
         unifiedAdvantageField: true,
-        pulseSend10Ready: true,
+        pulseSend11Ready: true,
 
-        routingContract: "PulseSend-v10.4",
-        gpuOrganContract: "PulseGPU-v10.4",
-        earnCompatibility: "Earn-v2"
+        // NEW v11-Evo awareness
+        binaryAware: true,
+        symbolicAware: true,
+        gpuDispatchAware: true,
+        gpuMemoryAware: true,
+        gpuAdvantageAware: true,
+
+        routingContract: "PulseSend-v11",
+        gpuOrganContract: "PulseGPU-v11-Evo",
+        binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+        earnCompatibility: "Earn-v3"
       }
     }
   };
@@ -104,11 +92,16 @@ function buildAdvice({
   if (baselineSettings) advice.baselineSettings = baselineSettings;
   if (extra && typeof extra === "object") advice.extra = extra;
 
+  // NEW v11-Evo GPU context injection
+  if (gpuContext && typeof gpuContext === "object") {
+    advice.gpuContext = { ...gpuContext };
+  }
+
   return advice;
 }
 
 // ============================================================================
-// ADVICE VALIDATION — For Immune Layer (v10.4)
+// ADVICE VALIDATION — For Immune Layer (v11-Evo)
 // ============================================================================
 function validateAdvice(advice) {
   if (!advice || typeof advice !== "object") return false;
@@ -121,7 +114,7 @@ function validateAdvice(advice) {
 }
 
 // ============================================================================
-// SCORING + REGRESSION DETECTION HELPERS (v10.4)
+// SCORING + REGRESSION DETECTION HELPERS (v11-Evo)
 // ============================================================================
 function scoreSession(metrics = {}) {
   if (!metrics || typeof metrics !== "object") return 0;
@@ -146,8 +139,9 @@ function detectRegression(currentMetrics = {}, baselineMetrics = {}) {
 
   return ((currentScore - baselineScore) / baselineScore) * 100;
 }
+
 // ============================================================================
-//  PULSE GPU PERFORMANCE ADVISOR — THE DRIVE CENTER (v10.4)
+//  PULSE GPU PERFORMANCE ADVISOR — THE DRIVE CENTER (v11-Evo)
 // ============================================================================
 class PulseGPUPerformanceAdvisor {
   constructor(settingsMemory) {
@@ -157,7 +151,7 @@ class PulseGPUPerformanceAdvisor {
   static meta = {
     layer: "PulseGPUPerformanceAdvisor",
     role: "DRIVE_CENTER",
-    version: 10.4,
+    version: "11.0-Evo",
     target: "full-gpu",
     selfRepairable: true,
     evo: {
@@ -166,23 +160,32 @@ class PulseGPUPerformanceAdvisor {
       driftProof: true,
       multiInstanceReady: true,
       unifiedAdvantageField: true,
-      pulseSend10Ready: true,
+      pulseSend11Ready: true,
 
-      routingContract: "PulseSend-v10.4",
-      gpuOrganContract: "PulseGPU-v10.4",
-      earnCompatibility: "Earn-v2"
+      // NEW v11-Evo awareness
+      binaryAware: true,
+      symbolicAware: true,
+      gpuDispatchAware: true,
+      gpuMemoryAware: true,
+      gpuAdvantageAware: true,
+
+      routingContract: "PulseSend-v11",
+      gpuOrganContract: "PulseGPU-v11-Evo",
+      binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+      earnCompatibility: "Earn-v3"
     }
   };
 
   // ----------------------------------------------------
-  // MAIN ANALYSIS — CURRENT SESSION
+  // MAIN ANALYSIS — CURRENT SESSION (v11-Evo)
   // ----------------------------------------------------
   analyzeCurrentSession({
     gameProfile,
     hardwareProfile,
     tierProfile,
     settings,
-    metrics
+    metrics,
+    gpuContext // NEW v11-Evo
   }) {
     const currentScore = scoreSession(metrics);
 
@@ -229,7 +232,8 @@ class PulseGPUPerformanceAdvisor {
           extra: {
             baselineMetrics: baselineEntry.bestMetrics,
             repairHint: "restore-baseline-settings"
-          }
+          },
+          gpuContext
         })
       );
     }
@@ -257,7 +261,8 @@ class PulseGPUPerformanceAdvisor {
           extra: {
             baselineMetrics: baselineEntry.bestMetrics,
             repairHint: "promote-current-to-baseline"
-          }
+          },
+          gpuContext
         })
       );
     }
@@ -271,11 +276,15 @@ class PulseGPUPerformanceAdvisor {
   }
 
   // ----------------------------------------------------
-  // SAFE ANALYSIS — IMMUNE LAYER ENTRYPOINT
+  // SAFE ANALYSIS — IMMUNE LAYER ENTRYPOINT (v11-Evo)
   // ----------------------------------------------------
-  safeAnalyzeCurrentSession(input) {
+  safeAnalyzeCurrentSession(input, gpuContext = null) {
     try {
-      const result = this.analyzeCurrentSession(input || {});
+      const result = this.analyzeCurrentSession(
+        { ...(input || {}), gpuContext },
+        gpuContext
+      );
+
       if (!result || typeof result !== "object" || !Array.isArray(result.advice)) {
         return {
           currentScore: 0,
@@ -310,14 +319,15 @@ class PulseGPUPerformanceAdvisor {
   }
 
   // ----------------------------------------------------
-  // SUBOPTIMAL SETTINGS ANALYSIS
+  // SUBOPTIMAL SETTINGS ANALYSIS (v11-Evo)
   // ----------------------------------------------------
   analyzeSuboptimalSettings({
     gameProfile,
     hardwareProfile,
     tierProfile,
     currentSettings,
-    currentMetrics
+    currentMetrics,
+    gpuContext
   }) {
     const baselineEntry = this.memory.getBestSettingsFor(
       gameProfile,
@@ -356,13 +366,14 @@ class PulseGPUPerformanceAdvisor {
         extra: {
           baselineMetrics: baselineEntry.bestMetrics,
           repairHint: "suggest-baseline-settings"
-        }
+        },
+        gpuContext
       })
     ];
   }
 
   // ----------------------------------------------------
-  // TIER UPGRADE ANALYSIS
+  // TIER UPGRADE ANALYSIS (v11-Evo)
   // ----------------------------------------------------
   analyzeTierUpgrade({
     gameProfile,
@@ -370,7 +381,8 @@ class PulseGPUPerformanceAdvisor {
     oldTierProfile,
     newTierProfile,
     currentSettings,
-    currentMetrics
+    currentMetrics,
+    gpuContext
   }) {
     const currentScore = scoreSession(currentMetrics);
 
@@ -412,7 +424,8 @@ class PulseGPUPerformanceAdvisor {
           newTierProfile,
           newTierMetrics: newTierBaseline.bestMetrics,
           repairHint: "upgrade-tier"
-        }
+        },
+        gpuContext
       })
     ];
   }

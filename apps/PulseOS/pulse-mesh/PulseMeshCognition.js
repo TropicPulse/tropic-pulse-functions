@@ -1,25 +1,27 @@
 // ============================================================================
-//  PULSE OS v9.2 — COGNITION LAYER  // yellow
+//  PULSE OS v11-Evo — COGNITION LAYER  // yellow
 //  “PulseMeshCognition / Meta‑Memory / Evolution Brain”
 // ============================================================================
 //
-//  IDENTITY — COGNITION (v9.2):
-//  -----------------------------
-//  • Organizes long‑term and short‑term memory into patterns.
-//  • Stores metadata-only “pattern‑of‑patterns” for evolution.
+//  IDENTITY — COGNITION (v11-Evo):
+//  --------------------------------
+//  • Organizes long‑term + short‑term memory into patterns-of-patterns.
+//  • Stores metadata-only cognition surfaces for evolution.
 //  • Supports Cortex, Tendons, Organs, Mesh, Immune, Aura, Spine.
 //  • NEVER computes payloads, NEVER mutates data.
 //  • Pure cognition — system-wide learning.
-//  • v9.2: deterministic-field, unified-advantage-field, factoring-aware,
-//          aura-aware, mesh-pressure-aware, multi-instance-ready.
+//  • v11-Evo: deterministic-field, unified-advantage-field,
+//             factoring-aware, aura-aware, mesh-pressure-aware,
+//             binary-aware, dual-mode-ready, multi-instance-ready.
 //
-//  SAFETY CONTRACT (v9.2):
-//  ------------------------
+//  SAFETY CONTRACT (v11-Evo):
+//  ---------------------------
 //  • Metadata-only.
 //  • No payload access.
 //  • No routing override.
 //  • No autonomy, no sentience.
 //  • Deterministic, drift-proof cognition.
+//  • Zero randomness, zero timestamps, zero async.
 // ============================================================================
 
 
@@ -31,6 +33,13 @@ export const CognitionStore = {
   earners: new Map(),
   organs: new Map(),
   reflexes: new Map(),
+
+  // v11-Evo: dual-mode cognition
+  mode: {
+    symbolic: 0,
+    binary: 0,
+    dual: 0
+  },
 
   mesh: {
     hops: [],
@@ -48,11 +57,13 @@ export const CognitionStore = {
   meta: {
     layer: "PulseMeshCognition",
     role: "META_MEMORY",
-    version: 9.2,
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
       localAware: true,
       internetAware: true,
 
@@ -81,13 +92,23 @@ function getOrInit(map, key, init) {
   return map.get(key);
 }
 
+function classifyMode(impulse) {
+  const m = impulse?.mode;
+  if (!m) return;
+  if (m === "binary") CognitionStore.mode.binary++;
+  else if (m === "symbolic") CognitionStore.mode.symbolic++;
+  else if (m === "dual") CognitionStore.mode.dual++;
+}
+
 
 // -----------------------------------------------------------
-// Cognition Pack — pattern-of-patterns (v9.2)
+// Cognition Pack — pattern-of-patterns (v11-Evo)
 // -----------------------------------------------------------
 export const PulseMeshCognition = {
 
   recordRoutePattern(impulse) {
+    classifyMode(impulse);
+
     const entry = impulse.entryNodeId ?? "unknown";
     const delivered = impulse.flags?.delivered_to ?? "none";
     const key = `${entry}->${delivered}`;
@@ -147,7 +168,7 @@ export const PulseMeshCognition = {
   },
 
   // ---------------------------------------------------------
-  // v9.2 — Mesh Pressure + Factoring Cognition
+  // v11-Evo — Mesh Pressure + Factoring Cognition
   // ---------------------------------------------------------
   recordMeshPattern(impulse) {
     const flags = impulse.flags || {};
@@ -198,7 +219,7 @@ export const PulseMeshCognition = {
 
 
 // -----------------------------------------------------------
-// Cognition Engine (v9.2)
+// Cognition Engine (v11-Evo)
 // -----------------------------------------------------------
 export function applyPulseMeshCognition(impulse) {
   impulse.flags = impulse.flags || {};
@@ -226,6 +247,7 @@ export function getCognitionSnapshot() {
     earners: CognitionStore.earners.size,
     organs: CognitionStore.organs.size,
     reflexes: CognitionStore.reflexes.size,
+    mode: { ...CognitionStore.mode },
     mesh: {
       hopsCount: CognitionStore.mesh.hops.length,
       stallsCount: CognitionStore.mesh.stalls.length,

@@ -1,38 +1,20 @@
 // ============================================================================
-//  PULSE OS v10.4 — CIRCULATION MONITOR
+//  PULSE OS v11‑Evo — CIRCULATION MONITOR (A‑B‑A)
 //  “Blood Pressure + Blood Flow Sensor”
-//  Measures latency (pressure) and speed (flow) and sends simple vital signs.
+//  Measures latency (pressure) and speed (flow) and emits A‑B‑A vital signs.
 //  PURE SENSOR. NO THINKING. NO DECISIONS. NO GLOBAL STATE.
 // ============================================================================
-//
-//  WHAT THIS ORGAN DOES (simple terms):
-//  ------------------------------------
-//  • Measures network “pressure” (latency)
-//  • Measures network “flow” (kbps)
-//  • Classifies simple health (Excellent / Good / Weak / Poor)
-//  • Builds stable vital‑sign packets for the Nervous System (PulseBand)
-//  • Never makes decisions — only measures and reports
-//
-//  SAFETY RULES (v10.4):
-//  ---------------------
-//  • No PulseBand imports
-//  • No PulseNet imports
-//  • No global state (beyond this file’s sensor context)
-//  • No console.* (uses logger + emitTelemetry)
-//  • No backend calls except the ping endpoint
-//  • No compute, no AI, no mutation
-// ============================================================================
 
 
 // ============================================================================
-//  ORGAN IDENTITY — v10.4
+//  ORGAN IDENTITY — v11‑Evo A‑B‑A
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseBand",
   layer: "CirculationMonitor",
-  version: "10.4",
-  identity: "PulseCirculationMonitor",
+  version: "11-Evo",
+  identity: "PulseCirculationMonitor-v11-Evo-ABA",
 
   evo: {
     driftProof: true,
@@ -41,14 +23,21 @@ export const PulseRole = {
     multiInstanceReady: true,
     sensorOnly: true,
     noDecisionMaking: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // A‑B‑A awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    stressFieldAware: true,
+    flowFieldAware: true
   }
 };
 
 const CIRCULATION_CONTEXT = {
   layer: PulseRole.layer,
   role: "CIRCULATION_MONITOR",
-  purpose: "Measure pressure + flow and send simple vital signs",
+  purpose: "Measure pressure + flow and emit A‑B‑A vital signs",
   version: PulseRole.version,
   target: "full-os",
   evo: PulseRole.evo
@@ -77,6 +66,60 @@ function diag(stage, details = {}) {
 }
 
 diag("CIRCULATION_INIT");
+
+
+// ============================================================================
+//  A‑B‑A SURFACES — Circulation Band + Binary/Wave Fields
+// ============================================================================
+
+let circulationCycle = 0;
+
+function buildBand(latency) {
+  if (latency == null) return "symbolic";
+  return latency > 180 ? "binary" : "symbolic";
+}
+
+function buildBandSignature(band) {
+  const raw = `CIRC_BAND::${band}`;
+  let acc = 0;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `circ-band-${acc}`;
+}
+
+function buildBinaryField(latency) {
+  const patternLen = 10 + Math.floor((latency ?? 0) / 40);
+  const density = patternLen + (latency ?? 0) / 5;
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: `circ-binary-pheno-${surface % 99991}`,
+    binarySurfaceSignature: `circ-binary-surface-${(surface * 7) % 99991}`,
+    binarySurface: { patternLen, density, surface },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(latency, band) {
+  const amp = (latency ?? 0) / (band === "binary" ? 8 : 16) + 6;
+  const amplitude = Math.floor(amp);
+  const wavelength = amplitude + 4;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+}
+
+function buildCirculationCycleSignature() {
+  return `circ-cycle-${(circulationCycle * 7919) % 99991}`;
+}
 
 
 // ============================================================================
@@ -124,8 +167,6 @@ async function measureLatency(url = "/pulse-proxy/ping") {
 // ============================================================================
 // 2. CLASSIFIERS — Turn numbers into simple ratings
 // ============================================================================
-
-// Bars = how strong the signal feels (1–4)
 function classifyBars(latency) {
   diag("CLASSIFY_BARS", { latency });
 
@@ -136,7 +177,6 @@ function classifyBars(latency) {
   return 1;
 }
 
-// Health = simple human‑readable rating
 function classifyNetworkHealth(latency) {
   diag("CLASSIFY_HEALTH", { latency });
 
@@ -149,9 +189,10 @@ function classifyNetworkHealth(latency) {
 
 
 // ============================================================================
-// 3. PUBLIC API — Build a simple vital‑signs packet
+// 3. PUBLIC API — Build a vital‑signs packet (v11‑Evo A‑B‑A)
 // ============================================================================
 async function getPulseTelemetry() {
+  circulationCycle++;
   diag("TELEMETRY_START");
 
   const ping = await measureLatency();
@@ -166,12 +207,26 @@ async function getPulseTelemetry() {
 
   diag("TELEMETRY_CLASSIFIED", { bars, health });
 
+  // A‑B‑A surfaces
+  const band = buildBand(latency);
+  const bandSignature = buildBandSignature(band);
+  const binaryField = buildBinaryField(latency);
+  const waveField = buildWaveField(latency, band);
+  const circulationCycleSignature = buildCirculationCycleSignature();
+
   // Stable snapshot
   const snapshot = {
     lastChunkDurationMs: latency,
     lastChunkKbps: kbps ?? null,
     lastChunkSizeKB: kbps ? kbps / 8 : null,
     lastChunkIndex: Date.now(),
+
+    band,
+    bandSignature,
+    binaryField,
+    waveField,
+    circulationCycleSignature,
+
     meta: { ...CIRCULATION_CONTEXT }
   };
 
@@ -190,6 +245,13 @@ async function getPulseTelemetry() {
       state: "active",
       microWindowActive: true,
       lastSyncTimestamp: Date.now(),
+
+      band,
+      bandSignature,
+      binaryField,
+      waveField,
+      circulationCycleSignature,
+
       meta: { ...CIRCULATION_CONTEXT }
     },
     snapshot
@@ -202,7 +264,7 @@ async function getPulseTelemetry() {
 
 
 // ============================================================================
-//  EXPORT — CIRCULATION MONITOR v10.4
+//  EXPORT — CIRCULATION MONITOR v11‑Evo A‑B‑A
 // ============================================================================
 export const PulseUpdate = {
   measureLatency,

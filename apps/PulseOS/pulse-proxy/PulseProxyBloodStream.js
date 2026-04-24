@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v10.4 — TELEMETRY ORGAN
+//  PULSE OS v11‑Evo — TELEMETRY ORGAN
 //  Unified Metrics • Subsystem Heartbeats • Drift Detection
 //  Mesh‑Aware Telemetry Propagation (Mini‑Pulse Distance Engine)
 //  PURE NERVOUS‑SYSTEM ORGAN — NO BACKEND, NO DOM, NO GPU, NO STATE MUTATION
@@ -7,14 +7,14 @@
 
 
 // ============================================================================
-//  ORGAN IDENTITY — v10.4
+//  ORGAN IDENTITY — v11‑Evo A‑B‑A
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseTelemetry",
   layer: "Bloodstream",
-  version: "10.4",
-  identity: "PulseTelemetryOrgan",
+  version: "11-Evo",
+  identity: "PulseTelemetryOrgan-v11-Evo-ABA",
 
   evo: {
     driftProof: true,
@@ -24,7 +24,11 @@ export const PulseRole = {
     meshPulseReady: true,
     sensorOnly: true,
     noDecisionMaking: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true
   }
 };
 
@@ -39,17 +43,85 @@ const MAX_STREAM_SIZE = 5000;
 const MAX_HOPS = 5;
 const DEFAULT_DISTANCE = 1;
 
+let telemetryCycle = 0;
+
 
 // ============================================================================
-// EMIT TELEMETRY — Universal signal emitter (v10.4)
+// A‑B‑A SURFACES — Band + Binary/Wave Fields
+// ============================================================================
+function buildBand(distance) {
+  if (distance == null) return "symbolic";
+  return distance > 3 ? "binary" : "symbolic";
+}
+
+function buildBandSignature(band) {
+  const raw = `TELEMETRY_BAND::${band}`;
+  let acc = 0;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `telemetry-band-${acc}`;
+}
+
+function buildBinaryField(distance) {
+  const d = distance ?? DEFAULT_DISTANCE;
+  const patternLen = 10 + d * 2;
+  const density = patternLen + d * 3;
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: `telemetry-binary-pheno-${surface % 99991}`,
+    binarySurfaceSignature: `telemetry-binary-surface-${(surface * 7) % 99991}`,
+    binarySurface: { patternLen, density, surface },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(distance, band) {
+  const d = distance ?? DEFAULT_DISTANCE;
+  const amplitude = 6 + d * (band === "binary" ? 2 : 1);
+  const wavelength = amplitude + 4;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+}
+
+function buildTelemetryCycleSignature() {
+  return `telemetry-cycle-${(telemetryCycle * 7919) % 99991}`;
+}
+
+
+// ============================================================================
+// EMIT TELEMETRY — Universal signal emitter (v11‑Evo A‑B‑A)
 // ============================================================================
 export function emitTelemetry(subsystem, event, data = {}) {
   try {
+    telemetryCycle++;
+
+    const baseDistance = data.distance ?? DEFAULT_DISTANCE;
+    const band = buildBand(baseDistance);
+    const bandSignature = buildBandSignature(band);
+    const binaryField = buildBinaryField(baseDistance);
+    const waveField = buildWaveField(baseDistance, band);
+    const telemetryCycleSignature = buildTelemetryCycleSignature();
+
     const packet = logger.makeTelemetryPacket(subsystem, event, {
       ...data,
       lineage: PulseLineage[subsystem],
       hops: 0,
-      distance: DEFAULT_DISTANCE,
+      distance: baseDistance,
+      band,
+      bandSignature,
+      binaryField,
+      waveField,
+      telemetryCycleSignature,
       meta: {
         layer: PulseRole.layer,
         version: PulseRole.version,
@@ -73,7 +145,7 @@ export function emitTelemetry(subsystem, event, data = {}) {
 
 
 // ============================================================================
-// MINI‑PULSE BROADCAST — Mesh‑safe propagation (v10.4)
+// MINI‑PULSE BROADCAST — Mesh‑safe propagation (v11‑Evo)
 // ============================================================================
 export function broadcastTelemetry(packet) {
   try {
@@ -95,19 +167,31 @@ export function broadcastTelemetry(packet) {
 
 
 // ============================================================================
-// MINI‑PULSE AMPLIFIER — Increase distance + hop count (v10.4)
+// MINI‑PULSE AMPLIFIER — Increase distance + hop count (v11‑Evo)
 // ============================================================================
 export function amplifyPulse(packet) {
+  const nextHops = (packet.hops ?? 0) + 1;
+  const nextDistance = (packet.distance ?? DEFAULT_DISTANCE) + 1;
+
+  const band = buildBand(nextDistance);
+  const bandSignature = buildBandSignature(band);
+  const binaryField = buildBinaryField(nextDistance);
+  const waveField = buildWaveField(nextDistance, band);
+
   return {
     ...packet,
-    hops: packet.hops + 1,
-    distance: packet.distance + 1
+    hops: nextHops,
+    distance: nextDistance,
+    band,
+    bandSignature,
+    binaryField,
+    waveField
   };
 }
 
 
 // ============================================================================
-// RECEIVE MESH PULSE — Accept telemetry from other nodes (v10.4)
+// RECEIVE MESH PULSE — Accept telemetry from other nodes (v11‑Evo)
 // ============================================================================
 export function receiveMeshPulse(packet) {
   try {
@@ -126,7 +210,7 @@ export function receiveMeshPulse(packet) {
 
 
 // ============================================================================
-// HEARTBEAT — Subsystem periodic pulse (v10.4)
+// HEARTBEAT — Subsystem periodic pulse (v11‑Evo)
 // ============================================================================
 export function heartbeat(subsystem, extra = {}) {
   return emitTelemetry(subsystem, "heartbeat", {
@@ -138,7 +222,7 @@ export function heartbeat(subsystem, extra = {}) {
 
 
 // ============================================================================
-// DRIFT DETECTION (v10.4)
+// DRIFT DETECTION (v11‑Evo)
 // ============================================================================
 export function detectDrift(subsystem, expectedVersion) {
   const actual = PulseVersion[subsystem];
@@ -153,7 +237,7 @@ export function detectDrift(subsystem, expectedVersion) {
 
 
 // ============================================================================
-// ANOMALY (v10.4)
+// ANOMALY (v11‑Evo)
 // ============================================================================
 export function anomaly(subsystem, description, details = {}) {
   return emitTelemetry(subsystem, "anomaly", {
@@ -164,7 +248,7 @@ export function anomaly(subsystem, description, details = {}) {
 
 
 // ============================================================================
-// PERFORMANCE METRICS (v10.4)
+// PERFORMANCE METRICS (v11‑Evo)
 // ============================================================================
 export function metric(subsystem, name, value, extra = {}) {
   return emitTelemetry(subsystem, "metric", {
@@ -176,7 +260,7 @@ export function metric(subsystem, name, value, extra = {}) {
 
 
 // ============================================================================
-// STREAM ACCESS (v10.4)
+// STREAM ACCESS (v11‑Evo)
 // ============================================================================
 export function getStream(limit = 500) {
   if (limit <= 0) return [...telemetryStream];
@@ -185,7 +269,7 @@ export function getStream(limit = 500) {
 
 
 // ============================================================================
-// SNAPSHOT (v10.4)
+// SNAPSHOT (v11‑Evo)
 // ============================================================================
 export function getTelemetrySnapshot() {
   const latest = telemetryStream.slice(-200);
@@ -210,7 +294,7 @@ export function getTelemetrySnapshot() {
 
 
 // ============================================================================
-// EXPORTS — Telemetry Organ API (v10.4)
+// EXPORTS — Telemetry Organ API (v11‑Evo A‑B‑A)
 // ============================================================================
 export const PulseTelemetry = {
   emit: emitTelemetry,

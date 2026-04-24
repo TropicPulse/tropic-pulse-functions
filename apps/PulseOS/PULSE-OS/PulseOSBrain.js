@@ -1,27 +1,30 @@
 // ============================================================================
 // FILE: /apps/PulseOS/PULSE-OS/PulseOSBrain.js
-// PULSE OS — v10.4 → v11 DESIGN UPGRADE
+// PULSE OS — v11.0 DUAL-MODE UPGRADE
 // “THE CNS BRAIN / CENTRAL NERVOUS SYSTEM / INTELLIGENCE LAYER 1”
 // ============================================================================
 //
-//  ORGAN IDENTITY (v10.4):
+//  ORGAN IDENTITY (v11.0):
 //  ------------------------
 //  • Organ Type: Brain / CNS Core
 //  • Layer: CENTRAL NERVOUS SYSTEM (CNS)
 //  • Biological Analog: Brain + Executive Cortex
 //  • System Role: Attach IQ, load organs by design, boot Cortex, govern CNS.
+//  • Dual-Mode: Symbolic-Primary + Binary-Post-Render (no pre-render binary)
 //
-//  PURPOSE (v10.4 → v11 DESIGN):
-//  -----------------------------
+//  PURPOSE (v10.4 → v11.0):
+//  ------------------------
 //  ✔ Attach PulseIQ (TEXT + DESIGN ONLY) to the organism.
 //  ✔ Interpret PulseOrganismMap as the genome-level truth.
 //  ✔ Load organs by design identity via Evolution (not IQ).
 //  ✔ Boot the Cortex and initialize nervous system + organs.
 //  ✔ Classify degradation and route around damage (continuance).
 //  ✔ Provide structural error intelligence (drift surface).
+//  ✔ Expose dual-mode surfaces: symbolic view + binary view (post-render).
+//  ✔ Keep binary as compression/transport surface only (no logic branching).
 //
-//  SAFETY CONTRACT (v10.4):
-//  -------------------------
+//  SAFETY CONTRACT (v11.0):
+//  ------------------------
 //  • May import ONLY:
 //      - PulseIQMap (IQ cortex / design + logging + appendages)
 //      - PulseOrganismMap (genome map)
@@ -30,11 +33,12 @@
 //  • No network law here — network is handled by other organs.
 //  • Deterministic behavior only.
 //  • No mutation of external modules (IQ, OrganismMap).
+//  • Binary surfaces are metadata/encoding only, not executable logic.
 // ============================================================================
 
 
 // ============================================================================
-//  IMPORTS — v10.4 LAW: BRAIN MAY IMPORT ONLY PULSEIQ (+ Cortex wiring)
+//  IMPORTS — LAW: BRAIN MAY IMPORT ONLY PULSEIQ (+ Cortex wiring)
 // ============================================================================
 import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
@@ -51,7 +55,7 @@ export const PulseOSBrain = {
     type: "Brain",
     subsystem: "OS",
     layer: "CNS",
-    version: "10.4",
+    version: "11.0",
     identity: "PulseOSBrain",
     evo: {
       deterministicNeuron: true,
@@ -60,16 +64,24 @@ export const PulseOSBrain = {
       advantageCascadeAware: true,
       unifiedAdvantageField: true,
 
-      // Contracts — v10.4 organism-wide
-      routingContract: "PulseRouter-v10.4",
-      osOrganContract: "PulseOS-v10.4",
-      earnCompatibility: "PulseEarn-v10.4",
-      proxyCompatibility: "PulseProxySpine-v10.4",
-      gpuCompatibility: "PulseGPU-v10.4",
+      // Contracts — organism-wide
+      routingContract: "PulseRouter-v11.0",
+      osOrganContract: "PulseOS-v11.0",
+      earnCompatibility: "PulseEarn-v11.0",
+      proxyCompatibility: "PulseProxySpine-v11.0",
+      gpuCompatibility: "PulseGPU-v11.0",
 
       // Continuance / loop-theory awareness (conceptual only)
       loopTheoryAware: true,
-      continuanceAware: true
+      continuanceAware: true,
+
+      // NEW — v11 dual-mode contracts
+      dualMode: true,
+      symbolicPrimary: true,
+      binaryPostRenderOnly: true,
+      binaryCompressionAware: true,
+      binaryNonExecutable: true,
+      organismWideIdentityField: true
     }
   },
 
@@ -100,6 +112,51 @@ export const PulseOSBrain = {
         ? iq.pages[route]
         : [];
       return { route, organs };
+    },
+
+    // -----------------------------------------------------------------------
+    // v11 DUAL-MODE SURFACES (SYMBOLIC + BINARY VIEW)
+    // -----------------------------------------------------------------------
+
+    // Symbolic view of organism identity (source of truth)
+    getSymbolicOrganismIdentity() {
+      return {
+        role: PulseOSBrain.PulseRole,
+        intent: PulseOSBrain.PulseIntentMap,
+        organismMap: PulseOSBrain.PulseOrganismMap,
+        iqMap: PulseOSBrain.PulseIQMap
+      };
+    },
+
+    // Binary view — NON-EXECUTABLE, post-render compression surface
+    // This is intentionally simple: JSON → Uint8Array-like payload descriptor.
+    // Actual encoding is delegated to GPU / Send organs, not executed here.
+    getBinaryOrganismDescriptor() {
+      const symbolic = this.getSymbolicOrganismIdentity();
+
+      // Deterministic, metadata-only descriptor
+      const descriptor = {
+        version: PulseOSBrain.PulseRole.version,
+        identity: PulseOSBrain.PulseRole.identity,
+        subsystem: PulseOSBrain.PulseRole.subsystem,
+        layer: PulseOSBrain.PulseRole.layer,
+        dualMode: true,
+        symbolicPrimary: true,
+        binaryPostRenderOnly: true,
+        // We do NOT compute bytes here; we just describe the shape.
+        encoding: {
+          format: "application/pulse-organism+json",
+          suggestedTransport: "PulseGPU-v11.0",
+          suggestedCompression: "post-render",
+          executable: false
+        }
+      };
+
+      return {
+        descriptor,
+        // Symbolic snapshot is included so GPU/send can compress it later.
+        symbolicSnapshot: symbolic
+      };
     }
   },
 

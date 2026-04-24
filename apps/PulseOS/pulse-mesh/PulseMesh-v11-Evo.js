@@ -1,176 +1,103 @@
 // ============================================================================
-//  PulseMesh-v11-Evo
-//  Deterministic Pathway Engine • Pulse-Agnostic • Evolution-Aware
-//  v11: Pathway Surface + Mode Surface + Diagnostics + Signatures + Legacy Map
+//  PulseBinaryMesh-v11-Evo (BINARY FULLY UPGRADED BEAST)
+//  Pure Binary Pathway Engine • Zero Drift • Zero Semantics
+// ============================================================================
+//  ROLE:
+//    - Binary-native counterpart to PulseMesh-v11-Evo.
+//    - Pure connective tissue between binary organs.
+//    - No patterns, no lineage, no JSON, no objects in the data path.
+//    - Deterministic, drift-proof, mutation-free.
+//
+//  DIFFERENCE FROM SYMBOLIC PulseMesh:
+//    - Symbolic PulseMesh builds pathway surfaces, diagnostics, signatures.
+//    - Binary PulseMesh does NONE of that.
+//    - It only validates, routes, and falls back.
+//    - It is the reflex-level mesh, not the cortex-level mesh.
+//
+//  BINARY CONTRACT:
+//    - Only accepts pure binary arrays (0/1).
+//    - No timestamps, no randomness.
+//    - No console unless trace=true.
+//    - No symbolic metadata.
 // ============================================================================
 
-export const PulseRole = {
-  type: "Mesh",
-  subsystem: "PulseMesh",
-  layer: "PathwayEngine",
-  version: "11.0",
-  identity: "PulseMesh-v11-Evo",
+export function createPulseBinaryMesh({
+  fallbackProxy,
+  trace = false,
+  maxBitsLength = 64
+} = {}) {
 
-  evo: {
-    driftProof: true,
-    patternAware: true,
-    lineageAware: true,
-    modeAware: true,
-    identityAware: true,
-    advantageAware: true,
-    deterministicPathways: true,
-    futureEvolutionReady: true,
+  // Internal link table (symbolic-only, safe)
+  const links = Object.create(null);
 
-    unifiedAdvantageField: true,
-    pulseMesh11Ready: true,
-
-    pathwaySurfaceReady: true,
-    diagnosticsReady: true,
-    signatureReady: true,
-    legacyBridgeCapable: true
-  },
-
-  pulseContract: "Pulse-v1/v2/v3",
-  routerContract: "PulseRouter-v11",
-  sendContract: "PulseSend-v11"
-};
-
-
-// ---------------------------------------------------------------------------
-// INTERNAL: Deterministic hash helper
-// ---------------------------------------------------------------------------
-function computeHash(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h + str.charCodeAt(i) * (i + 1)) % 100000;
+  // ---------------------------------------------------------------------------
+  // PURE BINARY VALIDATION
+  // ---------------------------------------------------------------------------
+  function isPureBinary(bits) {
+    if (!Array.isArray(bits)) return false;
+    const len = bits.length;
+    if (len === 0 || len > maxBitsLength) return false;
+    for (let i = 0; i < len; i++) {
+      const b = bits[i];
+      if (b !== 0 && b !== 1) return false;
+    }
+    return true;
   }
-  return `h${h}`;
-}
 
-
-// ---------------------------------------------------------------------------
-// INTERNAL: Pathway profiles (deterministic, static)
-// ---------------------------------------------------------------------------
-const BASE_PATHWAYS = {
-  GPU: {
-    style: "direct-burst",
-    hops: ["Kernel", "GPUCluster", "GPUWorker"],
-    reliability: 0.98
-  },
-  Earn: {
-    style: "credit-chain",
-    hops: ["Kernel", "EarnCore", "Ledger"],
-    reliability: 0.97
-  },
-  OS: {
-    style: "system-bridge",
-    hops: ["Kernel", "OSBridge"],
-    reliability: 0.99
-  },
-  Mesh: {
-    style: "intra-mesh",
-    hops: ["MeshHub"],
-    reliability: 0.995
-  },
-  DEFAULT: {
-    style: "neutral",
-    hops: ["Kernel"],
-    reliability: 0.96
+  // ---------------------------------------------------------------------------
+  // LINK REGISTRATION (symbolic-only)
+  // ---------------------------------------------------------------------------
+  function link(from, to) {
+    links[from] = to;
   }
-};
 
+  // ---------------------------------------------------------------------------
+  // PURE BINARY TRANSMISSION
+  // ---------------------------------------------------------------------------
+  function transmit(from, bits) {
+    const to = links[from];
 
-// ---------------------------------------------------------------------------
-// INTERNAL: Legacy target mapping (9.2 / 10.4 → v11 keys)
-// ---------------------------------------------------------------------------
-function normalizeTargetOrgan(targetOrgan) {
-  const key = (targetOrgan || "").toString().toLowerCase();
+    if (!to) {
+      return fallback("missing-link", from, bits);
+    }
 
-  // add any legacy names you actually used in 9.2 / 10.4
-  if (key === "gpu" || key === "gpumesh" || key === "gpupath") return "GPU";
-  if (key === "earn" || key === "earnengine" || key === "marketplace") return "Earn";
-  if (key === "os" || key === "system" || key === "kernelbridge") return "OS";
-  if (key === "mesh" || key === "pulsemesh") return "Mesh";
+    if (!isPureBinary(bits)) {
+      return fallback("non-binary-input", from, bits);
+    }
 
-  // unknown / legacy → DEFAULT
-  return "DEFAULT";
-}
+    if (trace && typeof console !== "undefined") {
+      console.log(`[PulseBinaryMesh] ${from} → ${to}`, bits);
+    }
 
+    // Binary mesh NEVER transforms bits
+    return bits;
+  }
 
-// ---------------------------------------------------------------------------
-// INTERNAL: Mode bias
-// ---------------------------------------------------------------------------
-function computeModeBias(mode) {
-  if (mode === "stress") return "low-latency";
-  if (mode === "drain") return "low-energy";
-  if (mode === "recovery") return "high-reliability";
-  return "neutral";
-}
+  // ---------------------------------------------------------------------------
+  // SMART BINARY FALLBACK
+  // ---------------------------------------------------------------------------
+  function fallback(reason, from, bits) {
+    if (!fallbackProxy) {
+      throw new Error(
+        `PulseBinaryMesh fallback triggered (${reason}) but no fallbackProxy provided`
+      );
+    }
 
+    if (trace && typeof console !== "undefined") {
+      console.warn(`[PulseBinaryMesh] FALLBACK (${reason}) from:${from}`, bits);
+    }
 
-// ---------------------------------------------------------------------------
-// INTERNAL: Build pathway surface
-// ---------------------------------------------------------------------------
-function buildPathwaySurface(targetOrgan, mode, pulse) {
-  const organKey = normalizeTargetOrgan(targetOrgan);
-  const base = BASE_PATHWAYS[organKey] || BASE_PATHWAYS.DEFAULT;
+    return fallbackProxy.exchange
+      ? fallbackProxy.exchange(bits)
+      : fallbackProxy(bits);
+  }
 
-  const modeBias = computeModeBias(mode);
-  const lineageDepth = Array.isArray(pulse?.lineage) ? pulse.lineage.length : 0;
-  const pattern = pulse?.pattern || "UNKNOWN_PATTERN";
-  const pulseType = pulse?.pulseType || pulse?.PulseRole?.identity || "UNKNOWN_PULSE_TYPE";
-
-  const raw = JSON.stringify({
-    organKey,
-    mode,
-    modeBias,
-    lineageDepth,
-    pattern,
-    pulseType
-  });
-
+  // ---------------------------------------------------------------------------
+  // PUBLIC API
+  // ---------------------------------------------------------------------------
   return {
-    meshRole: PulseRole,
-    targetOrgan: organKey,
-    style: base.style,
-    hops: base.hops.slice(),
-    reliability: base.reliability,
-    mode,
-    modeBias,
-
-    diagnostics: {
-      pattern,
-      lineageDepth,
-      pulseType,
-      patternHash: computeHash(pattern),
-      lineageHash: computeHash(String(lineageDepth)),
-      modeHash: computeHash(mode),
-      organHash: computeHash(organKey)
-    },
-
-    pathwaySignature: computeHash(raw),
-    organSignature: computeHash(organKey),
-    meshSignature: computeHash(base.style)
+    link,       // symbolic-only
+    transmit,   // pure binary
+    fallback    // pure binary
   };
 }
-
-
-// ---------------------------------------------------------------------------
-// PUBLIC API — PulseMesh (v11)
-// ---------------------------------------------------------------------------
-export const PulseMesh = {
-  PulseRole,
-
-  pathwayFor(targetOrgan, mode = "normal", pulse = null) {
-    return buildPathwaySurface(targetOrgan, mode, pulse);
-  },
-
-  diagnostics() {
-    return {
-      PulseRole,
-      basePathways: BASE_PATHWAYS,
-      pathwayCount: Object.keys(BASE_PATHWAYS).length,
-      pathwayKeys: Object.keys(BASE_PATHWAYS)
-    };
-  }
-};

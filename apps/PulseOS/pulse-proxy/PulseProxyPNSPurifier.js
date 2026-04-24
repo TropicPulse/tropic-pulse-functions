@@ -1,62 +1,76 @@
 // ============================================================================
-// FILE: /apps/pulse-proxy/pulsebandCleanup.js
-// PULSEBAND CLEANUP — VERSION 10.4
-// “THE PURIFIER / SANITY LAYER / ORDER‑KEEPER”
+//  PULSE OS v11.0 — PULSEBAND PURIFIER (BACKEND CLEANUP ORGAN)
+//  “THE PURIFIER / SANITY LAYER / ORDER‑KEEPER”
+//  Backend‑Only • Drift Control • Session/Error/Redownload Cleanup
 // ============================================================================
 //
-// ROLE (v10.4):
-//   pulsebandCleanup is the PURIFIER of the PulseBand subsystem.
-//   It is the SANITY LAYER / ORDER‑KEEPER — the organ that removes
-//   expired sessions, chunks, errors, and redownload logs before they
-//   accumulate into systemic drift.
+//  WHAT THIS ORGAN IS (v11.0):
+//  ---------------------------
+//  • Backend‑only organ for the PulseBand subsystem.
+//  • Periodically cleans up:
+//      – pulseband_sessions (+ nested chunks)
+//      – pulseband_errors
+//      – pulseband_redownloads
+//  • Prevents long‑term drift from stale sessions + logs.
+//  • Writes TIMER_LOGS + FUNCTION_ERRORS for full traceability.
+//  • Called by Heartbeat / OSKernel as a scheduled purifier.
 //
-// SAFETY CONTRACT (v10.4):
-//   • Fail-open: errors are logged, never fatal
-//   • No randomness in cleanup logic
-//   • No mutation outside intended collections
-//   • Always logs actions for traceability
-//   • No external side effects beyond Firestore writes
-//   • Deterministic cleanup order
-//   • Bounded scans via indexed queries where possible
-//   • Multi-instance safe
-//   • No IQ, no routing, no OS imports
+//  WHAT THIS ORGAN IS NOT:
+//  ------------------------
+//  • NOT a router.
+//  • NOT a nervous system organ.
+//  • NOT a GPU / Cortex / Mesh participant.
+//  • NOT dual‑band — no binary partner, no live UI role.
+//  • NOT allowed to introduce randomness or non‑deterministic scans.
+//  • NOT allowed to mutate anything outside its Firestore collections.
+//
+//  SAFETY CONTRACT (v11.0):
+//  ------------------------
+//  • Fail‑open: errors are logged, never fatal to the OS.
+//  • No randomness in cleanup logic.
+//  • No mutation outside intended collections.
+//  • Deterministic, bounded scans (MAX_BATCH).
+//  • Multi‑instance safe — repeated runs are idempotent in effect.
+//  • No OS imports, no IQ, no routing.
+//  • Pure symbolic backend organ (no binary mode).
 // ============================================================================
 
-// import * as admin from "firebase-admin";
-// import { getFirestore } from "firebase-admin/firestore";
-
-// if (!admin.apps.length) {
-//   admin.initializeApp();
-// }
-// const db = getFirestore();
 
 // ============================================================================
-// ORGAN IDENTITY — v10.4
+// ORGAN IDENTITY — v11.0
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "PulseBandPurifier",
-  version: "10.4",
+  version: "11.0",
   identity: "PulseBandCleanup",
 
   evo: {
     driftProof: true,
     deterministic: true,
+
     backendOnly: true,
+    symbolicBackend: true,
+    dualModeEvolution: false,   // backend-only, no binary partner
+
     noIQ: true,
     noRouting: true,
     noCompute: true,
+
     multiInstanceReady: true,
     pulseBandAware: true,
     futureEvolutionReady: true,
+
     boundedScan: true,
-    timerSafe: true
+    timerSafe: true,
+    organismClusterBoost: true
   }
 };
 
+
 // ============================================================================
-// HUMAN‑READABLE CONTEXT MAP (v10.4)
+// HUMAN‑READABLE CONTEXT MAP (v11.0)
 // ============================================================================
 const CLEANUP_CONTEXT = {
   label: "PULSEBAND_CLEANUP",
@@ -83,14 +97,17 @@ const logCleanup = (stage, details = {}) => {
   );
 };
 
+
 // ============================================================================
-// INTERNAL CONSTANTS (v10.4)
+// INTERNAL CONSTANTS (v11.0)
 // ============================================================================
-const MAX_BATCH = 500;
+const MAX_BATCH = 500; // bounded scan size — keeps cleanup deterministic + safe
+
 
 // ============================================================================
 // INTERNAL HELPERS (bounded, deterministic, no IQ)
 // ============================================================================
+
 async function cleanupSessionsBefore(cutoffMs, runId, errorPrefix) {
   let deletedCount = 0;
   let lastDoc = null;
@@ -122,6 +139,7 @@ async function cleanupSessionsBefore(cutoffMs, runId, errorPrefix) {
           );
           logCleanup("DELETE_SESSION", { sessionId: id, runId });
 
+          // Delete nested chunks first to avoid orphaned subcollections
           const chunksSnap = await s.ref.collection("chunks").get();
           for (const c of chunksSnap.docs) {
             await c.ref.delete();
@@ -155,6 +173,7 @@ async function cleanupSessionsBefore(cutoffMs, runId, errorPrefix) {
 
   return deletedCount;
 }
+
 async function cleanupErrorsBefore(cutoffMs, runId, errorPrefix) {
   let deletedCount = 0;
   let lastDoc = null;
@@ -273,8 +292,9 @@ async function cleanupRedownloadsBefore(cutoffMs, runId, errorPrefix) {
   return deletedCount;
 }
 
+
 // ============================================================================
-// BACKEND ENTRY POINT (CALLED BY HEARTBEAT / OSKernel)
+// BACKEND ENTRY POINT (CALLED BY HEARTBEAT / OSKernel) — v11.0
 // ============================================================================
 export async function pulsebandCleanup() {
   const runId = `PB_CLEANUP_${Date.now()}`;
@@ -287,6 +307,7 @@ export async function pulsebandCleanup() {
   logCleanup("START", { runId });
 
   try {
+    // 24h for sessions, 7d for errors + redownload logs
     const cutoff24h = Date.now() - 24 * 60 * 60 * 1000;
     const cutoff7d = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
@@ -308,9 +329,7 @@ export async function pulsebandCleanup() {
       errorPrefix
     );
 
-    // ---------------------------------------------------------
-    // ⭐ TIMER LOG
-    // ---------------------------------------------------------
+    // TIMER LOG — single summary record per run
     await db.collection("TIMER_LOGS").doc(runId).set({
       fn: "pulsebandCleanup",
       runId,
@@ -331,7 +350,6 @@ export async function pulsebandCleanup() {
       deletedErrors,
       deletedRedownloads
     });
-
     return {
       ok: true,
       runId,
@@ -340,7 +358,7 @@ export async function pulsebandCleanup() {
       deletedRedownloads,
       ...CLEANUP_CONTEXT
     };
-
+ 
   } catch (err) {
     error(
       `%c🟥 PURIFIER CLEANUP ERROR`,

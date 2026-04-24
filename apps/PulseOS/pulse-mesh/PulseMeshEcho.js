@@ -1,30 +1,34 @@
 // ============================================================================
-// [pulse:echo] PULSE_OS_DIAGNOSTIC_REFLECTION v9.2  // silver
+// [pulse:echo] PULSE_OS_DIAGNOSTIC_REFLECTION v11-Evo  // silver
 // Diagnostic Reflection Layer • Metadata-Only • Read-Only • Non-Interference
 // ============================================================================
 //
-// IDENTITY — THE SILVER ORGAN (v9.2):
-//  ----------------------------------
-//  • Sends metadata-only diagnostic pulses ("echo pulses").
-//  • Measures system friction, drift, loops, sync, organ usage.
-//  • Reads metadata from all layers without influencing them.
-//  • NEVER computes payloads.
-//  • NEVER mutates impulses.
-//  • NEVER affects routing, hormones, memory, or flow.
-//  • Pure reflection organ (safe for backendAI + Awareness Page).
+// IDENTITY — THE SILVER ORGAN (v11-Evo):
+// --------------------------------------
+// • Sends metadata-only diagnostic pulses ("echo pulses").
+// • Measures system friction, drift, loops, sync, organ usage.
+// • Reads metadata from all layers without influencing them.
+// • NEVER computes payloads.
+// • NEVER mutates impulses.
+// • NEVER affects routing, hormones, memory, or flow.
+// • Pure reflection organ (safe for backendAI + Awareness Page).
+// • v11-Evo: binary-aware, dual-mode-ready, deterministic-field,
+//            unified-advantage-field, mesh-pressure-aware,
+//            flow-aware, drift-aware, multi-instance-ready.
 //
-// SAFETY CONTRACT (v9.2):
-//  • Metadata-only
-//  • Read-only
-//  • No loops, no sync, no hormones, no memory writes
-//  • No autonomy, no sentience, no self-model
-//  • Deterministic: same system → same reflection
-//  • Zero imports — all dependencies injected by CNS
+// SAFETY CONTRACT (v11-Evo):
+// ---------------------------
+// • Metadata-only
+// • Read-only
+// • No loops, no sync, no hormones, no memory writes
+// • No autonomy, no sentience, no self-model
+// • Deterministic: same system → same reflection
+// • Zero imports — all dependencies injected by CNS
 // ============================================================================
 
 
 // ============================================================================
-//  FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
+// FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
 // ============================================================================
 export function createPulseEcho({
   flow,
@@ -37,11 +41,13 @@ export function createPulseEcho({
   const meta = {
     layer: "PulseEcho",
     role: "DIAGNOSTIC_REFLECTION",
-    version: 9.2,
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
       localAware: true,
       internetAware: true,
 
@@ -56,7 +62,13 @@ export function createPulseEcho({
 
       signalFactoringAware: true,
       auraPressureAware: true,
-      meshPressureAware: true
+      meshPressureAware: true,
+      flowAware: true,
+      driftAware: true,
+
+      zeroCompute: true,
+      zeroMutation: true,
+      zeroRoutingInfluence: true
     }
   };
 
@@ -70,7 +82,9 @@ export function createPulseEcho({
     const result = flow.run(echo, entryNodeId, {
       trustLevel: 1,
       load: 0,
-      echoMode: true // signals all organs to stay read-only
+      echoMode: true,     // signals all organs to stay read-only
+      binaryMode: false,  // symbolic echo by default
+      dualMode: true
     });
 
     return extractReflection(result);
@@ -79,7 +93,7 @@ export function createPulseEcho({
 
   // -------------------------------------------------------
   // INTERNAL: Create Echo Pulse (metadata-only, deterministic)
-//  -------------------------------------------------------
+  // -------------------------------------------------------
   function createEchoPulse(context) {
     return {
       id: "echo_diagnostic",
@@ -102,6 +116,12 @@ export function createPulseEcho({
 
     return {
       echoId: impulse.id || "echo_diagnostic",
+
+      mode: {
+        binary: !!flags.binary_mode,
+        symbolic: !flags.binary_mode,
+        dual: !!flags.dual_mode
+      },
 
       flow: {
         throttled: !!flags.flow_throttled,
@@ -146,7 +166,7 @@ export function createPulseEcho({
 
   // -------------------------------------------------------
   // INTERNAL: Stability Heuristic (metadata-only)
-//  -------------------------------------------------------
+  // -------------------------------------------------------
   function estimateStability(flags) {
     let score = 1;
 
@@ -161,7 +181,7 @@ export function createPulseEcho({
 
   // -------------------------------------------------------
   // INTERNAL: Drift Risk Heuristic (metadata-only)
-//  -------------------------------------------------------
+  // -------------------------------------------------------
   function estimateDrift(flags) {
     let risk = 0;
 
@@ -176,7 +196,7 @@ export function createPulseEcho({
 
   // -------------------------------------------------------
   // INTERNAL: Flag helpers (read-only)
-//  -------------------------------------------------------
+  // -------------------------------------------------------
   function hasAnyReflexDropFlag(flags) {
     return Object.keys(flags).some((k) => k.startsWith("instinct_") && k.endsWith("_drop"))
       || Object.keys(flags).some((k) => k.startsWith("reflex_drop_at_"));

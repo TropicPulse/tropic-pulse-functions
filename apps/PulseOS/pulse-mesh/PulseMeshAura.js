@@ -1,12 +1,12 @@
 // ============================================================================
 // FILE: /apps/organs/aura/PulseMeshAura.js
-// [pulse:mesh] PULSE_MESH_AURA v9.2  // violet
+// [pulse:mesh] PULSE_MESH_AURA v11-Evo  // violet
 // System-wide Field Layer • Stabilization Loops • Multi-Instance Resonance
 // Metadata-only • Zero Compute • Zero Payload Mutation
 // ============================================================================
 //
-// IDENTITY — THE AURA FIELD (v9.2):
-//  --------------------------------
+// IDENTITY — THE AURA FIELD (v11-Evo):
+//  -----------------------------------
 //  • Organism-wide field surrounding all pulses and instances.
 //  • Provides stabilization loops (loop field).
 //  • Provides multi-instance resonance (sync field).
@@ -14,14 +14,15 @@
 //  • Senses mesh factoring pressure → factoring hints.
 //  • Metadata-only: tags, hints, and gentle shaping fields.
 //  • Advantage-cascade aware: inherits ANY systemic advantage automatically.
+//  • Binary-aware: can tag pulses as binary-ready / binary-preferred.
 //  • Fully deterministic: same impulse → same aura tags.
 //  • Zero randomness, zero timestamps, zero async.
 //
-// SAFETY CONTRACT (v9.2):
-//  -----------------------
+// SAFETY CONTRACT (v11-Evo):
+//  --------------------------
 //  • No randomness
 //  • No timestamps
-//  • No payload mutation
+//  • No payload mutation (flags-only metadata shaping)
 //  • No async
 //  • Fail-open: missing fields → safe defaults
 //  • Deterministic: same impulse → same aura tags
@@ -43,10 +44,15 @@ const AuraState = {
   flowPressure: 0.0,
   recentThrottleRate: 0.0,
 
+  // Binary-awareness knobs (v11-Evo)
+  binaryPreference: 0.0,   // 0..1: how strongly we prefer binary routes
+  binaryMeshReady: true,   // whether mesh has binary counterpart
+  binaryOSReady: true,     // whether OS has binary counterpart
+
   meta: {
     layer: "PulseMeshAura",
     role: "AURA_FIELD",
-    version: 9.2,
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -62,7 +68,13 @@ const AuraState = {
       signalFactoringAware: true,
       deterministicField: true,
       zeroCompute: true,
-      zeroMutation: true
+      zeroMutation: true,
+
+      // v11-Evo additions
+      binaryAware: true,
+      binaryMeshReady: true,
+      binaryOSReady: true,
+      pulseMesh11Ready: true
     }
   }
 };
@@ -93,6 +105,9 @@ export const PulseAuraControl = {
   setRecentThrottleRate(v) {
     AuraState.recentThrottleRate = clamp01(v);
   },
+  setBinaryPreference(v) {
+    AuraState.binaryPreference = clamp01(v);
+  },
   snapshot() {
     return { ...AuraState };
   }
@@ -100,7 +115,7 @@ export const PulseAuraControl = {
 
 
 // -----------------------------------------------------------
-// Aura Pack: loop + sync + stabilization behaviors
+// Aura Pack: loop + sync + stabilization + binary hints
 // -----------------------------------------------------------
 export const PulseAura = {
 
@@ -175,6 +190,22 @@ export const PulseAura = {
     impulse.flags["aura_factoring_bias"] = clamp01((p + t) / 2);
 
     return impulse;
+  },
+
+  // v11-Evo: binary-awareness hinting
+  binaryHint(impulse) {
+    impulse.flags = impulse.flags || {};
+
+    if (AuraState.binaryPreference > 0 && AuraState.binaryMeshReady) {
+      impulse.flags["aura_prefers_binary_mesh"] = true;
+      impulse.flags["aura_binary_mesh_bias"] = AuraState.binaryPreference;
+    }
+
+    if (AuraState.binaryOSReady) {
+      impulse.flags["aura_binary_os_available"] = true;
+    }
+
+    return impulse;
   }
 };
 
@@ -192,6 +223,7 @@ export function applyPulseAura(impulse) {
   PulseAura.tagSync(impulse);
   PulseAura.syncHint(impulse);
   PulseAura.factoringHint(impulse);
+  PulseAura.binaryHint(impulse);
 
   impulse.flags["aura_applied"] = true;
 

@@ -80,10 +80,49 @@ export const PulseEarnGenomeMetadata = {
     "GENOME::id:string::payload:type:string::payload:data:any::payload:gpu::*::marketplace:string::assignedTo:deviceId::cycleIndex:number",
 
   // Deterministic signatures
-  genomeSignature: computeHash(
-    JSON.stringify(PulseEarnJobSchema)
+  genomeSignature: computeHash(JSON.stringify(PulseEarnJobSchema)),
+
+  // -----------------------------
+  // A — Dual-Band Metadata
+  // -----------------------------
+  bandAware: true,
+  dualBandReady: true,
+  bandSignature_symbolic: computeHash("band::symbolic"),
+  bandSignature_binary: computeHash("band::binary"),
+
+  // -----------------------------
+  // B — Binary Surfaces
+  // -----------------------------
+  binaryGenomeSignature: computeHash(
+    "binary::" + JSON.stringify(PulseEarnJobSchema)
   ),
 
+  binaryFieldSignatures: {
+    id: computeHash("binary::id:string"),
+    payload: computeHash("binary::payload"),
+    payload_type: computeHash("binary::payload.type:string"),
+    payload_data: computeHash("binary::payload.data:any"),
+    payload_gpu: computeHash("binary::payload.gpu"),
+    marketplace: computeHash("binary::marketplace:string"),
+    assignedTo: computeHash("binary::assignedTo:deviceId"),
+    cycleIndex: computeHash("binary::cycleIndex:number")
+  },
+
+  // -----------------------------
+  // A — Wave-Theory Metadata
+  // -----------------------------
+  waveSignature: computeHash(
+    "wave::" + computeHash(JSON.stringify(PulseEarnJobSchema))
+  ),
+
+  waveField: {
+    wavelength: 9,
+    amplitude: 3,
+    phase: (9 + 3) % 8,
+    mode: "symbolic-wave"
+  },
+
+  // Original field signatures (unchanged)
   fieldSignatures: {
     id: computeHash("id:string"),
     payload: computeHash("payload"),
@@ -95,3 +134,4 @@ export const PulseEarnGenomeMetadata = {
     cycleIndex: computeHash("cycleIndex:number")
   }
 };
+

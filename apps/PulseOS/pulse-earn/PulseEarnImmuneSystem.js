@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnImmuneSystem-v11-Evo.js
-// LAYER: THE IMMUNE SYSTEM (v11-Evo)
+// LAYER: THE IMMUNE SYSTEM (v11-Evo + Dual-Band + Binary + Wave)
 // (Subsystem Doctor + Drift Diagnostician + Deterministic Repair Engine)
 // ============================================================================
 //
@@ -19,6 +19,7 @@
 //   • NO executing user code.
 //   • NO timestamps, NO async.
 //   • Deterministic drift detection only.
+//   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
 
 
@@ -68,6 +69,12 @@ const immuneState = {
   lastDriftSignature: null,
   lastRepairSignature: null,
 
+  // v11+ Dual-Band + Binary + Wave
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null,
+
   ...PULSE_EARN_IMMUNE_CONTEXT
 };
 
@@ -85,6 +92,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -107,7 +119,7 @@ function buildRepairSignature(key, cycle) {
 
 
 // ============================================================================
-// runHealthCheck() — immune surveillance scan (v11-Evo)
+// runHealthCheck() — immune surveillance scan (v11-Evo + Dual-Band + Binary + Wave)
 // ============================================================================
 export function runHealthCheck() {
   immuneCycle++;
@@ -138,8 +150,57 @@ export function runHealthCheck() {
       report.cell.lastError ||
       report.connector.lastError;
 
+    // A — Dual-Band Awareness (derive band from runtime/packets, default symbolic)
+    const derivedBand = normalizeBand(
+      report.runtime.lastBand ||
+      report.packets.lastBand ||
+      "symbolic"
+    );
+    immuneState.lastBand = derivedBand;
+    immuneState.lastBandSignature = computeHash(`BAND::${derivedBand}`);
+
     immuneState.lastImmuneSignature = buildImmuneSignature(immuneCycle);
     immuneState.lastDriftSignature = buildDriftSignature(report);
+
+    // B — Binary Surfaces (structural only)
+    const errorFlags = [
+      report.engine.lastError,
+      report.runtime.lastError,
+      report.worker.lastError,
+      report.submission.lastError,
+      report.packets.lastError,
+      report.cell.lastError,
+      report.connector.lastError
+    ];
+    const errorCount = errorFlags.reduce(
+      (acc, e) => acc + (e ? 1 : 0),
+      0
+    );
+    const surface = errorCount * 100 + immuneCycle;
+
+    const binaryField = {
+      binaryImmuneSignature: computeHash(`BIMMUNE::${surface}`),
+      binarySurfaceSignature: computeHash(`BSURF_IMMUNE::${surface}`),
+      binarySurface: {
+        errorCount,
+        cycle: immuneCycle,
+        surface
+      },
+      parity: surface % 2 === 0 ? 0 : 1,
+      density: errorCount,
+      shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+    };
+    immuneState.lastBinaryField = binaryField;
+
+    // A — Wave-Theory Metadata (structural only)
+    const waveField = {
+      amplitude: errorCount,
+      wavelength: immuneCycle,
+      phase: (errorCount + immuneCycle) % 8,
+      band: derivedBand,
+      mode: derivedBand === "binary" ? "compression-wave" : "symbolic-wave"
+    };
+    immuneState.lastWaveField = waveField;
 
     if (!driftDetected) {
       immuneState.status = "healthy";
@@ -150,6 +211,9 @@ export function runHealthCheck() {
         report,
         immuneSignature: immuneState.lastImmuneSignature,
         driftSignature: immuneState.lastDriftSignature,
+        band: derivedBand,
+        binaryField,
+        waveField,
         cycleIndex: immuneCycle,
         ...PULSE_EARN_IMMUNE_CONTEXT
       };
@@ -164,6 +228,9 @@ export function runHealthCheck() {
       message: "Subsystem drift detected",
       immuneSignature: immuneState.lastImmuneSignature,
       driftSignature: immuneState.lastDriftSignature,
+      band: derivedBand,
+      binaryField,
+      waveField,
       cycleIndex: immuneCycle,
       ...PULSE_EARN_IMMUNE_CONTEXT
     };
@@ -172,10 +239,39 @@ export function runHealthCheck() {
     immuneState.status = "error";
     immuneState.lastError = err.message;
 
+    const derivedBand = normalizeBand(immuneState.lastBand);
+
+    const surface = immuneCycle;
+    const binaryField = {
+      binaryImmuneSignature: computeHash(`BIMMUNE_ERR::${surface}`),
+      binarySurfaceSignature: computeHash(`BSURF_IMMUNE_ERR::${surface}`),
+      binarySurface: {
+        errorCount: 1,
+        cycle: immuneCycle,
+        surface
+      },
+      parity: surface % 2 === 0 ? 0 : 1,
+      density: 1,
+      shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+    };
+    immuneState.lastBinaryField = binaryField;
+
+    const waveField = {
+      amplitude: 1,
+      wavelength: immuneCycle,
+      phase: (1 + immuneCycle) % 8,
+      band: derivedBand,
+      mode: derivedBand === "binary" ? "compression-wave" : "symbolic-wave"
+    };
+    immuneState.lastWaveField = waveField;
+
     return {
       status: "error",
       error: err.message,
       immuneSignature: buildImmuneSignature(immuneCycle),
+      band: derivedBand,
+      binaryField,
+      waveField,
       cycleIndex: immuneCycle,
       ...PULSE_EARN_IMMUNE_CONTEXT
     };
@@ -184,7 +280,7 @@ export function runHealthCheck() {
 
 
 // ============================================================================
-// runRepair() — immune response (v11-Evo)
+// runRepair() — immune response (v11-Evo + dual-band aware genetic repair)
 // ============================================================================
 export function runRepair() {
   immuneCycle++;
@@ -198,10 +294,14 @@ export function runRepair() {
 
     // If PacketEngine drifted, regenerate last packet deterministically
     if (packets.lastError && packets.lastKey) {
-      const [fileId, packetIndex] = packets.lastKey.split(":");
+      const parts = String(packets.lastKey).split(":");
+      const fileId = parts[0];
+      const packetIndex = parts[1];
+      const bandRaw = parts[2];
+      const band = normalizeBand(bandRaw);
 
-      const regenerated = synthesizePulseEarnGene(fileId, packetIndex);
-      writePulseEarnGene(fileId, packetIndex, regenerated);
+      const regenerated = synthesizePulseEarnGene(fileId, packetIndex, band);
+      writePulseEarnGene(fileId, packetIndex, regenerated, band);
 
       repairedKey = packets.lastKey;
     }

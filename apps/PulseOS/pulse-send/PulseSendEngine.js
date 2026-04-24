@@ -2,13 +2,23 @@
 //  PulseSendMover-v11-Evo.js
 //  Movement Organ • Pulse‑Agnostic • Deterministic Transport Muscle
 //  v11: Diagnostics + Signatures + Pattern Surface + Lineage Surface
+//  v11-Binary: Binary-Aware Movement Surface (Optional, Non-Breaking)
 // ============================================================================
+//
+//  ROLE:
+//    • Pulse‑agnostic movement organ (v1/v2/v3).
+//    • Builds a deterministic movement packet (no side effects).
+//    • Emits diagnostics + signatures for the movement arc.
+//    • Now *binary-aware*:
+//        - If the pulse carries binary metadata (binaryPattern, binaryMode, etc.),
+//          it is surfaced in diagnostics and in the movementSignature.
+//        - If not, behavior is unchanged.
 //
 //  SAFETY CONTRACT (v11-Evo):
 //  --------------------------
 //  • No imports.
 //  • No network.
-//  • No compute.
+//  • No compute beyond local helpers.
 //  • Zero randomness.
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
@@ -41,7 +51,12 @@ export const PulseRole = {
 
     diagnosticsReady: true,
     signatureReady: true,
-    movementSurfaceReady: true
+    movementSurfaceReady: true,
+
+    // Binary-aware movement surface:
+    //  - understands binaryPattern / binaryMode / binaryStrength if present
+    //  - does not require them
+    binaryAwareMovementReady: true
   },
 
   routingContract: "PulseRouter-v11",
@@ -63,12 +78,43 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function extractBinarySurfaceFromPulse(pulse) {
+  const payload = pulse?.payload || {};
+
+  const binaryPattern  = payload.binaryPattern || null;
+  const binaryMode     = payload.binaryMode || null;
+  const binaryPayload  = payload.binaryPayload || null;
+  const binaryHints    = payload.binaryHints || null;
+  const binaryStrength = typeof payload.binaryStrength === "number"
+    ? payload.binaryStrength
+    : null;
+
+  const hasBinary =
+    !!binaryPattern ||
+    !!binaryMode ||
+    !!binaryPayload ||
+    !!binaryHints ||
+    binaryStrength !== null;
+
+  return {
+    hasBinary,
+    binaryPattern,
+    binaryMode,
+    binaryPayload,
+    binaryHints,
+    binaryStrength
+  };
+}
+
 function buildMovementDiagnostics({ pulse, targetOrgan, pathway, mode }) {
   const pattern = pulse?.pattern || "NO_PATTERN";
   const lineageDepth = Array.isArray(pulse?.lineage) ? pulse.lineage.length : 0;
   const pulseType = pulse?.pulseType || pulse?.PulseRole?.identity || "UNKNOWN_PULSE_TYPE";
 
+  const binarySurface = extractBinarySurfaceFromPulse(pulse);
+
   return {
+    // Core symbolic surface
     pattern,
     lineageDepth,
     pulseType,
@@ -76,17 +122,29 @@ function buildMovementDiagnostics({ pulse, targetOrgan, pathway, mode }) {
     pathway: pathway || "NO_PATHWAY",
     mode,
 
+    // Binary surface (optional, non-breaking)
+    binary: binarySurface,
+
+    // Hashes for quick indexing / SDN / logging
     patternHash: computeHash(pattern),
     lineageHash: computeHash(String(lineageDepth)),
     pulseTypeHash: computeHash(pulseType),
     organHash: computeHash(String(targetOrgan)),
-    pathwayHash: computeHash(JSON.stringify(pathway || {}))
+    pathwayHash: computeHash(JSON.stringify(pathway || {})),
+
+    // Binary hashes (only meaningful if hasBinary === true)
+    binaryPatternHash: binarySurface.binaryPattern
+      ? computeHash(binarySurface.binaryPattern)
+      : null,
+    binaryModeHash: binarySurface.binaryMode
+      ? computeHash(binarySurface.binaryMode)
+      : null
   };
 }
 
 
 // ============================================================================
-//  FACTORY — Create the Mover Organ (v11-Evo)
+//  FACTORY — Create the Mover Organ (v11-Evo + Binary-Aware)
 // ============================================================================
 export function createPulseSendMover({ pulseMesh, log }) {
   return {
@@ -110,13 +168,15 @@ export function createPulseSendMover({ pulseMesh, log }) {
         advantageField
       });
 
-      // ⭐ v11 movement signature
+      // ⭐ v11 movement signature (now implicitly binary-aware via diagnostics)
       const movementSignature = computeHash(
         diagnostics.pattern +
         "::" +
         diagnostics.targetOrgan +
         "::" +
-        diagnostics.mode
+        diagnostics.mode +
+        "::" +
+        (diagnostics.binary.binaryPattern || "NO_BINARY_PATTERN")
       );
 
       // ⭐ Return deterministic movement packet

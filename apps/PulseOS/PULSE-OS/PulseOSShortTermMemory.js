@@ -1,54 +1,19 @@
+
 // ============================================================================
 // FILE: /apps/PulseOS/Organs/Memory/PulseOSShortTermMemory.js
-// PULSE OS — v9.2
+// PULSE OS — v11-Evo-Prime
 // “THE SHORT‑TERM MEMORY / HIPPOCAMPAL BUFFER”
-// B‑LAYER NEURAL MEMORY • OFFLINE‑ABSOLUTE • ZERO MUTATION AFTER INSERTION
-// ============================================================================
-//
-// ORGAN IDENTITY (v9.2):
-//   • Organ Type: Memory (Short‑Term / Working Memory)
-//   • Layer: B‑Layer (Router‑Adjacent Neural Buffer)
-//   • Biological Analog: Hippocampal short‑term memory buffer
-//   • System Role: Hold logs before Heart.js flush + Immune healing
-//
-// SAFETY CONTRACT (v9.2):
-//   • Never mutate logs after insertion
-//   • Never bypass this organ for logging
-//   • Always preserve lineage + timestamps
-//   • Always dedupe structurally
-//   • Always remain offline‑absolute
-//   • Never run timers, loops, or network calls
+// DUAL‑BAND NEURAL MEMORY • OFFLINE‑ABSOLUTE • ZERO MUTATION AFTER INSERTION
 // ============================================================================
 
 
-// ============================================================================
-// LAYER CONSTANTS + DIAGNOSTICS
-// ============================================================================
 const LAYER_ID   = "SHORT-TERM-MEMORY";
 const LAYER_NAME = "THE HIPPOCAMPAL BUFFER";
 const LAYER_ROLE = "B-LAYER NEURAL MEMORY";
-const LAYER_VER  = "9.2";
-
-const MEMORY_DIAGNOSTICS_ENABLED =
-  window.PULSE_MEMORY_DIAGNOSTICS === "true" ||
-  window.PULSE_DIAGNOSTICS === "true";
-
-const logMemory = (stage, details = {}) => {
-  if (!MEMORY_DIAGNOSTICS_ENABLED) return;
-
-  log(JSON.stringify({
-    pulseLayer: LAYER_ID,
-    pulseName:  LAYER_NAME,
-    pulseRole:  LAYER_ROLE,
-    pulseVer:   LAYER_VER,
-    stage,
-    ...details
-  }));
-};
-
+const LAYER_VER  = "11.0-Evo-Prime";
 
 // ============================================================================
-// HUMAN‑READABLE CONTEXT MAP
+// MEMORY CONTEXT — organism-wide identity
 // ============================================================================
 const MEMORY_CONTEXT = {
   label: "MEMORY",
@@ -64,105 +29,110 @@ const MEMORY_CONTEXT = {
     zeroNetwork: true,
     zeroMutation: true,
     zeroTiming: true,
-    offlineAbsolute: true
+    offlineAbsolute: true,
+
+    binaryAware: true,
+    symbolicAware: true,
+    dualModeAware: true,
+
+    executionContextAware: true,
+    pressureAware: true,
+    dispatchAware: true
   }
 };
 
+// ============================================================================
+// HELPERS — deterministic structural signature
+// ============================================================================
+function stableStringify(value) {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return "[" + value.map(stableStringify).join(",") + "]";
+  }
+  const keys = Object.keys(value).sort();
+  const parts = keys.map(k => JSON.stringify(k) + ":" + stableStringify(value[k]));
+  return "{" + parts.join(",") + "}";
+}
+
+function buildMemorySignature(entry) {
+  return stableStringify({
+    eventType: entry.eventType || "unknown",
+    modeKind: entry.modeKind || "symbolic",
+    executionContext: entry.executionContext || {},
+    pressureSnapshot: entry.pressureSnapshot || {}
+  });
+}
 
 // ============================================================================
-// INTERNAL HELPERS — STRUCTURAL DEDUPE
+// STRUCTURAL DEDUPE — drift-proof
 // ============================================================================
 function isStructurallySame(a, b) {
   if (!a || !b) return false;
-  if (a.eventType !== b.eventType) return false;
-
-  const aKeys = Object.keys(a.data || {});
-  const bKeys = Object.keys(b.data || {});
-  if (aKeys.length !== bKeys.length) return false;
-
-  for (const k of aKeys) {
-    if (!(k in b.data)) return false;
-  }
-
-  return true;
+  return a.memorySignature === b.memorySignature;
 }
 
-
 // ============================================================================
-// SHORT‑TERM MEMORY ORGAN — HIPPOCAMPAL BUFFER (v9.2)
+// SHORT‑TERM MEMORY ORGAN — v11-Evo-Prime
 // ============================================================================
 export const PulseOSShortTermMemory = {
   _logs: [],
   _maxLogs: 750,
 
   // --------------------------------------------------------------------------
-  // ⭐ PUSH A NEW LOG ENTRY (Router.js → ShortTermMemory)
+  // PUSH — immutable insertion, dual-band aware
   // --------------------------------------------------------------------------
   push(entry) {
-    if (!entry || typeof entry !== "object") {
-      logMemory("PUSH_INVALID", {});
-      return;
-    }
+    if (!entry || typeof entry !== "object") return;
 
-    // Immutable insertion wrapper
-    entry = {
+    const memorySignature = buildMemorySignature(entry);
+
+    const wrapped = {
       ...entry,
       ...MEMORY_CONTEXT,
-      memoryVersion: LAYER_VER
+      memoryVersion: LAYER_VER,
+      memorySignature
     };
 
     const last = this._logs[this._logs.length - 1];
 
-    // Structural dedupe
-    if (last && isStructurallySame(last, entry)) {
-      logMemory("PUSH_DEDUPE_STRUCTURAL", { eventType: entry.eventType });
+    if (last && isStructurallySame(last, wrapped)) {
       return;
     }
 
-    this._logs.push(entry);
+    this._logs.push(wrapped);
 
-    logMemory("PUSH_OK", {
-      eventType: entry.eventType,
-      total: this._logs.length
-    });
-
-    // Trim oldest logs
     if (this._logs.length > this._maxLogs) {
       this._logs.shift();
-      logMemory("PUSH_TRIM", { max: this._maxLogs });
     }
   },
 
   // --------------------------------------------------------------------------
-  // ⭐ GET ALL LOGS (Heart.js → ShortTermMemory)
+  // GET ALL — immutable read
   // --------------------------------------------------------------------------
   getAll() {
-    logMemory("READ", { total: this._logs.length });
     return [...this._logs];
   },
 
   // --------------------------------------------------------------------------
-  // ⭐ CLEAR LOGS AFTER FLUSH (Heart.js → ShortTermMemory)
+  // CLEAR — after flush
   // --------------------------------------------------------------------------
   clear() {
-    logMemory("CLEAR", { removed: this._logs.length });
     this._logs = [];
   },
 
   // --------------------------------------------------------------------------
-  // ⭐ CHECK IF MEMORY HAS ANY LOGS
+  // HAS LOGS
   // --------------------------------------------------------------------------
   hasLogs() {
-    const has = this._logs.length > 0;
-    logMemory("HAS_LOGS", { has });
-    return has;
+    return this._logs.length > 0;
   },
 
   // --------------------------------------------------------------------------
-  // ⭐ SNAPSHOT (offline mode + diagnostics)
+  // SNAPSHOT — offline-absolute
   // --------------------------------------------------------------------------
   snapshot() {
-    logMemory("SNAPSHOT", { total: this._logs.length });
     return {
       version: LAYER_VER,
       count: this._logs.length,

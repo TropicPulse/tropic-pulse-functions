@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v10.5 — THE HEART
+//  PULSE OS v11‑Evo — THE HEART
 //  PulseProxyHeart — Cardiac Pacemaker Engine
 //  ONE IMPORT ONLY (Pacemaker / SA Node)
 //  Backend‑Only • Deterministic • Drift‑Proof • No IQ
@@ -10,14 +10,14 @@ import * as heartbeat from "./PulseProxyHeartBeat.js";
 
 
 // ============================================================================
-// HEART IDENTITY — v10.5
+// HEART IDENTITY — v11‑Evo A‑B‑A
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "Heart",
-  version: "10.5",
-  identity: "PulseProxyHeart",
+  version: "11-Evo",
+  identity: "PulseProxyHeart-v11-Evo-ABA",
 
   evo: {
     driftProof: true,
@@ -31,9 +31,66 @@ export const PulseRole = {
     unifiedAdvantageField: true,
     pulseEfficiencyAware: true,
     organismClockOrchestrator: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // v11‑Evo A‑B‑A surfaces
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true
   }
 };
+
+
+// ============================================================================
+//  INTERNAL HELPERS — deterministic, pure
+// ============================================================================
+function computeHash(str) {
+  let h = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `h${h}`;
+}
+
+function buildBinaryField() {
+  const patternLen = 12;
+  const density = 12 + 24;
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: `heart-binary-pheno-${surface % 99991}`,
+    binarySurfaceSignature: `heart-binary-surface-${(surface * 7) % 99991}`,
+    binarySurface: { patternLen, density, surface },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField() {
+  const amplitude = 10;
+  const wavelength = amplitude + 4;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band: "symbolic-root",
+    mode: "symbolic-wave"
+  };
+}
+
+function buildHeartCycleSignature(cycle) {
+  return computeHash(`HEART_CYCLE::${cycle}`);
+}
+
+
+// ============================================================================
+// HEART CONTEXT — v11‑Evo A‑B‑A
+// ============================================================================
+let HEART_EVENT_SEQ = 0;
+let HEART_CYCLE = 0;
 
 const HEART_CONTEXT = {
   layer: PulseRole.layer,
@@ -41,7 +98,7 @@ const HEART_CONTEXT = {
   version: PulseRole.version,
   pacemaker: {
     source: "PulseProxyHeartBeat.js",
-    version: heartbeat?.VERSION || "10.4",
+    version: heartbeat?.VERSION || "11-Evo",
     label: heartbeat?.LABEL || "HEARTBEAT_PACEMAKER"
   },
   evo: PulseRole.evo
@@ -51,8 +108,6 @@ const HEART_CONTEXT = {
 // ============================================================================
 // HEART LOGGER — logs only, no control, no routing
 // ============================================================================
-let HEART_EVENT_SEQ = 0;
-
 async function logHeart(stage, details = {}) {
   HEART_EVENT_SEQ++;
 
@@ -62,7 +117,13 @@ async function logHeart(stage, details = {}) {
     pulseName: "THE HEART",
     pulseRole: "CARDIAC PACEMAKER ENGINE",
     stage,
-    ts: Date.now(),
+
+    // v11‑Evo A‑B‑A surfaces
+    heartCycle: HEART_CYCLE,
+    heartCycleSignature: buildHeartCycleSignature(HEART_CYCLE),
+    binaryField: buildBinaryField(),
+    waveField: buildWaveField(),
+
     ...details,
     ...HEART_CONTEXT
   };
@@ -78,23 +139,26 @@ async function logHeart(stage, details = {}) {
 // PURE WRAPPER AROUND PACEMAKER. NOTHING ELSE.
 // ============================================================================
 export const handler = async () => {
-  const runId = `HB_${Date.now()}`;
+  HEART_CYCLE++;
 
-  await logHeart("BEAT_START", { runId });
+  await logHeart("BEAT_START");
 
   try {
-    // ⭐ The ONLY thing the Heart does:
-    //    Delegate to the pacemaker organ (Heartbeat).
     const beatResult = await heartbeat.beat();
 
-    await logHeart("BEAT_COMPLETE", { runId });
+    await logHeart("BEAT_COMPLETE");
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         ok: true,
-        runId,
         beat: beatResult,
+
+        heartCycle: HEART_CYCLE,
+        heartCycleSignature: buildHeartCycleSignature(HEART_CYCLE),
+        binaryField: buildBinaryField(),
+        waveField: buildWaveField(),
+
         ...HEART_CONTEXT
       })
     };
@@ -102,14 +166,19 @@ export const handler = async () => {
   } catch (err) {
     const msg = String(err);
 
-    await logHeart("FATAL_ERROR", { runId, message: msg });
+    await logHeart("FATAL_ERROR", { message: msg });
 
     return {
       statusCode: 500,
       body: JSON.stringify({
         ok: false,
-        runId,
         error: msg,
+
+        heartCycle: HEART_CYCLE,
+        heartCycleSignature: buildHeartCycleSignature(HEART_CYCLE),
+        binaryField: buildBinaryField(),
+        waveField: buildWaveField(),
+
         ...HEART_CONTEXT
       })
     };

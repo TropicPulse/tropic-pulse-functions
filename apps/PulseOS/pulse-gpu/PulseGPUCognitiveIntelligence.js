@@ -1,23 +1,24 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUUXBridge.js
-// PULSE GPU UX BRIDGE v10.4
+// PULSE GPU UX BRIDGE v11-Evo
 // “INTELLIGENCE LAYER / COGNITIVE COMMUNICATION BRIDGE”
 // ============================================================================
 //
-// SAFETY RULES (v10.4):
+// SAFETY RULES (v11-Evo):
 //   • NO randomness or timestamps
 //   • NO DOM, WebGPU, Node, filesystem, or network APIs
 //   • FAIL-OPEN: malformed advice/plan/insight must not break UXBridge
 //   • SELF-REPAIR READY: notifications must be reconstructable + validateable
 //   • DETERMINISTIC: same advice → same notifications
-//   • PulseSend‑10.4‑ready: notifications routable by compute router
-//   • Earn-ready: compatible with Earn-v2
+//   • PulseSend‑v11‑ready: notifications routable by compute router
+//   • Earn-ready: compatible with Earn-v3
 //   • Zero autonomy, zero compute, zero mutation outside notif object
+//   • Binary-aware, symbolic-aware, dispatch-aware, memory-aware
 // ============================================================================
 
 
 // ------------------------------------------------------
-// ⭐ OS‑v10.4 Notification builder
+// ⭐ OS‑v11-Evo Notification builder
 // ------------------------------------------------------
 function buildNotification({
   kind,
@@ -34,7 +35,7 @@ function buildNotification({
     message: message || "",
     meta: {
       layer: "PulseGPUUXBridge",
-      version: 10.4,
+      version: "11.0-Evo",
       target: "full-gpu",
       selfRepairable: true,
 
@@ -44,12 +45,20 @@ function buildNotification({
         driftProof: true,
         multiInstanceReady: true,
         unifiedAdvantageField: true,
-        pulseSend10Ready: true,
+        pulseSend11Ready: true,
+
+        // NEW v11-Evo awareness
+        binaryAware: true,
+        symbolicAware: true,
+        gpuDispatchAware: true,
+        gpuMemoryAware: true,
+        gpuAdvantageAware: true,
 
         // PulseSend / Earn contracts (conceptual only)
-        routingContract: "PulseSend-v10.4",
-        gpuOrganContract: "PulseGPU-v10.4",
-        earnCompatibility: "Earn-v2"
+        routingContract: "PulseSend-v11",
+        gpuOrganContract: "PulseGPU-v11-Evo",
+        binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+        earnCompatibility: "Earn-v3"
       },
 
       ...(meta || {})
@@ -77,14 +86,14 @@ function validateNotification(n) {
 
 
 // ------------------------------------------------------
-// PulseGPUUXBridge v10.4 — Cognitive Communication Layer
+// PulseGPUUXBridge v11-Evo — Cognitive Communication Layer
 // ------------------------------------------------------
 class PulseGPUUXBridge {
   constructor() {}
 
   static meta = {
     layer: "PulseGPUUXBridge",
-    version: 10.4,
+    version: "11.0-Evo",
     target: "full-gpu",
     selfRepairable: true,
     evo: {
@@ -93,17 +102,27 @@ class PulseGPUUXBridge {
       driftProof: true,
       multiInstanceReady: true,
       unifiedAdvantageField: true,
-      pulseSend10Ready: true,
+      pulseSend11Ready: true,
 
-      routingContract: "PulseSend-v10.4",
-      gpuOrganContract: "PulseGPU-v10.4",
-      earnCompatibility: "Earn-v2"
+      // NEW v11-Evo awareness
+      binaryAware: true,
+      symbolicAware: true,
+      gpuDispatchAware: true,
+      gpuMemoryAware: true,
+      gpuAdvantageAware: true,
+
+      routingContract: "PulseSend-v11",
+      gpuOrganContract: "PulseGPU-v11-Evo",
+      binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+      earnCompatibility: "Earn-v3"
     }
   };
+
+
   // ----------------------------------------------------
-  // Advisor result → notifications
+  // Advisor result → notifications (v11-Evo)
   // ----------------------------------------------------
-  fromAdvisorResult({ currentScore, baselineScore, deltaPercent, advice }) {
+  fromAdvisorResult({ currentScore, baselineScore, deltaPercent, advice, gpuDispatchHints }) {
     if (!Array.isArray(advice) || advice.length === 0) return [];
 
     const notifications = [];
@@ -113,6 +132,15 @@ class PulseGPUUXBridge {
 
       const { type, severity, deltaPercent: dp } = item;
       const gameId = item.gameProfile?.gameId || "this game";
+
+      // NEW: GPU-aware metadata injection
+      const gpuMeta = {
+        gpuDispatchHints,
+        binaryModeObserved: item.binaryModeObserved,
+        symbolicModeObserved: item.symbolicModeObserved,
+        gpuPattern: item.gpuPattern,
+        gpuShapeSignature: item.gpuShapeSignature
+      };
 
       // REGRESSION
       if (type === "regression") {
@@ -143,7 +171,8 @@ class PulseGPUUXBridge {
               currentScore,
               baselineScore,
               deltaPercent: dp,
-              repairHint: "restore-baseline-settings"
+              repairHint: "restore-baseline-settings",
+              ...gpuMeta
             }
           })
         );
@@ -167,7 +196,8 @@ class PulseGPUUXBridge {
               currentScore,
               baselineScore,
               deltaPercent: dp,
-              repairHint: "promote-current-to-baseline"
+              repairHint: "promote-current-to-baseline",
+              ...gpuMeta
             }
           })
         );
@@ -202,7 +232,8 @@ class PulseGPUUXBridge {
               currentScore,
               baselineScore,
               deltaPercent: dp,
-              repairHint: "suggest-baseline-settings"
+              repairHint: "suggest-baseline-settings",
+              ...gpuMeta
             }
           })
         );
@@ -238,7 +269,8 @@ class PulseGPUUXBridge {
               currentScore,
               baselineScore,
               deltaPercent: dp,
-              repairHint: "upgrade-tier"
+              repairHint: "upgrade-tier",
+              ...gpuMeta
             }
           })
         );
@@ -248,8 +280,9 @@ class PulseGPUUXBridge {
     return notifications.filter(validateNotification);
   }
 
+
   // ----------------------------------------------------
-  // Restore plan → notification  (v10.4)
+  // Restore plan → notification  (v11-Evo)
   // ----------------------------------------------------
   fromRestorePlan(plan) {
     if (!plan || typeof plan !== "object") return null;
@@ -257,6 +290,13 @@ class PulseGPUUXBridge {
     const { action, reason, extra } = plan;
 
     if (action === "noop") return null;
+
+    const gpuMeta = {
+      gpuPattern: plan.gpuPattern,
+      gpuShapeSignature: plan.gpuShapeSignature,
+      binaryModeObserved: plan.binaryModeObserved,
+      symbolicModeObserved: plan.symbolicModeObserved
+    };
 
     if (action === "restore") {
       return buildNotification({
@@ -279,8 +319,9 @@ class PulseGPUUXBridge {
         meta: {
           extra,
           repairHint: "restore-baseline-settings",
-          routingContract: "PulseSend-v10.4",
-          gpuOrganContract: "PulseGPU-v10.4"
+          routingContract: "PulseSend-v11",
+          gpuOrganContract: "PulseGPU-v11-Evo",
+          ...gpuMeta
         }
       });
     }
@@ -306,8 +347,9 @@ class PulseGPUUXBridge {
         meta: {
           extra,
           repairHint: "suggest-baseline-settings",
-          routingContract: "PulseSend-v10.4",
-          gpuOrganContract: "PulseGPU-v10.4"
+          routingContract: "PulseSend-v11",
+          gpuOrganContract: "PulseGPU-v11-Evo",
+          ...gpuMeta
         }
       });
     }
@@ -333,8 +375,9 @@ class PulseGPUUXBridge {
         meta: {
           extra,
           repairHint: "upgrade-tier",
-          routingContract: "PulseSend-v10.4",
-          gpuOrganContract: "PulseGPU-v10.4"
+          routingContract: "PulseSend-v11",
+          gpuOrganContract: "PulseGPU-v11-Evo",
+          ...gpuMeta
         }
       });
     }
@@ -342,10 +385,11 @@ class PulseGPUUXBridge {
     return null;
   }
 
+
   // ----------------------------------------------------
-  // Insights → notifications  (v10.4)
-  // ----------------------------------------------------
-  fromInsights(insights = []) {
+  // Insights → notifications  (v11-Evo)
+// ----------------------------------------------------
+  fromInsights(insights = [], gpuDispatchHints = null) {
     if (!Array.isArray(insights) || insights.length === 0) return [];
 
     const notifications = [];
@@ -355,6 +399,14 @@ class PulseGPUUXBridge {
 
       const { type, severity, message, stepId, deltaPercent } = insight;
       const gameId = insight.gameProfile?.gameId || "this game";
+
+      const gpuMeta = {
+        gpuDispatchHints,
+        gpuPattern: insight.gpuPattern,
+        gpuShapeSignature: insight.gpuShapeSignature,
+        binaryModeObserved: insight.binaryModeObserved,
+        symbolicModeObserved: insight.symbolicModeObserved
+      };
 
       if (type === "step-duration-change") {
         const faster = typeof deltaPercent === "number" && deltaPercent > 0;
@@ -381,8 +433,9 @@ class PulseGPUUXBridge {
               extra: insight.extra,
               repairHint: "recompute-insight",
 
-              routingContract: "PulseSend-v10.4",
-              gpuOrganContract: "PulseGPU-v10.4"
+              routingContract: "PulseSend-v11",
+              gpuOrganContract: "PulseGPU-v11-Evo",
+              ...gpuMeta
             }
           })
         );
@@ -392,6 +445,7 @@ class PulseGPUUXBridge {
     return notifications.filter(validateNotification);
   }
 }
+
 
 // ------------------------------------------------------
 // EXPORTS

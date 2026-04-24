@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnHeart-v11-Evo.js
-// LAYER: THE HEART (v11-Evo)
+// LAYER: THE HEART (v11-Evo + Dual-Band + Binary + Wave)
 // (Deterministic Heartbeat Cycle + Circulatory Pump)
 // ============================================================================
 //
@@ -23,6 +23,7 @@
 //   • NO async, NO timers, NO timestamps.
 //   • Deterministic cycle only.
 //   • PulseSendSystem + Metabolism are injected, not imported.
+//   • Dual-band + binary + wave metadata are structural-only, no behavior change.
 // ============================================================================
 
 import { getNextMarketplaceJob } from "./PulseEarnNervousSystem-v11-Evo.js";
@@ -45,7 +46,13 @@ const heartHealing = {
   lastHeartSignature: null,
   lastJobSignature: null,
   lastResultSignature: null,
-  lastSubmissionSignature: null
+  lastSubmissionSignature: null,
+
+  // v11+ Dual-Band + Binary + Wave
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 // Deterministic cycle counter
@@ -62,6 +69,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -89,7 +101,7 @@ function buildSubmissionSignature(submission) {
 
 
 // ============================================================================
-// FACTORY — createPulseEarnHeart (v11-Evo)
+// FACTORY — createPulseEarnHeart (v11-Evo + Dual-Band + Binary + Wave)
 // ============================================================================
 export function createPulseEarnHeart({
   pulseSendSystem,   // optional: injected PulseSendSystem (compute override)
@@ -125,10 +137,48 @@ export function createPulseEarnHeart({
         heartHealing.lastJob = job;
         heartHealing.lastJobSignature = buildJobSignature(job);
 
+        // A — Dual-Band Awareness
+        const band = normalizeBand(job.band || job.meta?.band || "symbolic");
+        heartHealing.lastBand = band;
+        heartHealing.lastBandSignature = computeHash(`BAND::${band}`);
+
+        // B — Binary Surfaces (structural only)
+        const jobIdLength = (job.id || "").length;
+        const marketplaceLength = (job.marketplace || "").length;
+        const binarySurfaceValue = jobIdLength + marketplaceLength + heartCycle;
+
+        const binaryField = {
+          binaryHeartSignature: computeHash(`BHEART::${binarySurfaceValue}`),
+          binarySurfaceSignature: computeHash(`BSURF_HEART::${binarySurfaceValue}`),
+          binarySurface: {
+            jobIdLength,
+            marketplaceLength,
+            cycle: heartCycle,
+            surface: binarySurfaceValue
+          },
+          parity: binarySurfaceValue % 2 === 0 ? 0 : 1,
+          density: jobIdLength,
+          shiftDepth: Math.max(0, Math.floor(Math.log2(binarySurfaceValue || 1)))
+        };
+
+        heartHealing.lastBinaryField = binaryField;
+
+        // A — Wave-Theory Metadata (structural only)
+        const waveField = {
+          amplitude: jobIdLength,
+          wavelength: heartCycle,
+          phase: (jobIdLength + heartCycle) % 8,
+          band,
+          mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+        };
+
+        heartHealing.lastWaveField = waveField;
+
         log("earn:heart_job_selected", {
           workerId,
           jobId: job.id,
-          cycleIndex: heartCycle
+          cycleIndex: heartCycle,
+          band
         });
 
         // ------------------------------------------------------
@@ -151,7 +201,8 @@ export function createPulseEarnHeart({
           workerId,
           jobId: job.id,
           success: result.success,
-          cycleIndex: heartCycle
+          cycleIndex: heartCycle,
+          band
         });
 
         // ------------------------------------------------------
@@ -165,7 +216,8 @@ export function createPulseEarnHeart({
           workerId,
           jobId: job.id,
           submission,
-          cycleIndex: heartCycle
+          cycleIndex: heartCycle,
+          band
         });
 
         // ------------------------------------------------------
@@ -177,7 +229,10 @@ export function createPulseEarnHeart({
           job,
           result,
           submission,
-          heartSignature: heartHealing.lastHeartSignature
+          heartSignature: heartHealing.lastHeartSignature,
+          band,
+          binaryField,
+          waveField
         };
 
       } catch (err) {
@@ -223,7 +278,12 @@ export function createPulseEarnHeart({
         lastHeartSignature: heartHealing.lastHeartSignature,
         lastJobSignature: heartHealing.lastJobSignature,
         lastResultSignature: heartHealing.lastResultSignature,
-        lastSubmissionSignature: heartHealing.lastSubmissionSignature
+        lastSubmissionSignature: heartHealing.lastSubmissionSignature,
+
+        lastBand: heartHealing.lastBand,
+        lastBandSignature: heartHealing.lastBandSignature,
+        lastBinaryField: heartHealing.lastBinaryField,
+        lastWaveField: heartHealing.lastWaveField
       };
     }
   };

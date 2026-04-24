@@ -1,46 +1,20 @@
 // ============================================================================
-//  PULSE GPU RUNTIME v10.4 — THE MOMENTUM NETWORK
+//  PULSE GPU RUNTIME v11-Evo — THE MOMENTUM NETWORK
 //  Forward Motion Layer • Signal Conduction Pathway • GPU Kinetic System
 // ============================================================================
 //
-// IDENTITY — THE MOMENTUM NETWORK (v10.4):
-//  ---------------------------------------
+// IDENTITY — THE MOMENTUM NETWORK (v11-Evo):
+//  -----------------------------------------
 //  • The GPU organism’s forward-motion layer.
 //  • The kinetic system that moves data, buffers, and packages downstream.
 //  • The conduction pathway between Analyst (Brain) and Motor Hall (Engine).
 //  • The self-moving cart: once initialized, it carries the whole subsystem forward.
-//  • The nervous conduction layer that keeps the GPU body alive.
 //  • Advantage‑cascade aware: inherits all systemic advantages automatically.
-//  • PulseSend‑10.4‑ready: exposes a clean, deterministic surface for the compute router.
+//  • Binary-aware, symbolic-aware, dispatch-aware, memory-aware.
+//  • PulseSend‑v11‑ready: exposes a clean, deterministic surface for the compute router.
 //
-// ROLE IN THE GPU NATION:
-//  ------------------------
-//  • Analyst → Intelligence Division (precompute brain)
-//  • Momentum Network → Forward Motion + Signal Conduction (THIS FILE)
-//  • Motor Hall → Execution Cortex (rendering + motion)
-//  • Guardian → Permission Gate
-//  • Lymph Node Network → Immune Filter
-//  • Wisdom Cortex → Insight + Interpretation
-//  • Brainstem → Command + Coordination
-//
-// WHAT THIS FILE IS:
-//  -------------------
-//  • A GPU memory initializer
-//  • A loader for Brain-generated packages
-//  • A WebGPU context manager
-//  • The bridge between CPU-side precompute and GPU-side execution
-//  • The forward-motion / conduction layer of the GPU subsystem
-//
-// WHAT THIS FILE IS NOT:
+// SAFETY RULES (v11-Evo):
 //  -----------------------
-//  • NOT a renderer
-//  • NOT a CPU optimizer
-//  • NOT a shader compiler
-//  • NOT a backend module
-//  • NOT a business logic module
-//
-// SAFETY RULES (v10.4):
-//  ---------------------
 //  • NO backend APIs
 //  • NO DOM manipulation outside WebGPU canvas/context
 //  • NO Node.js APIs
@@ -49,19 +23,15 @@
 //  • ALWAYS check navigator.gpu before initializing
 //  • FAIL‑OPEN: if GPU or packages are unavailable, expose empty buffers/context
 //
-// ADVANTAGE CASCADE (conceptual only):
-//  ------------------------------------
-//  • If pulses accelerate → conduction conceptually accelerates.
-//  • If system collapses 1000 pulses into 1 → Runtime inherits that gain.
-//  • If any organ evolves → Runtime carries that advantage downstream.
-//  • No OR — all advantages are inherited automatically.
-//  • PulseSend contract (conceptual only):
-//      - routingContract: "PulseSend-v10.4"
-//      - gpuOrganContract: "PulseGPU-v10.4"
-//      - earnCompatibility: "Earn-v2"
+// CONTRACTS (conceptual only):
+//  ----------------------------
+//  • routingContract: "PulseSend-v11"
+//  • gpuOrganContract: "PulseGPU-v11-Evo"
+//  • binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo"
+//  • earnCompatibility: "Earn-v3"
 // ============================================================================
 
-const PULSE_GPU_RUNTIME_VERSION = 10.4;
+const PULSE_GPU_RUNTIME_VERSION = "11.0-Evo";
 
 // ============================================================================
 // GPU CONTEXT WRAPPER — Momentum Network: Conduction Node
@@ -84,13 +54,20 @@ class PulseGPUContext {
         pulseEfficiencyAware: true,
         driftProof: true,
         multiInstanceReady: true,
-
         unifiedAdvantageField: true,
-        pulseSend10Ready: true,
+        pulseSend11Ready: true,
 
-        routingContract: "PulseSend-v10.4",
-        gpuOrganContract: "PulseGPU-v10.4",
-        earnCompatibility: "Earn-v2"
+        // NEW v11-Evo awareness
+        binaryAware: true,
+        symbolicAware: true,
+        gpuDispatchAware: true,
+        gpuMemoryAware: true,
+        gpuAdvantageAware: true,
+
+        routingContract: "PulseSend-v11",
+        gpuOrganContract: "PulseGPU-v11-Evo",
+        binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+        earnCompatibility: "Earn-v3"
       }
     };
   }
@@ -173,6 +150,9 @@ class PulseGPURuntimeLoader {
     this.meshBuffers = [];
     this.shaderModules = [];
 
+    this.dispatchHints = null; // NEW v11-Evo
+    this.gpuMemorySnapshot = null; // NEW v11-Evo
+
     this.meta = {
       layer: "PulseGPURuntimeLoader",
       role: "MOMENTUM_FLOW",
@@ -183,13 +163,20 @@ class PulseGPURuntimeLoader {
         pulseEfficiencyAware: true,
         driftProof: true,
         multiInstanceReady: true,
-
         unifiedAdvantageField: true,
-        pulseSend10Ready: true,
+        pulseSend11Ready: true,
 
-        routingContract: "PulseSend-v10.4",
-        gpuOrganContract: "PulseGPU-v10.4",
-        earnCompatibility: "Earn-v2"
+        // NEW v11-Evo awareness
+        binaryAware: true,
+        symbolicAware: true,
+        gpuDispatchAware: true,
+        gpuMemoryAware: true,
+        gpuAdvantageAware: true,
+
+        routingContract: "PulseSend-v11",
+        gpuOrganContract: "PulseGPU-v11-Evo",
+        binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+        earnCompatibility: "Earn-v3"
       }
     };
   }
@@ -201,7 +188,13 @@ class PulseGPURuntimeLoader {
       this.packages = null;
       return null;
     }
+
     this.packages = pkg;
+
+    // NEW v11-Evo: load dispatch hints + memory snapshot if present
+    this.dispatchHints = pkg.dispatchHints || null;
+    this.gpuMemorySnapshot = pkg.gpuMemorySnapshot || null;
+
     return this.packages;
   }
 
@@ -299,13 +292,20 @@ class PulseGPURuntime {
         pulseEfficiencyAware: true,
         driftProof: true,
         multiInstanceReady: true,
-
         unifiedAdvantageField: true,
-        pulseSend10Ready: true,
+        pulseSend11Ready: true,
 
-        routingContract: "PulseSend-v10.4",
-        gpuOrganContract: "PulseGPU-v10.4",
-        earnCompatibility: "Earn-v2"
+        // NEW v11-Evo awareness
+        binaryAware: true,
+        symbolicAware: true,
+        gpuDispatchAware: true,
+        gpuMemoryAware: true,
+        gpuAdvantageAware: true,
+
+        routingContract: "PulseSend-v11",
+        gpuOrganContract: "PulseGPU-v11-Evo",
+        binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+        earnCompatibility: "Earn-v3"
       }
     };
   }
@@ -338,6 +338,15 @@ class PulseGPURuntime {
 
   getPackages() {
     return this.loader.packages;
+  }
+
+  // NEW v11-Evo: expose dispatch hints + memory snapshot
+  getDispatchHints() {
+    return this.loader.dispatchHints;
+  }
+
+  getGpuMemorySnapshot() {
+    return this.loader.gpuMemorySnapshot;
   }
 
   getMeshesFromPackages() {

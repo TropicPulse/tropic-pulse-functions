@@ -1,7 +1,7 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnCirculatorySystem-v11-Evo.js
 // LAYER: THE CIRCULATORY SYSTEM (v11-Evo)
-// (Deterministic Reflex + Routing + Weighting)
+// (Deterministic Reflex + Routing + Weighting + Dual-Band + Loop/Wave Fields)
 // ============================================================================
 //
 // ROLE (v11-Evo):
@@ -11,13 +11,15 @@
 //   • Fetches jobs deterministically (no async, no network).
 //   • Applies reputation weighting (synaptic strength).
 //   • Selects the best job for the device (autonomic prioritization).
-//   • Emits v11‑Evo routing signatures.
+//   • Emits v11‑Evo routing signatures + loop/wave fields.
+//   • Supports dual-band routing (symbolic + binary) as metadata-only.
 //
 // PURPOSE (v11-Evo):
 //   • Provide deterministic, drift‑proof job routing.
 //   • Guarantee safe multi‑marketplace discovery.
 //   • Maintain healing metadata for the Immune System.
 //   • Preserve autonomic routing + synaptic weighting.
+//   • Expose routing loop/wave fields + band-aware advantage.
 //
 // CONTRACT (v11-Evo):
 //   • PURE ROUTER — no AI layers, no translation, no memory model.
@@ -26,7 +28,22 @@
 //   • NO executing user code.
 //   • NO timestamps, NO randomness, NO async.
 //   • Deterministic job selection only.
+//   • Dual-band is metadata-only (no non-deterministic branching).
 // ============================================================================
+
+
+// ============================================================================
+// Dual-Band Constants — Symbolic + Binary (metadata-only)
+// ============================================================================
+const CIRC_BANDS = {
+  SYMBOLIC: "symbolic",
+  BINARY: "binary"
+};
+
+function normalizeBand(band) {
+  const b = String(band || CIRC_BANDS.SYMBOLIC).toLowerCase();
+  return b === CIRC_BANDS.BINARY ? CIRC_BANDS.BINARY : CIRC_BANDS.SYMBOLIC;
+}
 
 
 // ============================================================================
@@ -46,7 +63,13 @@ const circulatoryHealing = {
   lastHealthSignature: null,
   lastJobListSignature: null,
   lastSelectionSignature: null,
-  lastRoutingCycleSignature: null
+  lastRoutingCycleSignature: null,
+
+  // v11-Evo+ — band + loop/wave/advantage fields
+  lastBand: CIRC_BANDS.SYMBOLIC,
+  lastLoopField: null,
+  lastWaveField: null,
+  lastAdvantageField: null
 };
 
 
@@ -78,8 +101,49 @@ function buildSelectionSignature(jobId) {
   return computeHash(`SELECT::${jobId || "NONE"}`);
 }
 
-function buildRoutingCycleSignature(cycle) {
-  return computeHash(`ROUTE_CYCLE::${cycle}`);
+function buildRoutingCycleSignature(cycle, band) {
+  return computeHash(`ROUTE_CYCLE::${cycle}::${normalizeBand(band)}`);
+}
+
+
+// ============================================================================
+// Loop / Wave / Advantage Fields (Routing-Level)
+// ============================================================================
+function buildLoopField(jobs, band) {
+  const count = Array.isArray(jobs) ? jobs.length : 0;
+  const b = normalizeBand(band);
+
+  return {
+    loopDepth: count,
+    closedLoop: count > 0,
+    loopStrength: count * (b === CIRC_BANDS.BINARY ? 2 : 1),
+    band: b
+  };
+}
+
+function buildWaveField(jobs, band) {
+  const count = Array.isArray(jobs) ? jobs.length : 0;
+  const b = normalizeBand(band);
+
+  return {
+    wavelength: count || 1,
+    amplitude: (count * 3) % 11,
+    phase: (count * 5) % 16,
+    band: b,
+    mode: b === CIRC_BANDS.BINARY ? "compression-wave" : "symbolic-wave"
+  };
+}
+
+function buildAdvantageFieldForRouting(jobs, band) {
+  const count = Array.isArray(jobs) ? jobs.length : 0;
+  const b = normalizeBand(band);
+
+  return {
+    jobCount: count,
+    band: b,
+    symbolicPlanningBias: b === CIRC_BANDS.SYMBOLIC ? 1 : 0,
+    binaryCompressionBias: b === CIRC_BANDS.BINARY ? 1 : 0
+  };
 }
 
 
@@ -185,11 +249,27 @@ function scoreJobForDevice(job, device) {
 
 
 // ============================================================================
-// 3. selectBestJob — Deterministic Autonomic Prioritization
+// INTERNAL: Deterministic Band-Aware Job Score (v11-Evo)
 // ============================================================================
-export function selectBestJob(jobs) {
+function scoreJobWithBand(job, device, band) {
+  const baseCapability = scoreJobForDevice(job, device);
+  const rep = job.reputationWeight ?? 0.5;
+
+  const b = normalizeBand(band);
+  const bandBias = b === CIRC_BANDS.BINARY ? 1.1 : 1.0;
+
+  // deterministic, multiplicative advantage field
+  return baseCapability * (0.5 + rep) * bandBias;
+}
+
+
+// ============================================================================
+// 3. selectBestJob — Deterministic Autonomic Prioritization (Band-Aware)
+// ============================================================================
+export function selectBestJob(jobs, band = CIRC_BANDS.SYMBOLIC) {
   try {
     const device = getDeviceProfile();
+    const normalizedBand = normalizeBand(band);
 
     let bestJob = null;
     let bestScore = -Infinity;
@@ -197,10 +277,7 @@ export function selectBestJob(jobs) {
     for (const job of jobs) {
       if (!job.id || !job.marketplaceId) continue;
 
-      const capabilityScore = scoreJobForDevice(job, device);
-      const rep = job.reputationWeight ?? 0.5;
-
-      const finalScore = capabilityScore * (0.5 + rep);
+      const finalScore = scoreJobWithBand(job, device, normalizedBand);
 
       if (finalScore > bestScore) {
         bestScore = finalScore;
@@ -223,30 +300,57 @@ export function selectBestJob(jobs) {
 
 
 // ============================================================================
-// 4. getNextJob — Full Autonomic Routing Cycle (Deterministic)
+// 4. getNextJob — Full Autonomic Routing Cycle (Deterministic + Dual-Band)
 // ============================================================================
-export function getNextJob(allMarketplaces, getMarketplaceReputation) {
+//
+// band parameter:
+//   • "symbolic" — planning-first routing
+//   • "binary"   — compression-first routing (metadata-only bias)
+//
+export function getNextJob(allMarketplaces, getMarketplaceReputation, band = CIRC_BANDS.SYMBOLIC) {
+  const normalizedBand = normalizeBand(band);
+  circulatoryHealing.lastBand = normalizedBand;
+
   try {
     const healthy = discoverHealthyMarketplaces(allMarketplaces);
-    if (healthy.length === 0) return null;
+    if (healthy.length === 0) {
+      circulatoryHealing.lastRoutingCycleSignature =
+        buildRoutingCycleSignature(circulatoryHealing.cycleCount, normalizedBand);
+      return null;
+    }
 
     const jobs = fetchJobsFromMarketplaces(healthy);
-    if (jobs.length === 0) return null;
+    if (jobs.length === 0) {
+      circulatoryHealing.lastRoutingCycleSignature =
+        buildRoutingCycleSignature(circulatoryHealing.cycleCount, normalizedBand);
+      return null;
+    }
 
     const weightedJobs = jobs.map(job => {
       const rep = getMarketplaceReputation(job.marketplaceId);
       return { ...job, reputationWeight: rep };
     });
 
-    const best = selectBestJob(weightedJobs);
+    const best = selectBestJob(weightedJobs, normalizedBand);
+
+    // loop/wave/advantage fields for this routing cycle
+    const loopField = buildLoopField(weightedJobs, normalizedBand);
+    const waveField = buildWaveField(weightedJobs, normalizedBand);
+    const advantageField = buildAdvantageFieldForRouting(weightedJobs, normalizedBand);
+
+    circulatoryHealing.lastLoopField = loopField;
+    circulatoryHealing.lastWaveField = waveField;
+    circulatoryHealing.lastAdvantageField = advantageField;
 
     circulatoryHealing.lastRoutingCycleSignature =
-      buildRoutingCycleSignature(circulatoryHealing.cycleCount);
+      buildRoutingCycleSignature(circulatoryHealing.cycleCount, normalizedBand);
 
     return best;
 
   } catch (err) {
     circulatoryHealing.lastSelectionError = err.message;
+    circulatoryHealing.lastRoutingCycleSignature =
+      buildRoutingCycleSignature(circulatoryHealing.cycleCount, normalizedBand);
     return null;
   }
 }

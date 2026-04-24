@@ -1,40 +1,42 @@
 // ============================================================================
-// FILE: /apps/specs/PulseSpecsDNAGenome.js
-// [pulse:specs] PULSE_SPECS_DNA_GENOME v10.4  // gold‑white
+// FILE: /apps/specs/PulseSpecsDNAGenome-v11-Evo.js
+// [pulse:specs] PULSE_SPECS_DNA_GENOME v11-Evo  // gold‑white + binary
 // OS Data Genome • Canonical Field Language • Deterministic Translation Spec
 // PURE SPEC — NO IO • NO NETWORK • NO AI • NO RUNTIME
 // ============================================================================
 //
-// IDENTITY — THE OS DNA GENOME (v10.4):
-//  ------------------------------------
-//  • Immutable genetic blueprint of Pulse OS.
-//  • Canonical PulseField language for all v10.4 subsystems.
-//  • Source of truth for SQL ↔ Pulse ↔ Firestore mappings.
-//  • Validation rulebook for translators + healers.
-//  • Schema cortex foundation for AI reasoning + component generation.
-//  • Drift‑proof, deterministic, backwards‑compatible, evolution‑safe.
+// IDENTITY — THE OS DNA GENOME (v11-Evo):
+// --------------------------------------
+// • Immutable genetic blueprint of Pulse OS.
+// • Canonical PulseField language for all v11 subsystems.
+// • Source of truth for SQL ↔ Pulse ↔ Firestore mappings.
+// • Validation rulebook for translators + healers.
+// • Schema cortex foundation for AI reasoning + component generation.
+// • Drift‑proof, deterministic, backwards‑compatible, evolution‑safe.
+// • ⭐ Binary‑aware, pulse‑aware, v1/v2/v3 compatible.
 //
-// ROLE IN THE ORGANISM (v10.4):
-//  -----------------------------
-//  • DNA → canonical data genome (this file)
-//  • RNA → translators (sqlToPulse, pulseToSQL, firestoreToPulse, etc.)
-//  • Proteins → actual data structures in the organism
-//  • Healers → mutation correction + schema drift repair
-//  • Cortex → uses genome to reason about structure + generate components
+// ROLE IN THE ORGANISM (v11-Evo):
+// -------------------------------
+// • DNA → canonical data genome (this file)
+// • RNA → translators (sqlToPulse, pulseToSQL, firestoreToPulse, etc.)
+// • Proteins → actual data structures in the organism
+// • Healers → mutation correction + schema drift repair
+// • Cortex → uses genome to reason about structure + generate components
 //
-// SAFETY CONTRACT (v10.4):
-//  ------------------------
-//  • Read‑only spec — no writes, no mutation.
-//  • No eval(), no Function(), no dynamic imports.
-//  • No network calls.
-//  • Deterministic, stable output only.
-//  • Backwards‑compatible evolution only.
-//  • All new types must degrade safely to existing primitives.
-//  • Frozen snapshot — cannot be modified at runtime.
+// SAFETY CONTRACT (v11-Evo):
+// --------------------------
+// • Read‑only spec — no writes, no mutation.
+// • No eval(), no Function(), no dynamic imports.
+// • No network calls.
+// • Deterministic, stable output only.
+// • Backwards‑compatible evolution only.
+// • All new types must degrade safely to existing primitives.
+// • Frozen snapshot — cannot be modified at runtime.
 //
 // THEME:
-//  • Color: Gold‑White (genetic law + organism‑wide purity).
-//  • Subtheme: Determinism, lineage, schema purity, evolutionary stability.
+// • Color: Gold‑White (genetic law + organism‑wide purity).
+// • Binary Accent: Black‑Gold (binary/unbinary pulse layer).
+// • Subtheme: Determinism, lineage, schema purity, evolutionary stability.
 // ============================================================================
 
 export const PULSE_FIELDS_CONTEXT = {
@@ -42,21 +44,22 @@ export const PULSE_FIELDS_CONTEXT = {
   role: "OS_DATA_GENOME",
   purpose: "Define canonical PulseField types, rules, and mappings",
   context: "Deterministic data language for all Pulse subsystems",
-  version: 10.4,
-  target: "os-core",
+  version: 11.0,
+  target: "os-core-v11",
   selfRepairable: false,
 
   evolution: {
     "1.1": "Base genome: core types + SQL/Firestore mappings.",
     "1.2": "Extended numeric semantics (currency/percent) and enum support.",
     "1.3": "Explicit null handling + stricter URL/email patterns + frozen spec snapshot.",
-    "10.4": "Identity uplift, organism alignment, gold‑white genome header, v10.4 contract sync."
+    "10.4": "Identity uplift, organism alignment, gold‑white genome header, v10.4 contract sync.",
+    "11.0": "Binary‑aware genome extension, v11‑Evo alignment, pulse/binary field layer (backwards‑compatible)."
   }
 };
 
 
 // ============================================================================
-//  PulseField Types — the universal data language (GENETIC ALPHABET)
+// PulseField Types — the universal data language (GENETIC ALPHABET)
 // ============================================================================
 export const PulseFieldTypes = {
   STRING: "string",
@@ -76,11 +79,18 @@ export const PulseFieldTypes = {
   ENUM: "enum",
   CURRENCY: "currency",
   PERCENT: "percent",
-  NULLABLE: "nullable"
+  NULLABLE: "nullable",
+
+  // v11‑Evo binary/pulse extensions (must degrade to primitives)
+  BINARY: "binary",           // degrades to string/bytes
+  BITFIELD: "bitfield",       // degrades to number
+  PULSE: "pulse",             // degrades to json/map
+  PULSE_BINARY: "pulse_binary"// degrades to binary
 };
 
+
 // ============================================================================
-//  Validation rules — GENETIC EXPRESSION RULES
+// Validation rules — GENETIC EXPRESSION RULES
 // ============================================================================
 export const PulseFieldRules = {
   string: { maxLength: 2048, trim: true },
@@ -117,11 +127,30 @@ export const PulseFieldRules = {
   nullable: {
     wrapper: true,
     allowNull: true
+  },
+
+  // v11‑Evo binary/pulse extensions
+  binary: {
+    baseType: "string",       // can be stored as base64 string or bytes
+    encoding: "base64",
+    maxLength: 8192
+  },
+  bitfield: {
+    baseType: "number",
+    min: 0
+  },
+  pulse: {
+    baseType: "json",         // full pulse organism snapshot
+    strict: false
+  },
+  pulse_binary: {
+    baseType: "binary"        // binary‑encoded pulse snapshot
   }
 };
 
+
 // ============================================================================
-//  SQL → PulseField mapping — RNA TRANSCRIPTION (SQL → Genome)
+// SQL → PulseField mapping — RNA TRANSCRIPTION (SQL → Genome)
 // ============================================================================
 export const SQLToPulse = {
   VARCHAR: PulseFieldTypes.STRING,
@@ -137,11 +166,17 @@ export const SQLToPulse = {
   JSON: PulseFieldTypes.JSON,
 
   DECIMAL: PulseFieldTypes.NUMBER,
-  NUMERIC: PulseFieldTypes.NUMBER
+  NUMERIC: PulseFieldTypes.NUMBER,
+
+  // v11‑Evo binary mappings
+  VARBINARY: PulseFieldTypes.BINARY,
+  BLOB: PulseFieldTypes.BINARY,
+  BIT: PulseFieldTypes.BITFIELD
 };
 
+
 // ============================================================================
-//  Firestore → PulseField mapping — RNA TRANSCRIPTION (Firestore → Genome)
+// Firestore → PulseField mapping — RNA TRANSCRIPTION (Firestore → Genome)
 // ============================================================================
 export const FirestoreToPulse = {
   string: PulseFieldTypes.STRING,
@@ -150,11 +185,15 @@ export const FirestoreToPulse = {
   timestamp: PulseFieldTypes.TIMESTAMP,
   array: PulseFieldTypes.ARRAY,
   map: PulseFieldTypes.OBJECT,
-  null: PulseFieldTypes.JSON
+  null: PulseFieldTypes.JSON,
+
+  // v11‑Evo binary mapping
+  bytes: PulseFieldTypes.BINARY
 };
 
+
 // ============================================================================
-//  PulseField → SQL mapping — PROTEIN SYNTHESIS (Genome → SQL)
+// PulseField → SQL mapping — PROTEIN SYNTHESIS (Genome → SQL)
 // ============================================================================
 export const PulseToSQL = {
   string: "VARCHAR(255)",
@@ -173,11 +212,18 @@ export const PulseToSQL = {
   enum: "VARCHAR(255)",
   currency: "DECIMAL(18,2)",
   percent: "DOUBLE",
-  nullable: "JSON"
+  nullable: "JSON",
+
+  // v11‑Evo binary/pulse
+  binary: "VARBINARY(8192)",
+  bitfield: "BIGINT",
+  pulse: "JSON",
+  pulse_binary: "VARBINARY(8192)"
 };
 
+
 // ============================================================================
-//  PulseField → Firestore mapping — PROTEIN SYNTHESIS (Genome → Firestore)
+// PulseField → Firestore mapping — PROTEIN SYNTHESIS (Genome → Firestore)
 // ============================================================================
 export const PulseToFirestore = {
   string: "string",
@@ -196,11 +242,18 @@ export const PulseToFirestore = {
   enum: "string",
   currency: "number",
   percent: "number",
-  nullable: "map"
+  nullable: "map",
+
+  // v11‑Evo binary/pulse
+  binary: "bytes",
+  bitfield: "number",
+  pulse: "map",
+  pulse_binary: "bytes"
 };
 
+
 // ============================================================================
-//  validatePulseField(field) — GENETIC SANITY CHECK
+// validatePulseField(field) — GENETIC SANITY CHECK
 // ============================================================================
 export function validatePulseField(field) {
   if (!field || !field.type) {
@@ -227,8 +280,9 @@ export function validatePulseField(field) {
   return true;
 }
 
+
 // ============================================================================
-//  PULSE_FIELDS_SPEC — FROZEN GENOME SNAPSHOT
+// PULSE_FIELDS_SPEC — FROZEN GENOME SNAPSHOT (v11‑Evo, binary‑aware)
 // ============================================================================
 export const PULSE_FIELDS_SPEC = Object.freeze({
   ...PULSE_FIELDS_CONTEXT,

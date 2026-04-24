@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /apps/organs/endocrine/PulseMeshEndocrineSystem.js
-// PULSE OS v9.2 — MESH ENDOCRINE SYSTEM  // white-gold
+// PULSE OS v11-Evo — MESH ENDOCRINE SYSTEM  // white-gold
 // “Mesh Endocrine Interpreter / System Hormone Clinician”
 // ============================================================================
 //
-// IDENTITY — THE MESH ENDOCRINE SYSTEM (v9.2):
-// -------------------------------------------
+// IDENTITY — THE MESH ENDOCRINE SYSTEM (v11-Evo):
+// -----------------------------------------------
 // • Reads Halo (counters), Field (pressure), Echo (diagnostic reflection).
 // • Interprets mesh health as endocrine / hormone-like systemic signals.
 // • Produces a structured “mesh endocrine report” for:
@@ -15,12 +15,11 @@
 //      - Clinician / you (human-readable interpretation)
 // • NEVER mutates impulses, NEVER routes, NEVER computes payloads.
 // • Pure interpretation organ — white-gold, clinical, non-interference.
+// • v11-Evo: binary-aware, dual-mode-ready, deterministic-field,
+//            unified-advantage-field, mesh-pressure-aware,
+//            flow-aware, drift-aware, multi-instance-ready.
 //
-// THEME:
-// • Color: White-Gold (clinical clarity + systemic influence).
-// • Subtheme: Interpretation, diagnosis, endocrine-style systemic insight.
-//
-// SAFETY CONTRACT (v9.2):
+// SAFETY CONTRACT (v11-Evo):
 // • Read-only, metadata-only.
 // • No loops, no hormones, no memory writes.
 // • No routing, no healing, no mutation, no payload access.
@@ -28,15 +27,6 @@
 // • Deterministic-field: same Halo/Field/Echo → same report.
 // • Unified-advantage-field: inherits all safe systemic advantages.
 // • Drift-proof, multi-instance-ready, factoring-aware.
-//
-// ARCHITECTURE (v9.2):
-// • Zero imports — all dependencies injected by CNS Brain.
-// • Uses:
-//      - PulseHalo      → counters / safety / flow / mesh vitals
-//      - PulseFieldRead → environmental + internal field snapshot
-//      - PulseEcho      → diagnostic echo pulse (metadata-only)
-// • Pure endocrine interpreter — no routing, no mutation, no compute.
-// • Backend-safe, frontend-safe, global-safe.
 // ============================================================================
 
 
@@ -51,11 +41,13 @@ export function createPulseMeshEndocrineSystem({
   const meta = {
     layer: "PulseMeshEndocrineSystem",
     role: "MESH_ENDOCRINE_INTERPRETER",
-    version: 9.2,
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
       localAware: true,
       internetAware: true,
 
@@ -70,7 +62,13 @@ export function createPulseMeshEndocrineSystem({
 
       signalFactoringAware: true,
       auraPressureAware: true,
-      meshPressureAware: true
+      meshPressureAware: true,
+      flowAware: true,
+      driftAware: true,
+
+      zeroCompute: true,
+      zeroMutation: true,
+      zeroRoutingInfluence: true
     }
   };
 
@@ -100,7 +98,7 @@ export function createPulseMeshEndocrineSystem({
 
 
 // ============================================================================
-// Mesh Endocrine Report Builder (v9.2)
+// Mesh Endocrine Report Builder (v11-Evo)
 // ============================================================================
 function buildMeshEndocrineReport({ halo, field, echo, meta }) {
   const flowThrottles = halo.flow_throttles ?? 0;
@@ -120,7 +118,9 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
       `Friction (inflammation): ${pct(field.friction)}`,
       `Noise (sensory load): ${pct(field.noise)}`,
       `Flow Throttles (self‑protection events): ${flowThrottles}`,
-      `Throttle Rate: ${pct(flowThrottleRate)}`
+      `Throttle Rate: ${pct(flowThrottleRate)}`,
+      `Binary Mode: ${echo.mode?.binary ? "ACTIVE" : "inactive"}`,
+      `Dual Mode: ${echo.mode?.dual ? "ACTIVE" : "inactive"}`
     ]
   });
 
@@ -188,7 +188,7 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
 
 
 // ============================================================================
-// Interpretation Logic (v9.2)
+// Interpretation Logic (v11-Evo)
 // ============================================================================
 function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   let base = 100;
@@ -209,6 +209,7 @@ function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   if (echo.aura?.sync) base += 2;
   if (echo.aura?.inLoop) base -= 3;
   if (echo.flow?.throttled) base -= 5;
+  if (echo.mode?.binary) base += 1; // binary mode slightly improves reflex efficiency
 
   return Math.max(0, base);
 }

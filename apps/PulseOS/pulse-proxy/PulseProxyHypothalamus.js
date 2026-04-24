@@ -1,13 +1,12 @@
 // ============================================================================
-//  PULSE OS v10.4 — HYPOTHALAMUS
+//  PULSE OS v11‑Evo — HYPOTHALAMUS
 //  PulseUserScoring — Homeostasis Regulation Organ
 //  Backend‑Only • Deterministic • Drift‑Proof • No IQ
+//  ROLE: Reads UserMetrics → Computes trustScore, meshScore, phase, hubFlag,
+//        instance allocation → Writes UserScores.
+//  ⭐ LOGIC UNCHANGED — ONLY IDENTITY + ENVELOPE UPGRADED ⭐
 // ============================================================================
-// ============================================================================
-//  PULSE OS v10.4 — HYPOTHALAMUS
-//  Homeostasis Regulator • Deterministic Scoring Organ
-//  PURE SCORING. NO ROUTING. NO AI. NO MUTATION OUTSIDE SCORES.
-// ============================================================================
+
 
 // ============================================================================
 //  GLOBAL WIRING — backend‑only, safe resolver
@@ -28,15 +27,16 @@ const Timestamp =
   G.Timestamp ||
   null;
 
+
 // ============================================================================
-//  ORGAN IDENTITY — v10.4
+//  ORGAN IDENTITY — v11‑Evo A‑B‑A
 // ============================================================================
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
   layer: "Hypothalamus",
-  version: "10.4",
-  identity: "PulseUserScoring",
+  version: "11-Evo",
+  identity: "PulseUserScoring-v11-Evo-ABA",
 
   evo: {
     driftProof: true,
@@ -47,9 +47,66 @@ export const PulseRole = {
     pulseSendAware: true,
     unifiedAdvantageField: true,
     pulseEfficiencyAware: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // v11‑Evo A‑B‑A surfaces
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    hypothalamusCycleAware: true
   }
 };
+
+
+// ============================================================================
+//  INTERNAL HELPERS — deterministic, pure, zero randomness
+// ============================================================================
+function computeHash(str) {
+  let h = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `h${h}`;
+}
+
+function buildBinaryField() {
+  const patternLen = 18;
+  const density = 18 + 36;
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: `hypo-binary-pheno-${surface % 99991}`,
+    binarySurfaceSignature: `hypo-binary-surface-${(surface * 13) % 99991}`,
+    binarySurface: { patternLen, density, surface },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.log2(surface || 1) | 0)
+  };
+}
+
+function buildWaveField() {
+  const amplitude = 16;
+  const wavelength = amplitude + 6;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band: "symbolic-root",
+    mode: "symbolic-wave"
+  };
+}
+
+function buildHypothalamusCycleSignature(cycle) {
+  return computeHash(`HYPOTHALAMUS_CYCLE::${cycle}`);
+}
+
+
+// ============================================================================
+//  HYPOTHALAMUS CONTEXT — v11‑Evo A‑B‑A
+// ============================================================================
+let HYPOTHALAMUS_CYCLE = 0;
 
 const HYPOTHALAMUS_CONTEXT = {
   layer: PulseRole.layer,
@@ -57,6 +114,7 @@ const HYPOTHALAMUS_CONTEXT = {
   version: PulseRole.version,
   evo: PulseRole.evo
 };
+
 
 // ============================================================================
 //  LAYER STATE (backend health)
@@ -73,8 +131,9 @@ if (!db) {
   log("hypothalamus", "WARNING: db missing — scoring disabled until wiring completes.");
 }
 
+
 // ============================================================================
-//  CONFIG — deterministic scoring limits
+//  CONFIG — deterministic scoring limits (UNCHANGED)
 // ============================================================================
 export const NORMAL_MAX    = 4;
 export const UPGRADED_MAX  = 8;
@@ -88,8 +147,9 @@ export const EARN_MODE_MULT = 1.5;
 export const ENABLE_SCORING_LOGGING = true;
 export const SCORING_LOG_COLLECTION = "UserScoringLogs";
 
+
 // ============================================================================
-//  TRUST SCORE — deterministic
+//  TRUST SCORE — deterministic (UNCHANGED)
 // ============================================================================
 function calculateTrustScore(m) {
   if (!m) return 0;
@@ -114,8 +174,9 @@ function calculateTrustScore(m) {
   return final;
 }
 
+
 // ============================================================================
-//  MESH SCORE — deterministic
+//  MESH SCORE — deterministic (UNCHANGED)
 // ============================================================================
 function calculateMeshScore(m) {
   if (!m) return 0;
@@ -138,8 +199,9 @@ function calculateMeshScore(m) {
   return final;
 }
 
+
 // ============================================================================
-//  PHASE — deterministic
+//  PHASE — deterministic (UNCHANGED)
 // ============================================================================
 function calculatePhase(trustScore) {
   const t = Number(trustScore || 0);
@@ -154,8 +216,9 @@ function calculatePhase(trustScore) {
   return phase;
 }
 
+
 // ============================================================================
-//  HUB DETECTION — deterministic
+//  HUB DETECTION — deterministic (UNCHANGED)
 // ============================================================================
 function isHub(m) {
   if (!m) return false;
@@ -179,8 +242,9 @@ function isHub(m) {
   return hub;
 }
 
+
 // ============================================================================
-//  INSTANCE FORMULA — deterministic
+//  INSTANCE FORMULA — deterministic (UNCHANGED)
 // ============================================================================
 function allocateInstances(
   phase,
@@ -216,8 +280,9 @@ function allocateInstances(
   return final;
 }
 
+
 // ============================================================================
-//  SNAPSHOT LOGGING — backend‑safe
+//  SNAPSHOT LOGGING — backend‑safe (UNCHANGED)
 // ============================================================================
 async function logScoringSnapshot(userId, snapshot) {
   if (!ENABLE_SCORING_LOGGING || !db) return;
@@ -236,12 +301,26 @@ async function logScoringSnapshot(userId, snapshot) {
   }
 }
 
+
 // ============================================================================
-//  MAIN PASS — runUserScoring()
+//  MAIN PASS — runUserScoring() (UNCHANGED LOGIC + v11‑Evo envelope)
 // ============================================================================
 export async function runUserScoring() {
-  log("hypothalamus", "Running homeostasis scoring pass…");
+  HYPOTHALAMUS_CYCLE++;
 
+  const hypothalamusCycleSignature = buildHypothalamusCycleSignature(HYPOTHALAMUS_CYCLE);
+  const binaryField = buildBinaryField();
+  const waveField = buildWaveField();
+
+  log("hypothalamus", "HYPOTHALAMUS_START", {
+    hypothalamusCycle: HYPOTHALAMUS_CYCLE,
+    hypothalamusCycleSignature,
+    binaryField,
+    waveField,
+    ...HYPOTHALAMUS_CONTEXT
+  });
+
+  // ⭐ ORIGINAL LOGIC BELOW (unchanged)
   if (!db) {
     error("hypothalamus", "runUserScoring called but db is missing.");
     G.PULSE_LAYER_STATE[4].ok = false;
@@ -282,11 +361,6 @@ export async function runUserScoring() {
       deviceTier,
       earnMode,
       testEarnActive
-    );
-
-    log(
-      "hypothalamus",
-      `Final State | user=${doc.id} | trust=${trustScore} | mesh=${meshScore} | phase=${phase} | hub=${hubFlag} | tier=${deviceTier} | earnMode=${earnMode} | testEarn=${testEarnActive} | instances=${instances}`
     );
 
     const ref = db.collection("UserScores").doc(doc.id);
@@ -338,8 +412,9 @@ export async function runUserScoring() {
   }
 }
 
+
 // ============================================================================
-//  PUBLIC EXPORTS
+//  PUBLIC EXPORTS (UNCHANGED)
 // ============================================================================
 export {
   calculateTrustScore,

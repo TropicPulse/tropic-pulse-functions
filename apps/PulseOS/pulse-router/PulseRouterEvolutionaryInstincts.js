@@ -1,34 +1,29 @@
 // ============================================================================
-//  PULSE ROUTER EVOLUTIONARY INSTINCTS v10.4‑Evo‑A2 — ROUTER EVOLUTION CORE
+//  PULSE ROUTER EVOLUTIONARY INSTINCTS v11‑Evo‑DualStack — ROUTER EVOLUTION CORE
 //  Adaptive Routing Identity • Genetic Route Memory • Best‑Path Preservation
-//  Page/Lineage/Pattern‑Ancestry Aware
+//  Symbolic + Binary Ancestry • Deterministic • Drift‑Proof
 // ============================================================================
 //
-// SAFETY CONTRACT (v10.4‑Evo‑A2):
-//  -------------------------------
-//  • No randomness
-//  • No timestamps
-//  • No DOM
-//  • No network or filesystem access
-//  • No async
-//  • Fail-open: malformed routes → safe defaults
-//  • Deterministic: same inputs → same evolutionary memory
-//  • Self-repair-ready: entries include OS metadata
-//  • Loop-Theory-Aware (routingCompletion, loopfieldPropulsion,
-//    pulseComputeContinuity, errorRouteAround)
-//  • Page/lineage/pattern ancestry are internal only, no external mutation
+//  ROLE:
+//    • Stores evolutionary routing memory (success/failure/degrade).
+//    • Symbolic + Binary dual‑stack ancestry.
+//    • Deterministic scoring + regression detection.
+//    • Loop‑Theory‑Aware.
+//    • Pure memory organ — NO routing, NO compute, NO mutation outside instance.
+//
 // ============================================================================
 
+
 // ------------------------------------------------------------
-// OS‑v10.4 CONTEXT METADATA — Router Evolution Identity
+// v11‑Evo CONTEXT METADATA — Router Evolution Identity
 // ------------------------------------------------------------
 const ROUTER_EVOLUTION_CONTEXT = {
   layer: "PulseRouterEvolutionaryInstincts",
   role: "ROUTER_EVOLUTION_CORE",
-  purpose: "Adaptive routing identity + genetic memory for route patterns",
-  context: "Stores best-known routes, lineage, stability, and regression data",
-  target: "full-router",
-  version: 10.4,
+  purpose: "Adaptive routing identity + genetic memory for symbolic + binary routes",
+  context: "Stores best-known routes, lineage, stability, regression, binary ancestry",
+  target: "dual-stack-router",
+  version: 11.0,
   selfRepairable: true,
 
   evo: {
@@ -37,14 +32,16 @@ const ROUTER_EVOLUTION_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    pulseSend10Ready: true,
+    pulseSend11Ready: true,
 
-    routingContract: "PulseSend-v10.4",
-    routerOrganContract: "PulseRouter-v10.4",
-    earnCompatibility: "Earn-v2"
+    routingContract: "PulseSend-v11",
+    routerOrganContract: "PulseRouter-v11",
+    earnCompatibility: "Earn-v3",
+
+    // ⭐ NEW: binary-aware instincts cortex
+    binaryAware: true
   },
 
-  // ⭐ LOOP THEORY INVARIANTS ⭐
   loopTheory: {
     routingCompletion: true,
     allowLoopfieldPropulsion: true,
@@ -53,22 +50,17 @@ const ROUTER_EVOLUTION_CONTEXT = {
   }
 };
 
+
 // ------------------------------------------------------------
 // Utility: stable JSON stringify
 // ------------------------------------------------------------
 function stableStringify(value) {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value);
-  }
-  if (Array.isArray(value)) {
-    return "[" + value.map(stableStringify).join(",") + "]";
-  }
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(stableStringify).join(",") + "]";
   const keys = Object.keys(value).sort();
-  const parts = keys.map(
-    (k) => JSON.stringify(k) + ":" + stableStringify(value[k])
-  );
-  return "{" + parts.join(",") + "}";
+  return "{" + keys.map(k => JSON.stringify(k) + ":" + stableStringify(value[k])).join(",") + "}";
 }
+
 
 // ------------------------------------------------------------
 // Utility: deterministic hash
@@ -76,15 +68,15 @@ function stableStringify(value) {
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    const chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
+    hash = (hash << 5) - hash + str.charCodeAt(i);
     hash |= 0;
   }
   return (hash >>> 0).toString(16);
 }
 
+
 // ------------------------------------------------------------
-// Helpers: pattern / lineage / page ancestry
+// Symbolic ancestry helpers
 // ------------------------------------------------------------
 function buildPatternAncestry(pattern) {
   if (!pattern || typeof pattern !== "string") return [];
@@ -101,35 +93,63 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
   const safeLineage = Array.isArray(lineage) ? lineage : [];
   const safePageId = pageId || "NO_PAGE";
 
-  const patternAncestry = buildPatternAncestry(safePattern);
-  const lineageSig = buildLineageSignature(safeLineage);
-
   const shape = {
     pattern: safePattern,
-    patternAncestry,
-    lineageSignature: lineageSig,
+    patternAncestry: buildPatternAncestry(safePattern),
+    lineageSignature: buildLineageSignature(safeLineage),
     pageId: safePageId
   };
 
   return simpleHash(stableStringify(shape));
 }
 
+
 // ------------------------------------------------------------
-// Route hash — Genetic Route Fingerprint
+// Binary ancestry helpers (optional)
 // ------------------------------------------------------------
-function computeRouteHash(routeShape) {
-  const serialized = stableStringify(routeShape || {});
-  return simpleHash(serialized);
+function extractBinarySurface(payload = {}) {
+  const binaryPattern  = payload.binaryPattern || null;
+  const binaryMode     = payload.binaryMode || null;
+  const binaryPayload  = payload.binaryPayload || null;
+  const binaryHints    = payload.binaryHints || null;
+  const binaryStrength = typeof payload.binaryStrength === "number"
+    ? payload.binaryStrength
+    : null;
+
+  const hasBinary =
+    !!binaryPattern ||
+    !!binaryMode ||
+    !!binaryPayload ||
+    !!binaryHints ||
+    binaryStrength !== null;
+
+  return {
+    hasBinary,
+    binaryPattern,
+    binaryMode,
+    binaryPayload,
+    binaryHints,
+    binaryStrength
+  };
 }
+
+
+// ------------------------------------------------------------
+// Route hash — Genetic Route Fingerprint (Symbolic + Binary)
+// ------------------------------------------------------------
+function computeRouteHash(routeShape, payload = {}) {
+  const binary = extractBinarySurface(payload);
+  const base = { routeShape, binary };
+  return simpleHash(stableStringify(base));
+}
+
 
 // ------------------------------------------------------------
 // Route scoring — Evolutionary Fitness Score
 // ------------------------------------------------------------
 function clamp(value, min, max) {
   if (typeof value !== "number" || Number.isNaN(value)) return min;
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
+  return Math.max(min, Math.min(max, value));
 }
 
 function scoreRoute(routeStats = {}) {
@@ -139,17 +159,13 @@ function scoreRoute(routeStats = {}) {
     degradationEvents = 0
   } = routeStats;
 
-  const safeSuccess = clamp(successCount, 0, 100000);
-  const safeFailure = clamp(failureCount, 0, 100000);
-  const safeDegrade = clamp(degradationEvents, 0, 100000);
+  const s = clamp(successCount, 0, 100000);
+  const f = clamp(failureCount, 0, 100000);
+  const d = clamp(degradationEvents, 0, 100000);
 
-  const score =
-    safeSuccess * 1.0 -
-    safeFailure * 0.8 -
-    safeDegrade * 0.5;
-
-  return clamp(score, 0, 100000);
+  return clamp(s * 1.0 - f * 0.8 - d * 0.5, 0, 100000);
 }
+
 
 // ------------------------------------------------------------
 // Regression detection — Evolutionary Delta
@@ -157,19 +173,16 @@ function scoreRoute(routeStats = {}) {
 function detectRegression(currentStats, baselineStats) {
   const currentScore = scoreRoute(currentStats);
   const baselineScore = scoreRoute(baselineStats);
-
   if (baselineScore === 0) return 0;
-
-  const delta = (currentScore - baselineScore) / baselineScore;
-  return delta * 100;
+  return ((currentScore - baselineScore) / baselineScore) * 100;
 }
+
 
 // ------------------------------------------------------------
 // Degradation tier helper
 // ------------------------------------------------------------
 function classifyDegradationTier(healthScore) {
   const h = typeof healthScore === "number" ? healthScore : 1.0;
-
   if (h >= 0.95) return "microDegrade";
   if (h >= 0.85) return "softDegrade";
   if (h >= 0.50) return "midDegrade";
@@ -177,8 +190,9 @@ function classifyDegradationTier(healthScore) {
   return "criticalDegrade";
 }
 
+
 // ------------------------------------------------------------
-// Memory entry model — Evolutionary Route Record
+// Memory entry model — Evolutionary Route Record (DualStack)
 // ------------------------------------------------------------
 class PulseRouterEvolutionaryStore {
   constructor() {
@@ -190,8 +204,8 @@ class PulseRouterEvolutionaryStore {
     this.entries.clear();
   }
 
-  recordRoute({ routeShape, routeStats, healthScore, pattern, lineage, pageId }) {
-    const routeHash = computeRouteHash(routeShape);
+  recordRoute({ routeShape, routeStats, healthScore, pattern, lineage, pageId, payload }) {
+    const routeHash = computeRouteHash(routeShape, payload);
     const score = scoreRoute(routeStats);
 
     const existing = this.entries.get(routeHash);
@@ -210,7 +224,8 @@ class PulseRouterEvolutionaryStore {
       pageId: safePageId
     });
 
-    // ⭐ LOOP THEORY INVARIANTS INCLUDED IN EVOLUTION RECORD ⭐
+    const binary = extractBinarySurface(payload || {});
+
     const loopTheory = {
       routingCompletion: true,
       allowLoopfieldPropulsion: true,
@@ -223,12 +238,18 @@ class PulseRouterEvolutionaryStore {
       routeShape: routeShape || {},
       bestStats: routeStats || {},
       bestScore: score,
+
+      // symbolic ancestry
       pattern: safePattern,
       patternAncestry,
       lineage: safeLineage,
       lineageSignature,
       pageId: safePageId,
       pageAncestrySignature,
+
+      // ⭐ NEW: binary ancestry
+      binary,
+
       healthScore: safeHealth,
       tier,
       loopTheory,
@@ -240,27 +261,32 @@ class PulseRouterEvolutionaryStore {
     } else {
       const merged = {
         ...existing,
+
         pattern: safePattern || existing.pattern,
-        patternAncestry: patternAncestry.length
-          ? patternAncestry
-          : existing.patternAncestry,
+        patternAncestry: patternAncestry.length ? patternAncestry : existing.patternAncestry,
+
         lineage: safeLineage.length ? safeLineage : existing.lineage,
         lineageSignature: lineageSignature || existing.lineageSignature,
+
         pageId: safePageId || existing.pageId,
-        pageAncestrySignature:
-          pageAncestrySignature || existing.pageAncestrySignature,
+        pageAncestrySignature: pageAncestrySignature || existing.pageAncestrySignature,
+
+        // ⭐ always update binary surface
+        binary,
+
         healthScore: safeHealth,
         tier,
-        loopTheory // always overwrite with latest invariants
+        loopTheory
       };
+
       this.entries.set(routeHash, merged);
     }
 
     return this.entries.get(routeHash);
   }
 
-  getBestRoute(routeShape) {
-    const routeHash = computeRouteHash(routeShape);
+  getBestRoute(routeShape, payload = {}) {
+    const routeHash = computeRouteHash(routeShape, payload);
     return this.entries.get(routeHash) || null;
   }
 
@@ -271,12 +297,18 @@ class PulseRouterEvolutionaryStore {
         key: entry.key,
         bestScore: entry.bestScore,
         bestStats: entry.bestStats,
+
+        // symbolic ancestry
         pattern: entry.pattern,
         patternAncestry: entry.patternAncestry.slice(),
         lineage: entry.lineage.slice(),
         lineageSignature: entry.lineageSignature,
         pageId: entry.pageId,
         pageAncestrySignature: entry.pageAncestrySignature,
+
+        // ⭐ binary ancestry
+        binary: { ...entry.binary },
+
         healthScore: entry.healthScore,
         tier: entry.tier,
         loopTheory: { ...entry.loopTheory }
@@ -306,9 +338,7 @@ class PulseRouterEvolutionaryStore {
       if (!entry || typeof entry !== "object" || !entry.key) return;
 
       const safePattern = typeof entry.pattern === "string" ? entry.pattern : "";
-      const safeLineage = Array.isArray(entry.lineage)
-        ? entry.lineage.slice()
-        : [];
+      const safeLineage = Array.isArray(entry.lineage) ? entry.lineage.slice() : [];
       const safePageId = entry.pageId || "NO_PAGE";
 
       const patternAncestry = Array.isArray(entry.patternAncestry)
@@ -333,19 +363,21 @@ class PulseRouterEvolutionaryStore {
         key: entry.key,
         routeShape: entry.routeShape || {},
         bestStats: entry.bestStats || {},
-        bestScore:
-          typeof entry.bestScore === "number" ? entry.bestScore : 0,
+        bestScore: typeof entry.bestScore === "number" ? entry.bestScore : 0,
+
         pattern: safePattern,
         patternAncestry,
         lineage: safeLineage,
         lineageSignature,
         pageId: safePageId,
         pageAncestrySignature,
-        healthScore:
-          typeof entry.healthScore === "number" ? entry.healthScore : 1.0,
+
+        // ⭐ restore binary surface
+        binary: entry.binary || extractBinarySurface({}),
+
+        healthScore: typeof entry.healthScore === "number" ? entry.healthScore : 1.0,
         tier: classifyDegradationTier(entry.healthScore),
 
-        // ⭐ ALWAYS RESTORE LOOP THEORY INVARIANTS ⭐
         loopTheory: {
           routingCompletion: true,
           allowLoopfieldPropulsion: true,
@@ -361,6 +393,7 @@ class PulseRouterEvolutionaryStore {
   }
 }
 
+
 // ------------------------------------------------------------
 // Public API wrapper — Evolution Core Surface
 // ------------------------------------------------------------
@@ -374,8 +407,8 @@ class PulseRouterEvolutionaryInstincts {
     return this.store.recordRoute(route);
   }
 
-  getBestRoute(routeShape) {
-    return this.store.getBestRoute(routeShape);
+  getBestRoute(routeShape, payload) {
+    return this.store.getBestRoute(routeShape, payload);
   }
 
   detectRegression(currentStats, baselineStats) {
@@ -402,6 +435,7 @@ class PulseRouterEvolutionaryInstincts {
     this.store.clear();
   }
 }
+
 
 // ------------------------------------------------------------
 // EXPORTS

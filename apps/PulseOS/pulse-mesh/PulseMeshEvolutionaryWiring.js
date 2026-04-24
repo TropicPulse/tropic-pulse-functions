@@ -1,25 +1,25 @@
 // ============================================================================
-//  EvolutionaryWiring.js — v3.0
-//  PulseMesh v3 • Nervous System Wiring • Pattern-Based Pathways
+//  EvolutionaryWiring.js — v11-Evo
+//  PulseMesh Wiring Organ • Nervous System Pathway Selector
 // ============================================================================
 //
 //  WHAT THIS ORGAN IS:
 //  --------------------
 //  • The wiring layer of the Pulse Nervous System.
-//  • Chooses pathway style for Pulse v2 organisms.
-//  • Pattern-aware, lineage-aware, reflexive, deterministic.
-//  • Self-repairing: bad pathways auto-correct to safe defaults.
+//  • Chooses wiring surfaces for symbolic + binary pulses.
+//  • Pattern-aware, lineage-aware, dual-mode-aware, deterministic.
+//  • Self-repairing: bad wiring auto-corrects to safe defaults.
 //
 //  WHAT THIS ORGAN IS NOT:
 //  ------------------------
-//  • Not a router (PulseRouter v3 handles destination).
-//  • Not a mover (PulseSend handles movement).
+//  • Not a router (PulseRouter v11 handles destination).
+//  • Not a mover (PulseSend v11 handles movement).
 //  • Not a compute engine.
 //  • Not a network layer.
 //  • Not a messenger.
 //
-//  SAFETY CONTRACT (v3.0):
-//  ------------------------
+//  SAFETY CONTRACT (v11-Evo):
+//  ---------------------------
 //  • No imports.
 //  • No network.
 //  • No randomness.
@@ -28,13 +28,14 @@
 //  • Zero mutation outside instance.
 // ============================================================================
 
-// ⭐ PulseRole — identifies this as the PulseMesh v3 Organ
+
+// ⭐ PulseRole — identifies this as the PulseMesh Wiring Organ (v11-Evo)
 export const PulseRole = {
   type: "Mesh",
   subsystem: "PulseMesh",
   layer: "Wiring",
-  version: "3.0",
-  identity: "PulseMesh-v3",
+  version: "11.0-Evo",
+  identity: "PulseMesh-Wiring-v11-Evo",
 
   evo: {
     driftProof: true,
@@ -43,95 +44,112 @@ export const PulseRole = {
     reflexReady: true,
     wiringReady: true,
     selfRepairReady: true,
+    dualModeReady: true,
+    binaryAware: true,
+    symbolicAware: true,
     futureEvolutionReady: true,
 
     unifiedAdvantageField: true,
-    pulseMesh3Ready: true
+    deterministicField: true,
+    pulseMesh11Ready: true
   },
 
-  pulseContract: "Pulse-v2",
-  routerContract: "PulseRouter-v3",
-  sendContract: "PulseSend-v3",
-  gpuOrganContract: "PulseGPU-v9.2",
-  earnCompatibility: "PulseEarn-v9"
+  pulseContract: "Pulse-v1/v2/v3",
+  routerContract: "PulseRouter-v11",
+  sendContract: "PulseSend-v11"
 };
+
 
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
 // ============================================================================
 
-// ⭐ Build a wiring key from organ + lineage depth
+// Build a wiring key from organ + lineage depth + mode
 function buildWiringKey(targetOrgan, pulse) {
   const depth = Array.isArray(pulse.lineage) ? pulse.lineage.length : 0;
-  return `${targetOrgan}::d${depth}`;
+  const mode = pulse.mode || "symbolic";
+  return `${targetOrgan}::d${depth}::${mode}`;
 }
 
-// ⭐ Infer pathway style from organ name + pattern hints
-function inferDefaultPathway(targetOrgan, pulse) {
-  const p = pulse.pattern.toLowerCase();
+// Infer default wiring surface from organ + pattern + mode
+function inferDefaultWiring(targetOrgan, pulse) {
+  const p = (pulse.pattern || "").toLowerCase();
+  const mode = pulse.mode || "symbolic";
 
-  if (targetOrgan === "GPU") return "fast-lane";
-  if (targetOrgan === "Earn") return "steady-lane";
-  if (targetOrgan === "OS") return "safe-lane";
-  if (targetOrgan === "Mesh") return "signal-lane";
+  // Binary mode prefers binary surfaces
+  if (mode === "binary") {
+    if (targetOrgan === "GPU") return "gpuBurst";
+    if (targetOrgan === "Earn") return "earnCreditChain";
+    if (targetOrgan === "OS") return "osBridge";
+    if (targetOrgan === "Mesh") return "meshSignal";
+    return "binaryPreferred";
+  }
 
-  if (p.includes("gpu")) return "fast-lane";
-  if (p.includes("earn")) return "steady-lane";
-  if (p.includes("os")) return "safe-lane";
-  if (p.includes("mesh")) return "signal-lane";
+  // Symbolic mode
+  if (targetOrgan === "GPU") return "gpuBurst";
+  if (targetOrgan === "Earn") return "earnCreditChain";
+  if (targetOrgan === "OS") return "osBridge";
+  if (targetOrgan === "Mesh") return "meshSignal";
 
-  return "neutral-lane";
+  if (p.includes("gpu")) return "gpuBurst";
+  if (p.includes("earn")) return "earnCreditChain";
+  if (p.includes("os")) return "osBridge";
+  if (p.includes("mesh")) return "meshSignal";
+
+  return "neutral";
 }
+
 
 // ============================================================================
-//  FACTORY — Create PulseMesh v3
+//  FACTORY — Create PulseMesh Wiring Organ (v11-Evo)
 // ============================================================================
 //
 //  Behavior:
-//    • pathwayFor(targetOrgan, pulse) → returns pathway style
+//    • wiringFor(targetOrgan, pulse) → returns wiring surface
 //    • remember(targetOrgan, pulse, outcome) → stores reflexive wiring memory
 //
 //  Memory model:
-//    • internal map: wiringKey → { pathway, successCount, failureCount }
-//    • deterministic fallback: if failures dominate → safe-lane
+//    • internal map: wiringKey → { surface, successCount, failureCount }
+//    • deterministic fallback: if failures dominate → safeFallback
 // ============================================================================
 
-export function createPulseMesh({ log } = {}) {
-  const memory = {}; // wiringKey → { pathway, successCount, failureCount }
+export function createPulseMeshWiring({ log } = {}) {
+  const memory = {}; // wiringKey → { surface, successCount, failureCount }
 
-  function pathwayFor(targetOrgan, pulse) {
+  function wiringFor(targetOrgan, pulse) {
     const key = buildWiringKey(targetOrgan, pulse);
     const entry = memory[key];
 
-    let pathway;
+    let surface;
 
-    if (entry && entry.pathway) {
-      pathway = entry.pathway;
+    if (entry && entry.surface) {
+      surface = entry.surface;
     } else {
-      pathway = inferDefaultPathway(targetOrgan, pulse);
+      surface = inferDefaultWiring(targetOrgan, pulse);
       memory[key] = {
-        pathway,
+        surface,
         successCount: 0,
         failureCount: 0
       };
     }
 
-    log && log("[PulseMesh-v3] Selecting pathway", {
+    log && log("[PulseMesh-Wiring-v11-Evo] Selecting wiring surface", {
       jobId: pulse.jobId,
       pattern: pulse.pattern,
       targetOrgan,
-      lineageDepth: pulse.lineage.length,
+      lineageDepth: pulse.lineage?.length || 0,
+      mode: pulse.mode,
       wiringKey: key,
-      pathway
+      surface
     });
 
-    return pathway;
+    return surface;
   }
 
   function remember(targetOrgan, pulse, outcome = "success") {
     const key = buildWiringKey(targetOrgan, pulse);
     const entry = memory[key] || {
-      pathway: inferDefaultPathway(targetOrgan, pulse),
+      surface: inferDefaultWiring(targetOrgan, pulse),
       successCount: 0,
       failureCount: 0
     };
@@ -142,19 +160,20 @@ export function createPulseMesh({ log } = {}) {
       entry.failureCount += 1;
     }
 
-    // ⭐ Self-repair: if failures dominate, switch to safe-lane
+    // ⭐ Self-repair: if failures dominate, switch to safeFallback
     if (entry.failureCount > entry.successCount) {
-      entry.pathway = "safe-lane";
+      entry.surface = "safeFallback";
     }
 
     memory[key] = entry;
 
-    log && log("[PulseMesh-v3] Remembering pathway", {
+    log && log("[PulseMesh-Wiring-v11-Evo] Remembering wiring", {
       jobId: pulse.jobId,
       pattern: pulse.pattern,
       targetOrgan,
+      mode: pulse.mode,
       wiringKey: key,
-      pathway: entry.pathway,
+      surface: entry.surface,
       successCount: entry.successCount,
       failureCount: entry.failureCount
     });
@@ -164,7 +183,7 @@ export function createPulseMesh({ log } = {}) {
 
   return {
     PulseRole,
-    pathwayFor,
+    wiringFor,
     remember
   };
 }

@@ -1,11 +1,12 @@
 // ============================================================================
 //  PulseEarnReflex-v11-Evo.js
-//  Side-Attached Earn Reflex (v11-Evo)
+//  Side-Attached Earn Reflex (v11-Evo + Dual-Band A-B-A)
 //  - No imports
 //  - No sending, no routing
 //  - Pure deterministic reflex builder
 //  - Fully aligned with PulseOSGovernor v3.3 (dynamic slicing safe)
 //  - v11: Diagnostics + Signatures + Pattern Surface
+//  - v11+ A-B-A: Dual-band + binary + wave (metadata-only, deterministic)
 // ============================================================================
 
 
@@ -46,6 +47,11 @@ function getReason(event) {
   return event.reason || "unknown_reason";
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
 
 // ============================================================================
 // REFLEX IDENTITY (v11-Evo)
@@ -57,12 +63,71 @@ function getReflexId(event, pulseOrImpulse) {
   return `${pulseId}::${organ}::${reason}`;
 }
 
+
+// ============================================================================
+// Dual-Band + Binary + Wave Builder (v11+ A-B-A)
+// ============================================================================
+function buildReflexBandBinaryWave(event, pulseOrImpulse, reflexId, cycleIndex) {
+  const pulseId = getPulseId(pulseOrImpulse);
+  const organ   = getOrgan(event);
+  const reason  = getReason(event);
+
+  const band = normalizeBand(
+    event.band ||
+    pulseOrImpulse?.band ||
+    pulseOrImpulse?.meta?.band ||
+    "symbolic"
+  );
+
+  const pulseLen = String(pulseId).length;
+  const organLen = String(organ).length;
+  const reasonLen = String(reason).length;
+
+  const surface = pulseLen + organLen + reasonLen + cycleIndex;
+
+  const binaryField = {
+    binaryReflexSignature: computeHash(`BREFLEX::${reflexId}::${surface}`),
+    binarySurfaceSignature: computeHash(`BSURF_REFLEX::${surface}`),
+    binarySurface: {
+      pulseLen,
+      organLen,
+      reasonLen,
+      cycle: cycleIndex,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density: organLen + reasonLen,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+
+  const waveField = {
+    amplitude: organLen,
+    wavelength: cycleIndex,
+    phase: (organLen + reasonLen + cycleIndex) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+
+  const bandSignature = computeHash(`BAND::REFLEX::${band}::${cycleIndex}`);
+
+  return {
+    band,
+    bandSignature,
+    binaryField,
+    waveField
+  };
+}
+
+
+// ============================================================================
+// REFLEX DIAGNOSTICS (v11-Evo + A-B-A)
+// ============================================================================
 function buildReflexDiagnostics(event, pulseOrImpulse, reflexId, state) {
   const pulseId = getPulseId(pulseOrImpulse);
   const organ   = getOrgan(event);
   const reason  = getReason(event);
 
-  return {
+  const base = {
     reflexId,
     pulseId,
     organ,
@@ -77,7 +142,26 @@ function buildReflexDiagnostics(event, pulseOrImpulse, reflexId, state) {
     pulseHash: computeHash(pulseId),
     organHash: computeHash(organ),
     reasonHash: computeHash(reason),
-    cycleHash: computeHash(String(reflexCycle))
+    cycleHash: computeHash(String(reflexCycle)),
+
+    instanceCount: state.count,
+    firstSeenCycle: state.firstSeenCycle,
+    lastSeenCycle: state.lastSeenCycle
+  };
+
+  const bandPack = buildReflexBandBinaryWave(
+    event,
+    pulseOrImpulse,
+    reflexId,
+    base.cycleIndex
+  );
+
+  return {
+    ...base,
+    band: bandPack.band,
+    bandSignature: bandPack.bandSignature,
+    binaryField: bandPack.binaryField,
+    waveField: bandPack.waveField
   };
 }
 
@@ -136,7 +220,7 @@ function buildReflexEarnFromGovernorEvent(event, pulseOrImpulse, instanceContext
 
 
 // ============================================================================
-// PUBLIC API — PulseEarnReflex v11-Evo
+// PUBLIC API — PulseEarnReflex v11-Evo + Dual-Band A-B-A
 // ============================================================================
 export const PulseEarnReflex = {
 
@@ -167,7 +251,7 @@ export const PulseEarnReflex = {
       instanceContext
     );
 
-    // v11-Evo diagnostics
+    // v11-Evo + A-B-A diagnostics
     const diagnostics = buildReflexDiagnostics(
       event,
       pulseOrImpulse,

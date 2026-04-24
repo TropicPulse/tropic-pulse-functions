@@ -1,8 +1,28 @@
 // ============================================================================
-//  PulseV2EvolutionEngine-v11-Evo.js
+//  FILE: PulseShifterEvolutionaryPulse-v11-Evo.js
 //  Pulse v2 Organism • Evolution Engine • Pattern + Lineage + Shape
-//  v11: Diagnostics + Signatures + Ancestry + Evolution Surface
+//  v11-Evo: Diagnostics + Signatures + Ancestry + Evolution Surface
 // ============================================================================
+//
+//  ROLE:
+//  -----
+//  This organ is the *pure evolution core* for Pulse v2.
+//
+//  It does NOT know about bits, binary pulses, or UI.
+//  It only knows about:
+//    - pattern: a symbolic identifier for the work / route / job
+//    - lineage: the historical chain of patterns
+//    - shape: how pattern + lineage combine into a "shape signature"
+//    - advantageField: a deterministic "fitness" / advantage surface
+//    - healthScore: a normalized health metric for this pulse
+//    - tier: a coarse degradation tier based on healthScore
+//
+//  This engine is designed to sit BEHIND a binary front-end such as
+//  PulseBinaryShifterEvolutionaryPulse-v11-Evo, which will:
+//    - accept bits
+//    - derive pattern/mode/payload hints
+//    - call createPulseV2 / evolvePulseV2
+//    - emit compact, binary-friendly summaries
 //
 //  SAFETY CONTRACT (v11-Evo):
 //  --------------------------
@@ -16,33 +36,46 @@
 
 
 // ============================================================================
-// ⭐ PulseRole — identifies this as the Pulse v2 evolution engine (v11)
+// ⭐ PulseRole — identifies this as the Pulse v2 evolution engine (v11-Evo)
 // ============================================================================
 export const PulseRole = {
   type: "Pulse",
   subsystem: "Pulse",
   layer: "Organ",
   version: "11.0",
-  identity: "Pulse-v2-EvolutionEngine-v11-Evo",
+  identity: "PulseShifterEvolutionaryPulse-v11-Evo",
 
   evo: {
+    // Core evolution capabilities
     driftProof: true,
     patternAware: true,
     lineageAware: true,
     shapeAware: true,
     modeAware: true,
+
+    // Ready to cooperate with routing/mesh organs
     routerAwareReady: true,
     meshAwareReady: true,
 
+    // Explicitly an evolution engine
     evolutionEngineReady: true,
 
+    // Advantage field is unified so a binary front-end can read it
     unifiedAdvantageField: true,
     pulseV2Ready: true,
     futureEvolutionReady: true,
 
+    // Diagnostics + signatures + evolution surface
     diagnosticsReady: true,
     signatureReady: true,
-    evolutionSurfaceReady: true
+    evolutionSurfaceReady: true,
+
+    // Binary integration flags:
+    //   - This file is the *back-end* evolution engine.
+    //   - A separate binary organ (PulseBinaryShifterEvolutionaryPulse-v11-Evo)
+    //     will act as the front-end that speaks in bits.
+    binaryBackEndReady: true,
+    binaryFrontEndContract: "PulseBinaryShifterEvolutionaryPulse-v11-Evo"
   },
 
   routingContract: "PulseRouter-v11",
@@ -56,27 +89,35 @@ export const PulseRole = {
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
 // ============================================================================
+//  These helpers are intentionally small and self-contained. They define how
+//  patterns, lineages, and shapes are turned into signatures and diagnostics.
+//  They are the "symbolic math" behind the evolution engine.
+// ============================================================================
 
 function computeHash(str) {
+  // v2-specific deterministic hash; small, bounded, and stable.
   let h = 0;
   for (let i = 0; i < str.length; i++) {
-    h = (h + str.charCodeAt(i) * (i + 3)) % 100000; // v2-specific weight
+    h = (h + str.charCodeAt(i) * (i + 3)) % 100000;
   }
   return `h${h}`;
 }
 
 function buildLineage(parentLineage, pattern) {
+  // Append the new pattern to the existing lineage, forming a simple ancestry chain.
   const base = Array.isArray(parentLineage) ? parentLineage : [];
   return [...base, pattern];
 }
 
 function computeShapeSignature(pattern, lineage) {
+  // Shape = pattern + lineage combined into a single signature.
   const lineageKey = lineage.join("::");
   const raw = `${pattern}::${lineageKey}`;
   return `shape-${computeHash(raw)}`;
 }
 
 function computeEvolutionStage(pattern, lineage) {
+  // Simple, human-readable stage based on lineage depth.
   const depth = lineage.length;
 
   if (depth === 1) return "seed";
@@ -87,6 +128,7 @@ function computeEvolutionStage(pattern, lineage) {
 }
 
 // v2-style deterministic pattern evolution
+// This is where a front-end (router/mesh/binary) can inject hints.
 function evolvePattern(pattern, context = {}) {
   const { routerHint, meshHint, organHint } = context;
 
@@ -110,6 +152,7 @@ function buildLineageSignature(lineage) {
 }
 
 function buildPageAncestrySignature({ pattern, lineage, pageId }) {
+  // Page ancestry is a compact way to tie pattern+lineage to a page context.
   const shape = {
     pattern,
     patternAncestry: buildPatternAncestry(pattern),
@@ -121,6 +164,7 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
 }
 
 function buildDiagnostics(pattern, lineage, healthScore, tier) {
+  // Diagnostics are a human/AI-readable summary of the evolution state.
   return {
     patternLength: pattern.length,
     lineageDepth: lineage.length,
@@ -137,6 +181,17 @@ function buildDiagnostics(pattern, lineage, healthScore, tier) {
 // ============================================================================
 //  INTERNAL: Deterministic evolution compute loop (v2 — experimental tier)
 // ============================================================================
+//  This is the core "advantage field" computation. It takes symbolic inputs
+//  (pattern, lineage, payload, mode) and produces:
+//    - advantageField: a structured description of "strength" and context
+//    - healthScore: a normalized [0..1] health metric
+//
+//  A binary front-end can:
+//    - feed patterns/modes derived from bits
+//    - read advantageField + healthScore
+//    - route or prioritize work accordingly
+// ============================================================================
+
 function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
   const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
   const payloadSize = payload && typeof payload === "object"
@@ -179,8 +234,15 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v11)
+//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v11-Evo)
 // ============================================================================
+//  This is the "birth" function for a Pulse v2 evolution instance.
+//  A binary front-end will typically call this after deriving:
+//    - pattern (from bits / route / job)
+//    - payload (metadata)
+//    - mode (stress/drain/recovery/normal)
+// ============================================================================
+
 export function createPulseV2({
   jobId,
   pattern,
@@ -220,7 +282,10 @@ export function createPulseV2({
   const diagnostics = buildDiagnostics(pattern, lineage, healthScore, tier);
 
   return {
+    // Identity + contracts
     PulseRole,
+
+    // Core pulse identity
     jobId,
     pattern,
     payload,
@@ -230,11 +295,15 @@ export function createPulseV2({
     mode,
     pageId,
 
+    // Evolution engine type
     pulseType: "Pulse-v2-EvolutionEngine-v11",
+
+    // Advantage + health
     advantageField,
     healthScore,
     tier,
 
+    // Meta: signatures + diagnostics
     meta: {
       shapeSignature,
       evolutionStage,
@@ -259,9 +328,15 @@ export function createPulseV2({
 // ============================================================================
 //  EVOLUTION ENGINE — evolve an existing Pulse deterministically (v2 style)
 // ============================================================================
+//  This is the "next step" function. A binary front-end or router/mesh can:
+//    - take an existing pulse
+//    - provide context hints (routerHint, meshHint, organHint)
+//    - get back a new pulse with updated pattern/lineage/advantage/health
+// ============================================================================
+
 export function evolvePulseV2(pulse, context = {}) {
-  const nextPattern   = evolvePattern(pulse.pattern, context);
-  const nextLineage   = buildLineage(pulse.lineage, nextPattern);
+  const nextPattern    = evolvePattern(pulse.pattern, context);
+  const nextLineage    = buildLineage(pulse.lineage, nextPattern);
   const shapeSignature = computeShapeSignature(nextPattern, nextLineage);
   const evolutionStage = computeEvolutionStage(nextPattern, nextLineage);
 
@@ -291,7 +366,10 @@ export function evolvePulseV2(pulse, context = {}) {
   const diagnostics = buildDiagnostics(nextPattern, nextLineage, healthScore, tier);
 
   return {
+    // Identity + contracts
     PulseRole,
+
+    // Core pulse identity (carried forward)
     jobId: pulse.jobId,
     pattern: nextPattern,
     payload: pulse.payload,
@@ -301,11 +379,15 @@ export function evolvePulseV2(pulse, context = {}) {
     mode: pulse.mode || "normal",
     pageId,
 
+    // Evolution engine type
     pulseType: "Pulse-v2-EvolutionEngine-v11",
+
+    // Advantage + health
     advantageField,
     healthScore,
     tier,
 
+    // Meta: signatures + diagnostics
     meta: {
       shapeSignature,
       evolutionStage,

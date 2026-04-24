@@ -1,21 +1,20 @@
 // ============================================================================
 // FILE: PulseMeshTendons.js
-// PULSE OS — v10.4
+// PULSE OS — v11-Evo
 // CONNECTIVE TISSUE ORGAN — “PulseMeshTendons”
 // Intent Translation • Earn-Ready Metadata • Deterministic Connective Tissue
 // ============================================================================
 //
-// IDENTITY — THE TENDON ORGAN (v10.4):
-// ------------------------------------
+// IDENTITY — THE TENDON ORGAN (v11-Evo):
+// --------------------------------------
 // • Translates Cortex intent into earn-ready metadata.
 // • Classifies impulses (heavy/medium/light) deterministically.
-// • Shapes routeHint based ONLY on class (no pressure logic).
-// • Stabilizes energy deterministically (no tension logic).
+// • Shapes routeHint based on class + mode (symbolic/binary/dual).
+// • Stabilizes energy deterministically (v11-Evo contract).
 // • Attaches volatility + earn-context for EarnEngine.
 // • Pure metadata-only — zero payload mutation.
 // • Deterministic, drift-proof, connective tissue.
-// • Pulse-agnostic: works with Pulse v1/v2/v3.
-// • No pressure gating, no route-mode logic, no factoring pressure.
+// • Binary-aware, dual-mode-ready.
 // ============================================================================
 
 export function createPulseMeshTendons({ log, warn, error }) {
@@ -23,26 +22,37 @@ export function createPulseMeshTendons({ log, warn, error }) {
   const tendonMeta = {
     layer: "PulseMeshTendons",
     role: "INTENT_TRANSLATION",
-    version: "10.4",
+    version: "11.0-Evo",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
       localAware: true,
       internetAware: true,
+
       advantageCascadeAware: true,
       pulseEfficiencyAware: true,
       driftProof: true,
       multiInstanceReady: true,
+
       unifiedAdvantageField: true,
       deterministicField: true,
       futureEvolutionReady: true,
-      signalFactoringAware: true
+
+      signalFactoringAware: true,
+      meshPressureAware: true,
+      auraPressureAware: true,
+
+      zeroCompute: true,
+      zeroMutation: true,
+      zeroRoutingInfluence: true
     }
   };
 
   // ========================================================================
-  // Tendon Pack (v10.4)
+  // Tendon Pack (v11-Evo)
   // ========================================================================
   const PulseMeshTendons = {
 
@@ -58,59 +68,75 @@ export function createPulseMeshTendons({ log, warn, error }) {
     },
 
     // -------------------------------------------------------
-    // ROUTE HINT — earn class only (no pressure logic)
+    // ROUTE HINT — v11-Evo (class + mode)
     // -------------------------------------------------------
     routeHint(impulse, cls) {
       impulse.flags = impulse.flags || {};
 
-      switch (cls) {
-        case "heavy":
-          impulse.routeHint = "earner-heavy";
-          break;
-        case "medium":
-          impulse.routeHint = "earner-medium";
-          break;
-        default:
-          impulse.routeHint = "earner-light";
+      const binary = impulse.flags.binary_mode;
+      const dual = impulse.flags.dual_mode;
+
+      if (binary) {
+        impulse.routeHint = `earner-binary-${cls}`;
+        return impulse;
       }
 
+      if (dual) {
+        impulse.routeHint = `earner-dual-${cls}`;
+        return impulse;
+      }
+
+      // symbolic default
+      impulse.routeHint = `earner-${cls}`;
       return impulse;
     },
 
     // -------------------------------------------------------
-    // SHAPE ENERGY — deterministic stabilization
+    // SHAPE ENERGY — deterministic stabilization (v11-Evo)
     // -------------------------------------------------------
     shapeEnergy(impulse, cls) {
       impulse.flags = impulse.flags || {};
 
-      if (cls === "heavy") impulse.energy = (impulse.energy ?? 1) * 1.05;
-      if (cls === "light") impulse.energy = (impulse.energy ?? 1) * 0.95;
+      let e = impulse.energy ?? 1;
 
+      if (cls === "heavy") e *= 1.05;
+      if (cls === "light") e *= 0.95;
+
+      // v11-Evo: binary mode slightly boosts stability
+      if (impulse.flags.binary_mode) e *= 1.02;
+
+      impulse.energy = e;
       impulse.flags.tendon_energy_shaped = true;
       return impulse;
     },
 
     // -------------------------------------------------------
-    // NORMALIZE EARN ENERGY — clamp to safe range
+    // NORMALIZE EARN ENERGY — clamp to safe range (v11-Evo)
     // -------------------------------------------------------
     normalizeEarnEnergy(impulse) {
       impulse.flags = impulse.flags || {};
 
       const e = impulse.energy ?? 1;
-      impulse.energy = Math.max(0.1, Math.min(e, 1));
+      impulse.energy = Math.max(0.1, Math.min(e, 1.2));
 
       impulse.flags.tendon_energy_normalized = true;
       return impulse;
     },
 
     // -------------------------------------------------------
-    // ATTACH VOLATILITY — deterministic (no pressure)
+    // ATTACH VOLATILITY — deterministic (v11-Evo)
     // -------------------------------------------------------
     attachVolatility(impulse) {
       impulse.flags = impulse.flags || {};
 
-      // v10.4: volatility is simple + deterministic
-      impulse.flags.earner_volatility = 0;
+      // v11-Evo: volatility is mode-aware but deterministic
+      if (impulse.flags.binary_mode) {
+        impulse.flags.earner_volatility = 0.1;
+      } else if (impulse.flags.dual_mode) {
+        impulse.flags.earner_volatility = 0.05;
+      } else {
+        impulse.flags.earner_volatility = 0;
+      }
 
       return impulse;
     },
@@ -126,7 +152,12 @@ export function createPulseMeshTendons({ log, warn, error }) {
         urgency: impulse.energy ?? 1,
         stability_hint: 1,
         volatility: impulse.flags.earner_volatility ?? 0,
-        route_hint: impulse.routeHint
+        route_hint: impulse.routeHint,
+        mode: impulse.flags.binary_mode
+          ? "binary"
+          : impulse.flags.dual_mode
+          ? "dual"
+          : "symbolic"
       };
 
       return impulse;
@@ -143,14 +174,14 @@ export function createPulseMeshTendons({ log, warn, error }) {
   };
 
   // ========================================================================
-  // Tendon Engine (v10.4)
+  // Tendon Engine (v11-Evo)
   // “Apply connective tissue shaping for Mesh → EarnEngine”
   // ========================================================================
   function applyPulseMeshTendons(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.flags.tendon_meta = tendonMeta;
 
-    let cls = PulseMeshTendons.classify(impulse);
+    const cls = PulseMeshTendons.classify(impulse);
 
     PulseMeshTendons.routeHint(impulse, cls);
     PulseMeshTendons.shapeEnergy(impulse, cls);

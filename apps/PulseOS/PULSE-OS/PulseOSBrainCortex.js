@@ -1,26 +1,27 @@
 // ============================================================================
 // FILE: /apps/pulse-os/PulseOSCortex.js
-// PULSE OS — v10.4
+// PULSE OS — v11-Evo
 // “THE CORTEX ORGAN — HIGH‑LEVEL COGNITION + ORGAN SUPERVISOR”
 // ============================================================================
 //
-// ROLE (v10.4):
-// -------------
+// ROLE (v11-Evo):
+// ---------------
 // • Receives PulseOSBrain (CNS) directly
 // • Reads Intent, IQ, OrganismMap from Brain
 // • Reads Evolution from Brain.evolution
-// • Initializes Nervous System (SDN) + Organs
-// • Reports lineage + drift to Evolution
-// • Maintains OS‑level conscious state
-// • Pure frontend, deterministic, no backend
+// • Initializes Nervous System + Organs (delegated to CNS Brain)
+// • Reports lineage + drift to Evolution (band-tagged)
+// • Maintains OS-level conscious state
+// • Pure frontend, deterministic, zero timing, zero backend
 // • Continuance-aware (never halts organism)
+// • Dual-band aware (symbolic | binary | dual) — tagging only
 // ============================================================================
 
 export const PulseRole = {
   type: "Brain",
   subsystem: "OS",
   layer: "Cortex",
-  version: "10.4",
+  version: "11.0-Evo",
   identity: "PulseOSCortex",
 
   evo: {
@@ -30,15 +31,20 @@ export const PulseRole = {
     advantageCascadeAware: true,
     unifiedAdvantageField: true,
     pulseEfficiencyAware: true,
-
-    // NEW — v10.4 organism-wide contracts
     loopTheoryAware: true,
     continuanceAware: true,
-    routingContract: "PulseRouter-v10.4",
-    gpuCompatibility: "PulseGPU-v10.4",
-    sdnCompatibility: "PulseSDN-v10.4",
-    earnCompatibility: "PulseEarn-v10.4",
-    sendCompatibility: "PulseSendSystem-v10.4"
+
+    // v11 organism-wide contracts
+    routingContract: "PulseRouter-v11",
+    gpuCompatibility: "PulseGPU-v11",
+    sdnCompatibility: "PulseSDN-v11",
+    earnCompatibility: "PulseEarn-v11",
+    sendCompatibility: "PulseSendSystem-v11",
+
+    // Dual-band
+    dualMode: true,
+    symbolicAware: true,
+    binaryAware: true
   }
 };
 
@@ -54,10 +60,19 @@ export function createPulseOSCortex({ Brain }) {
 
   const Evolution = Brain.evolution || null;
 
-  // Cortex State
+  // --------------------------------------------------------------------------
+  // Band normalizer — tagging only, no branching
+  // --------------------------------------------------------------------------
+  function normalizeBand(band) {
+    if (band === "binary" || band === "symbolic" || band === "dual") return band;
+    return "dual";
+  }
+
+  // --------------------------------------------------------------------------
+  // Cortex State (zero timing, zero backend)
+// --------------------------------------------------------------------------
   const CortexState = {
-    bootTs: null,
-    ready: false,
+    booted: false,
     routeName: "main",
     hasIdentity: false,
 
@@ -67,49 +82,56 @@ export function createPulseOSCortex({ Brain }) {
     OrganismMap: Brain.PulseOrganismMap,
 
     // Understanding context
-    understanding: Brain.understanding || null
+    understanding: Brain.understanding || null,
+
+    // v11 band tagging
+    band: "dual"
   };
 
 
   // ========================================================================
   //  BOOT — Cortex comes online AFTER PulseOSBrain
   // ========================================================================
-  async function bootCortex() {
-    if (!CortexState.bootTs) {
-      CortexState.bootTs = Date.now();
+  function bootCortex({ band = "dual" } = {}) {
+    const normBand = normalizeBand(band);
+    CortexState.band = normBand;
+
+    if (!CortexState.booted) {
+      CortexState.booted = true;
     }
 
-    // Evolution lineage
-    Evolution?.recordLineage?.("cortex-boot");
+    // Evolution lineage (band-tagged)
+    Evolution?.recordLineage?.("cortex-boot", { band: normBand });
 
-    // Initialize Nervous System (SDN) if Brain provided it
+    // Initialize Nervous System (delegated to CNS Brain)
     if (Brain.cortex?.initializeNervousSystem) {
       Brain.cortex.initializeNervousSystem();
     }
 
-    // Initialize Organs if Brain provided it
+    // Initialize Organs (delegated to CNS Brain)
     if (Brain.cortex?.initializeOrgans) {
       Brain.cortex.initializeOrgans();
     }
 
-    CortexState.ready = true;
+    // Drift scan (band-tagged)
+    Evolution?.scanDrift?.(Brain, { band: normBand });
 
-    // Evolution drift scan
-    Evolution?.scanDrift?.(Brain);
-
-    Brain.log("[Cortex v10.4] Boot complete", { CortexState });
+    Brain.log("[Cortex v11-Evo] Boot complete", { CortexState });
     return CortexState;
   }
 
 
   // ========================================================================
-  //  UPDATE — Route or identity changed
-  // ========================================================================
-  function updateCortex(ctx = {}) {
-    CortexState.routeName = ctx.routeName ?? CortexState.routeName;
+  //  UPDATE — Route or identity changed (band-tagged)
+// ========================================================================
+  function updateCortex(ctx = {}, { band = "dual" } = {}) {
+    const normBand = normalizeBand(band);
+    CortexState.band = normBand;
+
+    CortexState.routeName   = ctx.routeName   ?? CortexState.routeName;
     CortexState.hasIdentity = ctx.hasIdentity ?? CortexState.hasIdentity;
 
-    Evolution?.recordLineage?.("cortex-update");
+    Evolution?.recordLineage?.("cortex-update", { band: normBand });
     return CortexState;
   }
 
@@ -121,6 +143,6 @@ export function createPulseOSCortex({ Brain }) {
     boot: bootCortex,
     update: updateCortex,
     state: CortexState,
-    isReady: () => CortexState.ready
+    isReady: () => CortexState.booted
   };
 }

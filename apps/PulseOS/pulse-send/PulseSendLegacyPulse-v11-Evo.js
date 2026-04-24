@@ -1,8 +1,17 @@
 // ============================================================================
-//  PulseSendLegacyPulse-v11-EvoStable.js
+//  PulseSendLegacyPulse-v11-Evo.js
 //  Pulse v1 Organism • Stable Evolutionary Tier • Full Organism Minus Compute
 //  v11: Diagnostics + Signatures + Ancestry + Stability Surface
+//  v11-Binary: Binary-Aware, Unbinary-Friendly, Still Non-Evolving
 // ============================================================================
+//
+//  ROLE:
+//    • v1 is the *stable floor* of the organism stack.
+//    • It never evolves, never computes evolution tiers, never changes behavior.
+//    • It now understands binary metadata if present, but:
+//        - It does NOT depend on bits.
+//        - It does NOT evolve from bits.
+//        - It only *surfaces* binary context in diagnostics/signatures.
 //
 //  SAFETY CONTRACT (v11-EvoStable):
 //  --------------------------------
@@ -40,7 +49,12 @@ export const PulseRole = {
 
     diagnosticsReady: true,
     signatureReady: true,
-    stabilitySurfaceReady: true
+    stabilitySurfaceReady: true,
+
+    // Binary-aware but non-evolving:
+    //  - can surface binaryPattern/binaryMode/binaryStrength if present
+    //  - does not change behavior based on them
+    binaryAwareStableReady: true
   },
 
   routingContract: "PulseRouter-v11",
@@ -102,18 +116,51 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
   return computeHash(JSON.stringify(shape));
 }
 
-function buildDiagnostics(pattern, lineage) {
+function extractBinarySurfaceFromPayload(payload) {
+  const p = payload || {};
+
+  const binaryPattern  = p.binaryPattern || null;
+  const binaryMode     = p.binaryMode || null;
+  const binaryPayload  = p.binaryPayload || null;
+  const binaryHints    = p.binaryHints || null;
+  const binaryStrength = typeof p.binaryStrength === "number"
+    ? p.binaryStrength
+    : null;
+
+  const hasBinary =
+    !!binaryPattern ||
+    !!binaryMode ||
+    !!binaryPayload ||
+    !!binaryHints ||
+    binaryStrength !== null;
+
+  return {
+    hasBinary,
+    binaryPattern,
+    binaryMode,
+    binaryPayload,
+    binaryHints,
+    binaryStrength
+  };
+}
+
+function buildDiagnostics(pattern, lineage, payload) {
+  const binarySurface = extractBinarySurfaceFromPayload(payload);
+
   return {
     patternLength: pattern.length,
     lineageDepth: lineage.length,
     lineageDensity: lineage.length === 0 ? 0 : pattern.length / lineage.length,
-    stabilityTier: "v1-evo-stable-v11"
+    stabilityTier: "v1-evo-stable-v11",
+
+    // Binary surface (optional, non-breaking)
+    binary: binarySurface
   };
 }
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v1 Organism (v11‑EvoStable)
+//  FACTORY — Create a Pulse v1 Organism (v11‑EvoStable + Binary-Aware)
 // ============================================================================
 export function createLegacyPulse({
   jobId,
@@ -149,7 +196,7 @@ export function createLegacyPulse({
   const healthScore = 1.0;
   const tier = "stable";
 
-  const diagnostics = buildDiagnostics(pattern, lineage);
+  const diagnostics = buildDiagnostics(pattern, lineage, payload);
 
   return {
     PulseRole,
@@ -192,22 +239,28 @@ export function createLegacyPulse({
 
 // ============================================================================
 //  FROM IMPULSE — build a v1 Pulse from an Impulse traveler
+//  (Binary-aware but still stable / non-evolving)
 // ============================================================================
 export function legacyPulseFromImpulse(impulse, overrides = {}) {
   if (!impulse) return null;
 
-  const pattern       = overrides.pattern       || impulse.payload?.pattern       || impulse.intent || "UNKNOWN_PATTERN";
-  const jobId         = overrides.jobId         || impulse.payload?.jobId         || impulse.tickId;
-  const priority      = overrides.priority      || impulse.payload?.priority      || "normal";
-  const returnTo      = overrides.returnTo      || impulse.payload?.returnTo      || null;
-  const parentLineage = overrides.parentLineage || impulse.payload?.parentLineage || null;
-  const mode          = overrides.mode          || impulse.payload?.mode          || "normal";
-  const pageId        = overrides.pageId        || impulse.payload?.pageId        || "NO_PAGE";
+  const payload = impulse.payload || {};
 
+  const pattern       = overrides.pattern       || payload.pattern       || impulse.intent || "UNKNOWN_PATTERN";
+  const jobId         = overrides.jobId         || payload.jobId         || impulse.tickId;
+  const priority      = overrides.priority      || payload.priority      || "normal";
+  const returnTo      = overrides.returnTo      || payload.returnTo      || null;
+  const parentLineage = overrides.parentLineage || payload.parentLineage || null;
+  const mode          = overrides.mode          || payload.mode          || "normal";
+  const pageId        = overrides.pageId        || payload.pageId        || "NO_PAGE";
+
+  // We pass payload through unchanged so any binary metadata (binaryPattern,
+  // binaryMode, binaryPayload, binaryHints, binaryStrength) is preserved and
+  // surfaced by diagnostics, but never used to evolve v1.
   return createLegacyPulse({
     jobId,
     pattern,
-    payload: impulse.payload || {},
+    payload,
     priority,
     returnTo,
     parentLineage,

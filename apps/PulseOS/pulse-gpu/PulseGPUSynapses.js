@@ -1,45 +1,41 @@
 // ============================================================================
-//  PULSE GPU EVENT EMITTER v10.4 — THE SYNAPSE LAYER
+//  PULSE GPU EVENT EMITTER v11-Evo — THE SYNAPSE LAYER
 //  Deterministic, Fail‑Open, Zero‑Side‑Effects Signal Relay
 // ============================================================================
 //
-// IDENTITY — THE SYNAPSE LAYER (v10.4):
-//  ------------------------------------
-//  • The electrical junctions of the GPU organism.
-//  • Where impulses jump between GPU subsystems.
-//  • Ordered, calm, deterministic — no chaos, no randomness.
-//  • The layer that lets the organism communicate internally.
-//  • Dual‑mode evolved: biological + system‑level advantage active together.
-//  • PulseSend‑10.4‑ready: synaptic impulses can be routed by the compute router.
+// IDENTITY — THE SYNAPSE LAYER (v11-Evo):
+//  --------------------------------------
+//  • Electrical junctions of the GPU organism.
+//  • Pure deterministic relay between GPU subsystems.
+//  • Binary-aware, dual-mode-aware, dispatch-aware (metadata only).
+//  • No randomness, no async, no timestamps, no GPU calls.
+//  • Fail‑open: a bad handler never breaks the relay.
+//  • PulseSend‑v11‑ready: impulses routable by compute router.
+//  • Earn‑v3‑ready.
 //
-// SAFETY CONTRACT (v10.4):
-//  ------------------------
+// SAFETY CONTRACT (v11-Evo):
+//  --------------------------
 //  • No randomness
 //  • No timestamps
 //  • No async
 //  • No DOM
 //  • No GPU calls
-//  • Fail‑open: no handler may break the relay
+//  • No environment access
+//  • No mutation outside internal listener map
 //  • Deterministic: same impulses → same order → same results
-//  • Zero mutation outside internal listener map
 // ============================================================================
 
-const PULSE_GPU_EVENT_EMITTER_META = {
+const PULSE_GPU_EVENT_EMITTER_META_V11 = {
   layer: "PulseGPUEventEmitter",
-  version: 10.4,
-  target: "full-gpu",
+  version: "11.0-Evo-binary",
+  target: "full-gpu+binary",
   description: "Synaptic signal relay for GPU subsystem communication.",
 
-  // v10.4 unified identity
   selfRepairable: true,
   unifiedAdvantageField: true,
-  pulseSend10Ready: true,
+  pulseSend11Ready: true,
 
-  // PulseSend / Earn contracts (conceptual only)
-  routingContract: "PulseSend-v10.4",
-  gpuOrganContract: "PulseGPU-v10.4",
-  earnCompatibility: "Earn-v2",
-
+  // v11-Evo awareness
   evo: {
     metabolicBoost: 1.0,
     neuralReflexBoost: 1.0,
@@ -55,18 +51,36 @@ const PULSE_GPU_EVENT_EMITTER_META = {
 
     dualModeEvolution: true,
     organismClusterBoost: 1.0,
-    cognitiveComputeLink: true
+    cognitiveComputeLink: true,
+    unifiedAdvantageField: true,
+
+    // NEW v11-Evo
+    binaryAware: true,
+    symbolicAware: true,
+    gpuDispatchAware: true,
+    gpuMemoryAware: true,
+
+    // Contracts (conceptual only)
+    routingContract: "PulseSend-v11",
+    gpuOrganContract: "PulseGPU-v11-Evo",
+    binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+    earnCompatibility: "Earn-v3",
+
+    // Legacy compatibility
+    legacyRoutingContract: "PulseSend-v10.4",
+    legacyGPUOrganContract: "PulseGPU-v10.4",
+    legacyEarnCompatibility: "Earn-v2"
   }
 };
 
 class PulseGPUEventEmitter {
   constructor() {
     this.listeners = {};
-    this.meta = { ...PULSE_GPU_EVENT_EMITTER_META };
+    this.meta = { ...PULSE_GPU_EVENT_EMITTER_META_V11 };
 
     log(
       "synapse",
-      "PulseGPUEventEmitter v10.4 — electrical junction layer active (dual‑mode evolution, PulseSend‑10.4‑ready)."
+      "PulseGPUEventEmitter v11-Evo — synaptic junction layer active (binary-aware, dual-mode, PulseSend‑v11‑ready)."
     );
   }
 
@@ -106,13 +120,13 @@ class PulseGPUEventEmitter {
     const handlers = this.listeners[signalName];
     if (!handlers || handlers.length === 0) return;
 
-    // Deterministic ordering: handlers are invoked in registration order
+    // Deterministic ordering: handlers invoked in registration order
     for (let i = 0; i < handlers.length; i++) {
       const handler = handlers[i];
       try {
         handler(payload);
       } catch {
-        // fail‑open: synapse never breaks from a bad neuron
+        // fail‑open: synapse never breaks
       }
     }
   }

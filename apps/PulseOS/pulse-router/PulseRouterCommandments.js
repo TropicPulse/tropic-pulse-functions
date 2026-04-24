@@ -1,40 +1,32 @@
 // ============================================================================
-//  PULSE ROUTER COMMANDMENTS v10.4‑Evo‑A2 — ROUTER SETTINGS COVENANT
-//  Long‑Term Route Settings Memory • Deterministic • Drift‑Proof • Lineage/Page/Pattern‑Aware
+//  PULSE ROUTER COMMANDMENTS v11‑Evo‑DualStack — ROUTER SETTINGS COVENANT
+//  Long‑Term Route Settings Memory • Deterministic • Drift‑Proof
+//  Pattern/Lineage/Page‑Aware + BinaryPattern/BinaryHints Aware
 // ============================================================================
 //
-//  WHAT THIS ORGAN NOW IS:
-//  ------------------------
-//  • Canonical route settings + constraints.
-//  • Pattern‑aware, lineage‑aware, page‑aware.
-//  • Deterministic fallback + safe defaults.
-//  • Multi‑instance safe, drift‑proof, self‑repair‑ready.
-//  • Compatible with EvolutionaryThought inheritance layer.
-//  • Compatible with EvolutionaryInstincts + EvolutionaryDesign metadata.
-//  • Loop‑Theory‑Aware (routingCompletion, loopfieldPropulsion,
-//    pulseComputeContinuity, errorRouteAround)
+//  ROLE:
+//    • Canonical route settings + constraints.
+//    • Symbolic + Binary dual‑stack.
+//    • Deterministic fallback + safe defaults.
+//    • Multi‑instance safe, drift‑proof, self‑repair‑ready.
+//    • Compatible with EvolutionaryThought, Instincts, Design.
+//    • Loop‑Theory‑Aware.
+//    • Pure memory organ — NO routing, NO compute, NO mutation outside instance.
 //
-//  WHAT THIS ORGAN IS NOT:
-//  ------------------------
-//  • Not a router.
-//  • Not a compute engine.
-//  • Not a mesh organ.
-//  • Not a transport organ.
-//  • Not a mutation engine.
 // ============================================================================
 
 
 // ------------------------------------------------------------
-// OS‑v10.4 CONTEXT METADATA — Router Commandments Identity
+// v11‑Evo CONTEXT METADATA — Router Commandments Identity
 // ------------------------------------------------------------
 const ROUTER_COMMANDMENTS_CONTEXT = {
   layer: "PulseRouterCommandments",
   role: "ROUTER_SETTINGS_COVENANT",
-  purpose: "Long‑term canonical settings + constraints for routes",
+  purpose: "Long‑term canonical settings + constraints for symbolic + binary routes",
   context:
-    "Stores per‑route commandments: allowed behaviors, fallbacks, and stability rules",
-  target: "full-router",
-  version: 10.4,
+    "Stores per‑route commandments: allowed behaviors, fallbacks, stability rules, binary hints",
+  target: "dual-stack-router",
+  version: 11.0,
   selfRepairable: true,
 
   evo: {
@@ -43,19 +35,21 @@ const ROUTER_COMMANDMENTS_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    pulseSend10Ready: true,
+    pulseSend11Ready: true,
 
-    routingContract: "PulseSend-v10.4",
-    routerOrganContract: "PulseRouter-v10.4",
-    earnCompatibility: "Earn-v2"
+    routingContract: "PulseSend-v11",
+    routerOrganContract: "PulseRouter-v11",
+    earnCompatibility: "Earn-v3",
+
+    // ⭐ NEW: Binary-aware commandments
+    binaryAware: true
   },
 
-  // ⭐ LOOP THEORY COMMANDMENTS (router-level)
   loopTheory: {
-    routingCompletion: true,          // Always attempt full route
-    allowLoopfieldPropulsion: true,   // LoopField may accelerate routing
-    pulseComputeContinuity: true,     // Pulse computes during routing
-    errorRouteAround: true            // Route around errors
+    routingCompletion: true,
+    allowLoopfieldPropulsion: true,
+    pulseComputeContinuity: true,
+    errorRouteAround: true
   }
 };
 
@@ -93,7 +87,7 @@ function simpleHash(str) {
 
 
 // ------------------------------------------------------------
-// Helpers: pattern / lineage / page ancestry
+// Helpers: symbolic ancestry
 // ------------------------------------------------------------
 function buildPatternAncestry(pattern) {
   if (!pattern || typeof pattern !== "string") return [];
@@ -110,13 +104,10 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
   const safeLineage = Array.isArray(lineage) ? lineage : [];
   const safePageId = pageId || "NO_PAGE";
 
-  const patternAncestry = buildPatternAncestry(safePattern);
-  const lineageSig = buildLineageSignature(safeLineage);
-
   const shape = {
     pattern: safePattern,
-    patternAncestry,
-    lineageSignature: lineageSig,
+    patternAncestry: buildPatternAncestry(safePattern),
+    lineageSignature: buildLineageSignature(safeLineage),
     pageId: safePageId
   };
 
@@ -125,7 +116,37 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
 
 
 // ------------------------------------------------------------
-// Commandment key — Route + Tier + Context + Pattern + Page
+// Helpers: binary ancestry (optional)
+// ------------------------------------------------------------
+function extractBinarySurface(payload = {}) {
+  const binaryPattern  = payload.binaryPattern || null;
+  const binaryMode     = payload.binaryMode || null;
+  const binaryPayload  = payload.binaryPayload || null;
+  const binaryHints    = payload.binaryHints || null;
+  const binaryStrength = typeof payload.binaryStrength === "number"
+    ? payload.binaryStrength
+    : null;
+
+  const hasBinary =
+    !!binaryPattern ||
+    !!binaryMode ||
+    !!binaryPayload ||
+    !!binaryHints ||
+    binaryStrength !== null;
+
+  return {
+    hasBinary,
+    binaryPattern,
+    binaryMode,
+    binaryPayload,
+    binaryHints,
+    binaryStrength
+  };
+}
+
+
+// ------------------------------------------------------------
+// Commandment key — Route + Tier + Context + Pattern + Page + Binary
 // ------------------------------------------------------------
 function buildRouteKey({
   routeId = "unknown-route",
@@ -133,16 +154,24 @@ function buildRouteKey({
   context = {},
   pattern = "",
   pageId = "NO_PAGE",
-  lineage = []
+  lineage = [],
+  payload = {}
 } = {}) {
+
+  const binary = extractBinarySurface(payload);
+
   const base = {
     routeId,
     tierId,
     context,
     pattern,
     pageId,
-    lineage
+    lineage,
+    binaryPattern: binary.binaryPattern,
+    binaryMode: binary.binaryMode,
+    binaryStrength: binary.binaryStrength
   };
+
   return simpleHash(stableStringify(base));
 }
 
@@ -160,7 +189,6 @@ function normalizeCommandments(commandments = {}) {
     forbiddenPaths = [],
     notes = "",
 
-    // ⭐ LOOP THEORY COMMANDMENTS ⭐
     routingCompletion = true,
     allowLoopfieldPropulsion = true,
     pulseComputeContinuity = true,
@@ -181,7 +209,6 @@ function normalizeCommandments(commandments = {}) {
       : [],
     notes: String(notes || ""),
 
-    // ⭐ LOOP THEORY COMMANDMENTS ⭐
     routingCompletion: Boolean(routingCompletion),
     allowLoopfieldPropulsion: Boolean(allowLoopfieldPropulsion),
     pulseComputeContinuity: Boolean(pulseComputeContinuity),
@@ -191,7 +218,7 @@ function normalizeCommandments(commandments = {}) {
 
 
 // ------------------------------------------------------------
-// Memory entry model — Route Commandment Record
+// Memory entry model — Route Commandment Record (Dual‑Stack)
 // ------------------------------------------------------------
 class PulseRouterCommandmentsStore {
   constructor() {
@@ -210,11 +237,14 @@ class PulseRouterCommandmentsStore {
     commandments,
     pattern,
     lineage,
-    pageId
+    pageId,
+    payload
   }) {
     const safePattern = typeof pattern === "string" ? pattern : "";
     const safeLineage = Array.isArray(lineage) ? lineage.slice() : [];
     const safePageId = pageId || "NO_PAGE";
+
+    const binary = extractBinarySurface(payload);
 
     const patternAncestry = buildPatternAncestry(safePattern);
     const lineageSignature = buildLineageSignature(safeLineage);
@@ -230,7 +260,8 @@ class PulseRouterCommandmentsStore {
       context,
       pattern: safePattern,
       lineage: safeLineage,
-      pageId: safePageId
+      pageId: safePageId,
+      payload
     });
 
     const normalized = normalizeCommandments(commandments);
@@ -246,6 +277,10 @@ class PulseRouterCommandmentsStore {
       lineageSignature,
       pageId: safePageId,
       pageAncestrySignature,
+
+      // ⭐ NEW: binary surface
+      binary,
+
       commandments: normalized,
       meta: { ...ROUTER_COMMANDMENTS_CONTEXT }
     };
@@ -254,7 +289,7 @@ class PulseRouterCommandmentsStore {
     return this.entries.get(key);
   }
 
-  getCommandments({ routeId, tierId, context, pattern, lineage, pageId }) {
+  getCommandments({ routeId, tierId, context, pattern, lineage, pageId, payload }) {
     const safePattern = typeof pattern === "string" ? pattern : "";
     const safeLineage = Array.isArray(lineage) ? lineage.slice() : [];
     const safePageId = pageId || "NO_PAGE";
@@ -265,7 +300,8 @@ class PulseRouterCommandmentsStore {
       context,
       pattern: safePattern,
       lineage: safeLineage,
-      pageId: safePageId
+      pageId: safePageId,
+      payload
     });
 
     const entry = this.entries.get(key);
@@ -290,6 +326,10 @@ class PulseRouterCommandmentsStore {
         lineageSignature,
         pageId: safePageId,
         pageAncestrySignature,
+
+        // ⭐ NEW: binary surface
+        binary: extractBinarySurface(payload),
+
         commandments: normalizeCommandments({}),
         meta: { ...ROUTER_COMMANDMENTS_CONTEXT }
       };
@@ -310,6 +350,10 @@ class PulseRouterCommandmentsStore {
         lineageSignature: entry.lineageSignature,
         pageId: entry.pageId,
         pageAncestrySignature: entry.pageAncestrySignature,
+
+        // ⭐ NEW: binary surface snapshot
+        binary: { ...entry.binary },
+
         commandments: { ...entry.commandments }
       };
     }
@@ -371,6 +415,10 @@ class PulseRouterCommandmentsStore {
         lineageSignature,
         pageId: safePageId,
         pageAncestrySignature,
+
+        // ⭐ NEW: binary surface
+        binary: entry.binary || extractBinarySurface({}),
+
         commandments: normalizeCommandments(entry.commandments || {}),
         meta: { ...ROUTER_COMMANDMENTS_CONTEXT }
       };

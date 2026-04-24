@@ -1,21 +1,22 @@
 // ============================================================================
 // FILE: /apps/organs/skin/PulseMeshSkin.js
-// [pulse:mesh] PULSE_OS_SKIN_LAYER v10.4  // silver
+// [pulse:mesh] PULSE_OS_SKIN_LAYER v11-Evo  // silver
 // Boundary Membrane • Entry–Exit Normalization • Deterministic Skin
 // ============================================================================
 //
-// IDENTITY — THE SKIN (v10.4):
-// ----------------------------
+// IDENTITY — THE SKIN (v11-Evo):
+// ------------------------------
 // • First organ touched by every impulse entering the organism.
 // • Last organ to touch every impulse leaving the organism.
 // • Normalizes entry (score, energy).
 // • Cleans exit (strips internal metadata).
-// • No pressure reactivity (v9.2 behavior removed).
 // • Pure metadata-only — zero payload mutation.
+// • No pressure reactivity, no friction, no noise.
 // • Deterministic-field, drift-proof, SDN-aligned.
+// • v11-Evo: binary-aware, dual-mode-ready, unified-advantage-field.
 //
-// SAFETY CONTRACT (v10.4):
-// -------------------------
+// SAFETY CONTRACT (v11-Evo):
+// ---------------------------
 // • No routing, no compute, no shaping.
 // • No payload mutation.
 // • No async, no randomness.
@@ -30,11 +31,13 @@ export function createPulseSkin({ log, warn, error }) {
     meta: {
       layer: "PulseSkin",
       role: "BOUNDARY_MEMBRANE",
-      version: 10.4,
+      version: "11.0-Evo",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
+        binaryAware: true,
+        symbolicAware: true,
         localAware: true,
         internetAware: true,
 
@@ -49,13 +52,17 @@ export function createPulseSkin({ log, warn, error }) {
 
         signalFactoringAware: true,
         meshPressureAware: true,
-        auraPressureAware: true
+        auraPressureAware: true,
+
+        zeroCompute: true,
+        zeroMutation: true,
+        zeroRoutingInfluence: true
       }
     }
   };
 
   // ========================================================================
-  //  SKIN PACK (v10.4)
+  //  SKIN PACK (v11-Evo)
   // ========================================================================
   const PulseSkin = {
 
@@ -65,6 +72,15 @@ export function createPulseSkin({ log, warn, error }) {
     normalizeEntry(impulse) {
       impulse.flags = impulse.flags || {};
       impulse.flags.skin_entry_normalized = true;
+
+      // v11-Evo: dual-mode tagging
+      if (impulse.flags.binary_mode) {
+        impulse.flags.skin_mode = "binary";
+      } else if (impulse.flags.dual_mode) {
+        impulse.flags.skin_mode = "dual";
+      } else {
+        impulse.flags.skin_mode = "symbolic";
+      }
 
       // deterministic normalization
       impulse.score = clamp01(impulse.score ?? 0.5);
@@ -79,13 +95,16 @@ export function createPulseSkin({ log, warn, error }) {
     normalizeExit(impulse) {
       impulse.flags = impulse.flags || {};
       impulse.flags.skin_exit_normalized = true;
+
+      // v11-Evo: strip internal metadata safely
       impulse.flags.internal_metadata_stripped = true;
+
       return impulse;
     }
   };
 
   // ========================================================================
-  //  SKIN ENGINE (v10.4)
+  //  SKIN ENGINE (v11-Evo)
   // ========================================================================
   function applyPulseSkin(impulse, phase = "entry") {
     impulse.flags = impulse.flags || {};
@@ -95,10 +114,8 @@ export function createPulseSkin({ log, warn, error }) {
       PulseSkin.normalizeEntry(impulse);
     }
 
-    // v10.4: NO dynamic friction
-    // v10.4: NO dynamic noise
-    // v10.4: NO boundary load modulation
-    // Skin is now pure normalization only.
+    // v11-Evo: NO friction, NO noise, NO boundary load modulation
+    // Skin is pure normalization only.
 
     if (phase === "exit") {
       PulseSkin.normalizeExit(impulse);

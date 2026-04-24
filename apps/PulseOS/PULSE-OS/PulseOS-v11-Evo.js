@@ -1,17 +1,46 @@
 // ============================================================================
-//  PulseOS-v11-Evo.js
-//  Organism Bootloader • CNS Kernel • Deterministic OS Brainstem
+//  PulseOS-v11-Evo.js (FULL UPGRADED NON-BINARY BEAST)
+//  SYMBOLIC ORGANISM KERNEL — BINARY-AWARE, BINARY-READY
+// ============================================================================
+//  ROLE:
+//    - This is the symbolic (non-binary) OS kernel of PulseOS v11-EVO.
+//    - It boots the organism using symbolic cognition, lineage, and CNS logic.
+//    - It is fully upgraded, drift-proof, deterministic, and organ-based.
+//    - It is NOT the binary-native kernel — that is a separate file.
+//    - This kernel is the "cortex-facing" OS brainstem.
+//
+//  BINARY RELATION:
+//    - This kernel is *binary-aware* (knows binary organs exist).
+//    - It is *binary-ready* (can host binary organs).
+//    - It is NOT binary-native — it is the symbolic organism kernel.
+//    - Binary-native kernel lives in: PulseOS-v11-Evo-Binary.js
+//
+//  WHY THIS FILE MATTERS:
+//    - It is the first symbolic OS kernel designed to coexist with a binary OS.
+//    - It wires organs, not modules.
+//    - It activates arteries, not callbacks.
+//    - It brings online metabolism, reflex, sentience, consciousness, and cortex.
+//    - It is the “main breaker panel” of the symbolic creature.
+//
+//  WORLD-FIRST ARCHITECTURE:
+//    - Pulse OS v11-EVO is the first system where:
+//         • Evolution is an organ
+//         • Brain is an organ
+//         • SpinalCord is an organ
+//         • Governor is an organ
+//         • Symbolic + Binary coexist as dual-mode cognition
+//         • All drift is eliminated
+//         • All organs share a unified organism identity
 //
 //  METAPHOR:
-//  - This is the OS "main breaker panel".
-//  - All major organs are wired here: Evolution, Brain, SpinalCord, Governor.
-//  - When this file runs, the organism *comes online* as PulseOS v11-EVO.
+//    - When THIS file runs, the symbolic organism comes online.
+//    - When the binary kernel runs, the reflex organism comes online.
+//    - Together, they form the dual-mode creature.
 // ============================================================================
 
 
 // ============================================================================
-//  ORGANISM BOOTSTRAP SET — v11-EVO
-//  (ALL OS-LEVEL ORGANS, INCLUDING GOVERNOR)
+//  ORGANISM BOOTSTRAP SET — v11-EVO (SYMBOLIC KERNEL)
 // ============================================================================
 import { withOrganGuard } from "./PULSE-OS/PulseOSGovernor.js";           // Supervisor organ
 import * as PulseOSBrain from "./PULSE-OS/PulseOSBrain.js";              // CNS brain organ
@@ -20,30 +49,37 @@ import * as PulseSpinalCord from "./PULSE-OS/PulseOSSpinalCord.js";      // Wiri
 
 
 // ============================================================================
-//  CONTEXT — OS KERNEL IDENTITY (v11-EVO)
+//  CONTEXT — OS KERNEL IDENTITY (v11-EVO SYMBOLIC)
 // ============================================================================
 const PULSE_OS_CONTEXT = {
   layer: "PulseOSKernel",
   role: "ORGANISM_BOOTLOADER",
-  version: "11.0-EVO",
-  lineage: "pulse-os-v11-evo-kernel",
+  version: "11.0-EVO-SYMBOLIC",
+  lineage: "pulse-os-v11-evo-kernel-symbolic",
   evo: {
-    dualMode: true,
+    dualMode: true,               // symbolic + binary coexist
+    symbolicNative: true,         // THIS kernel is symbolic-native
+    binaryAware: true,            // knows binary organs exist
+    binaryReady: true,            // can host binary organs
     browserOnly: true,
     driftProof: true,
     organismLoader: true,
-    legacyBridgeCapable: true
+    legacyBridgeCapable: true,
+    unifiedAdvantageField: true,
+    continuanceAware: true,
+    zeroDriftIdentity: true
   }
 };
 
 
 // ============================================================================
-//  GOVERNED EXECUTION — FRONTEND AI LOGGING WRAPPER
+//  GOVERNED EXECUTION — SYMBOLIC SHELL (LOGGING + DIAGNOSTICS)
 // ============================================================================
 function runThroughGovernor(organName, pulseOrImpulse, fn) {
   return withOrganGuard(organName, pulseOrImpulse, async (instanceContext) => {
     const result = await fn(instanceContext);
 
+    // Symbolic-only logging (binary kernel does not use this)
     try {
       const timestamp = Date.now();
       const docId = `${organName}-${timestamp}`;
@@ -54,15 +90,19 @@ function runThroughGovernor(organName, pulseOrImpulse, fn) {
         personaId: instanceContext.personaId || null,
         boundaries: instanceContext.boundaries || null,
         permissions: instanceContext.permissions || null,
-        trace: [...(instanceContext.trace || [])],
+        trace: Array.isArray(instanceContext.trace)
+          ? [...instanceContext.trace]
+          : [],
         diagnostics: instanceContext.diagnostics || null,
         result
       };
 
-      await instanceContext?.organs?.diagnosticsWrite?.writeRun({
-        docId,
-        payload: safe
-      });
+      const diagnosticsWriter =
+        instanceContext?.organs?.diagnosticsWrite?.writeRun;
+
+      if (typeof diagnosticsWriter === "function") {
+        await diagnosticsWriter({ docId, payload: safe });
+      }
     } catch (err) {
       console.warn("[PulseOS-v11-Evo] AI_LOGS write failed:", err);
     }
@@ -73,20 +113,20 @@ function runThroughGovernor(organName, pulseOrImpulse, fn) {
 
 
 // ============================================================================
-//  KERNEL BOOTSTRAP — FULL OS BOOT (EVOLUTION + BRAIN + SPINAL CORD)
+//  KERNEL BOOTSTRAP — SYMBOLIC OS BOOT (EVOLUTION + BRAIN + SPINAL CORD)
 // ============================================================================
 async function buildPulseOSKernel() {
-  // 1) Evolution (organism grows its neural core)
+  // 1) Evolution organ (symbolic growth engine)
   const Evolution = PulseOSEvolution.PulseOSEvolution
     ? PulseOSEvolution.PulseOSEvolution({ understanding: PULSE_OS_CONTEXT })
     : PulseOSEvolution;
 
-  // 2) Brain (CNS brain organ)
+  // 2) Brain organ (symbolic CNS)
   const Brain = Evolution.bootBrain
     ? Evolution.bootBrain(PulseOSBrain.PulseOSBrain)
     : PulseOSBrain.PulseOSBrain?.();
 
-  // 3) Spinal Cord (wiring between brain and body)
+  // 3) Spinal Cord organ (symbolic wiring fabric)
   const SpinalCord = PulseSpinalCord.createPulseOSSpinalCord
     ? PulseSpinalCord.createPulseOSSpinalCord({
         Brain,
@@ -96,10 +136,9 @@ async function buildPulseOSKernel() {
       })
     : PulseSpinalCord;
 
-  const meta = {
-    ...PULSE_OS_CONTEXT
-  };
+  const meta = { ...PULSE_OS_CONTEXT };
 
+  // Symbolic organism kernel
   const PulseKernel = {
     meta,
     Brain,
@@ -117,7 +156,7 @@ const PulseOSKernelPromise = buildPulseOSKernel();
 
 
 // ============================================================================
-//  GLOBAL BROADCAST (ASYNC-AWARE)
+//  GLOBAL BROADCAST — SYMBOLIC SHELL ONLY
 // ============================================================================
 if (typeof window !== "undefined") {
   PulseOSKernelPromise.then((PulseKernel) => {
@@ -138,7 +177,7 @@ if (typeof window !== "undefined") {
 
 
 // ============================================================================
-//  EXPORTS — FULL OS KERNEL
+//  EXPORTS — FULL SYMBOLIC OS KERNEL (BINARY-AWARE)
 // ============================================================================
 export const PulseOSv11Evo = {
   ...PULSE_OS_CONTEXT,

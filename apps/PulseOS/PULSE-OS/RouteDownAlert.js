@@ -1,43 +1,48 @@
 // ============================================================================
 // FILE: /pulse-proxy/RouteDownAlert.js
-// PULSE OS — v7.1+
+// PULSE OS — v11-Evo-Prime
 // “IMMUNE ALERT NODE / ROUTE FAILURE SENTINEL”
 // ============================================================================
 //
-// ROLE (v7.1+):
-//   RouteDownAlert is part of the backend **IMMUNE SYSTEM**.
+// ROLE (v11-Evo-Prime):
+//   RouteDownAlert is a backend **IMMUNE ORGAN**.
 //   It is the **IMMUNE ALERT NODE** — the sentinel that receives
-//   route‑failure signals from router.js and triggers an immune response.
+//   route‑failure signals from router.js and triggers an immune reflex.
 //
 //   • Accepts route‑down alerts from the frontend
 //   • Validates and sanitizes all incoming payloads
-//   • Logs the immune event
+//   • Logs the immune event (safe logging only)
 //   • Optionally notifies the operator (email/SMS/Discord/etc.)
 //   • Never exposes backend internals
 //   • Never trusts frontend input
+//   • Never mutates organism state
 //
-// WHAT THIS FILE *IS* (v7.1+):
+// WHAT THIS FILE *IS* (v11-Evo-Prime):
 //   • A backend immune‑response organ
 //   • A deterministic alert receiver
-//   • A safe, zero‑drift sentinel
+//   • A drift‑proof sentinel
+//   • Binary + symbolic aware
+//   • Organism‑aware (OS + GPU + Router)
 //
 // WHAT THIS FILE *IS NOT*:
 //   • NOT a router
 //   • NOT a scheduler
 //   • NOT a heartbeat
 //   • NOT a retry system
+//   • NOT a GPU organ
 //
-// SAFETY CONTRACT (v7.1+):
+// SAFETY CONTRACT (v11-Evo-Prime):
 //   • Never trust frontend payloads
 //   • Always validate + sanitize input
 //   • Never expose backend internals
 //   • Never throw unhandled errors
 //   • Always return a safe JSON response
-//   • No timing logic
 //   • No randomness
+//   • No timing logic
+//   • No environment access
 //
 // VERSION TAG:
-//   version: 7.1+
+//   version: 11.0-Evo-Prime
 // ============================================================================
 
 export const handler = async (event) => {
@@ -52,29 +57,47 @@ export const handler = async (event) => {
       body = {};
     }
 
-    const error = typeof body.error === "string" ? body.error : "Unknown error";
-    const type  = typeof body.type  === "string" ? body.type  : "Unknown route";
+    const error =
+      typeof body.error === "string" ? body.error : "Unknown error";
+
+    const type =
+      typeof body.type === "string" ? body.type : "Unknown route";
+
+    const routeId =
+      typeof body.routeId === "string" ? body.routeId : "unknown";
+
+    const context =
+      typeof body.context === "object" && body.context !== null
+        ? body.context
+        : {};
 
     // ------------------------------------------------------------
-    // ⭐ IMMUNE EVENT LOG
+    // ⭐ IMMUNE EVENT LOG — drift-proof, safe metadata only
     // ------------------------------------------------------------
-    log("🧬 IMMUNE ALERT — ROUTE FAILURE DETECTED:", {
+    log("🧬 IMMUNE ALERT (v11-Evo-Prime) — ROUTE FAILURE DETECTED", {
       error,
       type,
+      routeId,
+      context: {
+        binaryMode: context.binaryMode || "unknown",
+        pipelineId: context.pipelineId || "",
+        sceneType: context.sceneType || "",
+        workloadClass: context.workloadClass || ""
+      },
       organ: "RouteDownAlert",
-      version: "7.1+"
+      version: "11.0-Evo-Prime"
     });
 
     // ------------------------------------------------------------
     // ⭐ OPTIONAL: NOTIFY OPERATOR (email/SMS/Discord/etc.)
     // ------------------------------------------------------------
     // await sendEmail({
-    //   subject: `Route Failure: ${type}`,
-    //   message: `Error: ${error}`
+    //   subject: `[PulseOS] Route Failure: ${type}`,
+    //   message: `Error: ${error}\nRoute: ${routeId}`
     // });
 
     // ------------------------------------------------------------
-    // ⭐ IMMUNE RESPONSE ACK
+    // ⭐ IMMUNE RESPONSE ACK — deterministic, safe
     // ------------------------------------------------------------
     return {
       statusCode: 200,
@@ -83,13 +106,17 @@ export const handler = async (event) => {
         message: "RouteDownAlert received",
         type,
         error,
+        routeId,
         organ: "Immune Alert Node",
-        version: "7.1+"
+        version: "11.0-Evo-Prime"
       })
     };
 
   } catch (err) {
-    error("🟥 IMMUNE ALERT NODE ERROR:", err);
+    // ------------------------------------------------------------
+    // ⭐ IMMUNE FAILURE — safe fallback
+    // ------------------------------------------------------------
+    error("🟥 IMMUNE ALERT NODE ERROR (v11-Evo-Prime):", err);
 
     return {
       statusCode: 500,
@@ -97,12 +124,12 @@ export const handler = async (event) => {
         ok: false,
         message: "RouteDownAlert internal error",
         organ: "Immune Alert Node",
-        version: "7.1+"
+        version: "11.0-Evo-Prime"
       })
     };
   }
 };
 
 // ============================================================================
-// END OF FILE — IMMUNE ALERT NODE / ROUTE FAILURE SENTINEL
+// END OF FILE — IMMUNE ALERT NODE / ROUTE FAILURE SENTINEL (v11-Evo-Prime)
 // ============================================================================

@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnNervousSystem-v11-Evo.js
-// LAYER: THE NERVOUS SYSTEM + EXCHANGE OFFICE (v11-Evo)
+// LAYER: THE NERVOUS SYSTEM + EXCHANGE OFFICE (v11-Evo + Dual-Band + Binary + Wave)
 // (Deterministic Job Intake + Result Forwarding + Reputation Updating)
 // ============================================================================
 //
@@ -11,6 +11,7 @@
 //   • Submits completed results back to deterministic receptors.
 //   • Updates marketplace reputation deterministically.
 //   • Emits v11-Evo signatures + diagnostics.
+//   • NOW dual-band, binary-aware, wave-aware (metadata only).
 //
 // PURPOSE (v11-Evo):
 //   • Provide deterministic, drift‑proof interface between Earn and markets.
@@ -25,6 +26,7 @@
 //   • NO executing user code.
 //   • NO async, NO timestamps, NO network.
 //   • Deterministic job intake + result forwarding only.
+//   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
 
 import { updateMarketplaceReputation, computeReputationSignals } from "./PulseEarnEndocrineSystem-v11-Evo.js";
@@ -57,7 +59,13 @@ const nervousHealing = {
     allowLoopfieldPropulsion: true,
     pulseComputeContinuity: true,
     errorRouteAround: true
-  }
+  },
+
+  // v11+ Dual-Band + Binary + Wave
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
@@ -71,6 +79,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -100,6 +113,51 @@ function buildJobPattern(job) {
 
 
 // ============================================================================
+// Dual-Band + Binary + Wave Builder — v11+ A-B-A
+// ============================================================================
+function buildNervousBandBinaryWave(job, result, cycleIndex) {
+  const band = normalizeBand(
+    result?.band ||
+    job?.band ||
+    job?.meta?.band ||
+    "symbolic"
+  );
+  nervousHealing.lastBand = band;
+  nervousHealing.lastBandSignature = computeHash(`BAND::NERVOUS::${band}`);
+
+  const jobIdLength = (job?.id || "").length;
+  const marketplaceLength = (job?.marketplaceId || "").length;
+  const surface = jobIdLength + marketplaceLength + cycleIndex;
+
+  const binaryField = {
+    binaryNervousSignature: computeHash(`BNERV::${surface}`),
+    binarySurfaceSignature: computeHash(`BSURF_NERV::${surface}`),
+    binarySurface: {
+      jobIdLength,
+      marketplaceLength,
+      cycle: cycleIndex,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density: marketplaceLength,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+  nervousHealing.lastBinaryField = binaryField;
+
+  const waveField = {
+    amplitude: marketplaceLength,
+    wavelength: cycleIndex,
+    phase: (marketplaceLength + cycleIndex) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+  nervousHealing.lastWaveField = waveField;
+
+  return { band, binaryField, waveField };
+}
+
+
+// ============================================================================
 // fetchJobFromMarketplace — Sensory Intake (v11-Evo)
 // ============================================================================
 export function fetchJobFromMarketplace() {
@@ -125,6 +183,9 @@ export function fetchJobFromMarketplace() {
       nervousHealing.lastJobIntakeSignature = computeHash(
         `${job.id}::${job.marketplaceId}::${nervousHealing.cycleCount}`
       );
+
+      // A-B-A: intake band/binary/wave from job surface
+      buildNervousBandBinaryWave(job, null, nervousHealing.cycleCount);
     }
 
     return job || null;
@@ -200,6 +261,9 @@ export function submitMarketplaceResult(job, result) {
     nervousHealing.lastResultForwardSignature = computeHash(
       `${job.id}::${job.marketplaceId}::${result.jobSuccessRate ?? 0}`
     );
+
+    // A-B-A: forward band/binary/wave using job + result
+    buildNervousBandBinaryWave(job, result, nervousHealing.cycleCount);
 
     return submission;
 

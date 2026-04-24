@@ -1,35 +1,38 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_CORTEX_LAYER v9.2  // blue
+// [pulse:mesh] COMMUNITY_CORTEX_LAYER v11-Evo  // blue
 // Strategic Decision Layer • Survival-Pattern Instincts • Metadata-Only
 // ============================================================================
 //
-// IDENTITY — THE MESH CORTEX (v9.2):
-//  ---------------------------------
-//  • High-level decision layer for impulses.
-//  • Applies survival-pattern instincts: risk, novelty, cooperation, budgeting.
-//  • Sets strategic priority + intent, NEVER computes payloads.
-//  • Sits above Tendons, below Earners (EarnEngine).
-//  • v9.2: deterministic-field, unified-advantage-field, factoring-aware,
-//          flow-aware, aura-aware, multi-instance-ready.
+// IDENTITY — THE MESH CORTEX (v11-Evo):
+// -------------------------------------
+// • High-level decision layer for impulses.
+// • Applies survival-pattern instincts: risk, novelty, cooperation, budgeting.
+// • Sets strategic priority + intent, NEVER computes payloads.
+// • Sits above Tendons, below Earners (EarnEngine).
+// • v11-Evo: deterministic-field, unified-advantage-field, factoring-aware,
+//            flow-aware, drift-aware, aura-aware, binary-aware,
+//            multi-instance-ready, dual-mode-ready.
 //
-// SAFETY CONTRACT (v9.2):
-//  • No randomness
-//  • No timestamps
-//  • No payload mutation
-//  • No async
-//  • Deterministic: same impulse → same strategic score
-//  • Fail-open: missing context → safe defaults
+// SAFETY CONTRACT (v11-Evo):
+// ---------------------------
+// • No randomness
+// • No timestamps
+// • No payload mutation
+// • No async
+// • Deterministic: same impulse → same strategic score
+// • Fail-open: missing context → safe defaults
+// • Metadata-only shaping
 // ============================================================================
 
 
 // ============================================================================
-//  FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
-//  (Cortex MUST HAVE ZERO IMPORTS)
+// FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
+// (Cortex MUST HAVE ZERO IMPORTS)
 // ============================================================================
 export function createPulseMeshCortex({ log, warn, error }) {
 
   // -----------------------------------------------------------
-  // Cortex Instinct Pack (v9.2, factoring-aware)
+  // Cortex Instinct Pack (v11-Evo, factoring-aware, binary-aware)
   // -----------------------------------------------------------
   const PulseCortex = {
 
@@ -76,10 +79,21 @@ export function createPulseMeshCortex({ log, warn, error }) {
       if (flowPressure > 0.3) penalty += flowPressure * 0.4;
       if (recentThrottleRate > 0.0) penalty += recentThrottleRate * 0.5;
 
-      // v9.2: factoring pressure reduces budget more aggressively
+      // v11-Evo: factoring pressure reduces budget more aggressively
       if (factoringBias > 0.0) penalty += factoringBias * 0.4;
 
       return clamp01(base - penalty);
+    },
+
+    // [pulse:mesh] CORTEX_BINARY_AWARENESS  // cyan
+    binaryAwareness(impulse, context = {}) {
+      const binaryBias = context.binaryBias || 0.0;
+      const base = impulse.score || 0.5;
+
+      if (binaryBias <= 0) return base;
+
+      // binary preference gently boosts score
+      return clamp01(base + (binaryBias * 0.15));
     },
 
     // [pulse:mesh] CORTEX_ANOMALY  // magenta
@@ -105,18 +119,20 @@ export function createPulseMeshCortex({ log, warn, error }) {
 
 
   // -----------------------------------------------------------
-  // Cortex Engine (v9.2)
+  // Cortex Engine (v11-Evo)
   // -----------------------------------------------------------
   function applyPulseCortex(impulse, context = {}) {
     impulse.meta = impulse.meta || {};
     impulse.meta.cortex = {
       layer: "PulseCortex",
       role: "MESH_STRATEGIC_LAYER",
-      version: 9.2,
+      version: "11.0-Evo",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
+        binaryAware: true,
+        symbolicAware: true,
         localAware: true,
         internetAware: true,
         advantageCascadeAware: true,
@@ -125,7 +141,9 @@ export function createPulseMeshCortex({ log, warn, error }) {
         multiInstanceReady: true,
         unifiedAdvantageField: true,
         deterministicField: true,
-        signalFactoringAware: true
+        signalFactoringAware: true,
+        flowAware: true,
+        driftAware: true
       }
     };
 
@@ -135,6 +153,7 @@ export function createPulseMeshCortex({ log, warn, error }) {
     score = PulseCortex.novelty({ ...impulse, score }, context);
     score = PulseCortex.cooperation({ ...impulse, score }, context);
     score = PulseCortex.resourceBudget({ ...impulse, score }, context);
+    score = PulseCortex.binaryAwareness({ ...impulse, score }, context);
 
     impulse.score = score;
 
@@ -166,7 +185,7 @@ export function createPulseMeshCortex({ log, warn, error }) {
       load > 0.8 ||
       factoringBias > 0.5;
 
-    // v9.2: NEVER push_hard under pressure
+    // v11-Evo: NEVER push_hard under pressure
     if (score >= 0.85 && !environmentHot) return "push_hard";
     if (score >= 0.5) return "normal";
     if (score < 0.3) return "defer_or_drop";

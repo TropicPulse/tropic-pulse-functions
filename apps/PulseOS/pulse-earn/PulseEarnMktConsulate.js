@@ -254,7 +254,37 @@ function computeResourceModifiers(job) {
 }
 
 // ---------------------------------------------------------------------------
-// – Composite Priority Score
+// Light A‑B‑A Influence — Optional Advantage Modifiers
+// ---------------------------------------------------------------------------
+function computeAbaModifiers(job) {
+  // These fields are optional; if absent, modifiers are neutral (1.0).
+  const band = job._abaBand || null;
+  const binaryDensity = Number(job._abaBinaryDensity ?? 0);
+  const waveAmplitude = Number(job._abaWaveAmplitude ?? 0);
+
+  let bandFactor = 1.0;
+  if (band === "binary") {
+    bandFactor = 1.02; // +2% for binary band
+  }
+
+  let binaryFactor = 1.0;
+  if (binaryDensity > 0) {
+    // capped light influence
+    const bonus = Math.min(binaryDensity / 1000, 0.03); // up to +3%
+    binaryFactor = 1.0 + bonus;
+  }
+
+  let waveFactor = 1.0;
+  if (waveAmplitude > 0) {
+    const bonus = Math.min(waveAmplitude / 1000, 0.02); // up to +2%
+    waveFactor = 1.0 + bonus;
+  }
+
+  return { bandFactor, binaryFactor, waveFactor };
+}
+
+// ---------------------------------------------------------------------------
+// Composite Priority Score
 // ---------------------------------------------------------------------------
 function computePriorityScore(job) {
   const slope = computeMoneySlope(job);
@@ -264,13 +294,17 @@ function computePriorityScore(job) {
     job.marketplaceId || job._sourceMarketplaceId || "unknown"
   );
   const { gpuFactor, durationFactor, bwFactor } = computeResourceModifiers(job);
+  const { bandFactor, binaryFactor, waveFactor } = computeAbaModifiers(job);
 
   const score =
     slope *
     profile.baseWeight *
     Math.pow(profile.gpuBias, gpuFactor - 1) *
     Math.pow(profile.shortJobBias, durationFactor - 1) *
-    Math.pow(profile.bwBias, bwFactor - 1);
+    Math.pow(profile.bwBias, bwFactor - 1) *
+    bandFactor *
+    binaryFactor *
+    waveFactor;
 
   if (job.id) {
     consulateState.lastPrioritySignature = buildPrioritySignature(
@@ -338,8 +372,18 @@ function fetchJobsFromAllMarketplaces(deviceId) {
 
   for (const adapter of marketplaces) {
     try {
-      const jobs = adapter.fetchJobs(deviceId);
-      if (Array.isArray(jobs) && jobs.length) {
+      const raw = adapter.fetchJobs(deviceId);
+
+      let jobs;
+      if (Array.isArray(raw)) {
+        jobs = raw;
+      } else if (raw && Array.isArray(raw.jobs)) {
+        jobs = raw.jobs;
+      } else {
+        jobs = [];
+      }
+
+      if (jobs.length) {
         allJobs.push(
           ...jobs.map((j) => ({
             ...j,
@@ -437,7 +481,7 @@ function sortJobsByPriority(jobs) {
 }
 
 // ---------------------------------------------------------------------------
-// – Public: Fetch + Process + Prioritize Jobs (deterministic, sync)
+// Public: Fetch + Process + Prioritize Jobs (deterministic, sync)
 // ---------------------------------------------------------------------------
 function getRoutedJobs(deviceId) {
   consulateState.cycleIndex++;

@@ -1,32 +1,27 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktForager.js
-// LAYER: THE FORAGER (General GPU Compute Harvester) — v11
+// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktForager-v11-Evo.js
+// LAYER: THE FORAGER (v11‑Evo A‑B‑A)
+// (Deterministic Salad Marketplace Receptor + A‑B‑A Band Surfaces)
 // ============================================================================
 //
-// ROLE (v11):
-//   THE FORAGER — Pulse‑Earn’s deterministic Salad marketplace receptor.
-//   • Represents Salad GPU compute workloads as stable receptor DNA.
-//   • Normalizes raw Salad-like tasks into Pulse‑Earn job schema.
+// ROLE (v11‑Evo A‑B‑A):
+//   THE FORAGER — deterministic Salad marketplace receptor.
+//   • Represents Salad compute jobs as stable receptor DNA.
+//   • Normalizes raw Salad tasks into Pulse‑Earn job schema.
+//   • Emits bandSignature + binaryField + waveField.
 //   • Provides deterministic ping(), fetchJobs(), submitResult().
-//   • Maintains healing metadata + v11 signatures for Earn healers.
+//   • Maintains healing metadata + v11‑Evo signatures.
 //
-// PURPOSE (v11):
-//   • Replace all network behavior with deterministic receptor DNA.
-//   • Maintain strict protocol boundaries.
-//   • Ensure safe, predictable compute job communication.
-//
-// CONTRACT (v11):
-//   • PURE RECEPTOR — no network, no async, no timestamps.
-//   • READ‑ONLY except for healing metadata.
-//   • NO eval(), NO Function(), NO dynamic imports.
-//   • NO executing user code.
-//   • Deterministic normalization only.
+// CONTRACT:
+//   • PURE RECEPTOR — deterministic, drift‑proof.
+//   • NO network, NO async, NO randomness, NO timestamps.
+//   • READ‑ONLY except healing metadata.
 // ============================================================================
 
 
-// ---------------------------------------------------------------------------
-// Deterministic Hash Helper — v11
-// ---------------------------------------------------------------------------
+// ============================================================================
+// Deterministic Hash Helper — v11‑Evo
+// ============================================================================
 function computeHash(str) {
   let h = 0;
   const s = String(str || "");
@@ -36,6 +31,60 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
+function buildBandSignature(band) {
+  return computeHash(`FORAGER_BAND::${normalizeBand(band)}`);
+}
+
+
+// ============================================================================
+// A‑B‑A Binary + Wave Surfaces
+// ============================================================================
+function buildBinaryField(cycle, gpuTier) {
+  const tierWeight =
+    gpuTier === "high" ? 20 :
+    gpuTier === "mid"  ? 12 :
+    gpuTier === "low"  ? 8  : 5;
+
+  const patternLen = tierWeight;
+  const density = patternLen + cycle + (tierWeight * 2);
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: computeHash(`BFORAGER::${surface}`),
+    binarySurfaceSignature: computeHash(`BFORAGER_SURF::${surface}`),
+    binarySurface: {
+      patternLen,
+      density,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(cycle, band) {
+  const amplitude = (cycle + 1) * (band === "binary" ? 10 : 5);
+  const wavelength = amplitude + 3;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+}
+
+
+// ============================================================================
+// Signature Builders — v11‑Evo
+// ============================================================================
 function buildPingSignature(latency) {
   return computeHash(`PING::SALAD::${latency}`);
 }
@@ -53,9 +102,9 @@ function buildSubmitSignature(jobId) {
 }
 
 
-// ---------------------------------------------------------------------------
-// Healing Metadata — Forager Interaction Log (v11)
-// ---------------------------------------------------------------------------
+// ============================================================================
+// Healing Metadata — Forager Interaction Log (A‑B‑A)
+// ============================================================================
 const healingState = {
   lastPingMs: null,
   lastPingError: null,
@@ -74,17 +123,23 @@ const healingState = {
   liquidityScore: 0,
   cycleCount: 0,
 
-  // v11 signatures
+  // v11‑Evo signatures
   lastPingSignature: null,
   lastFetchSignature: null,
   lastNormalizationSignature: null,
-  lastSubmitSignature: null
+  lastSubmitSignature: null,
+
+  // A‑B‑A surfaces
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
-// ---------------------------------------------------------------------------
+// ============================================================================
 // INTERNAL — Safe Getter
-// ---------------------------------------------------------------------------
+// ============================================================================
 function safeGet(obj, path, fallback = null) {
   try {
     return path
@@ -96,11 +151,11 @@ function safeGet(obj, path, fallback = null) {
 }
 
 
-// ---------------------------------------------------------------------------
-// DETERMINISTIC SALAD DNA — replaces all network calls
-// ---------------------------------------------------------------------------
+// ============================================================================
+// Deterministic Salad Receptor DNA (v11‑Evo)
+// ============================================================================
 const SALAD_RECEPTOR_DNA = {
-  pingLatency: 55, // deterministic
+  pingLatency: 55,
   jobs: [
     {
       id: "salad-001",
@@ -123,57 +178,54 @@ const SALAD_RECEPTOR_DNA = {
       type: "ai-task"
     }
   ],
-  version: "11",
-  lineage: "Forager-Salad-v11",
+  version: "11-Evo",
+  lineage: "Forager-Salad-v11-Evo",
   phenotype: "MarketplaceReceptor"
 };
 
 
-// ---------------------------------------------------------------------------
-// Volatility — deterministic (no real variance)
-// ---------------------------------------------------------------------------
-function updateVolatility(jobs) {
-  const count = jobs.length;
-  const payouts = jobs
-    .map(j => Number(j.payout ?? 0))
-    .filter(n => Number.isFinite(n));
-
-  healingState.liquidityScore = Math.abs(
-    count - (healingState.lastFetchCount || 0)
-  );
-
-  if (payouts.length > 1) {
-    const avg = payouts.reduce((a, b) => a + b, 0) / payouts.length;
-    const variance =
-      payouts.reduce((a, b) => a + (b - avg) * (b - avg), 0) / payouts.length;
-    healingState.payoutVolatility = variance;
-  }
-}
-
-
-// ---------------------------------------------------------------------------
-// FORAGER CLIENT — Salad Marketplace Interface (deterministic, v11)
-// ---------------------------------------------------------------------------
+// ============================================================================
+// FORAGER CLIENT — Salad Marketplace Interface (A‑B‑A)
+// ============================================================================
 export const PulseEarnMktForager = {
   id: "salad",
   name: "Salad Marketplace",
-  version: "11",
-  lineage: "Forager-Salad-v11",
+  version: "11-Evo",
+  lineage: "Forager-Salad-v11-Evo",
 
   // -------------------------------------------------------------------------
-  // Ping — deterministic marketplace latency
+  // Ping — deterministic + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   ping() {
     const latency = SALAD_RECEPTOR_DNA.pingLatency;
+
+    healingState.cycleCount++;
     healingState.lastPingMs = latency;
     healingState.lastPingError = null;
-    healingState.cycleCount++;
     healingState.lastPingSignature = buildPingSignature(latency);
-    return latency; // keep v10.4 shape for compatibility
+
+    // Ping is symbolic band
+    const band = "symbolic";
+    healingState.lastBand = band;
+    healingState.lastBandSignature = buildBandSignature(band);
+
+    const binaryField = buildBinaryField(healingState.cycleCount, "low");
+    const waveField = buildWaveField(healingState.cycleCount, band);
+
+    healingState.lastBinaryField = binaryField;
+    healingState.lastWaveField = waveField;
+
+    return {
+      latency,
+      signature: healingState.lastPingSignature,
+      bandSignature: healingState.lastBandSignature,
+      binaryField,
+      waveField
+    };
   },
 
   // -------------------------------------------------------------------------
-  // Fetch Jobs — Retrieve deterministic Salad compute tasks
+  // Fetch Jobs — deterministic + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   fetchJobs() {
     try {
@@ -197,7 +249,26 @@ export const PulseEarnMktForager = {
       healingState.lastFetchCount = jobs.length;
       healingState.cycleCount++;
       healingState.lastFetchSignature = buildFetchSignature(jobs.length);
-      return jobs;
+
+      // Fetch is symbolic band
+      const band = "symbolic";
+      healingState.lastBand = band;
+      healingState.lastBandSignature = buildBandSignature(band);
+
+      const binaryField = buildBinaryField(healingState.cycleCount, "low");
+      const waveField = buildWaveField(healingState.cycleCount, band);
+
+      healingState.lastBinaryField = binaryField;
+      healingState.lastWaveField = waveField;
+
+      return {
+        jobs,
+        signature: healingState.lastFetchSignature,
+        bandSignature: healingState.lastBandSignature,
+        binaryField,
+        waveField
+      };
+
     } catch (err) {
       healingState.lastFetchError = err.message;
       healingState.lastFetchCount = 0;
@@ -207,26 +278,41 @@ export const PulseEarnMktForager = {
   },
 
   // -------------------------------------------------------------------------
-  // Submit Result — Return completed outputs (deterministic stub)
-// -------------------------------------------------------------------------
+  // Submit Result — deterministic + A‑B‑A surfaces
+  // -------------------------------------------------------------------------
   submitResult(job, result) {
     const jobId = job?.id ?? null;
+
     healingState.lastSubmitJobId = jobId;
     healingState.lastSubmitError = null;
     healingState.cycleCount++;
     healingState.lastSubmitSignature = buildSubmitSignature(jobId);
 
+    const band = "symbolic";
+    healingState.lastBand = band;
+    healingState.lastBandSignature = buildBandSignature(band);
+
+    const binaryField = buildBinaryField(healingState.cycleCount, "low");
+    const waveField = buildWaveField(healingState.cycleCount, band);
+
+    healingState.lastBinaryField = binaryField;
+    healingState.lastWaveField = waveField;
+
     return {
       ok: true,
       marketplace: "salad",
       jobId,
-      note: "Salad submission simulated deterministically in v11.",
+      signature: healingState.lastSubmitSignature,
+      bandSignature: healingState.lastBandSignature,
+      binaryField,
+      waveField,
+      note: "Salad submission simulated deterministically (v11‑Evo A‑B‑A).",
       result
     };
   },
 
   // -------------------------------------------------------------------------
-  // Normalize Job — Convert Salad job → Pulse‑Earn job schema
+  // Normalize Job — deterministic + dynamic A‑B‑A band
   // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
@@ -280,6 +366,17 @@ export const PulseEarnMktForager = {
 
       const bandwidthNeededMbps = Number(raw.bandwidth ?? 10);
 
+      // Dynamic band assignment
+      const band = gpuTier === "high" ? "binary" : "symbolic";
+      healingState.lastBand = band;
+      healingState.lastBandSignature = buildBandSignature(band);
+
+      const binaryField = buildBinaryField(healingState.cycleCount, gpuTier);
+      const waveField = buildWaveField(healingState.cycleCount, band);
+
+      healingState.lastBinaryField = binaryField;
+      healingState.lastWaveField = waveField;
+
       const normalized = {
         id: String(raw.id),
         marketplaceId: "salad",
@@ -290,7 +387,12 @@ export const PulseEarnMktForager = {
         estimatedSeconds,
 
         minGpuScore,
-        bandwidthNeededMbps
+        bandwidthNeededMbps,
+
+        // A‑B‑A hints for Consulate
+        _abaBand: band,
+        _abaBinaryDensity: binaryField.binarySurface.density,
+        _abaWaveAmplitude: waveField.amplitude
       };
 
       healingState.lastNormalizedJobId = normalized.id;
@@ -299,6 +401,7 @@ export const PulseEarnMktForager = {
         buildNormalizationSignature(normalized.id);
 
       return normalized;
+
     } catch (err) {
       healingState.lastNormalizationError = err.message;
       healingState.lastNormalizationSignature = buildNormalizationSignature(null);

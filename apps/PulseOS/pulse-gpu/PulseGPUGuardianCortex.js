@@ -1,25 +1,20 @@
 // ============================================================================
 // FILE: /apps/organs/gpu/PulseGPUGuardianCortex.js
-// [pulse:gpu] PULSE_GPU_GUARDIAN_CORTEX v10.4  // blue-gold
+// [pulse:gpu] PULSE_GPU_GUARDIAN_CORTEX v11-Evo  // blue-gold
 // GPU Permission Cortex • Deterministic Policy Engine • Zero Imports
 // ============================================================================
 //
-// IDENTITY — THE GPU GUARDIAN CORTEX (v10.4):
-//  ------------------------------------------
+// IDENTITY — THE GPU GUARDIAN CORTEX (v11-Evo):
+//  --------------------------------------------
 //  • The decision-making cortex of the GPU subsystem.
 //  • Determines when GPU actions may auto-apply vs require confirmation.
 //  • Pure logic: deterministic, stateless, zero-entropy, zero randomness.
-//  • Reads advisor severity + user preferences + plan type.
+//  • Reads advisor severity + user preferences + plan type + GPU context.
 //  • Produces a final decision object (mode + reason + plan).
-//  • PulseSend‑10.4‑ready: decisions can be routed by the compute router.
+//  • PulseSend‑v11‑ready: decisions can be routed by the compute router.
+//  • Binary-aware, symbolic-aware, dispatch-aware, memory-aware.
 //
-// ROLE (v10.4):
-//  • Permission arbiter for GPU healing + optimization.
-//  • Safety cortex for GPU actions.
-//  • Policy cortex for auto-apply vs confirmation.
-//  • Guardian lineage: protects GPU stability + user intent.
-//
-// SAFETY CONTRACT:
+// SAFETY CONTRACT (v11-Evo):
 //  • No imports (DI only).
 //  • No async.
 //  • No randomness.
@@ -28,30 +23,21 @@
 //  • No routing.
 //  • No mutation outside instance.
 //  • Deterministic: same inputs → same decision.
-//
-// THEME:
-//  • Color: Blue-Gold (guardian + cortex).
-//  • Subtheme: Permission, safety, deterministic policy.
-//
-// ADVANTAGE CASCADE (conceptual only):
-//  • Inherits ANY advantage from ANY GPU organ automatically.
-//  • Zero-entropy decision surface.
-//  • Multi-instance ready.
-//  • PulseSend contract: routingContract: "PulseSend-v10.4"
 // ============================================================================
 
 
 // ============================================================================
 //  Utility: build decision — Guardian lineage + nervous-system metadata
 // ============================================================================
-function buildDecision({ mode, reason, plan }) {
+function buildDecision({ mode, reason, plan, gpuContext }) {
   return {
     mode,
     reason,
     plan: plan || null,
+    gpuContext: gpuContext || null,
     meta: {
       layer: "PulseGPUGuardianCortex",
-      version: 10.4,
+      version: "11.0-Evo",
       target: "full-gpu",
 
       // Evolutionary metadata (no logic impact)
@@ -66,18 +52,26 @@ function buildDecision({ mode, reason, plan }) {
       neuralRole: "policy-cortex",
       subsystem: "gpu-healing",
       instanceBehavior: "predictable",
-      decisionSurface: "severity × preference × plan",
+      decisionSurface: "severity × preference × plan × gpuContext",
       driftResistance: "high",
       mutationRisk: "none",
 
-      // v10.4 unified advantage + PulseSend‑10.4 identity
+      // v11-Evo unified advantage + PulseSend‑v11 identity
       unifiedAdvantageField: true,
-      pulseSend10Ready: true,
+      pulseSend11Ready: true,
+
+      // NEW v11-Evo awareness
+      binaryAware: true,
+      symbolicAware: true,
+      gpuDispatchAware: true,
+      gpuMemoryAware: true,
+      gpuAdvantageAware: true,
 
       // PulseSend / Earn contracts (conceptual only)
-      routingContract: "PulseSend-v10.4",
-      gpuOrganContract: "PulseGPU-v10.4",
-      earnCompatibility: "Earn-v2"
+      routingContract: "PulseSend-v11",
+      gpuOrganContract: "PulseGPU-v11-Evo",
+      binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+      earnCompatibility: "Earn-v3"
     }
   };
 }
@@ -109,7 +103,7 @@ function getHighestSeverity(adviceList = []) {
 
 
 // ============================================================================
-//  PulseGPUGuardianCortex v10.4 — GPU Permission Cortex
+//  PulseGPUGuardianCortex v11-Evo — GPU Permission Cortex
 // ============================================================================
 class PulseGPUGuardianCortex {
   constructor(userPreferences, instanceId) {
@@ -120,13 +114,18 @@ class PulseGPUGuardianCortex {
   // ----------------------------------------------------
   // Main entry point:
   //   decide(plan, context) → decision
+  //   context may include:
+  //     • adviceList
+  //     • userPreferences
+  //     • gpuContext (binary/symbolic/dispatch/memory hints)
   // ----------------------------------------------------
   decide(plan, context = {}) {
     if (!plan || typeof plan !== "object") {
       return buildDecision({
         mode: "ignore",
         reason: "No plan provided.",
-        plan: null
+        plan: null,
+        gpuContext: context.gpuContext || null
       });
     }
 
@@ -141,151 +140,132 @@ class PulseGPUGuardianCortex {
 
     const topAdvice = getHighestSeverity(adviceList);
 
+    // No advisor context
     if (!topAdvice) {
       if (plan.action === "noop") {
         return buildDecision({
           mode: "ignore",
           reason: "No action required.",
-          plan: null
+          plan: null,
+          gpuContext: context.gpuContext
         });
       }
 
       return buildDecision({
         mode: "require-confirmation",
-        reason: "No advisor context; require confirmation for safety.",
-        plan
+        reason: "No advisor context; confirmation required.",
+        plan,
+        gpuContext: context.gpuContext
       });
     }
 
     const severity = topAdvice.severity || "low";
 
+    // Dispatch to specific handlers
     if (plan.action === "restore") {
-      return this.decideForRestore(plan, severity, mergedPrefs);
+      return this.decideForRestore(plan, severity, mergedPrefs, context.gpuContext);
     }
 
     if (plan.action === "apply-optimal") {
-      return this.decideForApplyOptimal(plan, severity, mergedPrefs);
+      return this.decideForApplyOptimal(plan, severity, mergedPrefs, context.gpuContext);
     }
 
     if (plan.action === "upgrade-tier") {
-      return this.decideForTierUpgrade(plan, severity, mergedPrefs);
+      return this.decideForTierUpgrade(plan, severity, mergedPrefs, context.gpuContext);
     }
 
     if (plan.action === "noop") {
       return buildDecision({
         mode: "ignore",
         reason: "No action required.",
-        plan: null
+        plan: null,
+        gpuContext: context.gpuContext
       });
     }
 
     return buildDecision({
       mode: "require-confirmation",
-      reason: "Unknown plan action; require confirmation.",
-      plan
+      reason: "Unknown plan action; confirmation required.",
+      plan,
+      gpuContext: context.gpuContext
     });
   }
 
   // ----------------------------------------------------
-  // Restore plan policy — Regression Healer
+  // Restore plan policy — Regression Healer (v11-Evo)
   // ----------------------------------------------------
-  decideForRestore(plan, severity, prefs) {
+  decideForRestore(plan, severity, prefs, gpuContext) {
     const allowLow = !!prefs.allowAutoFixLowRegressions;
     const allowMedium = !!prefs.allowAutoFixMediumRegressions;
     const allowHigh = !!prefs.allowAutoFixHighRegressions;
     const allowCritical = !!prefs.allowAutoFixCriticalRegressions;
 
+    // v11-Evo: binary regressions get extra caution
+    const binaryPenalty =
+      gpuContext?.binaryModeObserved && severity !== "low";
+
+    function decision(auto, reason) {
+      return buildDecision({
+        mode: auto ? "auto-apply" : "require-confirmation",
+        reason,
+        plan,
+        gpuContext
+      });
+    }
+
     if (severity === "low") {
       return allowLow
-        ? buildDecision({
-            mode: "auto-apply",
-            reason: "Auto-fix enabled for low severity regressions.",
-            plan
-          })
-        : buildDecision({
-            mode: "require-confirmation",
-            reason: "Low severity regression; confirmation required.",
-            plan
-          });
+        ? decision(true, "Auto-fix enabled for low severity regressions.")
+        : decision(false, "Low severity regression; confirmation required.");
     }
 
     if (severity === "medium") {
-      return allowMedium
-        ? buildDecision({
-            mode: "auto-apply",
-            reason: "Auto-fix enabled for medium severity regressions.",
-            plan
-          })
-        : buildDecision({
-            mode: "require-confirmation",
-            reason: "Medium severity regression; confirmation required.",
-            plan
-          });
+      return allowMedium && !binaryPenalty
+        ? decision(true, "Auto-fix enabled for medium severity regressions.")
+        : decision(false, "Medium severity regression; confirmation required.");
     }
 
     if (severity === "high") {
-      return allowHigh
-        ? buildDecision({
-            mode: "auto-apply",
-            reason: "Auto-fix enabled for high severity regressions.",
-            plan
-          })
-        : buildDecision({
-            mode: "require-confirmation",
-            reason: "High severity regression; confirmation required.",
-            plan
-          });
+      return allowHigh && !binaryPenalty
+        ? decision(true, "Auto-fix enabled for high severity regressions.")
+        : decision(false, "High severity regression; confirmation required.");
     }
 
-    return allowCritical
-      ? buildDecision({
-          mode: "auto-apply",
-          reason: "Auto-fix enabled for critical regressions.",
-          plan
-        })
-      : buildDecision({
-          mode: "require-confirmation",
-          reason: "Critical regression; confirmation required by default.",
-          plan
-        });
+    return allowCritical && !binaryPenalty
+      ? decision(true, "Auto-fix enabled for critical regressions.")
+      : decision(false, "Critical regression; confirmation required.");
   }
 
   // ----------------------------------------------------
-  // Apply-optimal plan policy — Optimization Reflex
+  // Apply-optimal plan policy — Optimization Reflex (v11-Evo)
   // ----------------------------------------------------
-  decideForApplyOptimal(plan, severity, prefs) {
+  decideForApplyOptimal(plan, severity, prefs, gpuContext) {
     const allowAuto = !!prefs.allowAutoApplyOptimalSettings;
 
-    return allowAuto
-      ? buildDecision({
-          mode: "auto-apply",
-          reason: "Auto-apply enabled for optimal settings.",
-          plan
-        })
-      : buildDecision({
-          mode: "require-confirmation",
-          reason: "Optimal settings available; confirmation required.",
-          plan
-        });
+    return buildDecision({
+      mode: allowAuto ? "auto-apply" : "require-confirmation",
+      reason: allowAuto
+        ? "Auto-apply enabled for optimal settings."
+        : "Optimal settings available; confirmation required.",
+      plan,
+      gpuContext
+    });
   }
 
   // ----------------------------------------------------
-  // Tier upgrade plan policy — Tier Ascent Logic
+  // Tier upgrade plan policy — Tier Ascent Logic (v11-Evo)
   // ----------------------------------------------------
-  decideForTierUpgrade(plan, severity, prefs) {
+  decideForTierUpgrade(plan, severity, prefs, gpuContext) {
     const allowAutoTier = !!prefs.allowAutoTierChanges;
 
-    return allowAutoTier
-      ? buildDecision({
-          mode: "auto-apply",
-          reason: "Auto-apply enabled for tier changes.",
-          plan
-        })
-      : buildDecision({
-          mode: "require-confirmation",
-          reason: "Tier upgrade opportunity; confirmation required.",
-          plan
-        });
+    return buildDecision({
+      mode: allowAutoTier ? "auto-apply" : "require-confirmation",
+      reason: allowAutoTier
+        ? "Auto-apply enabled for tier changes."
+        : "Tier upgrade opportunity; confirmation required.",
+      plan,
+      gpuContext
+    });
   }
 }
 

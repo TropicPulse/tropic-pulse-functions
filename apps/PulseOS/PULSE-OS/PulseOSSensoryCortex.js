@@ -1,36 +1,39 @@
 // ============================================================================
 // FILE: /apps/PulseOS/Organs/Senses/PulseOSSensoryCortex.js
-// PULSE OS — v9.2
+// PULSE OS — v11-Evo-Prime
 // “THE SENSORY CORTEX / NERVE MAP ENGINE”
-// LIVING PATHWAY • DRIFT SENTINEL • DIRECTIONAL MAPPER
+// DUAL-BAND NERVE MAP • DRIFT SENTINEL • EXECUTION CONTEXT VISUALIZER
 // ============================================================================
 //
-// ORGAN IDENTITY (v9.2):
+// ORGAN IDENTITY (v11-Evo-Prime):
 //   • Organ Type: Sensory Cortex (Diagnostics / Perception)
 //   • Layer: Sensory Layer (S‑Layer)
 //   • Biological Analog: Cortical sensory interpretation of nerve signals
-//   • System Role: Interpret Impulse.path as a living nervous pathway
+//   • System Role: Interpret Impulse.path as a living nervous pathway,
+//                  now dual-band (binary + symbolic) and executionContext-aware.
 //
-// PURPOSE:
+// PURPOSE (v11-Evo-Prime):
 //   ✔ Compute health, efficiency, degradation per hop
 //   ✔ Build forward + return directional nerve maps
 //   ✔ Compare forward vs return efficiency (repair insight)
 //   ✔ Detect version drift across layers
+//   ✔ Surface binary/symbolic mode + executionContext + pressureSnapshot
 //   ✔ Produce UI‑ready nerve chains for diagnostics
-//   ✔ NEVER mutate the impulse
+//   ✔ NEVER mutate the impulse or hops
 //
-// SAFETY CONTRACT (v9.2):
+// SAFETY CONTRACT (v11-Evo-Prime):
 //   • Pure diagnostics — metadata only
 //   • No business logic
 //   • No network, no fetch, no backend
 //   • No timers, no external stimuli
 //   • No hardcoded pages — pathway is the truth
 //   • No mutation of impulse or hops
+//   • No timestamps generated here (may pass through existing hop timestamps)
 // ============================================================================
 
 
 // ============================================================================
-// NERVE SCORING PACK (unchanged logic, v9.2 identity)
+// NERVE SCORING PACK (logic preserved, v11 identity)
 // ============================================================================
 export const Nerves = {
 
@@ -81,11 +84,15 @@ export const Nerves = {
 
 
 // ============================================================================
-// INTERNAL: BUILD A SINGLE DIRECTIONAL MAP
+// INTERNAL: BUILD A SINGLE DIRECTIONAL MAP (dual-band + context aware)
 // ============================================================================
 function buildDirectionalMap(impulse, hops, directionLabel) {
   const nerves = [];
   let prevHealth = null;
+
+  const modeKind = impulse?.modeKind || "symbolic"; // "binary" | "symbolic" | "dual"
+  const executionContext = impulse?.executionContext || {};
+  const pressureSnapshot = impulse?.pressureSnapshot || {};
 
   hops.forEach((hop, index) => {
     const health = Nerves.healthScore(hop);
@@ -112,9 +119,15 @@ function buildDirectionalMap(impulse, hops, directionLabel) {
       page: hop?.page || impulse?.page?.name || "UNKNOWN_PAGE",
       identityHealth: hop?.identityHealth || impulse?.identityHealth || null,
 
+      // v11-Evo-Prime: dual-band + execution context + pressure
+      modeKind,
+      executionContext,
+      pressureSnapshot,
+
       rawState: hop?.state || {},
       rawDelta: hop?.delta || null,
-      timestamp: hop?.timestamp || null
+      // Pass-through only; no timestamps generated here
+      timestamp: hop?.timestamp ?? null
     });
 
     prevHealth = health;
@@ -125,7 +138,7 @@ function buildDirectionalMap(impulse, hops, directionLabel) {
 
 
 // ============================================================================
-// SENSORY CORTEX ENGINE — v9.2
+// SENSORY CORTEX ENGINE — v11-Evo-Prime
 // ============================================================================
 export const PulseOSSensoryCortex = {
 
@@ -133,8 +146,8 @@ export const PulseOSSensoryCortex = {
     organ: "PulseOSSensoryCortex",
     layer: "S-Layer",
     role: "Sensory Cortex / Diagnostics",
-    version: "9.2",
-    generation: "v9",
+    version: "11.0-Evo-Prime",
+    generation: "v11",
     evo: {
       driftProof: true,
       deterministicNeuron: true,
@@ -142,7 +155,13 @@ export const PulseOSSensoryCortex = {
       multiInstanceReady: true,
       zeroNetwork: true,
       zeroMutation: true,
-      zeroTiming: true
+      zeroTiming: true,
+
+      binaryAware: true,
+      symbolicAware: true,
+      dualModeAware: true,
+      executionContextAware: true,
+      pressureAware: true
     }
   },
 
@@ -188,8 +207,9 @@ export const PulseOSSensoryCortex = {
 
   detectVersionDrift(impulse) {
     const versions = {};
+    const path = Array.isArray(impulse?.path) ? impulse.path : [];
 
-    for (const hop of impulse.path) {
+    for (const hop of path) {
       if (!hop?.id) continue;
       const v = hop.version || null;
 

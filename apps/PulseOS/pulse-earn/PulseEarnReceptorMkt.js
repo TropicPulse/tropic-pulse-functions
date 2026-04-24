@@ -1,30 +1,23 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnReceptor-v11-Evo.js
 // LAYER: THE STANDARD RECEPTOR (Marketplace Protocol + Universal Adapter)
-// PULSE EARN — v11-Evo
+// PULSE EARN — v11-Evo A‑B‑A
 // ============================================================================
 //
-// ROLE (v11-Evo):
+// ROLE (v11-Evo A‑B‑A):
 //   THE STANDARD RECEPTOR — Pulse‑Earn’s canonical marketplace interface.
-//   • Defines the universal interface for all marketplaces.
-//   • Provides a config‑driven, reusable adapter (deterministic only).
-//   • Establishes the minimum contract (ping, fetchJobs, submitResult).
-//   • Acts as the “sensory receptor” of the Earn organism.
-//   • Emits v11‑Evo signatures + diagnostics.
-//
-// PURPOSE (v11-Evo):
-//   • Provide deterministic, drift‑proof marketplace template.
-//   • Allow runtime configuration for receptor DNA (no network).
-//   • Guarantee safe, deterministic behavior + fallback values.
-//   • Preserve receptor lineage + environmental interface (conceptual only).
+//   • Deterministic sensory receptor for marketplace signals.
+//   • Pure adapter: ping(), fetchJobs(), submitResult().
+//   • Configurable receptor DNA (no network).
+//   • Emits receptorPattern, receptorSignature, endpointSignature.
+//   • Emits A‑B‑A bandSignature + binaryField + waveField surfaces.
 //
 // CONTRACT (v11-Evo):
-//   • PURE RECEPTOR — no AI layers, no translation, no memory model.
-//   • READ‑ONLY except for config overrides.
+//   • PURE RECEPTOR — deterministic, drift‑proof.
+//   • NO async, NO network, NO randomness, NO timestamps.
 //   • NO eval(), NO Function(), NO dynamic imports.
-//   • NO executing user code.
-//   • NO fetch, NO network, NO timestamps, NO async.
-//   • Deterministic receptor behavior only.
+//   • READ‑ONLY except deterministic config override.
+//   • NEVER mutate job objects.
 // ============================================================================
 
 
@@ -35,9 +28,13 @@ let receptorConfig = {
   id: "A",
   name: "PulseEarn Receptor A",
   healthScore: 1.0,
+
+  // A‑B‑A band identity
+  band: "symbolic", // symbolic | binary
+
   endpoints: {
     pingSignal: "PING_OK",
-    jobs: [],          // deterministic job list
+    jobs: [],              // deterministic job list
     submitStatus: "SUBMIT_OK"
   }
 };
@@ -55,6 +52,54 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
+
+// ============================================================================
+// A‑B‑A Binary + Wave Surfaces (v11‑Evo)
+// ============================================================================
+function buildBinaryField(cfg) {
+  const patternLen =
+    String(cfg.id).length + String(cfg.name).length;
+
+  const density =
+    patternLen +
+    (cfg.endpoints.jobs?.length || 0) +
+    (cfg.healthScore * 100);
+
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: computeHash(`BRECEPTOR::${surface}`),
+    binarySurfaceSignature: computeHash(`BRECEPTOR_SURF::${surface}`),
+    binarySurface: {
+      patternLen,
+      density,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(cfg) {
+  const amplitude = (cfg.healthScore || 1) * 100;
+  const wavelength = (cfg.endpoints.jobs?.length || 0) + 1;
+  const phase = (cfg.id.charCodeAt(0) || 1) % 16;
+  const band = normalizeBand(cfg.band);
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+}
+
 
 // ============================================================================
 // v11-Evo: Signature Builders
@@ -65,26 +110,32 @@ function buildReceptorPattern(cfg) {
     `::name:${cfg.name}` +
     `::health:${cfg.healthScore}` +
     `::jobs:${Array.isArray(cfg.endpoints.jobs) ? cfg.endpoints.jobs.length : 0}` +
-    `::submit:${cfg.endpoints.submitStatus}`
+    `::submit:${cfg.endpoints.submitStatus}` +
+    `::band:${normalizeBand(cfg.band)}`
   );
 }
 
 function buildReceptorSignature(cfg) {
   return computeHash(
-    `${cfg.id}::${cfg.name}::${cfg.healthScore}::${cfg.endpoints.submitStatus}`
+    `${cfg.id}::${cfg.name}::${cfg.healthScore}::${cfg.endpoints.submitStatus}::${normalizeBand(cfg.band)}`
   );
 }
 
 function buildEndpointSignature(cfg) {
   return computeHash(
     `ENDPOINTS::jobs:${Array.isArray(cfg.endpoints.jobs) ? cfg.endpoints.jobs.length : 0}` +
-    `::submit:${cfg.endpoints.submitStatus}`
+    `::submit:${cfg.endpoints.submitStatus}` +
+    `::band:${normalizeBand(cfg.band)}`
   );
+}
+
+function buildBandSignature(cfg) {
+  return computeHash(`RECEPTOR_BAND::${normalizeBand(cfg.band)}::${cfg.id}`);
 }
 
 
 // ============================================================================
-// Health Tier (unchanged logic, v11-Evo naming)
+// Health Tier (v11-Evo)
 // ============================================================================
 function classifyHealth(healthScore) {
   const h = typeof healthScore === "number" ? healthScore : 1.0;
@@ -103,6 +154,7 @@ export function configurePulseEarnReceptor(config) {
   receptorConfig = {
     ...receptorConfig,
     ...config,
+    band: normalizeBand(config?.band ?? receptorConfig.band),
     endpoints: {
       ...receptorConfig.endpoints,
       ...(config?.endpoints || {})
@@ -154,7 +206,7 @@ function submitResult(job, result) {
 
 
 // ============================================================================
-// PUBLIC EXPORT — PulseEarnReceptor v11-Evo
+// PUBLIC EXPORT — PulseEarnReceptor v11-Evo A‑B‑A
 // ============================================================================
 export const PulseEarnReceptor = {
   id: () => receptorConfig.id,
@@ -164,6 +216,11 @@ export const PulseEarnReceptor = {
   receptorSignature: () => buildReceptorSignature(receptorConfig),
   endpointSignature: () => buildEndpointSignature(receptorConfig),
   receptorPattern: () => buildReceptorPattern(receptorConfig),
+  bandSignature: () => buildBandSignature(receptorConfig),
+
+  // A‑B‑A surfaces
+  binaryField: () => buildBinaryField(receptorConfig),
+  waveField: () => buildWaveField(receptorConfig),
 
   // sensory functions
   ping,
@@ -177,9 +234,17 @@ export const PulseEarnReceptor = {
       name: receptorConfig.name,
       healthScore: receptorConfig.healthScore,
       healthTier: classifyHealth(receptorConfig.healthScore),
+
+      band: normalizeBand(receptorConfig.band),
+      bandSignature: buildBandSignature(receptorConfig),
+
       receptorSignature: buildReceptorSignature(receptorConfig),
       endpointSignature: buildEndpointSignature(receptorConfig),
       receptorPattern: buildReceptorPattern(receptorConfig),
+
+      binaryField: buildBinaryField(receptorConfig),
+      waveField: buildWaveField(receptorConfig),
+
       jobCount: Array.isArray(receptorConfig.endpoints.jobs)
         ? receptorConfig.endpoints.jobs.length
         : 0

@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnSkeletalSystem-v11-Evo.js
-// LAYER: THE SKELETAL SYSTEM + VITAL SIGNS MONITOR (v11-Evo)
+// LAYER: THE SKELETAL SYSTEM + VITAL SIGNS MONITOR (v11-Evo A-B-A)
 // (Deterministic Device Phenotype + Structural Limits + Physiological Baselines)
 // ============================================================================
 //
@@ -14,11 +14,17 @@
 //   • Bandwidth = circulatory throughput (deterministic)
 //   • Stability = organism homeostasis (deterministic)
 //
+//   A-B-A DUAL-BAND EXTENSION (v11+):
+//   • band = symbolic | binary (phenotype-declared)
+//   • binaryField = deterministic binary surface
+//   • waveField = deterministic wave surface
+//
 // PURPOSE (v11-Evo):
 //   • Provide deterministic, drift‑proof device profiling.
 //   • Guarantee safe capability declaration.
 //   • Supply Survival Instincts + Reflex + Earn + PulseSend with stable data.
 //   • Emit pattern + signature surfaces for v11‑Evo diagnostics.
+//   • Provide band + binary + wave metadata for organism-wide A-B-A field.
 //
 // CONTRACT (v11-Evo):
 //   • PURE CAPABILITY ENGINE — no AI layers, no translation, no memory model.
@@ -44,6 +50,11 @@ const skeletalHealing = {
   lastPhysiologicalSignature: null,
   lastDevicePattern: null,
 
+  lastBand: null,
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null,
+
   cycleCount: 0,
 
   loopTheory: {
@@ -65,6 +76,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -93,7 +109,10 @@ let phenotype = {
 
   // Physiological baselines
   bandwidthMbps: 50,
-  stabilityScore: 0.7
+  stabilityScore: 0.7,
+
+  // A-B-A band identity (phenotype-declared)
+  band: "symbolic" // "symbolic" | "binary"
 };
 
 
@@ -103,7 +122,8 @@ let phenotype = {
 export function configurePulseEarnPhenotype(config) {
   phenotype = {
     ...phenotype,
-    ...config
+    ...config,
+    band: normalizeBand(config && config.band != null ? config.band : phenotype.band)
   };
 }
 
@@ -117,7 +137,8 @@ function buildDevicePattern(p) {
     `::mem:${p.memoryMB}` +
     `::gpu:${p.gpuScore}` +
     `::bw:${p.bandwidthMbps}` +
-    `::stab:${p.stabilityScore}`
+    `::stab:${p.stabilityScore}` +
+    `::band:${normalizeBand(p.band)}`
   );
 }
 
@@ -139,17 +160,75 @@ function buildPhysiologicalSignature(p) {
 
 function buildPhenotypeSignature(p) {
   return computeHash(
-    `PHENO::${p.cpuCores}::${p.memoryMB}::${p.gpuScore}::${p.bandwidthMbps}::${p.stabilityScore}`
+    `PHENO::${p.cpuCores}::${p.memoryMB}::${p.gpuScore}::${p.bandwidthMbps}::${p.stabilityScore}::${normalizeBand(p.band)}`
   );
+}
+
+function buildBandSignature(p, cycleIndex) {
+  const band = normalizeBand(p.band);
+  return computeHash(`BAND::SKELETAL::${band}::${cycleIndex}`);
+}
+
+
+// ---------------------------------------------------------------------------
+// INTERNAL: A-B-A Binary + Wave Surfaces (v11+)
+// ---------------------------------------------------------------------------
+function buildBinaryField(p, cycleIndex) {
+  const patternLen =
+    String(p.id || "").length +
+    String(p.gpuModel || "").length;
+
+  const density = p.cpuCores + (p.memoryMB >> 10) + p.gpuScore;
+  const surface = density + patternLen + cycleIndex;
+
+  return {
+    binaryPhenotypeSignature: computeHash(`BPHENO::${surface}`),
+    binarySurfaceSignature: computeHash(`BSURF_SKEL::${surface}`),
+    binarySurface: {
+      patternLen,
+      density,
+      cycle: cycleIndex,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(p, cycleIndex) {
+  const band = normalizeBand(p.band);
+  const amplitude = p.gpuScore;
+  const wavelength = p.bandwidthMbps;
+  const phase = (p.cpuCores + (p.memoryMB >> 10) + cycleIndex) % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
 }
 
 
 // ---------------------------------------------------------------------------
 // MAIN EXPORT — getPulseEarnDeviceProfile()
-// Phenotype Passport + Structural Identity (v11-Evo)
+// Phenotype Passport + Structural Identity (v11-Evo A-B-A)
 // ---------------------------------------------------------------------------
 export function getPulseEarnDeviceProfile() {
   skeletalHealing.cycleCount++;
+
+  const band = normalizeBand(phenotype.band);
+  const cycleIndex = skeletalHealing.cycleCount;
+
+  const structuralSignature = buildStructuralSignature(phenotype);
+  const physiologicalSignature = buildPhysiologicalSignature(phenotype);
+  const phenotypeSignature = buildPhenotypeSignature(phenotype);
+  const devicePattern = buildDevicePattern(phenotype);
+  const bandSignature = buildBandSignature(phenotype, cycleIndex);
+  const binaryField = buildBinaryField(phenotype, cycleIndex);
+  const waveField = buildWaveField(phenotype, cycleIndex);
 
   const profile = {
     id: phenotype.id,
@@ -167,13 +246,21 @@ export function getPulseEarnDeviceProfile() {
     bandwidthMbps: phenotype.bandwidthMbps,
     stabilityScore: phenotype.stabilityScore,
 
+    // A-B-A band identity
+    band,
+    bandSignature,
+
     // v11-Evo signatures
-    structuralSignature: buildStructuralSignature(phenotype),
-    physiologicalSignature: buildPhysiologicalSignature(phenotype),
-    phenotypeSignature: buildPhenotypeSignature(phenotype),
+    structuralSignature,
+    physiologicalSignature,
+    phenotypeSignature,
 
     // v11-Evo pattern surface
-    devicePattern: buildDevicePattern(phenotype)
+    devicePattern,
+
+    // A-B-A binary + wave surfaces
+    binaryField,
+    waveField
   };
 
   // Update healing metadata
@@ -183,10 +270,15 @@ export function getPulseEarnDeviceProfile() {
   skeletalHealing.lastBandwidthMbps = phenotype.bandwidthMbps;
   skeletalHealing.lastStabilityScore = phenotype.stabilityScore;
 
-  skeletalHealing.lastStructuralSignature = profile.structuralSignature;
-  skeletalHealing.lastPhysiologicalSignature = profile.physiologicalSignature;
-  skeletalHealing.lastPhenotypeSignature = profile.phenotypeSignature;
-  skeletalHealing.lastDevicePattern = profile.devicePattern;
+  skeletalHealing.lastStructuralSignature = structuralSignature;
+  skeletalHealing.lastPhysiologicalSignature = physiologicalSignature;
+  skeletalHealing.lastPhenotypeSignature = phenotypeSignature;
+  skeletalHealing.lastDevicePattern = devicePattern;
+
+  skeletalHealing.lastBand = band;
+  skeletalHealing.lastBandSignature = bandSignature;
+  skeletalHealing.lastBinaryField = binaryField;
+  skeletalHealing.lastWaveField = waveField;
 
   return profile;
 }

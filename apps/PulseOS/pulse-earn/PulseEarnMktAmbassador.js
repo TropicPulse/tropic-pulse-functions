@@ -1,27 +1,26 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktAmbassador-v11-Evo.js
-// LAYER: THE AMBASSADOR (v11-Evo)
-// (Marketplace Liaison + External Negotiator — Deterministic Receptor DNA)
+// LAYER: THE AMBASSADOR (v11‑Evo A‑B‑A)
+// (Deterministic Akash Marketplace Receptor + A‑B‑A Band Surfaces)
 // ============================================================================
 //
-// ROLE (v11-Evo):
-//   THE AMBASSADOR — Pulse‑Earn’s deterministic interface to the Akash Network.
+// ROLE (v11‑Evo A‑B‑A):
+//   THE AMBASSADOR — deterministic Akash marketplace receptor.
 //   • Represents Akash leases as stable receptor DNA.
-//   • Normalizes raw Akash-like tasks into Pulse‑Earn job schema.
+//   • Normalizes leases into Pulse‑Earn job schema.
+//   • Emits bandSignature + binaryField + waveField.
 //   • Provides deterministic ping(), fetchJobs(), submitResult().
-//   • Emits v11‑Evo signatures for all diplomatic actions.
+//   • Maintains healing metadata + v11‑Evo signatures.
 //
-// CONTRACT (v11-Evo):
-//   • PURE RECEPTOR — no network, no async, no timestamps.
-//   • READ‑ONLY except for healing metadata.
-//   • NO eval(), NO Function(), NO dynamic imports.
-//   • NO executing user code.
-//   • Deterministic normalization only.
+// CONTRACT:
+//   • PURE RECEPTOR — deterministic, drift‑proof.
+//   • NO network, NO async, NO randomness, NO timestamps.
+//   • READ‑ONLY except healing metadata.
 // ============================================================================
 
 
 // ============================================================================
-// Healing Metadata — Ambassador Interaction Log (v11-Evo)
+// Healing Metadata — Ambassador Interaction Log (A‑B‑A)
 // ============================================================================
 const ambassadorHealing = {
   lastPingMs: null,
@@ -46,12 +45,18 @@ const ambassadorHealing = {
   lastFetchSignature: null,
   lastNormalizationSignature: null,
   lastSubmitSignature: null,
-  lastAmbassadorCycleSignature: null
+  lastAmbassadorCycleSignature: null,
+
+  // A‑B‑A surfaces
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
 // ============================================================================
-// Deterministic Hash Helper — v11-Evo
+// Deterministic Hash Helper — v11‑Evo
 // ============================================================================
 function computeHash(str) {
   let h = 0;
@@ -62,9 +67,54 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
+function buildBandSignature(band) {
+  return computeHash(`AMBASSADOR_BAND::${normalizeBand(band)}`);
+}
+
 
 // ============================================================================
-// Signature Builders — v11-Evo
+// A‑B‑A Binary + Wave Surfaces
+// ============================================================================
+function buildBinaryField(cycle, hasGpu) {
+  const patternLen = hasGpu ? 16 : 10;
+  const density = patternLen + cycle + (hasGpu ? 25 : 8);
+  const surface = density + patternLen;
+
+  return {
+    binaryPhenotypeSignature: computeHash(`BAKASH::${surface}`),
+    binarySurfaceSignature: computeHash(`BAKASH_SURF::${surface}`),
+    binarySurface: {
+      patternLen,
+      density,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(cycle, band) {
+  const amplitude = (cycle + 1) * (band === "binary" ? 14 : 7);
+  const wavelength = amplitude + 5;
+  const phase = amplitude % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+}
+
+
+// ============================================================================
+// Signature Builders — v11‑Evo
 // ============================================================================
 function buildPingSignature(latency) {
   return computeHash(`PING::${latency}`);
@@ -110,7 +160,7 @@ const VALID_LEASE_STATES = new Set([
 
 
 // ============================================================================
-// DETERMINISTIC AKASH RECEPTOR DNA (v11-Evo)
+// Deterministic Akash Receptor DNA (v11‑Evo)
 // ============================================================================
 const AKASH_RECEPTOR_DNA = {
   pingLatency: 87,
@@ -153,7 +203,7 @@ let ambassadorCycle = 0;
 
 
 // ============================================================================
-// AMBASSADOR CLIENT — Deterministic Akash Marketplace Interface
+// AMBASSADOR CLIENT — Deterministic Akash Marketplace Interface (A‑B‑A)
 // ============================================================================
 export const PulseEarnMktAmbassador = {
   id: "akash",
@@ -162,7 +212,7 @@ export const PulseEarnMktAmbassador = {
   lineage: "Ambassador-Akash-v11-Evo",
 
   // -------------------------------------------------------------------------
-  // Ping — Deterministic Diplomatic Channel Latency
+  // Ping — deterministic + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   ping() {
     ambassadorCycle++;
@@ -176,14 +226,28 @@ export const PulseEarnMktAmbassador = {
     ambassadorHealing.lastAmbassadorCycleSignature =
       buildAmbassadorCycleSignature(ambassadorCycle);
 
+    // Ping is symbolic band
+    const band = "symbolic";
+    ambassadorHealing.lastBand = band;
+    ambassadorHealing.lastBandSignature = buildBandSignature(band);
+
+    const binaryField = buildBinaryField(ambassadorCycle, false);
+    const waveField = buildWaveField(ambassadorCycle, band);
+
+    ambassadorHealing.lastBinaryField = binaryField;
+    ambassadorHealing.lastWaveField = waveField;
+
     return {
       latency,
-      signature: ambassadorHealing.lastPingSignature
+      signature: ambassadorHealing.lastPingSignature,
+      bandSignature: ambassadorHealing.lastBandSignature,
+      binaryField,
+      waveField
     };
   },
 
   // -------------------------------------------------------------------------
-  // Fetch Jobs — Deterministic Lease Retrieval
+  // Fetch Jobs — deterministic + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   fetchJobs() {
     ambassadorCycle++;
@@ -210,7 +274,24 @@ export const PulseEarnMktAmbassador = {
       ambassadorHealing.lastAmbassadorCycleSignature =
         buildAmbassadorCycleSignature(ambassadorCycle);
 
-      return jobs;
+      // Fetch is symbolic band
+      const band = "symbolic";
+      ambassadorHealing.lastBand = band;
+      ambassadorHealing.lastBandSignature = buildBandSignature(band);
+
+      const binaryField = buildBinaryField(ambassadorCycle, false);
+      const waveField = buildWaveField(ambassadorCycle, band);
+
+      ambassadorHealing.lastBinaryField = binaryField;
+      ambassadorHealing.lastWaveField = waveField;
+
+      return {
+        jobs,
+        signature: ambassadorHealing.lastFetchSignature,
+        bandSignature: ambassadorHealing.lastBandSignature,
+        binaryField,
+        waveField
+      };
 
     } catch (err) {
       ambassadorHealing.lastFetchError = err.message;
@@ -221,7 +302,7 @@ export const PulseEarnMktAmbassador = {
   },
 
   // -------------------------------------------------------------------------
-  // Submit Result — Deterministic Certified Marketplace Dispatch
+  // Submit Result — deterministic + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   submitResult(job, result) {
     ambassadorCycle++;
@@ -235,18 +316,31 @@ export const PulseEarnMktAmbassador = {
     ambassadorHealing.lastAmbassadorCycleSignature =
       buildAmbassadorCycleSignature(ambassadorCycle);
 
+    const band = "symbolic";
+    ambassadorHealing.lastBand = band;
+    ambassadorHealing.lastBandSignature = buildBandSignature(band);
+
+    const binaryField = buildBinaryField(ambassadorCycle, false);
+    const waveField = buildWaveField(ambassadorCycle, band);
+
+    ambassadorHealing.lastBinaryField = binaryField;
+    ambassadorHealing.lastWaveField = waveField;
+
     return {
       ok: true,
       marketplace: "akash",
       jobId,
       result,
       signature: ambassadorHealing.lastSubmitSignature,
-      note: "Akash submission simulated deterministically (v11-Evo)."
+      bandSignature: ambassadorHealing.lastBandSignature,
+      binaryField,
+      waveField,
+      note: "Akash submission simulated deterministically (v11‑Evo A‑B‑A)."
     };
   },
 
   // -------------------------------------------------------------------------
-  // Normalize Job — Convert Akash Lease → Pulse‑Earn Job (deterministic)
+  // Normalize Job — deterministic + dynamic A‑B‑A band
   // -------------------------------------------------------------------------
   normalizeJob(raw) {
     try {
@@ -295,6 +389,17 @@ export const PulseEarnMktAmbassador = {
 
       const hasGpu = !!safeGet(raw, "resources.gpu", null);
 
+      // Dynamic band assignment
+      const band = hasGpu ? "binary" : "symbolic";
+      ambassadorHealing.lastBand = band;
+      ambassadorHealing.lastBandSignature = buildBandSignature(band);
+
+      const binaryField = buildBinaryField(ambassadorCycle, hasGpu);
+      const waveField = buildWaveField(ambassadorCycle, band);
+
+      ambassadorHealing.lastBinaryField = binaryField;
+      ambassadorHealing.lastWaveField = waveField;
+
       const normalized = {
         id: String(raw.id),
         marketplaceId: "akash",
@@ -305,7 +410,12 @@ export const PulseEarnMktAmbassador = {
         estimatedSeconds,
 
         minGpuScore: hasGpu ? 300 : 100,
-        bandwidthNeededMbps: 5
+        bandwidthNeededMbps: 5,
+
+        // A‑B‑A hints for Consulate
+        _abaBand: band,
+        _abaBinaryDensity: binaryField.binarySurface.density,
+        _abaWaveAmplitude: waveField.amplitude
       };
 
       ambassadorHealing.lastNormalizedJobId = normalized.id;
@@ -326,7 +436,7 @@ export const PulseEarnMktAmbassador = {
 
 
 // ============================================================================
-// Healing State Export — Ambassador Interaction Log (v11-Evo)
+// Healing State Export — Ambassador Interaction Log (A‑B‑A)
 // ============================================================================
 export function getPulseEarnMktAmbassadorHealingState() {
   return { ...ambassadorHealing };

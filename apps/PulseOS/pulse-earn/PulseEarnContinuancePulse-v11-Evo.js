@@ -24,6 +24,7 @@ function computeHash(str) {
 
 // ============================================================================
 //  INTERNAL: Build LegacyEarn v1 directly from impulse (NO IMPORTS)
+//  Now dual-band + binary/wave/factoring aware (structural only).
 // ============================================================================
 function buildLegacyEarnFromImpulse(impulse) {
   continuanceCycle++;
@@ -34,8 +35,43 @@ function buildLegacyEarnFromImpulse(impulse) {
   const pattern = impulse.intent || payload.pattern || "UNKNOWN_PATTERN";
   const lineage = payload.parentLineage || [];
 
+  // Dual-band + factoring inputs (metadata-only)
+  const band =
+    (payload.band && String(payload.band).toLowerCase() === "binary")
+      ? "binary"
+      : "symbolic";
+
+  const factoringSignal =
+    typeof payload.factoringSignal === "number"
+      ? (payload.factoringSignal ? 1 : 0)
+      : 1;
+
   const patternSignature = computeHash(pattern);
   const lineageSignature = computeHash(lineage.join("::"));
+
+  // Binary surface (structural, no real bits)
+  const surface = pattern.length * (lineage.length || 1);
+  const binaryField = {
+    binaryShapeSignature: computeHash(`bshape::${pattern}::${lineage.join("::")}`),
+    binarySurfaceSignature: computeHash(`bsurf::${surface}`),
+    binarySurface: {
+      patternLength: pattern.length,
+      lineageDepth: lineage.length,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    bitDensity: pattern.length + lineage.length,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+
+  // Wave field (structural wave-theory metadata)
+  const waveField = {
+    wavelength: pattern.length,
+    amplitude: lineage.length,
+    phase: (pattern.length + lineage.length) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
 
   return {
     EarnRole: {
@@ -54,6 +90,11 @@ function buildLegacyEarnFromImpulse(impulse) {
     lineage,
     lineageSignature,
 
+    band,
+    factoringSignal,
+    binaryField,
+    waveField,
+
     meta: {
       ...(payload.meta || {}),
       legacy: true,
@@ -68,6 +109,7 @@ function buildLegacyEarnFromImpulse(impulse) {
 
 // ============================================================================
 //  INTERNAL: Build Pulse-Compatible Earn Wrapper (v11-Evo)
+//  Now carries band + factoring + binary/wave surfaces through the envelope.
 // ============================================================================
 function buildPulseCompatibleEarn(earn) {
   if (!earn) return null;
@@ -75,6 +117,29 @@ function buildPulseCompatibleEarn(earn) {
   const continuanceSignature = computeHash(
     `${earn.jobId}::${earn.patternSignature}::${earn.meta.cycleIndex}`
   );
+
+  const band = earn.band || "symbolic";
+  const factoringSignal =
+    typeof earn.factoringSignal === "number"
+      ? (earn.factoringSignal ? 1 : 0)
+      : 1;
+
+  const binaryField = earn.binaryField || {
+    binaryShapeSignature: null,
+    binarySurfaceSignature: null,
+    binarySurface: null,
+    parity: null,
+    bitDensity: null,
+    shiftDepth: null
+  };
+
+  const waveField = earn.waveField || {
+    wavelength: earn.pattern ? earn.pattern.length : 0,
+    amplitude: Array.isArray(earn.lineage) ? earn.lineage.length : 0,
+    phase: 0,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
 
   return {
     PulseRole: earn.EarnRole,
@@ -89,6 +154,11 @@ function buildPulseCompatibleEarn(earn) {
     lineage: earn.lineage,
     lineageSignature: earn.lineageSignature,
 
+    band,
+    factoringSignal,
+    binaryField,
+    waveField,
+
     meta: {
       ...(earn.meta || {}),
       origin: "ContinuancePulse-v11-Evo",
@@ -96,7 +166,11 @@ function buildPulseCompatibleEarn(earn) {
       earnIdentity: "Earn-v1-Continuance-v11-Evo",
       earnEnvelope: true,
       cycleIndex: earn.meta.cycleIndex,
-      continuanceSignature
+      continuanceSignature,
+      bandSignature: computeHash(band),
+      factoringSignature: computeHash(String(factoringSignal)),
+      binarySignature: binaryField.binaryShapeSignature,
+      waveSignature: computeHash(JSON.stringify(waveField))
     },
 
     earn: {
@@ -105,6 +179,10 @@ function buildPulseCompatibleEarn(earn) {
       patternSignature: earn.patternSignature,
       lineage: earn.lineage,
       lineageSignature: earn.lineageSignature,
+      band,
+      factoringSignal,
+      binaryField,
+      waveField,
       meta: earn.meta,
       __earnEnvelope: true
     }
@@ -121,7 +199,7 @@ function buildPulseCompatibleEarn(earn) {
 export const PulseEarnContinuancePulse = {
 
   build(impulse) {
-    // 1. Build Earn v1 from Impulse
+    // 1. Build Earn v1 from Impulse (now dual-band + binary/wave/factoring aware)
     const earnV1 = buildLegacyEarnFromImpulse(impulse);
 
     // 2. Wrap Earn v1 in Pulse-compatible shape

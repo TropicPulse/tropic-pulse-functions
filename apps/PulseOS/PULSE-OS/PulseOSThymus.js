@@ -1,67 +1,71 @@
 // ============================================================================
-//  PULSE OS v9.2 — THE THYMUS
-//  Immune Command Organ • Integrity Sentinel • Root Healing Authority
-//  PURE HEALING. ZERO COMPUTE. ZERO AI. ZERO AUTONOMY.
+// FILE: /apps/PulseOS/Organs/Instincts/PulseOSThymus.js
+// PULSE OS — v11-Evo-Prime
+// “THE THYMUS”
+// Immune Command Organ • Integrity Sentinel • Root Healing Authority
+// PURE IMMUNE METADATA. ZERO COMPUTE. ZERO TIMERS. ZERO I/O.
 // ============================================================================
 //
-//  DESCRIPTION — WHAT THE THYMUS IS (v9.2):
-//  ----------------------------------------
+//  DESCRIPTION — WHAT THE THYMUS IS (v11-Evo-Prime):
+//  -------------------------------------------------
 //  The Thymus is the **root immune organ** of PulseOS. It is the backend
-//  immune command center responsible for:
+//  immune command nucleus responsible for:
 //
-//    • Emitting immune signals (OSEvents)
-//    • Recording drift signatures
-//    • Ingesting FUNCTION_LOGS as immune stimuli
-//    • Maintaining OS-level vital signs (OSHealth)
-//    • Creating restore points after large immune events
-//    • Coordinating healing across all backend subsystems
+//    • Emitting immune signals (as pure metadata objects)
+//    • Recording drift signatures (as pure metadata objects)
+//    • Building immune snapshots (OS-level vital signs, structurally only)
+//    • Maintaining organism-level immune identity + lineage
 //
-//  It is NOT a brain, NOT a cortex, NOT a decision-maker. It performs
-//  **pure immune behavior**, strictly metadata-only, with zero compute,
-//  zero autonomy, and zero AI.
+//  It is NOT a brain, NOT a cortex, NOT a decision-maker, NOT a scheduler.
+//  It performs **pure immune behavior**, strictly metadata-only, with:
 //
-//  SAFETY CONTRACT (v9.2):
-//  ------------------------
+//    • Zero compute
+//    • Zero timers
+//    • Zero I/O
+//    • Zero AI
+//    • Zero autonomy
+//
+//  SAFETY CONTRACT (v11-Evo-Prime):
+//  --------------------------------
 //    • No eval()
 //    • No dynamic imports
 //    • No arbitrary code execution
-//    • No compute
-//    • No GPU work
-//    • No marketplace calls
-//    • Deterministic, drift-proof immune behavior only
+//    • No timers (no setInterval, no setTimeout)
+//    • No timestamps (no Date.now, no Timestamp.now)
+//    • No network, no DB, no filesystem
+//    • Deterministic, drift-proof immune metadata only
 //
-//  IDENTITY (v9.2):
-//  ----------------
+//  IDENTITY (v11-Evo-Prime):
+//  -------------------------
 //    • organ: Thymus
 //    • role: immune_command_organ
-//    • generation: v9
-//    • version: 9.2
+//    • generation: v11
+//    • version: 11.0-Evo-Prime
 //    • organism: PulseOS
 // ============================================================================
 
+// Collections are now conceptual identifiers only (no direct DB usage here)
 export const FUNCTION_LOGS_COLLECTION = "FUNCTION_LOGS";
 export const OS_HEALTH_COLLECTION     = "OSHealth";
 export const OS_EVENTS_COLLECTION     = "OSEvents";
 
+// These are now symbolic constants only (no timers use them here)
 export const OS_HEARTBEAT_INTERVAL_MS      = 30_000;
 export const FUNCTION_LOG_SCAN_INTERVAL_MS = 60_000;
 
-// ⭐ Version + Generation + Organ Identity (v9.2 aligned)
-export const PULSE_OS_ID         = "PulseOS-v9.2";
+// ⭐ Version + Generation + Organ Identity (v11-Evo-Prime aligned)
+export const PULSE_OS_ID         = "PulseOS-v11-Evo-Prime";
 export const PULSE_OS_ROLE       = "immune_command_organ";
-export const PULSE_OS_GENERATION = "v9";
+export const PULSE_OS_GENERATION = "v11";
 export const PULSE_OS_ORGAN      = "Thymus";
 
-import {saveSnapshot, recordDriftSignature, createRestorePoint} from "./PulseOSLiverMemory.js";
-
-// ⭐ Thymus identity block (v9.2 organism identity)
-const THYMUS_CONTEXT = {
+// ⭐ Thymus identity block (v11-Evo-Prime organism identity)
+export const THYMUS_CONTEXT = {
   osId: PULSE_OS_ID,
   role: PULSE_OS_ROLE,
   organ: PULSE_OS_ORGAN,
   generation: PULSE_OS_GENERATION,
-  version: "9.2",
-
+  version: "11.0-Evo-Prime",
   evo: {
     dualMode: true,
     localAware: true,
@@ -73,189 +77,197 @@ const THYMUS_CONTEXT = {
     unifiedAdvantageField: true,
     futureEvolutionReady: true,
 
+    organismWideAnchor: true,
+    binaryAware: true,
+    symbolicAware: true,
+    gpuDispatchAware: true,
+    gpuMemoryAware: true,
+
     // Conceptual compatibility (no logic impact)
-    routingContract: "PulseSend-v9.2",
-    osOrganContract: "PulseOS-v9.2",
-    earnCompatibility: "PulseEarn-v9.2"
+    routingContract: "PulseSend-v11",
+    osOrganContract: "PulseOS-v11-Evo",
+    earnCompatibility: "PulseEarn-v11"
   }
 };
 
-log("thymus", "PulseOS v9.2 immune kernel online.");
-log("thymus", "Heartbeat interval", OS_HEARTBEAT_INTERVAL_MS, "ms");
-log("thymus", "FUNCTION_LOG scan interval", FUNCTION_LOG_SCAN_INTERVAL_MS, "ms");
-
-
 // ============================================================================
-//  writeOSEvent() — Immune Signal Emitter (v9.2)
+//  IMMUNE SIGNAL BUILDERS — PURE METADATA (NO I/O)
 // ============================================================================
-async function writeOSEvent(entry) {
-  try {
-    log(
-      "thymus",
-      `ImmuneSignal | type=${entry.type} | hintCode=${entry.hintCode ?? "UNSPECIFIED_HINT"}`,
-      entry
-    );
 
-    await db.collection(OS_EVENTS_COLLECTION).add({
-      ...THYMUS_CONTEXT,
-      ts: Date.now(),
-      hintCode: entry.hintCode ?? "UNSPECIFIED_HINT",
-      ...entry
-    });
-  } catch (err) {
-    error("thymus", "Failed to emit immune signal", err);
-  }
+// buildOSEvent() — Immune Signal Emitter (metadata only)
+function buildOSEvent(entry = {}) {
+  const safeEntry = {
+    type: entry.type || "unspecified",
+    hintCode: entry.hintCode || "UNSPECIFIED_HINT",
+    subsystem: entry.subsystem || null,
+    fileName: entry.fileName || null,
+    functionName: entry.functionName || null,
+    fieldName: entry.fieldName || null,
+    note: entry.note || null,
+    severity: entry.severity || "info",
+    functionLogId: entry.functionLogId || null
+  };
+
+  return {
+    ...THYMUS_CONTEXT,
+    collection: OS_EVENTS_COLLECTION,
+    // No timestamps here — consumer may attach them if needed
+    immuneEvent: safeEntry
+  };
 }
 
+// buildOSHealthSnapshot() — Vital Signs + Immune Snapshot (metadata only)
+function buildOSHealthSnapshot(extra = {}) {
+  const safeExtra = {
+    role: PULSE_OS_ROLE,
+    generation: PULSE_OS_GENERATION,
+    organ: PULSE_OS_ORGAN,
+    ...extra
+  };
 
-// ============================================================================
-//  updateOSHealth() — Vital Signs + Immune Snapshot (v9.2)
-// ============================================================================
-async function updateOSHealth(extra = {}) {
-  try {
-    const now = Timestamp.now();
-
-    log("thymus", "Heartbeat emitted.");
-
-    await db.collection(OS_HEALTH_COLLECTION).doc(PULSE_OS_ID).set(
-      {
-        ...THYMUS_CONTEXT,
-        heartbeatAt: now,
-        ...extra
-      },
-      { merge: true }
-    );
-
-    await saveSnapshot("OS", {
-      heartbeatAt: now.toMillis(),
-      role: PULSE_OS_ROLE,
-      generation: PULSE_OS_GENERATION,
-      organ: PULSE_OS_ORGAN,
-      ...extra
-    });
-
-  } catch (err) {
-    error("thymus", "Failed to update vital signs", err);
-  }
+  return {
+    ...THYMUS_CONTEXT,
+    collection: OS_HEALTH_COLLECTION,
+    osId: PULSE_OS_ID,
+    // No heartbeatAt timestamp here — consumer may attach one
+    snapshot: safeExtra
+  };
 }
 
+// buildDriftSignature() — Immune Drift Record (metadata only)
+function buildDriftSignature(subsystem = "unknown", details = {}) {
+  const safeDetails = {
+    fileName: details.fileName || null,
+    functionName: details.functionName || null,
+    fieldName: details.fieldName || null,
+    note: details.note || null
+  };
+
+  return {
+    ...THYMUS_CONTEXT,
+    subsystem,
+    drift: {
+      type: details.type || "function_error",
+      severity: details.severity || "info",
+      details: safeDetails
+      // No timestamp here — consumer may attach one
+    }
+  };
+}
+
+// buildFunctionLogIngestEvent() — Immune stimulus from FUNCTION_LOGS (metadata only)
+function buildFunctionLogIngestEvent(docId, entry = {}) {
+  const base = {
+    type: "function_log_ingested",
+    hintCode: entry.hintCode || "FUNCTION_LOG_INGESTED",
+    functionLogId: docId || null,
+    subsystem: entry.subsystem || null,
+    fileName: entry.fileName || null,
+    functionName: entry.functionName || null,
+    fieldName: entry.fieldName || null,
+    note: entry.note || null,
+    severity: entry.severity || "info"
+  };
+
+  return buildOSEvent(base);
+}
+
+// buildSubsystemSnapshot() — Immune snapshot for a subsystem (metadata only)
+function buildSubsystemSnapshot(subsystem, entry = {}) {
+  const safeSubsystem = subsystem || "unknown";
+
+  return {
+    ...THYMUS_CONTEXT,
+    collection: FUNCTION_LOGS_COLLECTION,
+    subsystem: safeSubsystem,
+    snapshot: {
+      fileName: entry.fileName || null,
+      functionName: entry.functionName || null,
+      fieldName: entry.fieldName || null,
+      note: entry.note || null,
+      severity: entry.severity || "info"
+    }
+  };
+}
 
 // ============================================================================
-//  processFunctionLogs() — Immune Training + Drift Detection (v9.2)
+//  PUBLIC IMMUNE NUCLEUS API — PURE BUILDERS (NO LOOPS, NO I/O)
 // ============================================================================
-async function processFunctionLogs() {
-  log("thymus", "Scanning FUNCTION_LOGS…");
 
-  const snap = await db
-    .collection(FUNCTION_LOGS_COLLECTION)
-    .where("processed", "==", false)
-    .limit(100)
-    .get();
+export const PulseOSThymus = {
+  meta: THYMUS_CONTEXT,
 
-  if (snap.empty) {
-    log("thymus", "No new immune stimuli.");
-    return;
-  }
+  // Build a generic OS-level immune event (metadata only)
+  buildOSEvent,
 
-  log("thymus", `Ingesting ${snap.size} FUNCTION_LOGS…`);
+  // Build an OS health snapshot (metadata only)
+  buildOSHealthSnapshot,
 
-  const batch = db.batch();
+  // Build a drift signature record (metadata only)
+  buildDriftSignature,
 
-  for (const doc of snap.docs) {
-    const entry = doc.data();
+  // Build an immune event from a FUNCTION_LOG entry (metadata only)
+  buildFunctionLogIngestEvent,
 
-    log(
-      "thymus",
-      `Ingest | id=${doc.id} | subsystem=${entry.subsystem ?? "unknown"} | severity=${entry.severity ?? "info"}`,
-      entry
-    );
+  // Build a subsystem snapshot from a FUNCTION_LOG entry (metadata only)
+  buildSubsystemSnapshot
+};
 
-    // ⭐ Emit immune signal
-    await writeOSEvent({
-      type: "function_log_ingested",
-      hintCode: entry.hintCode ?? "FUNCTION_LOG_INGESTED",
-      functionLogId: doc.id,
-      subsystem: entry.subsystem ?? null,
-      fileName: entry.fileName ?? null,
-      functionName: entry.functionName ?? null,
-      fieldName: entry.fieldName ?? null,
-      note: entry.note ?? null,
-      severity: entry.severity ?? "info"
-    });
+// ============================================================================
+//  LEGACY COMPATIBILITY EXPORTS (for existing call sites)
+//  These now just return metadata instead of performing I/O.
+// ============================================================================
 
-    // ⭐ Save subsystem snapshot
+// v9.2 writeOSEvent() → now returns metadata only
+export async function writeOSEvent(entry) {
+  return buildOSEvent(entry);
+}
+
+// v9.2 updateOSHealth() → now returns metadata only
+export async function updateOSHealth(extra = {}) {
+  return buildOSHealthSnapshot(extra);
+}
+
+// v9.2 processFunctionLogs() → now expects pre-fetched logs and returns metadata
+export async function processFunctionLogs(functionLogDocs = []) {
+  // functionLogDocs: array of { id, data }
+  const results = [];
+
+  for (const doc of functionLogDocs) {
+    const id = doc.id;
+    const entry = doc.data || {};
+
+    const ingestEvent = buildFunctionLogIngestEvent(id, entry);
+    results.push({ kind: "immuneEvent", payload: ingestEvent });
+
     if (entry.subsystem) {
-      await saveSnapshot(entry.subsystem, {
+      const subsystemSnapshot = buildSubsystemSnapshot(entry.subsystem, entry);
+      results.push({ kind: "subsystemSnapshot", payload: subsystemSnapshot });
+    }
+
+    if (entry.severity === "error" || entry.severity === "critical") {
+      const driftRecord = buildDriftSignature(entry.subsystem || "unknown", {
+        type: "function_error",
+        severity: entry.severity,
         fileName: entry.fileName,
         functionName: entry.functionName,
         fieldName: entry.fieldName,
-        note: entry.note,
-        severity: entry.severity
+        note: entry.note
       });
+      results.push({ kind: "driftSignature", payload: driftRecord });
     }
-
-    // ⭐ Drift detection
-    if (entry.severity === "error" || entry.severity === "critical") {
-      log(
-        "thymus",
-        `Drift signature recorded | subsystem=${entry.subsystem ?? "unknown"}`,
-        entry
-      );
-
-      await recordDriftSignature(entry.subsystem ?? "unknown", {
-        type: "function_error",
-        severity: entry.severity,
-        details: {
-          fileName: entry.fileName,
-          functionName: entry.functionName,
-          fieldName: entry.fieldName,
-          note: entry.note
-        },
-        version: "9.2",
-        generation: "v9",
-        organ: "Thymus",
-        timestamp: Date.now()
-      });
-    }
-
-    // ⭐ Mark processed
-    batch.update(doc.ref, {
-      processed: true,
-      processedAt: Timestamp.now()
-    });
   }
 
-  await batch.commit();
-
-  log("thymus", "FUNCTION_LOG ingestion complete.");
-
-  // ⭐ Auto-restore after large immune stimulus
-  if (snap.size >= 50) {
-    warn("thymus", "Large immune stimulus — creating restore point.");
-    await createRestorePoint("auto_after_large_ingest", ["OS"]);
-  }
+  return results;
 }
 
-
-// ============================================================================
-//  PUBLIC: startPulseOS() — Activate Immune Organ (v9.2)
-// ============================================================================
+// v9.2 startPulseOS() → removed timers; now a no-op that returns meta
 export default function startPulseOS() {
-  log("thymus", "Starting immune supervisor loops…");
-
-  setInterval(() => {
-    updateOSHealth().catch((err) => {
-      error("thymus", "Heartbeat loop error", err);
-    });
-  }, OS_HEARTBEAT_INTERVAL_MS);
-
-  setInterval(() => {
-    processFunctionLogs().catch((err) => {
-      error("thymus", "FUNCTION_LOGS loop error", err);
-    });
-  }, FUNCTION_LOG_SCAN_INTERVAL_MS);
-
-  log("thymus", "v9.2 immune kernel active.");
+  // No loops, no timers, no I/O — Thymus is now a pure immune nucleus.
+  return {
+    meta: THYMUS_CONTEXT,
+    organ: "Thymus",
+    generation: PULSE_OS_GENERATION,
+    version: "11.0-Evo-Prime"
+  };
 }
-
-export { updateOSHealth, processFunctionLogs, writeOSEvent };

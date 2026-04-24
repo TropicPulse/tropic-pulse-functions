@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnLymphNodes-v11-Evo.js
-// LAYER: THE LYMPHATIC HANDSHAKE NODES (v11-Evo)
+// LAYER: THE LYMPHATIC HANDSHAKE NODES (v11-Evo + Dual-Band + Binary + Wave)
 // (Finalizer of Jobs + Immune-Safe Dispatch + Certified Marketplace Exchange)
 // ============================================================================
 //
@@ -17,6 +17,7 @@
 //   • NO async, NO timestamps, NO nondeterministic behavior.
 //   • NEVER mutate job objects.
 //   • Deterministic identity verification + dispatch only.
+//   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
 
 import { PulseEarnReceptor } from "./PulseEarnReceptor.js";
@@ -37,7 +38,13 @@ const lymphHealing = {
 
   lastHandshakeSignature: null,
   lastJobSignature: null,
-  lastMarketplaceSignature: null
+  lastMarketplaceSignature: null,
+
+  // v11+ Dual-Band + Binary + Wave
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 // Deterministic cycle counter
@@ -54,6 +61,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -86,12 +98,57 @@ const receptorRegistry = {
 
 
 // ---------------------------------------------------------------------------
-// submitPulseEarnResult — Deterministic Lymphatic Handshake (v11-Evo)
+// INTERNAL: Build dual-band + binary + wave metadata for a job/cycle
+// ---------------------------------------------------------------------------
+function buildLymphBandBinaryWave(job, cycleIndex) {
+  const band = normalizeBand(job?.band || job?.meta?.band || "symbolic");
+  lymphHealing.lastBand = band;
+  lymphHealing.lastBandSignature = computeHash(`BAND::${band}`);
+
+  const jobIdLength = (job?.id || "").length;
+  const marketplaceLength = (job?.marketplaceId || "").length;
+  const surface = jobIdLength + marketplaceLength + cycleIndex;
+
+  const binaryField = {
+    binaryLymphSignature: computeHash(`BLYMPH::${surface}`),
+    binarySurfaceSignature: computeHash(`BSURF_LYMPH::${surface}`),
+    binarySurface: {
+      jobIdLength,
+      marketplaceLength,
+      cycle: cycleIndex,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density: jobIdLength,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+  lymphHealing.lastBinaryField = binaryField;
+
+  const waveField = {
+    amplitude: jobIdLength,
+    wavelength: cycleIndex,
+    phase: (jobIdLength + cycleIndex) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+  lymphHealing.lastWaveField = waveField;
+
+  return { band, binaryField, waveField };
+}
+
+
+// ---------------------------------------------------------------------------
+// submitPulseEarnResult — Deterministic Lymphatic Handshake (v11-Evo + A-B-A)
 // ---------------------------------------------------------------------------
 export function submitPulseEarnResult(job, result) {
   lymphCycle++;
   lymphHealing.cycleCount++;
   lymphHealing.lastCycleIndex = lymphCycle;
+
+  const { band, binaryField, waveField } = buildLymphBandBinaryWave(
+    job,
+    lymphCycle
+  );
 
   try {
     // 1. Identity Verification — Immune Recognition
@@ -105,6 +162,9 @@ export function submitPulseEarnResult(job, result) {
         error: "Job missing marketplaceId",
         jobId: job?.id ?? null,
         marketplaceId: job?.marketplaceId ?? null,
+        band,
+        binaryField,
+        waveField,
         cycleIndex: lymphCycle
       };
 
@@ -137,6 +197,9 @@ export function submitPulseEarnResult(job, result) {
         error: `Unknown marketplace: ${job.marketplaceId}`,
         jobId: job.id,
         marketplaceId: job.marketplaceId,
+        band,
+        binaryField,
+        waveField,
         cycleIndex: lymphCycle
       };
 
@@ -154,6 +217,9 @@ export function submitPulseEarnResult(job, result) {
         error: `Marketplace ${job.marketplaceId} does not support result submission`,
         jobId: job.id,
         marketplaceId: job.marketplaceId,
+        band,
+        binaryField,
+        waveField,
         cycleIndex: lymphCycle
       };
 
@@ -172,7 +238,13 @@ export function submitPulseEarnResult(job, result) {
     lymphHealing.lastError = null;
     lymphHealing.lastHandshakeSignature = buildHandshakeSignature(job, lymphCycle);
 
-    return response;
+    return {
+      ...response,
+      band,
+      binaryField,
+      waveField,
+      cycleIndex: lymphCycle
+    };
 
   } catch (err) {
     lymphHealing.lastError = err.message;
@@ -182,6 +254,9 @@ export function submitPulseEarnResult(job, result) {
       error: err.message,
       jobId: job?.id ?? null,
       marketplaceId: job?.marketplaceId ?? null,
+      band,
+      binaryField,
+      waveField,
       cycleIndex: lymphCycle
     };
 

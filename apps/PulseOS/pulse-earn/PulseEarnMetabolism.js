@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMetabolism-v11-Evo.js
-// LAYER: THE METABOLIC ENGINEER (v11-Evo)
+// LAYER: THE METABOLIC ENGINEER (v11-Evo + Dual-Band + Binary + Wave)
 // (Interpreter of Jobs + Safe Executor + Deterministic Throughput Engine)
 // ============================================================================
 //
@@ -12,6 +12,7 @@
 //   • Produces deterministic, drift‑proof results.
 //   • Emits v11‑Evo signatures + diagnostics.
 //   • Never improvises, never executes unsafe code.
+//   • NOW dual-band, binary-aware, wave-aware (metadata only).
 //
 // CONTRACT (v11-Evo):
 //   • PURE EXECUTION BRIDGE — no AI layers, no translation, no memory model.
@@ -19,6 +20,7 @@
 //   • NO user scripts, NO network calls, NO filesystem access.
 //   • NEVER mutate job objects.
 //   • Deterministic output only.
+//   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
 
 
@@ -37,7 +39,13 @@ const metabolicHealing = {
 
   lastMetabolicSignature: null,
   lastJobSignature: null,
-  lastPayloadSignature: null
+  lastPayloadSignature: null,
+
+  // v11+ Dual-Band + Binary + Wave
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
@@ -55,6 +63,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -92,7 +105,47 @@ function buildMetabolicSignature(job, cycle) {
 
 
 // ============================================================================
-// executePulseEarnJob(job) — Deterministic Metabolic Workflow (v11-Evo)
+// INTERNAL: Build dual-band + binary + wave metadata for a job/cycle
+// ============================================================================
+function buildMetabolicBandBinaryWave(job, cycleIndex) {
+  const band = normalizeBand(job?.band || job?.meta?.band || "symbolic");
+  metabolicHealing.lastBand = band;
+  metabolicHealing.lastBandSignature = computeHash(`BAND::${band}`);
+
+  const payloadType = job?.payload?.type || "NO_TYPE";
+  const payloadKeysCount = job?.payload ? Object.keys(job.payload).length : 0;
+  const surface = payloadType.length + payloadKeysCount + cycleIndex;
+
+  const binaryField = {
+    binaryMetabolicSignature: computeHash(`BMETA::${surface}`),
+    binarySurfaceSignature: computeHash(`BSURF_META::${surface}`),
+    binarySurface: {
+      payloadTypeLength: payloadType.length,
+      payloadKeysCount,
+      cycle: cycleIndex,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density: payloadKeysCount,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+  metabolicHealing.lastBinaryField = binaryField;
+
+  const waveField = {
+    amplitude: payloadKeysCount,
+    wavelength: cycleIndex,
+    phase: (payloadKeysCount + cycleIndex) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+  metabolicHealing.lastWaveField = waveField;
+
+  return { band, binaryField, waveField };
+}
+
+
+// ============================================================================
+// executePulseEarnJob(job) — Deterministic Metabolic Workflow (v11-Evo + A-B-A)
 // ============================================================================
 export function executePulseEarnJob(job) {
   metabolismCycle++;
@@ -122,6 +175,12 @@ export function executePulseEarnJob(job) {
     // v11-Evo signatures
     metabolicHealing.lastJobSignature = buildJobSignature(job);
     metabolicHealing.lastPayloadSignature = buildPayloadSignature(payload);
+
+    // A — Dual-Band + B — Binary + A — Wave metadata
+    const { band, binaryField, waveField } = buildMetabolicBandBinaryWave(
+      job,
+      metabolismCycle
+    );
 
     // 2. Deterministic Metabolic Boost
     const evoBoost = computeMetabolicBoost();
@@ -173,6 +232,9 @@ export function executePulseEarnJob(job) {
       jobId: job.id,
       result,
       evoBoost,
+      band,
+      binaryField,
+      waveField,
       cycleIndex: metabolismCycle,
       metabolicSignature: metabolicHealing.lastMetabolicSignature,
       jobSignature: metabolicHealing.lastJobSignature,

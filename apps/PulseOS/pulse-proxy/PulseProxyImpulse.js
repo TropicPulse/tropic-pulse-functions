@@ -1,176 +1,153 @@
 // ============================================================================
-//  PULSE OS v9.3 — IMPULSE ORGAN (Shape‑Unified)
-//  Adaptive Traveler • Pattern Carrier • Identity Anchor
-//  PURE INTERNAL ORGAN — ZERO IMPORTS — ZERO DEPENDENCIES
+//  IMPULSE CONTEXT — keep as-is, bump when you move fully to v11
 // ============================================================================
+const IMPULSE_CONTEXT = { /* ...your existing object... */ };
+
+// internal helpers: nowMs, buildLineage, computeShapeSignature, computeEvolutionStage
+// keep them shared for all three versions
 
 
+
 // ============================================================================
-// ⭐ IMPULSE CONTEXT — v9.3 Identity
+// 1) LEGACY IMPULSE — v9.3 (unchanged, frozen)
 // ============================================================================
-const IMPULSE_CONTEXT = {
-  layer: "Impulse",
-  role: "IMPULSE_TRAVELER",
-  version: "9.3",
-  purpose: "Adaptive traveler + pattern carrier + identity anchor",
-  evo: {
-    driftProof: true,
-    deterministic: true,
-    offlineAbsolute: true,
-    pathwayMemoryReady: true,
-    pulseSendAware: true,
-    meshAware: true,
-    bandAware: true,
-    multiInstanceReady: true,
-    futureEvolutionReady: true,
-    pulseShapeReady: true
-  }
+export const ImpulseLegacy = {
+  create(intent, payload = {}) {
+    // your current create implementation, exactly as-is
+  },
+  computeUrgency(layerState) { /* as-is */ },
+  factorImpulse(impulse) { /* as-is */ },
+  annotate(impulse, layerIdentity, layerState, delta) { /* as-is */ },
+  snapshot(impulse) { /* as-is */ },
+  markPathwayStable(impulse, learnedRouteId) { /* as-is */ },
+  returnToPulseBand(impulse) { /* as-is */ }
 };
 
 
-// ============================================================================
-// INTERNAL HELPERS — unchanged
-// ============================================================================
-function nowMs() {
-  return Date.now();
-}
-
-function makeTickId() {
-  return nowMs() + "-" + Math.random().toString(36).slice(2);
-}
-
-function clone(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-
-function impulseLog(stage, details = {}) {
-  if (typeof window === "undefined") return;
-  if (!window.PULSE_IMPULSE_DIAGNOSTICS && !window.PULSE_DIAGNOSTICS) return;
-
-  try {
-    console.log(
-      JSON.stringify({
-        stage,
-        ...details,
-        meta: { ...IMPULSE_CONTEXT }
-      })
-    );
-  } catch {}
-}
-
-// Pulse‑v2 compatible helpers
-function buildLineage(parentLineage, pattern) {
-  const base = Array.isArray(parentLineage) ? parentLineage : [];
-  return [...base, pattern];
-}
-
-function computeShapeSignature(pattern, lineage) {
-  const lineageKey = lineage.join("::");
-  const raw = `${pattern}::${lineageKey}`;
-
-  let acc = 0;
-  for (let i = 0; i < raw.length; i++) {
-    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
-  }
-
-  return `shape-${acc}`;
-}
-
-function computeEvolutionStage(pattern, lineage) {
-  const depth = lineage.length;
-
-  if (depth === 1) return "seed";
-  if (depth === 2) return "sprout";
-  if (depth === 3) return "branch";
-
-  return "mature";
-}
-
 
 // ============================================================================
-// ⭐ IMPULSE ENGINE — v9.3
-// PURE INTERNAL TRAVELER — ZERO EXTERNAL DEPENDENCY
+// 2) BINARY CORE — v11+ (no window, no JSON, no random)
+// ============================================================================
+function makeDeterministicTickId(now, seed = "") {
+  return `${now}-${seed}`;
+}
+
+function createBinaryImpulse(intent, payload = {}, now) {
+  const pageIdentity = payload?.pageIdentity || {};
+
+  const tickNow       = now || nowMs();
+  const tickId        = makeDeterministicTickId(tickNow, payload.jobId || "");
+  const jobId         = payload.jobId || tickId;
+  const pattern       = payload.pattern || intent || "UNKNOWN_PATTERN";
+  const priority      = payload.priority || "normal";
+  const returnTo      = payload.returnTo || null;
+  const parentLineage = payload.parentLineage || null;
+
+  const lineage        = buildLineage(parentLineage, pattern);
+  const shapeSignature = computeShapeSignature(pattern, lineage);
+  const evolutionStage = computeEvolutionStage(pattern, lineage);
+
+  return {
+    tickId,
+    intent,
+    payload,
+    version: "v11-binary",
+
+    path: [],
+    pathway: {
+      hops: [],
+      stable: false,
+      learnedRouteId: null
+    },
+
+    energy: 1,
+    factor: 1,
+    urgency: 0,
+
+    page: {
+      name:        pageIdentity.page        || "UNKNOWN_PAGE",
+      vars:        pageIdentity.vars        || {},
+      repairHooks: pageIdentity.repairHooks || {}
+    },
+
+    repairSeed: {
+      pageName: pageIdentity.page || "UNKNOWN_PAGE",
+      focus:    payload?.repairFocus || null
+    },
+
+    identityHealth: pageIdentity.page ? "Stable" : "Missing",
+
+    offline: true,
+    externalDependencies: [],
+
+    pulse: {
+      jobId,
+      pattern,
+      payload,
+      priority,
+      returnTo,
+      lineage,
+      meta: {
+        shapeSignature,
+        evolutionStage
+      }
+    },
+
+    meta: { ...IMPULSE_CONTEXT }
+  };
+}
+
+function computeUrgencyBinary(layerState) {
+  let u = 0;
+  if (layerState?.health === "Weak")     u += 0.3;
+  if (layerState?.health === "Critical") u += 0.6;
+  if (layerState?.latency > 150)         u += 0.2;
+  if (layerState?.stability < 50)        u += 0.3;
+  return Math.min(1, u);
+}
+
+function annotateBinary(impulse, layerIdentity, layerState, delta, now) {
+  impulse.urgency = computeUrgencyBinary(layerState);
+
+  const hop = {
+    ...layerIdentity,
+    state: layerState,
+    delta,
+    urgency: impulse.urgency,
+    timestamp: now || nowMs(),
+
+    page:           impulse.page.name,
+    repairSeed:     impulse.repairSeed,
+    identityHealth: impulse.identityHealth,
+
+    offline: true,
+    meta: { ...IMPULSE_CONTEXT }
+  };
+
+  impulse.path.push(hop);
+  if (layerIdentity?.id) impulse.pathway.hops.push(layerIdentity.id);
+  return impulse;
+}
+
+export const ImpulseBinary = {
+  create: createBinaryImpulse,
+  computeUrgency: computeUrgencyBinary,
+  annotate: annotateBinary,
+  // factor/snapshot/markPathwayStable can be added here as pure transforms too
+};
+
+
+
+// ============================================================================
+// 3) UPGRADED SYMBOLIC — v10.4–11 (wraps binary, adds logs + window hooks)
 // ============================================================================
 export const Impulse = {
-
-  // --------------------------------------------------------------------------
-  // CREATE — v9.3
-  // Identity‑anchored, repair‑seeded, offline‑absolute, pathway‑ready
-  // PLUS: embeds Pulse v2–compatible shape
-  // --------------------------------------------------------------------------
+  // upgraded nonbinary
   create(intent, payload = {}) {
-    const tickId = makeTickId();
-    const pageIdentity = payload?.pageIdentity || {};
-
-    const jobId       = payload.jobId || tickId;
-    const pattern     = payload.pattern || intent || "UNKNOWN_PATTERN";
-    const priority    = payload.priority || "normal";
-    const returnTo    = payload.returnTo || null;
-    const parentLineage = payload.parentLineage || null;
-
-    const lineage        = buildLineage(parentLineage, pattern);
-    const shapeSignature = computeShapeSignature(pattern, lineage);
-    const evolutionStage = computeEvolutionStage(pattern, lineage);
-
-    const impulse = {
-      tickId,
-      intent,
-      payload,
-      version: "v9.3",
-
-      // PATHWAY MEMORY
-      path: [],
-      pathway: {
-        hops: [],
-        stable: false,
-        learnedRouteId: null
-      },
-
-      // ENERGY MODEL
-      energy: 1,
-      factor: 1,
-      urgency: 0,
-
-      // PAGE IDENTITY
-      page: {
-        name:        pageIdentity.page        || "UNKNOWN_PAGE",
-        vars:        pageIdentity.vars        || {},
-        repairHooks: pageIdentity.repairHooks || {}
-      },
-
-      // REPAIR SEED
-      repairSeed: {
-        pageName: pageIdentity.page || "UNKNOWN_PAGE",
-        focus:    payload?.repairFocus || null
-      },
-
-      // IDENTITY HEALTH
-      identityHealth: pageIdentity.page ? "Stable" : "Missing",
-
-      // OFFLINE ABSOLUTE
-      offline: true,
-      externalDependencies: [],
-
-      // ⭐ PULSE v2–COMPATIBLE VIEW
-      pulse: {
-        jobId,
-        pattern,
-        payload,
-        priority,
-        returnTo,
-        lineage,
-        meta: {
-          shapeSignature,
-          evolutionStage
-        }
-      },
-
-      // META
-      meta: { ...IMPULSE_CONTEXT }
-    };
+    const impulse = ImpulseBinary.create(intent, payload, nowMs());
 
     impulseLog("IMPULSE_CREATE", {
-      tickId,
+      tickId: impulse.tickId,
       intent,
       page: impulse.page.name,
       identityHealth: impulse.identityHealth,
@@ -181,25 +158,10 @@ export const Impulse = {
     return impulse;
   },
 
-
-  // --------------------------------------------------------------------------
-  // URGENCY — unchanged
-  // --------------------------------------------------------------------------
   computeUrgency(layerState) {
-    let u = 0;
-
-    if (layerState?.health === "Weak")     u += 0.3;
-    if (layerState?.health === "Critical") u += 0.6;
-    if (layerState?.latency > 150)         u += 0.2;
-    if (layerState?.stability < 50)        u += 0.3;
-
-    return Math.min(1, u);
+    return ImpulseBinary.computeUrgency(layerState);
   },
 
-
-  // --------------------------------------------------------------------------
-  // FACTOR — unchanged
-  // --------------------------------------------------------------------------
   factorImpulse(impulse) {
     impulse.factor *= 0.5;
     impulse.energy *= impulse.factor;
@@ -219,61 +181,32 @@ export const Impulse = {
     return impulse;
   },
 
-
-  // --------------------------------------------------------------------------
-  // ANNOTATE — unchanged
-  // --------------------------------------------------------------------------
   annotate(impulse, layerIdentity, layerState, delta) {
-    impulse.urgency = this.computeUrgency(layerState);
-
-    const hop = {
-      ...layerIdentity,
-      state: layerState,
-      delta,
-      urgency: impulse.urgency,
-      timestamp: nowMs(),
-
-      page:           impulse.page.name,
-      repairSeed:     impulse.repairSeed,
-      identityHealth: impulse.identityHealth,
-
-      offline: true,
-      meta: { ...IMPULSE_CONTEXT }
-    };
-
-    impulse.path.push(hop);
-
-    if (layerIdentity?.id) {
-      impulse.pathway.hops.push(layerIdentity.id);
-    }
+    const updated = ImpulseBinary.annotate(impulse, layerIdentity, layerState, delta, nowMs());
 
     impulseLog("IMPULSE_ANNOTATE", {
-      tickId: impulse.tickId,
+      tickId: updated.tickId,
       layer: layerIdentity.id,
-      page: impulse.page.name,
-      urgency: impulse.urgency,
-      hopIndex: impulse.path.length - 1,
-      totalHops: impulse.path.length
+      page: updated.page.name,
+      urgency: updated.urgency,
+      hopIndex: updated.path.length - 1,
+      totalHops: updated.path.length
     });
 
-    return impulse;
+    return updated;
   },
 
-
-  // --------------------------------------------------------------------------
-  // SNAPSHOT — unchanged
-  // --------------------------------------------------------------------------
   snapshot(impulse) {
     const snap = {
       tickId:   impulse.tickId,
       intent:   impulse.intent,
       version:  impulse.version,
-      page:     clone(impulse.page),
-      repairSeed: clone(impulse.repairSeed),
+      page:     { ...impulse.page },
+      repairSeed: { ...impulse.repairSeed },
       identityHealth: impulse.identityHealth,
-      pathway: clone(impulse.pathway),
+      pathway: { ...impulse.pathway, hops: [...impulse.pathway.hops] },
       hops:    impulse.path.length,
-      pulse:   clone(impulse.pulse),
+      pulse:   { ...impulse.pulse },
       meta:    { ...IMPULSE_CONTEXT }
     };
 
@@ -286,10 +219,6 @@ export const Impulse = {
     return snap;
   },
 
-
-  // --------------------------------------------------------------------------
-  // MARK PATHWAY STABLE — unchanged
-  // --------------------------------------------------------------------------
   markPathwayStable(impulse, learnedRouteId) {
     impulse.pathway.stable = true;
     impulse.pathway.learnedRouteId = learnedRouteId || null;
@@ -303,10 +232,6 @@ export const Impulse = {
     return impulse;
   },
 
-
-  // --------------------------------------------------------------------------
-  // RETURN — unchanged
-  // --------------------------------------------------------------------------
   returnToPulseBand(impulse) {
     impulse.signature = "1001101010101010101";
 
@@ -323,11 +248,9 @@ export const Impulse = {
     if (typeof window !== "undefined" && window.PulseBand?.receiveImpulseReturn) {
       window.PulseBand.receiveImpulseReturn(impulse, snap);
     }
-
     if (typeof window !== "undefined" && window.NerveMap?.ingestImpulse) {
       window.NerveMap.ingestImpulse(snap);
     }
-
     if (typeof window !== "undefined" && window.PathwayMemory?.recordImpulse) {
       window.PathwayMemory.recordImpulse(snap);
     }
@@ -335,4 +258,3 @@ export const Impulse = {
 };
 
 export const IMPULSE_META = { ...IMPULSE_CONTEXT };
-

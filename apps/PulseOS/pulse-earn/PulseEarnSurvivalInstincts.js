@@ -1,3 +1,4 @@
+//js
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnSurvivalInstincts-v11-Evo.js
 // LAYER: THE SURVIVAL INSTINCTS (v11-Evo)
@@ -36,7 +37,9 @@
 const survivalHealing = {
   lastJobId: null,
   lastMarketplaceId: null,
+
   lastScore: null,
+  lastRawScore: null,
   lastCompatibility: null,
   lastRuntimeSeconds: null,
   lastPayoutEstimate: null,
@@ -46,6 +49,10 @@ const survivalHealing = {
   lastProfitPerSecond: null,
   lastStabilityBonus: null,
   lastHealthScore: null,
+
+  lastDecision: null,           // "approved" | "rejected_incompatible" | "rejected_unprofitable"
+  lastRejectionReason: null,    // string | null
+  lastApprovalReason: null,     // string | null
 
   // v11-Evo: pattern / signature surface
   lastJobPattern: null,
@@ -73,6 +80,27 @@ function computeDeterministicHash(str) {
     acc = (acc + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${acc}`;
+}
+
+
+// ---------------------------------------------------------------------------
+// INTERNAL: Numeric safety helpers (deterministic)
+// ---------------------------------------------------------------------------
+function toNumber(value, fallback) {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function clamp(value, min, max) {
+  const v = toNumber(value, min);
+  if (v < min) return min;
+  if (v > max) return max;
+  return v;
+}
+
+function nonNegative(value, fallback) {
+  const v = toNumber(value, fallback);
+  return v < 0 ? 0 : v;
 }
 
 
@@ -107,11 +135,11 @@ function buildSurvivalSignature({
     jobId || "NO_JOB",
     marketplaceId || "NO_MARKET",
     compatibility ? "COMPATIBLE" : "INCOMPATIBLE",
-    `pps:${profitPerSecond}`,
-    `bw:${bandwidthPenalty}`,
-    `tier:${tier}`,
-    `h:${healthScore}`,
-    `stab:${stabilityBonus}`
+    `pps:${toNumber(profitPerSecond, 0)}`,
+    `bw:${toNumber(bandwidthPenalty, 0)}`,
+    `tier:${tier || "NO_TIER"}`,
+    `h:${toNumber(healthScore, 1)}`,
+    `stab:${toNumber(stabilityBonus, 0.5)}`
   ].join("::");
 
   return computeDeterministicHash(raw);
@@ -122,81 +150,95 @@ function buildSurvivalSignature({
 // scoreJobForDevice — Survival Instinct Approval Process (v11-Evo)
 // ---------------------------------------------------------------------------
 export function scoreJobForDevice(rawJob, deviceProfile) {
+  const job = rawJob || {};
+  const device = deviceProfile || {};
+
   survivalHealing.cycleCount++;
-  survivalHealing.lastJobId = rawJob?.id ?? null;
-  survivalHealing.lastMarketplaceId = rawJob?.marketplaceId ?? null;
+  survivalHealing.lastJobId = job.id ?? null;
+  survivalHealing.lastMarketplaceId = job.marketplaceId ?? null;
+
+  survivalHealing.lastDecision = null;
+  survivalHealing.lastRejectionReason = null;
+  survivalHealing.lastApprovalReason = null;
 
   // 1. Worker Safety Check — Survival Protection
-  const compatible = isJobCompatible(rawJob, deviceProfile);
+  const compatible = isJobCompatible(job, device);
   survivalHealing.lastCompatibility = compatible;
+
+  const healthScore = toNumber(device.healthScore, 1.0);
+  const stabilityBonus = clamp(device.stabilityScore, 0, 1.5) || 0.5;
+  const tier = classifyDegradationTier(healthScore);
+
+  survivalHealing.lastTier = tier;
+  survivalHealing.lastHealthScore = healthScore;
+  survivalHealing.lastStabilityBonus = stabilityBonus;
 
   if (!compatible) {
     survivalHealing.lastScore = -Infinity;
+    survivalHealing.lastRawScore = -Infinity;
     survivalHealing.lastRuntimeSeconds = null;
     survivalHealing.lastPayoutEstimate = null;
     survivalHealing.lastBandwidthPenalty = null;
     survivalHealing.lastEvolutionBoost = null;
-    survivalHealing.lastTier = classifyDegradationTier(deviceProfile?.healthScore ?? 1.0);
     survivalHealing.lastProfitPerSecond = null;
-    survivalHealing.lastStabilityBonus = deviceProfile?.stabilityScore || 0.5;
-    survivalHealing.lastHealthScore = deviceProfile?.healthScore ?? 1.0;
 
-    survivalHealing.lastJobPattern = buildJobPattern(rawJob);
-    survivalHealing.lastDevicePattern = buildDevicePattern(deviceProfile);
+    survivalHealing.lastJobPattern = buildJobPattern(job);
+    survivalHealing.lastDevicePattern = buildDevicePattern(device);
+
+    survivalHealing.lastDecision = "rejected_incompatible";
+    survivalHealing.lastRejectionReason = "incompatible_with_device";
+
     survivalHealing.lastSurvivalSignature = buildSurvivalSignature({
       jobId: survivalHealing.lastJobId,
       marketplaceId: survivalHealing.lastMarketplaceId,
       compatibility: false,
       profitPerSecond: 0,
       bandwidthPenalty: 0,
-      tier: survivalHealing.lastTier,
-      healthScore: survivalHealing.lastHealthScore,
-      stabilityBonus: survivalHealing.lastStabilityBonus
+      tier,
+      healthScore,
+      stabilityBonus
     });
 
     return -Infinity;
   }
 
   // 2. Evolutionary Capability Scaling — Organism Advantage
-  const evoBoost = computeEvolutionaryBoost(deviceProfile);
+  const evoBoost = computeEvolutionaryBoost(device);
   survivalHealing.lastEvolutionBoost = evoBoost;
 
   // 3. Workload Evaluation — Difficulty
-  const estimatedRuntimeSeconds =
-    estimateRuntimeSeconds(rawJob, deviceProfile, evoBoost);
+  const estimatedRuntimeSeconds = nonNegative(
+    estimateRuntimeSeconds(job, device, evoBoost),
+    1
+  ) || 1;
   survivalHealing.lastRuntimeSeconds = estimatedRuntimeSeconds;
 
   // 4. Compensation Check — Fair Pay
-  const estimatedPayout = estimatePayout(rawJob);
+  const estimatedPayout = nonNegative(estimatePayout(job), 0);
   survivalHealing.lastPayoutEstimate = estimatedPayout;
 
   // 5. Hidden Cost Detection — Bandwidth Penalties
-  const bandwidthPenalty = estimateBandwidthPenalty(rawJob, deviceProfile);
+  const bandwidthPenalty = nonNegative(
+    estimateBandwidthPenalty(job, device),
+    0
+  );
   survivalHealing.lastBandwidthPenalty = bandwidthPenalty;
 
-  // 6. Degradation Tier Awareness
-  const healthScore = deviceProfile.healthScore ?? 1.0;
-  const tier = classifyDegradationTier(healthScore);
-  survivalHealing.lastTier = tier;
-  survivalHealing.lastHealthScore = healthScore;
-
-  // 7. Stability Bonus
-  const stabilityBonus = deviceProfile.stabilityScore || 0.5;
-  survivalHealing.lastStabilityBonus = stabilityBonus;
-
-  // 8. Final Survival Score — Profitability + Evolution
+  // 6. Final Survival Score — Profitability + Evolution
   const profitPerSecond =
     estimatedPayout / Math.max(estimatedRuntimeSeconds, 1);
   survivalHealing.lastProfitPerSecond = profitPerSecond;
 
-  const finalScore =
+  const rawScore =
     profitPerSecond * stabilityBonus * evoBoost - bandwidthPenalty;
+  survivalHealing.lastRawScore = rawScore;
 
+  const finalScore = Number.isFinite(rawScore) ? rawScore : -Infinity;
   survivalHealing.lastScore = finalScore;
 
-  // 9. v11-Evo: Pattern + Signature Surface
-  const jobPattern = buildJobPattern(rawJob);
-  const devicePattern = buildDevicePattern(deviceProfile);
+  // 7. v11-Evo: Pattern + Signature Surface
+  const jobPattern = buildJobPattern(job);
+  const devicePattern = buildDevicePattern(device);
   survivalHealing.lastJobPattern = jobPattern;
   survivalHealing.lastDevicePattern = devicePattern;
 
@@ -211,55 +253,87 @@ export function scoreJobForDevice(rawJob, deviceProfile) {
     stabilityBonus
   });
 
+  survivalHealing.lastDecision =
+    finalScore > 0 ? "approved" : "rejected_unprofitable";
+  survivalHealing.lastApprovalReason =
+    finalScore > 0 ? "profitable_and_compatible" : null;
+  if (finalScore <= 0 && !survivalHealing.lastRejectionReason) {
+    survivalHealing.lastRejectionReason = "non_profitable_or_neutral";
+  }
+
   return finalScore;
 }
-
-
 // ---------------------------------------------------------------------------
-// COMPATIBILITY CHECKS — Worker Safety Rules (v11-Evo)
+// COMPATIBILITY CHECKS — Worker Safety Rules (v11-Evo A-B-A Upgraded)
 // ---------------------------------------------------------------------------
 function isJobCompatible(rawJob, deviceProfile) {
   if (!rawJob || !deviceProfile) return false;
 
-  if (rawJob.cpuRequired &&
-      rawJob.cpuRequired > (deviceProfile.cpuCores || 4)) {
-    return false;
-  }
+  const cpuReq = rawJob.cpuRequired || 0;
+  const memReq = rawJob.memoryRequired || 0;
+  const gpuReq = rawJob.minGpuScore || 0;
 
-  if (rawJob.memoryRequired &&
-      rawJob.memoryRequired > (deviceProfile.memoryMB || 4096)) {
-    return false;
-  }
+  const cpuAvail = deviceProfile.cpuCores || 4;
+  const memAvail = deviceProfile.memoryMB || 4096;
+  const gpuAvail = deviceProfile.gpuScore || 100;
 
-  if (rawJob.minGpuScore &&
-      deviceProfile.gpuScore &&
-      rawJob.minGpuScore > deviceProfile.gpuScore * 1.5) {
-    return false;
-  }
+  // CPU safety
+  if (cpuReq > cpuAvail) return false;
+
+  // Memory safety
+  if (memReq > memAvail) return false;
+
+  // GPU safety (v11-Evo: allow 1.5x tolerance)
+  if (gpuReq > gpuAvail * 1.5) return false;
 
   return true;
 }
 
 
 // ---------------------------------------------------------------------------
-// EVOLUTIONARY CAPABILITY BOOST — Organism Advantage (v11-Evo)
+// EVOLUTIONARY CAPABILITY BOOST — Organism Advantage (v11-Evo A-B-A)
 // ---------------------------------------------------------------------------
 function computeEvolutionaryBoost(deviceProfile) {
   const stability = deviceProfile.stabilityScore || 0.5;
   const bandwidth = deviceProfile.bandwidthMbps || 50;
   const memory = deviceProfile.memoryMB || 4096;
 
-  return (
+  // A-B-A surfaces
+  const band = (deviceProfile.band || "symbolic").toLowerCase();
+  const binaryField = deviceProfile.binaryField || null;
+  const waveField = deviceProfile.waveField || null;
+
+  const density = binaryField?.density || 0;
+  const amplitude = waveField?.amplitude || 0;
+
+  // Base deterministic boost
+  let boost =
     1 +
     stability * 0.4 +
     Math.min(bandwidth / 200, 0.3) +
-    Math.min(memory / 32000, 0.3)
-  );
+    Math.min(memory / 32000, 0.3);
+
+  // A-B-A binary advantage
+  if (band === "binary") {
+    boost += 0.05;
+  }
+
+  // A-B-A density advantage
+  boost += Math.min(density / 20000, 0.1);
+
+  // A-B-A wave amplitude advantage
+  boost += Math.min(amplitude / 5000, 0.1);
+
+  // Clamp for determinism
+  if (boost < 0.5) return 0.5;
+  if (boost > 2.5) return 2.5;
+
+  return boost;
 }
 
 
 // ---------------------------------------------------------------------------
-// RUNTIME ESTIMATION — Workload Difficulty (v11-Evo)
+// RUNTIME ESTIMATION — Workload Difficulty (v11-Evo A-B-A)
 // ---------------------------------------------------------------------------
 function estimateRuntimeSeconds(rawJob, deviceProfile, evoBoost) {
   const base = rawJob.estimatedSeconds || 600;
@@ -269,7 +343,10 @@ function estimateRuntimeSeconds(rawJob, deviceProfile, evoBoost) {
 
   const speedFactor = ourGpu / jobGpuBaseline;
 
-  return base / Math.max(speedFactor, 0.25);
+  // Deterministic clamp
+  const sf = Math.max(speedFactor, 0.25);
+
+  return base / sf;
 }
 
 
@@ -278,27 +355,32 @@ function estimateRuntimeSeconds(rawJob, deviceProfile, evoBoost) {
 // ---------------------------------------------------------------------------
 function estimatePayout(rawJob) {
   if (rawJob.payout) return rawJob.payout;
-  return 0.01;
+  return 0.01; // deterministic fallback
 }
 
 
 // ---------------------------------------------------------------------------
-// BANDWIDTH PENALTY — Hidden Cost Detection (v11-Evo)
+// BANDWIDTH PENALTY — Hidden Cost Detection (v11-Evo A-B-A)
 // ---------------------------------------------------------------------------
 function estimateBandwidthPenalty(rawJob, deviceProfile) {
-  if (!rawJob.bandwidthNeededMbps) return 0;
+  const needed = rawJob.bandwidthNeededMbps || 0;
+  const available = deviceProfile.bandwidthMbps || 1;
 
-  const ratio =
-    rawJob.bandwidthNeededMbps /
-    Math.max(deviceProfile.bandwidthMbps || 1, 1);
+  if (needed <= 0) return 0;
 
-  if (ratio > 1) return ratio * 0.01;
-  return ratio * 0.001;
+  const ratio = needed / Math.max(available, 1);
+
+  // A-B-A band-aware penalty
+  const band = (deviceProfile.band || "symbolic").toLowerCase();
+  const bandMultiplier = band === "binary" ? 0.8 : 1.0;
+
+  if (ratio > 1) return ratio * 0.01 * bandMultiplier;
+  return ratio * 0.001 * bandMultiplier;
 }
 
 
 // ---------------------------------------------------------------------------
-// PATTERN BUILDERS — Job / Device Pattern Surfaces (v11-Evo)
+// PATTERN BUILDERS — Job / Device Pattern Surfaces (v11-Evo A-B-A)
 // ---------------------------------------------------------------------------
 function buildJobPattern(rawJob) {
   if (!rawJob) return "JOB::NONE";
@@ -310,8 +392,14 @@ function buildJobPattern(rawJob) {
   const gpu = rawJob.minGpuScore || 0;
   const bw = rawJob.bandwidthNeededMbps || 0;
 
-  const base = `JOB::${id}::${market}::cpu:${cpu}::mem:${mem}::gpu:${gpu}::bw:${bw}`;
-  return base;
+  return (
+    `JOB::${id}` +
+    `::${market}` +
+    `::cpu:${cpu}` +
+    `::mem:${mem}` +
+    `::gpu:${gpu}` +
+    `::bw:${bw}`
+  );
 }
 
 function buildDevicePattern(deviceProfile) {
@@ -323,9 +411,17 @@ function buildDevicePattern(deviceProfile) {
   const bw = deviceProfile.bandwidthMbps || 0;
   const stab = deviceProfile.stabilityScore || 0.5;
   const health = deviceProfile.healthScore ?? 1.0;
+  const band = (deviceProfile.band || "symbolic").toLowerCase();
 
-  const base = `DEVICE::cpu:${cpu}::mem:${mem}::gpu:${gpu}::bw:${bw}::stab:${stab}::h:${health}`;
-  return base;
+  return (
+    `DEVICE::cpu:${cpu}` +
+    `::mem:${mem}` +
+    `::gpu:${gpu}` +
+    `::bw:${bw}` +
+    `::stab:${stab}` +
+    `::h:${health}` +
+    `::band:${band}`
+  );
 }
 
 

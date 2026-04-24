@@ -28,7 +28,7 @@
 // ============================================================================
 const DEFAULT_REPUTATION = 0.5;
 
-// In-memory endocrine hormone store
+// In-memory endocrine hormone store (now keyed by `${id}::${band}`)
 let reputation = new Map();
 
 
@@ -37,6 +37,7 @@ let reputation = new Map();
 // ============================================================================
 const endocrineHealing = {
   lastMarketplaceId: null,
+  lastBand: "symbolic",
   lastReputationBefore: null,
   lastReputationAfter: null,
   lastSignals: null,
@@ -47,7 +48,11 @@ const endocrineHealing = {
   lastHormoneSignature: null,
   lastSignalSignature: null,
   lastReputationSignature: null,
-  lastEndocrineCycleSignature: null
+  lastEndocrineCycleSignature: null,
+  lastBandSignature: null,
+
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
@@ -63,6 +68,15 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
+function makeReputationKey(id, band) {
+  return `${id}::${band}`;
+}
+
 
 // ============================================================================
 // Signature Builders — v11-Evo
@@ -75,8 +89,8 @@ function buildSignalSignature(signals) {
   return computeHash(`SIG::${JSON.stringify(signals)}`);
 }
 
-function buildReputationSignature(id, rep) {
-  return computeHash(`REP::${id}::${rep}`);
+function buildReputationSignature(id, rep, band) {
+  return computeHash(`REP::${id}::${band}::${rep}`);
 }
 
 function buildEndocrineCycleSignature(cycle) {
@@ -102,22 +116,28 @@ function savePulseEarnReputation() {
 
 
 // ============================================================================
-// Get current reputation — Hormone Level Lookup
+// Get current reputation — Hormone Level Lookup (now band-aware)
 // ============================================================================
-export function getPulseEarnReputation(id) {
-  return Number(reputation.get(id)) || DEFAULT_REPUTATION;
+export function getPulseEarnReputation(id, band = "symbolic") {
+  const normalizedBand = normalizeBand(band);
+  const key = makeReputationKey(id, normalizedBand);
+  return Number(reputation.get(key)) || DEFAULT_REPUTATION;
 }
 
 
 // ============================================================================
-// Update reputation — Endocrine Regulation Cycle (v11-Evo)
+// Update reputation — Endocrine Regulation Cycle (v11-Evo, dual-band)
 // ============================================================================
 export function updatePulseEarnReputation(id, signals) {
   endocrineHealing.cycleCount++;
   endocrineHealing.lastMarketplaceId = id;
   endocrineHealing.lastSignals = { ...signals };
 
-  const current = getPulseEarnReputation(id);
+  const band = normalizeBand(signals?.band);
+  endocrineHealing.lastBand = band;
+  endocrineHealing.lastBandSignature = computeHash(`BAND::${band}`);
+
+  const current = getPulseEarnReputation(id, band);
   endocrineHealing.lastReputationBefore = current;
 
   endocrineHealing.lastSignalSignature = buildSignalSignature(signals);
@@ -143,7 +163,8 @@ export function updatePulseEarnReputation(id, signals) {
   const updated = current * 0.7 + score * 0.3;
   const clamped = clamp(updated, 0, 1);
 
-  reputation.set(id, clamped);
+  const key = makeReputationKey(id, band);
+  reputation.set(key, clamped);
   endocrineHealing.lastReputationAfter = clamped;
 
   endocrineHealing.lastHormoneSignature = buildHormoneSignature(
@@ -153,12 +174,42 @@ export function updatePulseEarnReputation(id, signals) {
 
   endocrineHealing.lastReputationSignature = buildReputationSignature(
     id,
-    clamped
+    clamped,
+    band
   );
 
   endocrineHealing.lastEndocrineCycleSignature = buildEndocrineCycleSignature(
     endocrineHealing.cycleCount
   );
+
+  // Binary surface for endocrine reputation (structural only)
+  const surface = clamped * 1000 + endocrineHealing.cycleCount;
+  const binaryField = {
+    binaryReputationSignature: computeHash(
+      `BREP::${id}::${band}::${clamped}`
+    ),
+    binarySurfaceSignature: computeHash(`BSURF::${surface}`),
+    binarySurface: {
+      reputation: clamped,
+      cycle: endocrineHealing.cycleCount,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density: clamped,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+  endocrineHealing.lastBinaryField = binaryField;
+
+  // Wave field for endocrine reputation (wave-theory metadata)
+  const waveField = {
+    amplitude: clamped,
+    wavelength: endocrineHealing.cycleCount,
+    phase:
+      (Math.floor(clamped * 100) + endocrineHealing.cycleCount) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+  endocrineHealing.lastWaveField = waveField;
 
   savePulseEarnReputation();
 

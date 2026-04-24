@@ -1,12 +1,37 @@
 // ============================================================================
-//  PulseOSGovernor.js — Global Loop, Re-entry & Multi-Instance Governor (v3.2)
+//  PulseOSGovernor.v11.js
+//  Global Loop, Re-entry & Multi-Instance Governor (v11-Evo)
 //  - No imports
 //  - No routing
 //  - No sending
 //  - Pure guards + dynamic multi-instance slicing context
 //  - Optional EarnReflex hook (window.PulseEarnReflex)
 //  - Optional ReflexRouter hook (window.PulseEarnReflexRouter)
+//  - Dual-band aware (symbolic + binary pulses)
 // ============================================================================
+
+export const GOVERNOR_CONTEXT_V11 = {
+  organ: "PulseOSGovernor",
+  layer: "C-Layer",
+  role: "Global Loop & Re-entry Governor",
+  version: "11.0-Evo",
+  generation: "v11",
+  organism: "PulseOS",
+  evo: {
+    dualMode: true,
+    symbolicAware: true,
+    binaryAware: true,
+    driftProof: true,
+    deterministicNeuron: true,
+    unifiedAdvantageField: true,
+    multiInstanceReady: true,
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroRouting: true,
+    zeroMarketplace: true,
+    zeroTiming: true
+  }
+};
 
 const activeOrgans     = new Set();
 const activeModules    = new Set();
@@ -54,6 +79,18 @@ function getInstanceKey(organName, pulseOrImpulse) {
   return `${organName}::${pulseId}`;
 }
 
+function classifyBand(pulseOrImpulse) {
+  // Pure metadata: no behavior change, just tagging
+  const band = pulseOrImpulse?.band || pulseOrImpulse?.mode || null;
+  if (band === "binary" || band === "bit" || band === "BAND_BINARY") {
+    return "binary";
+  }
+  if (band === "symbolic" || band === "SYMBOLIC") {
+    return "symbolic";
+  }
+  return "dual";
+}
+
 // ---------------------------------------------------------------------------
 //  OPTIONAL: Emit EarnReflex + Route it if router is present
 // ---------------------------------------------------------------------------
@@ -64,21 +101,18 @@ async function maybeEmitAndRouteEarnReflex(event, pulseOrImpulse, instanceContex
     const reflex = window.PulseEarnReflex;
     if (!reflex || typeof reflex.fromGovernorEvent !== "function") return;
 
-    // Build the EarnReflex organism
     const { earnReflex } = await reflex.fromGovernorEvent(
       event,
       pulseOrImpulse,
       instanceContext
     );
 
-    // If router exists, hand it off to EarnSystem
     const router = window.PulseEarnReflexRouter;
     const earn   = window.Pulse?.Earn;
 
     if (router && typeof router.route === "function" && earn) {
       router.route(earnReflex, earn);
     }
-
   } catch {
     // fail-open: governor must never break
   }
@@ -88,10 +122,10 @@ async function maybeEmitAndRouteEarnReflex(event, pulseOrImpulse, instanceContex
 //  Organ-level guard
 // ---------------------------------------------------------------------------
 export async function withOrganGuard(organName, pulseOrImpulse, fn) {
-  const pulseId     = getPulseId(pulseOrImpulse);
-  const instanceKey = getInstanceKey(organName, pulseOrImpulse);
+  const pulseId       = getPulseId(pulseOrImpulse);
+  const instanceKey   = getInstanceKey(organName, pulseOrImpulse);
+  const band          = classifyBand(pulseOrImpulse);
 
-  // Multi-instance registry
   let state = instanceRegistry.get(instanceKey);
   if (!state) {
     state = { count: 0 };
@@ -102,6 +136,8 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
   const instanceIndex   = state.count - 1;
   const totalInstances  = state.count;
   const instanceContext = {
+    ...GOVERNOR_CONTEXT_V11,
+    band,
     organ: organName,
     pulseId,
     instanceKey,
@@ -114,6 +150,8 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
       ok: false,
       blocked: true,
       reason,
+      ...GOVERNOR_CONTEXT_V11,
+      band,
       organ: organName,
       pulseId,
       instanceContext,
@@ -170,6 +208,8 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
     return {
       ok: true,
       blocked: false,
+      ...GOVERNOR_CONTEXT_V11,
+      band,
       organ: organName,
       pulseId,
       instanceContext,
@@ -179,6 +219,8 @@ export async function withOrganGuard(organName, pulseOrImpulse, fn) {
     return {
       ok: false,
       blocked: false,
+      ...GOVERNOR_CONTEXT_V11,
+      band,
       organ: organName,
       pulseId,
       instanceContext,
@@ -198,6 +240,7 @@ export async function withModuleInitGuard(moduleName, fn) {
       ok: false,
       blocked: true,
       reason: "module_init_reentry",
+      ...GOVERNOR_CONTEXT_V11,
       module: moduleName
     };
   }
@@ -208,6 +251,7 @@ export async function withModuleInitGuard(moduleName, fn) {
     return {
       ok: true,
       blocked: false,
+      ...GOVERNOR_CONTEXT_V11,
       module: moduleName,
       result
     };
@@ -215,6 +259,7 @@ export async function withModuleInitGuard(moduleName, fn) {
     return {
       ok: false,
       blocked: false,
+      ...GOVERNOR_CONTEXT_V11,
       module: moduleName,
       error
     };

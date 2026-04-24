@@ -1,27 +1,25 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktAuctioneer-v11-Evo.js
-// LAYER: THE AUCTIONEER (v11-Evo)
-// (Bid‑Floor Interpreter + Volatility Handler + Market Chaos Normalizer)
+// LAYER: MARKETPLACE AUCTIONEER (v11‑Evo A‑B‑A)
+// Vast.ai Deterministic Adapter
 // ============================================================================
 //
-// ROLE (v11-Evo):
-//   THE AUCTIONEER — deterministic Vast.ai receptor phenotype.
-//   • Provides a stable, drift‑proof representation of Vast.ai offers.
-//   • Normalizes inconsistent metadata into Pulse‑Earn job schema.
-//   • Supplies deterministic ping(), fetchJobs(), submitResult().
-//   • Emits v11‑Evo signatures for all receptor actions.
+// ROLE (v11‑Evo A‑B‑A):
+//   • Deterministic Vast.ai → Pulse‑Earn adapter.
+//   • Pure receptor phenotype: ping(), fetchJobs(), normalizeJob(), submitResult().
+//   • Emits A‑B‑A bandSignature + binaryField + waveField surfaces.
+//   • Emits deterministic volatility + healing metadata.
+//   • Zero async, zero randomness, zero timestamps.
 //
-// CONTRACT (v11-Evo):
-//   • PURE RECEPTOR — no network, no async, no timestamps.
-//   • READ‑ONLY except for healing metadata.
-//   • NO eval(), NO Function(), NO dynamic imports.
-//   • NO executing user code.
-//   • Deterministic normalization only.
+// CONTRACT:
+//   • PURE RECEPTOR — deterministic, drift‑proof.
+//   • NO network, NO fetch, NO async, NO randomness.
+//   • NEVER mutate external objects.
 // ============================================================================
 
 
 // ============================================================================
-// Healing Metadata — deterministic receptor log (v11-Evo)
+// Healing Metadata — deterministic receptor log (v11-Evo A‑B‑A)
 // ============================================================================
 const healingState = {
   lastPingMs: null,
@@ -51,7 +49,13 @@ const healingState = {
   lastFetchSignature: null,
   lastNormalizationSignature: null,
   lastSubmitSignature: null,
-  lastAuctioneerCycleSignature: null
+  lastAuctioneerCycleSignature: null,
+
+  // A‑B‑A surfaces
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
@@ -65,6 +69,11 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -91,6 +100,10 @@ function buildAuctioneerCycleSignature(cycle) {
   return computeHash(`AUCTIONEER_CYCLE::${cycle}`);
 }
 
+function buildBandSignature(band) {
+  return computeHash(`AUCTIONEER_BAND::${normalizeBand(band)}`);
+}
+
 
 // ============================================================================
 // SAFE GET — deterministic path reader
@@ -107,10 +120,58 @@ function safeGet(obj, path, fallback = null) {
 
 
 // ============================================================================
+// A‑B‑A Binary + Wave Surfaces (v11‑Evo)
+// ============================================================================
+function buildBinaryField() {
+  const patternLen = 8; // deterministic constant
+  const density =
+    patternLen +
+    healingState.lastFetchCount +
+    (healingState.lastPingMs || 0);
+
+  const surface = density + patternLen;
+
+  const field = {
+    binaryPhenotypeSignature: computeHash(`BAUCTIONEER::${surface}`),
+    binarySurfaceSignature: computeHash(`BAUCTIONEER_SURF::${surface}`),
+    binarySurface: {
+      patternLen,
+      density,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+
+  healingState.lastBinaryField = field;
+  return field;
+}
+
+function buildWaveField(band) {
+  const amplitude = (healingState.lastFetchCount || 1) * 10;
+  const wavelength = (healingState.lastPingMs || 10) + 1;
+  const phase = amplitude % 16;
+
+  const field = {
+    amplitude,
+    wavelength,
+    phase,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+
+  healingState.lastWaveField = field;
+  return field;
+}
+
+
+// ============================================================================
 // DETERMINISTIC VAST.AI DNA — v11-Evo
 // ============================================================================
 const VAST_RECEPTOR_DNA = {
   pingLatency: 42,
+
+  band: "symbolic",
 
   offers: [
     {
@@ -144,7 +205,7 @@ let auctioneerCycle = 0;
 
 
 // ============================================================================
-// VOLATILITY — deterministic (no real variance)
+// VOLATILITY — deterministic
 // ============================================================================
 function updateVolatility(jobs) {
   const count = jobs.length;
@@ -164,7 +225,7 @@ function updateVolatility(jobs) {
 
 
 // ============================================================================
-// AUCTIONEER — Vast.ai Marketplace Adapter (v11-Evo)
+// AUCTIONEER — Vast.ai Marketplace Adapter (v11-Evo A‑B‑A)
 // ============================================================================
 export const PulseEarnMktAuctioneer = {
   id: "vast",
@@ -173,32 +234,45 @@ export const PulseEarnMktAuctioneer = {
   lineage: "Auctioneer-Vast-v11-Evo",
 
   // -------------------------------------------------------------------------
-  // PING — deterministic latency
+  // PING — deterministic latency + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   ping() {
     auctioneerCycle++;
     healingState.cycleCount++;
 
     const latency = VAST_RECEPTOR_DNA.pingLatency;
+    const band = normalizeBand(VAST_RECEPTOR_DNA.band);
 
+    healingState.lastBand = band;
     healingState.lastPingMs = latency;
     healingState.lastPingError = null;
+
     healingState.lastPingSignature = buildPingSignature(latency);
+    healingState.lastBandSignature = buildBandSignature(band);
     healingState.lastAuctioneerCycleSignature =
       buildAuctioneerCycleSignature(auctioneerCycle);
 
+    const binaryField = buildBinaryField();
+    const waveField = buildWaveField(band);
+
     return {
       latency,
-      signature: healingState.lastPingSignature
+      signature: healingState.lastPingSignature,
+      bandSignature: healingState.lastBandSignature,
+      binaryField,
+      waveField
     };
   },
 
   // -------------------------------------------------------------------------
-  // FETCH JOBS — deterministic offers
+  // FETCH JOBS — deterministic offers + A‑B‑A surfaces
   // -------------------------------------------------------------------------
   fetchJobs() {
     auctioneerCycle++;
     healingState.cycleCount++;
+
+    const band = normalizeBand(VAST_RECEPTOR_DNA.band);
+    healingState.lastBand = band;
 
     try {
       const offers = VAST_RECEPTOR_DNA.offers || [];
@@ -212,16 +286,29 @@ export const PulseEarnMktAuctioneer = {
       healingState.lastFetchError = null;
       healingState.lastFetchCount = jobs.length;
       healingState.lastFetchSignature = buildFetchSignature(jobs.length);
+      healingState.lastBandSignature = buildBandSignature(band);
       healingState.lastAuctioneerCycleSignature =
         buildAuctioneerCycleSignature(auctioneerCycle);
 
-      return jobs;
+      const binaryField = buildBinaryField();
+      const waveField = buildWaveField(band);
+
+      return {
+        jobs,
+        signature: healingState.lastFetchSignature,
+        bandSignature: healingState.lastBandSignature,
+        binaryField,
+        waveField
+      };
 
     } catch (err) {
       healingState.lastFetchError = err?.message || String(err);
       healingState.lastFetchCount = 0;
       healingState.lastFetchSignature = buildFetchSignature(0);
-      return [];
+      return {
+        jobs: [],
+        signature: healingState.lastFetchSignature
+      };
     }
   },
 
@@ -233,12 +320,17 @@ export const PulseEarnMktAuctioneer = {
     healingState.cycleCount++;
 
     const jobId = job?.id ?? null;
+    const band = normalizeBand(VAST_RECEPTOR_DNA.band);
 
     healingState.lastSubmitJobId = jobId;
     healingState.lastSubmitError = null;
     healingState.lastSubmitSignature = buildSubmitSignature(jobId);
+    healingState.lastBandSignature = buildBandSignature(band);
     healingState.lastAuctioneerCycleSignature =
       buildAuctioneerCycleSignature(auctioneerCycle);
+
+    const binaryField = buildBinaryField();
+    const waveField = buildWaveField(band);
 
     return {
       ok: true,
@@ -246,6 +338,9 @@ export const PulseEarnMktAuctioneer = {
       jobId,
       result,
       signature: healingState.lastSubmitSignature,
+      bandSignature: healingState.lastBandSignature,
+      binaryField,
+      waveField,
       note: "Vast.ai does not accept compute results (v11-Evo deterministic)."
     };
   },
@@ -326,7 +421,7 @@ export const PulseEarnMktAuctioneer = {
 
 
 // ============================================================================
-// HEALING STATE EXPORT — v11-Evo
+// HEALING STATE EXPORT — v11-Evo A‑B‑A
 // ============================================================================
 export function getPulseEarnMktAuctioneerHealingState() {
   return { ...healingState };

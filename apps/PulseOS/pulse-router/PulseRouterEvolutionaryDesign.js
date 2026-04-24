@@ -1,44 +1,31 @@
 // ============================================================================
-//  PULSE ROUTER EVOLUTIONARY DESIGN v10.4‑Evo‑A2 — ROUTER DESIGN CORTEX
+//  PULSE ROUTER EVOLUTIONARY DESIGN v11‑Evo‑DualStack — ROUTER DESIGN CORTEX
 //  Long‑Term Route Architecture Memory • Deterministic • Drift‑Proof
-//  Page/Lineage/Pattern‑Ancestry Aware
+//  Symbolic + Binary Design Metadata • Page/Lineage/Pattern/Binary‑Ancestry Aware
 // ============================================================================
 //
-// IDENTITY — THE DESIGN CORTEX (v10.4‑Evo‑A2):
-//  -------------------------------------------
-//  • Stores long‑term route design blueprints.
-//  • Preserves structural intent for each route.
-//  • Maintains design lineage + evolution history.
-//  • Provides deterministic design lookup + self‑repair.
-//  • Ensures router never drifts from founder‑approved design.
-//  • PulseSend‑10.4‑ready: design metadata can be routed.
-//  • Earn‑v2‑ready.
-//  • Loop‑Theory‑Aware (routingCompletion, loopfieldPropulsion,
-//    pulseComputeContinuity, errorRouteAround)
-//  • Page/lineage/pattern ancestry are internal only, no external mutation
+//  ROLE:
+//    • Stores long‑term route design blueprints.
+//    • Symbolic + Binary dual‑stack design memory.
+//    • Preserves structural intent + evolution lineage.
+//    • Deterministic design lookup + self‑repair.
+//    • Ensures router never drifts from founder‑approved design.
+//    • Loop‑Theory‑Aware.
+//    • Pure memory organ — NO routing, NO compute, NO mutation outside instance.
 //
-// SAFETY CONTRACT (v10.4‑Evo‑A2):
-//  -------------------------------
-//  • No randomness
-//  • No timestamps
-//  • No DOM
-//  • No network or filesystem access
-//  • No async
-//  • Fail‑open: malformed designs → safe defaults
-//  • Deterministic: same design → same blueprint
-//  • Self‑repair‑ready: entries include OS metadata
 // ============================================================================
 
+
 // ------------------------------------------------------------
-// OS‑v10.4 CONTEXT METADATA — Router Design Identity
+// v11‑Evo CONTEXT METADATA — Router Design Identity
 // ------------------------------------------------------------
 const ROUTER_DESIGN_CONTEXT = {
   layer: "PulseRouterEvolutionaryDesign",
   role: "ROUTER_DESIGN_CORTEX",
   purpose: "Long‑term architectural memory for route design blueprints",
-  context: "Stores route design intent, lineage, constraints, and evolution",
-  target: "full-router",
-  version: 10.4,
+  context: "Stores route design intent, lineage, constraints, evolution, binary metadata",
+  target: "dual-stack-router",
+  version: 11.0,
   selfRepairable: true,
 
   evo: {
@@ -47,21 +34,24 @@ const ROUTER_DESIGN_CONTEXT = {
     driftProof: true,
     multiInstanceReady: true,
     unifiedAdvantageField: true,
-    pulseSend10Ready: true,
+    pulseSend11Ready: true,
 
-    routingContract: "PulseSend-v10.4",
-    routerOrganContract: "PulseRouter-v10.4",
-    earnCompatibility: "Earn-v2"
+    routingContract: "PulseSend-v11",
+    routerOrganContract: "PulseRouter-v11",
+    earnCompatibility: "Earn-v3",
+
+    // ⭐ NEW: binary-aware design cortex
+    binaryAware: true
   },
 
-  // ⭐ LOOP THEORY DESIGN INVARIANTS ⭐
   loopTheory: {
-    routingCompletion: true,          // Route intends full completion
-    allowLoopfieldPropulsion: true,   // Design allows LoopField acceleration
-    pulseComputeContinuity: true,     // Pulse computes during routing
-    errorRouteAround: true            // Design supports route-around behavior
+    routingCompletion: true,
+    allowLoopfieldPropulsion: true,
+    pulseComputeContinuity: true,
+    errorRouteAround: true
   }
 };
+
 
 // ------------------------------------------------------------
 // Utility: stable JSON stringify
@@ -80,6 +70,7 @@ function stableStringify(value) {
   return "{" + parts.join(",") + "}";
 }
 
+
 // ------------------------------------------------------------
 // Utility: deterministic hash
 // ------------------------------------------------------------
@@ -93,8 +84,9 @@ function simpleHash(str) {
   return (hash >>> 0).toString(16);
 }
 
+
 // ------------------------------------------------------------
-// Helpers: pattern / lineage / page ancestry
+// Symbolic ancestry helpers
 // ------------------------------------------------------------
 function buildPatternAncestry(pattern) {
   if (!pattern || typeof pattern !== "string") return [];
@@ -111,18 +103,46 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
   const safeLineage = Array.isArray(lineage) ? lineage : [];
   const safePageId = pageId || "NO_PAGE";
 
-  const patternAncestry = buildPatternAncestry(safePattern);
-  const lineageSig = buildLineageSignature(safeLineage);
-
   const shape = {
     pattern: safePattern,
-    patternAncestry,
-    lineageSignature: lineageSig,
+    patternAncestry: buildPatternAncestry(safePattern),
+    lineageSignature: buildLineageSignature(safeLineage),
     pageId: safePageId
   };
 
   return simpleHash(stableStringify(shape));
 }
+
+
+// ------------------------------------------------------------
+// Binary ancestry helpers (optional)
+// ------------------------------------------------------------
+function extractBinarySurface(payload = {}) {
+  const binaryPattern  = payload.binaryPattern || null;
+  const binaryMode     = payload.binaryMode || null;
+  const binaryPayload  = payload.binaryPayload || null;
+  const binaryHints    = payload.binaryHints || null;
+  const binaryStrength = typeof payload.binaryStrength === "number"
+    ? payload.binaryStrength
+    : null;
+
+  const hasBinary =
+    !!binaryPattern ||
+    !!binaryMode ||
+    !!binaryPayload ||
+    !!binaryHints ||
+    binaryStrength !== null;
+
+  return {
+    hasBinary,
+    binaryPattern,
+    binaryMode,
+    binaryPayload,
+    binaryHints,
+    binaryStrength
+  };
+}
+
 
 // ------------------------------------------------------------
 // Design hash — Architectural Fingerprint
@@ -131,6 +151,7 @@ function computeDesignHash(design) {
   const serialized = stableStringify(design || {});
   return simpleHash(serialized);
 }
+
 
 // ------------------------------------------------------------
 // Design scoring — Structural Fitness Score
@@ -151,8 +172,9 @@ function scoreDesign(designStats = {}) {
   return s * 0.5 + c * 0.3 + l * 0.2;
 }
 
+
 // ------------------------------------------------------------
-// Memory entry model — Architectural Design Record
+// Memory entry model — Architectural Design Record (DualStack)
 // ------------------------------------------------------------
 class PulseRouterDesignStore {
   constructor() {
@@ -164,7 +186,7 @@ class PulseRouterDesignStore {
     this.entries.clear();
   }
 
-  recordDesign({ routeId, design, designStats, pattern, lineage, pageId }) {
+  recordDesign({ routeId, design, designStats, pattern, lineage, pageId, payload }) {
     const designHash = computeDesignHash(design);
     const score = scoreDesign(designStats);
 
@@ -182,7 +204,8 @@ class PulseRouterDesignStore {
       pageId: safePageId
     });
 
-    // ⭐ LOOP THEORY INVARIANTS INCLUDED IN DESIGN RECORD ⭐
+    const binary = extractBinarySurface(payload || {});
+
     const loopTheory = {
       routingCompletion: true,
       allowLoopfieldPropulsion: true,
@@ -196,12 +219,18 @@ class PulseRouterDesignStore {
       design: design || {},
       bestStats: designStats || {},
       bestScore: score,
+
+      // symbolic ancestry
       pattern: safePattern,
       patternAncestry,
       lineage: safeLineage,
       lineageSignature,
       pageId: safePageId,
       pageAncestrySignature,
+
+      // ⭐ NEW: binary ancestry
+      binary,
+
       loopTheory,
       meta: { ...ROUTER_DESIGN_CONTEXT }
     };
@@ -215,17 +244,25 @@ class PulseRouterDesignStore {
         design: design || existing.design,
         bestStats: designStats || existing.bestStats,
         bestScore: score > existing.bestScore ? score : existing.bestScore,
+
         pattern: safePattern || existing.pattern,
         patternAncestry: patternAncestry.length
           ? patternAncestry
           : existing.patternAncestry,
+
         lineage: safeLineage.length ? safeLineage : existing.lineage,
         lineageSignature: lineageSignature || existing.lineageSignature,
+
         pageId: safePageId || existing.pageId,
         pageAncestrySignature:
           pageAncestrySignature || existing.pageAncestrySignature,
-        loopTheory // always overwrite with latest invariants
+
+        // ⭐ always update binary surface
+        binary,
+
+        loopTheory
       };
+
       this.entries.set(routeId, merged);
     }
 
@@ -244,12 +281,18 @@ class PulseRouterDesignStore {
         designHash: entry.designHash,
         bestScore: entry.bestScore,
         bestStats: entry.bestStats,
+
+        // symbolic ancestry
         pattern: entry.pattern,
         patternAncestry: entry.patternAncestry.slice(),
         lineage: entry.lineage.slice(),
         lineageSignature: entry.lineageSignature,
         pageId: entry.pageId,
         pageAncestrySignature: entry.pageAncestrySignature,
+
+        // ⭐ binary ancestry
+        binary: { ...entry.binary },
+
         loopTheory: { ...entry.loopTheory }
       };
     }
@@ -307,6 +350,7 @@ class PulseRouterDesignStore {
         bestStats: entry.bestStats || {},
         bestScore:
           typeof entry.bestScore === "number" ? entry.bestScore : 0,
+
         pattern: safePattern,
         patternAncestry,
         lineage: safeLineage,
@@ -314,7 +358,9 @@ class PulseRouterDesignStore {
         pageId: safePageId,
         pageAncestrySignature,
 
-        // ⭐ ALWAYS RESTORE LOOP THEORY INVARIANTS ⭐
+        // ⭐ restore binary surface
+        binary: entry.binary || extractBinarySurface({}),
+
         loopTheory: {
           routingCompletion: true,
           allowLoopfieldPropulsion: true,
@@ -329,6 +375,7 @@ class PulseRouterDesignStore {
     });
   }
 }
+
 
 // ------------------------------------------------------------
 // Public API wrapper — Design Cortex Surface
@@ -367,6 +414,7 @@ class PulseRouterEvolutionaryDesign {
     this.store.clear();
   }
 }
+
 
 // ------------------------------------------------------------
 // EXPORTS

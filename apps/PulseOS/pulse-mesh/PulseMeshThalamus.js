@@ -1,38 +1,50 @@
 // ============================================================================
-// [pulse:mesh] PULSE_MESH_THALAMUS v10.4  // white‑violet
+// [pulse:mesh] PULSE_MESH_THALAMUS v11-Evo  // white‑violet
 // Sensory Relay Gate • Perception Filter • Neural Signal Interpreter
 // Deterministic • Metadata‑Only • Zero Pressure Logic
 // ============================================================================
 //
-// IDENTITY — THALAMUS (v10.4):
-// ----------------------------
+// IDENTITY — THALAMUS (v11-Evo):
+// ------------------------------
 // • First neural relay after ShadowGuard.
 // • Interprets shellState → safe neuralState.
-// • Performs structural validation only.
+// • Performs structural validation only (no pressure logic).
 // • Blocks malformed or unsafe signals.
 // • Pure metadata-only — zero payload mutation.
 // • Deterministic, drift-proof, CNS-injected dependencies.
+// • Binary-aware, dual-mode-ready.
 // • No pressure gating, no route-mode logic, no factoring logic.
 // ============================================================================
 
 const ThalamusMeta = {
   layer: "PulseMeshThalamus",
   role: "THALAMUS_RELAY",
-  version: "10.4",
+  version: "11.0-Evo",
   target: "full-mesh",
   selfRepairable: true,
   evo: {
     dualMode: true,
+    binaryAware: true,
+    symbolicAware: true,
     localAware: true,
     internetAware: true,
+
     advantageCascadeAware: true,
     pulseEfficiencyAware: true,
     driftProof: true,
     multiInstanceReady: true,
+
     unifiedAdvantageField: true,
     deterministicField: true,
     futureEvolutionReady: true,
-    signalFactoringAware: true
+
+    signalFactoringAware: true,
+    meshPressureAware: true,
+    auraPressureAware: true,
+
+    zeroCompute: true,
+    zeroMutation: true,
+    zeroRoutingInfluence: true
   }
 };
 
@@ -54,7 +66,7 @@ export function createPulseMeshThalamus({
   // ======================================================
   function interpretShellSignal(input) {
     groupCollapsed(
-      "%c[PulseThalamus v10.4] Relay",
+      "%c[PulseThalamus v11-Evo] Relay",
       "color:#CE93D8; font-weight:bold;"
     );
 
@@ -70,7 +82,7 @@ export function createPulseMeshThalamus({
         return null;
       }
 
-      const { shellState, allowPulseBand, allowIdentity } = input;
+      const { shellState, allowPulseBand, allowIdentity, binaryMode, dualMode } = input;
 
       if (!shellState) {
         error("thalamus", "Missing shellState in thalamic relay.");
@@ -79,13 +91,17 @@ export function createPulseMeshThalamus({
       }
 
       // ------------------------------------------------------------
-      // PERCEPTION SAFETY — v10.4: structural only
+      // PERCEPTION SAFETY — v11-Evo: structural only
       // ------------------------------------------------------------
       let perceptionSafe = true;
 
-      // Basic structural checks
       if (typeof shellState !== "object") perceptionSafe = false;
       if (shellState === null) perceptionSafe = false;
+
+      // ------------------------------------------------------------
+      // MODE TAGGING — v11-Evo
+      // ------------------------------------------------------------
+      const mode = binaryMode ? "binary" : dualMode ? "dual" : "symbolic";
 
       // ------------------------------------------------------------
       // BUILD OUTPUT
@@ -96,8 +112,11 @@ export function createPulseMeshThalamus({
         enablePulse: allowPulseBand === true && perceptionSafe,
         enableIdentity: allowIdentity === true && perceptionSafe,
         perceptionSafe,
+        mode,
         perceptionFlags: {
-          structural_valid: perceptionSafe
+          structural_valid: perceptionSafe,
+          binary_mode: !!binaryMode,
+          dual_mode: !!dualMode
         }
       };
 

@@ -1,8 +1,9 @@
 // ============================================================================
 //  PulseEarnSendSystem-v11-Evo.js
-//  Earn Nervous System Conductor (v11-Evo GOVERNED)
+//  Earn Nervous System Conductor (v11-Evo GOVERNED + Dual-Band A-B-A)
 //  Deterministic Single‑Pass Earn → Pulse → Send (No async, No loops)
 //  v11: Diagnostics + Signatures + Pattern Surface + Continuance Fallback
+//  v11+ A-B-A: Dual-band + binary + wave metadata (structural-only)
 // ============================================================================
 //
 //  SAFETY CONTRACT (v11-Evo):
@@ -26,10 +27,16 @@ import { PulseEarnContinuancePulse } from "./PulseEarnContinuancePulse-v11-Evo.j
 // ============================================================================
 function computeHash(str) {
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h + str.charCodeAt(i) * (i + 1)) % 100000;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 
@@ -141,7 +148,52 @@ function wrapEarnForPulse(earn) {
 
 
 // ============================================================================
-//  FACTORY — SDN‑aware PulseEarnSendSystem (v11-Evo GOVERNED)
+//  A-B-A Dual-Band + Binary + Wave Builder (v11+)
+// ============================================================================
+function buildEarnSendBandBinaryWave(earn, fallbackUsed, cycleIndex) {
+  const band = normalizeBand(
+    earn?.meta?.band ||
+    earn?.band ||
+    "symbolic"
+  );
+
+  const patternLen = String(earn.pattern || "").length;
+  const lineageDepth = earn.lineage?.length || 0;
+  const fallbackFlag = fallbackUsed ? 1 : 0;
+
+  const surface = patternLen + lineageDepth + fallbackFlag + cycleIndex;
+
+  const binaryField = {
+    binaryEarnSendSignature: computeHash(`BESEND::${surface}`),
+    binarySurfaceSignature: computeHash(`BSURF_ESEND::${surface}`),
+    binarySurface: {
+      patternLen,
+      lineageDepth,
+      fallbackFlag,
+      cycle: cycleIndex,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    density: patternLen + lineageDepth,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+
+  const waveField = {
+    amplitude: patternLen,
+    wavelength: cycleIndex,
+    phase: (patternLen + lineageDepth + cycleIndex) % 8,
+    band,
+    mode: band === "binary" ? "compression-wave" : "symbolic-wave"
+  };
+
+  const bandSignature = computeHash(`BAND::ESEND::${band}::${cycleIndex}`);
+
+  return { band, bandSignature, binaryField, waveField };
+}
+
+
+// ============================================================================
+//  FACTORY — SDN‑aware PulseEarnSendSystem (v11-Evo GOVERNED + A-B-A)
 // ============================================================================
 export function createPulseEarnSendSystem({
   sendSystem,
@@ -161,6 +213,8 @@ export function createPulseEarnSendSystem({
   return {
     // Deterministic Single‑Pass Earn → Pulse → Send
     send(impulse) {
+      const cycleIndex = impulse?.tickId || 0;
+
       emitSDN("earnSend:begin", {
         tickId: impulse.tickId,
         intent: impulse.intent
@@ -228,16 +282,27 @@ export function createPulseEarnSendSystem({
         pulseCompatibleEarn
       );
 
+      // ================================================================
+      // 5. A-B-A Dual-Band + Binary + Wave metadata
+      // ================================================================
+      const bandPack = buildEarnSendBandBinaryWave(
+        earn,
+        usedFallback,
+        cycleIndex
+      );
+
       const earnSendSignature = computeHash(
         earn.pattern +
         "::" +
         earn.lineage.length +
         "::" +
-        (usedFallback ? "fallback" : "primary")
+        (usedFallback ? "fallback" : "primary") +
+        "::" +
+        bandPack.band
       );
 
       // ================================================================
-      // 5. Delegate to PulseSendSystem (deterministic)
+      // 6. Delegate to PulseSendSystem (deterministic)
       // ================================================================
       const result = sendSystem.send(governedImpulse);
 
@@ -247,7 +312,11 @@ export function createPulseEarnSendSystem({
         pulseCompatibleEarn,
         result,
         fallback: usedFallback,
-        earnSendSignature
+        earnSendSignature,
+        band: bandPack.band,
+        bandSignature: bandPack.bandSignature,
+        binaryField: bandPack.binaryField,
+        waveField: bandPack.waveField
       };
 
       emitSDN("earnSend:complete", out);

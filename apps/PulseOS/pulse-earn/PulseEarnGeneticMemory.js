@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnGeneticMemory-v11-Evo.js
-// LAYER: THE GENETIC MEMORY (v11-Evo)
+// LAYER: THE GENETIC MEMORY (v11-Evo + Dual-Band + Binary + Wave)
 // (Keeper of Packets + Guardian of Determinism + DNA Repair Substrate)
 // ============================================================================
 //
@@ -8,9 +8,9 @@
 //   THE GENETIC MEMORY — Pulse‑Earn’s deterministic packet genome.
 //   • Stores packet data in a safe, in‑memory gene archive.
 //   • Generates deterministic packet values (genetic identity).
-//   • Ensures reproducibility for healing + compute (DNA stability).
 //   • Maintains packet‑level healing metadata (genetic health).
 //   • Emits v11‑Evo genetic signatures.
+//   • NOW dual-band, binary-aware, wave-aware.
 //
 // CONTRACT (v11-Evo):
 //   • PURE PACKET ENGINE — no AI layers, no translation, no memory model.
@@ -33,7 +33,13 @@ const geneticHealing = {
 
   lastGeneSignature: null,
   lastWriteSignature: null,
-  lastSynthesisSignature: null
+  lastSynthesisSignature: null,
+
+  // v11+ Dual-Band + Binary + Wave
+  lastBand: "symbolic",
+  lastBandSignature: null,
+  lastBinaryField: null,
+  lastWaveField: null
 };
 
 
@@ -58,6 +64,11 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
+}
+
 
 // ============================================================================
 // Signature Builders — v11-Evo
@@ -76,15 +87,19 @@ function buildSynthesisSignature(key, value) {
 
 
 // ============================================================================
-// 1. readPulseEarnGeneExists — Genome Lookup (deterministic)
+// 1. readPulseEarnGeneExists — Genome Lookup (deterministic + dual-band)
 // ============================================================================
-export function readPulseEarnGeneExists(fileId, packetIndex) {
+export function readPulseEarnGeneExists(fileId, packetIndex, band = "symbolic") {
   geneCycle++;
   geneticHealing.cycleCount++;
   geneticHealing.lastCycleIndex = geneCycle;
 
+  const normalizedBand = normalizeBand(band);
+  geneticHealing.lastBand = normalizedBand;
+  geneticHealing.lastBandSignature = computeHash(`BAND::${normalizedBand}`);
+
   try {
-    const key = `${fileId}:${packetIndex}`;
+    const key = `${fileId}:${packetIndex}:${normalizedBand}`;
     geneticHealing.lastKey = key;
 
     geneticHealing.lastGeneSignature = buildGeneSignature(key, geneCycle);
@@ -99,15 +114,19 @@ export function readPulseEarnGeneExists(fileId, packetIndex) {
 
 
 // ============================================================================
-// 2. writePulseEarnGene — DNA Write (Gene Expression)
+// 2. writePulseEarnGene — DNA Write (Gene Expression + dual-band)
 // ============================================================================
-export function writePulseEarnGene(fileId, packetIndex, data) {
+export function writePulseEarnGene(fileId, packetIndex, data, band = "symbolic") {
   geneCycle++;
   geneticHealing.cycleCount++;
   geneticHealing.lastCycleIndex = geneCycle;
 
+  const normalizedBand = normalizeBand(band);
+  geneticHealing.lastBand = normalizedBand;
+  geneticHealing.lastBandSignature = computeHash(`BAND::${normalizedBand}`);
+
   try {
-    const key = `${fileId}:${packetIndex}`;
+    const key = `${fileId}:${packetIndex}:${normalizedBand}`;
     geneticHealing.lastKey = key;
 
     genome.set(key, structuredClone(data));
@@ -121,6 +140,36 @@ export function writePulseEarnGene(fileId, packetIndex, data) {
     geneticHealing.lastWriteSignature = buildWriteSignature(key, data);
     geneticHealing.lastError = null;
 
+    // -------------------------------
+    // BINARY FIELD (structural only)
+    // -------------------------------
+    const surface = JSON.stringify(data).length + geneCycle;
+    const binaryField = {
+      binaryGeneSignature: computeHash(`BGENE::${key}`),
+      binarySurfaceSignature: computeHash(`BSURF::${surface}`),
+      binarySurface: {
+        size: JSON.stringify(data).length,
+        cycle: geneCycle,
+        surface
+      },
+      parity: surface % 2 === 0 ? 0 : 1,
+      density: JSON.stringify(data).length,
+      shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+    };
+    geneticHealing.lastBinaryField = binaryField;
+
+    // -------------------------------
+    // WAVE FIELD (structural only)
+    // -------------------------------
+    const waveField = {
+      amplitude: JSON.stringify(data).length,
+      wavelength: geneCycle,
+      phase: (JSON.stringify(data).length + geneCycle) % 8,
+      band: normalizedBand,
+      mode: normalizedBand === "binary" ? "compression-wave" : "symbolic-wave"
+    };
+    geneticHealing.lastWaveField = waveField;
+
     return true;
 
   } catch (err) {
@@ -131,15 +180,19 @@ export function writePulseEarnGene(fileId, packetIndex, data) {
 
 
 // ============================================================================
-// 3. synthesizePulseEarnGene — Deterministic DNA Synthesis (v11-Evo)
+// 3. synthesizePulseEarnGene — Deterministic DNA Synthesis (v11-Evo + dual-band)
 // ============================================================================
-export function synthesizePulseEarnGene(fileId, packetIndex) {
+export function synthesizePulseEarnGene(fileId, packetIndex, band = "symbolic") {
   geneCycle++;
   geneticHealing.cycleCount++;
   geneticHealing.lastCycleIndex = geneCycle;
 
+  const normalizedBand = normalizeBand(band);
+  geneticHealing.lastBand = normalizedBand;
+  geneticHealing.lastBandSignature = computeHash(`BAND::${normalizedBand}`);
+
   try {
-    const key = `${fileId}:${packetIndex}`;
+    const key = `${fileId}:${packetIndex}:${normalizedBand}`;
     geneticHealing.lastKey = key;
 
     // Deterministic FNV‑1a hash → genetic identity
@@ -156,12 +209,43 @@ export function synthesizePulseEarnGene(fileId, packetIndex) {
       packetIndex,
       key,
       value,
+      band: normalizedBand,
       cycleIndex: geneCycle
     };
 
     geneticHealing.lastGenerated = gene;
     geneticHealing.lastSynthesisSignature = buildSynthesisSignature(key, value);
     geneticHealing.lastError = null;
+
+    // -------------------------------
+    // BINARY FIELD (structural only)
+    // -------------------------------
+    const surface = value * 1000 + geneCycle;
+    const binaryField = {
+      binaryGeneSignature: computeHash(`BGENE_SYN::${key}`),
+      binarySurfaceSignature: computeHash(`BSURF_SYN::${surface}`),
+      binarySurface: {
+        value,
+        cycle: geneCycle,
+        surface
+      },
+      parity: surface % 2 === 0 ? 0 : 1,
+      density: value,
+      shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+    };
+    geneticHealing.lastBinaryField = binaryField;
+
+    // -------------------------------
+    // WAVE FIELD (structural only)
+    // -------------------------------
+    const waveField = {
+      amplitude: value,
+      wavelength: geneCycle,
+      phase: (Math.floor(value * 100) + geneCycle) % 8,
+      band: normalizedBand,
+      mode: normalizedBand === "binary" ? "compression-wave" : "symbolic-wave"
+    };
+    geneticHealing.lastWaveField = waveField;
 
     return gene;
 

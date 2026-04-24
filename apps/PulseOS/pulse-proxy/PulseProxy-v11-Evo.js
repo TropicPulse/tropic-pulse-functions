@@ -1,5 +1,5 @@
 // ============================================================================
-//  PulseProxy-v11-Evo.js — Proxy Organism v11.0
+//  PulseProxy-v11-Evo.js — Proxy Organism v11.0 (NON-BINARY EDITION)
 //  Evolutionary Proxy Organ • Pattern + Lineage + Shape • Route-Assist
 //  11.0: Ancestry + Loop-Theory + Tier + Advantage Field + Continuance Hint
 // ============================================================================
@@ -12,10 +12,8 @@
 //  • Pure deterministic string/shape operations.
 //  • Zero mutation outside instance.
 // ============================================================================
-
-
 // ============================================================================
-//  ProxyRole — identifies this as the Proxy v11 Organism
+//  ProxyRole — identifies this as the Proxy v11-Evo A‑B‑A Organism (symbolic)
 // ============================================================================
 export const ProxyRole = {
   type: "Proxy",
@@ -43,9 +41,13 @@ export const ProxyRole = {
     tierAware: true,
     advantageFieldAware: true,
 
-    // explicit continuance awareness (shape-level only)
     continuanceAware: true,
-    legacyBridgeCapable: true
+    legacyBridgeCapable: true,
+
+    // A‑B‑A awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true
   },
 
   routingContract: "PulseRouter-v11-Evo-A2",
@@ -137,7 +139,10 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
 }
 
 function computeHealthScore(pattern, lineage) {
-  const base = 0.7 + Math.min(0.3, lineage.length * 0.02 + pattern.length * 0.001);
+  const base = 0.7 + Math.min(
+    0.3,
+    lineage.length * 0.02 + pattern.length * 0.001
+  );
   return Math.max(0.15, Math.min(1.0, base));
 }
 
@@ -192,7 +197,77 @@ function buildProxyDiagnostics(pattern, lineage, healthScore, tier) {
 
 
 // ============================================================================
-//  FACTORY — Create a Proxy v11 Organism
+//  A‑B‑A SURFACES (symbolic proxy band)
+// ============================================================================
+
+function buildBand(pattern) {
+  if (pattern.includes("router")) return "symbolic-router";
+  if (pattern.includes("mesh")) return "symbolic-mesh";
+  if (pattern.includes("send")) return "symbolic-send";
+  return "symbolic";
+}
+
+function buildBandSignature(pattern) {
+  const band = buildBand(pattern);
+  const raw = `PROXY_BAND::${band}`;
+  let acc = 0;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return {
+    band,
+    bandSignature: `proxy-band-${acc}`
+  };
+}
+
+function buildBinaryField(pattern, lineage) {
+  const patternLen = pattern.length || 1;
+  const depth = lineage.length || 1;
+  const patternLenNorm = Math.max(4, Math.min(32, patternLen));
+  const depthNorm = Math.max(1, Math.min(16, depth));
+
+  const density = patternLenNorm + depthNorm * 3;
+  const surface = density + patternLenNorm;
+
+  let acc = 0;
+  const raw = `PROXY_BINARY_FIELD::${patternLenNorm}::${depthNorm}::${surface}`;
+  for (let i = 0; i < raw.length; i++) {
+    acc = (acc + raw.charCodeAt(i) * (i + 1)) % 100000;
+  }
+
+  return {
+    binaryPhenotypeSignature: `proxy-binary-pheno-${acc}`,
+    binarySurfaceSignature: `proxy-binary-surface-${(acc * 7) % 100000}`,
+    binarySurface: {
+      patternLen: patternLenNorm,
+      density,
+      surface
+    },
+    parity: surface % 2 === 0 ? 0 : 1,
+    shiftDepth: Math.max(0, Math.floor(Math.log2(surface || 1)))
+  };
+}
+
+function buildWaveField(pattern, lineage) {
+  const depth = lineage.length || 1;
+  const patternLen = pattern.length || 1;
+
+  const amplitude = (depth + 1) * 6 + Math.floor(patternLen / 8);
+  const wavelength = amplitude + 5;
+  const phase = (amplitude + patternLen) % 16;
+
+  return {
+    amplitude,
+    wavelength,
+    phase,
+    band: "symbolic",
+    mode: "symbolic-wave"
+  };
+}
+
+
+// ============================================================================
+//  FACTORY — Create a Proxy v11-Evo A‑B‑A Organism (symbolic)
 // ============================================================================
 export function createProxy({
   jobId,
@@ -219,7 +294,16 @@ export function createProxy({
   const tier           = classifyDegradationTier(healthScore);
   const advantageField = buildAdvantageField(pattern, lineage);
   const proxyMode      = computeProxyMode(tier, pattern);
-  const diagnostics    = buildProxyDiagnostics(pattern, lineage, healthScore, tier);
+  const diagnostics    = buildProxyDiagnostics(
+    pattern,
+    lineage,
+    healthScore,
+    tier
+  );
+
+  const { band, bandSignature } = buildBandSignature(pattern);
+  const binaryField = buildBinaryField(pattern, lineage);
+  const waveField   = buildWaveField(pattern, lineage);
 
   return {
     ProxyRole,
@@ -247,13 +331,23 @@ export function createProxy({
       preferProxyBeforeMesh: true,
       diagnostics,
 
+      // A‑B‑A surfaces
+      band,
+      bandSignature,
+      binaryField,
+      waveField,
+
+      // A‑B‑A hints for downstream organs
+      _abaBand: band,
+      _abaBinaryDensity: binaryField.binarySurface.density,
+      _abaWaveAmplitude: waveField.amplitude,
+
       loopTheory: {
         routingCompletion: true,
         allowLoopfieldPropulsion: true,
         pulseComputeContinuity: true,
         errorRouteAround: true,
 
-        // explicit continuance hint for runtime / routers
         continuanceCapable: true,
         preferContinuanceOnOrganFailure: true
       }
@@ -263,13 +357,13 @@ export function createProxy({
 
 
 // ============================================================================
-//  EVOLUTION ENGINE — evolve an existing Proxy deterministically
+//  EVOLUTION ENGINE — evolve an existing Proxy deterministically (symbolic)
 // ============================================================================
 export function evolveProxy(proxy, context = {}) {
-  const nextPattern = evolvePattern(proxy.pattern, context);
-  const nextLineage = buildLineage(proxy.lineage, nextPattern);
-  const shapeSignature = computeShapeSignature(nextPattern, nextLineage);
-  const evolutionStage = computeEvolutionStage(nextPattern, nextLineage);
+  const nextPattern     = evolvePattern(proxy.pattern, context);
+  const nextLineage     = buildLineage(proxy.lineage, nextPattern);
+  const shapeSignature  = computeShapeSignature(nextPattern, nextLineage);
+  const evolutionStage  = computeEvolutionStage(nextPattern, nextLineage);
 
   const patternAncestry       = buildPatternAncestry(nextPattern);
   const lineageSignature      = buildLineageSignature(nextLineage);
@@ -284,7 +378,16 @@ export function evolveProxy(proxy, context = {}) {
   const tier           = classifyDegradationTier(healthScore);
   const advantageField = buildAdvantageField(nextPattern, nextLineage);
   const proxyMode      = computeProxyMode(tier, nextPattern);
-  const diagnostics    = buildProxyDiagnostics(nextPattern, nextLineage, healthScore, tier);
+  const diagnostics    = buildProxyDiagnostics(
+    nextPattern,
+    nextLineage,
+    healthScore,
+    tier
+  );
+
+  const { band, bandSignature } = buildBandSignature(nextPattern);
+  const binaryField = buildBinaryField(nextPattern, nextLineage);
+  const waveField   = buildWaveField(nextPattern, nextLineage);
 
   const { routerHint, meshHint, sendHint, healthHint, tierHint } = context || {};
 
@@ -321,6 +424,16 @@ export function evolveProxy(proxy, context = {}) {
         healthHint: typeof healthHint === "number" ? healthHint : null,
         tierHint: tierHint || null
       },
+
+      // A‑B‑A surfaces
+      band,
+      bandSignature,
+      binaryField,
+      waveField,
+
+      _abaBand: band,
+      _abaBinaryDensity: binaryField.binarySurface.density,
+      _abaWaveAmplitude: waveField.amplitude,
 
       loopTheory: {
         routingCompletion: true,

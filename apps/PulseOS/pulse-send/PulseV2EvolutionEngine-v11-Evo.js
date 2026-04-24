@@ -1,8 +1,27 @@
 // ============================================================================
-//  PulseV2EvolutionEngine-v11-Evo.js
+//  FILE: PulseV2EvolutionEngine-v11-Evo.js
 //  Pulse v2 • Evolution Engine • Experimental Trait Layer (Compute Inside Pulse)
 //  v11: Diagnostics + Signatures + Evolution Surface + Advantage Surface
 // ============================================================================
+//
+//  ROLE:
+//  -----
+//  This organ is the *Pulse v2 evolution engine* — the experimental trait layer
+//  that computes evolution *inside* a Pulse.
+//
+//  It is a symbolic evolution core that:
+//    - Takes pattern + lineage + payload + mode.
+//    - Computes a deterministic advantageField (evolution surface).
+//    - Computes a normalized healthScore and a coarse degradation tier.
+//    - Emits signatures and diagnostics for routing, mesh, and higher layers.
+//
+//  It does NOT know about bits directly.
+//  It is designed to sit behind a binary front-end (e.g. a future
+//  PulseBinaryV2EvolutionEngine-v11-Evo) that:
+//    - Accepts bits.
+//    - Derives pattern/mode/payload from binary.
+//    - Calls createPulseV2.
+//    - Uses advantageField + healthScore + tier to route work.
 //
 //  SAFETY CONTRACT (v11-Evo):
 //  --------------------------
@@ -15,7 +34,7 @@
 
 
 // ============================================================================
-// ⭐ PulseRole — identifies this as the Pulse v2 evolution engine (v11)
+// ⭐ PulseRole — identifies this as the Pulse v2 evolution engine (v11-Evo)
 // ============================================================================
 export const PulseRole = {
   type: "Pulse",
@@ -25,22 +44,33 @@ export const PulseRole = {
   identity: "Pulse-v2-EvolutionEngine-v11-Evo",
 
   evo: {
+    // Core evolution awareness
     driftProof: true,
     patternAware: true,
     lineageAware: true,
     shapeAware: true,
     modeAware: true,
+
+    // Ready to cooperate with routing/mesh organs
     routerAwareReady: true,
     meshAwareReady: true,
 
+    // Explicitly an evolution engine
     evolutionEngineReady: true,
     unifiedAdvantageField: true,
     pulseV2Ready: true,
     futureEvolutionReady: true,
 
+    // Diagnostics + signatures + evolution surface
     diagnosticsReady: true,
     signatureReady: true,
-    evolutionSurfaceReady: true
+    evolutionSurfaceReady: true,
+
+    // Binary integration flags:
+    //   - This file is the *back-end* evolution engine.
+//   - A separate binary organ will act as the front-end that speaks in bits.
+    binaryBackEndReady: true,
+    binaryFrontEndContract: "PulseBinaryV2EvolutionEngine-v11-Evo"
   },
 
   routingContract: "PulseRouter-v11",
@@ -54,8 +84,16 @@ export const PulseRole = {
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
 // ============================================================================
+//  These helpers define how v2 builds its evolution identity:
+//    - lineage: ancestry chain
+//    - shapeSignature: pattern+lineage compressed
+//    - evolutionStage: coarse growth stage
+//    - ancestry signatures: pattern/lineage/page binding
+//    - diagnostics: human/AI-readable health summary
+// ============================================================================
 
 function computeHash(str) {
+  // v2-specific deterministic hash; small, bounded, and stable.
   let h = 0;
   for (let i = 0; i < str.length; i++) {
     h = (h + str.charCodeAt(i) * (i + 3)) % 100000;
@@ -64,16 +102,19 @@ function computeHash(str) {
 }
 
 function buildLineage(parentLineage, pattern) {
+  // Append the new pattern to the existing lineage, forming a simple ancestry chain.
   const base = Array.isArray(parentLineage) ? parentLineage : [];
   return [...base, pattern];
 }
 
 function computeShapeSignature(pattern, lineage) {
+  // Shape = pattern + lineage combined into a single signature.
   const raw = `${pattern}::${lineage.join("::")}`;
   return `shape-${computeHash(raw)}`;
 }
 
 function computeEvolutionStage(pattern, lineage) {
+  // v2 evolution stage: more "wild" at deeper depths.
   const depth = lineage.length;
 
   if (depth === 1) return "seed";
@@ -94,6 +135,7 @@ function buildLineageSignature(lineage) {
 }
 
 function buildPageAncestrySignature({ pattern, lineage, pageId }) {
+  // Page ancestry is a compact way to tie pattern+lineage to a page context.
   const shape = {
     pattern,
     patternAncestry: buildPatternAncestry(pattern),
@@ -108,6 +150,16 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
 // ============================================================================
 //  INTERNAL: Deterministic evolution compute loop (v11 — enhanced v2 tier)
 // ============================================================================
+//  v2's compute loop is an *experimental trait layer*:
+//
+//    - patternScore: how "large/complex" the pattern is
+//    - lineageScore: how deep the ancestry is
+//    - payloadScore: how rich the payload is
+//
+//  The advantageField is a structured description that routers/meshes/binary
+//  front-ends can read to understand "strength" and context.
+// ============================================================================
+
 function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
   const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
   const payloadSize = payload && typeof payload === "object"
@@ -149,6 +201,7 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
 }
 
 function buildDiagnostics(pattern, lineage, healthScore, tier) {
+  // Diagnostics: evolution engine view of health + structure + tier.
   return {
     patternLength: pattern.length,
     lineageDepth: lineage.length,
@@ -163,8 +216,23 @@ function buildDiagnostics(pattern, lineage, healthScore, tier) {
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v11)
+//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v11-Evo)
 // ============================================================================
+//  This is the "birth" function for a v2 evolution instance.
+//  A binary front-end will typically:
+//
+//    - derive pattern from bits / route / job
+//    - derive payload from bits / metadata
+//    - choose mode (normal/stress/drain/recovery)
+//    - call createPulseV2
+//
+//  The result is a v2 evolution object with:
+//    - PulseRole
+//    - pattern/lineage/mode/payload
+//    - advantageField + healthScore + tier
+//    - meta: signatures + diagnostics
+// ============================================================================
+
 export function createPulseV2({
   jobId,
   pattern,
@@ -175,13 +243,16 @@ export function createPulseV2({
   mode = "normal",
   pageId = "NO_PAGE"
 }) {
-  const lineage = buildLineage(parentLineage, pattern);
-  const shapeSignature = computeShapeSignature(pattern, lineage);
-  const evolutionStage = computeEvolutionStage(pattern, lineage);
-
-  const patternAncestry = buildPatternAncestry(pattern);
-  const lineageSignature = buildLineageSignature(lineage);
-  const pageAncestrySignature = buildPageAncestrySignature({ pattern, lineage, pageId });
+  const lineage              = buildLineage(parentLineage, pattern);
+  const shapeSignature       = computeShapeSignature(pattern, lineage);
+  const evolutionStage       = computeEvolutionStage(pattern, lineage);
+  const patternAncestry      = buildPatternAncestry(pattern);
+  const lineageSignature     = buildLineageSignature(lineage);
+  const pageAncestrySignature = buildPageAncestrySignature({
+    pattern,
+    lineage,
+    pageId
+  });
 
   const { advantageField, healthScore } = runEvolutionComputeLoopV2({
     pattern,
@@ -200,7 +271,10 @@ export function createPulseV2({
   const diagnostics = buildDiagnostics(pattern, lineage, healthScore, tier);
 
   return {
+    // Identity + contracts
     PulseRole,
+
+    // Core pulse identity
     jobId,
     pattern,
     payload,
@@ -210,12 +284,15 @@ export function createPulseV2({
     mode,
     pageId,
 
+    // Evolution engine type
     pulseType: "Pulse-v2-EvolutionEngine-v11",
 
+    // Advantage + health
     advantageField,
     healthScore,
     tier,
 
+    // Meta: signatures + diagnostics
     meta: {
       shapeSignature,
       evolutionStage,

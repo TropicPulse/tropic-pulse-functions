@@ -1,29 +1,22 @@
 // ============================================================================
-//  PULSE OS v10.4 — SURVIVAL ORGANS LAYER  // orange
+//  PULSE OS v11-Evo — SURVIVAL ORGANS LAYER  // orange
 //  “Functional Organ Map of the Mesh Body”
 //  Capability Signatures • Deterministic Organ Matching • Metadata-Only
 // ============================================================================
 //
-// IDENTITY (v10.4):
-// -----------------
+// IDENTITY (v11-Evo):
+// -------------------
 // • Maps impulses to functional organs (storage, routing, security, earnPrep).
 // • Pure metadata-only classification — zero payload mutation.
 // • Deterministic-field, drift-proof, SDN-aligned.
-// • No pressure gating (v9.2 behavior removed).
-// • Multi-instance-ready, unified-advantage-field, future-evolution-ready.
-//
-// ROLE IN THE DIGITAL BODY (v10.4):
-// ---------------------------------
-// • Organ Map → assigns impulses to the correct functional organ.
-// • Zero Compute → classification only, no transformation.
-// • No pressure thresholds, no load avoidance, no tension logic.
-// • Pure intent-based and flag-based organ selection.
+// • No pressure gating.
+// • Multi-instance-ready, unified-advantage-field, binary-aware, dual-mode-ready.
 // ============================================================================
 
 export function createPulseOrgans() {
 
   // -------------------------------------------------------
-  // ORGAN DEFINITIONS (v10.4)
+  // ORGAN DEFINITIONS (v11-Evo)
   // Deterministic, pressure-free, SDN-aligned.
   // -------------------------------------------------------
   const PulseOrgans = {
@@ -59,7 +52,8 @@ export function createPulseOrgans() {
       capabilities: ["validate", "verify", "protect"],
       match(impulse) {
         return impulse.flags?.cortex_anomaly ||
-               impulse.flags?.cortex_factoring_anomaly;
+               impulse.flags?.cortex_factoring_anomaly ||
+               impulse.flags?.cortex_flow_anomaly;
       }
     },
 
@@ -73,27 +67,55 @@ export function createPulseOrgans() {
         return typeof impulse.routeHint === "string" &&
                impulse.routeHint.startsWith("earner-");
       }
+    },
+
+    // -------------------------------------------------------
+    // NEW v11-Evo — BINARY PREP ORGAN
+    // Activated when binary mode is active
+    // -------------------------------------------------------
+    binaryPrep: {
+      id: "organ-binaryprep",
+      capabilities: ["binary_prepare", "binary_shape", "binary_assign"],
+      match(impulse) {
+        return impulse.flags?.binary_mode === true;
+      }
+    },
+
+    // -------------------------------------------------------
+    // NEW v11-Evo — MESH SIGNAL ORGAN
+    // Activated when mesh-level signals are present
+    // -------------------------------------------------------
+    meshSignal: {
+      id: "organ-meshsignal",
+      capabilities: ["mesh_signal", "mesh_factor", "mesh_trace"],
+      match(impulse) {
+        return impulse.flags?.aura_prefers_factored_paths ||
+               impulse.flags?.mesh_signal ||
+               impulse.flags?.aura_system_under_tension;
+      }
     }
   };
 
 
   // ========================================================================
-  // ORGAN ENGINE (v10.4)
+  // ORGAN ENGINE (v11-Evo)
   // “Attach functional organ identity to the impulse”
   // ========================================================================
   function applyPulseOrgans(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.organs = impulse.organs || [];
 
-    // attach v10.4 organ meta
+    // attach v11-Evo organ meta
     impulse.flags.organ_meta = {
       layer: "PulseOrgans",
       role: "FUNCTIONAL_ORGAN_MAP",
-      version: "10.4",
+      version: "11.0-Evo",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
+        binaryAware: true,
+        symbolicAware: true,
         localAware: true,
         internetAware: true,
         advantageCascadeAware: true,
@@ -105,7 +127,10 @@ export function createPulseOrgans() {
         futureEvolutionReady: true,
         signalFactoringAware: true,
         meshPressureAware: true,
-        auraPressureAware: true
+        auraPressureAware: true,
+        zeroCompute: true,
+        zeroMutation: true,
+        zeroRoutingInfluence: true
       }
     };
 

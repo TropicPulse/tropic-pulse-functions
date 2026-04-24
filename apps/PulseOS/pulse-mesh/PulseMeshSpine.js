@@ -1,13 +1,13 @@
 // ============================================================================
 // FILE: PulseMeshSpine.js
-// PULSE OS — v11-ready
+// PULSE OS — v11-Evo
 // COMMUNITY_SPINE_LAYER  // teal
 // Distributed Routing Spine • Reflex + Cortex + Tendons + Signal Factoring
-// Metadata-Only • Deterministic • Drift-Proof • Local-First
+// Metadata-Only • Deterministic • Drift-Proof • Local-First • Dual-Mode
 // ============================================================================
 //
-// IDENTITY — THE SPINE:
-// ---------------------
+// IDENTITY — THE SPINE (v11-Evo):
+// -------------------------------
 // • Routes impulses between nodes (devices, services, earners).
 // • Applies 1/0 reflex at each hop (instinct-style filtering).
 // • Applies cortex shaping (risk, novelty, cooperation, load).
@@ -17,8 +17,11 @@
 // • Emits drift + flow + factoring signals to Mesh Immune / GlobalHealer.
 // • NEVER mutates payload data, NEVER performs compute.
 // • Deterministic-field, mesh-pressure-aware, aura-pressure-aware.
+// • v11-Evo: binary-aware, dual-mode-ready, unified-advantage-field.
+// ============================================================================
 //
-// SAFETY CONTRACT (v11-ready):
+// SAFETY CONTRACT (v11-Evo):
+// --------------------------
 // • Metadata-only.
 // • No payload access.
 // • No compute.
@@ -55,7 +58,7 @@ export const MeshMemory = {
 let meshCycle = 0;
 
 // ============================================================================
-// Mesh Factory
+// Mesh Factory (v11-Evo)
 // ============================================================================
 export function createPulseMesh() {
   return {
@@ -64,11 +67,13 @@ export function createPulseMesh() {
     meta: {
       layer: "PulseMeshSpine",
       role: "ROUTING_SPINE",
-      version: 9.2,
+      version: "11.0-Evo",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
+        binaryAware: true,
+        symbolicAware: true,
         localAware: true,
         internetAware: true,
 
@@ -83,7 +88,14 @@ export function createPulseMesh() {
 
         signalFactoringAware: true,
         meshPressureAware: true,
-        auraPressureAware: true
+        auraPressureAware: true,
+
+        flowAware: true,
+        driftAware: true,
+
+        zeroCompute: true,
+        zeroMutation: true,
+        zeroRoutingInfluence: true
       },
       reach: {
         estimatedHops: 0,
@@ -156,8 +168,8 @@ function recordFactoring(impulse) {
 }
 
 // ============================================================================
-// Routing Entry Point (v11-ready)
-// Metadata-only • Deterministic • Local-first
+// Routing Entry Point (v11-Evo)
+// Metadata-only • Deterministic • Local-first • Dual-Mode
 // ============================================================================
 export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
   meshCycle++;
@@ -165,6 +177,14 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
   impulse.flags = impulse.flags || {};
   impulse.flags.mesh_meta = mesh.meta;
   impulse.flags.mesh_route_started = true;
+
+  // v11-Evo: mode tagging (binary / dual / symbolic)
+  const binaryMode = !!context.binaryMode || !!impulse.flags.binary_mode;
+  const dualMode = !!context.dualMode || !!impulse.flags.dual_mode;
+
+  impulse.flags.mesh_mode = binaryMode ? "binary" : dualMode ? "dual" : "symbolic";
+  impulse.flags.binary_mode = binaryMode;
+  impulse.flags.dual_mode = dualMode;
 
   const visited = new Set();
   let currentNodeId = entryNodeId;
@@ -211,7 +231,8 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
       cycle: meshCycle,
       node: node.id,
       trust: node.trustLevel ?? 0.5,
-      load: node.load ?? 0.0
+      load: node.load ?? 0.0,
+      mode: impulse.flags.mesh_mode
     });
 
     MeshMemory.trust.push({
@@ -287,12 +308,14 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     }
 
     // -------------------------------------------------------
-    // 2. CORTEX (strategic shaping)
+    // 2. CORTEX (strategic shaping, dual-mode-aware)
     // -------------------------------------------------------
     applyPulseCortex(impulse, {
       ...context,
       globalLoad: node.load,
-      trustLevel: node.trustLevel
+      trustLevel: node.trustLevel,
+      binaryMode,
+      dualMode
     });
 
     // -------------------------------------------------------
@@ -301,7 +324,7 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     applyPulseMeshTendons(impulse);
 
     // -------------------------------------------------------
-    // 4. Energy decay (instinctive fatigue)
+    // 4. Energy decay (instinctive fatigue, metadata-only)
     // -------------------------------------------------------
     impulse.energy =
       typeof impulse.energy === "number" ? impulse.energy * 0.9 : 0.9;
@@ -327,9 +350,12 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     }
 
     // -------------------------------------------------------
-    // 6. Next hop selection (factoring + load + locality aware)
+    // 6. Next hop selection (factoring + load + locality + mode aware)
     // -------------------------------------------------------
-    const nextId = selectNextHop(mesh, node, visited, impulse);
+    const nextId = selectNextHop(mesh, node, visited, impulse, {
+      binaryMode,
+      dualMode
+    });
 
     // DRIFT: Routing stall
     if (!nextId) {
@@ -363,9 +389,9 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
 }
 
 // ============================================================================
-// Next Hop Selection (factoring-aware, load-aware, locality-aware, metadata-only)
+// Next Hop Selection (factoring-aware, load-aware, locality-aware, mode-aware)
 // ============================================================================
-function selectNextHop(mesh, node, visited, impulse) {
+function selectNextHop(mesh, node, visited, impulse, { binaryMode, dualMode }) {
   const neighbors = node.neighbors || [];
   if (!neighbors.length) return null;
 
@@ -412,6 +438,18 @@ function selectNextHop(mesh, node, visited, impulse) {
       // locality preference: local < edge < internet
       if (locality === "edge") penalty += 0.05;
       if (locality === "internet") penalty += 0.15;
+
+      // v11-Evo: mode-aware tweaks
+      // binary mode prefers lower-hop, higher-trust, local-first paths
+      if (binaryMode) {
+        if (locality === "internet") penalty += 0.1;
+        if (trust < 0.6) penalty += 0.1;
+      }
+
+      // dual mode: slightly favor local/edge mix, keep deterministic
+      if (dualMode && locality === "edge") {
+        penalty -= 0.02;
+      }
 
       return {
         id,

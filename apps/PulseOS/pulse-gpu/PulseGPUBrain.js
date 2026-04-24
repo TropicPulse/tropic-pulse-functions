@@ -1,11 +1,12 @@
 // ============================================================================
-//  PULSE GPU BRAIN v10.4 — THE ANALYST CORTEX
+//  PULSE GPU BRAIN v11-Evo — THE ANALYST CORTEX / BRAINSTEM
 //  CPU-SIDE INTELLIGENCE DIVISION (FULL-GPU, API-AGNOSTIC)
 //  PURE LOGIC. PURE DETERMINISM. ZERO SIDE EFFECTS.
+//  SYMBOLIC + BINARY AWARE • DISPATCH-AWARE • MEMORY-AWARE
 // ============================================================================
 //
-// TRUST-SAFE CONTRACT (v10.4):
-//  ---------------------------
+// TRUST-SAFE CONTRACT (v11-Evo):
+//  -----------------------------
 //  • No GPU calls
 //  • No rendering
 //  • No async
@@ -16,26 +17,28 @@
 //  • No mutation outside the export holder
 //  • Deterministic: same input → same output
 //  • Fail-open: invalid input → empty packages, never throw
-//  • PulseSend‑10.4‑ready (routingContract v10.4)
-//  • GPU Organ Contract v10.4
+//  • PulseSend‑v11‑ready (routingContract v11)
+//  • GPU Organ Contracts v11-Evo (symbolic + binary)
+//  • Binary/dual-mode aware, dispatch-aware, memory-aware
 //
-// IDENTITY — THE ANALYST CORTEX (v10.4):
-//  -------------------------------------
+// IDENTITY — THE ANALYST CORTEX / GPU BRAINSTEM (v11-Evo):
+//  -------------------------------------------------------
 //  • The intelligence cortex of the GPU OS.
 //  • Gathers raw assets → produces GPU-ready intelligence packages.
-//  • Pure preprocessing, pure logic, pure determinism.
-//  • The strategist that prepares the Astral Nervous System for execution.
+//  • Reads usage patterns + GPU memory/dispatch hints (if provided).
+//  • Produces precompute intelligence aligned with symbolic + binary GPU organs.
+//  • The strategist + brainstem that prepares the Astral Nervous System for execution.
 //  • Dual-mode evolved: biological + system-level advantage active together.
-//  • PulseSend‑10.4‑ready: packages are routable by the compute nervous system.
+//  • PulseSend‑v11‑ready: packages are routable by the compute nervous system.
 //
-// LAYER POSITION (v10.4):
-//  ----------------------
+// LAYER POSITION (v11-Evo):
+//  ------------------------
 //  PulseBand → PulseGPU Astral Nervous System → PulseGPUBrain (this file)
-//  This organ THINKS. It does not render, route, or execute frames.
+//  This organ THINKS and PREPARES. It does not render, route, or execute frames.
 //  It does not import Runtime, Engine, Orchestrator, Healer, or AutoOptimize.
 //
-// DUAL-MODE ADVANTAGE (v10.4):
-//  ---------------------------
+// DUAL-MODE + BINARY ADVANTAGE (v11-Evo):
+//  --------------------------------------
 //  • Biological (mental) evolution:
 //      - metabolicBoost
 //      - neuralReflexBoost
@@ -54,16 +57,23 @@
 //      - organismClusterBoost
 //      - cognitiveComputeLink
 //      - unifiedAdvantageField
-//      - pulseSend10Ready
+//      - pulseSend11Ready
+//  • Binary / symbolic awareness:
+//      - binaryAware
+//      - symbolicAware
+//      - gpuDispatchAware
+//      - gpuMemoryAware
+//      - gpuAdvantageAware
 //  • PulseSend / GPU contracts (conceptual only):
-//      - routingContract: "PulseSend-v10.4"
-//      - gpuOrganContract: "PulseGPU-v10.4"
-//      - earnCompatibility: "Earn-v2"
-//      - workgroupLawVersion: 10
+//      - routingContract: "PulseSend-v11"
+//      - gpuOrganContract: "PulseGPU-v11-Evo-symbolic"
+//      - binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo"
+//      - earnCompatibility: "Earn-v3"
+//      - workgroupLawVersion: 11
 //      - zeroImportShaderPipeline: true
 //
-// SAFETY (v10.4):
-//  --------------
+// SAFETY (v11-Evo):
+//  ----------------
 //  • Always fail-open (invalid input → empty packages, never errors)
 //  • Always deterministic
 //  • Always API-agnostic
@@ -73,25 +83,25 @@
 // ✔ Logging via global primitive is allowed
 log(
   "gpu",
-  "PulseGPUBrain v10.4 — Analyst Cortex active (dual‑mode evolution, PulseSend‑10.4‑ready)."
+  "PulseGPUBrain v11-Evo — Analyst Cortex / Brainstem active (dual-mode + binary, PulseSend‑v11‑ready)."
 );
 
 // ------------------------------------------------------
 // GLOBAL VERSIONS
 // ------------------------------------------------------
 
-const PULSE_GPU_BRAIN_VERSION = 10.4;
-const PULSE_GPU_BRAIN_SCHEMA_VERSION = 6;
+const PULSE_GPU_BRAIN_VERSION = "11.0-Evo";
+const PULSE_GPU_BRAIN_SCHEMA_VERSION = 7;
 
 // ------------------------------------------------------
-// DUAL-MODE ADVANTAGE BLOCK (v10.4)
+// DUAL-MODE + BINARY ADVANTAGE BLOCK (v11-Evo)
 // ------------------------------------------------------
 
 const DUAL_MODE_EVO = {
   // Biological / mental
-  metabolicBoost: 1.0,
-  neuralReflexBoost: 1.0,
-  stabilityBoost: 1.0,
+  metabolicBoost: 1.1,
+  neuralReflexBoost: 1.1,
+  stabilityBoost: 1.2,
   cognitiveStabilityField: true,
 
   // System / physical
@@ -109,13 +119,21 @@ const DUAL_MODE_EVO = {
   organismClusterBoost: 1.0,
   cognitiveComputeLink: true,
   unifiedAdvantageField: true,
-  pulseSend10Ready: true,
+  pulseSend11Ready: true,
+
+  // Binary / symbolic awareness
+  binaryAware: true,
+  symbolicAware: true,
+  gpuDispatchAware: true,
+  gpuMemoryAware: true,
+  gpuAdvantageAware: true,
 
   // PulseSend / organism contracts (conceptual only)
-  routingContract: "PulseSend-v10.4",
-  gpuOrganContract: "PulseGPU-v10.4",
-  earnCompatibility: "Earn-v2",
-  workgroupLawVersion: 10,
+  routingContract: "PulseSend-v11",
+  gpuOrganContract: "PulseGPU-v11-Evo-symbolic",
+  binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo",
+  earnCompatibility: "Earn-v3",
+  workgroupLawVersion: 11,
   zeroImportShaderPipeline: true
 };
 
@@ -250,7 +268,7 @@ class PulseShaderPackage {
       evo: DUAL_MODE_EVO,
       brainVersion: PULSE_GPU_BRAIN_VERSION,
       schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
-      shaderContract: "WGSL-v10.4",
+      shaderContract: "WGSL-v11-Evo",
       ...metadata
     };
   }
@@ -280,17 +298,41 @@ class PulseRenderPlanPackage {
       brainVersion: PULSE_GPU_BRAIN_VERSION,
       schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
 
-      routingContract: "PulseSend-v10.4",
-      renderPlanContract: "PulseGPU-RenderPlan-v10.4",
-      frameGraphContract: "FrameGraph-v4",
+      routingContract: "PulseSend-v11",
+      renderPlanContract: "PulseGPU-RenderPlan-v11-Evo",
+      frameGraphContract: "FrameGraph-v5",
 
       ...metadata
     };
   }
 }
 
+// NEW: GPU DISPATCH HINT PACKAGE (symbolic + binary aware)
+class PulseGPUDispatchHintPackage {
+  constructor({
+    id = "gpu-dispatch-hints",
+    version = PULSE_GPU_BRAIN_SCHEMA_VERSION,
+    patternHints = [],
+    metadata = {}
+  } = {}) {
+    this.id = id;
+    this.version = version;
+    this.patternHints = patternHints;
+    this.metadata = {
+      layer: "PulseGPUBrain",
+      kind: "gpu-dispatch-hint-package",
+      target: "full-gpu",
+      evo: DUAL_MODE_EVO,
+      brainVersion: PULSE_GPU_BRAIN_VERSION,
+      schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
+      dispatchHintContract: "PulseGPU-DispatchHints-v11-Evo",
+      ...metadata
+    };
+  }
+}
+
 // ------------------------------------------------------
-// BRAIN INPUT (RAW ASSET CONTAINER)
+// BRAIN INPUT (RAW ASSET + GPU MEMORY / DISPATCH CONTEXT)
 // ------------------------------------------------------
 
 class BrainInput {
@@ -302,7 +344,12 @@ class BrainInput {
     rawShaders = [],
     rawScenes = [],
     usagePatterns = {},
-    predictionHints = {}
+    predictionHints = {},
+
+    // NEW: GPU memory / dispatch context (optional, metadata-only)
+    gpuMemorySnapshot = null,      // e.g. { history: [...], byPattern: {...} }
+    gpuDispatchHistory = [],       // array of recent dispatch descriptors
+    gpuAdvantageMap = null         // e.g. { patterns: {...}, strengths: {...} }
   } = {}) {
     this.schemaVersion = schemaVersion;
     this.rawTextures = rawTextures;
@@ -313,10 +360,15 @@ class BrainInput {
     this.usagePatterns = usagePatterns;
     this.predictionHints = predictionHints;
 
+    this.gpuMemorySnapshot = gpuMemorySnapshot;
+    this.gpuDispatchHistory = gpuDispatchHistory;
+    this.gpuAdvantageMap = gpuAdvantageMap;
+
     this.evo = DUAL_MODE_EVO;
     this.brainVersion = PULSE_GPU_BRAIN_VERSION;
-    this.routingContract = "PulseSend-v10.4";
-    this.gpuOrganContract = "PulseGPU-v10.4";
+    this.routingContract = "PulseSend-v11";
+    this.gpuOrganContract = "PulseGPU-v11-Evo-symbolic";
+    this.binaryGpuOrganContract = "PulseBinaryGPU-v11-Evo";
   }
 }
 
@@ -325,108 +377,196 @@ class BrainInput {
 // ------------------------------------------------------
 
 class TextureOptimizer {
-  static process(rawTextures) {
+  static process(rawTextures, brainInput) {
     log(
       "gpu",
-      "[Analyst] TextureOptimizer → pass-through",
+      "[Analyst] TextureOptimizer v11-Evo → pass-through (memory-aware placeholder)",
       "color:#8BC34A;",
-      { count: rawTextures.length }
+      {
+        count: rawTextures.length,
+        hasGpuMemory: !!brainInput.gpuMemorySnapshot
+      }
     );
 
     return new PulseTexturePackage({
       optimizedTextures: rawTextures,
       metadata: {
         sourceCount: rawTextures.length,
-        optimizerContract: "TextureOptimizer-v10.4"
+        optimizerContract: "TextureOptimizer-v11-Evo",
+        hasGpuMemorySnapshot: !!brainInput.gpuMemorySnapshot
       }
     });
   }
 }
 
 class MeshOptimizer {
-  static process(rawMeshes) {
+  static process(rawMeshes, brainInput) {
     log(
       "gpu",
-      "[Analyst] MeshOptimizer → pass-through",
+      "[Analyst] MeshOptimizer v11-Evo → pass-through (dispatch-aware placeholder)",
       "color:#8BC34A;",
-      { count: rawMeshes.length }
+      {
+        count: rawMeshes.length,
+        dispatchHistoryCount: Array.isArray(brainInput.gpuDispatchHistory)
+          ? brainInput.gpuDispatchHistory.length
+          : 0
+      }
     );
 
     return new PulseMeshPackage({
       simplifiedMeshes: rawMeshes,
       metadata: {
         sourceCount: rawMeshes.length,
-        optimizerContract: "MeshOptimizer-v10.4"
+        optimizerContract: "MeshOptimizer-v11-Evo",
+        dispatchHistoryCount: Array.isArray(brainInput.gpuDispatchHistory)
+          ? brainInput.gpuDispatchHistory.length
+          : 0
       }
     });
   }
 }
 
 class LightingBaker {
-  static process(rawScenes) {
+  static process(rawScenes, brainInput) {
     log(
       "gpu",
-      "[Analyst] LightingBaker → placeholder",
+      "[Analyst] LightingBaker v11-Evo → placeholder",
       "color:#8BC34A;",
-      { sceneCount: rawScenes.length }
+      {
+        sceneCount: rawScenes.length,
+        hasAdvantageMap: !!brainInput.gpuAdvantageMap
+      }
     );
 
     return new PulseLightingPackage({
       metadata: {
         sceneCount: rawScenes.length,
-        bakerContract: "LightingBaker-v10.4"
+        bakerContract: "LightingBaker-v11-Evo",
+        hasAdvantageMap: !!brainInput.gpuAdvantageMap
       }
     });
   }
 }
 
 class AnimationBaker {
-  static process(rawAnimations) {
+  static process(rawAnimations, brainInput) {
     log(
       "gpu",
-      "[Analyst] AnimationBaker → pass-through",
+      "[Analyst] AnimationBaker v11-Evo → pass-through",
       "color:#8BC34A;",
-      { clipCount: rawAnimations.length }
+      {
+        clipCount: rawAnimations.length,
+        hasUsagePatterns:
+          !!brainInput.usagePatterns &&
+          Object.keys(brainInput.usagePatterns).length > 0
+      }
     );
 
     return new PulseAnimationPackage({
       bakedFrames: rawAnimations,
       metadata: {
         clipCount: rawAnimations.length,
-        bakerContract: "AnimationBaker-v10.4"
+        bakerContract: "AnimationBaker-v11-Evo",
+        hasUsagePatterns:
+          !!brainInput.usagePatterns &&
+          Object.keys(brainInput.usagePatterns).length > 0
       }
     });
   }
 }
 
 class ShaderCompiler {
-  static process(rawShaders) {
+  static process(rawShaders, brainInput) {
     log(
       "gpu",
-      "[Analyst] ShaderCompiler → pass-through",
+      "[Analyst] ShaderCompiler v11-Evo → pass-through (binary/symbolic aware placeholder)",
       "color:#8BC34A;",
-      { shaderCount: rawShaders.length }
+      {
+        shaderCount: rawShaders.length,
+        hasDispatchHistory: Array.isArray(brainInput.gpuDispatchHistory)
+          ? brainInput.gpuDispatchHistory.length > 0
+          : false
+      }
     );
 
     return new PulseShaderPackage({
       compiledVariants: rawShaders,
       metadata: {
         shaderCount: rawShaders.length,
-        compilerContract: "ShaderCompiler-v10.4"
+        compilerContract: "ShaderCompiler-v11-Evo",
+        hasDispatchHistory: Array.isArray(brainInput.gpuDispatchHistory)
+          ? brainInput.gpuDispatchHistory.length > 0
+          : false
+      }
+    });
+  }
+}
+
+// NEW: GPU Dispatch Hint Builder (symbolic + binary aware, deterministic)
+class GPUDispatchHintBuilder {
+  static process(brainInput) {
+    const history = Array.isArray(brainInput.gpuDispatchHistory)
+      ? brainInput.gpuDispatchHistory
+      : [];
+
+    log(
+      "gpu",
+      "[Analyst] GPUDispatchHintBuilder v11-Evo → placeholder",
+      "color:#8BC34A;",
+      {
+        dispatchHistoryCount: history.length,
+        hasAdvantageMap: !!brainInput.gpuAdvantageMap
+      }
+    );
+
+    // Deterministic, simple pattern aggregation (no randomness)
+    const patternMap = Object.create(null);
+
+    history.forEach((d) => {
+      const pattern = d?.pattern || "gpu-default";
+      const key = pattern;
+      const bucket = patternMap[key] || {
+        pattern,
+        count: 0,
+        lastMode: d?.mode || "normal",
+        lastBinaryMode: !!d?.binaryMode,
+        lastDualMode: !!d?.dualMode
+      };
+      bucket.count += 1;
+      bucket.lastMode = d?.mode || bucket.lastMode;
+      bucket.lastBinaryMode = !!d?.binaryMode;
+      bucket.lastDualMode = !!d?.dualMode;
+      patternMap[key] = bucket;
+    });
+
+    const patternHints = Object.values(patternMap).map((bucket) => ({
+      pattern: bucket.pattern,
+      preferredMode: bucket.lastMode,
+      preferBinary: bucket.lastBinaryMode,
+      preferDualMode: bucket.lastDualMode,
+      observedCount: bucket.count
+    }));
+
+    return new PulseGPUDispatchHintPackage({
+      patternHints,
+      metadata: {
+        dispatchHistoryCount: history.length,
+        hasAdvantageMap: !!brainInput.gpuAdvantageMap
       }
     });
   }
 }
 
 class RenderPlanner {
-  static process(rawScenes, usagePatterns) {
+  static process(rawScenes, usagePatterns, brainInput) {
     log(
       "gpu",
-      "RenderPlanner → placeholder",
+      "RenderPlanner v11-Evo → placeholder (dispatch-aware, memory-aware)",
       {
         sceneCount: rawScenes.length,
         hasUsagePatterns:
-          !!usagePatterns && Object.keys(usagePatterns).length > 0
+          !!usagePatterns && Object.keys(usagePatterns).length > 0,
+        hasGpuMemorySnapshot: !!brainInput.gpuMemorySnapshot
       }
     );
 
@@ -435,21 +575,22 @@ class RenderPlanner {
         sceneCount: rawScenes.length,
         hasUsagePatterns:
           !!usagePatterns && Object.keys(usagePatterns).length > 0,
-        plannerContract: "RenderPlanner-v10.4"
+        hasGpuMemorySnapshot: !!brainInput.gpuMemorySnapshot,
+        plannerContract: "RenderPlanner-v11-Evo"
       }
     });
   }
 }
 
 // ------------------------------------------------------
-// BRAIN ORCHESTRATOR (PURE, SYNCHRONOUS)
+// BRAIN ORCHESTRATOR (PURE, SYNCHRONOUS, FULL v11-Evo)
 // ------------------------------------------------------
 
 class PulseGPUBrainController {
   static buildPackages(brainInput) {
     log(
       "gpu",
-      "[Analyst] buildPackages() — starting",
+      "[Analyst] buildPackages() v11-Evo — starting",
       "color:#03A9F4;",
       {
         schemaVersion: brainInput.schemaVersion,
@@ -458,19 +599,25 @@ class PulseGPUBrainController {
         meshes: brainInput.rawMeshes.length,
         animations: brainInput.rawAnimations.length,
         shaders: brainInput.rawShaders.length,
-        scenes: brainInput.rawScenes.length
+        scenes: brainInput.rawScenes.length,
+        hasGpuMemorySnapshot: !!brainInput.gpuMemorySnapshot,
+        dispatchHistoryCount: Array.isArray(brainInput.gpuDispatchHistory)
+          ? brainInput.gpuDispatchHistory.length
+          : 0
       }
     );
 
-    const textures   = TextureOptimizer.process(brainInput.rawTextures);
-    const meshes     = MeshOptimizer.process(brainInput.rawMeshes);
-    const lighting   = LightingBaker.process(brainInput.rawScenes);
-    const animation  = AnimationBaker.process(brainInput.rawAnimations);
-    const shaders    = ShaderCompiler.process(brainInput.rawShaders);
+    const textures   = TextureOptimizer.process(brainInput.rawTextures, brainInput);
+    const meshes     = MeshOptimizer.process(brainInput.rawMeshes, brainInput);
+    const lighting   = LightingBaker.process(brainInput.rawScenes, brainInput);
+    const animation  = AnimationBaker.process(brainInput.rawAnimations, brainInput);
+    const shaders    = ShaderCompiler.process(brainInput.rawShaders, brainInput);
     const renderPlan = RenderPlanner.process(
       brainInput.rawScenes,
-      brainInput.usagePatterns
+      brainInput.usagePatterns,
+      brainInput
     );
+    const dispatchHints = GPUDispatchHintBuilder.process(brainInput);
 
     const packageSet = {
       schemaVersion: PULSE_GPU_BRAIN_SCHEMA_VERSION,
@@ -483,15 +630,17 @@ class PulseGPUBrainController {
       animation,
       shaders,
       renderPlan,
+      dispatchHints,
 
       evo: DUAL_MODE_EVO,
-      routingContract: "PulseSend-v10.4",
-      gpuOrganContract: "PulseGPU-v10.4"
+      routingContract: "PulseSend-v11",
+      gpuOrganContract: "PulseGPU-v11-Evo-symbolic",
+      binaryGpuOrganContract: "PulseBinaryGPU-v11-Evo"
     };
 
     log(
       "gpu",
-      "[Analyst] buildPackages() — complete",
+      "[Analyst] buildPackages() v11-Evo — complete",
       "color:#4CAF50;",
       {
         schemaVersion: packageSet.schemaVersion,
@@ -513,7 +662,7 @@ class PulseGPUBrainExport {
   static buildAndStore(brainInput) {
     log(
       "gpu",
-      "[Analyst] buildAndStore()",
+      "[Analyst] buildAndStore() v11-Evo",
       "color:#03A9F4;"
     );
 
@@ -521,7 +670,7 @@ class PulseGPUBrainExport {
 
     log(
       "gpu",
-      "[Analyst] packageSet stored",
+      "[Analyst] packageSet stored v11-Evo",
       "color:#4CAF50;"
     );
 
@@ -531,7 +680,7 @@ class PulseGPUBrainExport {
   static exportToRuntime() {
     log(
       "gpu",
-      "[Analyst] exportToRuntime()",
+      "[Analyst] exportToRuntime() v11-Evo",
       "color:#03A9F4;",
       { hasPackageSet: !!this.packageSet }
     );
@@ -553,12 +702,14 @@ export {
   PulseAnimationPackage,
   PulseShaderPackage,
   PulseRenderPlanPackage,
+  PulseGPUDispatchHintPackage,
   TextureOptimizer,
   MeshOptimizer,
   LightingBaker,
   AnimationBaker,
   ShaderCompiler,
   RenderPlanner,
+  GPUDispatchHintBuilder,
   PulseGPUBrainController,
   PulseGPUBrainExport
 };
