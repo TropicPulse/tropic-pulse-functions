@@ -53,7 +53,7 @@ import { boot } from "./PulseOSBrainCortex.js";
 // ============================================================================
 //  EXTERNAL SERVICE IQ (ALLOWED)
 // ============================================================================
-import * as firebase from "../netlify/functions/firebase.js";
+import { admin } from "../netlify/functions/firebase.js";
 
 
 // ============================================================================

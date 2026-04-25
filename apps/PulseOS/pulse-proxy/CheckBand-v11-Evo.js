@@ -32,8 +32,6 @@
 // ============================================================================
 //  OSKernel imports (backend‑safe)
 // ============================================================================
-import { logger } from "../OSKernel/PulseLogger.js";
-import { PulseLineage } from "../OSKernel/PulseIdentity.js";
 
 // Firestore (backend‑only)
 import { getFirestore } from "firebase-admin/firestore";
