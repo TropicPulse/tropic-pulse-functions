@@ -96,6 +96,18 @@ export const PulseOrganismMap = {
     },
 
     // ----------------------------------------------------------------------
+    // PULSE-CORE — Repo / Manifest / Translation
+    // ----------------------------------------------------------------------
+    "pulse-core": {
+      role: "Core Memory System",
+      root: "PULSE-CORE",   // REAL folder
+      organs: [
+        "PulseBinaryCoreOverlay","PulseCoreAIMemoryAdapter","PulseCoreBrain","PulseCoreEarnMemoryAdapter","PulseCoreEvolution","PulseCoreGovernor","PulseCoreGPUMemoryAdapter","PulseCoreLayers"
+        ,"PulseCoreMemory","PulseCoreMeshMemoryAdapter","PulseCoreProxyMemoryAdapter","PulseCoreRouterMemoryAdapter","PulseCoreSendMemoryAdapter"
+      ]
+    },
+
+    // ----------------------------------------------------------------------
     // PULSE‑DESIGN — Repo / Manifest / Translation
     // ----------------------------------------------------------------------
     "pulse-design": {
