@@ -48,7 +48,7 @@
 //  - These are NOT organs; they are membrane‑level sensors.
 // ============================================================================
 import * as PulseVitals from "./PULSEProofMonitor.js";
-import * as PulseLogger from "../PULSEProofLogger.js";
+import * as PulseLogger from "./PULSEProofLogger.js";
 
 
 // ============================================================================
@@ -63,7 +63,7 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 //  - Binary organism is the real nervous system.
 //  - This file ONLY boots it and exposes a safe shadow.
 // ============================================================================
-import PulseBinaryOrganismBoot from "./aiBinary-v11-Evo.js";
+import PulseBinaryOrganismBoot from "../PULSE-AI/aiBinary-v11-Evo.js";
 
 
 // ============================================================================

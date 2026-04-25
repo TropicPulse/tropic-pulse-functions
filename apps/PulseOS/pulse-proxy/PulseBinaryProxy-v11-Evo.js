@@ -1,13 +1,13 @@
 // ============================================================================
-//  BinaryProxy-v11-PURE-EVO-ABA.js
-//  PURE BINARY NERVE ROOT — FINAL v11‑EVO‑A‑B‑A EDITION
+//  BinaryProxy-v11-EVO-MAX-ABA.js
+//  PURE BINARY NERVE ROOT — FINAL v11‑EVO‑A‑B‑A MAX EDITION
 // ============================================================================
 //  ROLE:
 //    - Accept ONLY pure binary arrays (0/1).
-//    - Encode using BinaryAgent.
-//    - Exchange using BinaryAgent.
-//    - Emit A‑B‑A bandSignature + binaryField + waveField.
-//    - Deterministic fallback to PulseProxy-v11-Evo.
+//    - Encode using BinaryAgent (encoder).
+//    - Exchange using BinaryAgent.process().
+//    - Emit A‑B‑A bandSignature + binaryField + waveField + cycleSignature.
+//    - Deterministic fallback to PulseProxy-v11-Evo (or any symbolic proxy).
 //
 //  ARCHITECTURE LAW (v11‑EVO‑A‑B‑A):
 //    - Binary adds ONLY binary representation.
@@ -18,12 +18,29 @@
 //    - No randomness, no drift, no mutation.
 // ============================================================================
 
+export const BinaryProxyRole = {
+  layer: "BinaryProxy",
+  role: "PURE_BINARY_NERVE_ROOT",
+  version: "11.0-EVO-MAX-ABA",
+  lineage: "binary-proxy-v11-aba",
+  evo: {
+    binaryOnly: true,
+    symbolicFallback: true,
+    driftProof: true,
+    deterministic: true,
+    noRouting: true,
+    noOrgans: true,
+    noEvolution: true,
+    noRandomness: true,
+    abaBandAware: true
+  }
+};
+
 export function createBinaryProxy({
   encoder,
   fallbackProxyFactory,
   trace = false
 } = {}) {
-
   if (!encoder) {
     throw new Error("BinaryProxy requires a BinaryAgent encoder");
   }
@@ -50,10 +67,10 @@ export function createBinaryProxy({
   }
 
   // ---------------------------------------------------------------------------
-  //  A‑B‑A SURFACES (binary-only phenotype)
-  // ---------------------------------------------------------------------------
+  //  A‑B‑A SURFACES (binary-only phenotype, deterministic)
+// ---------------------------------------------------------------------------
   function buildBandSignature() {
-    return encoder.hash("binary-band");
+    return encoder.hash("binary-band-v11-aba");
   }
 
   function buildBinaryField() {
@@ -88,75 +105,82 @@ export function createBinaryProxy({
     return encoder.hash(`BINARY_PROXY_CYCLE::${cycle}`);
   }
 
+  function buildBinaryEnvelope(dir, bits, encoded, extra = null) {
+    const bandSignature = buildBandSignature();
+    const binaryField = buildBinaryField();
+    const waveField = buildWaveField();
+    const cycleSignature = buildCycleSignature();
+
+    const record = {
+      dir,
+      bits,
+      encoded,
+      bandSignature,
+      binaryField,
+      waveField,
+      cycleSignature
+    };
+
+    if (extra) {
+      record.extra = extra;
+    }
+
+    history.push(record);
+
+    return {
+      encoded,
+      bandSignature,
+      binaryField,
+      waveField,
+      cycleSignature
+    };
+  }
+
   // ---------------------------------------------------------------------------
   //  RECEIVE (binary → encoded)
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   function receive(bits) {
     cycle++;
 
     const pure = ensurePureBinaryOrFallback("receive", bits, "non-binary-input");
     const encoded = encoder.encode(pure);
 
-    const bandSignature = buildBandSignature();
-    const binaryField = buildBinaryField();
-    const waveField = buildWaveField();
-    const cycleSignature = buildCycleSignature();
-
     if (trace) {
       console.log("[BinaryProxy] IN:", pure);
     }
 
-    history.push({
-      dir: "in",
-      bits: pure,
-      encoded,
-      bandSignature,
-      binaryField,
-      waveField,
-      cycleSignature
-    });
-
-    return encoded;
+    const envelope = buildBinaryEnvelope("in", pure, encoded);
+    return envelope.encoded;
   }
 
   // ---------------------------------------------------------------------------
   //  SEND (binary → encoded)
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   function send(bits) {
     cycle++;
 
     const pure = ensurePureBinaryOrFallback("send", bits, "non-binary-output");
     const encoded = encoder.encode(pure);
 
-    const bandSignature = buildBandSignature();
-    const binaryField = buildBinaryField();
-    const waveField = buildWaveField();
-    const cycleSignature = buildCycleSignature();
-
     if (trace) {
       console.log("[BinaryProxy] OUT:", pure);
     }
 
-    history.push({
-      dir: "out",
-      bits: pure,
-      encoded,
-      bandSignature,
-      binaryField,
-      waveField,
-      cycleSignature
-    });
-
-    return encoded;
+    const envelope = buildBinaryEnvelope("out", pure, encoded);
+    return envelope.encoded;
   }
 
   // ---------------------------------------------------------------------------
   //  EXCHANGE (binary → cortex → binary)
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   function exchange(bits) {
     cycle++;
 
-    const pure = ensurePureBinaryOrFallback("exchange", bits, "non-binary-exchange");
+    const pure = ensurePureBinaryOrFallback(
+      "exchange",
+      bits,
+      "non-binary-exchange"
+    );
 
     const encodedIn = encoder.encode(pure);
     const response = encoder.process(encodedIn);
@@ -169,31 +193,20 @@ export function createBinaryProxy({
 
     const encodedOut = encoder.encode(pureResponse);
 
-    const bandSignature = buildBandSignature();
-    const binaryField = buildBinaryField();
-    const waveField = buildWaveField();
-    const cycleSignature = buildCycleSignature();
-
     if (trace) {
       console.log("[BinaryProxy] EXCHANGE IN:", pure);
       console.log("[BinaryProxy] EXCHANGE OUT:", pureResponse);
     }
 
-    history.push({
-      dir: "exchange",
-      in: pure,
-      out: pureResponse,
-      bandSignature,
-      binaryField,
-      waveField,
-      cycleSignature
+    const envelope = buildBinaryEnvelope("exchange", pure, encodedOut, {
+      responseBits: pureResponse
     });
 
-    return encodedOut;
+    return envelope.encoded;
   }
 
   // ---------------------------------------------------------------------------
-  //  FALLBACK — deterministic, drift-proof
+  //  FALLBACK — deterministic, drift-proof, symbolic proxy bridge
   // ---------------------------------------------------------------------------
   function fallback(op, bits, reason) {
     if (!fallbackProxyFactory) {
@@ -206,6 +219,7 @@ export function createBinaryProxy({
       console.warn(`[BinaryProxy] FALLBACK (${op}):`, reason, bits);
     }
 
+    // This is the ONLY symbolic bridge: we hand off to a v11 Proxy.
     return fallbackProxyFactory({
       jobId: `fallback-${op}`,
       pattern: "binary-fallback",
@@ -221,6 +235,7 @@ export function createBinaryProxy({
   //  PUBLIC API
   // ---------------------------------------------------------------------------
   return {
+    role: BinaryProxyRole,
     receive,
     send,
     exchange,

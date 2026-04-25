@@ -1,79 +1,63 @@
 // ============================================================================
-//  PulseUnderstanding.js — v12-EVO-MAX
-//  Cortical Opener • Organism Loader • Deterministic Frontend Brainstem
-//
-//  METAPHOR:
-//  - The user has just stepped *through the window* (PulseEvolutionaryWindow).
-//  - Now they are *inside the house*, where real sensing and cognition begin.
-//  - This layer is the CORTEX OPENING: the moment the organism becomes aware.
+//  PulseUnderstanding.js — v11-EVO-BINARY-FIRST-ALL
+//  Cortical Opener • Binary-First Organism Loader • Deterministic Brainstem
 // ============================================================================
 
-
-// ============================================================================
-//  IMPORTS — MAPS + OS KERNEL (DOWNSTREAM OF WINDOW MEMBRANE)
-// ============================================================================
 import { PulseIntentMap } from "../PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
 import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
 
-// OS kernel (v12-EVO-MAX handles Evolution + Brain + SpinalCord + Governor)
-import { PulseOSv12Evo } from "./PulseOS-v12-Evo.js";
+// Symbolic OS kernel v11
+import { PulseOSv11Evo } from "../PULSE-OS/PulseOS-v11-Evo.js";
 
-// Cortex-level / page-level extensions (already wired to SpinalCord by OS boot)
-// - Proxy/Identity: external I/O + pressure sensors INSIDE the house.
-// - Router: nervous system pathways.
-// - GPU: visual cortex / sensory acceleration.
-import * as PulseProxy from "../PULSE-PROXY/PulseProxy-v12-EVO.js";
-import * as PulseRouter from "../pulse-router/PulseRouter-v12-EVO.js";
-import * as PulseGPU from "../PULSE-GPU/PulseGPU-v12-EVO.js";
+// Binary OS kernel v11 (pure organism core)
+import { PulseBinaryOSv11Evo } from "../PULSE-OS/PulseBinaryOS-v11-EVO-MAX.js";
 
+// ---------------- SYMBOLIC ORGANS ----------------
+import * as PulseProxySym from "../PULSE-PROXY/PulseProxy-v11-EVO.js";
+import * as PulseRouterSym from "../pulse-router/PulseRouter-v11-EVO.js";
+import * as PulseGPUSym from "../PULSE-GPU/PulseGPU-v11-EVO.js";
+import * as PulseMeshSym from "../PULSE-MESH/PulseMesh-v11-EVO.js";
+import * as PulseAISym from "../PULSE-AI/aiBinary-v11-Evo.js";
+import * as PulseSendSym from "../PULSE-SEND/PulseSend-v11-EVO.js";
+
+// ---------------- BINARY ORGANS ------------------
+import { createBinaryProxy } from "../PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
+import * as PulseRouterBin from "../pulse-router/PulseBinaryRouter-v11-EVO.js";
+import * as PulseGPUBin from "../PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
+// (If you have binary Mesh/AI/SendEarn, import them similarly)
 
 // ============================================================================
-//  CONTEXT — KERNEL IDENTITY (v12-EVO-MAX)
-// ============================================================================
+
 const PULSE_UNDERSTANDING_CONTEXT = {
   layer: "PulseUnderstanding",
   role: "KERNEL_OPENER",
-  version: "12.0-EVO-MAX",
-  lineage: "cortical-opener-core",
+  version: "11.0-EVO-BINARY-FIRST-ALL",
+  lineage: "cortical-opener-core-v11",
   evo: {
-    // Mode + environment
     dualMode: true,
     browserOnly: true,
-
-    // Advantage + loop theory awareness (front-end side)
-    advantageCascadeAware: true,
-    unifiedAdvantageField: true,
-    loopTheoryAware: true,
-    continuanceAware: true,
     driftProof: true,
     zeroDriftIdentity: true,
-
-    // Organism + loader role
     organismLoader: true,
     corticalOpener: true,
     routeChainAware: true,
     organismWideIdentityAware: true,
-
-    // Binary / symbolic awareness (but no heavy compute)
     binaryAware: true,
     symbolicAware: true,
     dualBandAware: true,
-
-    // Bridges
-    legacyBridgeCapable: true,
+    binaryFirstIdentity: true,
     proxyEvoReady: true,
     meshAware: true,
     gpuAware: true,
     sendEarnAware: true,
-    spinalCordAware: true
+    spinalCordAware: true,
+    memoryCoreAware: true,
+    binaryOverlayAware: true,
+    binaryKernelAware: true
   }
 };
 
-
-// ============================================================================
-//  ENVIRONMENT SNAPSHOT (DETERMINISTIC, NO TIME)
-// ============================================================================
 function buildEnvironmentSnapshot() {
   if (typeof window === "undefined") {
     return {
@@ -96,100 +80,223 @@ function buildEnvironmentSnapshot() {
 
 const PulseEnvironment = buildEnvironmentSnapshot();
 
-
-// ============================================================================
-//  GOVERNED EXECUTION — DELEGATE TO OS KERNEL GOVERNOR
-// ============================================================================
+// symbolic governor only
 function runThroughGovernor(organName, pulseOrImpulse, fn) {
-  // Delegate to OS-level governor so all runs share the same guard pattern
-  return PulseOSv12Evo.runThroughGovernor(organName, pulseOrImpulse, fn);
+  return PulseOSv11Evo.runThroughGovernor(organName, pulseOrImpulse, fn);
 }
 
+// ---------------- BINARY-FIRST IDENTITY ----------------
+async function resolveIdentityBinaryFirst(ProxyBin, ProxySym) {
+  // 1) binary identity if binary proxy exposes it
+  if (ProxyBin && typeof ProxyBin.identityBinary === "function") {
+    try {
+      const binId = await ProxyBin.identityBinary();
+      if (binId) return { kind: "binary", value: binId };
+    } catch {}
+  }
+
+  // 2) symbolic/hybrid identity
+  if (ProxySym && typeof ProxySym.identity === "function") {
+    try {
+      const hybridId = await ProxySym.identity("hybrid");
+      if (hybridId) return { kind: "hybrid", value: hybridId };
+    } catch {}
+  }
+
+  return { kind: "none", value: null };
+}
+
+// ---------------- BINARY-FIRST KERNELS ----------------
+async function resolveKernelsBinaryFirst() {
+  const BinaryKernel = await PulseBinaryOSv11Evo.Kernel;
+  const SymbolicKernel = await PulseOSv11Evo.Kernel;
+  return { BinaryKernel, SymbolicKernel };
+}
 
 // ============================================================================
 //  KERNEL BOOTSTRAP — UNDERSTANDING LAYER (A1 UNDER WINDOW)
-//
-//  METAPHOR:
-//  - OS-Evo has already booted Evolution + Brain + SpinalCord + Governor.
-//  - Understanding now:
-//      1. Registers itself as an extension on the Spinal Cord.
-//      2. Attaches Router + GPU + Proxy (already wired as extensions).
-//      3. Resolves identity via Proxy (if available).
-//      4. Wraps everything in a cortical meta context.
 // ============================================================================
 async function buildPulseKernel() {
-  // 0) Get OS kernel (Evolution + Brain + SpinalCord + Governor)
-  const OSKernel = await PulseOSv12Evo.Kernel;
+  const { BinaryKernel, SymbolicKernel } = await resolveKernelsBinaryFirst();
 
-  const Brain = OSKernel.Brain;
-  const Evolution = OSKernel.Evolution;
-  const SpinalCord = OSKernel.SDN;
-  const CoreGovernor = OSKernel.Governor ?? null;
+  // ---- binary-first core organs ----
+  const BinaryBrain = BinaryKernel?.Brain ?? null;
+  const BinaryEvolution = BinaryKernel?.Evolution ?? null;
+  const BinarySDN = BinaryKernel?.SDN ?? null;
+  const BinaryMemoryCore = BinaryKernel?.MemoryCore ?? null;
+  const BinaryOverlay = BinaryKernel?.BinaryOverlay ?? null;
 
-  // 1) Register Understanding as an extension on the Spinal Cord (if supported)
-  try {
-    SpinalCord?.registerExtension?.("Understanding", "extension", {
-      version: "v12",
-      role: "cortical-opener",
-      layer: "A1"
-    });
-  } catch {
-    // Non-fatal: older SDN may not support extension registry
-  }
+  const Brain = BinaryBrain ?? SymbolicKernel.Brain;
+  const Evolution = BinaryEvolution ?? SymbolicKernel.Evolution;
+  const SpinalCord = BinarySDN ?? SymbolicKernel.SDN;
+  const CoreGovernor = SymbolicKernel.Governor ?? null;
 
-  // 2) Identity via Proxy v12-EVO (pressure sensors inside the house)
-  let identity = null;
-  try {
-    identity = await PulseProxy.identity?.("hybrid");
-  } catch {
-    identity = null;
-  }
+  // ---- memory / overlay (binary-first, fallback symbolic) ----
+  const MemoryCore =
+    BinaryMemoryCore ??
+    SymbolicKernel.MemoryCore ??
+    null;
 
-  // 3) Router + GPU (nervous system + visual cortex)
-  const Router = PulseRouter;
-  const GPU = PulseGPU;
+  const BinaryOverlayFinal =
+    BinaryOverlay ??
+    SymbolicKernel.BinaryOverlay ??
+    null;
 
-  // 4) Proxy v12-EVO (external I/O spine)
-  const Proxy = PulseProxy.createProxy
-    ? PulseProxy.createProxy({
+  const EpisodicMemory =
+    SymbolicKernel.EpisodicMemory ??
+    (MemoryCore && MemoryCore.Episodic ? MemoryCore.Episodic : null);
+
+  const SemanticMemory =
+    SymbolicKernel.SemanticMemory ??
+    (MemoryCore && MemoryCore.Semantic ? MemoryCore.Semantic : null);
+
+  // ---- Mesh / AI / Send-Earn (symbolic, but binary-aware) ----
+  const Mesh = PulseMeshSym;
+  const AI = PulseAISym;
+  const SendEarn = PulseSendEarnSym;
+
+  // ---- Router / GPU: binary-first, fallback symbolic ----
+  const Router = Object.keys(PulseRouterBin || {}).length
+    ? PulseRouterBin
+    : PulseRouterSym;
+
+  const GPU = Object.keys(PulseGPUBin || {}).length
+    ? PulseGPUBin
+    : PulseGPUSym;
+
+  // ---- symbolic proxy base (for fallback + non-binary paths) ----
+  const ProxySym = PulseProxySym.createProxy
+    ? PulseProxySym.createProxy({
         Router,
         Brain,
         Evolution,
-        Identity: identity,
+        Identity: null, // filled after identity resolution
         Environment: PulseEnvironment,
-        Governor: CoreGovernor
+        Governor: CoreGovernor,
+        MemoryCore,
+        BinaryOverlay: BinaryOverlayFinal,
+        Mesh,
+        AI,
+        SendEarn
       })
-    : PulseProxy;
+    : PulseProxySym;
 
-  // 5) Emit a deterministic “understanding-online” impulse into the Spinal Cord
+  // ---- binary proxy (pure binary, with symbolic fallback) ----
+  // NOTE: you must provide a BinaryAgent encoder here.
+  const encoder = SymbolicKernel.BinaryAgent ?? null;
+  let ProxyBin = null;
+
+  if (encoder) {
+    ProxyBin = createBinaryProxy({
+      encoder,
+      fallbackProxyFactory: (job) => {
+        // deterministic bridge into symbolic proxy
+        if (typeof ProxySym.send === "function") {
+          return ProxySym.send(job);
+        }
+        if (typeof ProxySym.exchange === "function") {
+          return ProxySym.exchange(job);
+        }
+        return job;
+      },
+      trace: false
+    });
+  }
+
+  // ---- identity (binary-first, using both proxies) ----
+  const identityResult = await resolveIdentityBinaryFirst(ProxyBin, ProxySym);
+  const identity = identityResult.value;
+
+  // patch identity into symbolic proxy if it supports it
+  if (ProxySym && typeof ProxySym.setIdentity === "function") {
+    try {
+      ProxySym.setIdentity(identity);
+    } catch {}
+  }
+
+  // ---- unified Proxy handle: binary-first, fallback symbolic ----
+  const Proxy = ProxyBin || ProxySym;
+
+  // ---- register Understanding on SDN ----
+  try {
+    SpinalCord?.registerExtension?.("Understanding", "extension", {
+      version: "v11",
+      role: "cortical-opener",
+      layer: "A1",
+      binaryFirst: true
+    });
+  } catch {}
+
+  // ---- optional Mesh / AI / Send-Earn boot ----
+  try {
+    if (Mesh && typeof Mesh.boot === "function") {
+      Mesh.boot({
+        Brain,
+        Evolution,
+        SDN: SpinalCord,
+        MemoryCore,
+        BinaryOverlay: BinaryOverlayFinal
+      });
+    }
+  } catch {}
+
+  try {
+    if (AI && typeof AI.boot === "function") {
+      AI.boot({
+        Brain,
+        Evolution,
+        SDN: SpinalCord,
+        MemoryCore,
+        BinaryOverlay: BinaryOverlayFinal,
+        Mesh
+      });
+    }
+  } catch {}
+
+  try {
+    if (SendEarn && typeof SendEarn.boot === "function") {
+      SendEarn.boot({
+        Brain,
+        Evolution,
+        SDN: SpinalCord,
+        MemoryCore,
+        BinaryOverlay: BinaryOverlayFinal,
+        Mesh,
+        AI
+      });
+    }
+  } catch {}
+
+  // ---- dual-band impulse into SDN ----
   try {
     SpinalCord?.emitImpulse?.("Understanding", {
       modeKind: "dual",
       executionContext: {
         sceneType: "cortical-opener",
         workloadClass: "frontend-boot",
-        dispatchSignature: "Understanding.v12-EVO-MAX",
+        dispatchSignature: "Understanding.v11-EVO-BINARY-FIRST-ALL",
         shapeSignature: "A1-layer",
-        extensionId: "Understanding"
+        extensionId: "Understanding",
+        identityKind: identityResult.kind
       },
       pressureSnapshot: {
         runtime: PulseEnvironment.runtime,
         online: PulseEnvironment.online
       }
     });
-  } catch {
-    // Non-fatal: SDN may be older or not yet fully wired
-  }
+  } catch {}
 
   const meta = {
     ...PULSE_UNDERSTANDING_CONTEXT,
     identity,
+    identityKind: identityResult.kind,
     environment: PulseEnvironment
   };
 
   const Pulse = {
     meta,
     Identity: identity,
+    IdentityKind: identityResult.kind,
     Environment: PulseEnvironment,
 
     Brain,
@@ -198,6 +305,15 @@ async function buildPulseKernel() {
     GPU,
     SDN: SpinalCord,
     Proxy,
+
+    MemoryCore,
+    BinaryOverlay: BinaryOverlayFinal,
+    EpisodicMemory,
+    SemanticMemory,
+
+    Mesh,
+    AI,
+    SendEarn,
 
     Governed: {
       run: runThroughGovernor
@@ -209,9 +325,8 @@ async function buildPulseKernel() {
 
 const PulseKernelPromise = buildPulseKernel();
 
-
 // ============================================================================
-//  GLOBAL BROADCAST (ASYNC-AWARE, NO TIME, NO RANDOMNESS)
+//  GLOBAL BROADCAST
 // ============================================================================
 if (typeof window !== "undefined") {
   PulseKernelPromise
@@ -228,19 +343,26 @@ if (typeof window !== "undefined") {
             Proxy: PulseKernel.Proxy,
             Governed: PulseKernel.Governed,
             Environment: PulseKernel.Environment,
-            Identity: PulseKernel.Identity
+            Identity: PulseKernel.Identity,
+            IdentityKind: PulseKernel.IdentityKind,
+            MemoryCore: PulseKernel.MemoryCore,
+            BinaryOverlay: PulseKernel.BinaryOverlay,
+            EpisodicMemory: PulseKernel.EpisodicMemory,
+            SemanticMemory: PulseKernel.SemanticMemory,
+            Mesh: PulseKernel.Mesh,
+            AI: PulseKernel.AI,
+            SendEarn: PulseKernel.SendEarn
           }
         : PulseKernel;
     })
     .catch((err) => {
-      console.error("[PulseUnderstanding v12-EVO-MAX] Kernel bootstrap failed:", err);
+      console.error(
+        "[PulseUnderstanding v11-EVO-BINARY-FIRST-ALL] Kernel bootstrap failed:",
+        err
+      );
     });
 }
 
-
-// ============================================================================
-//  EXPORTS — FULL BOOT LAYER (A1 CORTICAL OPENER)
-// ============================================================================
 export const PulseUnderstanding = {
   ...PULSE_UNDERSTANDING_CONTEXT,
   Environment: PulseEnvironment,
@@ -250,6 +372,8 @@ export const PulseUnderstanding = {
   Kernel: PulseKernelPromise,
   Identity: () =>
     typeof window !== "undefined" ? window?.Pulse?.Identity ?? null : null,
+  IdentityKind: () =>
+    typeof window !== "undefined" ? window?.Pulse?.IdentityKind ?? null : null,
   runThroughGovernor
 };
 

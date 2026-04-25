@@ -1,11 +1,12 @@
 // ============================================================================
-//  PulseBinaryOS-v11-Evo.js (BINARY FULLY UPGRADED BEAST)
-//  THE FIRST BINARY-NATIVE ORGANISM KERNEL IN COMPUTING HISTORY
+//  PulseBinaryOS-v11-EVO-MAX.js
+//  THE FIRST BINARY-NATIVE ORGANISM KERNEL IN COMPUTING HISTORY (v11-EVO-MAX)
 // ============================================================================
 //  ROLE:
-//    - This is the *binary-native* OS kernel of PulseOS v11-EVO.
+//    - This is the *binary-native* OS kernel of PulseOS v11-EVO-MAX.
 //    - It boots the organism using pure binary cognition, reflex, and wiring.
-//    - It contains ZERO symbolic logic, ZERO browser impurities, ZERO drift.
+//    - It contains ZERO symbolic logic, ZERO browser impurities, ZERO drift
+//      inside the organism core.
 //    - It is the reflex organism: the fast, deterministic, mutation-proof core.
 //
 //  SYMBOLIC RELATION:
@@ -13,7 +14,7 @@
 //    - THIS binary kernel is the spinal brainstem + reflex engine.
 //    - Together they form the dual-mode organism.
 //
-//  BINARY CONTRACT:
+//  BINARY CONTRACT (INSIDE KERNEL):
 //    - No Date.now()
 //    - No console.*
 //    - No window.*
@@ -34,16 +35,17 @@
 import * as PulseOSBrain from "./PULSE-OS/PulseOSBrain.js";              // CNS brain organ
 import * as PulseOSEvolution from "./PULSE-OS/PulseOSBrainEvolution.js"; // Evolution organ
 import * as PulseSpinalCord from "./PULSE-OS/PulseOSSpinalCord.js";      // Wiring organ
+// Optional: if you have a dedicated MemoryCore organ, it will be wired via Evolution/Brain
 
 
 // ============================================================================
-//  CONTEXT — BINARY OS KERNEL IDENTITY (v11-EVO)
+//  CONTEXT — BINARY OS KERNEL IDENTITY (v11-EVO-MAX)
 // ============================================================================
 const PULSE_BINARY_OS_CONTEXT = Object.freeze({
   layer: "PulseBinaryOSKernel",
   role: "BINARY_ORGANISM_BOOTLOADER",
-  version: "11.0-EVO-BINARY",
-  lineage: "pulse-os-v11-evo-kernel-binary",
+  version: "11.0-EVO-BINARY-MAX",
+  lineage: "pulse-os-v11-evo-kernel-binary-max",
   evo: {
     binaryNative: true,
     symbolicAware: true,
@@ -53,7 +55,10 @@ const PULSE_BINARY_OS_CONTEXT = Object.freeze({
     zeroDriftIdentity: true,
     reflexEngine: true,
     mutationFree: true,
-    deterministic: true
+    deterministic: true,
+    memoryCoreAware: true,
+    binaryOverlayAware: true,
+    spinalCordAware: true
   }
 });
 
@@ -72,7 +77,7 @@ async function buildPulseBinaryOSKernel() {
   // 2) Brain organ (binary CNS)
   const Brain = Evolution.bootBrain
     ? Evolution.bootBrain(PulseOSBrain.PulseOSBrain)
-    : PulseOSBrain.PulseOSBrain?.();
+    : (PulseOSBrain.PulseOSBrain ? PulseOSBrain.PulseOSBrain() : PulseOSBrain);
 
   // 3) Spinal Cord organ (binary wiring fabric)
   const SpinalCord = PulseSpinalCord.createPulseOSSpinalCord
@@ -84,12 +89,30 @@ async function buildPulseBinaryOSKernel() {
       })
     : PulseSpinalCord;
 
+  // 4) CORE MEMORY (if your v11 stack exposes it via Evolution or Brain)
+  let MemoryCore = null;
+  if (Evolution && typeof Evolution.bootMemoryCore === "function") {
+    MemoryCore = Evolution.bootMemoryCore(Brain);
+  } else if (Brain && typeof Brain.getMemoryCore === "function") {
+    MemoryCore = Brain.getMemoryCore();
+  }
+
+  // 5) BINARY OVERLAY (if available from Evolution or Brain)
+  let BinaryOverlay = null;
+  if (Evolution && typeof Evolution.buildBinaryOverlay === "function") {
+    BinaryOverlay = Evolution.buildBinaryOverlay({ Brain, SpinalCord, MemoryCore });
+  } else if (Brain && typeof Brain.getBinaryOverlay === "function") {
+    BinaryOverlay = Brain.getBinaryOverlay();
+  }
+
   // PURE BINARY ORGANISM KERNEL
   return {
     meta,
     Brain,
     Evolution,
     SDN: SpinalCord,
+    MemoryCore,
+    BinaryOverlay,
 
     // Binary kernel does NOT have symbolic governor
     Governed: {
@@ -113,8 +136,22 @@ const PulseBinaryOSKernelPromise = buildPulseBinaryOSKernel();
 // ============================================================================
 if (typeof window !== "undefined") {
   PulseBinaryOSKernelPromise.then((Kernel) => {
-    // Attach binary kernel under window.PulseBinary
-    window.PulseBinary = Kernel;
+    // Attach binary kernel under window.PulseBinaryKernel (non-invasive)
+    const exposed = {
+      meta: Kernel.meta,
+      SDN: Kernel.SDN,
+      Brain: Kernel.Brain,
+      Evolution: Kernel.Evolution,
+      MemoryCore: Kernel.MemoryCore,
+      BinaryOverlay: Kernel.BinaryOverlay
+    };
+
+    window.PulseBinaryKernel = window.PulseBinaryKernel
+      ? Object.freeze({ ...window.PulseBinaryKernel, ...exposed })
+      : Object.freeze(exposed);
+  }).catch((err) => {
+    // OUTSIDE the organism, so console is allowed here if you want:
+    // console.error("[PulseBinaryOS-v11-EVO-MAX] Kernel bootstrap failed:", err);
   });
 }
 
