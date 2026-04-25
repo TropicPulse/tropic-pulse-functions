@@ -9,7 +9,7 @@
 // --------------------------------------
 // • Translates Cortex intent into earn-ready metadata.
 // • Classifies impulses (heavy/medium/light) deterministically.
-// • Shapes routeHint based on class + mode (symbolic/binary/dual).
+// • Shapes routeHint based on class + mode (symbolic/PULSE-TOOLS/dual).
 // • Stabilizes energy deterministically (v11-Evo contract).
 // • Attaches volatility + earn-context for EarnEngine.
 // • Pure metadata-only — zero payload mutation.

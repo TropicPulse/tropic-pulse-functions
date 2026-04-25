@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktEmbassyLedger.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktEmbassyLedger.js
 // LAYER: THE EMBASSY LEDGER (v11‑Evo A‑B‑A)
 // (Marketplace Registry + Identity Verifier + Diplomatic Roster)
 // ============================================================================

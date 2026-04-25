@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnEndocrineSystem-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnEndocrineSystem-v11-Evo.js
 // LAYER: THE ENDOCRINE SYSTEM (v11-Evo)
 // (Performance Intelligence + Reputation Hormones + Trust Regulation)
 // ============================================================================

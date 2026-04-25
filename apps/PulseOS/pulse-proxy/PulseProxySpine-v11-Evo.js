@@ -1,5 +1,5 @@
 // ============================================================================
-//  FILE: /apps/pulse-proxy/PulseProxySpine.js
+//  FILE: /apps/PULSE-PROXY/PulseProxySpine.js
 //  PULSE OS v11.1 — PULSE PROXY SPINE (BACKEND SPINE)
 //  Unified TPProxy Gateway • Vitals Pump • OS‑Healer Feed
 //  ORGANISM‑CORRECT BACKEND ORGAN — NO BUSINESS LOGIC, NO MARKETPLACE.
@@ -130,16 +130,16 @@ import {
   readPacketExists,
   writePacket,
   generatePacketData
-} from "./pulse-earn/PacketEngine.js";
+} from "./PULSE-EARN/PacketEngine.js";
 
 // ICU Vitals Monitor
-import { updateUserMetrics as recordUserMetrics } from "./pulse-os/PulseUserMetrics.js";
+import { updateUserMetrics as recordUserMetrics } from "./PULSE-OS/PulseUserMetrics.js";
 
 // OS‑level organs (Heart, OSKernel, Immune Layers)
 import startPulseTimer from "./PulseProxyHeart.js";
-import startPulseOS from "./pulse-os/PulseOS.js";
-import startPulseOSHealer from "./pulse-os/PulseOSHealer.js";
-import startGlobalHealer from "../pulse-os/GlobalHealer.js";
+import startPulseOS from "./PULSE-OS/PulseOS.js";
+import startPulseOSHealer from "./PULSE-OS/PulseOSHealer.js";
+import startGlobalHealer from "../PULSE-OS/GlobalHealer.js";
 
 // ============================================================================
 //  SINGLE‑BOOT GUARDS — v11.1 (idempotent, process‑local)
@@ -535,7 +535,7 @@ app.get("/TPProxy", async (req, res) => {
 //   • Reports Redis status, uptime, protocol, and event loop lag.
 //   • No mutations beyond healingState.lastHealthCheck.
 // ============================================================================
-app.get("/pulse-proxy/health", async (req, res) => {
+app.get("/PULSE-PROXY/health", async (req, res) => {
   const now = Date.now();
   healingState.lastHealthCheck = now;
 
@@ -578,7 +578,7 @@ app.get("/pulse-proxy/health", async (req, res) => {
 //   • CPU, memory, event loop lag, cache status, and cold‑start awareness.
 //   • Read‑only; no cross‑subsystem writes.
 // ============================================================================
-app.get("/pulse-proxy/metrics", async (req, res) => {
+app.get("/PULSE-PROXY/metrics", async (req, res) => {
   const now = Date.now();
   healingState.lastMetricsCheck = now;
 
@@ -630,7 +630,7 @@ app.get("/pulse-proxy/metrics", async (req, res) => {
 //   • Exposes node‑level identity and runtime envelope for debuggers / healers.
 //   • No business logic, no routing decisions.
 // ============================================================================
-app.get("/pulse-proxy/node", async (req, res) => {
+app.get("/PULSE-PROXY/node", async (req, res) => {
   const now = Date.now();
   healingState.lastNodeCheck = now;
 
@@ -673,7 +673,7 @@ app.get("/pulse-proxy/node", async (req, res) => {
 //   • Simple reflex endpoint for liveness checks.
 //   • No writes beyond healingState.lastPingCheck.
 // ============================================================================
-app.get("/pulse-proxy/ping", async (req, res) => {
+app.get("/PULSE-PROXY/ping", async (req, res) => {
   const t0 = Date.now();
   healingState.lastPingCheck = t0;
 

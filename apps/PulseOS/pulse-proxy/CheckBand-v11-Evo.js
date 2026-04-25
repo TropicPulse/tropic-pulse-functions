@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/pulse-proxy/CheckBand-v11-EVO-BINARY.js
+// FILE: /apps/PULSE-PROXY/CheckBand-v11-EVO-BINARY.js
 // PULSE INSTANCE ORCHESTRATOR — “CHECKBAND” — v11‑EVO‑BINARY
 // “THE BAND CONTROLLER / INSTANCE ADRENAL SYSTEM / BINARY-FIRST ORCHESTRATOR”
 // ============================================================================

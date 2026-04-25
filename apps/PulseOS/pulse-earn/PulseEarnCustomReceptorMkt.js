@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnCustomReceptor-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnCustomReceptor-v11-Evo.js
 // LAYER: THE GENETIC REGULATOR (v11-Evo A‑B‑A)
 // (Deterministic Marketplace Interpreter + Receptor Builder)
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktCourier-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktCourier-v11-Evo.js
 // LAYER: THE COURIER (v11‑Evo A‑B‑A)
 // (Deterministic Spheron Receptor + A‑B‑A Band Surfaces)
 // ============================================================================

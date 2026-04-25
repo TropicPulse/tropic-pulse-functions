@@ -179,7 +179,7 @@ const Transport = {
       return { error: "Fetch API not available in this environment" };
     }
 
-    const res = await fetch("/pulse-proxy/endpoint", {
+    const res = await fetch("/PULSE-PROXY/PulseProxyInnerAgent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, payload, context: CNS_CONTEXT })
@@ -204,7 +204,7 @@ const Transport = {
       return null;
     }
 
-    const res = await fetch("/pulse-proxy/CheckRouterMemory", {
+    const res = await fetch("/PULSE-PROXY/CheckRouterMemory", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ logs, context: CNS_CONTEXT })

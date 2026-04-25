@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnGenome-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnGenome-v11-Evo.js
 // LAYER: THE GENOME CORE (v11-Evo)
 // (Immutable DNA Sequence + Cross‑Organism Law + Eternal Job Contract)
 // ============================================================================

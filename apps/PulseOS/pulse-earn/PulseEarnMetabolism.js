@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMetabolism-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMetabolism-v11-Evo.js
 // LAYER: THE METABOLIC ENGINEER (v11-Evo + Dual-Band + Binary + Wave)
 // (Interpreter of Jobs + Safe Executor + Deterministic Throughput Engine)
 // ============================================================================

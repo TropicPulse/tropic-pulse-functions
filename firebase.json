@@ -28,9 +28,9 @@
     "rewrites": [
       { "source": "/", "destination": "/index.html" },
 
-      { "source": "/admin", "destination": "/admin/admin.html" },
-      { "source": "/admin/", "destination": "/admin/admin.html" },
-      { "source": "/admin/**", "destination": "/admin" },
+      { "source": "/PULSEAdmin", "destination": "/PULSEAdmin/PULSEAdmin.html" },
+      { "source": "/PULSEAdmin/", "destination": "/PULSEAdmin/PULSEAdmin.html" },
+      { "source": "/PULSEAdmin/**", "destination": "/PULSEAdmin" },
 
       {
         "source": "/TPProxy",
@@ -57,9 +57,9 @@
         "function": "getStripeDashboardLink"
       },
 
-      { "source": "/proxy", "destination": "/pulse-proxy/PulseBand.html" },
-      { "source": "/pulse-proxy/", "destination": "/pulse-proxy/PulseBand.html" },
-      { "source": "/pulse-proxy/**", "destination": "/proxy" },
+      { "source": "/proxy", "destination": "/PULSE-PROXY/PulseBand.html" },
+      { "source": "/PULSE-PROXY/", "destination": "/PULSE-PROXY/PulseBand.html" },
+      { "source": "/PULSE-PROXY/**", "destination": "/proxy" },
 
       { "source": "/emailopen", "function": "emailOpened" },
       { "source": "/unsubscribe", "function": "unsubscribe" },

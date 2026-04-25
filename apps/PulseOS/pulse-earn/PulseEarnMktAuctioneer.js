@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktAuctioneer-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktAuctioneer-v11-Evo.js
 // LAYER: MARKETPLACE AUCTIONEER (v11‑Evo A‑B‑A)
 // Vast.ai Deterministic Adapter
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/pulse-proxy/pulseHistoryRepair.js
+// FILE: /apps/PULSE-PROXY/pulseHistoryRepair.js
 // PULSE HISTORY REPAIR — VERSION 11.0
 // “THE SHORT‑TERM MEMORY LAYER++ / WORKING MEMORY REPAIR ENGINE++”
 // ============================================================================

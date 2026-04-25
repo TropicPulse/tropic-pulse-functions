@@ -6,7 +6,7 @@
 
 import { translateFirestoreDocument } from "../pulse-translator/firestoreToPulse.js";
 import { translateSQLSchema } from "../pulse-translator/sqlToPulse.js";
-import { validatePulseField } from "../pulse-specs/pulseFields.js";
+import { validatePulseField } from "../PULSE-SPECS/pulseFields.js";
 
 // ============================================================================
 //  IDENTITY — THE INSTRUMENTS (v10.4)

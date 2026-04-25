@@ -49,7 +49,7 @@
 //  - These are NOT organs; they are membrane‑level sensors.
 // ============================================================================
 import * as PulseVitals from "./PULSEProofMonitor.js";
-import * as PulseLogger from "./PULSEProofLogger.js";
+import * as PulseLogger from "../PULSEProofLogger.js";
 
 
 // ============================================================================

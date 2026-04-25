@@ -43,7 +43,7 @@
 // ============================================================================
 //  SAFE LOGGING (ACCESS IMPORT)
 // ============================================================================
-import { log, warn, error as logError } from "../PULSEProofLogger.js";
+import { log, warn, error as logError } from "../PULSEX/PULSEProofLogger.js";
 
 
 // ============================================================================

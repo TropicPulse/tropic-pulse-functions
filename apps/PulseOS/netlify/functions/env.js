@@ -18,19 +18,19 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import sharp from "sharp";
 import { fileURLToPath } from "url";
-// Marketplace adapters (inside /pulse-earn/marketplaces/)
-// import { marketplaceA } from "../pulse-earn/marketplaces/marketplaceA.js";
-// import { marketplaceB } from "../pulse-earn/marketplaces/marketplaceB.js";
-// import { marketplaceC } from "../pulse-earn/marketplaces/marketplaceC.js";
+// Marketplace adapters (inside /PULSE-EARN/marketplaces/)
+// import { marketplaceA } from "../PULSE-EARN/marketplaces/marketplaceA.js";
+// import { marketplaceB } from "../PULSE-EARN/marketplaces/marketplaceB.js";
+// import { marketplaceC } from "../PULSE-EARN/marketplaces/marketplaceC.js";
 
 // // Remote scoring (ESM only)
-// import { runUserScoring } from "../pulse-proxy/PulseUserScoring.js";
+// import { runUserScoring } from "../PULSE-PROXY/PulseUserScoring.js";
 
-// // Reputation loader (inside /pulse-earn/)
-// import { loadMarketplaceReputation } from "../pulse-earn/MarketplaceReputation.js";
+// // Reputation loader (inside /PULSE-EARN/)
+// import { loadMarketplaceReputation } from "../PULSE-EARN/MarketplaceReputation.js";
 
-// // Connector (inside /pulse-earn/)
-// import { getNextJob } from "../pulse-earn/MarketplaceConnector.js";
+// // Connector (inside /PULSE-EARN/)
+// import { getNextJob } from "../PULSE-EARN/MarketplaceConnector.js";
 
 // // Example: capacity for ONE worker instance
 // const capacity = {

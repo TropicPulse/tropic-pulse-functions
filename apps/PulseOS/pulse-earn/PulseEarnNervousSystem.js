@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnNervousSystem-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnNervousSystem-v11-Evo.js
 // LAYER: THE NERVOUS SYSTEM + EXCHANGE OFFICE (v11-Evo + Dual-Band + Binary + Wave)
 // (Deterministic Job Intake + Result Forwarding + Reputation Updating)
 // ============================================================================
@@ -184,7 +184,7 @@ export function fetchJobFromMarketplace() {
         `${job.id}::${job.marketplaceId}::${nervousHealing.cycleCount}`
       );
 
-      // A-B-A: intake band/binary/wave from job surface
+      // A-B-A: intake band/PULSE-TOOLS/wave from job surface
       buildNervousBandBinaryWave(job, null, nervousHealing.cycleCount);
     }
 
@@ -262,7 +262,7 @@ export function submitMarketplaceResult(job, result) {
       `${job.id}::${job.marketplaceId}::${result.jobSuccessRate ?? 0}`
     );
 
-    // A-B-A: forward band/binary/wave using job + result
+    // A-B-A: forward band/PULSE-TOOLS/wave using job + result
     buildNervousBandBinaryWave(job, result, nervousHealing.cycleCount);
 
     return submission;

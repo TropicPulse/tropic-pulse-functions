@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiDiagnosticsWrite.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiDiagnosticsWrite.js
 // LAYER: WRITE ORGAN (AI Logs)
 // ============================================================================
 //

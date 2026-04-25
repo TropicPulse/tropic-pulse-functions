@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-design/repoWalker.js
+// FILE: tropic-pulse-functions/apps/PULSE-DESIGN/repoWalker.js
 // LAYER: THE CARTOGRAPHER (Terrain Explorer + Directory Mapper + Evolutionary Topographer)
 // ============================================================================
 //

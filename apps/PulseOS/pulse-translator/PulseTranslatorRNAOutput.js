@@ -34,7 +34,7 @@ import {
   PulseToFirestore,
   PulseFieldTypes,
   validatePulseField
-} from "../pulse-specs/PulseSpecsDNAGenome.js";
+} from "../PULSE-SPECS/PulseSpecsDNAGenome.js";
 
 
 // ============================================================================

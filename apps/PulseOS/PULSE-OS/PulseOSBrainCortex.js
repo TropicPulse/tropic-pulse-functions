@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/pulse-os/PulseOSCortex.js
+// FILE: /apps/PULSE-OS/PulseOSCortex.js
 // PULSE OS — v11‑EVO‑BINARY‑MAX
 // “THE CORTEX ORGAN — HIGH‑LEVEL COGNITION + ORGAN SUPERVISOR”
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/createOrgans.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/createOrgans.js
 // LAYER: BRAINSTEM (Organ Assembly + Context Binding)
 // ============================================================================
 //

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/EarnEngine-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/EarnEngine-v11-Evo.js
 // LAYER: THE MUSCLE SYSTEM (v11-Evo + Dual-Band + Binary + Wave)
 // (Deterministic Worker Supervisor + Profit Orchestrator)
 // ============================================================================

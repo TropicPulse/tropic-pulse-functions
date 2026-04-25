@@ -197,7 +197,7 @@ function emitReflexSenseReport(context = {}) {
 // PULSE OS v11 — SKIN REFLEX (A1 → A2 → Router → Backend/Binary Nervous System)
 //  • route() is the dualband nervous entry: binary-first, text fallback
 // ============================================================================
-import { route } from "./PULSE-OS/PulseOSCNSNervousSystem.js";
+import { route } from "../PULSE-OS/PulseOSCNSNervousSystem.js";
 
 
 // ============================================================================

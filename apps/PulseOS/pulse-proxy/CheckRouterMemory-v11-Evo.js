@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/pulse-proxy/CheckRouterMemory-v11-EVO-BINARY.js
+// FILE: /apps/PULSE-PROXY/CheckRouterMemory-v11-EVO-BINARY.js
 // PULSE NETWORK MEMORY HEALER — v11‑EVO‑BINARY
 // “THE NETWORK HEALER+++ / BINARY-FIRST LOG INTAKE + DUALBAND REPAIR ENGINE”
 // ============================================================================

@@ -125,7 +125,7 @@ function buildCirculationCycleSignature() {
 // ============================================================================
 // 1. PRESSURE CHECK — Measure latency (blood pressure)
 // ============================================================================
-async function measureLatency(url = "/pulse-proxy/ping") {
+async function measureLatency(url = "/PULSE-PROXY/ping") {
   diag("MEASURE_LATENCY_START", { url });
 
   const start = performance.now();

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiDeps.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiDeps.js
 // LAYER: DEPENDENCY INJECTION (DB, FS, ROUTES, SCHEMA)
 // ============================================================================
 //

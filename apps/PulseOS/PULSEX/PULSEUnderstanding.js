@@ -12,9 +12,9 @@
 // ============================================================================
 //  IMPORTS — MAPS + OS KERNEL (DOWNSTREAM OF WINDOW MEMBRANE)
 // ============================================================================
-import { PulseIntentMap } from "./PULSE-OS/PulseIntentMap.js";
-import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
-import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
+import { PulseIntentMap } from "../PULSE-OS/PulseIntentMap.js";
+import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
+import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
 
 // OS kernel (v11-EVO handles Evolution + Brain + SpinalCord + Governor)
 import { PulseOSv11Evo } from "./PulseOS-v11-Evo.js";
@@ -23,9 +23,9 @@ import { PulseOSv11Evo } from "./PulseOS-v11-Evo.js";
 // - Proxy/Identity: external I/O + pressure sensors INSIDE the house.
 // - Router: nervous system pathways.
 // - GPU: visual cortex / sensory acceleration.
-import * as PulseProxy from "./PULSE-PROXY/PulseProxy-v11-EVO.js";
-import * as PulseRouter from "./pulse-router/PulseRouter-v11-EVO.js";
-import * as PulseGPU from "./pulse-gpu/PulseGPU-v11-EVO.js";
+import * as PulseProxy from "../PULSE-PROXY/PulseProxy-v11-EVO.js";
+import * as PulseRouter from "../pulse-router/PulseRouter-v11-EVO.js";
+import * as PulseGPU from "../PULSE-GPU/PulseGPU-v11-EVO.js";
 
 
 // ============================================================================

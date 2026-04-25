@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiPower.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiPower.js
 // LAYER: POWER ORGAN (Grid Status + Fluctuations + History + Drift Awareness)
 // ============================================================================
 //

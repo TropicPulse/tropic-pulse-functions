@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktBroker.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktBroker.js
 // LAYER: THE RUNPOD BROKER (v11-Evo A‑B‑A)
 // (Deterministic RunPod Receptor DNA + Signature-Rich Marketplace Organ)
 // ============================================================================

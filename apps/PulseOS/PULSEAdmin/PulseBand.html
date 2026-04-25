@@ -1540,7 +1540,7 @@ function renderPulseStatusUnified(s) {
 
 async function detectProtocol() {
   try {
-    const res = await fetch("/pulse-proxy/health");
+    const res = await fetch("/PULSE-PROXY/health");
     const json = await res.json();
     window.__proxyHealth = json;   // <-- THIS IS THE FIX
     return json;
@@ -1941,7 +1941,7 @@ function analyzePulseEnvironment(proxy = {}, net = {}, pulse = {}) {
 
 async function detectProxyHealth() {
   try {
-    const res = await fetch("/pulse-proxy/health");
+    const res = await fetch("/PULSE-PROXY/health");
     const json = await res.json();
     window.__proxyHealth = json;   // <-- THIS IS THE FIX
     return json;
@@ -1958,10 +1958,10 @@ async function getProxyHealth() {
 
 async function renderProxyHealth(pulse) {
   try {
-    const data = await getProxyHealth();          // /pulse-proxy/health
+    const data = await getProxyHealth();          // /PULSE-PROXY/health
     
-    const node = window.__proxyNode || {};        // /pulse-proxy/node
-    const metrics = window.__proxyMetrics || {};  // /pulse-proxy/metrics
+    const node = window.__proxyNode || {};        // /PULSE-PROXY/node
+    const metrics = window.__proxyMetrics || {};  // /PULSE-PROXY/metrics
 
     
     
@@ -2171,7 +2171,7 @@ function renderLogs() {
 
 async function refreshProxyNode() {
   try {
-    const res = await fetch("/pulse-proxy/node");
+    const res = await fetch("/PULSE-PROXY/node");
     window.__proxyNode = await res.json();
   } catch {
     // keep last known good value
@@ -2181,7 +2181,7 @@ async function refreshProxyNode() {
 
 async function refreshProxyMetrics() {
   try {
-    const res = await fetch("/pulse-proxy/metrics");
+    const res = await fetch("/PULSE-PROXY/metrics");
     window.__proxyMetrics = await res.json();
   } catch {
     window.__proxyMetrics = window.__proxyMetrics || null;
@@ -2190,7 +2190,7 @@ async function refreshProxyMetrics() {
 
 async function refreshProxyHealth() {
   try {
-    const res = await fetch("/pulse-proxy/health");
+    const res = await fetch("/PULSE-PROXY/health");
     window.__proxyHealth = await res.json();
   } catch {
     window.__proxyHealth = window.__proxyHealth || null;

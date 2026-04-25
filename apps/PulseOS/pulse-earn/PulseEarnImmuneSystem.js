@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnImmuneSystem-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnImmuneSystem-v11-Evo.js
 // LAYER: THE IMMUNE SYSTEM (v11-Evo + Dual-Band + Binary + Wave)
 // (Subsystem Doctor + Drift Diagnostician + Deterministic Repair Engine)
 // ============================================================================

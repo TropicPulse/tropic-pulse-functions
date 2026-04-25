@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiEnvironment.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiEnvironment.js
 // LAYER: ENVIRONMENT ORGAN (World State + Internal Flags + Drift Awareness)
 // ============================================================================
 //

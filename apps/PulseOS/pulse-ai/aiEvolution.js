@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiEvolution.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiEvolution.js
 // LAYER: EVOLUTION ORGAN (Organism Awareness + Drift + Growth Detection)
 // ============================================================================
 //

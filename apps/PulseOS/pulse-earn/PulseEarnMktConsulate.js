@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktConsulate.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktConsulate.js
 // LAYER: THE CONSULATE (v11)
 // (Cross‑Marketplace Intelligence + Job Prioritizer + Result Reuse Organ)
 // PULSE‑EARN v11 — DETERMINISTIC INTELLIGENCE LAYER

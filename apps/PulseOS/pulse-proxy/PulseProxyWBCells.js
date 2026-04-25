@@ -82,10 +82,10 @@ const ImmuneState = {
 //  IMMUNE CONFIG — unchanged thresholds
 // ============================================================================
 export const PROXY_HEALTH_URL  =
-  process.env.PULSE_PROXY_HEALTH_URL  || "http://localhost:8080/pulse-proxy/health";
+  process.env.PULSE_PROXY_HEALTH_URL  || "http://localhost:8080/PULSE-PROXY/health";
 
 export const PROXY_METRICS_URL =
-  process.env.PULSE_PROXY_METRICS_URL || "http://localhost:8080/pulse-proxy/metrics";
+  process.env.PULSE_PROXY_METRICS_URL || "http://localhost:8080/PULSE-PROXY/metrics";
 
 export const HEALTH_INTERVAL_MS      = 30_000;
 export const SCORES_SCAN_INTERVAL_MS = 60_000;
@@ -342,7 +342,7 @@ async function scanUserScoresForInstanceHints() {
 
       await writeFunctionLog({
         type: "missing_field",
-        pagePath: "/apps/pulse-proxy",
+        pagePath: "/apps/PULSE-PROXY",
         fileName: "PulseUserScoring.js",
         functionName: "allocateInstances",
         fieldName: "instances",

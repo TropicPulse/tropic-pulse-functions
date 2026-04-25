@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktForager-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktForager-v11-Evo.js
 // LAYER: THE FORAGER (v11‑Evo A‑B‑A)
 // (Deterministic Salad Marketplace Receptor + A‑B‑A Band Surfaces)
 // ============================================================================

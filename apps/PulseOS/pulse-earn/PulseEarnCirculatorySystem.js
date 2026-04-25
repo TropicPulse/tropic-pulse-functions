@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnCirculatorySystem-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnCirculatorySystem-v11-Evo.js
 // LAYER: THE CIRCULATORY SYSTEM (v11-Evo)
 // (Deterministic Reflex + Routing + Weighting + Dual-Band + Loop/Wave Fields)
 // ============================================================================

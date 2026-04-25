@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/PulseOS/binary/PulseNodeAdmin-v11-EVO-INTELLECT.js
+// FILE: /apps/PulseOS/PULSE-TOOLS/PulseNodeAdmin-v11-EVO-INTELLECT.js
 // PULSE OS — v11-EVO
 // NODEADMIN ORGAN — NETWORK BRAIN / SENTINEL COMMAND / INTENT + MEMORY CORTEX
 // ============================================================================

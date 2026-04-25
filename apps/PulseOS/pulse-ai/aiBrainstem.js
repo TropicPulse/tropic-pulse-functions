@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiBrainstem.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiBrainstem.js
 // LAYER: BRAINSTEM (Context + Organs + Pulse Awareness)
 // ============================================================================
 //

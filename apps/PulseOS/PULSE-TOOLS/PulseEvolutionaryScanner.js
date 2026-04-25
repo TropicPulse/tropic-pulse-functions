@@ -43,10 +43,10 @@
 import { PageEvo } from "../ui/PageEvo.js";
 
 // Binary signal organs (v11-EVO style)
-import { createBinaryPulse } from "../binary/BinaryPulse-v11-PURE-EVO.js";
-import { createBinaryWaveScanner } from "../binary/BinaryWaveScanner.js";
-import { createBinaryLoopScanner } from "../binary/BinaryLoopScanner.js";
-import { createAdminInspector } from "../binary/AdminInspector.js";
+import { createBinaryPulse } from "../PULSE-TECH/PulseBinaryTech-v11-Evo.js";
+import { createBinaryWaveScanner } from "../PULSE-TOOLS/PulseBinaryWaveScanner.js";
+import { createBinaryLoopScanner } from "../PULSE-TOOLS/PulseBinaryLoopScanner.js";
+import { createPulseAdminInspector } from "../PULSE-TOOLS/PulseAdminInspector.js";
 
 // ============================================================================
 // GRID HELPERS — SYNTHETIC “TISSUE” FOR ALL LAYERS

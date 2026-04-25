@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnHeart-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnHeart-v11-Evo.js
 // LAYER: THE HEART (v11-Evo + Dual-Band + Binary + Wave)
 // (Deterministic Heartbeat Cycle + Circulatory Pump)
 // ============================================================================

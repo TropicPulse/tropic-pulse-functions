@@ -42,10 +42,10 @@ import { createLegacyPulse } from "./PulseSendLegacyPulse-v11-EvoStable.js";
 // Router + Mesh + Send
 import { PulseRouter } from "../pulse-router/PulseRouter-v11.js";
 import { PulseMesh } from "../pulse-mesh/PulseMesh-v11.js";
-import { createPulseSend } from "./pulse-send/PulseSend-v11-Evo.js";
-import { createPulseSendMover } from "./pulse-send/PulseSendMover-v11-Evo.js";
-import { createPulseSendImpulse } from "./pulse-send/PulseSendImpulse-v11-Evo.js";
-import { createPulseSendReturn } from "./pulse-send/PulseSendReturn-v11-Evo.js";
+import { createPulseSend } from "./PULSE-SEND/PulseSend-v11-Evo.js";
+import { createPulseSendMover } from "./PULSE-SEND/PulseSendMover-v11-Evo.js";
+import { createPulseSendImpulse } from "./PULSE-SEND/PulseSendImpulse-v11-Evo.js";
+import { createPulseSendReturn } from "./PULSE-SEND/PulseSendReturn-v11-Evo.js";
 
 
 // ============================================================================

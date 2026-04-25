@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/pulse-os/PulseOSEvolution.js
+// FILE: /apps/PULSE-OS/PulseOSEvolution.js
 // PULSE OS — v11‑EVO‑BINARY‑MAX
 // “THE EVOLUTION ENGINE — ORGANISM-WIDE CNS GROWTH + DRIFT INTELLIGENCE”
 // ============================================================================

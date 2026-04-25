@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiArchitect.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiArchitect.js
 // LAYER: ARCHITECT ORGAN (System + Identity + Architecture Insight)
 // ============================================================================
 //

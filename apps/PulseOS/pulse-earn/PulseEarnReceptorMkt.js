@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnReceptor-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnReceptor-v11-Evo.js
 // LAYER: THE STANDARD RECEPTOR (Marketplace Protocol + Universal Adapter)
 // PULSE EARN — v11-Evo A‑B‑A
 // ============================================================================

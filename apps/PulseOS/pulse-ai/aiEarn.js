@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiEarn.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiEarn.js
 // LAYER: EARN ORGAN (Economics + Rewards + Flow Awareness)
 // ============================================================================
 //

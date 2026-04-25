@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnSkeletalSystem-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnSkeletalSystem-v11-Evo.js
 // LAYER: THE SKELETAL SYSTEM + VITAL SIGNS MONITOR (v11-Evo A-B-A)
 // (Deterministic Device Phenotype + Structural Limits + Physiological Baselines)
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnGeneticMemory-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnGeneticMemory-v11-Evo.js
 // LAYER: THE GENETIC MEMORY (v11-Evo + Dual-Band + Binary + Wave)
 // (Keeper of Packets + Guardian of Determinism + DNA Repair Substrate)
 // ============================================================================

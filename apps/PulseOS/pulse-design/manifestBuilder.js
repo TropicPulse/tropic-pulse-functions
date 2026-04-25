@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-design/manifestBuilder.js
+// FILE: tropic-pulse-functions/apps/PULSE-DESIGN/manifestBuilder.js
 // LAYER: THE ARCHIVIST (System Historian + Canonical Recorder + Genome Builder)
 // ============================================================================
 //

@@ -1,6 +1,6 @@
 //js
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnSurvivalInstincts-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnSurvivalInstincts-v11-Evo.js
 // LAYER: THE SURVIVAL INSTINCTS (v11-Evo)
 // (Worker Protection + Evolutionary Scaling + Fair Workload Defense + Diagnostics)
 // ============================================================================

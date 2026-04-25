@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/PulseOS/binary/PulseBinaryWaveScanner-v11-EVO.js
+// FILE: /apps/PulseOS/PULSE-TOOLS/PulseBinaryWaveScanner-v11-EVO.js
 // PULSE OS — v11-EVO
 // PURE BINARY WAVE ORGAN — ZERO DRIFT, MULTI-SPIN, HIGH-CONTRAST
 // ============================================================================

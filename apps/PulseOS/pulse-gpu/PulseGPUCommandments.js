@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-gpu/PulseGPUConfig.js
+// FILE: tropic-pulse-functions/apps/PULSE-GPU/PulseGPUConfig.js
 // LAYER: THE COMMANDMENTS — GPU-SUBSYSTEM (CONFIG + POLICY CONSTANTS)
 //
 // PulseGPUConfig v11-Evo — Deterministic, Drift‑Proof, PulseSend‑Ready, Self‑Repair‑Ready

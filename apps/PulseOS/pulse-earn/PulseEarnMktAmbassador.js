@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-earn/PulseEarnMktAmbassador-v11-Evo.js
+// FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnMktAmbassador-v11-Evo.js
 // LAYER: THE AMBASSADOR (v11‑Evo A‑B‑A)
 // (Deterministic Akash Marketplace Receptor + A‑B‑A Band Surfaces)
 // ============================================================================

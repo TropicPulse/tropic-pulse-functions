@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+      content="width=device-width,
+               initial-scale=1,
+               maximum-scale=1,
+               minimum-scale=1,
+               user-scalable=no">
+
+  <title>Pulse Evolutionary Page — v11-EVO</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- ============================================================================
+       PULSE UI SKIN ORGAN (BASE)
+       ============================================================================ -->
+  <link rel="stylesheet" href="./PULSE-UI/PulseEvolutionaryStyles.css" />
+
+  <!-- ============================================================================
+       PULSE UI ANIMATION ORGAN (MOTION)
+       ============================================================================ -->
+  <link rel="stylesheet" href="./PULSE-UI/PulseEvolutionaryAnimations.css" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSX89KS63P"></script>
+
+  <!-- ============================================================================
+       UNIFIED MODULE SCRIPT (OS ignition + analytics)
+       ============================================================================ -->
+  <script type="module">
+    // Auto‑derive page name
+    const pageName = import.meta.url.split('/').pop().replace('.js', '');
+
+    // A1 Skin Reflex
+    import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+    PulseSkinReflex.attachScanner(pageName);
+
+    // A0 Window / Evolutionary ignition
+    import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+
+    // optional: start the OS
+    const Brain = PulseEvolutionarySight.igniteBrain({
+      intent: PulseIntentMap,
+      organism: PulseOrganismMap,
+      iq: PulseIQMap
+    });
+
+    // Analytics
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-HSX89KS63P');
+
+    // Disable right‑click + drag
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("dragstart", e => e.preventDefault());
+
+    // Facebook Pixel
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq) return;
+      n = f.fbq = function(){
+        n.callMethod ?
+          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      };
+      if(!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = true;
+      n.version = '2.0';
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = true;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+    fbq('init', '1651551349364459');
+    fbq('track', 'PageView');
+  </script>
+
+  <noscript>
+    <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=1651551349364459&ev=PageView&noscript=1" />
+  </noscript>
+
+  <!-- ============================================================================
+       DYNAMIC CSS LAYER (EMPTY — JS will inject evolution rules)
+       ============================================================================ -->
+  <style id="evo-dynamic-style"></style>
+</head>
+
+<body>
+  <!-- ============================================================================
+        HTML LAYER (SKELETON)
+        ----------------------------------------------------------------------------
+        EMPTY. The organism grows its own body.
+  ============================================================================ -->
+  <div id="evo-wrapper"></div>
+
+  <!-- ============================================================================
+        JS LAYER (CORTEX)
+        ----------------------------------------------------------------------------
+        Full Pulse‑UI organism wiring
+  ============================================================================ -->
+  <script type="module">
+    // Import icons
+    import { PulseIcons } from "./PULSE-UI/PulseEvolutionaryIcons.js";
+
+    // Import the full UI organism
+    import { createPulseEvolutionaryCode } from "./PULSE-UI/PulseEvolutionaryCode.js";
+    import { createPulseEvolutionaryMemory } from "./PULSE-UI/PulseEvolutionaryMemory.js";
+    import { createPulseEvolutionaryBrain } from "./PULSE-UI/PulseEvolutionaryBrain.js";
+    import { createPulseEvolutionaryImpulse } from "./PULSE-UI/PulseEvolutionaryImpulse.js";
+    import { createPulseEvolutionaryRouter } from "./PULSE-UI/PulseEvolutionaryRouter.js";
+    import { createPulseEvolutionaryBinary } from "./PULSE-UI/PulseEvolutionaryBinary.js";
+
+    // Mock CNS + Evolution (replace with real Pulse OS CNS)
+    const CNS = {
+      emitImpulse(source, impulse) {
+        console.log("[CNS] Impulse:", source, impulse);
+      }
+    };
+
+    const Evolution = {
+      getPageLineage() {
+        return { lineage: "v11-evo", stable: true };
+      },
+      recordPageLineage(model) {
+        console.log("[Evolution] Lineage recorded:", model);
+      }
+    };
+
+    // Instantiate UI organs
+    const MemoryOrgan = createPulseEvolutionaryMemory();
+    const BinaryOrgan = createPulseEvolutionaryBinary();
+    const ImpulseOrgan = createPulseEvolutionaryImpulse({ CNS });
+
+    const CodeOrgan = createPulseEvolutionaryCode({
+      Evolution,
+      LongTermMemory: MemoryOrgan,
+      CNS
+    });
+
+    const BrainOrgan = createPulseEvolutionaryBrain({
+      Evolution,
+      LongTermMemory: MemoryOrgan,
+      CNS,
+      createCode: () => CodeOrgan,
+      createMemory: () => MemoryOrgan
+    });
+
+    const RouterOrgan = createPulseEvolutionaryRouter({
+      CNS,
+      Evolution,
+      CodeOrgan,
+      BrainOrgan,
+      ImpulseOrgan
+    });
+
+    // ------------------------------------------------------------------------
+    // BOOT SEQUENCE — deterministic, drift-proof
+    // ------------------------------------------------------------------------
+    (async () => {
+      console.log("[BOOT] PulseEvolutionaryPage starting…");
+
+      // 1. Try restore from memory
+      const restored = await BrainOrgan.restore();
+
+      if (!restored?.ok) {
+        // 2. If no memory, do fresh evolve
+        await BrainOrgan.freshEvolve({
+          type: "page:init",
+          payload: { title: "Initial Evolution", content: "Fresh boot." }
+        });
+      }
+
+      // 3. Expose global organism interface
+      window.PulseEvolutionaryPage = {
+        evolve: (payload) =>
+          CodeOrgan.evolve({ type: "page:update", payload }),
+
+        route: (route) => RouterOrgan.go(route),
+
+        encode: (payload) => BinaryOrgan.encode(payload),
+        decode: (compressed) => BinaryOrgan.decode(compressed),
+
+        memory: MemoryOrgan,
+        brain: BrainOrgan,
+        router: RouterOrgan,
+        binary: BinaryOrgan,
+        impulse: ImpulseOrgan,
+        icons: PulseIcons
+      };
+
+      console.log("[BOOT] PulseEvolutionaryPage ready.");
+    })();
+  </script>
+</body>
+</html>

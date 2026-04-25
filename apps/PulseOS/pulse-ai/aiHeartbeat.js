@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/pulse-ai/aiHeartbeat.js
+// FILE: tropic-pulse-functions/apps/PULSE-AI/aiHeartbeat.js
 // LAYER: AI HEARTBEAT (Pulse-Driven + Time-Fallback)
 // ============================================================================
 
