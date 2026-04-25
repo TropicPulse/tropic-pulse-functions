@@ -1464,15 +1464,14 @@ nav a:hover::after {
    Window is the membrane. Full read-only shadow, no identity.
    ============================================================ */
 
-// Auto‑derive page name
-const pageName = import.meta.url.split('/').pop().replace('.js', '');
+import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
 
-// A1 Skin Reflex — MUST BE EXPORTED UPWARD
-export * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
-PulseSkinReflex.attachScanner(pageName);
+// Use the identity Window already computed
+PulseSkinReflex.attachScanner(window.Pulse.pageName);
 
-// A0 Evolutionary Window (membrane + binary boot + understanding)
-import PulseWindow from "./PULSEX/PulseEvolutionaryWindow.js";
+// Boot membrane
+import PulseWindow from "./PulseEvolutionaryWindow.js";
+
 
 function mark(label) {
   log("[CHECKEMAIL]", label);

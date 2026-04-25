@@ -42,6 +42,12 @@
 //  - SurfaceEnv    → read‑only snapshot of user/device/browser context.
 // ============================================================================
 
+// Derive page identity ONCE, inside Window
+const pageName = import.meta.url.split('/').pop().replace('.js', '');
+
+// Expose it globally for the organism
+window.Pulse = window.Pulse || {};
+window.Pulse.pageName = pageName;
 
 // ============================================================================
 //  SURFACE REFLEXES (ALWAYS SAFE, ALWAYS PRESENT)
@@ -63,7 +69,7 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 //  - Binary organism is the real nervous system.
 //  - This file ONLY boots it and exposes a safe shadow.
 // ============================================================================
-import PulseBinaryOrganismBoot from "../PULSE-AI/aiBinary-v11-Evo.js";
+import PulseBinaryOrganismBoot from "./PULSE-AI/aiBinary-v11-Evo.js";
 
 
 // ============================================================================

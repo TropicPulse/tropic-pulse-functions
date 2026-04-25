@@ -3,34 +3,34 @@
 //  Cortical Opener • Binary-First Organism Loader • Deterministic Brainstem
 // ============================================================================
 
-import { PulseIntentMap } from "../PULSE-OS/PulseIntentMap.js";
-import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
-import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
+import { PulseIntentMap } from "./PULSE-OS/PulseIntentMap.js";
+import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
+import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
 
 // ---------------- SYMBOLIC OS KERNEL ----------------
-import { PulseOSv11Evo } from "../PULSE-OS/PulseOS-v11-Evo.js";
+import { PulseOSv11Evo } from "./PULSE-OS/PulseOS-v11-Evo.js";
 
 // ---------------- BINARY OS KERNEL ------------------
-import { PulseBinaryOSv11Evo } from "../PULSE-OS/PulseBinaryOS-v11-EVO-MAX.js";
+import { PulseBinaryOSv11Evo } from "./PULSE-OS/PulseBinaryOS-v11-EVO-MAX.js";
 
 // ---------------- SYMBOLIC ORGANS -------------------
-import * as PulseProxySym from "../PULSE-PROXY/PulseProxy-v11-EVO.js";
-import * as PulseRouterSym from "../pulse-router/PulseRouter-v11-EVO.js";
-import * as PulseGPUSym from "../PULSE-GPU/PulseGPU-v11-EVO.js";
-import * as PulseMeshSym from "../PULSE-MESH/PulseMesh-v11-EVO.js";
-import * as PulseSendSym from "../PULSE-SEND/PulseSend-v11-EVO.js";
+import * as PulseProxySym from "./PULSE-PROXY/PulseProxy-v11-EVO.js";
+import * as PulseRouterSym from "./pulse-router/PulseRouter-v11-EVO.js";
+import * as PulseGPUSym from "./PULSE-GPU/PulseGPU-v11-EVO.js";
+import * as PulseMeshSym from "./PULSE-MESH/PulseMesh-v11-EVO.js";
+import * as PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
 
 // *** Earn is dual-band ONLY — this is the ONLY Earn organ ***
-import * as PulseEarnSym from "../PULSE-EARN/PulseEarn-v11-EVO.js";
+import * as PulseEarnSym from "./PULSE-EARN/PulseEarn-v11-EVO.js";
 
-import * as PulseBinaryOrganismBoot from "../PULSE-AI/aiBinary-v11-Evo.js";
+import * as PulseBinaryOrganismBoot from "./PULSE-AI/aiBinary-v11-Evo.js";
 
 // ---------------- BINARY ORGANS ---------------------
-import { createBinaryProxy } from "../PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
-import * as PulseRouterBin from "../pulse-router/PulseBinaryRouter-v11-EVO.js";
-import * as PulseGPUBin from "../PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
-import * as PulseMeshBin from "../PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
-import * as PulseSendBin from "../PULSE-SEND/PulseBinarySend-v11-EVO.js";
+import { createBinaryProxy } from "./PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
+import * as PulseRouterBin from "./pulse-router/PulseBinaryRouter-v11-EVO.js";
+import * as PulseGPUBin from "./PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
+import * as PulseMeshBin from "./PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
+import * as PulseSendBin from "./PULSE-SEND/PulseBinarySend-v11-EVO.js";
 
 // *** REMOVE THIS — Earn has no binary organ ***
 // import * as PulseEarnBin from "../PULSE-EARN/PulseBinaryEarn-v11-EVO.js";
