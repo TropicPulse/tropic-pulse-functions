@@ -1,22 +1,15 @@
 // ============================================================================
-//  FILE: /ui/PulseEvolutionaryImpulse.js
-//  PULSE OS v11‑EVO‑PRIME — UI IMPULSE ORGAN
+//  FILE: /PULSE-UI/PulseEvolutionaryImpulse.js
+//  PULSE OS v11‑EVO‑PRIME — UI IMPULSE ORGAN (UPGRADED)
 //  “THE UI → CNS SIGNAL LAYER”
-//  Deterministic • Dual‑Band • Drift‑Proof • No Randomness
-//
-//  ROLE:
-//  -----
-//  • Emits impulses from UI → CNS.
-//  • Used by EvolutionaryBrain + EvolutionaryCode.
-//  • Dual‑band: symbolic + binary impulse payloads.
-//  • No routing logic, no compute, no mutation outside organ.
+//  Deterministic • Dual‑Band • Binary‑Native • Drift‑Proof
 // ============================================================================
 
 export const ImpulseRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "Impulse",
-  version: "11.2-Evo-Prime",
+  version: "11.3-Evo-Prime",
   identity: "PulseEvolutionaryImpulse",
 
   evo: {
@@ -26,20 +19,28 @@ export const ImpulseRole = {
     binaryAware: true,
     symbolicAware: true,
     impulseEmitter: true,
+    routeAware: true,
+    lineageAware: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true
   }
 };
 
+// ============================================================================
+//  FACTORY — creates the impulse organ
+// ============================================================================
 export function createPulseEvolutionaryImpulse({
   CNS,
+  Evolution,
+  RouteOrgan,   // optional: allows route-aware impulses
   log = console.log,
   warn = console.warn
 } = {}) {
 
   const ImpulseState = {
     lastImpulse: null,
-    lastModeKind: null
+    lastModeKind: null,
+    lastRoute: null
   };
 
   function safeLog(stage, details = {}) {
@@ -49,25 +50,40 @@ export function createPulseEvolutionaryImpulse({
   }
 
   // --------------------------------------------------------------------------
-  //  EMIT IMPULSE — deterministic, dual‑band
+  //  BUILD IMPULSE ENVELOPE — deterministic, binary-native
   // --------------------------------------------------------------------------
-  function emit({ source = "UI", payload = {}, binaryPayload = null, context = {} } = {}) {
+  function buildImpulseEnvelope({ source, payload, binaryPayload, context }) {
     const modeKind = binaryPayload ? "dual" : "symbolic";
 
-    const impulse = {
-      source,
-      payload,
-      binary: binaryPayload,
-      modeKind,
-      context
-    };
+    const lineage = Evolution?.getPageLineage?.() || {};
+    const route = RouteOrgan?.RouterState?.currentRoute || "unknown";
 
-    ImpulseState.lastImpulse = impulse;
-    ImpulseState.lastModeKind = modeKind;
+    return {
+      source,
+      modeKind,
+      route,
+      lineage,
+      payload: payload || {},
+      binary: binaryPayload || null,
+      context: context || {},
+      version: ImpulseRole.version,
+      timestamp: "NO_TIMESTAMP_v11" // deterministic placeholder
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  //  EMIT IMPULSE — deterministic, dual-band, CNS-aware
+  // --------------------------------------------------------------------------
+  function emit({ source = "UI", payload = {}, binaryPayload = null, context = {} } = {}) {
+    const envelope = buildImpulseEnvelope({ source, payload, binaryPayload, context });
+
+    ImpulseState.lastImpulse = envelope;
+    ImpulseState.lastModeKind = envelope.modeKind;
+    ImpulseState.lastRoute = envelope.route;
 
     try {
-      CNS?.emitImpulse?.("PulseEvolutionaryImpulse", impulse);
-      safeLog("IMPULSE_OK", { modeKind });
+      CNS?.emitImpulse?.("PulseEvolutionaryImpulse", envelope);
+      safeLog("IMPULSE_OK", { modeKind: envelope.modeKind, route: envelope.route });
       return { ok: true };
     } catch (err) {
       warn("[PulseEvolutionaryImpulse] EMIT_ERROR", String(err));

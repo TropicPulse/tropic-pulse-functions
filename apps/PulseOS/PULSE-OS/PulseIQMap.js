@@ -38,8 +38,6 @@
 //
 //  IQ IS THE “DESIGN BRAIN” — NOT THE EXECUTION BRAIN.
 // ============================================================================
-
-
 // ============================================================================
 //  SAFE LOGGING (ACCESS IMPORT)
 // ============================================================================
@@ -59,35 +57,50 @@ import * as firebase from "../netlify/functions/firebase.js";
 
 
 // ============================================================================
-//  VERSION MAP — v11‑EVO ORGANISM BLUEPRINT
+//  VERSION MAP — v11‑EVO‑PRIME ORGANISM BLUEPRINT
 //  Symbolic + Binary Awareness (TEXT‑ONLY)
 // ============================================================================
 const VERSION_MAP = {
   // Core organism
-  organism: "v11‑EVO",
-  iq: "v11‑EVO",
-  router: "v11‑EVO",
-  mesh: "v11‑EVO",
-  send: "v11‑EVO",
-  pulse: "v11‑EVO",
-  proxy: "v11‑EVO",
+  organism: "v11‑EVO‑PRIME",
+  iq: "v11‑EVO‑PRIME",
+  router: "v11‑EVO‑PRIME",
+  mesh: "v11‑EVO‑PRIME",
+  send: "v11‑EVO‑PRIME",
+  pulse: "v11‑EVO‑PRIME",
+  proxy: "v11‑EVO‑PRIME",
 
   // Compute / nervous system
-  gpu: "v11.0",
-  sdn: "v11.0",
-  pnsNervousSystem: "v11.0",          // PulseBand (PNS)
-  pnsNervousSystemBinary: "v11‑BINARY",
+  gpu: "v11.3",
+  sdn: "v11.3",
+  pnsNervousSystem: "v11.3",          // PulseBand (PNS)
+  pnsNervousSystemBinary: "v11‑BINARY‑PRIME",
 
   // Backend spine + proxy
-  proxySpine: "v11.0",                // PulseProxySpine (backend spine)
-  proxySpineBinary: "v11‑BINARY",     // future binary spine partner (design‑only)
-  proxyCleanup: "v11.0",              // PulseBandCleanup
-  proxyHistoryRepair: "v11.0",        // PulseHistoryRepair
+  proxySpine: "v11.3",                // PulseProxySpine (backend spine)
+  proxySpineBinary: "v11‑BINARY‑PRIME",
+  proxyCleanup: "v11.3",              // PulseBandCleanup
+  proxyHistoryRepair: "v11.3",        // PulseHistoryRepair
 
   // Dynamic systems
-  binaryNervousSystem: "v11‑PURE",
-  dynamicPageSystem: "v11‑EVO",
-  fallbackSystem: "ContinuancePulse‑v2"
+  binaryNervousSystem: "v11‑PURE‑PRIME",
+  dynamicPageSystem: "v11‑EVO‑PRIME",
+  fallbackSystem: "ContinuancePulse‑v2",
+
+  // UI organism (PULSE‑UI)
+  uiOrganism: "v11‑EVO‑PRIME",
+  uiEvolutionaryPage: "v11‑EVO‑PRIME",
+  uiBinaryOrgan: "v11‑EVO‑PRIME",
+  uiRouterOrgan: "v11‑EVO‑PRIME",
+  uiBrainOrgan: "v11‑EVO‑PRIME",
+  uiMemoryOrgan: "v11‑EVO‑PRIME",
+  uiImpulseOrgan: "v11‑EVO‑PRIME",
+  uiSkin: "v11‑EVO‑PRIME",
+  uiAnimations: "v11‑EVO‑PRIME",
+
+  // Core memory (design‑only awareness for next pass)
+  coreMemory: "v11‑CORE‑MEMORY",
+  coreBinaryMemory: "v11‑CORE‑BINARY"
 };
 
 
@@ -135,7 +148,7 @@ export const PulseIQMap = {
 
   // -------------------------------------------------------------------------
   // ACCESS UTILITIES (ALLOWED IMPORTS)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   log,
   warn,
   logError,
@@ -144,12 +157,12 @@ export const PulseIQMap = {
 
   // -------------------------------------------------------------------------
   // VERSION MAP (TEXT‑ONLY)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   version: VERSION_MAP,
 
   // -------------------------------------------------------------------------
   // ORGANISM EXPECTATIONS (TEXT‑ONLY)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   organs: {
     // Core OS
     kernel: ["PulseKernel"],
@@ -160,7 +173,10 @@ export const PulseIQMap = {
       "PulseOSShortTermMemory",
       "saveSnapshot",
       "recordDriftSignature",
-      "createRestorePoint"
+      "createRestorePoint",
+      // design‑only awareness for CoreMemory upgrade
+      "PulseCoreMemory",
+      "PulseCoreBinaryMemory"
     ],
 
     evolution: [
@@ -260,22 +276,41 @@ export const PulseIQMap = {
       "PulseEvolutionaryPage",
       "PageEvo",
       "DynamicWrapperPage"
+    ],
+
+    // UI organism (PULSE‑UI) — v11‑EVO‑PRIME
+    uiOrganism: [
+      "PulseEvolutionaryCode",
+      "PulseEvolutionaryMemory",
+      "PulseEvolutionaryBrain",
+      "PulseEvolutionaryRouter",
+      "PulseEvolutionaryImpulse",
+      "PulseEvolutionaryBinary",
+      "PulseEvolutionaryStyles",
+      "PulseEvolutionaryAnimations",
+      "PulseEvolutionaryIcons"
     ]
   },
 
   // -------------------------------------------------------------------------
   // PAGE EXPECTATIONS (TEXT‑ONLY)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   pages: {
     // Core shell
-    "/": ["PulseRouter", "PulseKernel"],
-    "/dashboard": ["PulseRouter", "PulseGPU", "LongTermMemory"],
+    "/": ["PulseRouter", "PulseKernel", "PulseEvolutionaryPage"],
+    "/dashboard": [
+      "PulseRouter",
+      "PulseGPU",
+      "LongTermMemory",
+      "PulseEvolutionaryPage"
+    ],
 
     // Send / earn flows (forms + working memory)
     "/send": [
       "PulseSendSystem",
       "BinarySend",
-      "PulseOSShortTermMemory"
+      "PulseOSShortTermMemory",
+      "PulseEvolutionaryPage"
     ],
     "/forms/send": [
       "PulseSendSystem",
@@ -285,17 +320,19 @@ export const PulseIQMap = {
     "/earn": [
       "PulseEarn",
       "PulseEarnSendSystem",
-      "PulseEarnContinuancePulse"
+      "PulseEarnContinuancePulse",
+      "PulseEvolutionaryPage"
     ],
 
     // Settings / identity / memory
     "/settings": [
       "BBB",
       "LongTermMemory",
-      "PulseOSShortTermMemory"
+      "PulseOSShortTermMemory",
+      "PulseEvolutionaryPage"
     ],
 
-    // Organism view — now includes backend spine + PNS nervous system
+    // Organism view — includes backend spine + PNS nervous system
     "/organism": [
       "PulseProxySpine",
       "PulseBand",
@@ -303,14 +340,16 @@ export const PulseIQMap = {
       "PulseHistoryRepair",
       "BinaryRouter",
       "BinaryMesh",
-      "BinaryPulse"
+      "BinaryPulse",
+      "PulseEvolutionaryPage"
     ],
 
     // Scanner / diagnostics
     "/scanner": [
       "BinaryMRI",
       "BinaryWaveScanner",
-      "BinaryLoopScanner"
+      "BinaryLoopScanner",
+      "PulseEvolutionaryPage"
     ],
 
     // Proxy / backend observability (front‑of‑house views)
@@ -321,20 +360,23 @@ export const PulseIQMap = {
     ],
     "/proxy/health": [
       "PulseProxySpine",
-      "PulseProxyHealer"
+      "PulseProxyHealer",
+      "PulseEvolutionaryPage"
     ],
     "/proxy/metrics": [
       "PulseProxySpine",
-      "PulseProxyHealer"
+      "PulseProxyHealer",
+      "PulseEvolutionaryPage"
     ],
     "/proxy/node": [
-      "PulseProxySpine"
+      "PulseProxySpine",
+      "PulseEvolutionaryPage"
     ]
   },
 
   // -------------------------------------------------------------------------
   // DRIFT / REPAIR METADATA (TEXT‑ONLY)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   drift: {
     lastScan: null,
     lastRepair: null,
@@ -350,7 +392,7 @@ export const PulseIQMap = {
 
   // -------------------------------------------------------------------------
   // ROUTING HELPERS (TEXT‑ONLY)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   topLevelRoutes: TOP_LEVEL_ROUTES,
 
   getTopLevelRouteFor(path) {
@@ -363,5 +405,5 @@ export const PulseIQMap = {
 };
 
 // ============================================================================
-// END OF FILE — PULSE IQ / TEXT DESIGN + ACCESS APPENDAGES / v11‑EVO
+// END OF FILE — PULSE IQ / TEXT DESIGN + ACCESS APPENDAGES / v11‑EVO‑PRIME
 // ============================================================================

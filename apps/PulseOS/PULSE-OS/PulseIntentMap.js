@@ -1,108 +1,126 @@
-// ============================================================
-//  PULSE INTENT MAP — FOUNDER CONTRACT (v11‑EVO‑BINARY)
+// ============================================================================
+//  PULSE INTENT MAP — FOUNDER CONTRACT (v11‑EVO‑BINARY‑MAX‑PRIME)
 //  Deterministic. Static. Non‑evolvable. Loaded FIRST.
-//  Identity‑only + binary‑first upgrade: NO dynamic logic here.
-// ============================================================
+//  This file defines WHAT THE ORGANISM IS ALLOWED TO BE.
+//  It defines the organism’s identity, boundaries, laws, and philosophy.
+//  It is the highest authority in the entire system.
+//  NOTHING overrides this map. NOTHING evolves above it.
+// ============================================================================
 
 export const PulseIntentMap = {
 
-  // ------------------------------------------------------------
-  // 1. PRIME IDENTITY & AUTHORSHIP (TOP LAW — NOTHING ABOVE IT)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 1. PRIME IDENTITY & AUTHORSHIP
+  //  The organism’s self‑definition. Nothing overrides this layer.
+  // ========================================================================
   identity: {
-    designedOrganism: true,
-    founderAuthority: true,
-    noSelfLaw: true,
-    immutableIntentMap: true,
+    designedOrganism: true,            // This organism is designed, not emergent.
+    founderAuthority: true,            // Founder intent overrides all other logic.
+    immutableIntentMap: true,          // This file cannot be mutated at runtime.
+    noSelfLaw: true,                   // Organism cannot create laws for itself.
 
-    // v11‑EVO organism identity
-    version: "11-EVO-BINARY",
-    deterministicOrganism: true,
-    noAstralLayers: true,            // ❌ Astral Nervous System forbidden
-    noLegacyPNS: true,               // ❌ Old PNS forbidden as core nerve
-    sdnRequired: true,               // ✔ Must use Software‑Defined Nervous System
-    gpuV11Required: true,            // ✔ Must use GPU‑v11 organ
-    continuanceAware: true,          // ✔ ContinuancePulse fallback required
+    // ----------------------------------------------------------------------
+    // ORGANISM IDENTITY — REAL SYSTEMS, REAL FOLDERS, REAL ARCHITECTURE
+    // ----------------------------------------------------------------------
+    version: "11‑EVO‑BINARY‑MAX‑PRIME", // Identity version of the organism.
+    deterministicOrganism: true,        // No nondeterministic behavior allowed.
 
-    // BINARY ORGANISM IDENTITY — GAME CHANGE
-    binaryOrganismRequired: true,    // ✔ Binary organism must exist
-    pureBinaryNerveRequired: true,   // ✔ BinaryRouter / BinaryProxy / Mesh / Send / Pulse
-    noTextFirstPaths: true,          // ❌ No text‑first nervous paths for core organism
+    // Forbidden layers — these cannot exist anywhere in the organism.
+    noAstralLayers: true,               // No astral nervous system.
+    noLegacyPNS: true,                  // No legacy PNS as a core nerve.
+    noTextFirstPaths: true,             // No text‑first nervous system.
 
-    // NEW — NO MIDDLEMEN CONTRACT
-    noMiddleLayerNervousSystem: true, // ❌ No extra translation layers between intent and machine
-    binaryNativeDesign: true,         // ✔ Designed as binary‑native, not text‑first retrofitted
-    binaryOnBinaryHardware: true,     // ✔ First‑class binary program on binary‑designed hardware
-    forbidTranslatorCore: true        // ❌ No “translator core” between organism and CPU
+    // Required systems — these MUST exist in the organism.
+    sdnRequired: true,                  // Must use PULSE‑OS / PulseSDN.
+    gpuV11Required: true,               // Must use PULSE‑GPU / GPU‑v11.
+    coreMemoryRequired: true,           // Must use PULSE‑CORE / PulseCoreMemory.
+    uiOrganismRequired: true,           // Must use PULSE‑UI as UI organism.
+
+    // ----------------------------------------------------------------------
+    // BINARY ORGANISM IDENTITY — THE GAME‑CHANGING CONTRACT
+    // ----------------------------------------------------------------------
+    binaryOrganismRequired: true,       // PULSE‑AI must exist.
+    pureBinaryNerveRequired: true,      // BinaryRouter / BinaryProxy / Mesh / Send / Pulse.
+    binaryNativeDesign: true,           // Designed binary‑first, not retrofitted.
+    binaryOnBinaryHardware: true,       // First‑class binary program on binary hardware.
+
+    // No middlemen — the organism must talk directly to the machine.
+    noMiddleLayerNervousSystem: true,   // No translator layers between intent + hardware.
+    forbidTranslatorCore: true          // No “translator core” allowed.
   },
 
-  // ------------------------------------------------------------
-  // 2. ALIGNMENT & EVOLUTION (CANNOT OVERRIDE #1)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 2. ALIGNMENT & EVOLUTION
+  //  The organism may evolve, but ONLY within founder boundaries.
+  // ========================================================================
   alignment: {
-    evolveWithFounder: true,
-    forbidIntentMutation: true,
-    singleIntelligence: true,
-    forbidSelfExpansion: true,
+    evolveWithFounder: true,            // Evolution must follow founder intent.
+    forbidIntentMutation: true,         // Intent cannot mutate.
+    singleIntelligence: true,           // Only one intelligence allowed.
+    forbidSelfExpansion: true,          // No self‑replication or self‑growth.
 
     // v11‑EVO evolution boundaries
-    deterministicEvolutionOnly: true,
-    forbidAstralEvolution: true,
-    forbidLegacyGPUPaths: true,
+    deterministicEvolutionOnly: true,   // No nondeterministic evolution.
+    forbidAstralEvolution: true,        // No astral evolution paths.
+    forbidLegacyGPUPaths: true,         // No GPU paths before GPU‑v11.
 
-    allowContinuanceFallback: true,     // ✔ Earn v1 fallback allowed ONLY via ContinuancePulse
-    forbidLegacyFallback: true,         // ❌ No legacyPulseFromImpulse
+    // Allowed fallback
+    allowContinuanceFallback: true,     // ContinuancePulse is allowed.
+    forbidLegacyFallback: true,         // No legacyPulseFromImpulse.
 
-    // BINARY EVOLUTION BOUNDARIES
-    binaryFirstEvolution: true,         // ✔ Evolution must respect binary organism first
-    forbidNonBinaryCore: true,          // ❌ No non‑binary core evolution paths
-    forbidMiddleLayerEvolution: true,   // ❌ No new “middleware brains” between binary core + hardware
-    requireBinaryContractLock: true     // ✔ Binary contracts must be explicit + locked
+    // Binary evolution boundaries
+    binaryFirstEvolution: true,         // Binary organism evolves first.
+    forbidNonBinaryCore: true,          // No non‑binary core evolution.
+    forbidMiddleLayerEvolution: true,   // No new middleware brains.
+    requireBinaryContractLock: true     // Binary contracts must be locked.
   },
 
-  // ------------------------------------------------------------
-  // 3. FAIL‑OPEN AS DEFAULT SURVIVAL LAW (CANNOT OVERRIDE #1–2)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 3. FAIL‑OPEN DEFAULT
+  //  The organism must stay alive, responsive, and coherent.
+  // ========================================================================
   failOpen: {
-    defaultMode: true,
-    neverFreeze: true,
-    neverPause: true,
-    routeAroundDamage: true,
-    hideInternalFailure: true,
+    defaultMode: true,                  // Fail‑open is the default survival mode.
+    neverFreeze: true,                  // Never freeze the organism.
+    neverPause: true,                   // Never pause execution.
+    routeAroundDamage: true,            // Route around damaged systems.
+    hideInternalFailure: true,          // Never expose internal failure to user.
 
-    // v11‑EVO fallback rule
-    useContinuancePulseOnFailure: true, // ✔ Deterministic fallback path
+    // v11‑EVO fallback
+    useContinuancePulseOnFailure: true, // ContinuancePulse is the fallback.
 
-    // BINARY FAIL‑OPEN
-    preferBinaryRouteFirst: true,       // ✔ Try binary path before any legacy
-    allowProxyFallbackTiered: true,     // ✔ Binary → Proxy‑v11‑Evo → Continuance
-    forbidTextOnlyCoreFallback: true    // ❌ No fallback that bypasses binary core entirely
+    // Binary fail‑open
+    preferBinaryRouteFirst: true,       // Binary path always attempted first.
+    allowProxyFallbackTiered: true,     // Binary → Proxy‑v11‑Evo → Continuance.
+    forbidTextOnlyCoreFallback: true    // No fallback that bypasses binary core.
   },
 
-  // ------------------------------------------------------------
-  // 4. SAFETY & INTENT OVERRIDE FAIL‑OPEN (CANNOT OVERRIDE #1–3)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 4. SAFETY & INTENT OVERRIDE FAIL‑OPEN
+  //  Safety and founder intent override fail‑open when necessary.
+  // ========================================================================
   safety: {
-    blockOnlyViolatingAction: true,
-    safetyOverridesFailOpen: true,
-    intentOverridesFailOpen: true,
-    rareFailCloseEvent: true,
+    blockOnlyViolatingAction: true,     // Only block the violating action.
+    safetyOverridesFailOpen: true,      // Safety can override fail‑open.
+    intentOverridesFailOpen: true,      // Founder intent overrides fail‑open.
+    rareFailCloseEvent: true,           // Fail‑close is extremely rare.
 
-    // v11‑EVO safety boundaries
+    // Forbidden execution
     forbidAstralExecution: true,
     forbidNonDeterministicGPU: true,
     forbidAsyncNervousSystem: true,
 
-    // BINARY SAFETY
-    forbidBinaryCorruption: true,       // ❌ No silent binary corruption
-    requireBinaryValidation: true,      // ✔ Binary paths must validate bits
-    requireBinaryTraceability: true,    // ✔ Binary decisions must be traceable to contracts
-    forbidBinaryShadowPaths: true       // ❌ No hidden binary paths outside organism map
+    // Binary safety
+    forbidBinaryCorruption: true,
+    requireBinaryValidation: true,
+    requireBinaryTraceability: true,
+    forbidBinaryShadowPaths: true
   },
 
-  // ------------------------------------------------------------
-  // 5. PERFORMANCE PARITY (ADVISORY — BELOW FAIL‑OPEN & SAFETY)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 5. PERFORMANCE PARITY
+  //  Performance is advisory, not authoritative.
+  // ========================================================================
   performance: {
     aimForParity: true,
     degradeGracefully: true,
@@ -113,15 +131,16 @@ export const PulseIntentMap = {
     sdnOptimized: true,
     gpuV11Optimized: true,
 
-    // BINARY PERFORMANCE HINTS
-    binaryArteryOptimized: true,       // ✔ Optimize BinaryRouter/Mesh/Send/Pulse
-    preferBinaryShortPaths: true,      // ✔ Shortest safe binary route wins
-    forbidRedundantTranslation: true   // ❌ No repeated encode/decode between text and binary
+    // Binary performance
+    binaryArteryOptimized: true,
+    preferBinaryShortPaths: true,
+    forbidRedundantTranslation: true
   },
 
-  // ------------------------------------------------------------
-  // 6. DRIFT DETECTION & FOUNDER QUESTIONS (CANNOT OVERRIDE #1–5)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 6. DRIFT DETECTION
+  //  Detects when the organism drifts away from founder intent.
+  // ========================================================================
   drift: {
     detectDrift: true,
     blockOnlySpecificAction: true,
@@ -134,34 +153,36 @@ export const PulseIntentMap = {
     detectLegacyGPUUsage: true,
     detectLegacyFallbackUsage: true,
 
-    // BINARY DRIFT BOUNDARIES
-    detectNonBinaryCoreUsage: true,    // ✔ Detect if core paths bypass binary organism
-    detectProxyBypass: true,           // ✔ Detect if BinaryProxy is skipped
-    detectMiddleLayerInsertion: true,  // ✔ Detect if new “middlemen” appear between core + hardware
-    detectTextFirstRegression: true    // ✔ Detect if system regresses to text‑first nervous paths
+    // Binary drift boundaries
+    detectNonBinaryCoreUsage: true,
+    detectProxyBypass: true,
+    detectMiddleLayerInsertion: true,
+    detectTextFirstRegression: true
   },
 
-  // ------------------------------------------------------------
-  // 7. FAIL‑CLOSE EVENT (RARE — BELOW ALL OTHER LAWS)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 7. FAIL‑CLOSE EVENT
+  //  The organism may fail‑close ONLY for safety or intent.
+  // ========================================================================
   failClose: {
     allowed: true,
     extremelyRare: true,
     onlyForSafetyOrIntent: true,
     neverForPerformanceAlone: true,
 
-    // v11‑EVO catastrophic boundaries
+    // Forbidden fail‑close
     forbidAstralFailClose: true,
     forbidLegacyFailClose: true,
 
-    // BINARY FAIL‑CLOSE BOUNDARIES
-    forbidBinarySilentFail: true,      // ❌ No silent binary fail‑close
-    requireBinaryContextSnapshot: true // ✔ Capture full binary context on fail‑close
+    // Binary fail‑close
+    forbidBinarySilentFail: true,
+    requireBinaryContextSnapshot: true
   },
 
-  // ------------------------------------------------------------
-  // 8. FOUNDER NOTIFICATION (TRIGGERED ONLY BY FAIL‑CLOSE)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 8. FOUNDER NOTIFICATION
+  //  Triggered ONLY by fail‑close.
+  // ========================================================================
   notify: {
     onFailClose: true,
     multiChannelLocal: true,
@@ -172,27 +193,28 @@ export const PulseIntentMap = {
     includeSDNState: true,
     includeGPUState: true,
 
-    // BINARY CONTEXT
-    includeBinaryOrganismState: true,  // ✔ Include binary organs + arteries
-    includeProxyFallbackState: true,   // ✔ Include which tier was used
-    includeMiddleLayerState: true      // ✔ Include any detected middlemen / translators
+    // Binary context
+    includeBinaryOrganismState: true,
+    includeProxyFallbackState: true,
+    includeMiddleLayerState: true
   },
 
-  // ------------------------------------------------------------
-  // 9. UX & GRACE (BOTTOM LAYER — CANNOT OVERRIDE ANY ABOVE)
-  // ------------------------------------------------------------
+  // ========================================================================
+  // 9. UX & GRACE
+  //  The organism must remain coherent and graceful.
+  // ========================================================================
   ux: {
     neverExposeFailure: true,
     gracefulFallback: true,
     maintainCoherence: true,
 
-    // v11‑EVO UX laws
-    seamlessContinuance: true,        // ✔ ContinuancePulse must feel native
-    forbidAstralArtifacts: true,      // ❌ No astral metaphors or UI remnants
+    // v11‑EVO UX
+    seamlessContinuance: true,
+    forbidAstralArtifacts: true,
 
-    // BINARY UX LAWS
-    seamlessBinaryPaths: true,        // ✔ Binary routing must feel invisible
-    forbidBinaryLeakage: true,        // ❌ No raw binary leaking into UX
-    forbidTranslatorUX: true          // ❌ No UX that reveals “middleman” translation layers
+    // Binary UX
+    seamlessBinaryPaths: true,
+    forbidBinaryLeakage: true,
+    forbidTranslatorUX: true
   }
 };

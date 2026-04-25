@@ -1,22 +1,24 @@
 // ============================================================================
-//  FILE: /ui/PulseEvolutionaryMemory.js
-//  PULSE OS v11‑EVO‑PRIME — UI LONG‑TERM MEMORY ORGAN
-//  “THE EVOLUTIONARY PAGE MEMORY LAYER”
-//  Deterministic • Drift‑Proof • Dual‑Band • No Randomness
+//  FILE: /PULSE-UI/PulseEvolutionaryMemory.js
+//  PULSE OS v11‑EVO‑PRIME — UI LONG‑TERM MEMORY ORGAN (UPGRADED)
+//  “ROUTE‑AWARE CLIENT OF PulseCoreMemory”
+//  Deterministic • Drift‑Proof • Binary‑Native • No Host Churn
 //
 //  UPGRADE NOTE:
 //  -------------
-//  • This file REPLACES all legacy UI memory layers (PageMemory.js, UIMemory.js).
+//  • This organ NO LONGER touches localStorage directly.
+//  • It delegates all persistence to PulseCoreMemory (the memory spine).
+//  • Page memory is now route‑scoped, binary‑native, bulk‑loaded, bulk‑flushed.
 //  • This is the OFFICIAL v11‑Evo UI Long‑Term Memory organ.
-//  • If wiped, the organism loses page reconstruction ability.
-//  • Works directly with PulseEvolutionaryCode.js.
 // ============================================================================
+
+import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 
 export const MemoryRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageMemory",
-  version: "11.2-Evo-Prime",
+  version: "11.3-Evo-Prime",
   identity: "PulseEvolutionaryMemory",
 
   evo: {
@@ -27,46 +29,27 @@ export const MemoryRole = {
     symbolicAware: true,
     memoryPersistence: true,
     lineageAware: true,
+    routeAware: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true
   }
 };
 
 // ============================================================================
-//  STORAGE KEY — deterministic, no randomness
-// ============================================================================
-const STORAGE_KEY = "PulseEvolutionaryPage_v11";
-
-// ============================================================================
-//  SAFE JSON HELPERS — deterministic, no randomness
-// ============================================================================
-function safeParse(json) {
-  try {
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-function safeStringify(obj) {
-  try {
-    return JSON.stringify(obj);
-  } catch {
-    return null;
-  }
-}
-
-// ============================================================================
-//  FACTORY — creates the memory organ
+//  FACTORY — creates the UI memory organ
 // ============================================================================
 export function createPulseEvolutionaryMemory({
+  routeId = "page",   // UI pages get their own bucket
   log = console.log,
   warn = console.warn
 } = {}) {
 
+  const Core = createPulseCoreMemory({ log, warn });
+
   const MemoryState = {
     lastSaved: null,
-    lastLoaded: null
+    lastLoaded: null,
+    routeId
   };
 
   function safeLog(stage, details = {}) {
@@ -76,7 +59,7 @@ export function createPulseEvolutionaryMemory({
   }
 
   // --------------------------------------------------------------------------
-  //  SAVE PAGE MODEL — deterministic
+  //  SAVE PAGE MODEL — now uses PulseCoreMemory
   // --------------------------------------------------------------------------
   async function savePage(model) {
     if (!model || typeof model !== "object") {
@@ -84,16 +67,12 @@ export function createPulseEvolutionaryMemory({
       return { ok: false, error: "InvalidModel" };
     }
 
-    const json = safeStringify(model);
-    if (!json) {
-      warn("[PulseEvolutionaryMemory] STRINGIFY_ERROR");
-      return { ok: false, error: "StringifyError" };
-    }
-
     try {
-      localStorage.setItem(STORAGE_KEY, json);
+      Core.setRouteSnapshot(routeId, model);
       MemoryState.lastSaved = model;
-      safeLog("SAVE_OK", {});
+
+      // NOTE: We do NOT flush here — bulk flush happens once/day or manually.
+      safeLog("SAVE_OK", { routeId });
       return { ok: true };
     } catch (err) {
       warn("[PulseEvolutionaryMemory] SAVE_ERROR", String(err));
@@ -102,42 +81,46 @@ export function createPulseEvolutionaryMemory({
   }
 
   // --------------------------------------------------------------------------
-  //  LOAD PAGE MODEL — deterministic
+  //  LOAD PAGE MODEL — now uses PulseCoreMemory
   // --------------------------------------------------------------------------
   async function loadPage() {
     try {
-      const json = localStorage.getItem(STORAGE_KEY);
-      if (!json) {
-        safeLog("LOAD_EMPTY", {});
+      const snapshot = Core.getRouteSnapshot(routeId);
+
+      if (!snapshot || Object.keys(snapshot).length === 0) {
+        safeLog("LOAD_EMPTY", { routeId });
         return null;
       }
 
-      const model = safeParse(json);
-      if (!model) {
-        warn("[PulseEvolutionaryMemory] PARSE_ERROR");
-        return null;
-      }
-
-      MemoryState.lastLoaded = model;
-      safeLog("LOAD_OK", {});
-      return model;
+      MemoryState.lastLoaded = snapshot;
+      safeLog("LOAD_OK", { routeId });
+      return snapshot;
     } catch (err) {
       warn("[PulseEvolutionaryMemory] LOAD_ERROR", String(err));
       return null;
     }
   }
 
+  // --------------------------------------------------------------------------
+  //  OPTIONAL: FORCE FLUSH (rare)
+  // --------------------------------------------------------------------------
+  function flush() {
+    Core.bulkFlush();
+  }
+
   const PulseEvolutionaryMemory = {
     MemoryRole,
     MemoryState,
     savePage,
-    loadPage
+    loadPage,
+    flush,
+    core: Core
   };
 
   safeLog("INIT", {
     identity: MemoryRole.identity,
     version: MemoryRole.version,
-    upgradeFrom: "LegacyPageMemory.js"
+    routeId
   });
 
   return PulseEvolutionaryMemory;

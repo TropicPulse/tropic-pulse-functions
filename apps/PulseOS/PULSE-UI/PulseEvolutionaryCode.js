@@ -1,22 +1,22 @@
 // ============================================================================
-//  FILE: /ui/PulseEvolutionaryCode.js
-//  PULSE OS v11‑EVO‑PRIME — PAGE EVOLUTION ORGAN (DUAL‑BAND + MEMORY)
-//  “THE SELF‑EVOLVING PAGE LAYER WITH MEMORY PERSISTENCE”
+//  FILE: /PULSE-UI/PulseEvolutionaryCode.js
+//  PULSE OS v11‑EVO‑PRIME — PAGE EVOLUTION ORGAN (UPGRADED)
+//  “SELF‑EVOLVING PAGE LAYER WITH CORE‑POWERED MEMORY”
 //
 //  UPGRADE NOTE:
 //  -------------
-//  • This file REPLACES all legacy PageEngine.js / PageBuilder.js / Endpoint.js.
-//  • This is the OFFICIAL v11‑Evo Page Evolution Organ.
-//  • If wiped, the organism loses page evolution + memory reconstruction.
-//  • BackendEndpoint.old = ["Endpoint.js"]
-//    BackendEndpoint.now = ["PulseProxyInnerAgent"]
+//  • Now uses PulseEvolutionaryMemory → PulseCoreMemory (binary‑native).
+//  • No direct localStorage usage.
+//  • No JSON churn.
+//  • Route‑aware memory buckets.
+//  • Deterministic, drift‑proof, dual‑band.
 // ============================================================================
 
 export const PageRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageEvo",
-  version: "11.2-Evo-Prime",
+  version: "11.3-Evo-Prime",
   identity: "PulseEvolutionaryCode",
 
   evo: {
@@ -28,6 +28,7 @@ export const PageRole = {
     pageEvolution: true,
     lineageAware: true,
     memoryPersistence: true,
+    routeAware: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true
   }
@@ -38,7 +39,7 @@ export const PageRole = {
 // ============================================================================
 export function createPulseEvolutionaryCode({
   Evolution,
-  LongTermMemory,
+  LongTermMemory,   // now a route-aware client of PulseCoreMemory
   CNS,
   log = console.log,
   warn = console.warn
@@ -58,7 +59,7 @@ export function createPulseEvolutionaryCode({
   }
 
   // --------------------------------------------------------------------------
-  //  LOAD PREVIOUS EVOLUTION FROM MEMORY (DETERMINISTIC)
+  //  LOAD PREVIOUS EVOLUTION FROM MEMORY (CORE‑POWERED)
   // --------------------------------------------------------------------------
   async function loadFromMemory() {
     try {
@@ -98,20 +99,20 @@ export function createPulseEvolutionaryCode({
   }
 
   // --------------------------------------------------------------------------
-  //  APPLY PAGE MODEL TO DOM — deterministic, no randomness
+  //  APPLY PAGE MODEL TO DOM — deterministic
   // --------------------------------------------------------------------------
   function applyModelToDOM(model) {
-    const wrapper = document.getElementById("pulse-evo-wrapper");
+    const wrapper = document.getElementById("evo-wrapper");
     if (!wrapper) return;
 
     wrapper.innerHTML = "";
 
     const div = document.createElement("div");
-    div.className = "pulse-evo-surface";
+    div.className = "evo-block evo-breathe evo-shimmer";
 
     div.innerHTML = `
-      <h2>Pulse Evolutionary Page</h2>
-      <pre>${JSON.stringify(model, null, 2)}</pre>
+      <div class="evo-title">Pulse Evolutionary Page</div>
+      <div class="evo-content"><pre>${JSON.stringify(model, null, 2)}</pre></div>
     `;
 
     wrapper.appendChild(div);
@@ -119,7 +120,7 @@ export function createPulseEvolutionaryCode({
   }
 
   // --------------------------------------------------------------------------
-  //  SAVE MODEL TO MEMORY — deterministic
+  //  SAVE MODEL TO MEMORY — now uses PulseCoreMemory
   // --------------------------------------------------------------------------
   async function saveToMemory(model) {
     try {

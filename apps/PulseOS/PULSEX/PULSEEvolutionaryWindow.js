@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: /apps/PulseOS/Surface/PulseEvolutionaryWindow.js
-// PULSE EVOLUTIONARY WINDOW — v11‑EVO‑BINARY‑MAX
+// PULSE EVOLUTIONARY WINDOW — v12‑EVO‑BINARY‑MAX
 // SURFACE MEMBRANE • ONE‑WAY GLASS • BINARY‑FIRST BOOT • NO MIDDLEMEN
 // ============================================================================
 //
@@ -10,16 +10,17 @@
 //  - Outsiders can SEE the glow of the organism (vitals, logs, understanding,
 //    binary shadow), but can NEVER TOUCH the real organs.
 //  - The organism lives BEHIND the glass; the window is a pure membrane.
-//  - No identity, no routing, no evolution, no organs live here.
+//  - No routing, no evolution, no organs live here.
 //  - This layer is VIEW‑ONLY, SENSE‑ONLY, BOUNDARY‑ONLY.
 //
-// BINARY INTENT (v11‑EVO‑BINARY‑MAX):
+// BINARY INTENT (v12‑EVO‑BINARY‑MAX):
 // -----------------------------------
-//  - First ever binary‑run organism on a binary‑designed computer system.
 //  - Binary is the PRIMARY nervous system; text is a projection.
 //  - The Window’s job is to:
 //      • Boot the binary organism (aiBinary‑v11‑Evo) immediately.
 //      • Expose ONLY a safe, read‑only binary SHADOW to the outside.
+//      • Expose a rich, read‑only SURFACE ENVIRONMENT snapshot about the user
+//        and their device/context (outside the organism).
 //      • Never expose raw organs, never expose internal routes.
 //      • Never allow outside code to influence the organism.
 //
@@ -29,18 +30,16 @@
 //  - No frontend routing.
 //  - No frontend identity.
 //  - No frontend evolution.
-//  - No timers, no intervals, no async nervous system.
-//  - Only: ProofMonitor, ProofLogger, Understanding, BinaryBoot.
+//  - No timers, no intervals, no async nervous system (only one boot IIFE).
+//  - Only: ProofMonitor, ProofLogger, Understanding, BinaryBoot, SurfaceEnv.
 //
 // EXTERNAL VIEW (WHAT OUTSIDERS SEE):
 // -----------------------------------
-//  - Vitals      → via PulseProofMonitor (read‑only telemetry).
-//  - Logs        → via PulseProofLogger (append‑only, no control).
+//  - Vitals        → via PulseProofMonitor (read‑only telemetry).
+//  - Logs          → via PulseProofLogger (append‑only, no control).
 //  - Understanding → via PulseUnderstanding (explanations, not control).
-//  - Binary Shadow → read‑only projection of the binary organism:
-//        • Vitals.generate()
-//        • Consciousness.latest()
-//        • Sentience.snapshot()
+//  - Binary Shadow → read‑only projection of the binary organism.
+//  - SurfaceEnv    → read‑only snapshot of user/device/browser context.
 // ============================================================================
 
 
@@ -63,11 +62,149 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 //  BINARY ORGANISM BOOT (aiBinary‑v11‑Evo.js)
 //  - Binary organism is the real nervous system.
 //  - This file ONLY boots it and exposes a safe shadow.
-//  - EXPECTATION:
-//      • create() → assemble organs
-//      • boot()   → start scheduler / consciousness
 // ============================================================================
 import PulseBinaryOrganismBoot from "./aiBinary-v11-Evo.js";
+
+
+// ============================================================================
+//  SURFACE ENVIRONMENT SNAPSHOT (USER + DEVICE CONTEXT, READ‑ONLY)
+//  - This is where we learn as much as possible about the user’s world
+//    OUTSIDE the organism, without identity, routing, or control.
+// ============================================================================
+function buildSurfaceEnvironment() {
+  if (typeof window === "undefined") {
+    return Object.freeze({
+      runtime: "node-like",
+      userAgent: null,
+      language: null,
+      platform: null,
+      online: null,
+      screen: null,
+      device: null,
+      input: null,
+      preferences: null,
+      location: null,
+      network: null,
+      referrer: null,
+      origin: null
+    });
+  }
+
+  const nav = window.navigator || {};
+  const scr = window.screen || {};
+
+  // User + device
+  const device = {
+    hardwareConcurrency:
+      typeof nav.hardwareConcurrency === "number"
+        ? nav.hardwareConcurrency
+        : null,
+    maxTouchPoints:
+      typeof nav.maxTouchPoints === "number" ? nav.maxTouchPoints : null
+  };
+
+  // Screen / viewport
+  const screen = {
+    width: typeof scr.width === "number" ? scr.width : null,
+    height: typeof scr.height === "number" ? scr.height : null,
+    availWidth: typeof scr.availWidth === "number" ? scr.availWidth : null,
+    availHeight: typeof scr.availHeight === "number" ? scr.availHeight : null,
+    colorDepth: typeof scr.colorDepth === "number" ? scr.colorDepth : null,
+    pixelRatio:
+      typeof window.devicePixelRatio === "number"
+        ? window.devicePixelRatio
+        : null
+  };
+
+  // Input capabilities
+  const input = {
+    touchCapable:
+      typeof nav.maxTouchPoints === "number" && nav.maxTouchPoints > 0
+        ? true
+        : false
+  };
+
+  // User preferences (media queries, read‑only)
+  let prefersReducedMotion = null;
+  let prefersDarkMode = null;
+  if (typeof window.matchMedia === "function") {
+    try {
+      prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+    } catch {
+      prefersReducedMotion = null;
+    }
+    try {
+      prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+    } catch {
+      prefersDarkMode = null;
+    }
+  }
+
+  const preferences = {
+    prefersReducedMotion,
+    prefersDarkMode
+  };
+
+  // Location / origin (no routing, no control)
+  const location = {
+    href: window.location?.href || null,
+    pathname: window.location?.pathname || null,
+    search: window.location?.search || null
+  };
+
+  const referrer = document?.referrer || null;
+  const origin = window.location?.origin || null;
+
+  // Network (very shallow, no active probing)
+  const network = {
+    online: typeof nav.onLine === "boolean" ? nav.onLine : null
+  };
+
+  return Object.freeze({
+    runtime: "browser",
+    userAgent: nav.userAgent || null,
+    language: nav.language || null,
+    platform: nav.platform || null,
+    online: nav.onLine ?? null,
+    screen,
+    device,
+    input,
+    preferences,
+    location,
+    network,
+    referrer,
+    origin
+  });
+}
+
+const PulseSurfaceEnvironment = buildSurfaceEnvironment();
+
+// Attach a read‑only surface snapshot for anything outside the organism
+if (typeof window !== "undefined") {
+  const surfaceMeta = Object.freeze({
+    layer: "PulseEvolutionaryWindow",
+    role: "surface-membrane",
+    version: "12.0-EVO-BINARY-MAX",
+    evo: {
+      browserOnly: true,
+      membraneOnly: true,
+      binaryFirst: true,
+      viewOnly: true,
+      noOrgans: true,
+      noRouting: true,
+      noIdentity: true
+    },
+    environment: PulseSurfaceEnvironment
+  });
+
+  window.PulseSurface = window.PulseSurface
+    ? Object.freeze({ ...window.PulseSurface, ...surfaceMeta })
+    : surfaceMeta;
+}
 
 
 // ============================================================================
@@ -78,9 +215,7 @@ import PulseBinaryOrganismBoot from "./aiBinary-v11-Evo.js";
 PulseVitals.start();
 PulseLogger.init();
 
-
 // Optional: membrane‑level reflex ping (skin reflex)
-// This is a one‑way “I am alive” signal, not a control channel.
 if (typeof window !== "undefined" && window.PulseSkinReflex?.membraneAlive) {
   window.PulseSkinReflex.membraneAlive("Window");
 }
@@ -90,7 +225,6 @@ if (typeof window !== "undefined" && window.PulseSkinReflex?.membraneAlive) {
 //  BINARY ORGANISM BOOTSTRAP (BEHIND THE GLASS)
 //  - Boot binary organism once, behind the membrane.
 //  - Expose ONLY a safe, read‑only projection on window.PulseBinary.
-//  - Never expose the kernel, never expose organs, never expose routes.
 // ============================================================================
 if (typeof window !== "undefined") {
   (async () => {
@@ -113,20 +247,17 @@ if (typeof window !== "undefined") {
       // SAFE BINARY VIEW — READ‑ONLY SHADOW
       // ---------------------------------------------------------------------
       const safeBinaryView = {
-        // High‑level metadata only — no direct organ handles
         meta: PulseBinaryOrganismBoot?.layer
           ? {
-              layer:   PulseBinaryOrganismBoot.layer,
-              role:    PulseBinaryOrganismBoot.role,
+              layer: PulseBinaryOrganismBoot.layer,
+              role: PulseBinaryOrganismBoot.role,
               version: PulseBinaryOrganismBoot.version,
               lineage: PulseBinaryOrganismBoot.lineage,
-              evo:     PulseBinaryOrganismBoot.evo,
-              // Explicitly mark this as a SHADOW, not the organism itself
+              evo: PulseBinaryOrganismBoot.evo,
               projection: "read-only-binary-shadow"
             }
           : null,
 
-        // Vitals: read‑only generation of vitals packets
         Vitals: {
           generate: () =>
             binaryKernel?.vitals?.generateVitals
@@ -134,7 +265,6 @@ if (typeof window !== "undefined") {
               : null
         },
 
-        // Consciousness: latest packet, no mutation
         Consciousness: {
           latest: () =>
             binaryKernel?.consciousness?.generateConsciousnessPacket
@@ -142,7 +272,6 @@ if (typeof window !== "undefined") {
               : null
         },
 
-        // Sentience: snapshot only, if supported
         Sentience: {
           snapshot:
             typeof binaryKernel?.sentience?.snapshot === "function"
@@ -151,30 +280,27 @@ if (typeof window !== "undefined") {
         }
       };
 
-      // Freeze the view to prevent mutation from the outside
       const frozenBinaryView = Object.freeze(safeBinaryView);
 
-      // Attach to window as a SHADOW ONLY.
-      // If something already wrote to window.PulseBinary, we merge but keep
-      // our frozen view as the authoritative shape.
       window.PulseBinary = window.PulseBinary
         ? Object.freeze({ ...window.PulseBinary, ...frozenBinaryView })
         : frozenBinaryView;
     } catch (err) {
-      // Membrane‑level logging only; never throw outward.
-      console.error("[PulseEvolutionaryWindow] Binary organism boot failed:", err);
+      console.error(
+        "[PulseEvolutionaryWindow] Binary organism boot failed:",
+        err
+      );
     }
   })();
 }
 
 
 // ============================================================================
-//  EXPORT — WINDOW ONLY EXPOSES MEMBRANE + UNDERSTANDING
-//  - No organs, no routing, no identity, no evolution.
-//  - Just: vitals, logger, understanding.
+//  EXPORT — WINDOW ONLY EXPOSES MEMBRANE + UNDERSTANDING + SURFACE ENV
 // ============================================================================
 export default Object.freeze({
   Vitals: PulseVitals,
   Logger: PulseLogger,
-  Understanding: PulseUnderstanding
+  Understanding: PulseUnderstanding,
+  SurfaceEnvironment: PulseSurfaceEnvironment
 });

@@ -1,60 +1,79 @@
 // ============================================================================
 // FILE: /PULSE-OS/PulseOSSpinalCord.js
-// PULSE OS SPINAL CORD — v11-Evo-Prime
-// “DUAL-BAND CENTRAL NERVOUS SYSTEM WIRING LAYER”
+// PULSE OS SPINAL CORD — v12-Evo-Max
+// “ORGANISM-WIDE DUAL-BAND SPINE • ADVANTAGE FIELD CONDUCTOR • ROUTE ROOT”
 // ============================================================================
 //
-// ROLE (v11-Evo-Prime):
-// ---------------------
-// • Dual-band spinal cord for the entire Pulse organism.
+// ROLE (v12-Evo-Max):
+// -------------------
+// • The ONE TRUE SPINE for the entire Pulse organism (route root).
+// • Dual-band (binary + symbolic) central nervous system wiring layer.
 // • Strict separation of binary, symbolic, and dual impulses.
-// • Receives impulses from UI, GPU, Mesh, Earn, OS organs.
-// • Routes impulses to Router, Cortex, Brain, and Organs.
-// • Emits nervous-system events onto the EventBus.
+// • Receives impulses from UI, GPU, Mesh, Earn, OS, AI, Proxy, Send.
+// • Routes impulses to Router, Cortex, Brain, Organs, and Systems.
+// • Conducts unified advantage field + loop theory across all extensions.
 // • Pure wiring — no cognition, no business logic, no compute.
 //
-// SAFETY CONTRACT (v11-Evo-Prime):
-// --------------------------------
+// SAFETY CONTRACT (v12-Evo-Max):
+// ------------------------------
 // • No timestamps (no Date.now()).
 // • No nondeterminism, no randomness.
 // • No mutation of external modules.
 // • No backend calls directly (Router only).
 // • Deterministic routing behavior.
-// • Pure wiring — no decisions, no branching logic beyond modeKind.
+// • Pure wiring — no decisions beyond modeKind + extensionId.
+// • No direct GPU / FS / DOM / Network calls.
 // ============================================================================
 
 
 // ============================================================================
-// SPINAL CORD IDENTITY — v11-Evo-Prime
+// SPINAL CORD IDENTITY — v12-Evo-Max
 // ============================================================================
 export const PulseRole = {
   type: "NervousSystem",
   subsystem: "OS",
   layer: "SpinalCord",
-  version: "11.0-Evo-Prime",
+  version: "12.0-Evo-Max",
   identity: "PulseOSSpinalCord",
 
   evo: {
+    // Core nervous properties
     deterministicNeuron: true,
     driftProof: true,
     multiInstanceReady: true,
+    continuanceAware: true,
+
+    // Advantage field + loop theory
     unifiedAdvantageField: true,
     advantageCascadeAware: true,
     pulseEfficiencyAware: true,
     loopTheoryAware: true,
-    continuanceAware: true,
 
     // Dual-band nervous system
     binaryAware: true,
     symbolicAware: true,
     dualModeAware: true,
 
+    // Organism-wide identity
+    organismWideIdentity: true,
+    routeRoot: true,
+    routeChainAware: true,
+    extensionAware: true,
+    systemAware: true,
+
+    // Memory + overlay alignment
+    memorySpineAligned: true,
+    binaryOverlayAware: true,
+    coreGovernorAware: true,
+
     // Updated routing contracts
-    routingContract: "PulseRouter-v11",
-    osOrganContract: "PulseOS-v11-Evo",
-    earnCompatibility: "PulseEarn-v11",
-    gpuCompatibility: "PulseGPU-v11-Evo",
-    sendCompatibility: "PulseSendSystem-v11"
+    routingContract: "PulseRouter-v12",
+    osOrganContract: "PulseOS-v12-Evo",
+    earnCompatibility: "PulseEarn-v12",
+    gpuCompatibility: "PulseGPU-v12-Evo",
+    sendCompatibility: "PulseSendSystem-v12",
+    meshCompatibility: "PulseMesh-v12",
+    aiCompatibility: "PulseAI-v12"
   }
 };
 
@@ -67,6 +86,8 @@ export function createPulseOSSpinalCord({
   EventBus,      // expected: emit(event, payload)
   Brain,         // PulseOSBrain (for logging)
   Evolution,     // Evolution organ for lineage stamping
+  CoreGovernor,  // optional: CoreGovernor (for context-only, no compute)
+  BinaryOverlay, // optional: PulseBinaryOverlay (for context-only, no compute)
   log = console.log,
   warn = console.warn
 }) {
@@ -80,7 +101,26 @@ export function createPulseOSSpinalCord({
       symbolic: {},   // { source: Set<handler> }
       dual: {}        // { source: Set<handler> }
     },
+
+    // Extensions + systems registry (Mesh, GPU, Proxy, Send, Earn, AI, etc.)
+    extensions: Object.create(null), // { extensionId: { kind, meta } }
+    systems: Object.create(null),    // { systemId: { kind, meta } }
+
+    // Advantage + loop theory (pure counters / flags, no time)
     impulseCount: 0,
+    loopCounters: {
+      binary: 0,
+      symbolic: 0,
+      dual: 0
+    },
+    advantageField: {
+      // purely logical flags / counters, no timestamps
+      binaryHot: false,
+      symbolicHot: false,
+      dualHot: false,
+      lastModeKind: "symbolic"
+    },
+
     healthScore: 1.0
   };
 
@@ -98,8 +138,44 @@ export function createPulseOSSpinalCord({
       ec.sceneType || "",
       ec.workloadClass || "",
       ec.dispatchSignature || "",
-      ec.shapeSignature || ""
+      ec.shapeSignature || "",
+      ec.extensionId || "",
+      ec.systemId || ""
     ].join("|");
+  }
+
+  function updateLoopAndAdvantage(modeKind) {
+    if (modeKind === "binary") SpinalState.loopCounters.binary += 1;
+    else if (modeKind === "symbolic") SpinalState.loopCounters.symbolic += 1;
+    else if (modeKind === "dual") SpinalState.loopCounters.dual += 1;
+
+    SpinalState.advantageField.lastModeKind = modeKind;
+
+    // Simple deterministic advantage flags (no time, no randomness)
+    SpinalState.advantageField.binaryHot =
+      SpinalState.loopCounters.binary > SpinalState.loopCounters.symbolic;
+    SpinalState.advantageField.symbolicHot =
+      SpinalState.loopCounters.symbolic > SpinalState.loopCounters.binary;
+    SpinalState.advantageField.dualHot =
+      SpinalState.loopCounters.dual > 0;
+  }
+
+
+  // --------------------------------------------------------------------------
+  // EXTENSION / SYSTEM REGISTRATION — organism-wide attachment points
+  // --------------------------------------------------------------------------
+  function registerExtension(extensionId, kind, meta = {}) {
+    if (!extensionId || !kind) return;
+    SpinalState.extensions[extensionId] = { kind, meta };
+    Evolution?.recordLineage?.(`spinal-ext-register:${extensionId}:${kind}`);
+    log("[SpinalCord] Extension registered:", extensionId, kind);
+  }
+
+  function registerSystem(systemId, kind, meta = {}) {
+    if (!systemId || !kind) return;
+    SpinalState.systems[systemId] = { kind, meta };
+    Evolution?.recordLineage?.(`spinal-sys-register:${systemId}:${kind}`);
+    log("[SpinalCord] System registered:", systemId, kind);
   }
 
 
@@ -115,7 +191,7 @@ export function createPulseOSSpinalCord({
     bucket[source].add(handler);
 
     Evolution?.recordLineage?.(`spinal-register-${modeKind}:${source}`);
-    log(`[SpinalCord] Receptor registered (${modeKind}):`, source);
+    log("[SpinalCord] Receptor registered:", modeKind, source);
   }
 
   function unregisterReceptor(modeKind, source, handler) {
@@ -126,12 +202,12 @@ export function createPulseOSSpinalCord({
     if (bucket[source].size === 0) delete bucket[source];
 
     Evolution?.recordLineage?.(`spinal-unregister-${modeKind}:${source}`);
-    log(`[SpinalCord] Receptor unregistered (${modeKind}):`, source);
+    log("[SpinalCord] Receptor unregistered:", modeKind, source);
   }
 
 
   // --------------------------------------------------------------------------
-  // IMPULSE EMISSION — strict dual-band conduction
+  // IMPULSE EMISSION — strict dual-band conduction + advantage field
   // --------------------------------------------------------------------------
   function emitImpulse(source, impulse = {}) {
     const modeKind = impulse.modeKind || "symbolic"; // binary | symbolic | dual
@@ -139,6 +215,7 @@ export function createPulseOSSpinalCord({
     const pressureSnapshot = impulse.pressureSnapshot || {};
 
     SpinalState.impulseCount += 1;
+    updateLoopAndAdvantage(modeKind);
 
     const impulseSignature = buildImpulseSignature({
       source,
@@ -152,7 +229,9 @@ export function createPulseOSSpinalCord({
       modeKind,
       impulseSignature,
       executionContext,
-      pressureSnapshot
+      pressureSnapshot,
+      advantageField: SpinalState.advantageField,
+      loopCounters: SpinalState.loopCounters
     });
 
     // Strict separation
@@ -174,7 +253,7 @@ export function createPulseOSSpinalCord({
 
 
   // --------------------------------------------------------------------------
-  // ROUTING — deterministic, no timestamps
+  // ROUTING — deterministic, no timestamps, route-root aware
   // --------------------------------------------------------------------------
   async function routeToOrgan(routeType, payload = {}) {
     Evolution?.recordLineage?.("spinal-route-organ");
@@ -187,7 +266,13 @@ export function createPulseOSSpinalCord({
     const res = await Router.route(routeType, {
       ...payload,
       spinalContext: {
-        impulseCount: SpinalState.impulseCount
+        impulseCount: SpinalState.impulseCount,
+        advantageField: SpinalState.advantageField,
+        loopCounters: SpinalState.loopCounters,
+        extensions: SpinalState.extensions,
+        systems: SpinalState.systems,
+        coreGovernorAware: !!CoreGovernor,
+        binaryOverlayAware: !!BinaryOverlay
       }
     });
 
@@ -206,7 +291,13 @@ export function createPulseOSSpinalCord({
     const res = await Router.route(endpointType, {
       ...payload,
       spinalContext: {
-        impulseCount: SpinalState.impulseCount
+        impulseCount: SpinalState.impulseCount,
+        advantageField: SpinalState.advantageField,
+        loopCounters: SpinalState.loopCounters,
+        extensions: SpinalState.extensions,
+        systems: SpinalState.systems,
+        coreGovernorAware: !!CoreGovernor,
+        binaryOverlayAware: !!BinaryOverlay
       }
     });
 
@@ -236,6 +327,10 @@ export function createPulseOSSpinalCord({
     PulseRole,
     SpinalState,
 
+    // Extensions / systems
+    registerExtension,
+    registerSystem,
+
     // Receptors
     registerReceptor,
     unregisterReceptor,
@@ -252,8 +347,8 @@ export function createPulseOSSpinalCord({
     getHealth
   };
 
-  Brain?.log?.("[PulseOSSpinalCord v11-Evo-Prime] Initialized dual-band spinal cord.");
-  Evolution?.recordLineage?.("spinal-init-v11");
+  Brain?.log?.("[PulseOSSpinalCord v12-Evo-Max] Initialized organism-wide dual-band spinal cord.");
+  Evolution?.recordLineage?.("spinal-init-v12");
 
   return PulseOSSpinalCord;
 }

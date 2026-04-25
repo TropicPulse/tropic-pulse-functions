@@ -1,28 +1,14 @@
 // ============================================================================
-//  FILE: /ui/PulseEvolutionaryRouter.js
-//  PULSE OS v11‑EVO‑PRIME — UI ROUTER ORGAN
-//  “THE PAGE ROUTING / STATE TRANSITION LAYER”
-//  Deterministic • Drift‑Proof • Dual‑Band • No Randomness
-//
-//  ROLE:
-//  -----
-//  • Handles UI route transitions (page modes / states).
-//  • Works with EvolutionaryBrain + EvolutionaryCode + Impulse.
-//  • Emits impulses to CNS for organism‑wide awareness.
-//  • Deterministic routing table — no async routing, no randomness.
-//
-//  UPGRADE NOTE:
-//  -------------
-//  • Replaces all legacy UIRouter.js / PageRouter.js.
-//  • This is the OFFICIAL v11‑Evo UI routing organ.
-//  • If wiped, the page loses deterministic state transitions.
+//  FILE: /PULSE-UI/PulseEvolutionaryRouter.js
+//  PULSE OS v11‑EVO‑PRIME — UI ROUTER ORGAN (UPGRADED)
+//  “DETERMINISTIC PAGE ROUTING WITH CORE‑POWERED MEMORY”
 // ============================================================================
 
 export const RouterRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageRouter",
-  version: "11.2-Evo-Prime",
+  version: "11.3-Evo-Prime",
   identity: "PulseEvolutionaryRouter",
 
   evo: {
@@ -33,6 +19,7 @@ export const RouterRole = {
     symbolicAware: true,
     uiRouting: true,
     cnsAware: true,
+    routeAware: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true
   }
@@ -53,7 +40,8 @@ export function createPulseEvolutionaryRouter({
 
   const RouterState = {
     currentRoute: "init",
-    lastTransition: null
+    lastTransition: null,
+    routeHistory: []
   };
 
   function safeLog(stage, details = {}) {
@@ -63,7 +51,7 @@ export function createPulseEvolutionaryRouter({
   }
 
   // --------------------------------------------------------------------------
-  //  ROUTING TABLE — deterministic, no randomness
+  //  ROUTING TABLE — deterministic, lineage-aware
   // --------------------------------------------------------------------------
   const ROUTES = {
     init: {
@@ -95,7 +83,7 @@ export function createPulseEvolutionaryRouter({
   }
 
   // --------------------------------------------------------------------------
-  //  TRANSITION — deterministic route change
+  //  TRANSITION — deterministic, binary-native, CNS-aware
   // --------------------------------------------------------------------------
   async function transition(toRoute, { payload, binaryPayload, context } = {}) {
     if (!isValidRoute(toRoute)) {
@@ -113,6 +101,7 @@ export function createPulseEvolutionaryRouter({
 
     RouterState.currentRoute = toRoute;
     RouterState.lastTransition = { from: fromRoute, to: toRoute };
+    RouterState.routeHistory.push({ from: fromRoute, to: toRoute });
 
     safeLog("TRANSITION", { fromRoute, toRoute });
 

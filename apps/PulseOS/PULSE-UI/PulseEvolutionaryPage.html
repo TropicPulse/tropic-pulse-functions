@@ -32,7 +32,7 @@
        ============================================================================ -->
   <script type="module">
     // Auto‑derive page name
-    const pageName = import.meta.url.split('/').pop().replace('.js', '');
+    const pageName = window.location.pathname.split('/').pop() || "PulseEvolutionaryPage";
 
     // A1 Skin Reflex
     import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
@@ -126,24 +126,30 @@
 
     const Evolution = {
       getPageLineage() {
-        return { lineage: "v11-evo", stable: true };
+        return { lineage: "v11-evo", stable: true, page: window.location.pathname };
       },
       recordPageLineage(model) {
         console.log("[Evolution] Lineage recorded:", model);
       }
     };
 
-    // Instantiate UI organs
-    const MemoryOrgan = createPulseEvolutionaryMemory();
-    const BinaryOrgan = createPulseEvolutionaryBinary();
-    const ImpulseOrgan = createPulseEvolutionaryImpulse({ CNS });
+    // ------------------------------------------------------------------------
+    // INSTANTIATE UI ORGANS — v11‑EVO‑Prime wiring order
+    // ------------------------------------------------------------------------
 
+    // 1) Long‑term memory (route‑aware)
+    const MemoryOrgan = createPulseEvolutionaryMemory({
+      routeId: window.location.pathname || "PulseEvolutionaryPage"
+    });
+
+    // 2) Code organ (needs Evolution + Memory + CNS)
     const CodeOrgan = createPulseEvolutionaryCode({
       Evolution,
       LongTermMemory: MemoryOrgan,
       CNS
     });
 
+    // 3) Brain organ (coordinates Code + Memory + CNS)
     const BrainOrgan = createPulseEvolutionaryBrain({
       Evolution,
       LongTermMemory: MemoryOrgan,
@@ -152,12 +158,25 @@
       createMemory: () => MemoryOrgan
     });
 
+    // 4) Router organ (needs CNS + Evolution + Code + Brain)
     const RouterOrgan = createPulseEvolutionaryRouter({
       CNS,
       Evolution,
       CodeOrgan,
-      BrainOrgan,
-      ImpulseOrgan
+      BrainOrgan
+    });
+
+    // 5) Impulse organ (route‑aware, lineage‑aware)
+    const ImpulseOrgan = createPulseEvolutionaryImpulse({
+      CNS,
+      Evolution,
+      RouteOrgan: RouterOrgan
+    });
+
+    // 6) Binary organ (route‑aware, lineage‑aware)
+    const BinaryOrgan = createPulseEvolutionaryBinary({
+      Evolution,
+      RouteOrgan: RouterOrgan
     });
 
     // ------------------------------------------------------------------------
@@ -182,7 +201,7 @@
         evolve: (payload) =>
           CodeOrgan.evolve({ type: "page:update", payload }),
 
-        route: (route) => RouterOrgan.go(route),
+        route: (route, opts) => RouterOrgan.go(route, opts),
 
         encode: (payload) => BinaryOrgan.encode(payload),
         decode: (compressed) => BinaryOrgan.decode(compressed),

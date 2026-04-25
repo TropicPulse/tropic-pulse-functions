@@ -1,28 +1,15 @@
 // ============================================================================
-//  FILE: /ui/PulseEvolutionaryBinary.js
-//  PULSE OS v11‑EVO‑PRIME — UI BINARY EVOLUTION ORGAN
-//  “THE GPU‑FRIENDLY BINARY EVOLUTION LAYER”
-//  Deterministic • Drift‑Proof • Dual‑Band • No Randomness
-//
-//  ROLE:
-//  -----
-//  • Converts symbolic → binary and binary → symbolic for UI evolution.
-//  • Provides low‑entropy binary surfaces for GPU‑friendly operations.
-//  • Works with EvolutionaryCode + EvolutionaryBrain + Router + Impulse.
-//  • Pure binary math — no DOM, no IO, no side‑effects.
-//
-//  UPGRADE NOTE:
-//  -------------
-//  • Replaces all legacy BinaryPage.js / PageBinaryEngine.js.
-//  • This is the OFFICIAL v11‑Evo UI binary organ.
-//  • If wiped, the UI loses binary evolution capability.
+//  FILE: /PULSE-UI/PulseEvolutionaryBinary.js
+//  PULSE OS v11‑EVO‑PRIME — UI BINARY EVOLUTION ORGAN (UPGRADED)
+//  “GPU‑FRIENDLY BINARY EVOLUTION LAYER”
+//  Deterministic • Drift‑Proof • Dual‑Band • Binary‑Native
 // ============================================================================
 
 export const BinaryRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageBinary",
-  version: "11.2-Evo-Prime",
+  version: "11.3-Evo-Prime",
   identity: "PulseEvolutionaryBinary",
 
   evo: {
@@ -34,6 +21,8 @@ export const BinaryRole = {
     symbolicAware: true,
     gpuFriendly: true,
     lowEntropy: true,
+    routeAware: true,
+    lineageAware: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true
   }
@@ -109,6 +98,8 @@ function expandBinary(chunks) {
 //  FACTORY — creates the binary organ
 // ============================================================================
 export function createPulseEvolutionaryBinary({
+  Evolution,
+  RouteOrgan,
   log = console.log,
   warn = console.warn
 } = {}) {
@@ -117,7 +108,8 @@ export function createPulseEvolutionaryBinary({
     lastEncoded: null,
     lastDecoded: null,
     lastCompressed: null,
-    lastExpanded: null
+    lastExpanded: null,
+    lastEnvelope: null
   };
 
   function safeLog(stage, details = {}) {
@@ -127,18 +119,37 @@ export function createPulseEvolutionaryBinary({
   }
 
   // --------------------------------------------------------------------------
-  //  ENCODE SYMBOLIC → BINARY
+  //  BUILD BINARY ENVELOPE — deterministic, lineage-aware, route-aware
+  // --------------------------------------------------------------------------
+  function buildEnvelope(payload, compressed) {
+    const lineage = Evolution?.getPageLineage?.() || {};
+    const route = RouteOrgan?.RouterState?.currentRoute || "unknown";
+
+    return {
+      version: BinaryRole.version,
+      route,
+      lineage,
+      compressed,
+      timestamp: "NO_TIMESTAMP_v11", // deterministic placeholder
+      size: compressed?.length || 0
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  //  ENCODE SYMBOLIC → BINARY (GPU-friendly)
   // --------------------------------------------------------------------------
   function encode(payload) {
     try {
       const bits = encodeSymbolicToBinary(payload);
       const compressed = compressBinary(bits);
+      const envelope = buildEnvelope(payload, compressed);
 
       BinaryState.lastEncoded = bits;
       BinaryState.lastCompressed = compressed;
+      BinaryState.lastEnvelope = envelope;
 
-      safeLog("ENCODE_OK", { bitLength: bits.length });
-      return { ok: true, bits, compressed };
+      safeLog("ENCODE_OK", { bitLength: bits.length, compressed: compressed.length });
+      return { ok: true, bits, compressed, envelope };
     } catch (err) {
       warn("[PulseEvolutionaryBinary] ENCODE_ERROR", String(err));
       return { ok: false, error: "EncodeError" };

@@ -1,21 +1,15 @@
 // ============================================================================
-//  FILE: /ui/PulseEvolutionaryBrain.js
-//  PULSE OS v11‑EVO‑PRIME — EVOLUTIONARY PAGE BRAIN
+//  FILE: /PULSE-UI/PulseEvolutionaryBrain.js
+//  PULSE OS v11‑EVO‑PRIME — EVOLUTIONARY PAGE BRAIN (UPGRADED)
 //  “THE PAGE CORTEX / COORDINATION LAYER”
-//  Orchestrates: EvolutionaryCode + EvolutionaryMemory + CNS impulses.
-//
-//  UPGRADE NOTE:
-//  -------------
-//  • This replaces any legacy UIBrain.js / PageBrain.js.
-//  • This is the OFFICIAL v11‑Evo brain for PulseEvolutionaryPage.html.
-//  • If wiped, the page loses coordinated restore/evolve behavior.
+//  Now powered by PulseCoreMemory → PulseEvolutionaryMemory.
 // ============================================================================
 
 export const BrainRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageBrain",
-  version: "11.2-Evo-Prime",
+  version: "11.3-Evo-Prime",
   identity: "PulseEvolutionaryBrain",
 
   evo: {
@@ -25,23 +19,25 @@ export const BrainRole = {
     dualBandAware: true,
     memoryAware: true,
     cnsAware: true,
+    routeAware: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true
   }
 };
 
 // ============================================================================
-//  FACTORY — wires Code + Memory + CNS
+//  FACTORY — wires Code + Memory + CNS using the new Core Memory Spine
 // ============================================================================
 export function createPulseEvolutionaryBrain({
   Evolution,
-  LongTermMemory,
+  LongTermMemory,   // now a route-aware client of PulseCoreMemory
   CNS,
-  createCode,    // factory: () => PulseEvolutionaryCode organ
-  createMemory,  // factory: () => PulseEvolutionaryMemory organ
+  createCode,       // factory: () => PulseEvolutionaryCode organ
+  createMemory,     // factory: () => PulseEvolutionaryMemory organ
   log = console.log,
   warn = console.warn
 } = {}) {
+
   const BrainState = {
     initialized: false,
     lastMode: null,      // "restore" | "fresh"
@@ -54,19 +50,24 @@ export function createPulseEvolutionaryBrain({
     } catch {}
   }
 
-  // Instantiate sub‑organs
+  // --------------------------------------------------------------------------
+  //  Instantiate sub‑organs (route-aware memory + code)
+  // --------------------------------------------------------------------------
   const MemoryOrgan =
     typeof createMemory === "function"
       ? createMemory({ log, warn })
-      : null;
+      : LongTermMemory || null;
 
   const CodeOrgan =
     typeof createCode === "function"
       ? createCode({ Evolution, LongTermMemory: MemoryOrgan, CNS, log, warn })
       : null;
 
+  if (!MemoryOrgan) warn("[PulseEvolutionaryBrain] NO_MEMORY_ORGAN");
+  if (!CodeOrgan) warn("[PulseEvolutionaryBrain] NO_CODE_ORGAN");
+
   // --------------------------------------------------------------------------
-  //  RESTORE PATH — try to reconstruct from memory
+  //  RESTORE PATH — deterministic, binary-native, core-powered
   // --------------------------------------------------------------------------
   async function restore() {
     if (!MemoryOrgan || !CodeOrgan) {
@@ -80,7 +81,7 @@ export function createPulseEvolutionaryBrain({
       return { ok: false, error: "NoSavedPage" };
     }
 
-    // Let CodeOrgan re‑apply model via its restore/evolve path
+    // Let CodeOrgan re-apply the model
     const res = await CodeOrgan.restore?.();
     BrainState.lastMode = "restore";
     BrainState.lastResult = res || null;
@@ -95,7 +96,7 @@ export function createPulseEvolutionaryBrain({
   }
 
   // --------------------------------------------------------------------------
-  //  FRESH EVOLVE PATH — no prior memory or forced evolve
+  //  FRESH EVOLVE PATH — deterministic, no randomness
   // --------------------------------------------------------------------------
   async function freshEvolve({ type = "page:init", payload, binaryPayload, context } = {}) {
     if (!CodeOrgan) {
@@ -117,7 +118,7 @@ export function createPulseEvolutionaryBrain({
   }
 
   // --------------------------------------------------------------------------
-  //  PUBLIC ENTRY — boot sequence for the page
+  //  PUBLIC ENTRY — boot sequence
   //  1) Try restore from memory
   //  2) If none, do fresh evolve
   // --------------------------------------------------------------------------
