@@ -18,14 +18,6 @@
 <!-- Backend Connector Layer -->
 <script type="module">
 
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
-
-// Use the identity Window already computed
-PulseSkinReflex.attachScanner(window.Pulse.pageName);
-
-// Boot membrane
-import PulseWindow from "./PulseEvolutionaryWindow.js";
-
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -1008,14 +1000,30 @@ import PulseWindow from "./PulseEvolutionaryWindow.js";
   </div>
 <script type="module">
 /* ============================================================================
-   DASHBOARD — v11 FRONT PAGE
-   Identity → OS Boot → Render → UI Animations
-   No PulseBand engine. No timers except CSS fades.
+   DASHBOARD — v11 FRONT PAGE (UPDATED FOR PAGESCANNER v12)
+   UI-only. OS handles identity, trust, routing, continuity.
 ============================================================================ */
 
-// -----------------------------------------
-// ⭐ UI HELPERS
-// -----------------------------------------
+/* ============================================================
+   0. SKIN REFLEX — UNIVERSAL FRONT DOOR
+============================================================ */
+import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+
+/* ⭐ attachScanner handles:
+      • sessionCheck
+      • routeCheck
+      • pageName / lastPage
+      • identity exposure
+*/
+await PulseSkinReflex.attachScanner();
+
+/* ============================================================
+   1. BOOT MEMBRANE
+============================================================ */
+import PulseWindow from "./PulseEvolutionaryWindow.js";
+/* ============================================================
+   1. UI HELPERS
+   ============================================================ */
 function hideTPLoader() {
   const el = document.getElementById("t-loading");
   if (!el) return;
@@ -1029,32 +1037,9 @@ function safeLogout() {
   window.location.replace("/login.html");
 }
 
-// -----------------------------------------
-// ⭐ SESSION CHECK (v11 rule)
-// -----------------------------------------
-async function sessionCheck() {
-  let id = null;
-
-  try {
-    const raw = localStorage.getItem("tp_identity_v9");
-    if (raw) id = JSON.parse(raw);
-  } catch {
-    id = null;
-  }
-
-  if (!id || !id.trustedDevice) {
-    const here = encodeURIComponent(location.pathname + location.search);
-    window.location.href = `/CheckEmail.html?returnTo=${here}`;
-    return null;
-  }
-
-  window.PulseIdentity = id;
-  return id;
-}
-
-// -----------------------------------------
-// ⭐ HERO HEADER ENTRANCE ANIMATION
-// -----------------------------------------
+/* ============================================================
+   2. HERO HEADER ENTRANCE ANIMATION
+   ============================================================ */
 async function runHeroHeaderEntrance() {
   if (window.__heroHeaderPlayed) return;
   window.__heroHeaderPlayed = true;
@@ -1107,9 +1092,9 @@ async function runHeroHeaderEntrance() {
   }, 1800);
 }
 
-// -----------------------------------------
-// ⭐ DASHBOARD POP ANIMATION
-// -----------------------------------------
+/* ============================================================
+   3. DASHBOARD POP ANIMATION
+   ============================================================ */
 function applyDashboardPop(identity) {
   const header = document.querySelector(".tp-dashboard-header");
   const nameEl = document.querySelector(".tp-dashboard-greeting-name");
@@ -1132,9 +1117,9 @@ function applyDashboardPop(identity) {
   }
 }
 
-// -----------------------------------------
-// ⭐ MAIN RENDER
-// -----------------------------------------
+/* ============================================================
+   4. MAIN RENDER
+   ============================================================ */
 async function renderDashboard(identity) {
   const shimmer = document.getElementById("shimmer");
   const img = document.getElementById("profilePhoto");
@@ -1198,70 +1183,29 @@ async function renderDashboard(identity) {
   hideTPLoader();
 }
 
-// -----------------------------
-// DASHBOARD BOOTSTRAP — v11 (UNDERSTANDING-ONLY)
-// -----------------------------
+/* ============================================================
+   5. DASHBOARD BOOTSTRAP
+   ============================================================ */
 (async () => {
-  // -----------------------------------------
-  // MARKER (CLEAN + SAFE)
-  // -----------------------------------------
-  let lastTime = nowMs();
-  function mark(label, absolute = false) {
-    const now = nowMs();
-    const diff = now - lastTime;
-    log(
-      absolute
-        ? `${label}: @${now.toFixed(1)}ms`
-        : `${label}: +${diff.toFixed(1)}ms`
-    );
-    lastTime = now;
-  }
+  const id = PulseIdentity; // ⭐ identity already provided by attachScanner()
 
-  mark("DASHBOARD DOM START");
+  if (!id) return; // attachScanner already redirected if invalid
 
-  // -----------------------------------------
-  // GLOBAL UI STATE
-  // -----------------------------------------
-  window.isIdle = true;
-
-  // -----------------------------------------
-  // 1️⃣ v11 SESSION CHECK (ONE-TIME)
-  // -----------------------------------------
-  mark("DASHBOARD: sessionCheck()");
-  const id = await sessionCheck();
-  if (!id) return; // redirected to login if invalid
-
-  // -----------------------------------------
-  // 2️⃣ UI PREP
-  // -----------------------------------------
   document.body.classList.add("hero-header-intro");
   hideTPLoader();
 
-  // -----------------------------------------
-  // 3️⃣ HERO HEADER ANIMATION
-  // -----------------------------------------
-  mark("DASHBOARD: HERO ENTRANCE");
   await runHeroHeaderEntrance();
-
-  // -----------------------------------------
-  // 4️⃣ RENDER DASHBOARD (IDENTITY-ONLY INPUT)
-  // -----------------------------------------
-  mark("DASHBOARD: RENDER START");
   await renderDashboard(id);
 
-  // -----------------------------------------
-  // ⭐ PULSEBAND UI RESTORE (NO LOOPS)
-// -----------------------------------------
+  // PulseBand UI restore (unchanged)
   if (!window.__pulsebandListenersAttached) {
     window.__pulsebandListenersAttached = true;
 
-    // Restore PulseBand UI on load
     window.addEventListener("load", () => {
       const inactiveFlag = localStorage.getItem("pulseband_disabled") === "1";
       window.isIdle = !!inactiveFlag;
     });
 
-    // Mini badge toggle
     const miniBadge = document.getElementById("pb-mini-badge");
     if (miniBadge) {
       miniBadge.addEventListener("click", () => {
@@ -1278,11 +1222,8 @@ async function renderDashboard(identity) {
       });
     }
   }
-
-  mark("DASHBOARD DOM END", true);
 })();
+</script>
 
-
-  </script>
 </body>
 </html>

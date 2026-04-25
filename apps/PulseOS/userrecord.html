@@ -18,14 +18,6 @@
 <!-- Backend Connector Layer -->
 <script type="module">
 
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
-
-// Use the identity Window already computed
-PulseSkinReflex.attachScanner(window.Pulse.pageName);
-
-// Boot membrane
-import PulseWindow from "./PulseEvolutionaryWindow.js";
-
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -1380,27 +1372,36 @@ body::before {
 </div>
 
 <script type="module">
-   // ============================================================================
-// USER RECORD PAGE (Pulse‑OS‑v5 CLEAN VERSION)
-// Supports:
-//   - Normal user editing themselves
-//   - Admin editing ANY user via dropdown
-//   - Email change requires PIN before save
-// ============================================================================
 
-// -----------------------------
-// GLOBAL STATE
-// -----------------------------
-let identityUser = null;   // logged-in identity()
-let currentUser = null;    // user being edited (self or selected)
-let isAdmin = false;
-let formIsDirty = false;
+/* ============================================================
+   0. SKIN REFLEX — UNIVERSAL FRONT DOOR
+============================================================ */
+import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
 
-function markDirty() { formIsDirty = true; }
+/* ⭐ attachScanner handles:
+      • sessionCheck
+      • routeCheck
+      • pageName / lastPage
+      • identity exposure
+*/
+await PulseSkinReflex.attachScanner();
 
-// -----------------------------
-// DOM ELEMENTS
-// -----------------------------
+/* ============================================================
+   1. BOOT MEMBRANE
+============================================================ */
+import PulseWindow from "./PulseEvolutionaryWindow.js";
+/* -----------------------------
+   GLOBAL STATE (UI ONLY)
+----------------------------- */
+let identityUser = PulseIdentity;
+let currentUser  = null;
+let isAdmin      = identityUser.role === "Admin";
+let formIsDirty  = false;
+const markDirty  = () => formIsDirty = true;
+
+/* -----------------------------
+   DOM ELEMENTS (UNCHANGED)
+----------------------------- */
 const img             = document.getElementById("profilePhoto");
 const emailInput      = document.getElementById("email");
 const verifyEmailBtn  = document.getElementById("verifyEmailBtn");
@@ -1413,41 +1414,28 @@ const redeemYes       = document.getElementById("redeemYesBtn");
 const redeemNo        = document.getElementById("redeemNoBtn");
 const msg             = document.getElementById("msg");
 
-// -----------------------------
-// BOOTSTRAP (OS‑v5 CONSUMER‑ONLY)
-// -----------------------------
+/* -----------------------------
+   BOOTSTRAP — UI ONLY
+----------------------------- */
 (async function userRecordBootstrap() {
   showTPLoader();
 
-  // 1️⃣ Load identity (authoritative, allowed)
-  identityUser = await identity();
-  if (!identityUser) {
-    window.location.replace("/CheckEmail.html");
-    return;
-  }
-
-  isAdmin = identityUser.role === "Admin";
-
-  // 2️⃣ Determine which user to edit (CONSUME ONLY)
   if (isAdmin) {
-    setupAdminUserDropdown(); // uses getUsersCache() which is warmed by OS layer
+    setupAdminUserDropdown();
   } else {
-    const users = (typeof getUsersCache === "function") ? getUsersCache() : null;
-
+    const users = typeof getUsersCache === "function" ? getUsersCache() : null;
     currentUser =
       (Array.isArray(users) && users.find(u => u.id === identityUser.uid)) ||
       identityUser;
-
     populateUserUI(currentUser);
   }
 
   hideTPLoader();
 })();
 
-
-// -----------------------------
-// ADMIN DROPDOWN
-// -----------------------------
+/* -----------------------------
+   ADMIN DROPDOWN (UNCHANGED)
+----------------------------- */
 function setupAdminUserDropdown() {
   const dropdown = document.getElementById("userSelectDropdown");
   if (!dropdown) return;
@@ -1459,38 +1447,31 @@ function setupAdminUserDropdown() {
   );
 
   dropdown.innerHTML = `<option value="">Select a user...</option>`;
-
-  for (const u of users) {
+  users.forEach(u => {
     const opt = document.createElement("option");
     opt.value = u.id;
     opt.textContent = `${u.displayName || u.email} (${u.email})`;
     dropdown.appendChild(opt);
-  }
+  });
 
   dropdown.onchange = () => {
-    const uid = dropdown.value;
-    if (!uid) return;
-
-    currentUser = users.find(u => u.id === uid);
-    populateUserUI(currentUser);
+    currentUser = users.find(u => u.id === dropdown.value);
+    if (currentUser) populateUserUI(currentUser);
   };
 }
 
-// -----------------------------
-// POPULATE UI
-// -----------------------------
+/* -----------------------------
+   POPULATE UI (UNCHANGED)
+----------------------------- */
 function populateUserUI(user) {
   if (!user) return;
 
   document.getElementById("displayNameInput").value = user.displayName || "";
   emailInput.value = user.email || "";
-
   img.src = user.photoURL || "/_PICTURES/Frustrated.png";
 
   const pointsEl = document.getElementById("pointsBalance");
-  if (pointsEl) {
-    pointsEl.textContent = user.pointsBalance ?? 0;
-  }
+  if (pointsEl) pointsEl.textContent = user.pointsBalance ?? 0;
 
   document.getElementById("emailPinContainer").style.display = "none";
   verifyEmailBtn.style.display = "none";
@@ -1499,21 +1480,20 @@ function populateUserUI(user) {
   formIsDirty = false;
 }
 
-// -----------------------------
-// SAVE PROFILE
-// -----------------------------
+/* -----------------------------
+   SAVE PROFILE (UNCHANGED)
+----------------------------- */
 saveBtn.onclick = async () => {
   if (!currentUser) return;
 
   const payload = {
     uid: currentUser.id,
     displayName: document.getElementById("displayNameInput").value.trim(),
-    email: currentUser.email, // email already validated / pinned
+    email: currentUser.email,
     photoURL: currentUser.photoURL
   };
 
-  const ok = await updateUserRecordFromUI(payload);
-  if (!ok) {
+  if (!await updateUserRecordFromUI(payload)) {
     showMessage("Unable to update profile.", "error");
     return;
   }
@@ -1529,76 +1509,62 @@ saveBtn.onclick = async () => {
   formIsDirty = false;
 };
 
-// -----------------------------
-// EMAIL CHANGE HANDLER
-// -----------------------------
+/* -----------------------------
+   EMAIL CHANGE HANDLER (UNCHANGED)
+----------------------------- */
 emailInput.addEventListener("input", () => {
   if (!currentUser) return;
 
   const newEmail = emailInput.value.trim().toLowerCase();
+  const currentEmail = (currentUser.email || "").toLowerCase();
 
-  // Admin editing someone else → block email editing
   if (isAdmin && currentUser.id !== identityUser.uid) {
     emailInput.value = currentUser.email || "";
     showMessage("Admins cannot change another user's email.", "error");
     return;
   }
 
-  const currentEmail = (currentUser.email || "").toLowerCase();
-
-  if (newEmail && newEmail !== currentEmail) {
-    verifyEmailBtn.style.display = "inline-block";
-    saveBtn.disabled = true;
-    saveBtn.classList.add("disabled");
-  } else {
-    verifyEmailBtn.style.display = "none";
-    saveBtn.disabled = false;
-    saveBtn.classList.remove("disabled");
-  }
+  const changed = newEmail && newEmail !== currentEmail;
+  verifyEmailBtn.style.display = changed ? "inline-block" : "none";
+  saveBtn.disabled = changed;
+  saveBtn.classList.toggle("disabled", changed);
 });
 
-// -----------------------------
-// SEND EMAIL VERIFICATION PIN
-// -----------------------------
+/* -----------------------------
+   SEND EMAIL VERIFICATION PIN (UNCHANGED)
+----------------------------- */
 verifyEmailBtn.onclick = async () => {
   if (!currentUser) return;
 
   const newEmail = emailInput.value.trim().toLowerCase();
-  if (!newEmail) {
-    showMessage("Please enter a valid email first.", "error");
-    return;
-  }
+  if (!newEmail) return showMessage("Please enter a valid email first.", "error");
 
   try {
     const data = await getHook({
       type: "sendPin",
       email: newEmail,
-      uid: identityUser.uid, // always identity user
+      uid: identityUser.uid,
       purpose: "emailChange"
     });
 
-    if (data.success) {
-      document.getElementById("emailPinContainer").style.display = "block";
-      showMessage("A verification code has been sent to " + newEmail, "success");
-    } else {
-      showMessage(data.error || "Unable to send verification PIN.", "error");
-    }
-  } catch (err) {
+    if (!data.success) return showMessage(data.error || "Unable to send verification PIN.", "error");
+
+    document.getElementById("emailPinContainer").style.display = "block";
+    showMessage("A verification code has been sent to " + newEmail, "success");
+  } catch {
     showMessage("Unable to send verification PIN.", "error");
   }
-};// -----------------------------
-// VERIFY EMAIL PIN (FINAL — CLEAN)
-// -----------------------------
+};
+
+/* -----------------------------
+   VERIFY EMAIL PIN (UNCHANGED)
+----------------------------- */
 document.getElementById("submitEmailPinBtn").onclick = async () => {
   if (!currentUser) return;
 
   const newEmail = emailInput.value.trim().toLowerCase();
   const pin = document.getElementById("emailPinInput").value.trim();
-
-  if (!newEmail || !pin) {
-    showMessage("Please enter both email and PIN.", "error");
-    return;
-  }
+  if (!newEmail || !pin) return showMessage("Please enter both email and PIN.", "error");
 
   try {
     const data = await getHook({
@@ -1609,18 +1575,11 @@ document.getElementById("submitEmailPinBtn").onclick = async () => {
       purpose: "emailChange"
     });
 
-    if (!data.success) {
-      showMessage(data.error || "Invalid PIN.", "error");
-      return;
-    }
+    if (!data.success) return showMessage(data.error || "Invalid PIN.", "error");
 
-    // Update identity + currentUser if self
     identityUser.email = newEmail;
-    if (currentUser.id === identityUser.uid) {
-      currentUser.email = newEmail;
-    }
+    if (currentUser.id === identityUser.uid) currentUser.email = newEmail;
 
-    // Persist identity (v4 contract)
     localStorage.setItem("tp_identity_v4", JSON.stringify(identityUser));
 
     verifyEmailBtn.style.display = "none";
@@ -1629,65 +1588,47 @@ document.getElementById("submitEmailPinBtn").onclick = async () => {
     saveBtn.classList.remove("disabled");
 
     showMessage("Email Verified and Updated!", "success");
-  } catch (err) {
+  } catch {
     showMessage("Network error verifying PIN.", "error");
   }
 };
 
-
-// -----------------------------
-// MESSAGES
-// -----------------------------
+/* -----------------------------
+   MESSAGES (UNCHANGED)
+----------------------------- */
 function showMessage(text, type = "error") {
-  const msg = document.getElementById("msg");
   msg.textContent = text;
   msg.className = "msg " + type;
   msg.style.display = "block";
-
   msg.classList.add("show");
+
   setTimeout(() => msg.classList.remove("show"), 300);
-
   msg.scrollIntoView({ behavior: "smooth", block: "center" });
-
-  setTimeout(() => {
-    msg.style.display = "none";
-  }, 4000);
+  setTimeout(() => msg.style.display = "none", 4000);
 }
 
-
-// -----------------------------
-// DIRTY FORM TRACKING
-// -----------------------------
-[
-  "fullName",
-  "displayNameInput",
-  "email",
-  "phone"
-].forEach(id => {
+/* -----------------------------
+   DIRTY FORM TRACKING (UNCHANGED)
+----------------------------- */
+["fullName","displayNameInput","email","phone"].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", markDirty);
 });
 
-[
-  "country",
-  "role",
-  "smsOpt",
-  "emailOpt"
-].forEach(id => {
+["country","role","smsOpt","emailOpt"].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("change", markDirty);
 });
 
-window.addEventListener("beforeunload", (e) => {
+window.addEventListener("beforeunload", e => {
   if (!formIsDirty) return;
   e.preventDefault();
   e.returnValue = "";
 });
 
-
-// -----------------------------
-// LOADER
-// -----------------------------
+/* -----------------------------
+   LOADER (UNCHANGED)
+----------------------------- */
 function hideTPLoader() {
   const el = document.getElementById("t-loading");
   if (!el) return;
@@ -1695,20 +1636,15 @@ function hideTPLoader() {
   setTimeout(() => el.remove(), 700);
 }
 
-
-// -----------------------------
-// LEAVE CONFIRM / STRIPE REDIRECT
-// -----------------------------
+/* -----------------------------
+   LEAVE CONFIRM / STRIPE REDIRECT (UNCHANGED)
+----------------------------- */
 window.attemptStripeRedirect = function (url) {
-  if (url.includes("stripe.com") || url.includes("connect.stripe.com")) {
-    window.location.href = url;
-    return;
-  }
+  if (url.includes("stripe.com") || url.includes("connect.stripe.com"))
+    return window.location.href = url;
 
-  if (!formIsDirty) {
-    window.location.href = url;
-    return;
-  }
+  if (!formIsDirty)
+    return window.location.href = url;
 
   const row = document.getElementById("leaveConfirmRow");
   row.style.display = "flex";
@@ -1722,8 +1658,6 @@ window.attemptStripeRedirect = function (url) {
     row.style.display = "none";
   };
 };
-
-
 // -----------------------------
 // HERO HEADER ENTRANCE
 // -----------------------------
@@ -1735,32 +1669,30 @@ export async function runHeroHeaderEntrance() {
   const bottom = document.createElement("div");
   top.id = "hero-backdrop-top";
   bottom.id = "hero-backdrop-bottom";
-  top.style.opacity = "1";
-  bottom.style.opacity = "1";
 
-  const baseStyle = {
+  const base = {
     position: "fixed",
     left: "0",
     right: "0",
     background: "rgba(0,0,0,0.65)",
     pointerEvents: "none",
-    zIndex: "9999"
+    zIndex: "9999",
+    opacity: "1"
   };
 
-  Object.assign(top.style, baseStyle, {
+  Object.assign(top.style, base, {
     top: "0",
     height: "100vh",
     transition: "height 1.2s ease-out, opacity 0.8s ease-out"
   });
 
-  Object.assign(bottom.style, baseStyle, {
+  Object.assign(bottom.style, base, {
     bottom: "0",
     height: "100vh",
     transition: "height 1.2s ease-out"
   });
 
-  document.body.appendChild(top);
-  document.body.appendChild(bottom);
+  document.body.append(top, bottom);
 
   await new Promise(requestAnimationFrame);
   await new Promise(requestAnimationFrame);
@@ -1780,63 +1712,42 @@ export async function runHeroHeaderEntrance() {
 
 
 // ============================================================================
-// UTILITIES (UNCHANGED, CORRECT)
+// UTILITIES
 // ============================================================================
-function normalizePhone(raw, row, coords = {}) {
+function normalizePhone(raw) {
   if (!raw) return null;
-
-  let v = String(raw).replace(/\u00A0/g, " ").trim();
-  v = v.replace(/[^\d+]/g, "");
-
+  let v = String(raw).replace(/\u00A0/g, " ").trim().replace(/[^\d+]/g, "");
   if (v.startsWith("+") && v.length >= 8 && v.length <= 15) return v;
   if (v.startsWith("+")) v = v.slice(1);
 
   const digits = v.replace(/\D/g, "");
-
   if (digits.length === 7) return "+501" + digits;
   if (digits.startsWith("501") && digits.length === 10) return "+501" + digits.slice(3);
-
   if (digits.length === 10) return "+1" + digits;
   if (digits.length === 11 && digits.startsWith("1")) return "+1" + digits.slice(1);
-
   if (digits.length >= 8 && digits.length <= 15) return "+" + digits;
-
   return null;
 }
 
 function isDesktop() {
   const ua = navigator.userAgent.toLowerCase();
-  const mobileUA =
-    ua.includes("iphone") ||
-    ua.includes("android") ||
-    ua.includes("ipad") ||
-    ua.includes("mobile");
-
-  const smallScreen = window.innerWidth < 900 || window.innerHeight < 700;
-  const touch = navigator.maxTouchPoints > 1;
-
-  if (mobileUA && smallScreen && touch) return false;
-  return true;
+  const mobile = ua.includes("iphone") || ua.includes("android") || ua.includes("ipad") || ua.includes("mobile");
+  const small = window.innerWidth < 900 || window.innerHeight < 700;
+  return !(mobile && small && navigator.maxTouchPoints > 1);
 }
 
+
 // ============================================================================
-// STRIPE STATUS (UPDATED TO USE identityUser)
-// ============================================================================
-// ============================================================================
-// STRIPE STATUS (FINAL — CLEAN, SINGLE SOURCE, identityUser‑correct)
+// STRIPE STATUS
 // ============================================================================
 async function loadStripeStatus() {
   if (!identityUser) return;
 
   const statusEl = document.getElementById("stripeStatus");
   const actionEl = document.getElementById("stripeAction");
-
   statusEl.textContent = "Checking Status…";
 
-  const stripeId =
-    identityUser.stripeAccountID ||
-    identityUser.stripeId ||
-    null;
+  const stripeId = identityUser.stripeAccountID || identityUser.stripeId || null;
 
   try {
     const data = await getHook({
@@ -1846,68 +1757,52 @@ async function loadStripeStatus() {
     });
 
     if (!data.success) {
-      statusEl.textContent = "Unable to Load Stripe Status!?";
+      statusEl.textContent = "Unable to Load Stripe Status!?"; 
       actionEl.innerHTML = "";
       return;
     }
 
-    const status = data.status;
+    const s = data.status;
 
-    if (status === "connected") {
+    if (s === "connected") {
       statusEl.textContent = "Connected ✔";
-      actionEl.innerHTML = `
-        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.dashboardLink}')">
-          Open Stripe Dashboard
-        </div>`;
-    } else if (status === "pending") {
+      actionEl.innerHTML = `<div class="t-btn-tri" onclick="attemptStripeRedirect('${data.dashboardLink}')">Open Stripe Dashboard</div>`;
+    } else if (s === "pending") {
       statusEl.textContent = "Onboarding Not Complete";
-      actionEl.innerHTML = `
-        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
-          Continue Setup
-        </div>`;
-    } else if (status === "needs_verification") {
+      actionEl.innerHTML = `<div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">Continue Setup</div>`;
+    } else if (s === "needs_verification") {
       statusEl.textContent = "Verification Required";
-      actionEl.innerHTML = `
-        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
-          Fix Now
-        </div>`;
+      actionEl.innerHTML = `<div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">Fix Now</div>`;
     } else {
       statusEl.textContent = "Not Connected";
-      actionEl.innerHTML = `
-        <div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">
-          Start Setup
-        </div>`;
+      actionEl.innerHTML = `<div class="t-btn-tri" onclick="attemptStripeRedirect('${data.onboardingLink}')">Start Setup</div>`;
     }
 
-  } catch (err) {
+  } catch {
     statusEl.textContent = "Error Loading Status!?";
   }
 }
 
 
 // ============================================================================
-// DISPLAY NAME SANITIZER (KEEP — CLEAN)
+// DISPLAY NAME SANITIZER
 // ============================================================================
 function sanitizeDisplayName(name) {
   if (!name) return "";
-
-  name = name.replace(/·/g, "•");
-  name = name.replace(/[^\p{L}\p{N}\s\-_•]/gu, "");
-  name = name.replace(/[\s\-_]+/g, "•");
-  name = name.replace(/•+/g, "•");
-  name = name.replace(/^•|•$/g, "");
-
-  name = name
+  return name
+    .replace(/·/g, "•")
+    .replace(/[^\p{L}\p{N}\s\-_•]/gu, "")
+    .replace(/[\s\-_]+/g, "•")
+    .replace(/•+/g, "•")
+    .replace(/^•|•$/g, "")
     .split("•")
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join("•");
-
-  return name;
 }
 
 
 // ============================================================================
-// UPDATE USER RECORD (FINAL — CLEAN, IDENTITY‑CORRECT)
+// UPDATE USER RECORD
 // ============================================================================
 async function updateUserRecordFromUI(payloadOverride = null) {
   try {
@@ -1922,7 +1817,7 @@ async function updateUserRecordFromUI(payloadOverride = null) {
     const emailOpt = document.getElementById("emailOpt").checked;
 
     const cleanDisplayName = sanitizeDisplayName(rawDisplayName);
-    const normalizedPhone  = normalizePhone(rawPhone, country);
+    const normalizedPhone  = normalizePhone(rawPhone);
 
     const token = localStorage.getItem("tp_token_v4");
     if (!token || !identityUser?.uid) {
@@ -1974,7 +1869,7 @@ async function updateUserRecordFromUI(payloadOverride = null) {
 
 
 // ============================================================================
-// FALLBACK PHOTO (FINAL — CLEAN)
+// FALLBACK PHOTO
 // ============================================================================
 function loadFallbackPhoto() {
   const shimmer = document.getElementById("shimmer");
@@ -2001,18 +1896,14 @@ function loadFallbackPhoto() {
 
 
 // ============================================================================
-// STRIPE REDIRECT (KEEP — CLEAN)
+// STRIPE REDIRECT
 // ============================================================================
 window.attemptStripeRedirect = function (url) {
-  if (url.includes("stripe.com") || url.includes("connect.stripe.com")) {
-    window.location.href = url;
-    return;
-  }
+  if (url.includes("stripe.com") || url.includes("connect.stripe.com"))
+    return window.location.href = url;
 
-  if (!formIsDirty) {
-    window.location.href = url;
-    return;
-  }
+  if (!formIsDirty)
+    return window.location.href = url;
 
   const row = document.getElementById("leaveConfirmRow");
   row.style.display = "flex";
@@ -2026,59 +1917,49 @@ window.attemptStripeRedirect = function (url) {
     row.style.display = "none";
   };
 };
+
+
+// ============================================================================
+// SESSION CHECK (LEGACY COMPAT — MINIMAL)
+// ============================================================================
 async function sessionCheck() {
   let id = null;
 
   try {
     const raw = localStorage.getItem("tp_identity_v9");
-    if (raw) {
-      id = JSON.parse(raw);
-    }
-  } catch (e) {
-    // Corrupt identity → treat as missing
+    if (raw) id = JSON.parse(raw);
+  } catch {
     id = null;
   }
 
-  // Fallback: if some global understanding layer identity() exists,
-  // we can try to hydrate from there once, but we do NOT depend on it.
   if (!id && typeof identity === "function") {
-    try {
-      id = await identity();
-    } catch (e) {
-      id = null;
-    }
+    try { id = await identity(); } catch { id = null; }
   }
 
-  // No identity or not trusted → go to login
   if (!id || !id.trustedDevice) {
     const here = encodeURIComponent(location.pathname + location.search);
     window.location.href = `/CheckEmail.html?returnTo=${here}`;
     return null;
   }
 
-  // Expose canonical identity for the rest of the page
   window.PulseIdentity = id;
   return id;
 }
+
 // -----------------------------
-// USERRECORD BOOTSTRAP — v11 (CLEAN, SAFE, FINAL)
+// USERRECORD BOOTSTRAP — v11 (CLEAN, SAFE, MINIMAL)
 // -----------------------------
 (async () => {
-  // Minimal timing marker
   let lastTime = nowMs();
-  function mark(label, absolute = false) {
+  const mark = (label, absolute = false) => {
     const now = nowMs();
-    const diff = now - lastTime;
-    log(
-      absolute
-        ? `${label}: @${now.toFixed(1)}ms`
-        : `${label}: +${diff.toFixed(1)}ms`
-    );
+    log(absolute ? `${label}: @${now.toFixed(1)}ms`
+                 : `${label}: +${(now - lastTime).toFixed(1)}ms`);
     lastTime = now;
-  }
+  };
 
   // -----------------------------
-  // GLOBAL PAGE STATE (MATCH EXISTING SYSTEM)
+  // GLOBAL PAGE STATE
   // -----------------------------
   window.isIdle       = true;
   window.identityUser = window.identityUser || null;
@@ -2086,37 +1967,34 @@ async function sessionCheck() {
   window.isAdmin      = window.isAdmin      || false;
 
   // -----------------------------
-  // 1. v11 SESSION CHECK + IDENTITY
+  // 1. v11 SESSION CHECK
   // -----------------------------
   mark("USERRECORD: STARTING sessionCheck()");
-  const id = await sessionCheck();   // v11: returns canonical identity or null
-  if (!id) return;                   // redirected to login if not trusted/valid
+  const id = await sessionCheck();
+  if (!id) return;
 
-  // Canonical identity for this page
   window.identityUser = id;
   window.currentUser  = window.currentUser || id;
-  window.isAdmin      = (id.role === "Admin");
+  window.isAdmin      = id.role === "Admin";
 
-  // If somehow still missing, hard fail to email check
   if (!window.identityUser) {
     window.location.replace("/CheckEmail.html");
     return;
   }
 
   // -----------------------------
-  // 2. DETERMINE CURRENT USER (CONSUME CACHES ONLY)
-// -----------------------------
+  // 2. DETERMINE CURRENT USER
+  // -----------------------------
   if (window.isAdmin) {
-    // Uses existing contract: setupAdminUserDropdown() with no args.
     if (typeof setupAdminUserDropdown === "function") {
-      setupAdminUserDropdown(); // uses getUsersCache + populateUserUI
+      setupAdminUserDropdown();
     }
   } else {
-    const users = (typeof getUsersCache === "function") ? getUsersCache() : null;
+    const users = typeof getUsersCache === "function" ? getUsersCache() : null;
 
     window.currentUser =
-      (Array.isArray(users) && users.find(u => u.id === window.identityUser.uid)) ||
-      window.identityUser;
+      (Array.isArray(users) && users.find(u => u.id === id.uid)) ||
+      id;
 
     if (typeof populateUserUI === "function") {
       populateUserUI(window.currentUser);
@@ -2130,24 +2008,16 @@ async function sessionCheck() {
   const pageTitle     = document.getElementById("pageTitle");
   const pageSubtitle  = document.getElementById("pageSubtitle");
 
-  if (pageTitle) {
-    pageTitle.textContent = "Your Tropic Pulse Profile";
-  }
-
-  if (pageSubtitle) {
-    pageSubtitle.textContent = "Update your account details and preferences.";
-  }
-
-  if (stripeSection) {
-    stripeSection.style.display = "block";
-  }
+  if (pageTitle)     pageTitle.textContent = "Your Tropic Pulse Profile";
+  if (pageSubtitle)  pageSubtitle.textContent = "Update your account details and preferences.";
+  if (stripeSection) stripeSection.style.display = "block";
 
   // -----------------------------
   // 4. HIDE LOADER + STRIPE STATUS
   // -----------------------------
   hideTPLoader();
   if (typeof loadStripeStatus === "function") {
-    await loadStripeStatus(); // existing signature
+    await loadStripeStatus();
   }
 
   // -----------------------------
@@ -2160,6 +2030,7 @@ async function sessionCheck() {
   mark("USERRECORD: ENDING DOM BOOTSTRAP");
   mark("USERRECORD: ENDING DOM LOAD", true);
 })();
+
 
 </script>
 </body>

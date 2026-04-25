@@ -300,6 +300,77 @@ const RouteMemory = {
 
 
 // ============================================================================
+// ✅ ADDED v12 — SESSION CHECK (always runs, enforces trustedDevice barrier)
+// ============================================================================
+async function sessionCheck() {
+  if (!hasWindow || !window.localStorage) {
+    logProtector("SESSIONCHECK_SKIPPED_NO_WINDOW", {});
+    return null;
+  }
+
+  let id = null;
+
+  try {
+    const raw = window.localStorage.getItem("tp_identity_v9");
+    if (raw) id = JSON.parse(raw);
+  } catch {
+    id = null;
+  }
+
+  // Always expose identity for the organism
+  if (hasWindow) {
+    if (!window.Pulse) window.Pulse = {};
+    window.PulseIdentity = id || null;
+  }
+
+  // Barrier: trustedDevice must be true for normal UI pages
+  if (!id || !id.trustedDevice) {
+    const here =
+      encodeURIComponent(window.location.pathname + window.location.search);
+    logProtector("SESSIONCHECK_REDIRECT_UNTRUSTED", {
+      path: window.location.pathname,
+      trustedDevice: id?.trustedDevice || false
+    });
+    window.location.href = `/CheckEmail.html?returnTo=${here}`;
+    return null;
+  }
+
+  logProtector("SESSIONCHECK_OK", {
+    trustedDevice: true
+  });
+
+  return id;
+}
+
+
+// ============================================================================
+// ✅ ADDED v12 — ROUTE CHECK (pageName / lastPage continuity)
+// ============================================================================
+function routeCheck() {
+  if (!hasWindow) {
+    logProtector("ROUTECHECK_SKIPPED_NO_WINDOW", {});
+    return null;
+  }
+
+  if (!window.Pulse) window.Pulse = {};
+
+  const lastPage = window.Pulse.pageName || null;
+  const pageName =
+    (window.location && window.location.pathname) || "unknown";
+
+  window.Pulse.lastPage = lastPage;
+  window.Pulse.pageName = pageName;
+
+  logProtector("ROUTECHECK_UPDATED", {
+    pageName,
+    lastPage
+  });
+
+  return { pageName, lastPage };
+}
+
+
+// ============================================================================
 // PUBLIC API (C‑LAYER passthrough — dualband, binary-first nervous entry)
 // ============================================================================
 export async function getAuth(jwtToken) {
@@ -346,6 +417,38 @@ export async function callHelper(helperName, payload = {}) {
     binaryAware: true,
     dualBand: true
   });
+}
+
+
+// ============================================================================
+// ✅ ADDED v12 — PAGE SCANNER ENTRYPOINT
+//  • Single front door for pages: sessionCheck → routeCheck → SkinReflex
+// ============================================================================
+export async function attachScanner() {
+  logProtector("SCANNER_ATTACH_START", {});
+
+  // 1. Always run sessionCheck (identity + trustedDevice barrier)
+  const identity = await sessionCheck();
+  if (!identity) {
+    // sessionCheck already redirected if untrusted
+    logProtector("SCANNER_ABORTED_UNTRUSTED", {});
+    return null;
+  }
+
+  // 2. Always run routeCheck (page continuity)
+  const routeInfo = routeCheck();
+
+  // 3. Attach SkinReflex semantics are already active via window.error listener
+  logProtector("SCANNER_ATTACH_COMPLETE", {
+    pageName: routeInfo?.pageName || "unknown",
+    lastPage: routeInfo?.lastPage || null,
+    trustedDevice: !!identity.trustedDevice
+  });
+
+  return {
+    identity,
+    route: routeInfo
+  };
 }
 
 

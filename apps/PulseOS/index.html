@@ -15,7 +15,7 @@
        ANALYTICS — GOOGLE TAG
   ============================= -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSX89KS63P"></script>
-  <script>
+  <script type="module">
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
@@ -1460,32 +1460,41 @@ nav a:hover::after {
 </footer>
 <script type="module">
 /* ============================================================
-   FRONT DOOR — v11 WINDOW PULSEBAND
-   Window is the membrane. Full read-only shadow, no identity.
-   ============================================================ */
+   INDEX PAGE — CLEAN, OS-ALIGNED, UI-ONLY
+   Window is the membrane. OS handles identity, trust, routing.
+============================================================ */
 
+/* ============================================================
+   0. SKIN REFLEX — UNIVERSAL FRONT DOOR
+============================================================ */
 import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
 
-// Use the identity Window already computed
-PulseSkinReflex.attachScanner(window.Pulse.pageName);
+/* ⭐ attachScanner handles:
+      • sessionCheck
+      • routeCheck
+      • pageName / lastPage
+      • identity exposure
+*/
+await PulseSkinReflex.attachScanner();
 
-// Boot membrane
+/* ============================================================
+   1. BOOT MEMBRANE
+============================================================ */
 import PulseWindow from "./PulseEvolutionaryWindow.js";
 
-
 function mark(label) {
-  log("[CHECKEMAIL]", label);
+  log("[INDEX]", label);
 }
 
 /* ============================================================
-   1. LOADING SCREEN — CSS-driven fade-out
-   ============================================================ */
+   2. LOADING SCREEN — CSS-driven fade-out
+============================================================ */
 window.addEventListener("load", () => {
   mark("WINDOW DOM STARTED INDEX PAGE");
 
   /* ============================================================
-     2. PULSEBAND UI — WINDOW-POWERED (NO HARDCODED VALUES)
-     ============================================================ */
+     3. PULSEBAND UI — UI ONLY (NO LOGIC)
+  ============================================================ */
   const pbBadge = document.getElementById("pulseband-badge");
   const pbPanel = document.getElementById("pulseband-panel");
   let pbOpen = false;
@@ -1519,15 +1528,16 @@ window.addEventListener("load", () => {
     estimated:  document.getElementById("pb-estimated")
   };
 
+  /* ============================================================
+     3B. PULSEBAND SNAPSHOT — UI ONLY
+     (OS computes vitals; page only displays them)
+  ============================================================ */
   (async () => {
     try {
-      // membrane vitals + binary shadow
-      const vitals   = PulseWindow.Vitals?.generate?.() ?? null;
-      const surface  = PulseWindow.SurfaceEnvironment ?? null;
-      const binary   = window.PulseBinary ?? null;
+      const vitals    = PulseWindow.Vitals?.generate?.() ?? null;
+      const binary    = window.PulseBinary ?? null;
       const sentience = binary?.Sentience?.snapshot?.() ?? null;
 
-      // You can tune these mappings to match your OS PulseBand
       const signalBars  = vitals?.network?.bars ?? "—";
       const phoneBars   = vitals?.device?.bars ?? signalBars;
       const stability   = vitals?.stability?.score ?? null;
@@ -1559,8 +1569,8 @@ window.addEventListener("load", () => {
   })();
 
   /* ============================================================
-     3. GPU TEST — ONE-SHOT, WINDOW/BINARY-POWERED
-     ============================================================ */
+     4. GPU TEST — UI ONLY
+  ============================================================ */
   const testBtn     = document.getElementById("tp-test-button");
   const testFile    = document.getElementById("tp-test-file");
   const testStatus  = document.getElementById("tp-test-status");
@@ -1580,12 +1590,10 @@ window.addEventListener("load", () => {
     try {
       const file = testFile.files[0];
 
-      // You can implement these inside PulseUnderstanding or binaryKernel.vitals
       const binary   = window.PulseBinary ?? null;
       const vitalsFn = binary?.Vitals?.generate ?? PulseWindow.Vitals?.generate;
 
       const before = performance.now();
-      // simple decode/warm hint: read file into memory
       await file.arrayBuffer();
       const after = performance.now();
 
@@ -1620,8 +1628,8 @@ window.addEventListener("load", () => {
   });
 
   /* ============================================================
-     4. CAROUSEL — user-driven only
-     ============================================================ */
+     5. CAROUSEL — UI ONLY
+  ============================================================ */
   const carousel = document.getElementById("appCarousel");
   if (carousel) {
     const track  = carousel.querySelector(".carousel-track");
@@ -1655,11 +1663,9 @@ window.addEventListener("load", () => {
     });
   }
 
-  mark("WINDOW FAQ STARTED");
-
   /* ============================================================
-     5. FAQ ACCORDION
-     ============================================================ */
+     6. FAQ ACCORDION — UI ONLY
+  ============================================================ */
   document.querySelectorAll("[data-faq]").forEach((item) => {
     const btn = item.querySelector(".faq-question");
     btn.addEventListener("click", () => {

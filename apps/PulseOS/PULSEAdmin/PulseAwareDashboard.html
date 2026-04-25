@@ -382,14 +382,23 @@ details[open] summary::before {
 <!-- Backend Connector Layer -->
 <script type="module">
 
+/* ============================================================
+   0. SKIN REFLEX — UNIVERSAL FRONT DOOR
+============================================================ */
 import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
 
-// Use the identity Window already computed
-PulseSkinReflex.attachScanner(window.Pulse.pageName);
+/* ⭐ attachScanner handles:
+      • sessionCheck
+      • routeCheck
+      • pageName / lastPage
+      • identity exposure
+*/
+await PulseSkinReflex.attachScanner();
 
-// Boot membrane
+/* ============================================================
+   1. BOOT MEMBRANE
+============================================================ */
 import PulseWindow from "./PulseEvolutionaryWindow.js";
-
 // -----------------------------------------------------------
 // Boot
 // -----------------------------------------------------------

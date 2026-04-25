@@ -11,13 +11,6 @@
 <!-- Backend Connector Layer -->
 <script type="module">
 
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
-
-// Use the identity Window already computed
-PulseSkinReflex.attachScanner(window.Pulse.pageName);
-
-// Boot membrane
-import PulseWindow from "./PulseEvolutionaryWindow.js";
   
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -562,8 +555,25 @@ document.addEventListener("contextmenu", function(e) {
 </div>
 <!-- </div> -->
   <!-- Firebase SDK -->
-  <script>
+  <script type="module">
     
+/* ============================================================
+   0. SKIN REFLEX — UNIVERSAL FRONT DOOR
+============================================================ */
+import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+
+/* ⭐ attachScanner handles:
+      • sessionCheck
+      • routeCheck
+      • pageName / lastPage
+      • identity exposure
+*/
+await PulseSkinReflex.attachScanner();
+
+/* ============================================================
+   1. BOOT MEMBRANE
+============================================================ */
+import PulseWindow from "./PulseEvolutionaryWindow.js";
     const db = firebase.firestore();
     let userSortMode = "alpha"; // "alpha" or "created"
     let allOrders = [];

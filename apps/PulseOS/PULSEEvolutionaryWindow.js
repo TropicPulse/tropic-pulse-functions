@@ -42,12 +42,6 @@
 //  - SurfaceEnv    → read‑only snapshot of user/device/browser context.
 // ============================================================================
 
-// Derive page identity ONCE, inside Window
-const pageName = import.meta.url.split('/').pop().replace('.js', '');
-
-// Expose it globally for the organism
-window.Pulse = window.Pulse || {};
-window.Pulse.pageName = pageName;
 
 // ============================================================================
 //  SURFACE REFLEXES (ALWAYS SAFE, ALWAYS PRESENT)

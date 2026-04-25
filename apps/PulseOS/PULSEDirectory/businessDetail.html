@@ -18,15 +18,6 @@
 <!-- Backend Connector Layer -->
 <script type="module">
 
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
-
-// Use the identity Window already computed
-PulseSkinReflex.attachScanner(window.Pulse.pageName);
-
-// Boot membrane
-import PulseWindow from "./PulseEvolutionaryWindow.js";
-
-
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -1084,6 +1075,24 @@ body::before {
 
 <div id="tpToast"><span class="icon">📥</span><span id="tpToastMsg"></span></div>
 <script type="module">
+  
+/* ============================================================
+   0. SKIN REFLEX — UNIVERSAL FRONT DOOR
+============================================================ */
+import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+
+/* ⭐ attachScanner handles:
+      • sessionCheck
+      • routeCheck
+      • pageName / lastPage
+      • identity exposure
+*/
+await PulseSkinReflex.attachScanner();
+
+/* ============================================================
+   1. BOOT MEMBRANE
+============================================================ */
+import PulseWindow from "./PulseEvolutionaryWindow.js";
     let persistenceEnabled = true;
   let lastTime = null;
   let firstTime = null;
