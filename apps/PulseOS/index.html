@@ -1465,174 +1465,220 @@ nav a:hover::after {
 </footer>
 <script type="module">
 /* ============================================================
-   FRONT DOOR — v10.3
-   Only Understanding handles identity + attachScanner.
-   No timers. No random. No arrhythmia.
+   FRONT DOOR — v11 WINDOW PULSEBAND
+   Window is the membrane. Full read-only shadow, no identity.
    ============================================================ */
+
 // Auto‑derive page name
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
-// A1 Skin Reflex
+// A1 Skin Reflex (scanner only)
 import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
-// A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
+// A0 Evolutionary Window (membrane + binary boot + understanding)
+import PulseWindow from "./PULSEX/PulseEvolutionaryWindow.js";
 
-
-  // optional: start the OS
-  const Brain = PulseEvolutionarySight.igniteBrain({
-    intent: PulseIntentMap,
-    organism: PulseOrganismMap,
-    iq: PulseIQMap
-  });
+function mark(label) {
+  log("[CHECKEMAIL]", label);
+}
 
 /* ============================================================
-   1. OS BOOT — LOADING SCREEN (CSS-driven, no timers)
+   1. LOADING SCREEN — CSS-driven fade-out
    ============================================================ */
-
 window.addEventListener("load", () => {
   const loader = document.getElementById("t-loading");
   if (loader) loader.classList.add("t-loading-hide");
+  mark("WINDOW DOM STARTED INDEX PAGE");
 
-/* ============================================================
-   2. PULSEBAND BUBBLE + PANEL (click-only)
-   ============================================================ */
+  /* ============================================================
+     2. PULSEBAND UI — WINDOW-POWERED (NO HARDCODED VALUES)
+     ============================================================ */
+  const pbBadge = document.getElementById("pulseband-badge");
+  const pbPanel = document.getElementById("pulseband-panel");
+  let pbOpen = false;
 
-const pbBadge = document.getElementById("pulseband-badge");
-const pbPanel = document.getElementById("pulseband-panel");
+  if (pbBadge && pbPanel) {
+    pbBadge.addEventListener("click", () => {
+      pbOpen = !pbOpen;
+      pbPanel.classList.toggle("pb-open", pbOpen);
+    });
 
-let pbOpen = false;
+    document.addEventListener("click", (e) => {
+      if (!pbPanel.contains(e.target) && !pbBadge.contains(e.target)) {
+        pbOpen = false;
+        pbPanel.classList.remove("pb-open");
+      }
+    });
+  }
 
-if (pbBadge && pbPanel) {
-  pbBadge.addEventListener("click", () => {
-    pbOpen = !pbOpen;
-    pbPanel.classList.toggle("pb-open", pbOpen);
-  });
+  const pbFields = {
+    bars:       document.getElementById("pb-bars-text"),
+    phone:      document.getElementById("pb-phonebars-text"),
+    stability:  document.getElementById("pb-stability"),
+    latency:    document.getElementById("pb-latency"),
+    micro:      document.getElementById("pb-micro"),
+    route:      document.getElementById("pb-route"),
+    state:      document.getElementById("pb-state"),
+    sync:       document.getElementById("pb-sync"),
+    efficiency: document.getElementById("pb-efficiency"),
+    health:     document.getElementById("pb-health"),
+    advantage:  document.getElementById("pb-advantage"),
+    estimated:  document.getElementById("pb-estimated")
+  };
 
-  document.addEventListener("click", (e) => {
-    if (!pbPanel.contains(e.target) && !pbBadge.contains(e.target)) {
-      pbOpen = false;
-      pbPanel.classList.remove("pb-open");
+  (async () => {
+    try {
+      // membrane vitals + binary shadow
+      const vitals   = PulseWindow.Vitals?.generate?.() ?? null;
+      const surface  = PulseWindow.SurfaceEnvironment ?? null;
+      const binary   = window.PulseBinary ?? null;
+      const sentience = binary?.Sentience?.snapshot?.() ?? null;
+
+      // You can tune these mappings to match your OS PulseBand
+      const signalBars  = vitals?.network?.bars ?? "—";
+      const phoneBars   = vitals?.device?.bars ?? signalBars;
+      const stability   = vitals?.stability?.score ?? null;
+      const latencyMs   = vitals?.latency?.ms ?? null;
+      const microPhase  = vitals?.micro?.phase ?? sentience?.phase ?? "Idle";
+      const route       = vitals?.network?.route ?? "Primary";
+      const state       = vitals?.state ?? "Active";
+      const syncAge     = vitals?.sync?.ageLabel ?? "Just now";
+      const efficiency  = vitals?.efficiency?.label ?? "Balanced";
+      const health      = vitals?.health?.label ?? "Excellent";
+      const advantage   = vitals?.advantage?.multiplier ?? 1.0;
+      const estimated   = vitals?.advantage?.percent ?? 0;
+
+      if (pbFields.bars)       pbFields.bars.textContent       = String(signalBars);
+      if (pbFields.phone)      pbFields.phone.textContent      = String(phoneBars);
+      if (pbFields.stability)  pbFields.stability.textContent  = stability != null ? `${stability}%` : "—";
+      if (pbFields.latency)    pbFields.latency.textContent    = latencyMs != null ? `${latencyMs} ms` : "—";
+      if (pbFields.micro)      pbFields.micro.textContent      = microPhase;
+      if (pbFields.route)      pbFields.route.textContent      = route;
+      if (pbFields.state)      pbFields.state.textContent      = state;
+      if (pbFields.sync)       pbFields.sync.textContent       = syncAge;
+      if (pbFields.efficiency) pbFields.efficiency.textContent = efficiency;
+      if (pbFields.health)     pbFields.health.textContent     = health;
+      if (pbFields.advantage)  pbFields.advantage.textContent  = `${advantage}× Faster`;
+      if (pbFields.estimated)  pbFields.estimated.textContent  = `${estimated}% better`;
+    } catch (err) {
+      warn("Window PulseBand snapshot failed", err);
+    }
+  })();
+
+  /* ============================================================
+     3. GPU TEST — ONE-SHOT, WINDOW/BINARY-POWERED
+     ============================================================ */
+  const testBtn     = document.getElementById("tp-test-button");
+  const testFile    = document.getElementById("tp-test-file");
+  const testStatus  = document.getElementById("tp-test-status");
+  const testMetrics = document.getElementById("tp-test-metrics");
+
+  testBtn?.addEventListener("click", async () => {
+    if (!testFile?.files?.length) {
+      if (testStatus) testStatus.textContent = "Please select a file first.";
+      return;
+    }
+
+    if (testStatus)  testStatus.textContent  = "Running GPU warm test…";
+    if (testMetrics) testMetrics.textContent = "";
+
+    await new Promise((res) => requestAnimationFrame(res));
+
+    try {
+      const file = testFile.files[0];
+
+      // You can implement these inside PulseUnderstanding or binaryKernel.vitals
+      const binary   = window.PulseBinary ?? null;
+      const vitalsFn = binary?.Vitals?.generate ?? PulseWindow.Vitals?.generate;
+
+      const before = performance.now();
+      // simple decode/warm hint: read file into memory
+      await file.arrayBuffer();
+      const after = performance.now();
+
+      const vitalsAfter = vitalsFn ? await vitalsFn() : null;
+
+      const gpuSmooth   = vitalsAfter?.stability?.score ?? null;
+      const advantage   = vitalsAfter?.advantage?.multiplier ?? null;
+      const route       = vitalsAfter?.network?.route ?? null;
+      const cpuImpact   = vitalsAfter?.cpu?.impact ?? null;
+      const memImpact   = vitalsAfter?.memory?.impact ?? null;
+      const microMs     = vitalsAfter?.latency?.microMs ?? null;
+      const decodeMs    = Math.round(after - before);
+
+      if (testMetrics) {
+        testMetrics.innerHTML = `
+          GPU Smoothness: <strong>${gpuSmooth != null ? gpuSmooth + "%" : "—"}</strong><br>
+          PulseBand Advantage: <strong>${advantage != null ? advantage + "×" : "—"}</strong><br>
+          Network Route: <strong>${route ?? "—"}</strong><br>
+          CPU Impact: <strong>${cpuImpact != null ? cpuImpact + "%" : "—"}</strong><br>
+          Memory Impact: <strong>${memImpact != null ? memImpact + "%" : "—"}</strong><br>
+          Micro Latency: <strong>${microMs != null ? microMs + " ms" : "—"}</strong><br>
+          Decode Speed: <strong>${decodeMs} ms</strong>
+        `;
+      }
+
+      if (testStatus) testStatus.textContent = "Test complete.";
+    } catch (err) {
+      warn("Window GPU test failed", err);
+      if (testStatus)  testStatus.textContent  = "Test failed.";
+      if (testMetrics) testMetrics.textContent = "";
     }
   });
-}
 
-/* ============================================================
-   3. STATIC PULSEBAND SNAPSHOT (no timers, no random)
-   ============================================================ */
+  /* ============================================================
+     4. CAROUSEL — user-driven only
+     ============================================================ */
+  const carousel = document.getElementById("appCarousel");
+  if (carousel) {
+    const track  = carousel.querySelector(".carousel-track");
+    const slides = Array.from(carousel.querySelectorAll(".carousel-slide"));
+    const dots   = Array.from(carousel.querySelectorAll(".carousel-dot"));
+    const arrows = Array.from(carousel.querySelectorAll(".carousel-arrow"));
 
-const pbFields = {
-  bars: document.getElementById("pb-bars-text"),
-  phone: document.getElementById("pb-phonebars-text"),
-  stability: document.getElementById("pb-stability"),
-  latency: document.getElementById("pb-latency"),
-  micro: document.getElementById("pb-micro"),
-  route: document.getElementById("pb-route"),
-  state: document.getElementById("pb-state"),
-  sync: document.getElementById("pb-sync"),
-  efficiency: document.getElementById("pb-efficiency"),
-  health: document.getElementById("pb-health"),
-  advantage: document.getElementById("pb-advantage"),
-  estimated: document.getElementById("pb-estimated")
-};
+    const visibleSlides = 2;
+    const totalSlides   = slides.length;
+    const maxIndex      = totalSlides - visibleSlides;
 
-// Deterministic snapshot
-if (pbFields.bars)       pbFields.bars.textContent       = "3/4";
-if (pbFields.phone)      pbFields.phone.textContent      = "3/4";
-if (pbFields.stability)  pbFields.stability.textContent  = "94%";
-if (pbFields.latency)    pbFields.latency.textContent    = "32 ms";
-if (pbFields.micro)      pbFields.micro.textContent      = "Idle";
-if (pbFields.route)      pbFields.route.textContent      = "Primary";
-if (pbFields.state)      pbFields.state.textContent      = "Active";
-if (pbFields.sync)       pbFields.sync.textContent       = "Just now";
-if (pbFields.efficiency) pbFields.efficiency.textContent = "Balanced";
-if (pbFields.health)     pbFields.health.textContent     = "Excellent";
-if (pbFields.advantage)  pbFields.advantage.textContent  = "1.8× Faster";
-if (pbFields.estimated)  pbFields.estimated.textContent  = "65% better";
+    let currentIndex = 0;
 
-/* ============================================================
-   4. GPU TEST — one-shot, no cooldown timers
-   ============================================================ */
+    function updateCarousel(index) {
+      const clamped = Math.max(0, Math.min(index, maxIndex));
+      currentIndex = clamped;
 
-const testBtn     = document.getElementById("tp-test-button");
-const testFile    = document.getElementById("tp-test-file");
-const testStatus  = document.getElementById("tp-test-status");
-const testMetrics = document.getElementById("tp-test-metrics");
+      const offset = -(clamped * (100 / visibleSlides));
+      track.style.transform = `translateX(${offset}%)`;
 
-testBtn?.addEventListener("click", async () => {
-  if (!testFile.files.length) {
-    testStatus.textContent = "Please select a file first.";
-    return;
+      dots.forEach((dot, i) => dot.classList.toggle("active", i === clamped));
+    }
+
+    dots.forEach((dot, i) => dot.addEventListener("click", () => updateCarousel(i)));
+
+    arrows.forEach((arrow) => {
+      arrow.addEventListener("click", () => {
+        const dir = arrow.getAttribute("data-dir");
+        updateCarousel(dir === "next" ? currentIndex + 1 : currentIndex - 1);
+      });
+    });
   }
 
-  testStatus.textContent = "Running GPU warm test…";
-  testMetrics.textContent = "";
+  mark("WINDOW FAQ STARTED");
 
-  await new Promise((res) => requestAnimationFrame(res));
-
-  testMetrics.innerHTML = `
-    GPU Smoothness: <strong>92%</strong><br>
-    PulseBand Advantage: <strong>1.7×</strong><br>
-    Network Route: <strong>Primary</strong><br>
-    CPU Impact: <strong>7%</strong><br>
-    Memory Impact: <strong>9%</strong>
-  `;
-
-  testStatus.textContent = "Test complete.";
-});
-
-/* ============================================================
-   5. CAROUSEL — user-driven only (no auto-advance)
-   ============================================================ */
-
-const carousel = document.getElementById("appCarousel");
-if (carousel) {
-  const track  = carousel.querySelector(".carousel-track");
-  const slides = Array.from(carousel.querySelectorAll(".carousel-slide"));
-  const dots   = Array.from(carousel.querySelectorAll(".carousel-dot"));
-  const arrows = Array.from(carousel.querySelectorAll(".carousel-arrow"));
-
-  const visibleSlides = 2;
-  const totalSlides   = slides.length;
-  const maxIndex      = totalSlides - visibleSlides;
-
-  let currentIndex = 0;
-
-  function updateCarousel(index) {
-    const clamped = Math.max(0, Math.min(index, maxIndex));
-    currentIndex = clamped;
-
-    const offset = -(clamped * (100 / visibleSlides));
-    track.style.transform = `translateX(${offset}%)`;
-
-    dots.forEach((dot, i) => dot.classList.toggle("active", i === clamped));
-  }
-
-  dots.forEach((dot, i) => dot.addEventListener("click", () => updateCarousel(i)));
-
-  arrows.forEach((arrow) => {
-    arrow.addEventListener("click", () => {
-      const dir = arrow.getAttribute("data-dir");
-      updateCarousel(dir === "next" ? currentIndex + 1 : currentIndex - 1);
+  /* ============================================================
+     5. FAQ ACCORDION
+     ============================================================ */
+  document.querySelectorAll("[data-faq]").forEach((item) => {
+    const btn = item.querySelector(".faq-question");
+    btn.addEventListener("click", () => {
+      const isOpen = item.classList.contains("open");
+      document.querySelectorAll("[data-faq]").forEach((i) => i.classList.remove("open"));
+      if (!isOpen) item.classList.add("open");
     });
   });
-}
 
-/* ============================================================
-   6. FAQ ACCORDION
-   ============================================================ */
-
-document.querySelectorAll("[data-faq]").forEach((item) => {
-  const btn = item.querySelector(".faq-question");
-  btn.addEventListener("click", () => {
-    const isOpen = item.classList.contains("open");
-    document.querySelectorAll("[data-faq]").forEach((i) => i.classList.remove("open"));
-    if (!isOpen) item.classList.add("open");
-  });
+  mark("WINDOW DOM ENDED INDEX PAGE");
 });
-});
-
 </script>
 
 </body>

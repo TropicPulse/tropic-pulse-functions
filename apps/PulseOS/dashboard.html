@@ -1015,76 +1015,48 @@ import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
       <div class="logout" id="logoutBtn">Log Out</div>
     </div>
   </div>
-    <script type="module">
+<script type="module">
 /* ============================================================================
-   DASHBOARD — TOP OF SCRIPT (Pulse‑OS‑v11 FRONTEND)
-   Understanding‑Only • No imports • No caches • No v4 logic
-   Pure UI + Page Door + Identity + Hero Animation
+   DASHBOARD — v11 FRONT PAGE
+   Identity → OS Boot → Render → UI Animations
+   No PulseBand engine. No timers except CSS fades.
 ============================================================================ */
 
 // -----------------------------------------
-// ⭐ UI STATE (ALLOWED ON FRONTEND)
+// ⭐ UI HELPERS
 // -----------------------------------------
-let isDesk = isDesktop();   // UI-only
-let isIdle = true;          // UI-only
-let resizeTimeout = null;   // UI-only
+function hideTPLoader() {
+  const el = document.getElementById("t-loading");
+  if (!el) return;
+  el.classList.add("hide");
+  setTimeout(() => el.remove(), 700);
+}
 
-// -----------------------------------------
-// ⭐ MARKER (CLEAN + SAFE)
-// -----------------------------------------
-let lastTime = null;
-function mark(label, absolute = false) {
-  const now = nowMs();
-  const diff = lastTime ? now - lastTime : 0;
-  log(
-    absolute
-      ? `${label}: @${now.toFixed(1)}ms`
-      : `${label}: +${diff.toFixed(1)}ms`
-  );
-  lastTime = now;
+function safeLogout() {
+  localStorage.removeItem("tp_identity_v9");
+  localStorage.removeItem("tp_device_token_v9");
+  window.location.replace("/login.html");
 }
 
 // -----------------------------------------
-// ⭐ PAGE DOOR — v11 SESSION CHECK (LOCAL + STABLE)
+// ⭐ SESSION CHECK (v11 rule)
 // -----------------------------------------
-// v11 rule: sessionCheck owns identity for this page.
-// It:
-//   - reads canonical identity from localStorage
-//   - validates trustedDevice
-//   - exposes window.PulseIdentity
-//   - redirects to login with returnTo if not valid
-//   - returns the identity object on success
 async function sessionCheck() {
   let id = null;
 
   try {
     const raw = localStorage.getItem("tp_identity_v9");
-    if (raw) {
-      id = JSON.parse(raw);
-    }
-  } catch (e) {
-    // Corrupt identity → treat as missing
+    if (raw) id = JSON.parse(raw);
+  } catch {
     id = null;
   }
 
-  // Fallback: if some global understanding layer identity() exists,
-  // we can try to hydrate from there once, but we do NOT depend on it.
-  if (!id && typeof identity === "function") {
-    try {
-      id = await identity();
-    } catch (e) {
-      id = null;
-    }
-  }
-
-  // No identity or not trusted → go to login
   if (!id || !id.trustedDevice) {
     const here = encodeURIComponent(location.pathname + location.search);
     window.location.href = `/CheckEmail.html?returnTo=${here}`;
     return null;
   }
 
-  // Expose canonical identity for the rest of the page
   window.PulseIdentity = id;
   return id;
 }
@@ -1102,10 +1074,7 @@ async function runHeroHeaderEntrance() {
   top.id = "hero-backdrop-top";
   bottom.id = "hero-backdrop-bottom";
 
-  top.style.opacity = "1";
-  bottom.style.opacity = "1";
-
-  const baseStyle = {
+  const base = {
     position: "fixed",
     left: "0",
     right: "0",
@@ -1114,15 +1083,17 @@ async function runHeroHeaderEntrance() {
     zIndex: "9999"
   };
 
-  Object.assign(top.style, baseStyle, {
+  Object.assign(top.style, base, {
     top: "0",
     height: "100vh",
+    opacity: "1",
     transition: "height 1.2s ease-out, opacity 0.8s ease-out"
   });
 
-  Object.assign(bottom.style, baseStyle, {
+  Object.assign(bottom.style, base, {
     bottom: "0",
     height: "100vh",
+    opacity: "1",
     transition: "height 1.2s ease-out"
   });
 
@@ -1131,38 +1102,18 @@ async function runHeroHeaderEntrance() {
 
   await new Promise(requestAnimationFrame);
   await new Promise(requestAnimationFrame);
-
   await new Promise(res => setTimeout(res, 600));
 
   bottom.style.height = "0";
   top.style.height = "115px";
 
-  setTimeout(() => { top.style.opacity = "0"; }, 900);
+  setTimeout(() => (top.style.opacity = "0"), 900);
 
   setTimeout(() => {
     bottom.style.opacity = "0";
     top.remove();
     bottom.remove();
   }, 1800);
-}
-
-// -----------------------------------------
-// ⭐ SIMPLE LOCAL LOGOUT (UI-ONLY)
-// -----------------------------------------
-function safeLogout() {
-  localStorage.removeItem("tp_identity_v9");
-  localStorage.removeItem("tp_device_token_v9");
-  window.location.replace("/login.html");
-}
-
-// -----------------------------------------
-// ⭐ HIDE LOADER
-// -----------------------------------------
-function hideTPLoader() {
-  const el = document.getElementById("t-loading");
-  if (!el) return;
-  el.classList.add("hide");
-  setTimeout(() => el.remove(), 700);
 }
 
 // -----------------------------------------
@@ -1191,34 +1142,27 @@ function applyDashboardPop(identity) {
 }
 
 // -----------------------------------------
-// ⭐ MAIN DASHBOARD RENDER (v11, IDENTITY-ONLY INPUT)
+// ⭐ MAIN RENDER
 // -----------------------------------------
 async function renderDashboard(identity) {
   const shimmer = document.getElementById("shimmer");
   const img = document.getElementById("profilePhoto");
   const info = document.getElementById("info");
 
-  if (!shimmer || !img || !info) {
-    warn("[DASHBOARD] Elements missing");
-    return;
-  }
+  if (!shimmer || !img || !info) return;
 
-  // Shimmer on
   shimmer.style.display = "block";
 
   info.innerHTML = `
-    <div class="info-row"><span class="label">Name:</span> <span class="textA">${identity.name || "Unknown"}</span></div>
-    <div class="info-row"><span class="label">Email:</span>  <span class="textA">${identity.email || "Unknown"}</span></div>
-    <div class="info-row"><span class="label">Role:</span>  <span class="textA">${identity.role || "Deliverer"}</span></div>
-    <div class="info-row"><span class="label">Stripe Account:</span>  <span class="textA">${identity.stripeAccountID || "Not linked"}</span></div>
-    <div class="info-row"><span class="label">Trusted Device:</span>  <span class="textA">${identity.trustedDevice ? "Yes" : "No"}</span></div>
+    <div class="info-row"><span class="label">Name:</span> <span class="textA">${identity.name}</span></div>
+    <div class="info-row"><span class="label">Email:</span> <span class="textA">${identity.email}</span></div>
+    <div class="info-row"><span class="label">Role:</span> <span class="textA">${identity.role || "Deliverer"}</span></div>
+    <div class="info-row"><span class="label">Stripe Account:</span> <span class="textA">${identity.stripeAccountID || "Not linked"}</span></div>
+    <div class="info-row"><span class="label">Trusted Device:</span> <span class="textA">${identity.trustedDevice ? "Yes" : "No"}</span></div>
   `;
 
   applyDashboardPop(identity);
 
-  // -----------------------------------------
-  // PHOTO LOADING (DETERMINISTIC)
-  // -----------------------------------------
   let photo =
     (identity.photoURL && identity.photoURL.trim() !== "" && identity.photoURL) ||
     "/_PICTURES/Frustrated.png";
@@ -1231,17 +1175,12 @@ async function renderDashboard(identity) {
   };
 
   img.onerror = () => {
-    warn("[DASHBOARD] PHOTO LOAD ERROR → FALLBACK");
     img.src = "/_PICTURES/Frustrated.png";
     shimmer.style.display = "none";
     img.style.display = "block";
   };
 
-  // -----------------------------------------
-  // BUTTONS + NAVIGATION
-  // -----------------------------------------
-  const stripeUrl = identity.stripeDashboardURL || identity.loginLink || "#";
-
+  // Buttons
   const logoutBtn = document.getElementById("logoutBtn");
   const adminBtn  = document.getElementById("adminBtn");
   const stripeBtn = document.getElementById("stripeBtn");
@@ -1253,25 +1192,21 @@ async function renderDashboard(identity) {
     if (identity.role?.toLowerCase() === "admin") {
       adminBtn.style.display = "block";
     }
-    adminBtn.onclick = () => {
-      window.location.href = "/PULSEAdmin/PULSEAdmin.html";
-    };
+    adminBtn.onclick = () => (window.location.href = "/PULSEAdmin/PULSEAdmin.html");
   }
 
   if (stripeBtn) {
-    stripeBtn.onclick = () => {
-      window.location.href = stripeUrl;
-    };
+    const stripeUrl = identity.stripeDashboardURL || identity.loginLink || "#";
+    stripeBtn.onclick = () => (window.location.href = stripeUrl);
   }
 
   if (updateBtn) {
-    updateBtn.onclick = () => {
-      window.location.href = "/userrecord.html";
-    };
+    updateBtn.onclick = () => (window.location.href = "/userrecord.html");
   }
 
   hideTPLoader();
 }
+
 // -----------------------------
 // DASHBOARD BOOTSTRAP — v11 (UNDERSTANDING-ONLY)
 // -----------------------------
