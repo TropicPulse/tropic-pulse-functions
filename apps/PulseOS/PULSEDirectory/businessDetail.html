@@ -100,7 +100,7 @@ document.addEventListener("contextmenu", function(e) {
   justify-content: center;
 
   background: #000;
-  background-image: url('https://www.tropicpulse.bz/pictures/Mysterious.png');
+  background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -921,7 +921,7 @@ body::before {
 
 <body>
 <div id="t-loading">
-    <img src="https://www.tropicpulse.bz/pictures/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -934,7 +934,7 @@ body::before {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="https://www.tropicpulse.bz/pictures/PulseBand.png"
+          src="https://www.tropicpulse.bz/_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -1771,7 +1771,7 @@ function sanitizeBusiness(b) {
         ? b.images
         : b.mainPhotoURL
         ? [b.mainPhotoURL]
-        : ["https://www.tropicpulse.bz/pictures/Frustrated.png"],
+        : ["https://www.tropicpulse.bz/_PICTURES/Frustrated.png"],
 
     mainPhotoURL: b.mainPhotoURL || null,
 
@@ -1829,7 +1829,7 @@ function updateCarousel() {
 
     if (!Array.isArray(carouselImages) || carouselImages.length === 0) {
       warn("Carousel: No images found, using fallback.");
-      carouselImages = ["https://www.tropicpulse.bz/pictures/Frustrated.png"];
+      carouselImages = ["https://www.tropicpulse.bz/_PICTURES/Frustrated.png"];
       currentIndex = 0;
     }
 
@@ -1840,7 +1840,7 @@ function updateCarousel() {
     setTimeout(() => {
       mainImage.src = carouselImages[currentIndex];
       mainImage.onerror = () => {
-        mainImage.src = "https://www.tropicpulse.bz/pictures/Frustrated.png";
+        mainImage.src = "https://www.tropicpulse.bz/_PICTURES/Frustrated.png";
       };
       mainImage.style.opacity = 1;
     }, 150);
@@ -1859,7 +1859,7 @@ function updateCarousel() {
     error("updatCarousel error:", err);
     const mainImage = el("mainImage");
     if (mainImage) {
-      mainImage.src = "https://www.tropicpulse.bz/pictures/Frustrated.png";
+      mainImage.src = "https://www.tropicpulse.bz/_PICTURES/Frustrated.png";
       mainImage.style.opacity = 1;
     }
   }
@@ -2033,7 +2033,7 @@ async function renderBusiness(biz) {
   -------------------------------------------------- */
   const images = Array.isArray(biz.images) && biz.images.length > 0
     ? biz.images
-    : ["https://www.tropicpulse.bz/pictures/Frustrated.png"];
+    : ["https://www.tropicpulse.bz/_PICTURES/Frustrated.png"];
 
   const carousel = document.querySelector(".carousel-wrapper");
 
