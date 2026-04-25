@@ -21,7 +21,7 @@
 // ============================================================================
 import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
-import { boot } from "./PulseOSBrainCortex.js";
+import { bootCortex } from "./PulseOSBrainCortex.js";
 
 
 // ============================================================================
@@ -282,7 +282,7 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
   // PulseOSBrain.evolution = Evolution;
 
   // Boot Cortex with PulseOSBrain as CNS parent
-  PulseOSBrain.cortex = boot({ Brain: PulseOSBrain });
+  PulseOSBrain.cortex = bootCortex({ Brain: PulseOSBrain });
 
   // Let Cortex initialize Nervous System + organs if it exposes hooks
   PulseOSBrain.cortex?.initializeNervousSystem?.();
