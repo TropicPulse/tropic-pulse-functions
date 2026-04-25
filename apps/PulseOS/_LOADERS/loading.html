@@ -19,11 +19,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -75,7 +75,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
       margin: 0;
       padding: 0;
       background: #000;
-      background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png?v4');
+      background-image: url('/_PICTURES/Mysterious.png?v4');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -165,7 +165,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
   <div class="center-box" id="loaderBox">
 
     <div class="loader-image">
-      <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png?v4" alt="Tropic Pulse Logo">
+      <img src="/_PICTURES/ToucanLogo-Mini.png?v4" alt="Tropic Pulse Logo">
     </div>
 
     <div class="loader-circle"></div>
@@ -194,7 +194,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
 
         if (!token) {
           setTimeout(() => {
-            window.location.replace("https://www.tropicpulse.bz/CheckEmail.html");
+            window.location.replace("/CheckEmail.html");
           }, 300);
           return;
         }
@@ -216,7 +216,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
               }
             });
             setTimeout(() => {
-              window.location.replace("https://www.tropicpulse.bz/CheckEmail.html");
+              window.location.replace("/CheckEmail.html");
             }, 300);
             return;
           }
@@ -234,7 +234,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
                 window.location.replace(data.identity.stripeDashboardURL);
                 return;
               }
-              window.location.replace("https://www.tropicpulse.bz/dashboard.html");
+              window.location.replace("/dashboard.html");
             }, 300);
           }, 500);
         });

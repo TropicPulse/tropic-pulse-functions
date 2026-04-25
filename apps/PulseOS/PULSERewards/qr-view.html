@@ -14,11 +14,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -71,7 +71,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
       margin: 0;
       padding: 0;
       background: #000;
-      background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png?v4');
+      background-image: url('/_PICTURES/Mysterious.png?v4');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -185,8 +185,8 @@ log("🌞 Script loaded, attaching visibility listener…");
       }
     });
 
-    const returnTo = encodeURIComponent("https://www.tropicpulse.bz/PulsePoints.html");
-    window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+    const returnTo = encodeURIComponent("/PulsePoints.html");
+    window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
     throw new Error("No identity — redirecting to CheckEmail");
   }
   // --- END SIMPLE IDENTITY CHECK ---

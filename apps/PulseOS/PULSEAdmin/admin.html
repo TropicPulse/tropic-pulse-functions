@@ -14,11 +14,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -94,13 +94,13 @@ document.addEventListener("contextmenu", function(e) {
     const token = localStorage.getItem("tp_token_v4");
     if (!token) {
       const returnTo = encodeURIComponent(window.location.href);
-      window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+      window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
     }
 
     const trusted = localStorage.getItem("tp_device_token_v4");
     if (trusted !== "1") {
       const returnTo = encodeURIComponent(window.location.href);
-      window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+      window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
     }
 
     const response = await fetch("https://verifytoken-ilx3agka5q-uc.a.run.app", {
@@ -112,14 +112,14 @@ document.addEventListener("contextmenu", function(e) {
     const data = await response.json();
     if (!data.success) {
       const returnTo = encodeURIComponent(window.location.href);
-      window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+      window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
     }
 
     const identity = data.identity;
     localStorage.setItem("tp_identity_v4", JSON.stringify(identity));
 
     if (!identity.role || identity.role.toLowerCase() !== "admin") {
-      window.location.replace("https://www.tropicpulse.bz/dashboard.html");
+      window.location.replace("/dashboard.html");
     }
 
   })();
@@ -133,7 +133,7 @@ document.addEventListener("contextmenu", function(e) {
       margin: 0;
       padding: 0;
       background: #000;
-      background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png?v4');
+      background-image: url('/_PICTURES/Mysterious.png?v4');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -331,14 +331,14 @@ document.addEventListener("contextmenu", function(e) {
     .toucan-top-left {
         top: 30px;
         left: 30px;
-        background-image: url("https://www.tropicpulse.bz/_PICTURES/ToucanLeft.png?v4");
+        background-image: url("/_PICTURES/ToucanLeft.png?v4");
     }
 
 /* Bottom-right toucan (looking up) */
     .toucan-bottom-right {
         bottom: 30px;
         right: 30px;
-        background-image: url("https://www.tropicpulse.bz/_PICTURES/ToucanRight.png?v4");
+        background-image: url("/_PICTURES/ToucanRight.png?v4");
     }
 
     .user-row {
@@ -374,7 +374,7 @@ document.addEventListener("contextmenu", function(e) {
 
 <body>
   <div id="t-loading">
-    <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -387,7 +387,7 @@ document.addEventListener("contextmenu", function(e) {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="https://www.tropicpulse.bz/_PICTURES/PulseBand.png"
+          src="/_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -456,7 +456,7 @@ document.addEventListener("contextmenu", function(e) {
   <div class="toucan toucan-top-left"></div>
   <div class="toucan toucan-bottom-right"></div>
     <div style="text-align:center;margin-bottom:20px;">
-      <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png?v4" style="width:150px;border-radius:12px;">
+      <img src="/_PICTURES/ToucanLogo-Mini.png?v4" style="width:150px;border-radius:12px;">
       <h1 style="color:#008f5c;font-size:30px;margin-top:10px;">Email Admin Panel</h1>
     </div>
 
@@ -1641,7 +1641,7 @@ newUser: {
 	const { email, logId } = payload;
     const trackingPixel =
       logId && logId !== "Preview Mode"
-        ? `<img src="https://www.tropicpulse.bz/_PICTURES/emailopen?logId=${encodeURIComponent(
+        ? `<img src="/_PICTURES/emailopen?logId=${encodeURIComponent(
             logId
           )}" width="1" height="1" alt="" style="display:block; opacity:0;">`
         : "";

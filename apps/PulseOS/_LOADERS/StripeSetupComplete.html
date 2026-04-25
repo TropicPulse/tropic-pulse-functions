@@ -76,7 +76,7 @@
 
   <div class="loader-container">
     <div class="loader-image">
-      <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png?v9" alt="Tropic Pulse Logo">
+      <img src="/_PICTURES/ToucanLogo-Mini.png?v9" alt="Tropic Pulse Logo">
     </div>
     <div class="spinner"></div>
     <div class="loading-text">Finalizing your setup…</div>
@@ -88,11 +88,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -114,7 +114,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
       const token = window.__FIREBASETOKEN__;
 
       if (!token) {
-        window.location.href = "https://www.tropicpulse.bz/error.html";
+        window.location.href = "/error.html";
         return;
       }
 
@@ -133,7 +133,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
         const data = await response.json();
 
         if (!data.success || !data.identity) {
-          window.location.href = "https://www.tropicpulse.bz/error.html";
+          window.location.href = "/error.html";
           return;
         }
 
@@ -144,12 +144,12 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
         if (returnTo) {
           window.location.replace(returnTo);
         } else {
-          window.location.replace("https://www.tropicpulse.bz/loading.html?dest=appDashboard");
+          window.location.replace("/loading.html?dest=appDashboard");
         }
     })
 
       } catch (err) {
-        window.location.href = "https://www.tropicpulse.bz/error.html";
+        window.location.href = "/error.html";
       }
     });
   </script>

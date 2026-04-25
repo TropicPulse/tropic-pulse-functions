@@ -19,11 +19,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -34,7 +34,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
   });
     // This page is no longer part of the login flow.
     // Simply route the user back into the in-app login system.
-    window.location.replace("https://www.tropicpulse.bz/CheckEmail.html");
+    window.location.replace("/CheckEmail.html");
   </script>
 </body>
 </html>

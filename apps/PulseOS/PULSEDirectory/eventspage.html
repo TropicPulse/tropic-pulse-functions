@@ -21,11 +21,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -100,7 +100,7 @@ body {
   justify-content: center;
 
   background: #000;
-  background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png');
+  background-image: url('/_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1624,7 +1624,7 @@ input::placeholder {
 
 <body>
   <div id="t-loading">
-    <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -1637,7 +1637,7 @@ input::placeholder {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="https://www.tropicpulse.bz/_PICTURES/PulseBand.png"
+          src="/_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -1966,13 +1966,13 @@ input::placeholder {
   });
   
   const emptyStateImages = [
-    "https://www.tropicpulse.bz/_PICTURES/Disheveled.png",
-    "https://www.tropicpulse.bz/_PICTURES/Disheveled2.png",
-    "https://www.tropicpulse.bz/_PICTURES/Disheveled3.png",
-    "https://www.tropicpulse.bz/_PICTURES/Disheveled4.png",
-    "https://www.tropicpulse.bz/_PICTURES/Disheveled5.png",
-    "https://www.tropicpulse.bz/_PICTURES/Disheveled6.png",
-    "https://www.tropicpulse.bz/_PICTURES/DisheveledExhausted1.png"
+    "/_PICTURES/Disheveled.png",
+    "/_PICTURES/Disheveled2.png",
+    "/_PICTURES/Disheveled3.png",
+    "/_PICTURES/Disheveled4.png",
+    "/_PICTURES/Disheveled5.png",
+    "/_PICTURES/Disheveled6.png",
+    "/_PICTURES/DisheveledExhausted1.png"
   ];
 
   
@@ -3007,7 +3007,7 @@ function renderEvents(list, isDateFilter = false) {
     const img =
       ev.mainPhotoURL ||
       (ev.images?.length > 0 ? ev.images[0] : null) ||
-      "https://www.tropicpulse.bz/_PICTURES/Frustrated.png";
+      "/_PICTURES/Frustrated.png";
 
     let price;
 
@@ -3099,7 +3099,7 @@ function renderEvents(list, isDateFilter = false) {
     imgEl.loading = "lazy";
     // ⭐ ADD THIS — SAME BEHAVIOR AS DETAILS PAGE
     imgEl.onerror = () => {
-      imgEl.src = "https://www.tropicpulse.bz/_PICTURES/Frustrated.png";
+      imgEl.src = "/_PICTURES/Frustrated.png";
     };
     EventLazyObserver.observe(imgEl);
     
@@ -3127,7 +3127,7 @@ function renderEvents(list, isDateFilter = false) {
       editBtn.innerHTML = "✏️";
       editBtn.onclick = (e) => {
         e.stopPropagation();
-        window.location.href = `https://www.tropicpulse.bz/EditEvent.html?id=${encodeURIComponent(ev.id)}`;
+        window.location.href = `/EditEvent.html?id=${encodeURIComponent(ev.id)}`;
       };
       
       imgWrapper.appendChild(editBtn);
@@ -3143,7 +3143,7 @@ function renderEvents(list, isDateFilter = false) {
 
 // ⭐ OPEN EVENT
 function openEvent(id) {
-  window.location.href = `https://www.tropicpulse.bz/eventDetail.html?id=${encodeURIComponent(id)}`;
+  window.location.href = `/eventDetail.html?id=${encodeURIComponent(id)}`;
 }
 
 function handleDateChange(value, list = null) {
@@ -3551,10 +3551,10 @@ function punchBackdropHole(shell, panel, backdrop) {
       createBtn.onclick = () => {
         if (!userEmail) {
           const returnTo = encodeURIComponent(window.location.href);
-          window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+          window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
           return;
         }
-        window.location.href = `https://www.tropicpulse.bz/EditEvent.html`;
+        window.location.href = `/EditEvent.html`;
       };
       createBtn.__clickAdded = true;
     }
@@ -3585,7 +3585,7 @@ function punchBackdropHole(shell, panel, backdrop) {
       myBtn.onclick = () => {
         if (!userEmail) {
           const returnTo = encodeURIComponent(window.location.href);
-          window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+          window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
           return;
         }
         setEventMode("my");

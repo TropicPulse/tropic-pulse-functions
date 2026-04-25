@@ -21,11 +21,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -61,7 +61,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
       margin: 0;
       padding: 0;
       background: #000;
-      background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png?v4');
+      background-image: url('/_PICTURES/Mysterious.png?v4');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -134,7 +134,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
 
 <body>
   <div class="card">
-    <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png?v4" class="logo" />
+    <img src="/_PICTURES/ToucanLogo-Mini.png?v4" class="logo" />
 
     <h1>Payment Successful</h1>
     <p>Your Credits are being Added. Redirecting you back to your Event…</p>
@@ -152,7 +152,7 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
 
         // If missing eventID, fallback to events page
         if (!eventID) {
-          window.location.replace("https://www.tropicpulse.bz/eventspage.html");
+          window.location.replace("/eventspage.html");
           return;
         }
 
@@ -160,11 +160,11 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         // Redirect to the specific event
-        window.location.replace(`https://www.tropicpulse.bz/eventDetail.html?id=${eventID}&payment=success`);
+        window.location.replace(`/eventDetail.html?id=${eventID}&payment=success`);
 
       } catch (err) {
         error("Payment success flow error:", err);
-        window.location.replace("https://www.tropicpulse.bz/eventspage.html");
+        window.location.replace("/eventspage.html");
       }
     }
 

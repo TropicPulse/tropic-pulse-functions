@@ -50,7 +50,7 @@
 
   <div class="loader-container">
     <div class="loader-image">
-      <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png?v4" alt="Tropic Pulse Logo">
+      <img src="/_PICTURES/ToucanLogo-Mini.png?v4" alt="Tropic Pulse Logo">
     </div>
   </div>
 
@@ -59,11 +59,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -82,23 +82,23 @@ import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
 
   // Server-side token presence check
   if (!window.__SERVER_HAS_TOKEN__) {
-    window.location.href = "https://www.tropicpulse.bz/error.html";
+    window.location.href = "/error.html";
     return;
   }
 
   // Browser sends NO TOKEN — only a trigger
-  fetch("https://www.tropicpulse.bz/resendlink-trigger", {
+  fetch("/resendlink-trigger", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ request: true })
   })
   .then(() => {
     window.location.href =
-      "https://www.tropicpulse.bz/success.html?displayName=" +
+      "/success.html?displayName=" +
       encodeURIComponent(displayName);
   })
   .catch(() => {
-    window.location.href = "https://www.tropicpulse.bz/error.html";
+    window.location.href = "/error.html";
   });
 });
 

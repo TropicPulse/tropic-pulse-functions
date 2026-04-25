@@ -21,11 +21,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -100,7 +100,7 @@ body {
   justify-content: center;
 
   background: #000;
-  background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png');
+  background-image: url('/_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -911,7 +911,7 @@ input[type="checkbox"] {
 </head>
 <body>
 <div id="t-loading">
-    <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -924,7 +924,7 @@ input[type="checkbox"] {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="https://www.tropicpulse.bz/_PICTURES/PulseBand.png"
+          src="/_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -2753,7 +2753,7 @@ function hideTPLoader() {
     showMessage(isEditing ? "Business updated!" : "Business created!", "success");
 
     setTimeout(() => {
-      window.location.href = `https://www.tropicpulse.bz/businessDetail.html?id=${encodeURIComponent(docId)}`;
+      window.location.href = `/businessDetail.html?id=${encodeURIComponent(docId)}`;
     }, 600);
   });
 

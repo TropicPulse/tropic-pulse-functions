@@ -201,7 +201,7 @@ export const massEmailWebhook = onRequest(
         // NO CREDITS → SEND PAYMENT EMAIL
         // ---------------------------------------------------------
         if (freeRemaining <= 0 && paidRemaining <= 0) {
-          const eventImageUrl = "https://www.tropicpulse.bz/NewEvent.png?v8";
+          const eventImageUrl = "/NewEvent.png?v8";
 
           const paymentLink = await createMassEmailPaymentLink(
             eventID,
@@ -488,7 +488,7 @@ async function sendMASSemail(reqBody) {
     // ------------------------------------
     const ts = admin.firestore.Timestamp.now().toMillis();
     payload.logId = payload.logId || `${emailType}-${ts}`;
-    payload.unsubscribeUrl = "https://www.tropicpulse.bz/unsubscribe";
+    payload.unsubscribeUrl = "/unsubscribe";
 
     validatePayload(emailType, payload);
 
@@ -524,7 +524,7 @@ async function sendMASSemail(reqBody) {
         ...payload,
         email: uEmail,
         userID: doc.id,
-        unsubscribeUrl: `https://www.tropicpulse.bz/unsubscribe?token=${encodeURIComponent(
+        unsubscribeUrl: `/unsubscribe?token=${encodeURIComponent(
           resendToken
         )}`
       };

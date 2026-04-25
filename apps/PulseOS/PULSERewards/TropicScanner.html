@@ -15,11 +15,11 @@
 const pageName = import.meta.url.split('/').pop().replace('.js', '');
 
 // A1 Skin Reflex
-import * as PulseSkinReflex from "./PulseOSSkinReflex.js";
+import * as PulseSkinReflex from "./PULSEX/PulseOSSkinReflex.js";
 PulseSkinReflex.attachScanner(pageName);
 
 // A0 Window / Evolutionary ignition
-import * as PulseEvolutionarySight from "./PulseEvolutionaryWindow.js";
+import * as PulseEvolutionarySight from "./PULSEX/PulseEvolutionaryWindow.js";
 
 
   // optional: start the OS
@@ -464,7 +464,7 @@ html, body {
   position: fixed;
   inset: 0;
   background: #000;
-  background-image: url('https://www.tropicpulse.bz/_PICTURES/Mysterious.png');
+  background-image: url('/_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -709,7 +709,7 @@ html, body {
 
 <body>
 <div id="t-loading">
-    <img src="https://www.tropicpulse.bz/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -722,7 +722,7 @@ html, body {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="https://www.tropicpulse.bz/_PICTURES/PulseBand.png"
+          src="/_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -931,8 +931,8 @@ if (!identityCheck || !identityCheck.uid) {
     }
   });
 
-  const returnTo = encodeURIComponent("https://www.tropicpulse.bz/PulsePoints.html");
-  window.location.replace(`https://www.tropicpulse.bz/CheckEmail.html?returnTo=${returnTo}`);
+  const returnTo = encodeURIComponent("/PulsePoints.html");
+  window.location.replace(`/CheckEmail.html?returnTo=${returnTo}`);
   throw new Error("No identity — redirecting to CheckEmail");
 }
 // --- END SIMPLE IDENTITY CHECK ---
