@@ -1,53 +1,49 @@
 /**
- * aiField.js — Pulse OS v11‑EVO Organ
+ * aiField.js — Pulse OS v11.1‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Field Layer**, the organism’s interface
  *   with the external environment.
- *
- *   It provides:
- *     - environmental input handling
- *     - external binary ingestion
- *     - output emission to the world
- *     - field modulation (environmental state)
- *     - boundary-level filtering
- *     - binary artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • world membrane
- *     • environmental interface
- *     • I/O boundary
- *     • field interaction layer
- *     • binary lung (pressure + flow)
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO
+//  META BLOCK — v11.1‑EVO
 // ---------------------------------------------------------
 
-export const FieldMeta = Object.freeze({
+const FieldMeta = Object.freeze({
   layer: "BinaryField",
   role: "BINARY_FIELD_LAYER",
-  version: "11.0-EVO",
-  identity: "aiBinaryField-v11-EVO",
+  version: "11.1-EVO",
+  identity: "aiBinaryField-v11.1-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
+
     sentinelAware: true,
     metabolismAware: true,
     hormonesAware: true,
     consciousnessAware: true,
     pipelineAware: true,
     reflexAware: true,
+
+    cognitionAware: true,
+    arteryAware: true,
+    fieldAware: true,
+    organismAware: true,
+    vitalsAware: true,
+
+    identitySafe: true,
+    readOnly: true,
+
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.1-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide a deterministic binary membrane between the organism and the external world, handling ingestion, emission, and field-state modulation.",
+      "Provide a deterministic binary membrane between the organism and the external world.",
 
     never: Object.freeze([
       "interpret symbolic meaning",
@@ -65,6 +61,8 @@ export const FieldMeta = Object.freeze({
       "encode field packets in binary",
       "emit packets without interpretation",
       "respect metabolic pressure",
+      "compute artery metrics deterministically",
+      "expose binary vitals snapshot",
       "remain pure and minimal"
     ])
   })
@@ -76,7 +74,7 @@ export const FieldMeta = Object.freeze({
 
 class AIBinaryField {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-field';
+    this.id = config.id || "ai-binary-field";
     this.encoder = config.encoder;
     this.sentinel = config.sentinel;
     this.metabolism = config.metabolism;
@@ -87,24 +85,24 @@ class AIBinaryField {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinaryField requires aiBinaryAgent encoder');
-    if (!this.sentinel) throw new Error('AIBinaryField requires aiBinarySentinel');
-    if (!this.metabolism) throw new Error('AIBinaryField requires aiBinaryMetabolism');
-    if (!this.hormones) throw new Error('AIBinaryField requires aiBinaryHormones');
-    if (!this.consciousness) throw new Error('AIBinaryField requires aiBinaryConsciousness');
+    if (!this.encoder) throw new Error("AIBinaryField requires aiBinaryAgent encoder");
+    if (!this.sentinel) throw new Error("AIBinaryField requires aiBinarySentinel");
+    if (!this.metabolism) throw new Error("AIBinaryField requires aiBinaryMetabolism");
+    if (!this.hormones) throw new Error("AIBinaryField requires aiBinaryHormones");
+    if (!this.consciousness) throw new Error("AIBinaryField requires aiBinaryConsciousness");
 
     this.fieldState = {
       entropy: 0,
       signalDensity: 0,
       lastInputSize: 0,
       lastOutputSize: 0,
-      environmentalPressure: 0,
+      environmentalPressure: 0
+    };
+
+    this.vitals = {
+      snapshot: () => Object.freeze(this._computeBinaryVitals())
     };
   }
-
-  // ---------------------------------------------------------
-  //  BINARY ARTERY METRICS
-  // ---------------------------------------------------------
 
   _computeBinaryThroughput(entropy, density) {
     const raw = entropy * (1 - Math.min(1, density));
@@ -138,7 +136,7 @@ class AIBinaryField {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -146,48 +144,21 @@ class AIBinaryField {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
 
-  // ---------------------------------------------------------
-  //  FIELD STATE UPDATE
-  // ---------------------------------------------------------
-
-  _updateFieldState(bits, direction) {
-    const size = bits.length;
-    const ones = bits.split('').filter((b) => b === '1').length;
-    const entropy = ones / size;
-
-    if (direction === 'in') this.fieldState.lastInputSize = size;
-    else this.fieldState.lastOutputSize = size;
-
-    this.fieldState.entropy = entropy;
-    this.fieldState.signalDensity = size / 1024;
-    this.fieldState.environmentalPressure =
-      Math.min(1, entropy * this.fieldState.signalDensity);
-
-    this._trace('field:state:update', {
-      direction,
-      size,
-      entropy,
-      pressure: this.fieldState.environmentalPressure,
-    });
-  }
-
-  // ---------------------------------------------------------
-  //  FIELD PACKET
-  // ---------------------------------------------------------
-
-  _generateFieldPacket(bits, direction) {
+  _computeBinaryVitals() {
     const { entropy, signalDensity } = this.fieldState;
 
     const throughput = this._computeBinaryThroughput(entropy, signalDensity);
-    const pressure   = this._computeBinaryPressure(entropy, signalDensity);
-    const cost       = this._computeBinaryCost(pressure, throughput);
-    const budget     = this._computeBinaryBudget(throughput, cost);
+    const pressure = this._computeBinaryPressure(entropy, signalDensity);
+    const cost = this._computeBinaryCost(pressure, throughput);
+    const budget = this._computeBinaryBudget(throughput, cost);
 
-    const binary = {
+    return {
+      fieldState: { ...this.fieldState },
+
       throughput,
       throughputBucket: this._bucketLevel(throughput),
 
@@ -200,67 +171,90 @@ class AIBinaryField {
       budget,
       budgetBucket: this._bucketLevel(budget)
     };
+  }
+
+  _updateFieldState(bits, direction) {
+    const size = bits.length || 0;
+    const ones = size === 0 ? 0 : bits.split("").filter((b) => b === "1").length;
+    const entropy = size === 0 ? 0 : ones / size;
+
+    if (direction === "in") this.fieldState.lastInputSize = size;
+    else this.fieldState.lastOutputSize = size;
+
+    this.fieldState.entropy = entropy;
+    this.fieldState.signalDensity = size / 1024;
+    this.fieldState.environmentalPressure = Math.min(
+      1,
+      entropy * this.fieldState.signalDensity
+    );
+
+    this._trace("field:state:update", {
+      direction,
+      size,
+      entropy,
+      pressure: this.fieldState.environmentalPressure
+    });
+  }
+
+  _generateFieldPacket(bits, direction) {
+    const vitals = this._computeBinaryVitals();
 
     const payload = {
-      type: 'binary-field-event',
+      type: "binary-field-event",
       timestamp: Date.now(),
       direction,
       bits,
-      fieldState: this.fieldState,
-      binary
+      fieldState: vitals.fieldState,
+      binary: {
+        throughput: vitals.throughput,
+        throughputBucket: vitals.throughputBucket,
+        pressure: vitals.pressure,
+        pressureBucket: vitals.pressureBucket,
+        cost: vitals.cost,
+        costBucket: vitals.costBucket,
+        budget: vitals.budget,
+        budgetBucket: vitals.budgetBucket
+      }
     };
 
     const json = JSON.stringify(payload);
     const encoded = this.encoder.encode(json);
 
-    const packet = {
+    return Object.freeze({
       ...payload,
       bits: encoded,
-      bitLength: encoded.length,
-    };
-
-    this._trace('field:packet', { direction, bits: packet.bitLength });
-
-    return packet;
+      bitLength: encoded.length
+    });
   }
-
-  // ---------------------------------------------------------
-  //  INPUT HANDLING
-  // ---------------------------------------------------------
 
   ingest(bits) {
     const safe = this.sentinel.scan(bits);
-    if (!safe) return false;
+    if (!safe) {
+      this._trace("field:ingest:blocked", { reason: "sentinel-deny" });
+      return false;
+    }
 
-    this._updateFieldState(bits, 'in');
+    this._updateFieldState(bits, "in");
 
-    const packet = this._generateFieldPacket(bits, 'in');
+    const packet = this._generateFieldPacket(bits, "in");
 
-    if (this.pipeline) this.pipeline.run(packet.bits);
-    if (this.reflex) this.reflex.run(packet.bits);
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'field-in' });
+    this.pipeline?.run(packet.bits);
+    this.reflex?.run(packet.bits);
+    this.logger?.logBinary(packet.bits, { source: "field-in" });
 
     return packet;
   }
-
-  // ---------------------------------------------------------
-  //  OUTPUT EMISSION
-  // ---------------------------------------------------------
 
   emit(bits) {
-    this._updateFieldState(bits, 'out');
+    this._updateFieldState(bits, "out");
 
-    const packet = this._generateFieldPacket(bits, 'out');
+    const packet = this._generateFieldPacket(bits, "out");
 
-    if (this.pipeline) this.pipeline.run(packet.bits);
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'field-out' });
+    this.pipeline?.run(packet.bits);
+    this.logger?.logBinary(packet.bits, { source: "field-out" });
 
     return packet;
   }
-
-  // ---------------------------------------------------------
-  //  INTERNAL HELPERS
-  // ---------------------------------------------------------
 
   _trace(event, payload) {
     if (!this.trace) return;
@@ -272,6 +266,18 @@ function createAIBinaryField(config) {
   return new AIBinaryField(config);
 }
 
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  AIBinaryField,
+  createAIBinaryField,
+  FieldMeta
+};
+
+// CommonJS
 module.exports = {
   AIBinaryField,
   createAIBinaryField,

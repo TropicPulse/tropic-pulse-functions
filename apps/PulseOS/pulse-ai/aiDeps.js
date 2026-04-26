@@ -3,15 +3,7 @@
 //  Deterministic Adapters • Dual‑Band Safe • Evolution‑Compatible
 //  PURE INPUT. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
-//
-//  ROLE:
-//    • Provide deterministic, read‑only adapters for DB, FS, Routes, Schemas.
-//    • Safe for dual‑band cortex, router, boundaries, persona, evolution.
-//    • Never mutate host environment.
-//    • Never perform random behavior.
-//    • Never leak external state.
-//    • Pure dependency harness for Pulse OS v11‑EVO.
-// ============================================================================
+
 export const DepsMeta = Object.freeze({
   layer: "PulseAIDependencyKernel",
   role: "DEPENDENCY_INJECTION_ORGAN",
@@ -34,12 +26,15 @@ export const DepsMeta = Object.freeze({
     environmentAgnostic: true,
     logAware: true,
     organismAware: true,
+    packetAware: true,          // NEW — all v11‑EVO organs emit packets
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
 
   contract: Object.freeze({
-    purpose: "Provide deterministic, read-only adapters for DB, FS, Routes, Schemas, and organism snapshots.",
+    purpose:
+      "Provide deterministic, read-only adapters for DB, FS, Routes, Schemas, and organism snapshots.",
+
     never: Object.freeze([
       "mutate host environment",
       "perform random behavior",
@@ -49,21 +44,21 @@ export const DepsMeta = Object.freeze({
       "modify schemas",
       "modify routes"
     ]),
+
     always: Object.freeze([
       "return frozen adapters",
       "strip identity anchors",
       "provide deterministic organism snapshots",
       "support dual-band cortex",
       "support evolution organ",
-      "support router + boundaries + persona"
+      "support router + boundaries + persona",
+      "emit deterministic deps packets"   // NEW
     ])
   })
 });
 
-
 // ============================================================================
 //  DATABASE API — Firestore/SQL/KV Compatible Adapter
-//  Required by: aiTourist, aiPower, aiEnvironment, aiEarn, Brainstem, Evolution
 // ============================================================================
 export function getDb({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:db] ${msg}`, data);
@@ -83,7 +78,6 @@ export function getDb({ trace = false } = {}) {
 
 // ============================================================================
 //  FILESYSTEM API — Required by aiEvolution
-//  Must provide: getAllFiles(), getFile()
 // ============================================================================
 export function getFsAPI({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:fs] ${msg}`, data);
@@ -103,7 +97,6 @@ export function getFsAPI({ trace = false } = {}) {
 
 // ============================================================================
 //  ROUTE API — Required by aiEvolution
-//  Must provide: getRouteMap(), getRoute()
 // ============================================================================
 export function getRouteAPI({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:routes] ${msg}`, data);
@@ -123,7 +116,6 @@ export function getRouteAPI({ trace = false } = {}) {
 
 // ============================================================================
 //  SCHEMA API — Required by aiEvolution
-//  Must provide: getAllSchemas(), getSchema()
 // ============================================================================
 export function getSchemaAPI({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:schema] ${msg}`, data);
@@ -142,8 +134,7 @@ export function getSchemaAPI({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  DUAL‑BAND ORGANISM SNAPSHOT (NEW v11‑EVO)
-//  Provides binary vitals + symbolic CNS state to evolution + cortex
+//  DUAL‑BAND ORGANISM SNAPSHOT (v11‑EVO)
 // ============================================================================
 export function getOrganismSnapshot(dualBand) {
   if (!dualBand) {
@@ -168,12 +159,36 @@ export function getOrganismSnapshot(dualBand) {
 }
 
 // ============================================================================
-//  EXPORT — v11‑EVO Dependency Harness
+//  DEPS PACKET — NEW (v11‑EVO)
 // ============================================================================
-export default {
+export function emitDepsPacket() {
+  const payload = {
+    type: "deps-snapshot",
+    timestamp: Date.now(),
+    adapters: ["db", "fs", "routes", "schema", "organismSnapshot"]
+  };
+
+  const json = JSON.stringify(payload);
+
+  // Dependency layer is symbolic-only → no binary encoding
+  return Object.freeze({
+    ...payload,
+    bits: null,
+    bitLength: 0
+  });
+}
+
+// ============================================================================
+//  EXPORT — v11‑EVO Dependency Harness (Frozen)
+// ============================================================================
+const depsSurface = Object.freeze({
+  meta: DepsMeta,
   getDb,
   getFsAPI,
   getRouteAPI,
   getSchemaAPI,
-  getOrganismSnapshot
-};
+  getOrganismSnapshot,
+  emitDepsPacket
+});
+
+export default depsSurface;

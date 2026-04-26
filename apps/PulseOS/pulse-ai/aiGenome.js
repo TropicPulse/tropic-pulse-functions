@@ -3,28 +3,13 @@
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Genome** of the organism.
- *
- *   It defines:
- *     - organism DNA
- *     - organ lineage
- *     - organ signatures
- *     - canonical organ order
- *     - organism fingerprint
- *     - binary genetic artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • immutable identity
- *     • structural blueprint
- *     • genetic scripture
- *     • lineage record
- *     • arterial DNA source
  */
 
 // ---------------------------------------------------------
 //  META BLOCK — v11‑EVO
 // ---------------------------------------------------------
 
-export const GenomeMeta = Object.freeze({
+const GenomeMeta = Object.freeze({
   layer: "BinaryGenetics",
   role: "BINARY_GENOME",
   version: "11.0-EVO",
@@ -71,24 +56,24 @@ export const GenomeMeta = Object.freeze({
 //  ORGAN IMPLEMENTATION
 // ---------------------------------------------------------
 
+const GENOME_ORGANISM_ID = "pulse-os-binary-organism";
+const GENOME_VERSION = "v11-EVO";
+const GENOME_KEY = "genome:current";
+
 class AIBinaryGenome {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-genome';
+    this.id = config.id || "ai-binary-genome";
     this.encoder = config.encoder;
     this.registry = config.registry;
     this.evolution = config.evolution;
     this.memory = config.memory;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinaryGenome requires aiBinaryAgent encoder');
-    if (!this.registry) throw new Error('AIBinaryGenome requires aiBinaryOrganRegistry');
-    if (!this.evolution) throw new Error('AIBinaryGenome requires aiBinaryEvolution');
-    if (!this.memory) throw new Error('AIBinaryGenome requires aiBinaryMemory');
+    if (!this.encoder) throw new Error("AIBinaryGenome requires aiBinaryAgent encoder");
+    if (!this.registry) throw new Error("AIBinaryGenome requires aiBinaryOrganRegistry");
+    if (!this.evolution) throw new Error("AIBinaryGenome requires aiBinaryEvolution");
+    if (!this.memory) throw new Error("AIBinaryGenome requires aiBinaryMemory");
   }
-
-  // ---------------------------------------------------------
-  //  BINARY GENETIC ARTERY METRICS
-  // ---------------------------------------------------------
 
   _computeGeneticThroughput(organCount, driftCount) {
     const driftFactor = Math.min(1, driftCount / Math.max(organCount, 1));
@@ -137,20 +122,18 @@ class AIBinaryGenome {
     return "none";
   }
 
-  // ---------------------------------------------------------
-  //  GENOME GENERATION
-  // ---------------------------------------------------------
-
   generateGenome() {
-    const organIds = this.registry.listOrgans();
+    const organIds = Array.isArray(this.registry.listOrgans?.())
+      ? this.registry.listOrgans()
+      : [];
 
-    const signatures = {};
+    const signatures = Object.create(null);
     let driftCount = 0;
     let signatureBits = 0;
 
     for (const id of organIds) {
-      const stored = this.evolution.loadSignature({ id }) || '0';
-      const current = stored; // deterministic, no mutation
+      const stored = this.evolution.loadSignature({ id }) || "0";
+      const current = stored;
 
       signatures[id] = current;
       signatureBits += current.length;
@@ -178,17 +161,16 @@ class AIBinaryGenome {
     };
 
     const genomeObject = {
-      organismId: 'pulse-os-binary-organism',
-      version: 'v11-EVO',
+      organismId: GENOME_ORGANISM_ID,
+      version: GENOME_VERSION,
       organIds,
       signatures,
       artery,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
 
     const json = JSON.stringify(genomeObject);
     const binary = this.encoder.encode(json);
-
     const fingerprint = this._computeFingerprint(binary);
 
     const genome = {
@@ -196,10 +178,10 @@ class AIBinaryGenome {
       fingerprint,
       fingerprintBits: fingerprint.length,
       genomeBinary: binary,
-      genomeBits: binary.length,
+      genomeBits: binary.length
     };
 
-    this._trace('genome:generated', {
+    this._trace("genome:generated", {
       organCount: organIds.length,
       bits: binary.length,
       artery
@@ -208,71 +190,74 @@ class AIBinaryGenome {
     return genome;
   }
 
-  // ---------------------------------------------------------
-  //  GENOME STORAGE
-  // ---------------------------------------------------------
-
   storeGenome() {
     const genome = this.generateGenome();
 
-    const key = this.encoder.encode('genome:current');
+    const key = this.encoder.encode(GENOME_KEY);
     const value = genome.genomeBinary;
 
     this.memory.write(key, value);
 
-    this._trace('genome:stored', {
+    this._trace("genome:stored", {
       bits: value.length,
-      fingerprintBits: genome.fingerprintBits,
+      fingerprintBits: genome.fingerprintBits
     });
 
     return genome;
   }
 
-  // ---------------------------------------------------------
-  //  GENOME LOADING
-  // ---------------------------------------------------------
-
   loadGenome() {
-    const key = this.encoder.encode('genome:current');
+    const key = this.encoder.encode(GENOME_KEY);
     const binary = this.memory.read(key);
 
     if (!binary) {
-      this._trace('genome:load:none', {});
+      this._trace("genome:load:none", {});
       return null;
     }
 
-    const json = this.encoder.decode(binary, 'string');
+    const json = this.encoder.decode(binary, "string");
     const genome = JSON.parse(json);
 
-    this._trace('genome:loaded', {
-      organCount: genome.organIds.length,
-      bits: binary.length,
+    this._trace("genome:loaded", {
+      organCount: Array.isArray(genome.organIds) ? genome.organIds.length : 0,
+      bits: binary.length
     });
 
     return genome;
   }
 
-  // ---------------------------------------------------------
-  //  FINGERPRINTING
-  // ---------------------------------------------------------
+  snapshotMetrics() {
+    const genome = this.loadGenome();
+    if (!genome) {
+      return {
+        hasGenome: false,
+        artery: null
+      };
+    }
+
+    return {
+      hasGenome: true,
+      artery: genome.artery,
+      throughputBucket: genome.artery.throughputBucket,
+      pressureBucket: genome.artery.pressureBucket,
+      costBucket: genome.artery.costBucket,
+      budgetBucket: genome.artery.budgetBucket
+    };
+  }
 
   _computeFingerprint(binary) {
-    let out = '';
+    let out = "";
 
     for (let i = 0; i < binary.length; i++) {
       const bit = binary[i];
-      const prev = out[out.length - 1] || '0';
-      out += bit === prev ? '0' : '1';
+      const prev = out[out.length - 1] || "0";
+      out += bit === prev ? "0" : "1";
     }
 
-    this._trace('fingerprint:computed', { bits: out.length });
+    this._trace("fingerprint:computed", { bits: out.length });
 
     return out;
   }
-
-  // ---------------------------------------------------------
-  //  INTERNAL HELPERS
-  // ---------------------------------------------------------
 
   _trace(event, payload) {
     if (!this.trace) return;
@@ -280,10 +265,26 @@ class AIBinaryGenome {
   }
 }
 
+// ---------------------------------------------------------
+//  FACTORY
+// ---------------------------------------------------------
+
 function createAIBinaryGenome(config) {
   return new AIBinaryGenome(config);
 }
 
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  AIBinaryGenome,
+  createAIBinaryGenome,
+  GenomeMeta
+};
+
+// CommonJS
 module.exports = {
   AIBinaryGenome,
   createAIBinaryGenome,

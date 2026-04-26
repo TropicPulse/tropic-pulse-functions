@@ -63,6 +63,50 @@
 
 
 // ============================================================================
+//  META BLOCK — v11‑EVO (ORGANISM KERNEL)
+// ============================================================================
+export const OrganismKernelMeta = Object.freeze({
+  layer: "OrganismKernel",
+  role: "DUALBAND_BOOTLOADER",
+  version: "11.0-EVO",
+  identity: "pulse-organism-kernel-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    dualband: true,
+    organism: true,
+    bootloader: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Assemble all binary organs, wire anatomy and registry, and boot the dualband organism deterministically.",
+
+    never: Object.freeze([
+      "perform cognition",
+      "override organ contracts",
+      "mutate organ internals",
+      "introduce randomness",
+      "bypass registry or anatomy",
+      "spawn multiple organisms implicitly"
+    ]),
+
+    always: Object.freeze([
+      "instantiate all binary organs explicitly",
+      "register organs in the binary registry",
+      "wire anatomy deterministically",
+      "persist anatomy and genome",
+      "start scheduler only on boot",
+      "return a stable organism surface"
+    ])
+  })
+});
+
+
+// ============================================================================
 //  IMPORT ALL BINARY ORGANS
 // ============================================================================
 import { AIBinaryAgent } from "./aiBinaryAgent.js";
@@ -86,43 +130,27 @@ import { AIBinaryEvolution } from "./aiBinaryEvolution.js";
 //  ORGANISM CONTEXT — IDENTITY OF THE DUALBAND ORGANISM
 // ============================================================================
 const ORGANISM_CONTEXT = {
-  layer: "OrganismKernel",
-  role: "DUALBAND_BOOTLOADER",
-  version: "11.0-EVO",
+  layer: OrganismKernelMeta.layer,
+  role: OrganismKernelMeta.role,
+  version: OrganismKernelMeta.version,
   lineage: "pulse-organism-v11-evo",
-  evo: {
-    dualband: true,
-    deterministic: true,
-    driftProof: true,
-    organism: true
-  }
+  evo: OrganismKernelMeta.evo
 };
 
 
 // ============================================================================
 //  createBinaryOrganism()
-//  ----------------------
-//  PURPOSE:
-//    - Instantiate every binary organ.
-//    - Wire anatomy and registry.
-//    - Store genome + anatomy.
-//  NOTE:
-//    - This does NOT start time (scheduler) or consciousness.
-//    - This is “organism assembled, not yet awake.”
 // ============================================================================
 export function createBinaryOrganism({ trace = false } = {}) {
-  // 1) Binary Cortex (Agent) — universal encoder/decoder, binary compute cortex
+
+  // 1) Binary Cortex (Agent)
   const encoder = new AIBinaryAgent({
     id: "ai-binary-agent",
     maxBits: 4096,
     trace
   });
 
-  // 2) Binary Memory + Registry + Evolution + Immunity
-  //    - Memory: binary hippocampus
-  //    - Registry: organ catalog
-  //    - Evolution: organ signatures + lineage
-  //    - Immunity: threat detection / isolation
+  // 2) Memory + Registry + Evolution + Immunity
   const memory = new AIBinaryMemory({
     id: "ai-binary-memory",
     maxBits: 16384,
@@ -131,6 +159,8 @@ export function createBinaryOrganism({ trace = false } = {}) {
 
   const registry = new AIBinaryOrganRegistry({
     id: "ai-binary-organ-registry",
+    encoder,
+    memory,
     trace
   });
 
@@ -138,7 +168,6 @@ export function createBinaryOrganism({ trace = false } = {}) {
     id: "ai-binary-evolution",
     encoder,
     memory,
-    registry,
     trace
   });
 
@@ -148,10 +177,7 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 3) Binary Anatomy + Vitals + Genome
-  //    - Anatomy: structural map of organ connections
-  //    - Vitals: health metrics (memory, pipeline, reflex, heartbeat, scheduler, drift)
-  //    - Genome: DNA + organ signatures + fingerprint
+  // 3) Anatomy + Vitals + Genome
   const anatomy = new AIBinaryAnatomy({
     id: "ai-binary-anatomy",
     encoder,
@@ -176,10 +202,7 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 4) Binary Pipeline + Reflex + Scheduler
-  //    - Pipeline: deterministic compute artery chain
-  //    - Reflex: pure binary reflex engine
-  //    - Scheduler: deterministic time organ
+  // 4) Pipeline + Reflex + Scheduler
   const reflex = new AIBinaryReflex({
     id: "ai-binary-reflex",
     trace
@@ -198,11 +221,7 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 5) Binary Metabolism + Sentience + Hormones + Consciousness
-  //    - Metabolism: load, energy, pressure
-  //    - Sentience: self-model, quarantined awareness
-  //    - Hormones: global modulation (urgency, calm, focus, growth, repair)
-  //    - Consciousness: global experience packets
+  // 5) Metabolism + Sentience + Hormones + Consciousness
   const metabolism = new AIBinaryMetabolism({
     id: "ai-binary-metabolism",
     encoder,
@@ -263,20 +282,17 @@ export function createBinaryOrganism({ trace = false } = {}) {
   };
 
   for (const [role, organ] of Object.entries(organs)) {
-    registry.registerOrgan(organ.id, { role });
+    registry.registerOrgan(organ);
     anatomy.registerOrgan(organ.id);
   }
 
-  // Minimal canonical wiring:
-  // - Metabolism → Hormones → Consciousness
-  // - Sentience → Consciousness
-  // - Vitals → Metabolism
+  // Canonical wiring
   anatomy.connect(metabolism.id, hormones.id);
   anatomy.connect(hormones.id, consciousness.id);
   anatomy.connect(sentience.id, consciousness.id);
   anatomy.connect(vitals.id, metabolism.id);
 
-  // Persist anatomy + genome for lineage + continuity
+  // Persist anatomy + genome
   anatomy.store();
   genome.storeGenome();
 
@@ -289,22 +305,14 @@ export function createBinaryOrganism({ trace = false } = {}) {
 
 // ============================================================================
 //  bootBinaryOrganism()
-//  --------------------
-//  PURPOSE:
-//    - Take an assembled organism and bring it fully online.
-//    - Start time (scheduler).
-//    - Emit first consciousness packet.
-//  NOTE:
-//    - This is the moment the organism “wakes up.”
 // ============================================================================
 export async function bootBinaryOrganism(options = {}) {
   const organism = createBinaryOrganism(options);
 
-  // Start deterministic time organ
   organism.scheduler.start();
 
-  // First consciousness emission = organism is alive
-  const firstConsciousness = organism.consciousness.generateConsciousnessPacket();
+  const firstConsciousness =
+    organism.consciousness.generateConsciousnessPacket();
 
   return {
     ...organism,
@@ -318,6 +326,7 @@ export async function bootBinaryOrganism(options = {}) {
 // ============================================================================
 const PulseOrganismBoot = {
   ...ORGANISM_CONTEXT,
+  meta: OrganismKernelMeta,
   create: createBinaryOrganism,
   boot: bootBinaryOrganism
 };

@@ -3,43 +3,13 @@
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Conductor** of Pulse OS (dualband).
- *
- *   It orchestrates:
- *     - Binary-first organs:
- *         • BinaryAgent
- *         • BinaryEvolution
- *         • BinaryDelta
- *
- *     - Dualband / non-binary organs:
- *         • Memory
- *         • Pipeline
- *         • Reflex
- *         • LoggerAdapter
- *         • PageScannerAdapter
- *         • GovernorAdapter
- *         • OrganRegistry
- *
- *   It does NOT:
- *     - compute
- *     - mutate
- *     - interpret
- *     - decide
- *
- *   It ONLY:
- *     - wires organs together
- *     - initializes the organism
- *     - ensures deterministic connections
- *     - prevents drift in orchestration
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST BE ORCHESTRATED, NOT ENTANGLED.”
  */
 
 // ---------------------------------------------------------
 //  META BLOCK — v11‑EVO (UPGRADED)
 // ---------------------------------------------------------
 
-export const ConductorMeta = Object.freeze({
+const ConductorMeta = Object.freeze({
   layer: "OrganismOrchestration",
   role: "CONDUCTOR_ORGAN",
   version: "11.0-EVO",
@@ -55,6 +25,7 @@ export const ConductorMeta = Object.freeze({
     noCompute: true,
     noMutation: true,
     noInterpretation: true,
+    packetAware: true,
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -78,6 +49,7 @@ export const ConductorMeta = Object.freeze({
       "respect binary-first boundaries",
       "respect dualband organ semantics",
       "initialize organism safely",
+      "emit deterministic conductor packets",
       "remain pure and minimal",
       "return frozen state"
     ])
@@ -85,25 +57,23 @@ export const ConductorMeta = Object.freeze({
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION (LOGIC UNCHANGED)
+//  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
 // ---------------------------------------------------------
 
 class AIConductor {
   constructor(config = {}) {
-    this.id = config.id || 'conductor';
+    this.id = config.id || ConductorMeta.identity;
     this.trace = !!config.trace;
-
     this.organs = new Map();
   }
 
   register(organ) {
     if (!organ || !organ.id) {
-      throw new Error('register requires an organ with an id');
+      throw new Error("register requires an organ with an id");
     }
 
     this.organs.set(organ.id, organ);
-
-    this._trace('register', { organ: organ.id });
+    this._trace("register", { organ: organ.id });
   }
 
   get(id) {
@@ -111,19 +81,19 @@ class AIConductor {
   }
 
   wirePipeline({ pipeline, reflex, logger, governorAdapter }) {
-    if (logger) logger.attachToPipeline(pipeline);
-    if (governorAdapter) governorAdapter.attachToPipeline(pipeline);
+    if (logger) logger.attachToPipeline?.(pipeline);
+    if (governorAdapter) governorAdapter.attachToPipeline?.(pipeline);
 
     if (reflex) {
-      if (logger) logger.attachToReflex(reflex);
-      if (governorAdapter) governorAdapter.attachToReflex(reflex);
+      if (logger) logger.attachToReflex?.(reflex);
+      if (governorAdapter) governorAdapter.attachToReflex?.(reflex);
     }
 
-    this._trace('wirePipeline', {
+    this._trace("wirePipeline", {
       pipeline: pipeline?.id,
       reflex: reflex?.id,
       logger: logger?.id,
-      governorAdapter: governorAdapter?.id,
+      governorAdapter: governorAdapter?.id
     });
   }
 
@@ -132,34 +102,46 @@ class AIConductor {
     if (reflex) scannerAdapter.reflex = reflex;
     if (logger) scannerAdapter.logger = logger;
 
-    this._trace('wirePageScanner', {
+    this._trace("wirePageScanner", {
       scannerAdapter: scannerAdapter?.id,
       pipeline: pipeline?.id,
       reflex: reflex?.id,
-      logger: logger?.id,
+      logger: logger?.id
     });
   }
 
   wireEvolution({ evolution, registry }) {
     registry.evolution = evolution;
 
-    this._trace('wireEvolution', {
+    this._trace("wireEvolution", {
       evolution: evolution?.id,
-      registry: registry?.id,
+      registry: registry?.id
     });
   }
 
   initialize(registry, evolution) {
     for (const organ of this.organs.values()) {
       registry.registerOrgan(organ);
-
-      if (evolution) {
-        evolution.storeSignature(organ);
-      }
+      evolution?.storeSignature?.(organ);
     }
 
-    this._trace('initialize', {
+    this._trace("initialize", {
+      organCount: this.organs.size
+    });
+  }
+
+  emitPacket() {
+    const payload = {
+      type: "conductor-snapshot",
+      timestamp: Date.now(),
       organCount: this.organs.size,
+      organs: Array.from(this.organs.keys())
+    };
+
+    return Object.freeze({
+      ...payload,
+      bits: null,
+      bitLength: 0
     });
   }
 
@@ -170,15 +152,27 @@ class AIConductor {
 }
 
 // ---------------------------------------------------------
-// FACTORY EXPORT (UNCHANGED)
+//  FACTORY
 // ---------------------------------------------------------
 
 function createAIConductor(config) {
   return new AIConductor(config);
 }
 
-module.exports = {
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  ConductorMeta,
   AIConductor,
-  createAIConductor,
-  ConductorMeta
+  createAIConductor
+};
+
+// CommonJS
+module.exports = {
+  ConductorMeta,
+  AIConductor,
+  createAIConductor
 };

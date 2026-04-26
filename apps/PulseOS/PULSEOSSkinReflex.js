@@ -1,65 +1,265 @@
+// PULSE OS v12‑EVO — PAGE SCANNER INTELLIGENCE LAYER (A1/A2 HYBRID)
+// “DRIFT ENGINE • LINEAGE ENGINE • STRUCTURAL ENGINE • MODULE ENGINE”
+// This layer adds:
+//   • Naming Drift Detection
+//   • Lineage Drift Detection
+//   • Module‑Mode Drift Detection (ESM/CJS)
+//   • Export/Import Drift Detection
+//   • Structural Drift Detection (shape mismatches)
+//   • Contract Drift Detection (param/return mismatches)
+//   • Path Drift Detection (file moves)
+//   • Drift Intelligence Packets (for PageScannerAdapter)
+//   • ZERO mutation of A1 reflex payloads
+//   • ZERO interference with A1 timing/state rules
 // ============================================================================
-// FILE: /apps/PulseOS/PulseOSSkinReflex.js
-// PULSE OS — v11‑EVO‑BINARY‑MAX
-// “THE SKIN REFLEX / UNIVERSAL SURFACE MEMBRANE / ERROR CATCHER”
-// A1 BARRIER • PAGE-LEVEL REFLEX • ZERO TIMING • ZERO STATE • BINARY-AWARE
-// ============================================================================
-//
-// ORGAN IDENTITY (v11‑EVO‑BINARY‑MAX):
-//   • Organ Type: Skin / Surface Membrane / Reflex Layer
-//   • Layer: A1 (Page-Level Reflex)
-//   • Biological Analog: Skin + nociceptors + epithelial membrane
-//   • System Role: Universal error intake + binary/text dualband classifier
-//
-// PURPOSE (v11‑EVO‑BINARY‑MAX):
-//   ✔ Intercept ALL JS errors at the page/surface level
-//   ✔ Extract stack frames + route context (dualband: text + binary)
-//   ✔ Build dynamic route traces (living map, not config)
-//   ✔ Mark route degradation (binary-aware tiers)
-//   ✔ Tag route DNA (A1_SURFACE / A1_SURFACE_DEGRADED / A1_BINARY_SHADOW*)
-//   ✔ Trigger healing deterministically for missing-field patterns
-//   ✔ Always forward reflex packets to Router (binary-first nervous system)
-//   ✔ Never block the organism; always route forward
-//   ✔ ALWAYS EMIT LOCAL DIAGNOSTICS BEFORE ROUTING
-//
-// WHAT THIS ORGAN IS:
-//   ✔ The universal error catcher of PulseOS
-//   ✔ The outermost membrane (A1 barrier)
-//   ✔ A dualband classifier (binary-aware + text-aware)
-//   ✔ A degradation + DNA annotator for Router v11‑EVO
-//   ✔ A local diagnostic surface for humans
-//
-// WHAT THIS ORGAN IS NOT:
-//   ✘ NOT a router
-//   ✘ NOT a backend logic layer
-//   ✘ NOT a state machine
-//   ✘ NOT a scheduler or timer
-//   ✘ NOT a binary execution organ
-//   ✘ NOT an IQ/import organ
-//
-// SAFETY CONTRACT (v11‑EVO‑BINARY‑MAX):
-//   • Zero timers, zero scheduling (only event hooks)
-//   • Zero long-lived state (only ephemeral route memory)
-//   • Zero mutation of payloads
-//   • Always classify before escalating
-//   • Always forward healing triggers via Router
-//   • Never block CNS, Mesh, or Binary Nervous System
-//   • Import errors = degradation, NOT fatal
-//   • Errors are signals, not stops — reflex must always continue forward
-//   • Guarded access to globals for portability
-//   • Binary-aware but NEVER executes binary logic directly
-// ============================================================================
+import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
+
+const PageScannerV12 = Object.freeze({
+
+  // ---------------------------------------------------------
+  // Extract variable names from JS source
+  // ---------------------------------------------------------
+  extractVars(source = "") {
+    try {
+      return [...source.matchAll(/(?:const|let|var)\s+([A-Za-z0-9_]+)/g)]
+        .map((m) => m[1]);
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.extractVars")
+        );
+      } catch {}
+      return [];
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Normalize names (strip suffixes, digits, casing)
+  // ---------------------------------------------------------
+  normalize(name = "") {
+    try {
+      return name
+        .replace(/[\d_]+$/, "")              // remove trailing digits/underscores
+        .replace(/(Field|State|Mode)$/i, "") // remove common suffixes
+        .toLowerCase();
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.normalize")
+        );
+      } catch {}
+      return "";
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Detect lineage drift between two sets of variables
+  // ---------------------------------------------------------
+  detectLineage(varsA = [], varsB = []) {
+    try {
+      const splits = [];
+
+      for (const a of varsA) {
+        const normA = this.normalize(a);
+
+        for (const b of varsB) {
+          const normB = this.normalize(b);
+
+          if (normA === normB && a !== b) {
+            splits.push({ canonical: a, drifted: b });
+          }
+        }
+      }
+
+      return splits;
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.detectLineage")
+        );
+      } catch {}
+      return [];
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Detect module mode drift (ESM vs CJS)
+  // ---------------------------------------------------------
+  detectModuleMode(source = "") {
+    try {
+      const esm = /import\s+.*from\s+['"]/.test(source);
+      const cjs = /require\s*\(/.test(source);
+
+      return Object.freeze({
+        esm,
+        cjs,
+        mixed: esm && cjs
+      });
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.detectModuleMode")
+        );
+      } catch {}
+      return Object.freeze({ esm: false, cjs: false, mixed: false });
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Detect missing exports (ESM/CJS)
+  // ---------------------------------------------------------
+  detectExportDrift(source = "", vars = []) {
+    try {
+      const hasESM = /export\s+/.test(source);
+      const hasCJS = /module\.exports/.test(source);
+
+      return Object.freeze({
+        missingESM: !hasESM,
+        missingCJS: !hasCJS,
+        vars
+      });
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.detectExportDrift")
+        );
+      } catch {}
+      return Object.freeze({
+        missingESM: false,
+        missingCJS: false,
+        vars
+      });
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Detect structural drift (shape mismatches)
+  // ---------------------------------------------------------
+  detectStructural(sourceA = "", sourceB = "") {
+    try {
+      const shapeA = [...sourceA.matchAll(/return\s+{([^}]+)}/g)]
+        .map((m) => m[1].split(",").map((s) => s.trim()));
+
+      const shapeB = [...sourceB.matchAll(/return\s+{([^}]+)}/g)]
+        .map((m) => m[1].split(",").map((s) => s.trim()));
+
+      return Object.freeze({
+        shapeA,
+        shapeB,
+        mismatch: JSON.stringify(shapeA) !== JSON.stringify(shapeB)
+      });
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.detectStructural")
+        );
+      } catch {}
+      return Object.freeze({
+        shapeA: [],
+        shapeB: [],
+        mismatch: false
+      });
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Detect contract drift (function signature mismatches)
+  // ---------------------------------------------------------
+  detectContract(sourceA = "", sourceB = "") {
+    try {
+      const sigA = [...sourceA.matchAll(/function\s+([A-Za-z0-9_]+)\(([^)]*)\)/g)]
+        .map((m) => ({
+          name: m[1],
+          params: m[2].split(",").map((s) => s.trim()).filter(Boolean)
+        }));
+
+      const sigB = [...sourceB.matchAll(/function\s+([A-Za-z0-9_]+)\(([^)]*)\)/g)]
+        .map((m) => ({
+          name: m[1],
+          params: m[2].split(",").map((s) => s.trim()).filter(Boolean)
+        }));
+
+      return Object.freeze({
+        sigA,
+        sigB,
+        mismatch: JSON.stringify(sigA) !== JSON.stringify(sigB)
+      });
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.detectContract")
+        );
+      } catch {}
+      return Object.freeze({
+        sigA: [],
+        sigB: [],
+        mismatch: false
+      });
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Detect path drift (file moved or renamed)
+  // ---------------------------------------------------------
+  detectPathDrift(importLine = "") {
+    try {
+      const match = importLine.match(/from\s+['"](.+?)['"]/);
+      if (!match) return null;
+
+      const path = match[1];
+      const exists = false; // cannot check filesystem in browser
+
+      return Object.freeze({
+        path,
+        exists,
+        drift: !exists
+      });
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.detectPathDrift")
+        );
+      } catch {}
+      return null;
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Build drift intelligence packet (adapter-ready)
+  // ---------------------------------------------------------
+  buildDriftPacket(context = {}) {
+    try {
+      return Object.freeze({
+        type: "pagescanner-drift-intel",
+        timestamp: Date.now(),
+        ...context
+      });
+    } catch (err) {
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "pagescanner.buildDriftPacket")
+        );
+      } catch {}
+      return Object.freeze({
+        type: "pagescanner-drift-intel",
+        timestamp: Date.now(),
+        error: true
+      });
+    }
+  }
+
+});
 
 
 // ============================================================================
-// ORGAN ROLE EXPORT — v11‑EVO‑BINARY‑MAX
+// ORGAN ROLE EXPORT — v12‑EVO‑BINARY‑MAX
 // ============================================================================
 export const PulseRole = {
   type: "Skin",
   subsystem: "PulseOSSkinReflex",
   layer: "A1-SurfaceReflex",
-  version: "11.0",
-  identity: "PulseOSSkinReflex-v11-EVO-BINARY",
+  version: "12.0",
+  identity: "PulseOSSkinReflex-v12-EVO-BINARY-MAX",
 
   evo: {
     driftProof: true,
@@ -69,8 +269,8 @@ export const PulseRole = {
     surfaceOnly: true,
     classificationFirst: true,
     healingTriggerOnly: true,
-    binaryAware: true,          // understands binary arteries
-    dualBand: true,             // text + binary treated equally
+    binaryAware: true,
+    dualBand: true,
     futureEvolutionReady: true
   },
 
@@ -79,7 +279,7 @@ export const PulseRole = {
     errorIntake: true,
     routeSampler: true,
     degradationAnnotator: true,
-    binaryShadowTagger: true    // tags binary DNA at surface
+    binaryShadowTagger: true
   },
 
   pulseContract: "Pulse-v1/v2/v3",
@@ -89,7 +289,7 @@ export const PulseRole = {
 
 
 // ============================================================================
-// OWNER MODULE RESOLUTION — v11‑EVO (Brain-map aware, no mutation)
+// OWNER MODULE RESOLUTION — v12‑EVO (Brain-map aware, no mutation)
 // ============================================================================
 const hasWindow = typeof window !== "undefined";
 
@@ -121,7 +321,7 @@ function resolveOwnerModule(symbol) {
 
 if (typeof console !== "undefined" && typeof console.log === "function") {
   console.log(
-    "%c[PulseOSSkinReflex v11‑EVO‑BINARY] Loaded — A1 Universal Membrane Active",
+    "%c[PulseOSSkinReflex v12‑EVO‑BINARY‑MAX] Loaded — A1/A2 Universal Membrane Active",
     "color:#4CAF50; font-weight:bold;"
   );
 }
@@ -133,7 +333,7 @@ if (typeof console !== "undefined" && typeof console.log === "function") {
 const LAYER_ID   = "SKIN-REFLEX";
 const LAYER_NAME = "THE SKIN REFLEX";
 const LAYER_ROLE = "UNIVERSAL ERROR GUARDIAN & HEALING TRIGGER";
-const LAYER_VER  = "11.0";
+const LAYER_VER  = "12.0";
 
 const PROTECTOR_DIAGNOSTICS_ENABLED =
   hasWindow &&
@@ -165,7 +365,7 @@ function emitReflexSenseReport(context = {}) {
   if (typeof console === "undefined" || !console.groupCollapsed) return;
 
   console.groupCollapsed(
-    "%c[SkinReflex SENSE REPORT — v11‑EVO‑BINARY]",
+    "%c[SkinReflex SENSE REPORT — v12‑EVO‑BINARY‑MAX]",
     "color:#FF9800; font-weight:bold;"
   );
 
@@ -194,17 +394,16 @@ function emitReflexSenseReport(context = {}) {
 
 
 // ============================================================================
-// PULSE OS v11 — SKIN REFLEX (A1 → A2 → Router → Backend/Binary Nervous System)
+// PULSE OS v12 — SKIN REFLEX (A1 → A2 → Router → Backend/Binary Nervous System)
 //  • route() is the dualband nervous entry: binary-first, text fallback
 // ============================================================================
 import { route } from "./PULSE-OS/PulseOSCNSNervousSystem.js";
-
-
 // ============================================================================
-// ROUTE MEMORY — v11‑EVO‑BINARY‑MAX
+// ROUTE MEMORY — v12‑EVO‑BINARY‑MAX
 //  • Stores degradation, tiers, DNA tags
 //  • Binary-aware: tags binary-shadow routes
 //  • Deterministic sequence counter (no Date.now)
+//  • Error-spine aware (never throws)
 // ============================================================================
 let skinSeq = 0;
 
@@ -212,250 +411,400 @@ const RouteMemory = {
   store: {},
 
   makeKey(message, frames) {
-    const top = frames[0] || "NO_FRAME";
-    return message + "::" + top;
+    try {
+      const top = frames[0] || "NO_FRAME";
+      return message + "::" + top;
+    } catch (err) {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "skinreflex.routememory.makeKey")
+      );
+      return message + "::NO_FRAME";
+    }
   },
 
   classifyTier(healthScore) {
-    const h = typeof healthScore === "number" ? healthScore : 1.0;
+    try {
+      const h = typeof healthScore === "number" ? healthScore : 1.0;
 
-    if (h >= 0.95) return "microDegrade";
-    if (h >= 0.85) return "softDegrade";
-    if (h >= 0.50) return "midDegrade";
-    if (h >= 0.15) return "hardDegrade";
-    return "criticalDegrade";
+      if (h >= 0.95) return "microDegrade";
+      if (h >= 0.85) return "softDegrade";
+      if (h >= 0.50) return "midDegrade";
+      if (h >= 0.15) return "hardDegrade";
+      return "criticalDegrade";
+    } catch (err) {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "skinreflex.routememory.classifyTier")
+      );
+      return "microDegrade";
+    }
   },
 
   remember(message, frames, routeTrace, overrides = {}) {
-    const key = this.makeKey(message, frames);
-    const baseHealth = overrides.healthScore ?? 1.0;
-    const tier = this.classifyTier(baseHealth);
+    try {
+      const key = this.makeKey(message, frames);
+      const baseHealth = overrides.healthScore ?? 1.0;
+      const tier = this.classifyTier(baseHealth);
 
-    this.store[key] = {
-      seq: ++skinSeq,
-      message,
-      frames,
-      routeTrace,
-      degraded: !!overrides.degraded,
-      healthScore: baseHealth,
-      tier,
-      dnaTag: overrides.binaryAware
-        ? "A1_BINARY_SHADOW"
-        : "A1_SURFACE",
-      ...overrides
-    };
+      this.store[key] = {
+        seq: ++skinSeq,
+        message,
+        frames,
+        routeTrace,
+        degraded: !!overrides.degraded,
+        healthScore: baseHealth,
+        tier,
+        dnaTag: overrides.binaryAware
+          ? "A1_BINARY_SHADOW"
+          : "A1_SURFACE",
+        ...overrides
+      };
 
-    logProtector("ROUTE_MEMORY_SAVED", {
-      key,
-      frames: frames.length,
-      degraded: this.store[key].degraded,
-      healthScore: this.store[key].healthScore,
-      tier: this.store[key].tier,
-      dnaTag: this.store[key].dnaTag
-    });
+      logProtector("ROUTE_MEMORY_SAVED", {
+        key,
+        frames: frames.length,
+        degraded: this.store[key].degraded,
+        healthScore: this.store[key].healthScore,
+        tier: this.store[key].tier,
+        dnaTag: this.store[key].dnaTag
+      });
+    } catch (err) {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "skinreflex.routememory.remember")
+      );
+    }
   },
 
   markDegraded(message, frames, healthScore = 0.85, binaryAware = false) {
-    const key = this.makeKey(message, frames);
-    const entry = this.store[key];
-    if (!entry) return;
+    try {
+      const key = this.makeKey(message, frames);
+      const entry = this.store[key];
+      if (!entry) return;
 
-    entry.degraded = true;
-    entry.healthScore = healthScore;
-    entry.tier = this.classifyTier(healthScore);
-    entry.dnaTag = binaryAware
-      ? "A1_BINARY_SHADOW_DEGRADED"
-      : "A1_SURFACE_DEGRADED";
+      entry.degraded = true;
+      entry.healthScore = healthScore;
+      entry.tier = this.classifyTier(healthScore);
+      entry.dnaTag = binaryAware
+        ? "A1_BINARY_SHADOW_DEGRADED"
+        : "A1_SURFACE_DEGRADED";
 
-    logProtector("ROUTE_MEMORY_DEGRADED", {
-      key,
-      healthScore,
-      tier: entry.tier,
-      dnaTag: entry.dnaTag
-    });
+      logProtector("ROUTE_MEMORY_DEGRADED", {
+        key,
+        healthScore,
+        tier: entry.tier,
+        dnaTag: entry.dnaTag
+      });
+    } catch (err) {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "skinreflex.routememory.markDegraded")
+      );
+    }
   },
 
   recall(message, frames) {
-    const key = this.makeKey(message, frames);
-    const entry = this.store[key];
-    if (!entry) return null;
+    try {
+      const key = this.makeKey(message, frames);
+      const entry = this.store[key];
+      if (!entry) return null;
 
-    logProtector("ROUTE_MEMORY_HIT", {
-      key,
-      frames: entry.frames.length,
-      degraded: entry.degraded,
-      healthScore: entry.healthScore,
-      tier: entry.tier,
-      dnaTag: entry.dnaTag
-    });
+      logProtector("ROUTE_MEMORY_HIT", {
+        key,
+        frames: entry.frames.length,
+        degraded: entry.degraded,
+        healthScore: entry.healthScore,
+        tier: entry.tier,
+        dnaTag: entry.dnaTag
+      });
 
-    return entry.routeTrace;
+      return entry.routeTrace;
+    } catch (err) {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "skinreflex.routememory.recall")
+      );
+      return null;
+    }
   },
 
   getEntry(message, frames) {
-    const key = this.makeKey(message, frames);
-    return this.store[key] || null;
+    try {
+      const key = this.makeKey(message, frames);
+      return this.store[key] || null;
+    } catch (err) {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "skinreflex.routememory.getEntry")
+      );
+      return null;
+    }
   }
 };
 
 
 // ============================================================================
-// ✅ ADDED v12 — SESSION CHECK (always runs, enforces trustedDevice barrier)
+// v12 — SESSION CHECK (trustedDevice barrier + identity exposure)
 // ============================================================================
 async function sessionCheck() {
-  if (!hasWindow || !window.localStorage) {
-    logProtector("SESSIONCHECK_SKIPPED_NO_WINDOW", {});
-    return null;
-  }
-
-  let id = null;
-
   try {
-    const raw = window.localStorage.getItem("tp_identity_v9");
-    if (raw) id = JSON.parse(raw);
-  } catch {
-    id = null;
-  }
+    if (!hasWindow || !window.localStorage) {
+      logProtector("SESSIONCHECK_SKIPPED_NO_WINDOW", {});
+      return null;
+    }
 
-  // Always expose identity for the organism
-  if (hasWindow) {
-    if (!window.Pulse) window.Pulse = {};
-    window.PulseIdentity = id || null;
-  }
+    let id = null;
 
-  // Barrier: trustedDevice must be true for normal UI pages
-  if (!id || !id.trustedDevice) {
-    const here =
-      encodeURIComponent(window.location.pathname + window.location.search);
-    logProtector("SESSIONCHECK_REDIRECT_UNTRUSTED", {
-      path: window.location.pathname,
-      trustedDevice: id?.trustedDevice || false
-    });
-    window.location.href = `/CheckEmail.html?returnTo=${here}`;
+    try {
+      const raw = window.localStorage.getItem("tp_identity_v9");
+      if (raw) id = JSON.parse(raw);
+    } catch {
+      id = null;
+    }
+
+    if (hasWindow) {
+      if (!window.Pulse) window.Pulse = {};
+      window.PulseIdentity = id || null;
+    }
+
+    if (!id || !id.trustedDevice) {
+      const here =
+        encodeURIComponent(window.location.pathname + window.location.search);
+      logProtector("SESSIONCHECK_REDIRECT_UNTRUSTED", {
+        path: window.location.pathname,
+        trustedDevice: id?.trustedDevice || false
+      });
+      window.location.href = `/CheckEmail.html?returnTo=${here}`;
+      return null;
+    }
+
+    logProtector("SESSIONCHECK_OK", { trustedDevice: true });
+    return id;
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.sessionCheck")
+    );
     return null;
   }
-
-  logProtector("SESSIONCHECK_OK", {
-    trustedDevice: true
-  });
-
-  return id;
 }
 
 
 // ============================================================================
-// ✅ ADDED v12 — ROUTE CHECK (pageName / lastPage continuity)
+// v12 — ROUTE CHECK (page continuity)
 // ============================================================================
 function routeCheck() {
-  if (!hasWindow) {
-    logProtector("ROUTECHECK_SKIPPED_NO_WINDOW", {});
+  try {
+    if (!hasWindow) {
+      logProtector("ROUTECHECK_SKIPPED_NO_WINDOW", {});
+      return null;
+    }
+
+    if (!window.Pulse) window.Pulse = {};
+
+    const lastPage = window.Pulse.pageName || null;
+    const pageName =
+      (window.location && window.location.pathname) || "unknown";
+
+    window.Pulse.lastPage = lastPage;
+    window.Pulse.pageName = pageName;
+
+    logProtector("ROUTECHECK_UPDATED", {
+      pageName,
+      lastPage
+    });
+
+    return { pageName, lastPage };
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.routeCheck")
+    );
     return null;
   }
-
-  if (!window.Pulse) window.Pulse = {};
-
-  const lastPage = window.Pulse.pageName || null;
-  const pageName =
-    (window.location && window.location.pathname) || "unknown";
-
-  window.Pulse.lastPage = lastPage;
-  window.Pulse.pageName = pageName;
-
-  logProtector("ROUTECHECK_UPDATED", {
-    pageName,
-    lastPage
-  });
-
-  return { pageName, lastPage };
 }
 
 
 // ============================================================================
-// PUBLIC API (C‑LAYER passthrough — dualband, binary-first nervous entry)
+// PUBLIC API — dualband nervous entry (binary-first)
 // ============================================================================
 export async function getAuth(jwtToken) {
-  logProtector("GET_AUTH", {});
-  return await route("auth", {
-    jwtToken,
-    reflexOrigin: "SkinReflex",
-    layer: "A1",
-    binaryAware: true,
-    dualBand: true
-  });
+  try {
+    logProtector("GET_AUTH", {});
+    return await route("auth", {
+      jwtToken,
+      reflexOrigin: "SkinReflex",
+      layer: "A1",
+      binaryAware: true,
+      dualBand: true
+    });
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.getAuth")
+    );
+    return null;
+  }
 }
 
 export async function getHook(name, payload = {}) {
-  logProtector("GET_HOOK", { name });
-  return await route("hook", {
-    name,
-    payload,
-    reflexOrigin: "SkinReflex",
-    layer: "A1",
-    binaryAware: true,
-    dualBand: true
-  });
+  try {
+    logProtector("GET_HOOK", { name });
+    return await route("hook", {
+      name,
+      payload,
+      reflexOrigin: "SkinReflex",
+      layer: "A1",
+      binaryAware: true,
+      dualBand: true
+    });
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.getHook")
+    );
+    return null;
+  }
 }
 
 export async function getMap(mapName) {
-  logProtector("GET_MAP", { mapName });
-  return await route("map", {
-    mapName,
-    reflexOrigin: "SkinReflex",
-    layer: "A1",
-    binaryAware: true,
-    dualBand: true
-  });
+  try {
+    logProtector("GET_MAP", { mapName });
+    return await route("map", {
+      mapName,
+      reflexOrigin: "SkinReflex",
+      layer: "A1",
+      binaryAware: true,
+      dualBand: true
+    });
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.getMap")
+    );
+    return null;
+  }
 }
 
 export async function callHelper(helperName, payload = {}) {
-  logProtector("CALL_HELPER", { helperName });
-  return await route("helper", {
-    helperName,
-    payload,
-    reflexOrigin: "SkinReflex",
-    layer: "A1",
-    binaryAware: true,
-    dualBand: true
-  });
-}
-
-
-// ============================================================================
-// ✅ ADDED v12 — PAGE SCANNER ENTRYPOINT
-//  • Single front door for pages: sessionCheck → routeCheck → SkinReflex
-// ============================================================================
-export async function attachScanner() {
-  logProtector("SCANNER_ATTACH_START", {});
-
-  // 1. Always run sessionCheck (identity + trustedDevice barrier)
-  const identity = await sessionCheck();
-  if (!identity) {
-    // sessionCheck already redirected if untrusted
-    logProtector("SCANNER_ABORTED_UNTRUSTED", {});
+  try {
+    logProtector("CALL_HELPER", { helperName });
+    return await route("helper", {
+      helperName,
+      payload,
+      reflexOrigin: "SkinReflex",
+      layer: "A1",
+      binaryAware: true,
+      dualBand: true
+    });
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.callHelper")
+    );
     return null;
   }
-
-  // 2. Always run routeCheck (page continuity)
-  const routeInfo = routeCheck();
-
-  // 3. Attach SkinReflex semantics are already active via window.error listener
-  logProtector("SCANNER_ATTACH_COMPLETE", {
-    pageName: routeInfo?.pageName || "unknown",
-    lastPage: routeInfo?.lastPage || null,
-    trustedDevice: !!identity.trustedDevice
-  });
-
-  return {
-    identity,
-    route: routeInfo
-  };
 }
+
+
+// ============================================================================
+// v12 — PAGE SCANNER ENTRYPOINT (sessionCheck → routeCheck → reflex ready)
+// ============================================================================
+export async function attachScanner() {
+  try {
+    logProtector("SCANNER_ATTACH_START", {});
+
+    const identity = await sessionCheck();
+    if (!identity) {
+      logProtector("SCANNER_ABORTED_UNTRUSTED", {});
+      return null;
+    }
+
+    const routeInfo = routeCheck();
+
+    logProtector("SCANNER_ATTACH_COMPLETE", {
+      pageName: routeInfo?.pageName || "unknown",
+      lastPage: routeInfo?.lastPage || null,
+      trustedDevice: !!identity.trustedDevice
+    });
+
+    return {
+      identity,
+      route: routeInfo
+    };
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.attachScanner")
+    );
+    return null;
+  }
+}
+
+
+// ============================================================================
+// v12 — MEMBRANE ALIVE (Window → SkinReflex)
+// ============================================================================
+export function membraneAlive(origin = "unknown") {
+  try {
+    if (typeof console !== "undefined") {
+      console.debug(`[SkinReflex] membraneAlive from ${origin}`);
+    }
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.membraneAlive")
+    );
+  }
+}
+
+
+// ============================================================================
+// v12 — PAGE SCANNER INTELLIGENCE HOOKS (A1/A2 Hybrid)
+// ============================================================================
+function emitPageScannerIntel(context = {}) {
+  try {
+    if (!window || !window.PageScannerAdapter) return;
+
+    const packet = PageScannerV12.buildDriftPacket(context);
+
+    if (typeof window.PageScannerAdapter.onEvent === "function") {
+      window.PageScannerAdapter.onEvent(packet);
+    }
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "pagescanner.emitIntel")
+    );
+  }
+}
+// ============================================================================
+// v12‑EVO — PAGE SCANNER (A2) HOOK INSIDE attachScanner()
+//  • Runs AFTER sessionCheck + routeCheck
+//  • Emits page‑level drift‑intel (pageName, lastPage, identity)
+//  • Does NOT rewrite anything
+// ============================================================================
+(function attachPageScannerIntel() {
+  if (!hasWindow) return;
+
+  try {
+    const pageName =
+      (window.location && window.location.pathname) || "unknown";
+
+    const identity = window.PulseIdentity || null;
+    const lastPage = window.Pulse?.lastPage || null;
+
+    emitPageScannerIntel({
+      event: "page-scanner-attach",
+      pageName,
+      lastPage,
+      identityTrusted: !!identity?.trustedDevice,
+      layer: "A1/A2",
+      subsystem: "PageScannerV12",
+      note: "attachScanner completed"
+    });
+  } catch (err) {
+    // v12‑EVO: forward to error spine
+    try {
+      PulseUIErrors.broadcast(
+        PulseUIErrors.normalize(err, "pagescanner.attachIntel")
+      );
+    } catch {}
+  }
+})();
 
 
 // ============================================================================
 // A1 ERROR INTERCEPTOR — Dualband error catcher (binary-first, text fallback)
 //  • No timers, no intervals, no Date.now
 //  • Always emits local diagnostics before routing
+//  • v12‑EVO: error spine integrated BEFORE classification/healing
 // ============================================================================
 let healingInProgress = false;
 
@@ -475,36 +824,62 @@ if (hasWindow && typeof window.addEventListener === "function") {
 
       logProtector("ERROR_INTERCEPTED", { message: msg });
 
+      // ========================================================================
+      //  v12‑EVO — UNIVERSAL ERROR SPINE INTEGRATION (A1 → A3)
+      // ========================================================================
+      try {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(
+            event.error || msg,
+            "skinreflex.window.error"
+          )
+        );
+      } catch (spineErr) {
+        console.warn("[PulseUIErrors] failed to broadcast A1 error:", spineErr);
+      }
+
       const top = rawFrames[0] || "unknown";
       const file = top.split("/").pop().split(":")[0] || "unknown";
       const line = top.split(":")[1] || "unknown";
 
+      // ========================================================================
+      // LOCAL A1 DIAGNOSTICS (never throws)
+      // ========================================================================
       (function emitA1LocalDiagnostics() {
-        if (typeof console !== "undefined" && console.groupCollapsed) {
-          console.groupCollapsed(
-            `%cA1 DIAGNOSTIC — ${msg}`,
-            "color:#FF7043; font-weight:bold;"
-          );
+        try {
+          if (typeof console !== "undefined" && console.groupCollapsed) {
+            console.groupCollapsed(
+              `%cA1 DIAGNOSTIC — ${msg}`,
+              "color:#FF7043; font-weight:bold;"
+            );
 
-          console.log("• message:", msg);
-          console.log("• file:", file);
-          console.log("• line:", line);
-          console.log("• top frame:", top);
-          console.log("• raw frames:", rawFrames);
-          console.log(
-            "• page:",
-            hasWindow && window.location ? window.location.pathname : "unknown"
-          );
-          console.log("• layer:", "A1 (SkinReflex)");
-          console.log(
-            "• note:",
-            "LOCAL ONLY — does NOT depend on routing or backend."
-          );
+            console.log("• message:", msg);
+            console.log("• file:", file);
+            console.log("• line:", line);
+            console.log("• top frame:", top);
+            console.log("• raw frames:", rawFrames);
+            console.log(
+              "• page:",
+              hasWindow && window.location ? window.location.pathname : "unknown"
+            );
+            console.log("• layer:", "A1 (SkinReflex)");
+            console.log(
+              "• note:",
+              "LOCAL ONLY — does NOT depend on routing or backend."
+            );
 
-          console.groupEnd();
+            console.groupEnd();
+          }
+        } catch (err) {
+          PulseUIErrors.broadcast(
+            PulseUIErrors.normalize(err, "skinreflex.localDiagnostics")
+          );
         }
       })();
 
+      // ========================================================================
+      // ROUTE TRACE (A1 dynamic trace)
+      // ========================================================================
       let routeTrace = RouteMemory.recall(msg, rawFrames);
 
       if (!routeTrace) {
@@ -533,12 +908,14 @@ if (hasWindow && typeof window.addEventListener === "function") {
         });
       }
 
+      // ========================================================================
+      // CLASSIFICATION (v12‑EVO)
+      // ========================================================================
       let classified = false;
 
-      // Import errors: degradation, not fatal (binary-first nervous system can heal)
       if (msg.includes("Cannot find module")) {
         logProtector("IMPORT_DEGRADED", {
-          note: "Import errors are degradation signals in v11‑EVO‑BINARY",
+          note: "Import errors are degradation signals in v12‑EVO‑BINARY",
           details: msg
         });
 
@@ -575,6 +952,9 @@ if (hasWindow && typeof window.addEventListener === "function") {
       const pagePath =
         hasWindow && window.location ? window.location.pathname : null;
 
+      // ========================================================================
+      // LOCAL SENSE REPORT (binary-aware)
+      // ========================================================================
       emitReflexSenseReport({
         message: msg,
         file,
@@ -589,7 +969,9 @@ if (hasWindow && typeof window.addEventListener === "function") {
         binaryAware: true
       });
 
-      // Dualband error packet: binary-first nervous system behind route()
+      // ========================================================================
+      // ROUTE LOGGING (dualband → CNS nervous system)
+      // ========================================================================
       await route("logError", {
         type: classified ? "classified" : "unclassified",
         message: msg,
@@ -606,6 +988,68 @@ if (hasWindow && typeof window.addEventListener === "function") {
         dualBand: true
       });
 
+      // ========================================================================
+      // v12‑EVO — DRIFT INTELLIGENCE ENGINE (A1/A2 Hybrid)
+      // ========================================================================
+      try {
+        const sourceA = event?.error?.sourceA || "";
+        const sourceB = event?.error?.sourceB || "";
+
+        const varsA = PageScannerV12.extractVars(sourceA);
+        const varsB = PageScannerV12.extractVars(sourceB);
+
+        const lineage = PageScannerV12.detectLineage(varsA, varsB);
+        const moduleModeA = PageScannerV12.detectModuleMode(sourceA);
+        const moduleModeB = PageScannerV12.detectModuleMode(sourceB);
+        const exportDrift = PageScannerV12.detectExportDrift(sourceB, varsB);
+        const structural = PageScannerV12.detectStructural(sourceA, sourceB);
+        const contract = PageScannerV12.detectContract(sourceA, sourceB);
+
+        emitPageScannerIntel({
+          event: "page-error-drift-detected",
+          message: msg,
+          file,
+          line,
+          frames: rawFrames,
+          degraded,
+          healthScore,
+          tier,
+          dnaTag,
+          lineage,
+          moduleMode: {
+            pageA: moduleModeA,
+            pageB: moduleModeB
+          },
+          exportDrift,
+          structural,
+          contract,
+          page: pagePath,
+          seq: skinSeq,
+          layer: "A1/A2",
+          subsystem: "PageScannerV12",
+          binaryAware: true,
+          dualBand: true
+        });
+
+        logProtector("DRIFT_INTEL_EMITTED", {
+          lineageCount: lineage.length,
+          moduleMixedA: moduleModeA.mixed,
+          moduleMixedB: moduleModeB.mixed,
+          exportMissingESM: exportDrift.missingESM,
+          exportMissingCJS: exportDrift.missingCJS,
+          structuralMismatch: structural.mismatch,
+          contractMismatch: contract.mismatch
+        });
+
+      } catch (intelErr) {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(intelErr, "pagescanner.driftIntel")
+        );
+      }
+
+      // ========================================================================
+      // HEALING TRIGGER (v12‑EVO)
+      // ========================================================================
       const parsed = parseMissingField(msg);
       if (!parsed) {
         logProtector("NO_MISSING_FIELD", {
@@ -660,6 +1104,10 @@ if (hasWindow && typeof window.addEventListener === "function") {
           dnaTag
         });
       } catch (err) {
+        PulseUIErrors.broadcast(
+          PulseUIErrors.normalize(err, "skinreflex.healingFailed")
+        );
+
         logProtector("HEALING_FAILED", {
           error: String(err),
           degraded,
@@ -667,9 +1115,6 @@ if (hasWindow && typeof window.addEventListener === "function") {
           tier,
           dnaTag
         });
-        if (typeof error === "function") {
-          error("[PulseOSSkinReflex] Router fetch failed:", err);
-        }
       }
       healingInProgress = false;
       event.preventDefault();
@@ -680,19 +1125,26 @@ if (hasWindow && typeof window.addEventListener === "function") {
 
 
 // ============================================================================
-// MISSING FIELD PARSER — deterministic, dualband-safe
+// MISSING FIELD PARSER — deterministic, dualband-safe, v12‑EVO
 // ============================================================================
 function parseMissingField(message) {
-  logProtector("PARSER_INVOKED", {});
+  try {
+    logProtector("PARSER_INVOKED", {});
 
-  let match = message.match(/reading '([^']+)'/);
-  if (match) return { table: "Users", field: match[1] };
+    let match = message.match(/reading '([^']+)'/);
+    if (match) return { table: "Users", field: match[1] };
 
-  match = message.match(/([^ ]+) is not defined/);
-  if (match) return { table: "Users", field: match[1] };
+    match = message.match(/([^ ]+) is not defined/);
+    if (match) return { table: "Users", field: match[1] };
 
-  match = message.match(/property '([^']+)'/);
-  if (match) return { table: "Users", field: match[1] };
+    match = message.match(/property '([^']+)'/);
+    if (match) return { table: "Users", field: match[1] };
 
-  return null;
+    return null;
+  } catch (err) {
+    PulseUIErrors.broadcast(
+      PulseUIErrors.normalize(err, "skinreflex.parseMissingField")
+    );
+    return null;
+  }
 }

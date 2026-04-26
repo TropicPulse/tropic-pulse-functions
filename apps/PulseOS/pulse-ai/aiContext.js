@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — COGNITIVE FRAME TEMPLATE
+//  PULSE OS v11‑EVO — COGNITIVE FRAME ORGAN
 //  Dual‑Band Context • ABA Anchor • Drift & Diagnostics Surface
 //  PURE CONTEXT. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -7,7 +7,7 @@
 export const COGNITIVE_FRAME_META = Object.freeze({
   layer: "PulseAICognitiveFrame",
   role: "COGNITIVE_FRAME_ORGAN",
-  version: "11.0-EVO",
+  version: "11.1-EVO",
   identity: "aiCognitiveFrame-v11-EVO",
 
   evo: Object.freeze({
@@ -33,6 +33,9 @@ export const COGNITIVE_FRAME_META = Object.freeze({
     contextAware: true,
     fusionAware: true,
     organismAware: true,
+    safetyFrameAware: true,
+    experienceFrameAware: true,
+    overmindAware: true,
 
     // Safety
     identitySafe: true,
@@ -44,8 +47,10 @@ export const COGNITIVE_FRAME_META = Object.freeze({
   })
 });
 
+// ============================================================================
+//  createCognitiveFrame — Self‑Contained Cognitive Context
+// ============================================================================
 
-// You can wire these to your own router / organism snapshotters.
 export function createCognitiveFrame({
   request = {},
   routing = {},
@@ -57,6 +62,14 @@ export function createCognitiveFrame({
   const context = {
     meta: COGNITIVE_FRAME_META,
 
+    // Request echo (read‑only snapshot)
+    request: Object.freeze({
+      intent: request.intent || null,
+      domain: request.domain || null,
+      action: request.action || null,
+      userId: request.userId || null
+    }),
+
     // Persona + boundaries + permissions (symbolic)
     personaId: routing.personaId || null,
     persona: routing.persona || null,
@@ -66,15 +79,13 @@ export function createCognitiveFrame({
     // Dual‑band hints
     dualBand: routing.dualBand || null,
 
-    // Organism state
+    // Organism state (if provided)
     organism: organismSnapshot || null,
     binaryVitals: organismSnapshot?.binary || null,
     symbolicState: organismSnapshot?.symbolic || null,
 
     // SAFE reasoning trace (not chain‑of‑thought)
-    trace: Array.isArray(routing.reasoning)
-      ? [...routing.reasoning]
-      : [],
+    trace: Array.isArray(routing.reasoning) ? [...routing.reasoning] : [],
 
     // Diagnostics
     diagnostics: {
@@ -92,7 +103,7 @@ export function createCognitiveFrame({
   // TRACE HELPERS — Cognitive Breadcrumbs
   // --------------------------------------------------------------------------
   context.logStep = function logStep(message) {
-    this.trace.push(message);
+    this.trace.push(String(message || ""));
   };
 
   // --------------------------------------------------------------------------
@@ -147,8 +158,7 @@ export function createCognitiveFrame({
     level: "general",
 
     updateLevel(userMessage = "") {
-      // Simple heuristic — replace with your own.
-      const hasCodeLike = /[{}`;]/.test(userMessage);
+      const hasCodeLike = /[{}`;]/.test(userMessage || "");
       this.level = hasCodeLike ? "specific" : "general";
       context.logStep(`Abstraction level set to: ${this.level}`);
     }
@@ -174,7 +184,7 @@ export function createCognitiveFrame({
 
   // --------------------------------------------------------------------------
   // LAYERED REPAIR REFLEX (Confusion / Misalignment)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   context.repair = {
     attempts: 0,
 
@@ -218,8 +228,8 @@ export function createCognitiveFrame({
   };
 
   // --------------------------------------------------------------------------
-  // OPTIONAL: INTENT CONTEXT ATTACHMENT
-  // --------------------------------------------------------------------------
+  // OPTIONAL: INTENT CONTEXT ATTACHMENT (Self‑Contained)
+// --------------------------------------------------------------------------
   if (request.intentContext) {
     context.intentContext = Object.freeze({ ...request.intentContext });
     context.logStep("Intent handler context attached.");

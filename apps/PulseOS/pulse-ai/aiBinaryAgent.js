@@ -15,6 +15,57 @@
  *   It is pure binary physiology — the “bit‑level cortex.”
  */
 
+// ---------------------------------------------------------
+//  META BLOCK — v11‑EVO
+// ---------------------------------------------------------
+
+export const BinaryAgentMeta = Object.freeze({
+  layer: "BinaryCompute",
+  role: "BINARY_COMPUTE_CORTEX",
+  version: "11.0-EVO",
+  identity: "aiBinaryAgent-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    binaryOnly: true,
+    computeAware: true,
+    arteryAware: true,
+    metricsAware: true,
+    encodingAware: true,
+    decodingAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Provide a pure binary compute cortex that encodes/decodes values, executes binary compute arteries, and measures compute throughput, pressure, cost, and budget.",
+
+    never: Object.freeze([
+      "interpret symbolic meaning",
+      "perform cognition",
+      "act as a router",
+      "act as a scheduler",
+      "mutate external organs",
+      "introduce randomness"
+    ]),
+
+    always: Object.freeze([
+      "operate on binary-only values",
+      "compute artery metrics deterministically",
+      "encode values into binary",
+      "decode binary into requested types",
+      "validate binary inputs",
+      "remain pure and minimal"
+    ])
+  })
+});
+
+// ---------------------------------------------------------
+//  ORGAN IMPLEMENTATION
+// ---------------------------------------------------------
+
 class AIBinaryAgent {
   constructor(config = {}) {
     this.id = config.id || 'ai-binary-agent';
@@ -292,6 +343,10 @@ class AIBinaryAgent {
   }
 }
 
+// ---------------------------------------------------------
+// FACTORY EXPORT
+// ---------------------------------------------------------
+
 function createAIBinaryAgent(config) {
   return new AIBinaryAgent(config);
 }
@@ -299,4 +354,5 @@ function createAIBinaryAgent(config) {
 module.exports = {
   AIBinaryAgent,
   createAIBinaryAgent,
+  BinaryAgentMeta
 };

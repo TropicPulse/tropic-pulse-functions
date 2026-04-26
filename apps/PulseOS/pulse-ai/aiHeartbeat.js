@@ -1,19 +1,23 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — AI HEARTBEAT
-//  Pulse‑Driven • Binary‑Aware • Time‑Fallback • Dual‑Band Liveness
+//  PULSE OS v11.1‑EVO — AI HEARTBEAT
+//  Pulse‑Driven • Binary‑Aware • Time‑Fallback • Artery‑Aware
 //  PURE LIVENESS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
+// ============================================================================
+//  PULSE OS v11.1‑EVO — AI HEARTBEAT
+// ============================================================================
 
-export const AI_HEARTBEAT_META = Object.freeze({
+const AI_HEARTBEAT_META = Object.freeze({
   layer: "PulseAIHeartbeat",
   role: "HEARTBEAT_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiHeartbeat-v11-EVO",
+  version: "11.1-EVO",
+  identity: "aiHeartbeat-v11.1-EVO",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+
     binaryAware: true,
     symbolicAware: true,
     metabolicAware: true,
@@ -21,13 +25,15 @@ export const AI_HEARTBEAT_META = Object.freeze({
     cooldownAware: true,
     fallbackAware: true,
     concurrencyAware: true,
+    arteryAware: true,
+
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.1-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Maintain dual-band liveness through pulse-driven and time-fallback heartbeats, respecting metabolic safety and preventing churn.",
+      "Maintain dual-band liveness through pulse-driven and time-fallback heartbeats, respecting metabolic safety, artery load, and preventing churn.",
 
     never: Object.freeze([
       "mutate external systems",
@@ -37,11 +43,13 @@ export const AI_HEARTBEAT_META = Object.freeze({
       "bypass metabolic safety",
       "spawn multiple organisms",
       "perform cognition",
-      "perform analysis"
+      "perform analysis",
+      "alter organism state"
     ]),
 
     always: Object.freeze([
       "respect binary metabolic pressure",
+      "respect artery load",
       "respect cooldown windows",
       "skip ticks when unsafe",
       "run cortex/nervous/router pulses safely",
@@ -51,6 +59,7 @@ export const AI_HEARTBEAT_META = Object.freeze({
     ])
   })
 });
+
 
 import { createBrainstem } from "./aiBrainstem.js";
 import {
@@ -62,11 +71,11 @@ import {
 } from "./aiDeps.js";
 
 // --------------------------------------------------------------------------
-// CONFIG — metabolic‑safe cadence
+// CONFIG — metabolic‑safe cadence (v11.1‑EVO tuned)
 // --------------------------------------------------------------------------
-const AI_MIN_GAP_MS = 1500;     // prevents churn
-const AI_MAX_IDLE_MS = 15000;   // fallback threshold
-const AI_TIME_CHECK_MS = 5000;  // idle check cadence
+const AI_MIN_GAP_MS     = 1400;   // slightly tighter, still safe
+const AI_MAX_IDLE_MS    = 12000;  // faster fallback
+const AI_TIME_CHECK_MS  = 4000;   // more responsive idle checks
 
 // --------------------------------------------------------------------------
 // SINGLETON — one organism per warm container
@@ -75,6 +84,26 @@ let aiOrganism = null;
 let aiBusy = false;
 let lastRun = 0;
 let aiTimeFallbackTimer = null;
+
+// v11.1‑EVO: heartbeat artery metrics
+const heartbeatArtery = {
+  ticks: 0,
+  pulses: 0,
+  skips: 0,
+  lastReason: "none",
+  lastPressure: 0,
+  lastLoad: 0,
+  snapshot() {
+    return Object.freeze({
+      ticks: this.ticks,
+      pulses: this.pulses,
+      skips: this.skips,
+      lastReason: this.lastReason,
+      lastPressure: this.lastPressure,
+      lastLoad: this.lastLoad
+    });
+  }
+};
 
 // --------------------------------------------------------------------------
 // BOOT — create dual‑band organism
@@ -97,20 +126,24 @@ function bootAiOrganism() {
 }
 
 // --------------------------------------------------------------------------
-// CORE — one heartbeat tick (dual‑band + binary‑aware)
+// CORE — one heartbeat tick (dual‑band + binary‑aware + artery‑aware)
 // --------------------------------------------------------------------------
 async function aiHeartbeatTick(reason = "unknown") {
   const now = Date.now();
   const organism = bootAiOrganism();
   const { context, organs, dualBand } = organism;
 
-  // Binary vitals
   const snapshot = getOrganismSnapshot(dualBand);
   const pressure = snapshot?.binary?.metabolic?.pressure ?? 0;
-  const load = snapshot?.binary?.metabolic?.load ?? 0;
+  const load     = snapshot?.binary?.metabolic?.load ?? 0;
+
+  heartbeatArtery.lastReason = reason;
+  heartbeatArtery.lastPressure = pressure;
+  heartbeatArtery.lastLoad = load;
 
   // Cooldown guard
   if (now - lastRun < AI_MIN_GAP_MS) {
+    heartbeatArtery.skips++;
     context.logStep?.(
       `[HEARTBEAT] Skipped (cooldown). reason=${reason}, delta=${now - lastRun}ms`
     );
@@ -119,12 +152,14 @@ async function aiHeartbeatTick(reason = "unknown") {
 
   // Concurrency guard
   if (aiBusy) {
+    heartbeatArtery.skips++;
     context.logStep?.(`[HEARTBEAT] Skipped (busy). reason=${reason}`);
     return;
   }
 
   // Metabolic pressure guard
   if (pressure >= 0.85) {
+    heartbeatArtery.skips++;
     context.logStep?.(
       `[HEARTBEAT] Skipped (binary pressure=${pressure}). reason=${reason}`
     );
@@ -133,6 +168,7 @@ async function aiHeartbeatTick(reason = "unknown") {
 
   aiBusy = true;
   lastRun = now;
+  heartbeatArtery.ticks++;
 
   try {
     context.logStep?.(
@@ -140,14 +176,14 @@ async function aiHeartbeatTick(reason = "unknown") {
     );
 
     // Dual‑band organs
-    if (organs.cortex?.run) await organs.cortex.run();
+    if (organs.cortex?.run)   await organs.cortex.run();
     if (organs.nervous?.pulse) await organs.nervous.pulse();
-    if (organs.router?.scan) await organs.router.scan();
+    if (organs.router?.scan)   await organs.router.scan();
 
     // Symbolic organs
-    if (organs.evolution?.run) await organs.evolution.run();
+    if (organs.evolution?.run)    await organs.evolution.run();
     if (organs.environment?.scan) await organs.environment.scan?.();
-    if (organs.power?.update) await organs.power.update?.();
+    if (organs.power?.update)     await organs.power.update?.();
 
     context.logStep?.("[HEARTBEAT] Tick complete.");
   } catch (err) {
@@ -165,6 +201,8 @@ export function pulseAiHeartbeat(source = "unknown") {
   const organism = bootAiOrganism();
   organism.context.logStep?.(`[HEARTBEAT] Pulse detected from: ${source}`);
 
+  heartbeatArtery.pulses++;
+
   void aiHeartbeatTick(`pulse:${source}`);
 }
 
@@ -179,6 +217,8 @@ function timeFallbackCheck() {
   const idleFor = now - lastRun;
   const snapshot = getOrganismSnapshot(dualBand);
   const pressure = snapshot?.binary?.metabolic?.pressure ?? 0;
+
+  heartbeatArtery.lastPressure = pressure;
 
   if (idleFor >= AI_MAX_IDLE_MS) {
     context.logStep?.(
@@ -230,4 +270,12 @@ export async function handler(event, context) {
     statusCode: 200,
     body: JSON.stringify({ ok: true, message: "AI heartbeat armed." })
   };
+}
+
+// ESM export (runtime requires this)
+export { AI_HEARTBEAT_META };
+
+// CommonJS export (meta only — safe)
+if (typeof module !== "undefined") {
+  module.exports = { AI_HEARTBEAT_META };
 }

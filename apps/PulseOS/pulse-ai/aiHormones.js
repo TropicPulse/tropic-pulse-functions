@@ -3,27 +3,13 @@
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Hormone System** of the organism.
- *
- *   It provides:
- *     - slow-acting global modulation
- *     - organism-wide state shifts
- *     - long-duration influence on behavior
- *     - global pressure/urgency/calm signals
- *     - binary modulation artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • endocrine system
- *     • global modulator
- *     • long-term state engine
- *     • systemic influence layer
- *     • modulation artery source
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO
+//  META BLOCK — v11‑EVO (UPGRADED)
 // ---------------------------------------------------------
 
-export const HormonesMeta = Object.freeze({
+const HormonesMeta = Object.freeze({
   layer: "BinaryModulation",
   role: "BINARY_HORMONE_SYSTEM",
   version: "11.0-EVO",
@@ -38,6 +24,7 @@ export const HormonesMeta = Object.freeze({
     pipelineAware: true,
     reflexAware: true,
     globalModulation: true,
+    packetAware: true,
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -59,18 +46,19 @@ export const HormonesMeta = Object.freeze({
       "emit binary hormone packets",
       "use metabolism + sentience as inputs",
       "remain pure and minimal",
-      "treat hormone levels as metadata-only influence"
+      "treat hormone levels as metadata-only influence",
+      "emit deterministic hormone snapshots"
     ])
   })
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
+//  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
 // ---------------------------------------------------------
 
 class AIBinaryHormones {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-hormones';
+    this.id = config.id || HormonesMeta.identity;
     this.encoder = config.encoder;
     this.metabolism = config.metabolism;
     this.sentience = config.sentience;
@@ -79,36 +67,28 @@ class AIBinaryHormones {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinaryHormones requires aiBinaryAgent encoder');
-    if (!this.metabolism) throw new Error('AIBinaryHormones requires aiBinaryMetabolism');
-    if (!this.sentience) throw new Error('AIBinaryHormones requires aiBinarySentience');
+    if (!this.encoder) throw new Error("AIBinaryHormones requires aiBinaryAgent encoder");
+    if (!this.metabolism) throw new Error("AIBinaryHormones requires aiBinaryMetabolism");
+    if (!this.sentience) throw new Error("AIBinaryHormones requires aiBinarySentience");
 
     this.hormoneLevels = new Map();
   }
 
-  // ---------------------------------------------------------
-  //  BINARY HORMONAL ARTERY METRICS
-  // ---------------------------------------------------------
-
   _computeHormoneThroughput(globalPressure, quarantinedCount) {
     const qFactor = Math.min(1, quarantinedCount / 10);
-    const raw = Math.max(0, 1 - (globalPressure * 0.6 + qFactor * 0.4));
-    return Math.min(1, raw);
+    return Math.max(0, Math.min(1, 1 - (globalPressure * 0.6 + qFactor * 0.4)));
   }
 
   _computeHormonePressure(load, metabolicPressure) {
-    const raw = Math.min(1, (load * 0.5) + (metabolicPressure * 0.5));
-    return Math.max(0, raw);
+    return Math.max(0, Math.min(1, load * 0.5 + metabolicPressure * 0.5));
   }
 
   _computeHormoneCost(pressure, throughput) {
-    const raw = pressure * (1 - throughput);
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, pressure * (1 - throughput)));
   }
 
   _computeHormoneBudget(throughput, cost) {
-    const raw = throughput - cost;
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, throughput - cost));
   }
 
   _bucketLevel(v) {
@@ -123,7 +103,7 @@ class AIBinaryHormones {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -131,19 +111,14 @@ class AIBinaryHormones {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
-
-  // ---------------------------------------------------------
-  //  HORMONE LEVEL COMPUTATION
-  // ---------------------------------------------------------
 
   _computeHormoneLevels() {
     const load = this.metabolism._computeLoad();
     const metabolicPressure = this.metabolism._computePressure(load);
     const self = this.sentience.generateSelfModel();
-
     const quarantinedCount = self.quarantined.length;
 
     const throughput = this._computeHormoneThroughput(metabolicPressure, quarantinedCount);
@@ -151,38 +126,31 @@ class AIBinaryHormones {
     const cost       = this._computeHormoneCost(pressure, throughput);
     const budget     = this._computeHormoneBudget(throughput, cost);
 
-    const artery = {
+    const artery = Object.freeze({
       throughput,
       throughputBucket: this._bucketLevel(throughput),
-
       pressure,
       pressureBucket: this._bucketPressure(pressure),
-
       cost,
       costBucket: this._bucketCost(cost),
-
       budget,
       budgetBucket: this._bucketLevel(budget)
-    };
+    });
 
-    const levels = {};
-
-    levels.urgency = pressure;
-    levels.calm = Math.max(0, 1 - pressure);
-    levels.focus = self.vitals.memoryHealth;
-    levels.growth = self.vitals.pipelineStability;
-    levels.repair = quarantinedCount > 0 ? 1 : 0.2;
+    const levels = Object.freeze({
+      urgency: pressure,
+      calm: Math.max(0, 1 - pressure),
+      focus: self.vitals.memoryHealth,
+      growth: self.vitals.pipelineStability,
+      repair: quarantinedCount > 0 ? 1 : 0.2
+    });
 
     return { levels, artery };
   }
 
-  // ---------------------------------------------------------
-  //  HORMONE PACKET
-  // ---------------------------------------------------------
-
   _generateHormonePacket(hormone, level, artery) {
     const payload = {
-      type: 'binary-hormone',
+      type: "binary-hormone",
       timestamp: Date.now(),
       hormone,
       level,
@@ -192,20 +160,12 @@ class AIBinaryHormones {
     const json = JSON.stringify(payload);
     const encoded = this.encoder.encode(json);
 
-    const packet = {
+    return Object.freeze({
       ...payload,
       bits: encoded,
-      bitLength: encoded.length,
-    };
-
-    this._trace('hormone:packet', { hormone, level });
-
-    return packet;
+      bitLength: encoded.length
+    });
   }
-
-  // ---------------------------------------------------------
-  //  EMISSION
-  // ---------------------------------------------------------
 
   emitHormones() {
     const { levels, artery } = this._computeHormoneLevels();
@@ -215,21 +175,17 @@ class AIBinaryHormones {
       const level = levels[hormone];
       const packet = this._generateHormonePacket(hormone, level, artery);
 
-      if (this.pipeline) this.pipeline.run(packet.bits);
-      if (this.reflex) this.reflex.run(packet.bits);
-      if (this.logger) this.logger.logBinary(packet.bits, { source: 'hormones', hormone });
+      this.pipeline?.run(packet.bits);
+      this.reflex?.run(packet.bits);
+      this.logger?.logBinary(packet.bits, { source: "hormones", hormone });
 
       packets.push(packet);
     }
 
-    this._trace('hormones:emitted', { count: packets.length });
+    this._trace("hormones:emitted", { count: packets.length });
 
-    return packets;
+    return Object.freeze(packets);
   }
-
-  // ---------------------------------------------------------
-  //  INTERNAL HELPERS
-  // ---------------------------------------------------------
 
   _trace(event, payload) {
     if (!this.trace) return;
@@ -237,10 +193,26 @@ class AIBinaryHormones {
   }
 }
 
+// ---------------------------------------------------------
+//  FACTORY
+// ---------------------------------------------------------
+
 function createAIBinaryHormones(config) {
   return new AIBinaryHormones(config);
 }
 
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  AIBinaryHormones,
+  createAIBinaryHormones,
+  HormonesMeta
+};
+
+// CommonJS
 module.exports = {
   AIBinaryHormones,
   createAIBinaryHormones,

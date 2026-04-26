@@ -67,7 +67,18 @@
  *
  *   Entire fused decision is encoded into binary.
  */
-export const CortexMeta = Object.freeze({
+/**
+ * aiCortex.js — Pulse OS v11.1‑EVO Organ
+ * ---------------------------------------------------------
+ * CANONICAL ROLE:
+ *   Dual‑band executive cortex (binary‑primary, symbolic‑fallback)
+ */
+
+// ---------------------------------------------------------
+//  META BLOCK — v11.1‑EVO
+// ---------------------------------------------------------
+
+const CortexMeta = Object.freeze({
   layer: "PulseAICortexFrame",
   role: "CORTEX_ORGAN",
   version: "11.1-EVO",
@@ -136,21 +147,25 @@ export const CortexMeta = Object.freeze({
   })
 });
 
+// ---------------------------------------------------------
+//  CORTEX CLASS — HEADER
+// ---------------------------------------------------------
+
 class AIDualBandCortex {
   constructor(config = {}) {
     this.id = config.id || "ai-dualband-cortex";
 
     // Binary / organism stack
-    this.encoder = config.encoder;      // aiBinaryAgent
+    this.encoder = config.encoder;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
     this.logger = config.logger || null;
-    this.memory = config.memory || null;    // aiBinaryMemory (dualband)
-    this.registry = config.registry || null; // aiBinaryOrganRegistry
-    this.evolution = config.evolution || null; // aiBinaryEvolution
+    this.memory = config.memory || null;
+    this.registry = config.registry || null;
+    this.evolution = config.evolution || null;
 
     // Symbolic / CNS stack
-    this.router = config.router || null;       // aiRouter-v11-EVO
+    this.router = config.router || null;
     this.personaEngine = config.personaEngine || null;
     this.boundariesEngine = config.boundariesEngine || null;
     this.permissionsEngine = config.permissionsEngine || null;
@@ -506,8 +521,18 @@ function createCortex(config) {
   return new AIDualBandCortex(config);
 }
 
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  CortexMeta,
+  AIDualBandCortex
+};
+
+// CommonJS
 module.exports = {
-  AIDualBandCortex,
-  createCortex,
-  CortexMeta
+  CortexMeta,
+  AIDualBandCortex
 };

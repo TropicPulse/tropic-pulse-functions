@@ -1,70 +1,32 @@
 /**
- * aiBinaryOrganRegistry.js — Pulse OS v11‑EVO Organ
+ * aiBinaryOrganRegistry.js — Pulse OS v11.1‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
- *   This organ is the **Binary Organ Registry** of Pulse OS.
- *
- *   It is the organism’s:
- *     • organ map
- *     • identity ledger
- *     • canonical registry
- *     • structural overview
- *
- *   It tracks:
- *     - organ IDs
- *     - organ types
- *     - organ signatures (binary)
- *     - organ metadata
- *
- *   It stores everything in **binary memory**.
- *
- * WHY THIS ORGAN EXISTS:
- *   Every OS today has:
- *     - no organ map
- *     - no identity ledger
- *     - no structural registry
- *     - no canonical list of subsystems
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST KNOW ITS ORGANS.”
- *
- * ARCHITECTURAL INTENT:
- *   This organ is NOT:
- *     - a router
- *     - a scanner
- *     - a governor
- *     - a linter
- *
- *   This organ IS:
- *     - a binary registry
- *     - a canonical organ index
- *     - a structural identity map
- *     - a binary-first metadata store
- *
- *   This file must remain pure.
+ *   Binary Organ Registry (identity ledger)
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO (UPGRADED)
+//  META BLOCK — v11.1‑EVO
 // ---------------------------------------------------------
 
-export const OrganRegistryMeta = Object.freeze({
+const OrganRegistryMeta = Object.freeze({
   layer: "OrganismIdentity",
   role: "BINARY_ORGAN_REGISTRY",
-  version: "11.0-EVO",
-  identity: "aiOrganRegistry-v11-EVO",
+  version: "11.1-EVO",
+  identity: "aiOrganRegistry-v11.1-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
+
     memoryAware: true,
     evolutionAware: true,
     identityAware: true,
+    arteryAware: true,
+
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.1-EVO"
   }),
 
   contract: Object.freeze({
@@ -78,7 +40,8 @@ export const OrganRegistryMeta = Object.freeze({
       "perform routing",
       "perform scanning",
       "perform governance",
-      "perform linter behavior"
+      "perform linter behavior",
+      "introduce randomness"
     ]),
 
     always: Object.freeze([
@@ -86,53 +49,70 @@ export const OrganRegistryMeta = Object.freeze({
       "register only when explicitly called",
       "store only id/type/signature/timestamp",
       "remain pure and minimal",
-      "treat organ records as read-only data"
+      "treat organ records as read-only data",
+      "maintain registry artery metrics"
     ])
   })
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION (unchanged)
+//  ORGAN IMPLEMENTATION — v11.1‑EVO
 // ---------------------------------------------------------
 
 class AIBinaryOrganRegistry {
   constructor(config = {}) {
-    this.id = config.id || 'organ-registry';
-    this.encoder = config.encoder;
-    this.memory = config.memory;
+    this.id        = config.id || "organ-registry";
+    this.encoder   = config.encoder;
+    this.memory    = config.memory;
     this.evolution = config.evolution || null;
-    this.trace = !!config.trace;
+    this.trace     = !!config.trace;
 
-    if (!this.encoder || typeof this.encoder.encode !== 'function') {
-      throw new Error('AIBinaryOrganRegistry requires aiBinaryAgent encoder');
+    if (!this.encoder?.encode) {
+      throw new Error("AIBinaryOrganRegistry requires aiBinaryAgent encoder");
     }
-    if (!this.memory || typeof this.memory.write !== 'function') {
-      throw new Error('AIBinaryOrganRegistry requires aiBinaryMemory');
+    if (!this.memory?.write) {
+      throw new Error("AIBinaryOrganRegistry requires aiBinaryMemory");
     }
+
+    this.artery = {
+      registrations: 0,
+      lookups: 0,
+      lists: 0,
+      lastBits: 0,
+      snapshot: () => Object.freeze({
+        registrations: this.artery.registrations,
+        lookups: this.artery.lookups,
+        lists: this.artery.lists,
+        lastBits: this.artery.lastBits
+      })
+    };
   }
 
   registerOrgan(organ) {
     const signature = this.evolution
       ? this.evolution.generateSignature(organ)
-      : this.encoder.encode('nosig');
+      : this.encoder.encode("nosig");
 
     const record = {
       id: organ.id || null,
       type: organ.constructor.name,
       signatureBits: signature.length,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
 
-    const json = JSON.stringify(record);
-    const key = this.encoder.encode(`organ:${record.id}`);
+    const json  = JSON.stringify(record);
+    const key   = this.encoder.encode(`organ:${record.id}`);
     const value = this.encoder.encode(json);
 
     this.memory.write(key, value);
 
-    this._trace('registerOrgan', {
+    this.artery.registrations++;
+    this.artery.lastBits = value.length;
+
+    this._trace("registerOrgan", {
       organ: record.id,
       type: record.type,
-      bits: value.length,
+      bits: value.length
     });
 
     return record;
@@ -142,15 +122,19 @@ class AIBinaryOrganRegistry {
     const key = this.encoder.encode(`organ:${organId}`);
     const binary = this.memory.read(key);
 
+    this.artery.lookups++;
+
     if (!binary) {
-      this._trace('getOrganRecord:notFound', { organId });
+      this._trace("getOrganRecord:notFound", { organId });
       return null;
     }
 
-    const json = this.encoder.decode(binary, 'string');
+    const json = this.encoder.decode(binary, "string");
     const record = JSON.parse(json);
 
-    this._trace('getOrganRecord', { organId, record });
+    this.artery.lastBits = binary.length;
+
+    this._trace("getOrganRecord", { organId, record });
 
     return record;
   }
@@ -159,23 +143,26 @@ class AIBinaryOrganRegistry {
     const keys = this.memory.listKeys();
 
     const organKeys = keys.filter((k) => {
-      const decoded = this.encoder.decode(k, 'string');
-      return decoded.startsWith('organ:');
+      const decoded = this.encoder.decode(k, "string");
+      return decoded.startsWith("organ:");
     });
 
     const organIds = organKeys.map((k) => {
-      const decoded = this.encoder.decode(k, 'string');
-      return decoded.replace('organ:', '');
+      const decoded = this.encoder.decode(k, "string");
+      return decoded.replace("organ:", "");
     });
 
-    this._trace('listOrgans', { count: organIds.length });
+    this.artery.lists++;
+    this.artery.lastBits = organIds.length;
+
+    this._trace("listOrgans", { count: organIds.length });
 
     return organIds;
   }
 
   evolveOrgan(organ) {
     if (!this.evolution) {
-      throw new Error('evolution engine not provided');
+      throw new Error("evolution engine not provided");
     }
 
     const result = this.evolution.evolve(organ);
@@ -184,9 +171,9 @@ class AIBinaryOrganRegistry {
       this.registerOrgan(organ);
     }
 
-    this._trace('evolveOrgan', {
+    this._trace("evolveOrgan", {
       organ: organ.id,
-      evolved: result.evolved,
+      evolved: result.evolved
     });
 
     return result;
@@ -199,15 +186,27 @@ class AIBinaryOrganRegistry {
 }
 
 // ---------------------------------------------------------
-// FACTORY EXPORT
+//  FACTORY
 // ---------------------------------------------------------
 
 function createAIBinaryOrganRegistry(config) {
   return new AIBinaryOrganRegistry(config);
 }
 
-module.exports = {
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  OrganRegistryMeta,
   AIBinaryOrganRegistry,
-  createAIBinaryOrganRegistry,
-  OrganRegistryMeta
+  createAIBinaryOrganRegistry
+};
+
+// CommonJS
+module.exports = {
+  OrganRegistryMeta,
+  AIBinaryOrganRegistry,
+  createAIBinaryOrganRegistry
 };

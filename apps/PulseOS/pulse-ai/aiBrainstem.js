@@ -38,6 +38,7 @@
 //   • ZERO IDENTITY LEAKAGE beyond userId/owner flag.
 //   • PURE, DETERMINISTIC, PULSE‑SAFE.
 // ============================================================================
+
 export const BrainstemMeta = Object.freeze({
   layer: "PulseAICNS",
   role: "BRAINSTEM_ORGAN",
@@ -54,6 +55,7 @@ export const BrainstemMeta = Object.freeze({
     readOnly: true,
     organismAware: true,
     cognitiveAware: true,
+    packetAware: true,          // NEW
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -80,6 +82,7 @@ export const BrainstemMeta = Object.freeze({
       "attach ownership deterministically",
       "load cognitive tools from aiTools.js",
       "wire organs deterministically",
+      "emit deterministic brainstem packets",   // NEW
       "remain read-only",
       "remain drift-proof",
       "remain deterministic",
@@ -90,17 +93,11 @@ export const BrainstemMeta = Object.freeze({
 
 import { OWNER_ID } from "./persona.js";
 import { createOrgans } from "./createOrgans.js";
-
-// ---------------------------------------------------------------------------
-// COGNITIVE TOOLKIT IMPORT (v11‑EVO)
-// Import EVERYTHING from aiTools.js.
-// This is the single cognitive organ for the entire AI organism.
-// ---------------------------------------------------------------------------
 import * as aiTools from "./aiTools.js";
 
-// ---------------------------------------------------------------------------
+// ============================================================================
 // CREATE BRAINSTEM — Identity + Tools + Organs
-// ---------------------------------------------------------------------------
+// ============================================================================
 export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
   const { userId = null, userIsOwner: requestOwner = false } = request;
 
@@ -112,40 +109,53 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
   // -------------------------------------------------------------------------
   // BRAINSTEM CONTEXT (Merged into Cognitive Frame by aiCortex)
   // -------------------------------------------------------------------------
-  // NOTE:
-  //   Brainstem does NOT set persona, personaId, permissions, or boundaries.
-  //   Those belong to aiRouter + aiContext.
-  //
-  //   Brainstem ONLY handles:
-  //     • identity
-  //     • ownership
-  //     • cognitive tools (from aiTools.js)
-  //     • organ wiring
-  // -------------------------------------------------------------------------
-  const context = {
+  const context = Object.freeze({
     userId,
     userIsOwner,
-
-    // Attach ALL cognitive tools (intent, reasoning, assistant, api, etc.)
     ...aiTools
-  };
+  });
 
   // -------------------------------------------------------------------------
   // ORGANS (Environment Adapters)
   // -------------------------------------------------------------------------
-  const organs = createOrgans(context, db, fsAPI, routeAPI, schemaAPI);
+  const organs = Object.freeze(
+    createOrgans(context, db, fsAPI, routeAPI, schemaAPI)
+  );
 
   // -------------------------------------------------------------------------
-  // RETURN CNS ORGANISM
+  // BRAINSTEM PACKET (Deterministic)
   // -------------------------------------------------------------------------
-  return {
-    context,
-    organs
+  const packetPayload = {
+    type: "brainstem-activation",
+    timestamp: Date.now(),
+    userId,
+    userIsOwner,
+    toolCount: Object.keys(aiTools).length
   };
+
+  const packetJson = JSON.stringify(packetPayload);
+  const packetBits = aiTools.encode
+    ? aiTools.encode(packetJson)
+    : null;
+
+  const packet = Object.freeze({
+    ...packetPayload,
+    bits: packetBits,
+    bitLength: packetBits ? packetBits.length : 0
+  });
+
+  // -------------------------------------------------------------------------
+  // RETURN CNS ORGANISM (Frozen)
+  // -------------------------------------------------------------------------
+  return Object.freeze({
+    meta: BrainstemMeta,
+    context,
+    organs,
+    packet
+  });
 }
 
 // ============================================================================
 // EXPORT (v11‑EVO)
-// Brainstem is a stable CNS organ — no logic, only wiring.
 // ============================================================================
 export default createBrainstem;

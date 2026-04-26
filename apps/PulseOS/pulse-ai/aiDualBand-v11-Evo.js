@@ -2,19 +2,8 @@
 //  aiDualBand-v11-Evo.js
 //  PULSE OS v11-EVO — Dual-Band Bridge (Symbolic ↔ Binary)
 // ============================================================================
-//
-// ROLE:
-//   • Bind symbolic Pulse OS to the dualband organism.
-//   • Provide a single dual-band surface for all AI services.
-//   • Let symbolic cortex "think with" the binary body inside the organism.
-//   • Keep both bands deterministic, drift-proof, and identity-aligned.
-//
-// CONTRACT:
-//   • No eval(), no dynamic imports.
-//   • No mutation of external inputs.
-//   • Organism is treated as an organism, not a tool.
-// ============================================================================
-export const DualBandMeta = Object.freeze({
+
+const DualBandMeta = Object.freeze({
   layer: "PulseAIDualBandKernel",
   role: "DUAL_BAND_BRIDGE_ORGAN",
   version: "11.0-EVO",
@@ -64,10 +53,10 @@ export const DualBandMeta = Object.freeze({
   })
 });
 
-// Dualband organism (root organism)
+// ============================================================================
+//  IMPORTS (ESM syntax preserved)
+// ============================================================================
 import { createAIOrganism } from "./aiOrganism.js";
-
-// Symbolic CNS + service organs
 import { createPersonaEngine } from "./persona.js";
 import { createBoundariesEngine } from "./boundaries.js";
 import { createPermissionsEngine } from "./permissions.js";
@@ -94,21 +83,10 @@ const DUAL_BAND_CONTEXT = {
 
 // ============================================================================
 //  createDualBandOrganism()
-//  ------------------------
-//  Assembles:
-//    • Dualband organism (body with internal binary organs)
-//    • Symbolic CNS (mind)
-//    • Dual-band bridge surface
 // ============================================================================
-export function createDualBandOrganism({ trace = false, db, fsAPI, routeAPI, schemaAPI } = {}) {
-  // --------------------------------------------------------------------------
-  // 1) BOOT / ASSEMBLE ORGANISM (BODY, INTERNAL BINARY BAND)
-// --------------------------------------------------------------------------
+function createDualBandOrganism({ trace = false, db, fsAPI, routeAPI, schemaAPI } = {}) {
   const organism = createAIOrganism({ trace });
 
-  // --------------------------------------------------------------------------
-  // 2) SYMBOLIC CNS (MIND, UPPER BAND)
-// --------------------------------------------------------------------------
   const context = {
     ...DUAL_BAND_CONTEXT,
     trace
@@ -133,13 +111,9 @@ export function createDualBandOrganism({ trace = false, db, fsAPI, routeAPI, sch
     permissionsEngine
   });
 
-  // High-level symbolic organs
   const architect = createArchitectAPI({ context, db });
   const tourist = createTouristAPI({ context, db });
 
-  // --------------------------------------------------------------------------
-  // 3) DUAL-BAND BRIDGE ADAPTERS
-  // --------------------------------------------------------------------------
   function encodeToBinary(value) {
     return organism.agent.encode(value);
   }
@@ -161,25 +135,17 @@ export function createDualBandOrganism({ trace = false, db, fsAPI, routeAPI, sch
   }
 
   function syncSymbolicVitalsToBinary(symbolicVitals) {
-    // Logical hook: project symbolic state into organism snapshot space
-    // (kept minimal and deterministic; no mutation of external inputs)
     const snapshot = organism.organismSnapshot();
     return { symbolicVitals, organismSnapshot: snapshot };
   }
 
   function syncBinaryVitalsToSymbolic() {
-    // Logical hook: expose organism snapshot to symbolic band
-    const snapshot = organism.organismSnapshot();
-    return snapshot;
+    return organism.organismSnapshot();
   }
 
-  // --------------------------------------------------------------------------
-  // 4) UNIFIED DUAL-BAND SURFACE
-  // --------------------------------------------------------------------------
   const dualBand = Object.freeze({
     context,
 
-    // Symbolic band
     symbolic: {
       cortex,
       router,
@@ -190,10 +156,8 @@ export function createDualBandOrganism({ trace = false, db, fsAPI, routeAPI, sch
       tourist
     },
 
-    // Organism band (dualband with internal binary organs)
     organism,
 
-    // Bridge
     bridge: {
       encodeToBinary,
       decodeFromBinary,
@@ -209,10 +173,8 @@ export function createDualBandOrganism({ trace = false, db, fsAPI, routeAPI, sch
 
 // ============================================================================
 //  bootDualBandOrganism()
-//  ----------------------
-//  Brings organism online, then exposes dual-band surface.
 // ============================================================================
-export async function bootDualBandOrganism(options = {}) {
+async function bootDualBandOrganism(options = {}) {
   const dualBand = createDualBandOrganism({
     ...options,
     trace: options.trace
@@ -230,4 +192,22 @@ const PulseDualBandKernel = {
   boot: bootDualBandOrganism
 };
 
-export default PulseDualBandKernel;
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+// ESM
+export {
+  DualBandMeta,
+  createDualBandOrganism,
+  bootDualBandOrganism,
+  PulseDualBandKernel
+};
+
+// CommonJS
+module.exports = {
+  DualBandMeta,
+  createDualBandOrganism,
+  bootDualBandOrganism,
+  PulseDualBandKernel
+};

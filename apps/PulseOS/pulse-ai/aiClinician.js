@@ -11,12 +11,10 @@ export const ClinicianMeta = Object.freeze({
   identity: "aiClinician-v11-EVO",
 
   evo: Object.freeze({
-    // Core identity
     driftProof: true,
     deterministic: true,
     dualband: true,
 
-    // Awareness
     binaryAware: true,
     symbolicAware: true,
     diagnosticsAware: true,
@@ -24,15 +22,13 @@ export const ClinicianMeta = Object.freeze({
     contextAware: true,
     observerOnly: true,
 
-    // Evolutionary flags
     unifiedAdvantageField: true,
     futureEvolutionReady: true,
 
-    // Safety
     identitySafe: true,
     readOnly: true,
 
-    // Lifecycle
+    packetAware: true,          // NEW — all v11‑EVO organs emit packets
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -46,67 +42,96 @@ export const ClinicianMeta = Object.freeze({
       "Act as a non-medical fact-checker for AI behavior"
     ],
 
-    never: [
+    never: Object.freeze([
       "diagnose medical conditions",
       "interpret real scans as medical advice",
       "modify system architecture",
-      "mutate identity or permissions"
-    ],
+      "mutate identity or permissions",
+      "introduce randomness",
+      "override routing or persona logic"
+    ]),
 
-    always: [
+    always: Object.freeze([
       "stay observer-only",
       "stay deterministic",
       "stay identity-safe",
-      "stay schema-aware"
-    ]
+      "stay schema-aware",
+      "emit deterministic clinician packets"   // NEW
+    ])
   })
 });
 
 // ============================================================================
-// PUBLIC API — Create Clinician Organ
+//  CLINICIAN ORGAN IMPLEMENTATION
 // ============================================================================
-export function createClinicianOrgan(context) {
-  const diagnostics = context?.diagnostics || {};
-  const trace = Array.isArray(context?.trace) ? [...context.trace] : [];
+
+export function createClinicianOrgan(context = {}) {
+  const diagnostics = context.diagnostics || {};
+  const trace = Array.isArray(context.trace) ? [...context.trace] : [];
 
   // --------------------------------------------------------------------------
-  // SUMMARY BUILDER
+  // SUMMARY BUILDER (Frozen)
   // --------------------------------------------------------------------------
   function buildSummary() {
-    return {
+    return Object.freeze({
       mismatches: diagnostics.mismatches?.length || 0,
       missingFields: diagnostics.missingFields?.length || 0,
       slowdown: diagnostics.slowdownCauses?.length || 0,
       drift: diagnostics.driftDetected === true
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
-  // SAFE CONTEXT SNAPSHOT
+  // SAFE CONTEXT SNAPSHOT (Frozen)
   // --------------------------------------------------------------------------
   function buildSafeContext() {
-    return {
+    return Object.freeze({
       personaId: context.personaId,
       userIsOwner: context.userIsOwner === true,
       permissions: context.permissions || null,
       boundaries: context.boundaries || null
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
-  // FLAG SUMMARY
+  // FLAG SUMMARY (Frozen)
   // --------------------------------------------------------------------------
   function buildFlags() {
-    return [
+    return Object.freeze([
       ...(diagnostics.mismatches?.length ? [{ type: "mismatch" }] : []),
       ...(diagnostics.missingFields?.length ? [{ type: "missing" }] : []),
       ...(diagnostics.slowdownCauses?.length ? [{ type: "slowdown" }] : []),
       ...(diagnostics.driftDetected ? [{ type: "drift" }] : [])
-    ];
+    ]);
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC CLINICIAN API
+  // CLINICIAN PACKET (NEW — deterministic)
+  // --------------------------------------------------------------------------
+  function buildPacket() {
+    const payload = {
+      type: "clinician-snapshot",
+      timestamp: Date.now(),
+      summary: buildSummary(),
+      flags: buildFlags()
+    };
+
+    const json = JSON.stringify(payload);
+
+    // If encoder exists in context, use it; otherwise packet is symbolic-only.
+    const bits = context.encoder?.encode
+      ? context.encoder.encode(json)
+      : null;
+
+    return Object.freeze({
+      ...payload,
+      bits,
+      bitLength: bits ? bits.length : 0
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // PUBLIC CLINICIAN API (Frozen)
   // --------------------------------------------------------------------------
   return Object.freeze({
     meta: ClinicianMeta,
@@ -123,6 +148,10 @@ export function createClinicianOrgan(context) {
         flags: buildFlags(),
         meta: ClinicianMeta
       });
+    },
+
+    emitPacket() {
+      return buildPacket();
     }
   });
 }

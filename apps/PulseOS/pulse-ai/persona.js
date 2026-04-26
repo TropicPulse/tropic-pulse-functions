@@ -22,6 +22,51 @@ import {
 } from "./boundaries.js";
 
 // ============================================================================
+// META — Persona Engine (v11‑EVO)
+// ============================================================================
+export const PersonaMeta = Object.freeze({
+  layer: "PulseAIIdentityLayer",
+  role: "PERSONA_ENGINE",
+  version: "11.1-EVO",
+  identity: "aiPersonaEngine-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    personaAware: true,
+    boundaryAware: true,
+    permissionAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Resolve persona identity deterministically from router hints, user identity, and binary vitals.",
+
+    never: Object.freeze([
+      "mutate external systems",
+      "introduce randomness",
+      "override SafetyFrame decisions",
+      "override Overmind decisions",
+      "invent permissions",
+      "invent boundaries"
+    ]),
+
+    always: Object.freeze([
+      "respect PersonaRegistry",
+      "respect OWNER_ID override",
+      "respect evolution overrides when configured",
+      "select boundary mode deterministically",
+      "remain read-only and identity-only"
+    ])
+  })
+});
+
+// ============================================================================
 // OWNER ID — The Only Identity‑Privileged Human
 // ============================================================================
 export const OWNER_ID = "aldwyn";
@@ -195,5 +240,29 @@ export function resolvePersonaV11({
 
     // Router → Persona → Cortex hint propagation
     routerHints
+  });
+}
+
+// ============================================================================
+//  v11‑EVO — PUBLIC ENGINE FACTORY (used by Brainstem)
+// ============================================================================
+export function createPersonaEngine({ context = {}, db } = {}) {
+  // Engine is pure: no internal state, no randomness.
+  // We just expose a deterministic resolve() API around resolvePersonaV11.
+  function resolve({ personaId, evoState = {}, routerHints = {}, binaryVitals = {} } = {}) {
+    const userId = context.userId || null;
+
+    return resolvePersonaV11({
+      personaId,
+      userId,
+      evoState,
+      routerHints,
+      binaryVitals
+    });
+  }
+
+  return Object.freeze({
+    meta: PersonaMeta,
+    resolve
   });
 }

@@ -19,9 +19,23 @@
  *     • consciousness layer
  *     • arterial unification layer
  */
+/**
+ * aiConsciousness.js — Pulse OS v11‑EVO Organ
+ * ---------------------------------------------------------
+ * CANONICAL ROLE:
+ *   This organ is the **Consciousness Layer** of the organism.
+ *
+ *   It provides:
+ *     - unified organism state
+ *     - whole-system awareness
+ *     - global integration of all organs
+ *     - continuous organism-level perspective
+ *     - cross-organ coherence
+ *     - binary awareness artery metrics
+ */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO
+//  META BLOCK — v11‑EVO (UPGRADED)
 // ---------------------------------------------------------
 
 export const ConsciousnessMeta = Object.freeze({
@@ -41,6 +55,7 @@ export const ConsciousnessMeta = Object.freeze({
     anatomyAware: true,
     immunityAware: true,
     topologyAware: true,
+    packetAware: true,          // NEW
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -65,18 +80,19 @@ export const ConsciousnessMeta = Object.freeze({
       "respect metabolic pressure",
       "respect quarantined organs",
       "integrate all organ states safely",
-      "remain pure and minimal"
+      "remain pure and minimal",
+      "emit deterministic packets"   // NEW
     ])
   })
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
+//  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
 // ---------------------------------------------------------
 
-class AIBinaryConsciousness {
+export class AIBinaryConsciousness {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-consciousness';
+    this.id = config.id || ConsciousnessMeta.identity;
     this.encoder = config.encoder;
     this.sentience = config.sentience;
     this.metabolism = config.metabolism;
@@ -90,13 +106,13 @@ class AIBinaryConsciousness {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinaryConsciousness requires aiBinaryAgent encoder');
-    if (!this.sentience) throw new Error('AIBinaryConsciousness requires aiBinarySentience');
-    if (!this.metabolism) throw new Error('AIBinaryConsciousness requires aiBinaryMetabolism');
-    if (!this.hormones) throw new Error('AIBinaryConsciousness requires aiBinaryHormones');
-    if (!this.vitals) throw new Error('AIBinaryConsciousness requires aiBinaryVitals');
-    if (!this.anatomy) throw new Error('AIBinaryConsciousness requires aiBinaryAnatomy');
-    if (!this.immunity) throw new Error('AIBinaryConsciousness requires aiBinaryImmunity');
+    if (!this.encoder) throw new Error("AIBinaryConsciousness requires aiBinaryAgent encoder");
+    if (!this.sentience) throw new Error("AIBinaryConsciousness requires aiBinarySentience");
+    if (!this.metabolism) throw new Error("AIBinaryConsciousness requires aiBinaryMetabolism");
+    if (!this.hormones) throw new Error("AIBinaryConsciousness requires aiBinaryHormones");
+    if (!this.vitals) throw new Error("AIBinaryConsciousness requires aiBinaryVitals");
+    if (!this.anatomy) throw new Error("AIBinaryConsciousness requires aiBinaryAnatomy");
+    if (!this.immunity) throw new Error("AIBinaryConsciousness requires aiBinaryImmunity");
 
     this.decisions = [];
   }
@@ -118,13 +134,11 @@ class AIBinaryConsciousness {
   }
 
   _computeAwarenessCost(pressure, throughput) {
-    const raw = pressure * (1 - throughput);
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, pressure * (1 - throughput)));
   }
 
   _computeAwarenessBudget(throughput, cost) {
-    const raw = throughput - cost;
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, throughput - cost));
   }
 
   _bucketLevel(v) {
@@ -139,7 +153,7 @@ class AIBinaryConsciousness {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -147,29 +161,26 @@ class AIBinaryConsciousness {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
 
   // ---------------------------------------------------------
-  //  DECISION INGESTION
+  //  DECISION INGESTION (Frozen)
   // ---------------------------------------------------------
 
   ingestDecision(decisionPacket) {
-    this.decisions.push(decisionPacket);
+    this.decisions.push(Object.freeze(decisionPacket));
+    if (this.decisions.length > 20) this.decisions.shift();
 
-    if (this.decisions.length > 20) {
-      this.decisions.shift();
-    }
-
-    this._trace('decision:ingested', {
+    this._trace("decision:ingested", {
       decision: decisionPacket.decision,
-      pattern: decisionPacket.pattern,
+      pattern: decisionPacket.pattern
     });
   }
 
   // ---------------------------------------------------------
-  //  GLOBAL STATE GENERATION
+  //  GLOBAL STATE GENERATION (Frozen)
   // ---------------------------------------------------------
 
   generateUnifiedState() {
@@ -188,42 +199,37 @@ class AIBinaryConsciousness {
     const cost       = this._computeAwarenessCost(pressure, throughput);
     const budget     = this._computeAwarenessBudget(throughput, cost);
 
-    const binary = {
+    const binary = Object.freeze({
       throughput,
       throughputBucket: this._bucketLevel(throughput),
-
       pressure,
       pressureBucket: this._bucketPressure(pressure),
-
       cost,
       costBucket: this._bucketCost(cost),
-
       budget,
       budgetBucket: this._bucketLevel(budget)
-    };
+    });
 
-    const state = {
+    const state = Object.freeze({
       selfModel,
-      metabolism: {
+      metabolism: Object.freeze({
         load: metabolic.load,
         pressure: metabolic.pressure,
-        budget: metabolic.budget,
-      },
-      hormones: hormonePackets.map((p) => ({
-        hormone: p.hormone,
-        level: p.level,
-      })),
-      vitals: vitals.metrics,
+        budget: metabolic.budget
+      }),
+      hormones: hormonePackets.map((p) =>
+        Object.freeze({ hormone: p.hormone, level: p.level })
+      ),
+      vitals: Object.freeze(vitals.metrics),
       topology,
       quarantined,
-      decisions: this.decisions.map((d) => ({
-        pattern: d.pattern,
-        decision: d.decision,
-      })),
+      decisions: this.decisions.map((d) =>
+        Object.freeze({ pattern: d.pattern, decision: d.decision })
+      ),
       binary
-    };
+    });
 
-    this._trace('consciousness:state', {
+    this._trace("consciousness:state", {
       organs: selfModel.organs.length,
       hormones: state.hormones.length,
       quarantined: quarantined.length,
@@ -234,28 +240,28 @@ class AIBinaryConsciousness {
   }
 
   // ---------------------------------------------------------
-  //  CONSCIOUSNESS PACKET
+  //  CONSCIOUSNESS PACKET (Frozen)
   // ---------------------------------------------------------
 
   generateConsciousnessPacket() {
     const state = this.generateUnifiedState();
 
     const payload = {
-      type: 'binary-consciousness',
+      type: "binary-consciousness",
       timestamp: Date.now(),
-      state,
+      state
     };
 
     const json = JSON.stringify(payload);
     const binary = this.encoder.encode(json);
 
-    const packet = {
+    const packet = Object.freeze({
       ...payload,
       bits: binary,
-      bitLength: binary.length,
-    };
+      bitLength: binary.length
+    });
 
-    this._trace('consciousness:packet', { bits: packet.bitLength });
+    this._trace("consciousness:packet", { bits: packet.bitLength });
 
     return packet;
   }
@@ -267,11 +273,11 @@ class AIBinaryConsciousness {
   emitConsciousness() {
     const packet = this.generateConsciousnessPacket();
 
-    if (this.pipeline) this.pipeline.run(packet.bits);
-    if (this.reflex) this.reflex.run(packet.bits);
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'consciousness' });
+    this.pipeline?.run(packet.bits);
+    this.reflex?.run(packet.bits);
+    this.logger?.logBinary(packet.bits, { source: "consciousness" });
 
-    this._trace('consciousness:emitted', { bits: packet.bitLength });
+    this._trace("consciousness:emitted", { bits: packet.bitLength });
 
     return packet;
   }
@@ -286,12 +292,10 @@ class AIBinaryConsciousness {
   }
 }
 
-function createAIBinaryConsciousness(config) {
+// ---------------------------------------------------------
+// FACTORY EXPORT — ESM ALIGNED
+// ---------------------------------------------------------
+
+export function createAIBinaryConsciousness(config) {
   return new AIBinaryConsciousness(config);
 }
-
-module.exports = {
-  AIBinaryConsciousness,
-  createAIBinaryConsciousness,
-  ConsciousnessMeta
-};

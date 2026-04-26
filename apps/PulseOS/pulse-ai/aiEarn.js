@@ -33,38 +33,48 @@ export const EarnMeta = Object.freeze({
     dualband: true,
     lineageAware: true,
     evolutionAware: true,
+    packetAware: true,          // NEW
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
 
   contract: Object.freeze({
     purpose: "Provide SAFE, READ-ONLY economic insight for users and owners.",
+
     never: Object.freeze([
       "mutate data",
       "expose identity anchors",
       "expose UID or tokens",
       "modify economic state",
-      "perform writes"
+      "perform writes",
+      "introduce randomness"
     ]),
+
     always: Object.freeze([
       "strip identity fields",
       "respect user vs owner scope",
       "use deterministic analysis",
       "integrate organism snapshot",
-      "integrate evolution metadata"
+      "integrate evolution metadata",
+      "emit deterministic earn packets"   // NEW
     ])
   })
 });
+
 import { getOrganismSnapshot } from "./aiDeps.js";
 
+// ============================================================================
+//  EARN ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
+// ============================================================================
 
 export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 
   // --------------------------------------------------------------------------
-  // HELPERS — Identity‑Safe Cloning
+  // IDENTITY‑SAFE CLONING
   // --------------------------------------------------------------------------
   function stripIdentity(record) {
     if (!record || typeof record !== "object") return record;
+
     const clone = { ...record };
     delete clone.uid;
     delete clone.userId;
@@ -72,6 +82,7 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
     delete clone.identityRoot;
     delete clone.sessionRoot;
     delete clone.deviceFingerprint;
+
     return clone;
   }
 
@@ -102,11 +113,11 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
   }
 
   // --------------------------------------------------------------------------
-  // DUAL‑BAND ECONOMIC INSIGHT (NEW v11‑EVO)
+  // DUAL‑BAND ECONOMIC PRESSURE (Binary Metabolic → Economic Insight)
   // --------------------------------------------------------------------------
   function computeBinaryEconomicPressure(snapshot) {
     if (!snapshot?.binary?.metabolic) {
-      return { pressure: 0, load: 0, bucket: "none" };
+      return Object.freeze({ pressure: 0, load: 0, bucket: "none" });
     }
 
     const pressure = snapshot.binary.metabolic.pressure ?? 0;
@@ -118,13 +129,26 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
     else if (pressure >= 0.4) bucket = "medium";
     else if (pressure > 0) bucket = "low";
 
-    return { pressure, load, bucket };
+    return Object.freeze({ pressure, load, bucket });
+  }
+
+  // --------------------------------------------------------------------------
+  // EARN PACKET (NEW — v11‑EVO)
+  // --------------------------------------------------------------------------
+  function emitEarnPacket(type, payload) {
+    const packet = Object.freeze({
+      type: `earn-${type}`,
+      timestamp: Date.now(),
+      ...payload
+    });
+
+    return packet;
   }
 
   // --------------------------------------------------------------------------
   // PUBLIC API — Earn Insight (Dual‑Band + Evolution‑Aware)
-// --------------------------------------------------------------------------
-  return Object.freeze({
+  // --------------------------------------------------------------------------
+  const api = {
 
     // ----------------------------------------------------------------------
     // USER — “How am I earning?”
@@ -147,7 +171,7 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
       const snapshot = getOrganismSnapshot(dualBand);
       const binaryEconomics = computeBinaryEconomicPressure(snapshot);
 
-      return Object.freeze({
+      return emitEarnPacket("user-overview", Object.freeze({
         orders,
         referrals,
         referralClicks,
@@ -155,10 +179,9 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
         pulseHistory,
         binaryEconomics,
         organismSnapshot: snapshot
-      });
+      }));
     },
 
-    // USER — “Show me my referrals only.”
     async getUserReferrals(context) {
       const [referrals, referralClicks] = await Promise.all([
         fetchUserScoped(context, "referrals"),
@@ -167,35 +190,41 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 
       const snapshot = getOrganismSnapshot(dualBand);
 
-      return Object.freeze({
+      return emitEarnPacket("user-referrals", Object.freeze({
         referrals,
         referralClicks,
         organismSnapshot: snapshot
-      });
+      }));
     },
 
-    // USER — “Show me my orders.”
     async getUserOrders(context) {
       const orders = await fetchUserScoped(context, "orders");
       const snapshot = getOrganismSnapshot(dualBand);
 
-      return Object.freeze({ orders, organismSnapshot: snapshot });
+      return emitEarnPacket("user-orders", Object.freeze({
+        orders,
+        organismSnapshot: snapshot
+      }));
     },
 
-    // USER — “Show me my vault history.”
     async getUserVaultHistory(context) {
       const vaultHistory = await fetchUserScoped(context, "vaultHistory");
       const snapshot = getOrganismSnapshot(dualBand);
 
-      return Object.freeze({ vaultHistory, organismSnapshot: snapshot });
+      return emitEarnPacket("user-vault", Object.freeze({
+        vaultHistory,
+        organismSnapshot: snapshot
+      }));
     },
 
-    // USER — “Show me my pulse history (earn events).”
     async getUserPulseHistory(context) {
       const pulseHistory = await fetchUserScoped(context, "pulseHistory");
       const snapshot = getOrganismSnapshot(dualBand);
 
-      return Object.freeze({ pulseHistory, organismSnapshot: snapshot });
+      return emitEarnPacket("user-pulse", Object.freeze({
+        pulseHistory,
+        organismSnapshot: snapshot
+      }));
     },
 
     // ----------------------------------------------------------------------
@@ -217,17 +246,16 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
       const snapshot = getOrganismSnapshot(dualBand);
       const binaryEconomics = computeBinaryEconomicPressure(snapshot);
 
-      return Object.freeze({
+      return emitEarnPacket("system-overview", Object.freeze({
         orders,
         referrals,
         referralClicks,
         pulseHistory,
         binaryEconomics,
         organismSnapshot: snapshot
-      });
+      }));
     },
 
-    // OWNER — “Show me system‑level anomalies.”
     async getSystemEarnAnomalies(context) {
       const [
         orders,
@@ -243,13 +271,13 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 
       const snapshot = getOrganismSnapshot(dualBand);
 
-      return Object.freeze({
+      return emitEarnPacket("system-anomalies", Object.freeze({
         ordersSample: orders.slice(0, 100),
         referralsSample: referrals.slice(0, 100),
         referralClicksSample: referralClicks.slice(0, 100),
         pulseHistorySample: pulseHistory.slice(0, 100),
         organismSnapshot: snapshot
-      });
+      }));
     },
 
     // ----------------------------------------------------------------------
@@ -274,5 +302,7 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
       if (!context.userIsOwner || !evolutionAPI?.analyzeRoute) return null;
       return evolutionAPI.analyzeRoute(context, "earn");
     }
-  });
+  };
+
+  return Object.freeze(api);
 }

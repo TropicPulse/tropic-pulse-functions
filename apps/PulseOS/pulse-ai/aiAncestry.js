@@ -66,9 +66,9 @@ export const AncestryMeta = Object.freeze({
 //  ORGAN IMPLEMENTATION
 // ---------------------------------------------------------
 
-class AIAncestry {
+export class AIAncestry {
   constructor(config = {}) {
-    this.id = config.id || 'ai-ancestry';
+    this.id = config.id || AncestryMeta.identity;
     this.encoder = config.encoder;
     this.memory = config.memory;
     this.logger = config.logger || null;
@@ -76,8 +76,12 @@ class AIAncestry {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIAncestry requires aiBinaryAgent encoder');
-    if (!this.memory) throw new Error('AIAncestry requires aiBinaryMemory');
+    if (!this.encoder || typeof this.encoder.encode !== "function") {
+      throw new Error("AIAncestry requires aiBinaryAgent encoder");
+    }
+    if (!this.memory || typeof this.memory.write !== "function") {
+      throw new Error("AIAncestry requires aiBinaryMemory");
+    }
 
     this.lineage = [];
   }
@@ -87,15 +91,16 @@ class AIAncestry {
   // ---------------------------------------------------------
 
   recordReproduction(record) {
-    this.lineage.push(record);
+    const frozenRecord = Object.freeze({ ...record });
 
-    this._trace('ancestry:recorded', record);
+    this.lineage.push(frozenRecord);
+    this._trace("ancestry:recorded", frozenRecord);
 
-    const packet = this._generateAncestryPacket(record);
+    const packet = this._generateAncestryPacket(frozenRecord);
 
     if (this.pipeline) this.pipeline.run(packet.bits);
     if (this.reflex) this.reflex.run(packet.bits);
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'ancestry' });
+    if (this.logger) this.logger.logBinary(packet.bits, { source: "ancestry" });
 
     return packet;
   }
@@ -106,21 +111,21 @@ class AIAncestry {
 
   _generateAncestryPacket(record) {
     const payload = {
-      type: 'ancestry-event',
+      type: "ancestry-event",
       timestamp: Date.now(),
-      record,
+      record
     };
 
     const json = JSON.stringify(payload);
     const binary = this.encoder.encode(json);
 
-    const packet = {
+    const packet = Object.freeze({
       ...payload,
       bits: binary,
-      bitLength: binary.length,
-    };
+      bitLength: binary.length
+    });
 
-    this._trace('ancestry:packet', { bits: packet.bitLength });
+    this._trace("ancestry:packet", { bits: packet.bitLength });
 
     return packet;
   }
@@ -133,29 +138,32 @@ class AIAncestry {
     const json = JSON.stringify(this.lineage);
     const binary = this.encoder.encode(json);
 
-    const key = this.encoder.encode('ancestry:records');
+    const key = this.encoder.encode("ancestry:records");
     this.memory.write(key, binary);
 
-    this._trace('ancestry:stored', { count: this.lineage.length });
+    this._trace("ancestry:stored", { count: this.lineage.length });
 
     return binary;
   }
 
   load() {
-    const key = this.encoder.encode('ancestry:records');
+    const key = this.encoder.encode("ancestry:records");
     const binary = this.memory.read(key);
 
     if (!binary) {
-      this._trace('ancestry:load:none', {});
-      return [];
+      this._trace("ancestry:load:none", {});
+      this.lineage = [];
+      return Object.freeze([]);
     }
 
-    const json = this.encoder.decode(binary, 'string');
-    this.lineage = JSON.parse(json);
+    const json = this.encoder.decode(binary, "string");
+    const parsed = JSON.parse(json);
 
-    this._trace('ancestry:loaded', { count: this.lineage.length });
+    this.lineage = parsed.map((r) => Object.freeze({ ...r }));
 
-    return this.lineage;
+    this._trace("ancestry:loaded", { count: this.lineage.length });
+
+    return Object.freeze([...this.lineage]);
   }
 
   // ---------------------------------------------------------
@@ -209,12 +217,6 @@ class AIAncestry {
 // FACTORY EXPORT
 // ---------------------------------------------------------
 
-function createAIAncestry(config) {
+export function createAIAncestry(config) {
   return new AIAncestry(config);
 }
-
-module.exports = {
-  AIAncestry,
-  createAIAncestry,
-  AncestryMeta
-};

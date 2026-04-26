@@ -67,15 +67,19 @@ export const AnatomyMeta = Object.freeze({
 //  ORGAN IMPLEMENTATION
 // ---------------------------------------------------------
 
-class AIAnatomy {
+export class AIAnatomy {
   constructor(config = {}) {
-    this.id = config.id || 'ai-anatomy';
+    this.id = config.id || AnatomyMeta.identity;
     this.encoder = config.encoder;
     this.memory = config.memory;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIAnatomy requires aiBinaryAgent encoder');
-    if (!this.memory) throw new Error('AIAnatomy requires aiBinaryMemory');
+    if (!this.encoder || typeof this.encoder.encode !== "function") {
+      throw new Error("AIAnatomy requires aiBinaryAgent encoder");
+    }
+    if (!this.memory || typeof this.memory.write !== "function") {
+      throw new Error("AIAnatomy requires aiBinaryMemory");
+    }
 
     this.topology = new Map();
   }
@@ -86,7 +90,7 @@ class AIAnatomy {
 
   _computeStructuralThroughput(organCount, connectionCount) {
     const organFactor = Math.min(1, organCount / 100);
-    const connFactor = Math.min(1, connectionCount / 200);
+    const connFactor  = Math.min(1, connectionCount / 200);
     const raw = Math.max(0, 1 - (organFactor * 0.5 + connFactor * 0.5));
     return Math.min(1, raw);
   }
@@ -152,7 +156,7 @@ class AIAnatomy {
     const cost       = this._computeStructuralCost(pressure, throughput);
     const budget     = this._computeStructuralBudget(throughput, cost);
 
-    return {
+    return Object.freeze({
       throughput,
       throughputBucket: this._bucketLevel(throughput),
 
@@ -167,7 +171,7 @@ class AIAnatomy {
 
       organCount,
       connectionCount
-    };
+    });
   }
 
   // ---------------------------------------------------------
@@ -179,11 +183,11 @@ class AIAnatomy {
       this.topology.set(organId, {
         inputs: [],
         outputs: [],
-        bidirectional: [],
+        bidirectional: []
       });
 
       const artery = this._computeStructuralArtery();
-      this._trace('registerOrgan', { organId, artery });
+      this._trace("registerOrgan", { organId, artery });
     }
   }
 
@@ -198,7 +202,7 @@ class AIAnatomy {
     if (!target.inputs.includes(from)) target.inputs.push(from);
 
     const artery = this._computeStructuralArtery();
-    this._trace('connect', { from, to, artery });
+    this._trace("connect", { from, to, artery });
   }
 
   link(a, b) {
@@ -212,7 +216,7 @@ class AIAnatomy {
     if (!B.bidirectional.includes(a)) B.bidirectional.push(a);
 
     const artery = this._computeStructuralArtery();
-    this._trace('link', { a, b, artery });
+    this._trace("link", { a, b, artery });
   }
 
   // ---------------------------------------------------------
@@ -223,13 +227,17 @@ class AIAnatomy {
     const obj = {};
 
     for (const [organId, data] of this.topology.entries()) {
-      obj[organId] = data;
+      obj[organId] = {
+        inputs: [...data.inputs],
+        outputs: [...data.outputs],
+        bidirectional: [...data.bidirectional]
+      };
     }
 
     const artery = this._computeStructuralArtery();
 
     const payload = {
-      type: 'anatomy-snapshot',
+      type: "anatomy-snapshot",
       timestamp: Date.now(),
       topology: obj,
       artery
@@ -238,13 +246,13 @@ class AIAnatomy {
     const json = JSON.stringify(payload);
     const binary = this.encoder.encode(json);
 
-    const packet = {
+    const packet = Object.freeze({
       ...payload,
       bits: binary,
-      bitLength: binary.length,
-    };
+      bitLength: binary.length
+    });
 
-    this._trace('snapshot', {
+    this._trace("snapshot", {
       organs: Object.keys(obj).length,
       artery
     });
@@ -259,34 +267,34 @@ class AIAnatomy {
   store() {
     const snap = this.snapshot();
 
-    const key = this.encoder.encode('anatomy:current');
+    const key = this.encoder.encode("anatomy:current");
     const value = snap.bits;
 
     this.memory.write(key, value);
 
-    this._trace('store', { bits: value.length });
+    this._trace("store", { bits: value.length });
 
     return snap;
   }
 
   load() {
-    const key = this.encoder.encode('anatomy:current');
+    const key = this.encoder.encode("anatomy:current");
     const binary = this.memory.read(key);
 
     if (!binary) {
-      this._trace('load:none', {});
+      this._trace("load:none", {});
       return null;
     }
 
-    const json = this.encoder.decode(binary, 'string');
+    const json = this.encoder.decode(binary, "string");
     const topology = JSON.parse(json);
 
-    this._trace('load', {
-      organs: Object.keys(topology.topology).length,
+    this._trace("load", {
+      organs: Object.keys(topology.topology || {}).length,
       artery: topology.artery
     });
 
-    return topology;
+    return Object.freeze(topology);
   }
 
   // ---------------------------------------------------------
@@ -303,12 +311,6 @@ class AIAnatomy {
 // FACTORY EXPORT
 // ---------------------------------------------------------
 
-function createAIAnatomy(config) {
+export function createAIAnatomy(config) {
   return new AIAnatomy(config);
 }
-
-module.exports = {
-  AIAnatomy,
-  createAIAnatomy,
-  AnatomyMeta
-};

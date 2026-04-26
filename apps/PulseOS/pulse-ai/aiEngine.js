@@ -7,7 +7,7 @@
 export const ExecutionEngineMeta = Object.freeze({
   layer: "PulseAIExecutionKernel",
   role: "EXECUTION_ENGINE",
-  version: "11.0-EVO",
+  version: "11.1-EVO", // bumped to align with Router/Cortex/Safety/Experience
   identity: "aiExecutionEngine-v11-EVO",
 
   evo: Object.freeze({
@@ -21,7 +21,7 @@ export const ExecutionEngineMeta = Object.freeze({
     symbolicAware: true,
     binaryAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.1-EVO"
   }),
 
   contract: Object.freeze({
@@ -45,11 +45,12 @@ export const ExecutionEngineMeta = Object.freeze({
     ])
   })
 });
+
 import { createAIContext } from "./aiContext.js";
 import { createBrainstem } from "./aiBrainstem.js";
 import { resolvePersonaV11 } from "./persona.js";
 import { routeAIRequest } from "./aiRouter-v11-Evo.js";
-import { selectBoundaryMode, canPerformDynamic } from "./boundaries.js";
+import { canPerformDynamic } from "./boundaries.js"; // selectBoundaryMode no longer needed
 
 // Organ modes
 import { runArchitectMode } from "./modes/architect.js";
@@ -82,13 +83,21 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
   const routing = routeAIRequest(request, dualBand);
   context.routing = routing;
 
+  // Derive binary vitals from routing dual‑band hints (single source of truth)
+  const binaryVitals = {
+    metabolic: {
+      pressure: routing.dualBand?.binaryPressure ?? 0,
+      load: routing.dualBand?.binaryLoad ?? 0
+    }
+  };
+
   // Persona resolution (dual‑band)
   const persona = resolvePersonaV11({
     personaId: routing.personaId,
     userId: context.userId,
     evoState: context.evoState || {},
     routerHints: routing.dualBand,
-    binaryVitals: dualBand?.binary?.vitals?.snapshot?.() || {}
+    binaryVitals
   });
 
   context.persona = persona;
@@ -96,7 +105,7 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
 
   // --------------------------------------------------------------------------
   // 4) Boundary Mode (dual‑band)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   const boundaryMode = persona.boundaryMode;
   context.boundaryMode = boundaryMode;
 
@@ -106,7 +115,7 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
     request.domain || "system",
     request.action || "read",
     boundaryMode,
-    dualBand?.binary?.vitals?.snapshot?.()
+    binaryVitals
   );
 
   if (!permCheck.allowed) {
@@ -150,7 +159,7 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
 
   // --------------------------------------------------------------------------
   // 6) Build Unified Response Packet (v11‑EVO)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   return buildAIResponse(result, context);
 }
 

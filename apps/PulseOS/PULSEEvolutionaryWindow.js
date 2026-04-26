@@ -65,11 +65,21 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 // ============================================================================
 import PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
 
+// ============================================================================
+//  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
+//  - Safe, membrane-level, never throws, never breaks.
+// ============================================================================
+import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
+
+// ============================================================================
+//  UI FLOW ENGINE (PulseUIFlow-v12-EVO)
+//  - UI flow coordinator, UI-only, safe to expose at membrane.
+// ============================================================================
+import * as PulseUIFlow from "../PULSE-UI/PulseUIFlow-v12-EVO.js";
+
 
 // ============================================================================
 //  SURFACE ENVIRONMENT SNAPSHOT (USER + DEVICE CONTEXT, READ‑ONLY)
-//  - This is where we learn as much as possible about the user’s world
-//    OUTSIDE the organism, without identity, routing, or control.
 // ============================================================================
 function buildSurfaceEnvironment() {
   if (typeof window === "undefined") {
@@ -93,7 +103,6 @@ function buildSurfaceEnvironment() {
   const nav = window.navigator || {};
   const scr = window.screen || {};
 
-  // User + device
   const device = {
     hardwareConcurrency:
       typeof nav.hardwareConcurrency === "number"
@@ -103,7 +112,6 @@ function buildSurfaceEnvironment() {
       typeof nav.maxTouchPoints === "number" ? nav.maxTouchPoints : null
   };
 
-  // Screen / viewport
   const screen = {
     width: typeof scr.width === "number" ? scr.width : null,
     height: typeof scr.height === "number" ? scr.height : null,
@@ -116,7 +124,6 @@ function buildSurfaceEnvironment() {
         : null
   };
 
-  // Input capabilities
   const input = {
     touchCapable:
       typeof nav.maxTouchPoints === "number" && nav.maxTouchPoints > 0
@@ -124,7 +131,6 @@ function buildSurfaceEnvironment() {
         : false
   };
 
-  // User preferences (media queries, read‑only)
   let prefersReducedMotion = null;
   let prefersDarkMode = null;
   if (typeof window.matchMedia === "function") {
@@ -149,7 +155,6 @@ function buildSurfaceEnvironment() {
     prefersDarkMode
   };
 
-  // Location / origin (no routing, no control)
   const location = {
     href: window.location?.href || null,
     pathname: window.location?.pathname || null,
@@ -159,7 +164,6 @@ function buildSurfaceEnvironment() {
   const referrer = document?.referrer || null;
   const origin = window.location?.origin || null;
 
-  // Network (very shallow, no active probing)
   const network = {
     online: typeof nav.onLine === "boolean" ? nav.onLine : null
   };
@@ -183,7 +187,6 @@ function buildSurfaceEnvironment() {
 
 const PulseSurfaceEnvironment = buildSurfaceEnvironment();
 
-// Attach a read‑only surface snapshot for anything outside the organism
 if (typeof window !== "undefined") {
   const surfaceMeta = Object.freeze({
     layer: "PulseEvolutionaryWindow",
@@ -209,82 +212,93 @@ if (typeof window !== "undefined") {
 
 // ============================================================================
 //  SURFACE MEMBRANE INITIALIZATION
-//  - Start vitals + logger at the membrane level.
-//  - No identity, no routing, no evolution here.
 // ============================================================================
 PulseVitals.start();
 PulseLogger.init();
+// ============================================================================
+//  ERROR SPINE INITIALIZATION (membrane-level, safe)
+// ============================================================================
+try {
+  PulseUIErrors.init?.();
+} catch (err) {
+  console.error("[PulseEvolutionaryWindow] Error spine failed to initialize:", err);
+}
 
-// Optional: membrane‑level reflex ping (skin reflex)
 if (typeof window !== "undefined" && window.PulseSkinReflex?.membraneAlive) {
   window.PulseSkinReflex.membraneAlive("Window");
 }
 
 
 // ============================================================================
-//  BINARY ORGANISM BOOTSTRAP (BEHIND THE GLASS)
-//  - Boot binary organism once, behind the membrane.
-//  - Expose ONLY a safe, read‑only projection on window.PulseBinary.
+//  BINARY ORGANISM + UI FLOW BOOTSTRAP (BEHIND THE GLASS)
+//  - Single boot IIFE: binary kernel + UI flow context.
 // ============================================================================
 if (typeof window !== "undefined") {
   (async () => {
     try {
       // Prevent double‑boot if the Window is re‑mounted
-      if (window.__PulseBinaryBooted) {
-        return;
+      if (!window.__PulseBinaryBooted) {
+        const binaryKernel =
+          typeof PulseBinaryOrganismBoot?.boot === "function"
+            ? await PulseBinaryOrganismBoot.boot({ trace: false })
+            : null;
+
+        if (binaryKernel) {
+          window.__PulseBinaryBooted = true;
+
+          const safeBinaryView = {
+            meta: PulseBinaryOrganismBoot?.layer
+              ? {
+                  layer: PulseBinaryOrganismBoot.layer,
+                  role: PulseBinaryOrganismBoot.role,
+                  version: PulseBinaryOrganismBoot.version,
+                  lineage: PulseBinaryOrganismBoot.lineage,
+                  evo: PulseBinaryOrganismBoot.evo,
+                  projection: "read-only-binary-shadow"
+                }
+              : null,
+
+            Vitals: {
+              generate: () =>
+                binaryKernel?.vitals?.generateVitals
+                  ? binaryKernel.vitals.generateVitals()
+                  : null
+            },
+
+            Consciousness: {
+              latest: () =>
+                binaryKernel?.consciousness?.generateConsciousnessPacket
+                  ? binaryKernel.consciousness.generateConsciousnessPacket()
+                  : null
+            },
+
+            Sentience: {
+              snapshot:
+                typeof binaryKernel?.sentience?.snapshot === "function"
+                  ? () => binaryKernel.sentience.snapshot()
+                  : () => null
+            }
+          };
+
+          const frozenBinaryView = Object.freeze(safeBinaryView);
+
+          window.PulseBinary = window.PulseBinary
+            ? Object.freeze({ ...window.PulseBinary, ...frozenBinaryView })
+            : frozenBinaryView;
+        }
       }
 
-      const binaryKernel =
-        typeof PulseBinaryOrganismBoot?.boot === "function"
-          ? await PulseBinaryOrganismBoot.boot({ trace: false })
-          : null;
-
-      if (!binaryKernel) return;
-
-      window.__PulseBinaryBooted = true;
-
-      // ---------------------------------------------------------------------
-      // SAFE BINARY VIEW — READ‑ONLY SHADOW
-      // ---------------------------------------------------------------------
-      const safeBinaryView = {
-        meta: PulseBinaryOrganismBoot?.layer
-          ? {
-              layer: PulseBinaryOrganismBoot.layer,
-              role: PulseBinaryOrganismBoot.role,
-              version: PulseBinaryOrganismBoot.version,
-              lineage: PulseBinaryOrganismBoot.lineage,
-              evo: PulseBinaryOrganismBoot.evo,
-              projection: "read-only-binary-shadow"
-            }
-          : null,
-
-        Vitals: {
-          generate: () =>
-            binaryKernel?.vitals?.generateVitals
-              ? binaryKernel.vitals.generateVitals()
-              : null
-        },
-
-        Consciousness: {
-          latest: () =>
-            binaryKernel?.consciousness?.generateConsciousnessPacket
-              ? binaryKernel.consciousness.generateConsciousnessPacket()
-              : null
-        },
-
-        Sentience: {
-          snapshot:
-            typeof binaryKernel?.sentience?.snapshot === "function"
-              ? () => binaryKernel.sentience.snapshot()
-              : () => null
-        }
-      };
-
-      const frozenBinaryView = Object.freeze(safeBinaryView);
-
-      window.PulseBinary = window.PulseBinary
-        ? Object.freeze({ ...window.PulseBinary, ...frozenBinaryView })
-        : frozenBinaryView;
+      // -------------------------------------------------------------------
+      // UI FLOW BOOT — UI-only, safe at membrane
+      // -------------------------------------------------------------------
+      try {
+        const flowContext = await PulseUIFlow.initUIFlow();
+        window.PulseUI = window.PulseUI
+          ? Object.freeze({ ...window.PulseUI, Flow: PulseUIFlow, context: flowContext })
+          : Object.freeze({ Flow: PulseUIFlow, context: flowContext });
+      } catch (flowErr) {
+        console.error("[PulseEvolutionaryWindow] UIFlow boot failed:", flowErr);
+      }
     } catch (err) {
       console.error(
         "[PulseEvolutionaryWindow] Binary organism boot failed:",
@@ -296,11 +310,14 @@ if (typeof window !== "undefined") {
 
 
 // ============================================================================
-//  EXPORT — WINDOW ONLY EXPOSES MEMBRANE + UNDERSTANDING + SURFACE ENV
+//  EXPORT — WINDOW ONLY EXPOSES MEMBRANE + UNDERSTANDING + SURFACE ENV + FLOW
 // ============================================================================
 export default Object.freeze({
   Vitals: PulseVitals,
   Logger: PulseLogger,
   Understanding: PulseUnderstanding,
-  SurfaceEnvironment: PulseSurfaceEnvironment
+  SurfaceEnvironment: PulseSurfaceEnvironment,
+  UIFlow: PulseUIFlow,
+  Errors: PulseUIErrors
 });
+
