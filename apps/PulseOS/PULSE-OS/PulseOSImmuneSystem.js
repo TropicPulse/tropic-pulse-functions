@@ -10,20 +10,36 @@
 //  This organ ONLY builds immune artifacts from mesh drift events.
 // ============================================================================
 
-export const GLOBAL_HEALER_CONTEXT_V11 = {
+export const GLOBAL_HEALER_CONTEXT_V11 = Object.freeze({
   organ: "GlobalHealer",
   layer: "C-Layer",
   role: "Top-Level Immune Coordinator",
   version: "11.0-Evo",
   generation: "v11",
   organism: "PulseOS",
-  evo: {
+  band: "dualband",
+  intent: "global_immune_coordination",
+  evo: Object.freeze({
+    dualMode: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    localAware: true,
+    internetAware: true,
+
     driftProof: true,
     deterministicNeuron: true,
     deterministicImmuneSurface: true,
-    multiInstanceReady: true,
-    advantageCascadeAware: true,
+    deterministicField: true,
     unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    healerStackAware: true,
+    loopTheoryAware: true,
+    fpinTheoryAware: true,
+    intentFieldAware: true,
+    futureEvolutionReady: true,
+    multiInstanceReady: true,
+
     zeroNetwork: true,
     zeroBackend: true,
     zeroTiming: true,
@@ -33,9 +49,8 @@ export const GLOBAL_HEALER_CONTEXT_V11 = {
     routingContract: "PulseSend-v11.0",
     osOrganContract: "PulseOS-v11.0",
     earnCompatibility: "PulseEarn-v11.0"
-  }
-};
-
+  })
+});
 
 // ============================================================================
 // PURE BUILDERS — NO TIME, NO DB, NO SIDE EFFECTS
@@ -78,20 +93,19 @@ function buildFunctionLogHint(base) {
   };
 }
 
-
 // ============================================================================
 // FACTORY — PURE GLOBAL HEALER ORGAN (v11-Evo)
 // ============================================================================
 export function createGlobalHealerV11({ modeKind = "dual" } = {}) {
-  const identity = {
+  const identity = Object.freeze({
     ...GLOBAL_HEALER_CONTEXT_V11,
     modeKind
-  };
+  });
 
   // --------------------------------------------------------------------------
   // transformMeshDriftEvent — top-level immune reflex for Mesh drift
   // Returns: { globalHealerLog, driftSignature, functionLogHint }
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function transformMeshDriftEvent(entry = {}) {
     const base = {
       source: "Mesh",
@@ -101,7 +115,9 @@ export function createGlobalHealerV11({ modeKind = "dual" } = {}) {
       pathwayId: entry.pathwayId ?? null,
       severity: entry.severity ?? "info",
       driftType: entry.driftType ?? "unspecified",
-      note: entry.note ?? null
+      note: entry.note ?? null,
+      loopId: entry.loopId ?? null,
+      fpinId: entry.fpinId ?? null
     };
 
     const globalHealerLog = buildGlobalHealerLog({
@@ -117,6 +133,8 @@ export function createGlobalHealerV11({ modeKind = "dual" } = {}) {
         routeId: entry.routeId ?? null,
         pathwayId: entry.pathwayId ?? null,
         meshNodeId: entry.meshNodeId ?? null,
+        loopId: entry.loopId ?? null,
+        fpinId: entry.fpinId ?? null,
         ...(entry.details || {})
       }
     });

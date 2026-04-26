@@ -9,6 +9,51 @@
 //  - v11: Diagnostics + Signatures + Pattern Surface
 //  - v11+ A-B-A: Dual-band + binary + wave (metadata-only, deterministic)
 // ============================================================================
+// ============================================================================
+// ORGAN IDENTITY — v11‑EVO‑PRIME (Reflex → Earn Synapse)
+// ============================================================================
+export const PulseRole = {
+  type: "Synapse",
+  subsystem: "PulseEarnReflexRouter",
+  layer: "B1-ReflexToEarn",
+  version: "11.0-Evo-Prime",
+  identity: "PulseEarnReflexRouter-v11-Evo-Prime",
+
+  evo: {
+    // Core invariants
+    driftProof: true,
+    deterministicField: true,
+    unifiedAdvantageField: true,
+    futureEvolutionReady: true,
+
+    // Synapse laws
+    zeroTiming: true,
+    zeroState: false,            // local reflex state allowed
+    zeroMutation: true,
+    zeroCompute: true,
+    zeroRouting: true,
+    zeroSending: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+
+    // Reflex lineage
+    reflexSynapse: true,
+    reflexHandoffOnly: true,
+    reflexDeterministic: true,
+    reflexBandAware: true,
+    reflexABASurface: true,
+
+    // Band + metadata
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    bandNormalizationAware: true,
+
+    // Safety + environment
+    environmentAgnostic: true,
+    multiInstanceReady: true
+  }
+};
 
 
 // ============================================================================

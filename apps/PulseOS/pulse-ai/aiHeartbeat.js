@@ -1,38 +1,83 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/PULSE-AI/aiHeartbeat.js
-// LAYER: AI HEARTBEAT (Pulse-Driven + Time-Fallback)
+//  PULSE OS v11‑EVO — AI HEARTBEAT
+//  Pulse‑Driven • Binary‑Aware • Time‑Fallback • Dual‑Band Liveness
+//  PURE LIVENESS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
+export const AI_HEARTBEAT_META = Object.freeze({
+  layer: "PulseAIHeartbeat",
+  role: "HEARTBEAT_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiHeartbeat-v11-EVO",
+
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    metabolicAware: true,
+    livenessAware: true,
+    cooldownAware: true,
+    fallbackAware: true,
+    concurrencyAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Maintain dual-band liveness through pulse-driven and time-fallback heartbeats, respecting metabolic safety and preventing churn.",
+
+    never: Object.freeze([
+      "mutate external systems",
+      "introduce randomness",
+      "override cortex decisions",
+      "override router decisions",
+      "bypass metabolic safety",
+      "spawn multiple organisms",
+      "perform cognition",
+      "perform analysis"
+    ]),
+
+    always: Object.freeze([
+      "respect binary metabolic pressure",
+      "respect cooldown windows",
+      "skip ticks when unsafe",
+      "run cortex/nervous/router pulses safely",
+      "fallback when idle too long",
+      "log deterministic steps",
+      "return frozen state"
+    ])
+  })
+});
+
 import { createBrainstem } from "./aiBrainstem.js";
-import { getDb, getFsAPI, getRouteAPI, getSchemaAPI } from "./aiDeps.js";
+import {
+  getDb,
+  getFsAPI,
+  getRouteAPI,
+  getSchemaAPI,
+  getOrganismSnapshot
+} from "./aiDeps.js";
 
 // --------------------------------------------------------------------------
-// CONFIG
+// CONFIG — metabolic‑safe cadence
 // --------------------------------------------------------------------------
-
-// Minimum time between heartbeats (prevents churn)
-const AI_MIN_GAP_MS = 1500;
-
-// If no pulses occur for this long, time-fallback will fire
-const AI_MAX_IDLE_MS = 15000;
-
-// How often to check for idle state (very light)
-const AI_TIME_CHECK_INTERVAL_MS = 5000;
+const AI_MIN_GAP_MS = 1500;     // prevents churn
+const AI_MAX_IDLE_MS = 15000;   // fallback threshold
+const AI_TIME_CHECK_MS = 5000;  // idle check cadence
 
 // --------------------------------------------------------------------------
-// SINGLETON: one AI organism per warm container
+// SINGLETON — one organism per warm container
 // --------------------------------------------------------------------------
 let aiOrganism = null;
-
-// Concurrency + cadence control
 let aiBusy = false;
 let lastRun = 0;
-
-// Time fallback interval
 let aiTimeFallbackTimer = null;
 
 // --------------------------------------------------------------------------
-// BOOT: create the AI organism (brainstem + organs)
+// BOOT — create dual‑band organism
 // --------------------------------------------------------------------------
 function bootAiOrganism() {
   if (aiOrganism) return aiOrganism;
@@ -42,40 +87,46 @@ function bootAiOrganism() {
   const routeAPI = getRouteAPI();
   const schemaAPI = getSchemaAPI();
 
-  const request = {
-    userId: null,
-    personaId: null
-  };
+  const request = { userId: null, personaId: null };
 
   aiOrganism = createBrainstem(request, db, fsAPI, routeAPI, schemaAPI);
-  aiOrganism.context.logStep?.("[AI-HEARTBEAT] Brainstem created.");
+  aiOrganism.context.logStep?.("[HEARTBEAT] Brainstem created (dual‑band).");
 
-  // Initialize lastRun so fallback has a baseline
   lastRun = Date.now();
-
   return aiOrganism;
 }
 
 // --------------------------------------------------------------------------
-// CORE: one AI heartbeat tick (guarded)
+// CORE — one heartbeat tick (dual‑band + binary‑aware)
 // --------------------------------------------------------------------------
 async function aiHeartbeatTick(reason = "unknown") {
   const now = Date.now();
   const organism = bootAiOrganism();
-  const { context, organs } = organism;
+  const { context, organs, dualBand } = organism;
+
+  // Binary vitals
+  const snapshot = getOrganismSnapshot(dualBand);
+  const pressure = snapshot?.binary?.metabolic?.pressure ?? 0;
+  const load = snapshot?.binary?.metabolic?.load ?? 0;
 
   // Cooldown guard
   if (now - lastRun < AI_MIN_GAP_MS) {
     context.logStep?.(
-      `[AI-HEARTBEAT] Skipped (cooldown). reason=${reason}, delta=${now - lastRun}ms`
+      `[HEARTBEAT] Skipped (cooldown). reason=${reason}, delta=${now - lastRun}ms`
     );
     return;
   }
 
   // Concurrency guard
   if (aiBusy) {
+    context.logStep?.(`[HEARTBEAT] Skipped (busy). reason=${reason}`);
+    return;
+  }
+
+  // Metabolic pressure guard
+  if (pressure >= 0.85) {
     context.logStep?.(
-      `[AI-HEARTBEAT] Skipped (busy). reason=${reason}`
+      `[HEARTBEAT] Skipped (binary pressure=${pressure}). reason=${reason}`
     );
     return;
   }
@@ -84,89 +135,93 @@ async function aiHeartbeatTick(reason = "unknown") {
   lastRun = now;
 
   try {
-    context.logStep?.(`[AI-HEARTBEAT] Tick start. reason=${reason}`);
+    context.logStep?.(
+      `[HEARTBEAT] Tick start. reason=${reason}, pressure=${pressure}, load=${load}`
+    );
 
-    if (organs.thought?.run) await organs.thought.run();
-    if (organs.memory?.run) await organs.memory.run();
+    // Dual‑band organs
+    if (organs.cortex?.run) await organs.cortex.run();
+    if (organs.nervous?.pulse) await organs.nervous.pulse();
+    if (organs.router?.scan) await organs.router.scan();
+
+    // Symbolic organs
     if (organs.evolution?.run) await organs.evolution.run();
-    if (organs.routes?.scan) await organs.routes.scan();
-    if (organs.voiceCache?.maintain) await organs.voiceCache.maintain();
+    if (organs.environment?.scan) await organs.environment.scan?.();
+    if (organs.power?.update) await organs.power.update?.();
 
-    context.logStep?.("[AI-HEARTBEAT] Tick complete.");
+    context.logStep?.("[HEARTBEAT] Tick complete.");
   } catch (err) {
-    console.error("[AI-HEARTBEAT] Tick error:", err);
+    console.error("[HEARTBEAT] Tick error:", err);
+    context.logStep?.(`[HEARTBEAT] Error: ${err.message}`);
   } finally {
     aiBusy = false;
   }
 }
 
 // --------------------------------------------------------------------------
-// PULSE ENTRY: call this from ANY internal signal
+// PULSE ENTRY — ANY internal signal triggers a heartbeat
 // --------------------------------------------------------------------------
 export function pulseAiHeartbeat(source = "unknown") {
   const organism = bootAiOrganism();
-  organism.context.logStep?.(
-    `[AI-HEARTBEAT] Pulse detected from: ${source}`
-  );
+  organism.context.logStep?.(`[HEARTBEAT] Pulse detected from: ${source}`);
 
-  // Fire tick (guards prevent churn)
   void aiHeartbeatTick(`pulse:${source}`);
 }
 
 // --------------------------------------------------------------------------
-// TIME FALLBACK: fires only if no pulses for too long
+// TIME FALLBACK — fires only if idle too long
 // --------------------------------------------------------------------------
 function timeFallbackCheck() {
   const now = Date.now();
   const organism = bootAiOrganism();
-  const { context } = organism;
+  const { context, dualBand } = organism;
 
   const idleFor = now - lastRun;
+  const snapshot = getOrganismSnapshot(dualBand);
+  const pressure = snapshot?.binary?.metabolic?.pressure ?? 0;
 
   if (idleFor >= AI_MAX_IDLE_MS) {
     context.logStep?.(
-      `[AI-HEARTBEAT] Time fallback triggered after idle=${idleFor}ms`
+      `[HEARTBEAT] Time fallback triggered (idle=${idleFor}ms, pressure=${pressure})`
     );
     void aiHeartbeatTick("time-fallback");
   } else {
     context.logStep?.(
-      `[AI-HEARTBEAT] Time fallback check: idle=${idleFor}ms (no tick)`
+      `[HEARTBEAT] Time fallback check: idle=${idleFor}ms (no tick)`
     );
   }
 }
 
 // --------------------------------------------------------------------------
-// START: enable time-based survival fallback
+// START — enable time fallback
 // --------------------------------------------------------------------------
 export function startAiHeartbeat() {
-  if (aiTimeFallbackTimer) return; // already running
+  if (aiTimeFallbackTimer) return;
 
   bootAiOrganism();
 
   aiTimeFallbackTimer = setInterval(() => {
     timeFallbackCheck();
-  }, AI_TIME_CHECK_INTERVAL_MS);
+  }, AI_TIME_CHECK_MS);
 
   aiOrganism.context.logStep?.(
-    `[AI-HEARTBEAT] Time fallback active; checkInterval=${AI_TIME_CHECK_INTERVAL_MS}ms, maxIdle=${AI_MAX_IDLE_MS}ms`
+    `[HEARTBEAT] Time fallback active; check=${AI_TIME_CHECK_MS}ms, maxIdle=${AI_MAX_IDLE_MS}ms`
   );
 }
 
 // --------------------------------------------------------------------------
-// STOP: disable time-based fallback
+// STOP — disable fallback
 // --------------------------------------------------------------------------
 export function stopAiHeartbeat() {
   if (!aiTimeFallbackTimer) return;
   clearInterval(aiTimeFallbackTimer);
   aiTimeFallbackTimer = null;
 
-  if (aiOrganism?.context?.logStep) {
-    aiOrganism.context.logStep("[AI-HEARTBEAT] Time fallback stopped.");
-  }
+  aiOrganism?.context?.logStep?.("[HEARTBEAT] Time fallback stopped.");
 }
 
 // --------------------------------------------------------------------------
-// SERVERLESS / ROUTE ENTRY (optional)
+// SERVERLESS ENTRY
 // --------------------------------------------------------------------------
 export async function handler(event, context) {
   startAiHeartbeat();

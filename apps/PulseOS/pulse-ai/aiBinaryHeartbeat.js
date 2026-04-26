@@ -74,18 +74,54 @@
  *   This file must remain pure.
  */
 
+// ---------------------------------------------------------
+//  META BLOCK — v11‑EVO
+// ---------------------------------------------------------
+
+export const HeartbeatMeta = Object.freeze({
+  layer: "BinaryRhythm",
+  role: "BINARY_HEARTBEAT",
+  version: "11.0-EVO",
+  identity: "aiBinaryHeartbeat-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    binaryOnly: true,
+    livenessAware: true,
+    reflexAware: true,
+    pipelineAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Emit deterministic binary pulses that maintain organism liveness, rhythm, and internal synchronization.",
+
+    never: Object.freeze([
+      "interpret symbolic state",
+      "introduce randomness",
+      "act as a scheduler",
+      "act as a router",
+      "mutate external organs"
+    ]),
+
+    always: Object.freeze([
+      "generate binary heartbeat packets",
+      "emit pulses deterministically",
+      "remain pure and minimal",
+      "treat all outputs as binary-only"
+    ])
+  })
+});
+
+// ---------------------------------------------------------
+//  ORGAN IMPLEMENTATION
+// ---------------------------------------------------------
+
 class AIBinaryHeartbeat {
   constructor(config = {}) {
-    /**
-     * CONFIG INTENT:
-     *   id         → for ProofLogger / CNS attendance
-     *   encoder    → aiBinaryAgent instance (required)
-     *   pipeline   → aiBinaryPipeline instance (optional)
-     *   reflex     → aiBinaryReflex instance (optional)
-     *   logger     → aiBinaryLoggerAdapter instance (optional)
-     *   intervalMs → heartbeat interval (default: 1000ms)
-     *   trace      → deterministic visibility hook
-     */
     this.id = config.id || 'ai-binary-heartbeat';
     this.encoder = config.encoder;
     this.pipeline = config.pipeline || null;
@@ -105,11 +141,6 @@ class AIBinaryHeartbeat {
   //  HEARTBEAT GENERATION
   // ---------------------------------------------------------
 
-  /**
-   * _generatePulse()
-   * ----------------
-   * Creates a binary heartbeat packet.
-   */
   _generatePulse() {
     const payload = {
       type: 'binary-heartbeat',
@@ -134,46 +165,20 @@ class AIBinaryHeartbeat {
   //  HEARTBEAT EMISSION
   // ---------------------------------------------------------
 
-  /**
-   * _emitPulse()
-   * ------------
-   * Emits a heartbeat into:
-   *   - pipeline
-   *   - reflex
-   *   - logger
-   */
   _emitPulse() {
     const pulse = this._generatePulse();
 
-    // Pipeline
-    if (this.pipeline) {
-      this.pipeline.run(pulse.bits);
-    }
+    if (this.pipeline) this.pipeline.run(pulse.bits);
+    if (this.reflex) this.reflex.run(pulse.bits);
+    if (this.logger) this.logger.logBinary(pulse.bits, { source: 'heartbeat' });
 
-    // Reflex
-    if (this.reflex) {
-      this.reflex.run(pulse.bits);
-    }
-
-    // Logger
-    if (this.logger) {
-      this.logger.logBinary(pulse.bits, { source: 'heartbeat' });
-    }
-
-    this._trace('pulse:emitted', {
-      bits: pulse.bitLength,
-    });
+    this._trace('pulse:emitted', { bits: pulse.bitLength });
   }
 
   // ---------------------------------------------------------
   //  HEARTBEAT CONTROL
   // ---------------------------------------------------------
 
-  /**
-   * start()
-   * -------
-   * Starts the deterministic heartbeat loop.
-   */
   start() {
     if (this._timer) return;
 
@@ -184,11 +189,6 @@ class AIBinaryHeartbeat {
     this._trace('heartbeat:start', { intervalMs: this.intervalMs });
   }
 
-  /**
-   * stop()
-   * ------
-   * Stops the heartbeat loop.
-   */
   stop() {
     if (!this._timer) return;
 
@@ -219,4 +219,5 @@ function createAIBinaryHeartbeat(config) {
 module.exports = {
   AIBinaryHeartbeat,
   createAIBinaryHeartbeat,
+  HeartbeatMeta
 };

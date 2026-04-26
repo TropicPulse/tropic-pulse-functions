@@ -15,65 +15,58 @@
  *     - diff engine
  *     - binary comparator
  *     - temporal awareness layer
- *
- * WHY THIS ORGAN EXISTS:
- *   Every OS today computes diffs in:
- *     - strings
- *     - objects
- *     - JSON
- *     - ASTs
- *     - human-readable formats
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “DIFF IN BINARY. UNDERSTAND CHANGE IN BINARY.”
- *
- * ARCHITECTURAL INTENT:
- *   This organ is NOT:
- *     - a patch engine
- *     - a merge tool
- *     - a version control system
- *
- *   This organ IS:
- *     - a binary diff calculator
- *     - a delta generator
- *     - a structural change detector
- *
- * DELTA MODEL:
- *   A delta is a binary structure:
- *
- *     {
- *       type: "binary-delta",
- *       addedBits: <binary>,
- *       removedBits: <binary>,
- *       unchangedBits: <binary>,
- *       addedCount: <number>,
- *       removedCount: <number>,
- *       unchangedCount: <number>
- *     }
- *
- *   All fields except counts are binary strings.
- *
- * FUTURE EVOLUTION NOTES:
- *   This organ will eventually support:
- *     - binary patch generation
- *     - binary merge strategies
- *     - binary lineage diffs
- *     - binary memory deltas
- *     - binary organ deltas
- *
- *   But NOT in this file.
- *   This file must remain pure.
  */
+
+// ---------------------------------------------------------
+//  META BLOCK — v11‑EVO
+// ---------------------------------------------------------
+
+export const DeltaMeta = Object.freeze({
+  layer: "BinaryDelta",
+  role: "BINARY_DELTA_ENGINE",
+  version: "11.0-EVO",
+  identity: "aiBinaryDelta-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    binaryOnly: true,
+    diffAware: true,
+    changeAware: true,
+    temporalAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Compute deterministic binary diffs, deltas, and change maps without symbolic interpretation.",
+
+    never: Object.freeze([
+      "interpret symbolic meaning",
+      "mutate inputs",
+      "apply patches automatically",
+      "perform merges",
+      "introduce randomness",
+      "modify pipeline or reflex behavior"
+    ]),
+
+    always: Object.freeze([
+      "validate binary inputs",
+      "compute diffs deterministically",
+      "return pure binary delta structures",
+      "remain pure and minimal",
+      "produce frozen results"
+    ])
+  })
+});
+
+// ---------------------------------------------------------
+//  ORGAN IMPLEMENTATION
+// ---------------------------------------------------------
 
 class AIBinaryDelta {
   constructor(config = {}) {
-    /**
-     * CONFIG INTENT:
-     *   id        → for ProofLogger / CNS attendance
-     *   trace     → deterministic visibility hook
-     */
     this.id = config.id || 'ai-binary-delta';
     this.trace = !!config.trace;
   }
@@ -82,14 +75,6 @@ class AIBinaryDelta {
   //  BINARY DIFF CORE
   // ---------------------------------------------------------
 
-  /**
-   * diff(aBin, bBin)
-   * ----------------
-   * Computes a binary diff between two binary strings.
-   *
-   * RETURNS:
-   *   delta object (binary fields)
-   */
   diff(aBin, bBin) {
     this._assertBinary(aBin);
     this._assertBinary(bBin);
@@ -115,7 +100,7 @@ class AIBinaryDelta {
       }
     }
 
-    const delta = {
+    const delta = Object.freeze({
       type: 'binary-delta',
       addedBits: added || '0',
       removedBits: removed || '0',
@@ -123,7 +108,7 @@ class AIBinaryDelta {
       addedCount: added.length,
       removedCount: removed.length,
       unchangedCount: unchanged.length,
-    };
+    });
 
     this._trace('diff', {
       aBits: aBin.length,
@@ -135,32 +120,18 @@ class AIBinaryDelta {
   }
 
   // ---------------------------------------------------------
-  //  DELTA COMPRESSION (FUTURE-PROOF HOOK)
+  //  DELTA COMPRESSION (FUTURE HOOK)
   // ---------------------------------------------------------
 
-  /**
-   * compressDelta(delta)
-   * --------------------
-   * Placeholder for future binary delta compression.
-   *
-   * For now, returns delta unchanged.
-   */
   compressDelta(delta) {
     this._trace('compressDelta', { delta });
     return delta;
   }
 
   // ---------------------------------------------------------
-  //  DELTA APPLICATION (FUTURE-PROOF HOOK)
+  //  DELTA APPLICATION (FUTURE HOOK)
   // ---------------------------------------------------------
 
-  /**
-   * applyDelta(aBin, delta)
-   * -----------------------
-   * Placeholder for future binary patching.
-   *
-   * For now, returns original input unchanged.
-   */
   applyDelta(aBin, delta) {
     this._assertBinary(aBin);
     this._trace('applyDelta', { aBin, delta });
@@ -194,4 +165,5 @@ function createAIBinaryDelta(config) {
 module.exports = {
   AIBinaryDelta,
   createAIBinaryDelta,
+  DeltaMeta
 };

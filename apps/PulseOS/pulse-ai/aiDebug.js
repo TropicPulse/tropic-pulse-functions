@@ -1,54 +1,92 @@
 // ============================================================================
-//  PULSE OS v10.4 — THE SCRIBE
-//  Diagnostic Recorder • Forensic Historian • Evolutionary Report Formatter
-//  PURE FORMATTING + SUMMARIZATION. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
+//  PULSE OS v11‑EVO — THE SCRIBE
+//  Dual‑Band Diagnostic Recorder • Forensic Historian • Organism Snapshot
+//  PURE FORMATTING + SUMMARIZATION. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
 export const SCRIBE_META = Object.freeze({
   layer: "PulseAIScribe",
-  role: "SCRIBE",
-  version: "10.4",
-  target: "full-mesh",
-  selfRepairable: true,
+  role: "SCRIBE_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiScribe-v11-EVO",
+
   evo: Object.freeze({
     driftProof: true,
-    deterministicField: true,
+    deterministic: true,
+    dualband: true,
+
+    // Awareness
+    binaryAware: true,
+    symbolicAware: true,
+    organismAware: true,
+    diagnosticsAware: true,
+    routingAware: true,
+    cortexAware: true,
+    pulseAware: true,
+    historian: true,
+
+    // Safety
+    identitySafe: true,
+    readOnly: true,
+
+    // Lifecycle
     multiInstanceReady: true,
-    unifiedAdvantageField: true,
-    futureEvolutionReady: true,
-    observerOnly: true,
-    historian: true
+    epoch: "v11-EVO"
   })
 });
+
 
 // ============================================================================
 // PUBLIC API — Build Debug Report (Object)
 // ============================================================================
-export function formatDebugReport(context) {
+export function formatDebugReport(context = {}, dualBand = null) {
   const { trace = [], diagnostics = {} } = context;
+
+  const organismSnapshot = buildOrganismSnapshot(dualBand);
+  const binarySnapshot = organismSnapshot?.binary || null;
+  const symbolicSnapshot = organismSnapshot?.symbolic || null;
 
   return Object.freeze({
     meta: SCRIBE_META,
-    summary: buildSummary(diagnostics),
+
+    summary: buildSummary(diagnostics, binarySnapshot),
+
     trace: [...trace],
+
     mismatches: [...(diagnostics.mismatches || [])],
     missingFields: [...(diagnostics.missingFields || [])],
     slowdownCauses: [...(diagnostics.slowdownCauses || [])],
     driftDetected: diagnostics.driftDetected === true,
 
-    // NEW v10.4 — Evolutionary Layers
-    evolution: buildEvolutionaryNotes(context),
+    // NEW v11‑EVO — Dual‑Band Layers
+    binary: binarySnapshot,
+    symbolic: symbolicSnapshot,
+    organism: organismSnapshot,
+
+    // Evolutionary Layers
+    evolution: buildEvolutionaryNotes(context, organismSnapshot),
+
+    // CNS Layers
     organs: buildOrganSnapshot(context),
     routing: buildRoutingSnapshot(context),
+    cortex: buildCortexSnapshot(context),
+
+    // Pulse lineage
     pulse: buildPulseSnapshot(context)
   });
 }
 
 // ============================================================================
-// SUMMARY BUILDER — Evolutionary Summary Lines (v10.4)
+// SUMMARY BUILDER — Dual‑Band Summary Lines (v11‑EVO)
 // ============================================================================
-function buildSummary(diagnostics) {
+function buildSummary(diagnostics, binary) {
   const summary = [];
+
+  if (binary) {
+    summary.push(
+      `🧠 Binary load=${binary.metabolic?.load ?? 0}, pressure=${binary.metabolic?.pressure ?? 0}`
+    );
+  }
 
   if (diagnostics.mismatches?.length > 0)
     summary.push(`⚠️ ${diagnostics.mismatches.length} field mismatches detected`);
@@ -69,22 +107,41 @@ function buildSummary(diagnostics) {
 }
 
 // ============================================================================
-// EVOLUTIONARY NOTES — The Historian Layer (v10.4)
+// ORGANISM SNAPSHOT — Dual‑Band (v11‑EVO)
 // ============================================================================
-function buildEvolutionaryNotes(context) {
+function buildOrganismSnapshot(dualBand) {
+  if (!dualBand) return null;
+
+  return Object.freeze({
+    timestamp: Date.now(),
+
+    binary: dualBand.binary?.vitals?.snapshot?.() || null,
+
+    symbolic: {
+      persona: dualBand.symbolic?.personaEngine?.getActivePersona?.() || null,
+      boundaryMode: dualBand.symbolic?.boundariesEngine?.getMode?.() || null,
+      permissions: dualBand.symbolic?.permissionsEngine?.snapshot?.() || null
+    }
+  });
+}
+
+// ============================================================================
+// EVOLUTIONARY NOTES — Dual‑Band Historian (v11‑EVO)
+// ============================================================================
+function buildEvolutionaryNotes(context, organismSnapshot) {
   const notes = [];
+
+  if (organismSnapshot?.binary?.metabolic) {
+    notes.push(
+      `Binary metabolic pressure=${organismSnapshot.binary.metabolic.pressure}`
+    );
+  }
 
   if (context.pulse?.pattern)
     notes.push(`Pattern: ${context.pulse.pattern}`);
 
   if (Array.isArray(context.pulse?.lineage))
     notes.push(`Lineage depth: ${context.pulse.lineage.length}`);
-
-  if (context.pulse?.advantageField)
-    notes.push("Advantage field active");
-
-  if (context.organs)
-    notes.push("Organ snapshot included");
 
   if (context.diagnostics?.driftDetected)
     notes.push("Evolutionary drift detected");
@@ -93,30 +150,47 @@ function buildEvolutionaryNotes(context) {
 }
 
 // ============================================================================
-// ORGAN SNAPSHOT — Which organs were involved (v10.4)
+// ORGAN SNAPSHOT — Persona + Boundaries + Permissions (v11‑EVO)
 // ============================================================================
 function buildOrganSnapshot(context) {
   return Object.freeze({
     persona: context.persona || null,
-    permissions: context.permissions || null,
-    boundaries: context.boundaries || null
+    boundaryMode: context.boundaryMode || null,
+    permissions: context.permissions || null
   });
 }
 
 // ============================================================================
-// ROUTING SNAPSHOT — Pathway + Router Decisions (v10.4)
+// ROUTING SNAPSHOT — Dual‑Band Router Decisions (v11‑EVO)
 // ============================================================================
 function buildRoutingSnapshot(context) {
   if (!context.routing) return null;
 
   return Object.freeze({
     personaId: context.routing.personaId,
+    dualBand: context.routing.dualBand || null,
     reasoning: [...(context.routing.reasoning || [])]
   });
 }
 
 // ============================================================================
-// PULSE SNAPSHOT — Pulse lineage + pattern (v10.4)
+// CORTEX SNAPSHOT — Dual‑Band Cognition (v11‑EVO)
+// ============================================================================
+function buildCortexSnapshot(context) {
+  if (!context.cortexPacket) return null;
+
+  return Object.freeze({
+    pattern: context.cortexPacket.pattern,
+    decision: context.cortexPacket.decision,
+    binary: context.cortexPacket.binary,
+    symbolic: context.cortexPacket.symbolic,
+    band: context.cortexPacket.band,
+    bitLength: context.cortexPacket.bitLength
+  });
+}
+
+// ============================================================================
+// PULSE SNAPSHOT — Pulse lineage + pattern (v11‑EVO)
 // ============================================================================
 function buildPulseSnapshot(context) {
   if (!context.pulse) return null;
@@ -131,12 +205,12 @@ function buildPulseSnapshot(context) {
 }
 
 // ============================================================================
-// STRING FORMATTER — Pretty Printed Debug Report (v10.4)
+// STRING FORMATTER — Pretty Printed Debug Report (v11‑EVO)
 // ============================================================================
-export function formatDebugString(context) {
-  const report = formatDebugReport(context);
+export function formatDebugString(context, dualBand = null) {
+  const report = formatDebugReport(context, dualBand);
 
-  let out = "\n=== AI DEBUG REPORT (v10.4) ===\n\n";
+  let out = "\n=== AI DEBUG REPORT (v11‑EVO) ===\n\n";
 
   out += "SUMMARY:\n";
   report.summary.forEach(line => {
@@ -148,28 +222,17 @@ export function formatDebugString(context) {
     out += `  ${i + 1}. ${step}\n`;
   });
 
-  if (report.mismatches.length > 0) {
-    out += "\nMISMATCHES:\n";
-    report.mismatches.forEach(m => {
-      out += `  - Field "${m.key}": expected ${m.expected}, got ${m.actual}\n`;
-    });
-  }
+  out += "\nBINARY VITALS:\n";
+  out += JSON.stringify(report.binary, null, 2) + "\n";
 
-  if (report.missingFields.length > 0) {
-    out += "\nMISSING FIELDS:\n";
-    report.missingFields.forEach(f => {
-      out += `  - ${f.key}\n`;
-    });
-  }
+  out += "\nSYMBOLIC SNAPSHOT:\n";
+  out += JSON.stringify(report.symbolic, null, 2) + "\n";
 
-  if (report.slowdownCauses.length > 0) {
-    out += "\nSLOWDOWN CAUSES:\n";
-    report.slowdownCauses.forEach(s => {
-      out += `  - ${s.reason}\n`;
-    });
-  }
+  out += "\nROUTING:\n";
+  out += JSON.stringify(report.routing, null, 2) + "\n";
 
-  out += `\nDRIFT DETECTED: ${report.driftDetected ? "YES" : "NO"}\n`;
+  out += "\nCORTEX PACKET:\n";
+  out += JSON.stringify(report.cortex, null, 2) + "\n";
 
   out += "\nEVOLUTIONARY NOTES:\n";
   report.evolution.forEach(n => {

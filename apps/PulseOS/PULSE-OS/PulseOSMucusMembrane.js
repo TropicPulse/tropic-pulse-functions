@@ -30,6 +30,51 @@
 //   • Pure deterministic signal builder
 // ============================================================================
 
+// ============================================================================
+// ORGAN IDENTITY — v11‑EVO‑PRIME (A0 Mucus Membrane)
+// ============================================================================
+export const PulseRole = {
+  type: "Barrier",
+  subsystem: "PulseOSMucusMembrane",
+  layer: "A0-MucusBarrier",
+  version: "11.0-Evo-Prime",
+  identity: "PulseOSMucusMembrane-v11-Evo-Prime",
+
+  evo: {
+    // Core invariants
+    driftProof: true,
+    deterministicField: true,
+    unifiedAdvantageField: true,
+    futureEvolutionReady: true,
+
+    // Barrier laws
+    zeroTiming: true,
+    zeroState: true,
+    zeroMutation: true,
+    zeroNetwork: true,
+    zeroRetry: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+    offlineAbsolute: true,
+
+    // Awareness
+    binaryAware: true,
+    symbolicAware: true,
+    dualModeAware: true,
+    executionContextAware: true,
+    pressureAware: true,
+
+    // Membrane lineage
+    membraneLayer: "A0",
+    epithelialBarrier: true,
+    oneWaySignal: true,
+    passiveBarrier: true,
+
+    // Safety + environment
+    environmentAgnostic: true,
+    multiInstanceReady: true
+  }
+};
 
 // ============================================================================
 // PURE MUCOSAL SIGNAL BUILDER (Frontend → Organism)

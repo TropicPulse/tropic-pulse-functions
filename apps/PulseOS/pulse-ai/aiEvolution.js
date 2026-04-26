@@ -17,31 +17,63 @@
 //   • ZERO RANDOMNESS.
 //   • DETERMINISTIC ANALYSIS ONLY.
 // ============================================================================
-
-import { Personas } from "./persona.js";
-
-// ============================================================================
-//  IDENTITY — EVOLUTION ORGAN META (v10.4)
-// ============================================================================
 export const AI_EVOLUTION_META = Object.freeze({
   layer: "PulseAIEvolution",
-  role: "EVOLUTION",
-  version: "10.4",
+  role: "EVOLUTION_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiEvolution-v11-EVO",
+
   evo: Object.freeze({
     driftProof: true,
-    deterministicField: true,
-    multiInstanceReady: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
     organismAware: true,
     lineageAware: true,
     patternAware: true,
-    architectOnly: true
+    schemaAware: true,
+    routeAware: true,
+    fileAware: true,
+    readOnly: true,
+    architectOnly: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Detect unused imports, dead code, orphaned routes, schema drift, organ drift, and evolutionary patterns across the organism.",
+    never: Object.freeze([
+      "mutate data",
+      "modify external systems",
+      "override safety",
+      "self-modify",
+      "introduce randomness"
+    ]),
+    always: Object.freeze([
+      "analyze deterministically",
+      "strip identity anchors",
+      "report drift",
+      "propose diffs",
+      "provide owner-only insight",
+      "integrate dual-band organism snapshot"
+    ])
   })
 });
 
+import { Personas } from "./persona.js";
+import { getOrganismSnapshot } from "./aiDeps.js";
+
 // ============================================================================
-//  FACTORY — Evolution Organ
+//  IDENTITY — EVOLUTION ORGAN META (v11‑EVO)
 // ============================================================================
-export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI) {
+
+
+// ============================================================================
+//  FACTORY — Evolution Organ (v11‑EVO, dual‑band aware)
+// ============================================================================
+export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) {
 
   // --------------------------------------------------------------------------
   // ACCESS CONTROL — Owner + Architect Only
@@ -134,13 +166,13 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC API — Evolutionary Insight
-  // --------------------------------------------------------------------------
+  // PUBLIC API — Evolutionary Insight (v11‑EVO)
+// --------------------------------------------------------------------------
   return Object.freeze({
 
     // ----------------------------------------------------------------------
-    // FULL ORGANISM OVERVIEW
-    // ----------------------------------------------------------------------
+    // FULL ORGANISM OVERVIEW (code + routes + schemas)
+// ----------------------------------------------------------------------
     async getOrganismOverview(context) {
       if (!assertOwnerArchitect(context)) return null;
 
@@ -158,6 +190,7 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI) {
       const pulseEarnDrift = detectPulseEarnDrift(files);
 
       return Object.freeze({
+        meta: AI_EVOLUTION_META,
         unusedImports: unusedImports.map(stripIdentityAnchors),
         orphanedRoutes: orphanedRoutes.map(stripIdentityAnchors),
         deadComponents: deadComponents.map(stripIdentityAnchors),
@@ -177,6 +210,7 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI) {
       if (!file) return null;
 
       return Object.freeze({
+        meta: AI_EVOLUTION_META,
         unusedImports: detectUnusedImports(file),
         references: file.references || [],
         exports: file.exports || [],
@@ -194,6 +228,7 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI) {
       if (!route) return null;
 
       return Object.freeze({
+        meta: AI_EVOLUTION_META,
         inbound: route.inbound,
         outbound: route.outbound,
         orphaned: !route.inbound && !route.outbound
@@ -212,8 +247,23 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI) {
       const drift = detectSchemaDrift([schema]);
 
       return Object.freeze({
+        meta: AI_EVOLUTION_META,
         schema: stripIdentityAnchors(schema),
         drift
+      });
+    },
+
+    // ----------------------------------------------------------------------
+    // ORGANISM STATE (NEW v11‑EVO — dual‑band snapshot)
+// ----------------------------------------------------------------------
+    async getOrganismState(context) {
+      if (!assertOwnerArchitect(context)) return null;
+
+      const snapshot = getOrganismSnapshot(dualBand);
+
+      return Object.freeze({
+        meta: AI_EVOLUTION_META,
+        snapshot
       });
     }
   });

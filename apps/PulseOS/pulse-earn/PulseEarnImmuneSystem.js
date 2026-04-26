@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/PULSE-EARN/PulseEarnImmuneSystem-v11-Evo.js
-// LAYER: THE IMMUNE SYSTEM (v11-Evo + Dual-Band + Binary + Wave)
+// LAYER: THE IMMUNE SYSTEM (v11-Evo + Dual-Band + Binary-First + Wave)
 // (Subsystem Doctor + Drift Diagnostician + Deterministic Repair Engine)
 // ============================================================================
 //
@@ -13,25 +13,56 @@
 //   • Emits v11‑Evo signatures + diagnostics.
 //
 // CONTRACT (v11-Evo):
-//   • PURE HEALING — no AI layers, no translation, no memory model.
+//   • PURE HEALING — no AI layers, no translation, no LLM inference.
 //   • READ‑ONLY except deterministic repair actions.
 //   • NO eval(), NO Function(), NO dynamic imports.
 //   • NO executing user code.
 //   • NO timestamps, NO async.
 //   • Deterministic drift detection only.
 //   • Dual-band + binary + wave metadata are structural-only.
+//   • Binary-first: binary field is the primary immune surface, wave is secondary.
 // ============================================================================
 
 
 // ============================================================================
-// IMMUNE CONTEXT METADATA (v11-Evo)
+// IMMUNE CONTEXT METADATA (v11-Evo + Dual-Band + Binary-First)
 // ============================================================================
-const PULSE_EARN_IMMUNE_CONTEXT = {
+export const PULSE_EARN_IMMUNE_CONTEXT = Object.freeze({
   layer: "PulseEarnImmuneSystem-v11-Evo",
   role: "IMMUNE_PHYSICIAN",
   purpose: "Diagnose and repair drift across Earn subsystems",
-  context: "Immune surveillance + deterministic healing"
-};
+  context: "Immune surveillance + deterministic healing",
+  band: "dualband",
+  highway: "binary_first_dualband",
+  intent: "pulse_earn_subsystem_healing",
+  evo: Object.freeze({
+    dualMode: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    localAware: true,
+    internetAware: true,
+
+    driftProof: true,
+    deterministicField: true,
+    unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+    healerStackAware: true,
+    loopTheoryAware: true,
+    fpinTheoryAware: true,
+    intentFieldAware: true,
+    futureEvolutionReady: true,
+    multiInstanceReady: true,
+
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroTiming: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true
+  })
+});
 
 
 // ============================================================================
@@ -119,7 +150,7 @@ function buildRepairSignature(key, cycle) {
 
 
 // ============================================================================
-// runHealthCheck() — immune surveillance scan (v11-Evo + Dual-Band + Binary + Wave)
+// runHealthCheck() — immune surveillance scan (v11-Evo + Dual-Band + Binary-First + Wave)
 // ============================================================================
 export function runHealthCheck() {
   immuneCycle++;
@@ -162,7 +193,7 @@ export function runHealthCheck() {
     immuneState.lastImmuneSignature = buildImmuneSignature(immuneCycle);
     immuneState.lastDriftSignature = buildDriftSignature(report);
 
-    // B — Binary Surfaces (structural only)
+    // B — Binary Surfaces (binary-first structural surface)
     const errorFlags = [
       report.engine.lastError,
       report.runtime.lastError,
@@ -192,7 +223,7 @@ export function runHealthCheck() {
     };
     immuneState.lastBinaryField = binaryField;
 
-    // A — Wave-Theory Metadata (structural only)
+    // C — Wave-Theory Metadata (secondary structural field)
     const waveField = {
       amplitude: errorCount,
       wavelength: immuneCycle,

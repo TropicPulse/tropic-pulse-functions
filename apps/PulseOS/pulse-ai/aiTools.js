@@ -1,38 +1,112 @@
 // ============================================================================
-//  PULSE OS v10.4 — THE INSTRUMENTS
-//  Natural Abilities • Diagnostic Tools • Evolutionary Sensors
+//  PULSE OS v11‑EVO — THE INSTRUMENTS
+//  Cognitive Analysis Organ • Diagnostic Tools • Evolutionary Sensors
 //  PURE ANALYSIS. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
 // ============================================================================
-
-import { translateFirestoreDocument } from "../pulse-translator/firestoreToPulse.js";
-import { translateSQLSchema } from "../pulse-translator/sqlToPulse.js";
-import { validatePulseField } from "../PULSE-SPECS/pulseFields.js";
-
+//
+// ROLE (v11‑EVO):
+//   The INSTRUMENTS organ provides:
+//     • Schema analysis
+//     • Drift detection
+//     • Slowdown detection
+//     • Route/log/error analysis
+//     • Evolutionary pattern detection
+//     • Binary → Pulse translation
+//
+//   These tools are PURE ANALYSIS ONLY.
+//   They NEVER mutate data, NEVER modify external systems,
+//   NEVER introduce randomness, and NEVER override Router/Cortex decisions.
+//
+// ARCHITECTURE (v11‑EVO):
+//   INSTRUMENTS = Cognitive Analysis Organ
+//     → Reads data
+//     → Translates to PulseFields
+//     → Validates schema
+//     → Detects drift + slowdown
+//     → Reports diagnostics
+//     → Feeds Cortex, Router, Evolution, Brain
+//
+// EVOLUTION POLICY (NEW):
+//   • INSTRUMENTS contains ONLY analysis logic.
+//   • NO cognitive logic lives here.
+//   • NO intent logic lives here.
+//   • NO assistant logic lives here.
+//   • NO API logic lives here.
+//   • ALL cognition lives in aiTools.js.
+//   • INSTRUMENTS is imported BY aiTools.js.
+//
+// SECURITY POLICY (v11‑EVO+):
+//   • This file contains NO secure logic.
+//   • Secure CNS logic belongs ONLY in Brainstem.
+//   • This file must remain pure, deterministic, and read‑only.
+//
+// CONTRACT:
+//   • ZERO randomness.
+//   • ZERO mutation.
+//   • ZERO side effects.
+//   • ZERO identity leakage.
+//   • PURE deterministic analysis.
 // ============================================================================
-//  IDENTITY — THE INSTRUMENTS (v10.4)
-// ============================================================================
+
 export const AI_INSTRUMENTS_META = Object.freeze({
   layer: "PulseAIInstruments",
-  role: "INSTRUMENTS",
-  version: "10.4",
+  role: "INSTRUMENTS_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiInstruments-v11-EVO",
   target: "full-mesh",
-  selfRepairable: true,
+
   evo: Object.freeze({
     driftProof: true,
-    deterministicField: true,
-    multiInstanceReady: true,
-    unifiedAdvantageField: true,
-    futureEvolutionReady: true,
-    observerOnly: true,
-    architectAware: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
     schemaAware: true,
     lineageAware: true,
-    patternAware: true
+    patternAware: true,
+    advantageAware: true,
+    evolutionAware: true,
+    observerOnly: true,
+    architectAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose: "Provide PURE deterministic analysis for schemas, drift, slowdown, routes, logs, errors, and evolutionary patterns.",
+    never: Object.freeze([
+      "mutate data",
+      "modify external systems",
+      "introduce randomness",
+      "override router decisions",
+      "override cortex decisions",
+      "perform cognition",
+      "perform intent handling"
+    ]),
+    always: Object.freeze([
+      "analyze schemas",
+      "detect drift",
+      "detect slowdown",
+      "analyze routes",
+      "analyze logs",
+      "analyze errors",
+      "detect evolutionary patterns",
+      "translate binary/symbolic → PulseFields",
+      "report diagnostics only"
+    ])
   })
 });
 
 // ============================================================================
-//  FIRESTORE ANALYSIS — Instrument Procedure
+// SECTION 1 — IMPORTS
+// ============================================================================
+import { translateFirestoreDocument } from "../pulse-translator/firestoreToPulse.js";
+import { translateSQLSchema } from "../pulse-translator/sqlToPulse.js";
+import { validatePulseField } from "../PULSE-SPECS/pulseFields.js";
+
+
+// ============================================================================
+// SECTION 3 — FIRESTORE ANALYSIS
 // ============================================================================
 export function analyzeFirestoreDoc(context, docData = {}) {
   context.logStep?.("Analyzing Firestore document...");
@@ -56,8 +130,9 @@ export function analyzeFirestoreDoc(context, docData = {}) {
   return pulseSchema;
 }
 
+
 // ============================================================================
-//  SQL ANALYSIS — Instrument Procedure
+// SECTION 4 — SQL ANALYSIS
 // ============================================================================
 export function analyzeSQLSchema(context, sqlSchema = {}) {
   context.logStep?.("Analyzing SQL schema...");
@@ -77,8 +152,9 @@ export function analyzeSQLSchema(context, sqlSchema = {}) {
   return pulseSchema;
 }
 
+
 // ============================================================================
-//  DRIFT DETECTION — Instrument Procedure
+// SECTION 5 — DRIFT DETECTION
 // ============================================================================
 export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
   context.logStep?.("Checking for schema drift...");
@@ -102,8 +178,9 @@ export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
   return context.diagnostics?.driftDetected;
 }
 
+
 // ============================================================================
-//  SLOWDOWN DETECTION — Instrument Procedure
+// SECTION 6 — SLOWDOWN DETECTION
 // ============================================================================
 export function detectSlowdownPatterns(context, data) {
   context.logStep?.("Checking for slowdown patterns...");
@@ -126,8 +203,9 @@ export function detectSlowdownPatterns(context, data) {
   }
 }
 
+
 // ============================================================================
-//  PULSE SCHEMA VALIDATION — Instrument Procedure
+// SECTION 7 — PULSE SCHEMA VALIDATION
 // ============================================================================
 export function validatePulseSchema(context, schema = {}) {
   context.logStep?.("Validating Pulse schema...");
@@ -141,8 +219,9 @@ export function validatePulseSchema(context, schema = {}) {
   }
 }
 
+
 // ============================================================================
-//  NEW v10.4 — ROUTE ANALYSIS
+// SECTION 8 — ROUTE ANALYSIS
 // ============================================================================
 export function analyzeRoute(context, pathway = {}) {
   context.logStep?.("Analyzing pathway descriptor...");
@@ -163,8 +242,9 @@ export function analyzeRoute(context, pathway = {}) {
   return pathway;
 }
 
+
 // ============================================================================
-//  NEW v10.4 — LOG ANALYSIS
+// SECTION 9 — LOG ANALYSIS
 // ============================================================================
 export function analyzeLogs(context, logs = []) {
   context.logStep?.("Analyzing logs...");
@@ -181,8 +261,9 @@ export function analyzeLogs(context, logs = []) {
   return logs;
 }
 
+
 // ============================================================================
-//  NEW v10.4 — ERROR ANALYSIS
+// SECTION 10 — ERROR ANALYSIS
 // ============================================================================
 export function analyzeErrors(context, errors = []) {
   context.logStep?.("Analyzing errors...");
@@ -200,8 +281,9 @@ export function analyzeErrors(context, errors = []) {
   return errors;
 }
 
+
 // ============================================================================
-//  NEW v10.4 — EVOLUTIONARY PATTERN DETECTORS
+// SECTION 11 — EVOLUTIONARY PATTERN DETECTION
 // ============================================================================
 export function detectEvolutionaryPatterns(context, pulse = {}) {
   context.logStep?.("Detecting evolutionary patterns...");

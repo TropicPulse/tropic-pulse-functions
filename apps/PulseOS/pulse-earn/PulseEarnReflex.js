@@ -9,6 +9,54 @@
 //  - v11+ A-B-A: Dual-band + binary + wave (metadata-only, deterministic)
 // ============================================================================
 
+// ============================================================================
+// ORGAN IDENTITY — v11‑EVO‑PRIME (B1 Sub‑Healer Reflex Arc)
+// ============================================================================
+export const PulseRole = {
+  type: "Reflex",
+  subsystem: "PulseEarnReflex",
+  layer: "B1-SubHealerReflexArc",
+  version: "11.0-Evo-Prime",
+  identity: "PulseEarnReflex-v11-Evo-Prime",
+
+  evo: {
+    // Core invariants
+    driftProof: true,
+    deterministicField: true,
+    unifiedAdvantageField: true,
+    futureEvolutionReady: true,
+
+    // Reflex laws
+    reflexArc: true,
+    reflexDeterministic: true,
+    reflexHandoffOnly: true,
+    reflexInstanceLaw: true,
+    reflexABASurface: true,
+    reflexBandAware: true,
+
+    // Execution laws
+    zeroRouting: true,
+    zeroSending: true,
+    zeroCompute: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+    zeroMutation: true,
+    zeroTiming: true,
+
+    // Local state allowed (reflex instance tracking)
+    zeroState: false,
+
+    // Band + metadata
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    bandNormalizationAware: true,
+
+    // Safety + environment
+    environmentAgnostic: true,
+    multiInstanceReady: true
+  }
+};
 
 // ============================================================================
 // INTERNAL STATE — deterministic, drift-proof

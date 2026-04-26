@@ -99,7 +99,26 @@
 //  This file preserves that history — the exponential era — as part of the
 //  system’s long‑term memory and architectural lineage.
 // ============================================================================
+import crypto from "crypto";
 
+import admin from "firebase-admin";
+
+// ---------------------------------------------------------------------------
+//  INITIALIZE ADMIN SDK (ONE TIME PER COLD START)
+// ---------------------------------------------------------------------------
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+    storageBucket: "tropic-pulse.firebasestorage.app"
+  });
+}
+
+// ---------------------------------------------------------------------------
+//  SHARED INSTANCES
+// ---------------------------------------------------------------------------
+export const db = admin.firestore();
+export const storage = admin.storage().bucket();
+export { admin };
 
 
 async function logSecurityPatch(uid, patch, reason = "auto") {
@@ -26911,7 +26930,6 @@ export const sendPin = onRequest(
         }
 
         const normalizedEmail = email.trim().toLowerCase();
-
         let userID = null;
         let userData = null;
 
@@ -26962,8 +26980,6 @@ export const sendPin = onRequest(
             });
           }
 
-          userID = uid;
-
           const currentUser = await db.collection("Users").doc(uid).get();
           if (!currentUser.exists) {
             return res.status(404).json({
@@ -26972,22 +26988,18 @@ export const sendPin = onRequest(
             });
           }
 
+          userID = uid;
           userData = currentUser.data() || {};
         }
 
         // ---------------------------------------------------------
         // RATE LIMIT + PIN GENERATION
         // ---------------------------------------------------------
-        const pinRef = db
-        .collection("Users")
-        .doc(userID);
-
+        const pinRef = db.collection("Users").doc(userID);
         const pinSnap = await pinRef.get();
         const pinRecord = pinSnap.data() || {};
 
         const now = admin.firestore.Timestamp.now().toMillis();
-
-        // Ensure TPSecurity namespace exists
         const security = pinRecord.TPSecurity || {};
         const history = Array.isArray(security.requestHistory)
           ? security.requestHistory
@@ -27005,11 +27017,14 @@ export const sendPin = onRequest(
 
         filtered.push(now);
 
-        await pinRef.set({
-          TPSecurity: {
-            requestHistory: filtered
-          }
-        }, { merge: true });
+        await pinRef.set(
+          {
+            TPSecurity: {
+              requestHistory: filtered
+            }
+          },
+          { merge: true }
+        );
 
         const pin = String(Math.floor(100000 + Math.random() * 900000));
         const expiresAt = now + PIN_TTL_MS;
@@ -27040,17 +27055,8 @@ export const sendPin = onRequest(
           purpose,
           userID,
           expiresAt,
-
-          // Correct name priority
-          name:
-            TPIdentity.name ||
-            TPIdentity.displayName ||
-            "Friend",
-
-          // Correct Stripe account ID (TPIdentity ONLY)
-          stripeAccountID:
-            TPIdentity.stripeAccountID || null,
-
+          name: TPIdentity.name || TPIdentity.displayName || "Friend",
+          stripeAccountID: TPIdentity.stripeAccountID || null,
           logId: null
         };
 
@@ -27140,17 +27146,19 @@ export const sendPin = onRequest(
   }
 );
 
+
+
 export const verifyPin = onRequest(
   {
     region: "us-central1",
     timeoutSeconds: 120,
     memory: "512MiB",
-    secrets: [EMAIL_PASSWORD, JWT_SECRET, MESSAGING_SERVICE_SID]
+    // JWT_SECRET removed – no JWT generation anymore
+    secrets: [EMAIL_PASSWORD, MESSAGING_SERVICE_SID]
   },
   (req, res) => {
     corsHandler(req, res, async () => {
       try {
-        const jwtSecret = JWT_SECRET.value();
         const { email, pin, purpose = "login", uid } = req.body || {};
 
         if (req.method !== "POST") {
@@ -27163,9 +27171,11 @@ export const verifyPin = onRequest(
 
         let userID = null;
         let userData = null;
+        const normalizedEmail = (email || "").trim().toLowerCase();
 
-          const normalizedEmail = email.trim().toLowerCase();
-
+        // ---------------------------------------------------------
+        // 1. PRIMARY LOOKUP: NEW SCHEMA (email + PIN)
+        // ---------------------------------------------------------
         let userSnap = await db
           .collection("Users")
           .where("TPIdentity.email", "==", normalizedEmail)
@@ -27173,19 +27183,21 @@ export const verifyPin = onRequest(
           .limit(1)
           .get();
 
-        // If found by PIN → skip email entirely
         if (!userSnap.empty) {
           const doc = userSnap.docs[0];
           userID = doc.id;
           userData = doc.data() || {};
         }
 
+        // ---------------------------------------------------------
+        // 2. LOGIN FLOW (fallback legacy email lookup)
+        // ---------------------------------------------------------
         if (!userID && purpose === "login") {
           if (!email || typeof email !== "string" || !email.includes("@")) {
             return res.status(400).json({ success: false, error: "Invalid email" });
           }
 
-          // New schema
+          // New schema (email + PIN)
           userSnap = await db
             .collection("Users")
             .where("TPIdentity.email", "==", normalizedEmail)
@@ -27193,7 +27205,7 @@ export const verifyPin = onRequest(
             .limit(1)
             .get();
 
-          // Legacy schema
+          // Legacy schema (email only)
           if (userSnap.empty) {
             userSnap = await db
               .collection("Users")
@@ -27233,7 +27245,7 @@ export const verifyPin = onRequest(
         }
 
         // ---------------------------------------------------------
-        // LOAD PIN FROM TPSecurity MAP
+        // 4. LOAD PIN FROM TPSecurity MAP
         // ---------------------------------------------------------
         const pinRef = db.collection("Users").doc(userID);
         const pinSnap = await pinRef.get();
@@ -27385,7 +27397,9 @@ export const verifyPin = onRequest(
         // ✅ PIN VALID → clear it
         await pinRef.update({ pin: admin.firestore.FieldValue.delete() });
 
+        // ---------------------------------------------------------
         // EMAIL CHANGE FLOW (update TPIdentity.email + legacy Email/UserEmail)
+        // ---------------------------------------------------------
         if (purpose === "emailChange") {
           const existingTPIdentity = userData.TPIdentity || {};
 
@@ -27429,28 +27443,11 @@ export const verifyPin = onRequest(
           return res.json({ success: true });
         }
 
-        // -----------------------------
-        // TOKEN LOGIC (FINAL VERSION)
-        // -----------------------------
+        // ---------------------------------------------------------
+        // TOKEN LOGIC (SIMPLIFIED v11‑EVO)
+        // ---------------------------------------------------------
         const tpIdentity = userData.TPIdentity || {};
         const tpWallet = userData.TPWallet || {};
-
-        // permanent token (root-level anchor)
-        let permanentToken = userData.UserToken || null;
-
-        // current identity token (session token)
-        let identityToken = tpIdentity.resendToken || null;
-
-        // stay signed in flag
-        const staySignedIn =
-          userData.staySignedIn ??
-          false;
-
-        // last rotation timestamp
-        const lastRotation =
-          tpIdentity.tokenRotatedAt ||
-          userData.tokenRotatedAt ||
-          0;
 
         // Build identity object (returned to client)
         const identity = {
@@ -27471,52 +27468,13 @@ export const verifyPin = onRequest(
           identitySetAt: admin.firestore.Timestamp.now()
         };
 
-        // 1. FIRST LOGIN EVER → create permanent token
-        if (!permanentToken) {
-          permanentToken = generateLoginTokenForUser(
-            identity.uid,
-            identity.email,
-            identity.role,
-            identity.stripeAccountID,
-            jwtSecret
-          );
-        }
+        // Create a simple cryptographic pulse token (non-JWT, opaque)
+        const pulseToken = crypto.randomBytes(32).toString("hex");
 
-        // 2. REMEMBERED USER → rotate at most once per 30 days
-        if (staySignedIn) {
-          const nowMs = Date.now();
-          const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+        // Attach lineage token to identity (client can treat as resendToken)
+        identity.resendToken = pulseToken;
 
-          if (!identityToken || nowMs - lastRotation > THIRTY_DAYS) {
-            identityToken = generateLoginTokenForUser(
-              identity.uid,
-              identity.email,
-              identity.role,
-              identity.stripeAccountID,
-              jwtSecret
-            );
-          }
-          identity.rememberedDevice = true;
-          identity.resendToken = identityToken;
-          identity.tokenRotatedAt = nowMs;
-        } else {
-          // 3. NOT REMEMBERED USER → rotate every login
-          identityToken = generateLoginTokenForUser(
-            identity.uid,
-            identity.email,
-            identity.role,
-            identity.stripeAccountID,
-            jwtSecret
-          );
-
-          identity.rememberedDevice = false;
-          identity.resendToken = identityToken;
-          identity.tokenRotatedAt = Date.now();
-        }
-
-        // -----------------------------
-        // SAVE UPDATED USER (NEW SCHEMA)
-        // -----------------------------
+        // SAVE UPDATED USER (NEW SCHEMA) – no JWT, no rotation logic
         await db.collection("Users").doc(userID).set(
           {
             TPIdentity: {
@@ -27527,7 +27485,6 @@ export const verifyPin = onRequest(
               ...tpWallet,
               lastAppActive: admin.firestore.FieldValue.serverTimestamp()
             },
-            UserToken: permanentToken,
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
           },
           { merge: true }
@@ -27538,7 +27495,7 @@ export const verifyPin = onRequest(
           pin: pinData,
           uid: userID,
           identity,
-          token: identityToken,
+          token: pulseToken,
           reason: "pin_verified",
           actor: "user",
           source: "verifyPin",
@@ -27553,7 +27510,7 @@ export const verifyPin = onRequest(
             snapshotType: "pinVerifySuccess",
             pin: pinData,
             identity,
-            token: identityToken,
+            token: pulseToken,
             reason: "pin_verified",
             actor: "user",
             source: "verifyPin",
@@ -27562,7 +27519,7 @@ export const verifyPin = onRequest(
 
         return res.json({
           success: true,
-          token: identityToken,
+          token: pulseToken,
           identity
         });
       } catch (err) {
@@ -29789,3 +29746,4 @@ async function getUserRefByUid(uid) {
 //     }
 //   }
 // );
+export { detectUpgradedIntent, handleIntent};

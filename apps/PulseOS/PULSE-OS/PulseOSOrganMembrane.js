@@ -30,6 +30,52 @@
 //   • No timestamps, no randomness
 // ============================================================================
 
+// ============================================================================
+// ORGAN IDENTITY — v11‑EVO‑PRIME (A3 Organ Membrane)
+// ============================================================================
+export const PulseRole = {
+  type: "Barrier",
+  subsystem: "PulseOSOrganMembrane",
+  layer: "A3-OrganReflex",
+  version: "11.0-Evo-Prime",
+  identity: "PulseOSOrganMembrane-v11-Evo-Prime",
+
+  evo: {
+    // Core v11‑EVO invariants
+    driftProof: true,
+    deterministicField: true,
+    unifiedAdvantageField: true,
+    futureEvolutionReady: true,
+
+    // Reflex + membrane laws
+    zeroTiming: true,
+    zeroState: true,
+    zeroMutation: true,
+    zeroCompute: true,
+    zeroRoutingInfluence: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+
+    // Mesh + epithelial semantics
+    membraneLayer: "A3",
+    epithelialReflex: true,
+    meshLevel: true,
+    meshSentinel: true,
+    healingTriggerOnly: true,
+    degradationAnnotator: true,
+    dnaTagger: true,
+
+    // Mode + awareness
+    symbolicAware: true,
+    binaryAware: false,          // this membrane runs symbolic-only today
+    dualBandReady: true,
+
+    // Environment + safety
+    guardedWindowAccess: true,
+    environmentAgnostic: true,
+    multiInstanceReady: true
+  }
+};
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS

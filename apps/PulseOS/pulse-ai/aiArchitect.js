@@ -1,33 +1,52 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/PULSE-AI/aiArchitect.js
-// LAYER: ARCHITECT ORGAN (System + Identity + Architecture Insight)
-// ============================================================================
-//
-// ROLE:
-//   • Provide YOU (owner) deep visibility into system logs, identity evolution,
-//     security violations, drift, schema issues, unused imports, orphaned routes,
-//     dead components, and all design‑time diagnostics.
-//   • Integrates with aiEvolution for organism‑wide analysis.
-//   • Never exposes UID, resendToken, or identity anchors.
-//   • Pure read‑only introspection.
-//
-// CONTRACT:
-//   • READ‑ONLY — no writes, no deletes, no updates.
-//   • NO eval(), NO Function(), NO dynamic imports.
-//   • Deterministic analysis only.
-//   • ZERO IDENTITY LEAKAGE.
+//  PULSE OS v11‑EVO — ARCHITECT ORGAN
+//  System + Identity + Architecture Insight
+//  PURE READ-ONLY. ZERO IDENTITY LEAKAGE. ZERO MUTATION.
 // ============================================================================
 
-import { Personas } from "./persona.js";
+export const ArchitectMeta = Object.freeze({
+  layer: "PulseAIArchitectFrame",
+  role: "ARCHITECT_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiArchitect-v11-EVO",
 
-export function createArchitectAPI(db, evolutionAPI) {
+  contract: Object.freeze({
+    purpose: [
+      "Provide owner-level visibility into system and architecture state",
+      "Surface drift, schema issues, dead components, and orphaned routes",
+      "Map layers, imports, and web stack structure",
+      "Integrate with evolution organ for organism-wide analysis"
+    ],
+    never: [
+      "write to the system",
+      "delete data",
+      "update records",
+      "expose identity anchors"
+    ],
+    always: [
+      "stay read-only",
+      "stay deterministic",
+      "strip identity",
+      "respect owner+architect gating"
+    ]
+  })
+});
+
+// ============================================================================
+// PUBLIC API — Create Architect Organ
+// ============================================================================
+export function createArchitectOrgan({ db, evolutionAPI, personas }) {
 
   // --------------------------------------------------------------------------
   // HELPERS
   // --------------------------------------------------------------------------
   function assertOwnerArchitect(context) {
     const isOwner = context.userIsOwner === true;
-    const isArchitect = context.personaId === Personas.ARCHITECT;
+    const isArchitect =
+      context.personaId &&
+      personas &&
+      personas.ARCHITECT &&
+      context.personaId === personas.ARCHITECT;
 
     if (!isOwner || !isArchitect) {
       context.logStep?.("aiArchitect: access denied (not owner+architect).");
@@ -55,33 +74,82 @@ export function createArchitectAPI(db, evolutionAPI) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC API — Owner‑Only System / Identity / Evolution Insight
+  // WEB STACK / LAYER MAPPING
+  // --------------------------------------------------------------------------
+  function mapWebStack(filePath) {
+    const lower = String(filePath || "").toLowerCase();
+
+    let layer = "unknown";
+    let kind = "unknown";
+
+    if (lower.endsWith(".html")) {
+      layer = "presentation";
+      kind = "html-document";
+    } else if (lower.endsWith(".css")) {
+      layer = "presentation";
+      kind = "style-sheet";
+    } else if (lower.endsWith(".js")) {
+      layer = "logic";
+      kind = "javascript-module";
+    } else if (lower.endsWith(".json")) {
+      layer = "config";
+      kind = "schema-or-config";
+    }
+
+    return {
+      filePath,
+      layer,
+      kind,
+      message:
+        `File mapped as ${kind} in the ${layer} layer. ` +
+        "HTML/CSS/JS are treated as imports in a layered web stack."
+    };
+  }
+
+  function describeLayering() {
+    return {
+      layers: [
+        "binary / hardware",
+        "OS / runtime",
+        "backend services",
+        "API / routing",
+        "frontend logic (JS)",
+        "presentation (HTML/CSS)"
+      ],
+      message:
+        "Architecture is modeled as layers-of-layers; each layer can have its own organs and observers."
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // PUBLIC ARCHITECT API
   // --------------------------------------------------------------------------
   return Object.freeze({
 
-    // ----------------------------------------------------------------------
-    // IDENTITY + SECURITY
-    // ----------------------------------------------------------------------
+    meta: ArchitectMeta,
+
+    log(message) {
+      // architect-level trace
+      // context is passed per-call, so we log inside each method
+      console.debug?.("[aiArchitect]", message);
+    },
+
+    // IDENTITY + SECURITY (OWNER VIEW)
     async getIdentityHistory(context, options = {}) {
       const rows = await fetchOwnerCollection(context, "identityHistory", options);
+      context.logStep?.("aiArchitect: fetched identityHistory.");
       return Object.freeze(rows);
     },
 
     async getSecurityViolations(context, options = {}) {
       const rows = await fetchOwnerCollection(context, "securityViolations", options);
+      context.logStep?.("aiArchitect: fetched securityViolations.");
       return Object.freeze(rows);
     },
 
-    // ----------------------------------------------------------------------
-    // SYSTEM LOGS (DESIGN‑TIME)
-    // ----------------------------------------------------------------------
+    // SYSTEM LOGS (DESIGN-TIME)
     async getFunctionErrors(context, options = {}) {
       const rows = await fetchOwnerCollection(context, "functionErrors", options);
-      return Object.freeze(rows);
-    },
-
-    async getEmailLogs(context, options = {}) {
-      const rows = await fetchOwnerCollection(context, "emailLogs", options);
       return Object.freeze(rows);
     },
 
@@ -90,29 +158,9 @@ export function createArchitectAPI(db, evolutionAPI) {
       return Object.freeze(rows);
     },
 
-    async getCacheControl(context, options = {}) {
-      const rows = await fetchOwnerCollection(context, "CACHE_CONTROL", options);
-      return Object.freeze(rows);
-    },
-
-    // ----------------------------------------------------------------------
-    // SYSTEM SETTINGS
-    // ----------------------------------------------------------------------
-    async getSystemSettings(context, options = {}) {
-      const rows = await fetchOwnerCollection(context, "settings", options);
-      return Object.freeze(rows);
-    },
-
-    // ----------------------------------------------------------------------
     // ENVIRONMENT + POWER (OWNER VIEW)
-    // ----------------------------------------------------------------------
     async getEnvironmentInternal(context, options = {}) {
       const rows = await fetchOwnerCollection(context, "environment", options);
-      return Object.freeze(rows);
-    },
-
-    async getPowerInternal(context, options = {}) {
-      const rows = await fetchOwnerCollection(context, "power", options);
       return Object.freeze(rows);
     },
 
@@ -121,14 +169,7 @@ export function createArchitectAPI(db, evolutionAPI) {
       return Object.freeze(rows);
     },
 
-    async getPulseHistoryInternal(context, options = {}) {
-      const rows = await fetchOwnerCollection(context, "pulseHistory", options);
-      return Object.freeze(rows);
-    },
-
-    // ----------------------------------------------------------------------
-    // EVOLUTIONARY ANALYSIS (via aiEvolution)
-    // ----------------------------------------------------------------------
+    // EVOLUTIONARY ANALYSIS (via evolutionAPI)
     async getOrganismOverview(context) {
       if (!assertOwnerArchitect(context) || !evolutionAPI?.getOrganismOverview) return null;
       return evolutionAPI.getOrganismOverview(context);
@@ -136,7 +177,9 @@ export function createArchitectAPI(db, evolutionAPI) {
 
     async analyzeFile(context, filePath) {
       if (!assertOwnerArchitect(context) || !evolutionAPI?.analyzeFile) return null;
-      return evolutionAPI.analyzeFile(context, filePath);
+      const stackInfo = mapWebStack(filePath);
+      const evo = await evolutionAPI.analyzeFile(context, filePath);
+      return { stackInfo, evo };
     },
 
     async analyzeRoute(context, routeId) {
@@ -147,6 +190,10 @@ export function createArchitectAPI(db, evolutionAPI) {
     async analyzeSchema(context, schemaName) {
       if (!assertOwnerArchitect(context) || !evolutionAPI?.analyzeSchema) return null;
       return evolutionAPI.analyzeSchema(context, schemaName);
-    }
+    },
+
+    // ARCHITECTURE EXPLANATION
+    describeLayering,
+    mapWebStack
   });
 }

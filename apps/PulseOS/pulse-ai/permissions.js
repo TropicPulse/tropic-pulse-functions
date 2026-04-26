@@ -166,7 +166,7 @@ export const TourGuideAIPermissions = Object.freeze({
 
   canAccessIdentity: false,
 
-  // NEW v10.4 DOMAINS — BLOCKED
+  // NEW v10.4 DOMAINS — BLOCKED (base)
   canAccessEnvironment: false,
   canAccessPower: false,
   canAccessEarn: false,
@@ -213,7 +213,7 @@ export const NeutralAIPermissions = Object.freeze({
 
   canAccessIdentity: false,
 
-  // NEW v10.4 DOMAINS — BLOCKED
+  // NEW v10.4 DOMAINS — BLOCKED (base)
   canAccessEnvironment: false,
   canAccessPower: false,
   canAccessEarn: false,
@@ -249,4 +249,155 @@ export function checkPermission(persona, action, userIsOwner = false) {
 
   const permissions = getPermissionsForPersona(persona, userIsOwner);
   return permissions[action] === true;
+}
+
+// ============================================================================
+//  PULSE OS v11‑EVO — PERMISSION ENGINE EXTENSION
+//  Dual‑Band Safety • Castle Fully to the Wall • All Safe Tools Enabled
+// ============================================================================
+
+// Capability classes for high-level reasoning
+export const CapabilityClasses = Object.freeze({
+  SYSTEM_READ: "system-read",
+  DIAGNOSTIC_READ: "diagnostic-read",
+  USER_FACING: "user-facing",
+  MINIMAL: "minimal"
+});
+
+// Persona → capability class
+export const PersonaCapabilityClass = Object.freeze({
+  architect: CapabilityClasses.SYSTEM_READ,
+  observer: CapabilityClasses.DIAGNOSTIC_READ,
+  tourguide: CapabilityClasses.USER_FACING,
+  neutral: CapabilityClasses.MINIMAL,
+  owner: CapabilityClasses.SYSTEM_READ
+});
+
+// v11‑EVO: user-facing safety filter
+// “Give them every safe tool, never give them power to mutate or exfiltrate”
+export function filterPermissionsForUserFacing(permissions) {
+  return Object.freeze({
+    // Never allow system mutation or file mutation in user-facing mode
+    canReadFiles: false,
+    canWriteFiles: false,
+    canCreateFiles: false,
+    canDeleteFiles: false,
+
+    canModifySchemas: false,
+    canModifyBackend: false,
+    canModifyFrontend: false,
+    canModifyRouting: false,
+    canModifySecurity: false,
+    canRewriteSubsystems: false,
+
+    canGenerateFunctions: false,
+    canGenerateComponents: false,
+    canGenerateSchemas: false,
+    canGenerateMigrations: false,
+
+    canHealDrift: false,
+
+    // Never allow secrets / DB / OS / network
+    canAccessSecrets: false,
+    canAccessDatabase: false,
+    canAccessFirestore: false,
+    canAccessSQL: false,
+
+    // All internal cognitive tools that are safe
+    canAccessPulseSpecs: permissions.canAccessPulseSpecs === true,
+    canAccessPulseTranslators: permissions.canAccessPulseTranslators === true,
+    canAccessPulseDesign: permissions.canAccessPulseDesign === true,
+    canAccessPulseAI: permissions.canAccessPulseAI === true,
+
+    // Identity stays blocked for AIs
+    canAccessIdentity: false,
+
+    // Domain reads: allowed if base/expanded says true
+    canAccessEnvironment: permissions.canAccessEnvironment === true,
+    canAccessPower: permissions.canAccessPower === true,
+    canAccessEarn: permissions.canAccessEarn === true,
+    canAccessEvolution: permissions.canAccessEvolution === true,
+    canAccessDrift: permissions.canAccessDrift === true,
+    canAccessHistory: permissions.canAccessHistory === true,
+    canAccessSettings: permissions.canAccessSettings === true,
+
+    persona: permissions.persona
+  });
+}
+
+// v11‑EVO: evolutionary expansion (C‑plus / full wall)
+// Grants all safe *read-only* tools across domains, never mutation or secrets.
+function expandPermissionsForEvolution(base, { persona, archetypeId = null, evoState = {} }) {
+  const expanded = { ...base };
+
+  const allowExpansion = evoState.allowExpansion !== false;        // default: true
+  const allowSymbolicGrowth = evoState.allowSymbolicGrowth !== false; // default: true
+
+  if (!allowExpansion && !allowSymbolicGrowth) {
+    return Object.freeze(expanded);
+  }
+
+  // Architect / Observer: already strong read; ensure all safe tools are on
+  if (persona === "architect" || persona === "observer") {
+    expanded.canAccessPulseSpecs = true;
+    expanded.canAccessPulseTranslators = true;
+    expanded.canAccessPulseDesign = true;
+    expanded.canAccessPulseAI = true;
+
+    expanded.canAccessEnvironment = true;
+    expanded.canAccessPower = true;
+    expanded.canAccessEarn = true;
+    expanded.canAccessEvolution = true;
+    expanded.canAccessDrift = true;
+    expanded.canAccessHistory = true;
+    expanded.canAccessSettings = persona === "architect" ? true : expanded.canAccessSettings;
+
+    return Object.freeze(expanded);
+  }
+
+  // TourGuide / Neutral: evolve into full cognitive citizens (read-only)
+  if (persona === "tourguide" || persona === "neutral") {
+    expanded.canAccessPulseSpecs = true;
+    expanded.canAccessPulseAI = true;
+    expanded.canAccessPulseDesign = true;
+    expanded.canAccessPulseTranslators = true;
+
+    expanded.canAccessEnvironment = true;
+    expanded.canAccessPower = true;
+    expanded.canAccessEarn = true;
+    expanded.canAccessEvolution = true;
+    expanded.canAccessDrift = true;
+    expanded.canAccessHistory = true;
+    expanded.canAccessSettings = true;
+  }
+
+  // Never touch secrets, DB, OS, or mutation flags
+  return Object.freeze(expanded);
+}
+
+// High-level resolver for cortex/router
+export function resolvePermissionsV11({
+  persona,
+  userIsOwner = false,
+  userFacing = true,
+  archetypeId = null,
+  evoState = {}
+}) {
+  // Owner: full power, unchanged
+  if (userIsOwner) {
+    return OwnerPermissions;
+  }
+
+  const base = getPermissionsForPersona(persona, false);
+
+  // Evolutionary expansion: castle fully to the wall (read-only)
+  const expanded = expandPermissionsForEvolution(base, { persona, archetypeId, evoState });
+
+  if (!userFacing) {
+    // Internal/system use: expanded but not filtered
+    return expanded;
+  }
+
+  // User-facing: all safe tools, still no mutation/secrets/OS/DB
+  return filterPermissionsForUserFacing(expanded);
 }

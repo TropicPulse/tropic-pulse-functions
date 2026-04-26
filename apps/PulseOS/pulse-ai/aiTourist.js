@@ -1,14 +1,20 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/PULSE-AI/aiTourist.js
-// LAYER: TOURIST ORGAN (Public + User‑Scoped Data Pantry)
+// LAYER: TOURIST ORGAN (Public + User‑Scoped Data Pantry, Intent‑Aware)
 // ============================================================================
 //
 // ROLE:
 //   • Provide SAFE, READ‑ONLY access to tourist + user‑scoped data.
 //   • Respect owner‑only, user‑only, and tourist‑safe boundaries.
 //   • Never expose UID, resendToken, or identity anchors in AI output.
-//   • Act as the “data pantry” for Tour Guide AI.
+//   • Act as the “data pantry” for Tour Guide AI + intent handlers.
 //   • Provide cache-control metadata for each collection.
+//   • Expose high‑level bundles for:
+//       – area exploration
+//       – events
+//       – businesses
+//       – environment + history
+//       – power + history
 //
 // CONTRACT:
 //   • READ‑ONLY — no writes, no deletes, no updates.
@@ -16,6 +22,51 @@
 //   • NO executing user code.
 //   • Deterministic, scoped data access only.
 // ============================================================================
+export const TouristMeta = Object.freeze({
+  layer: "PulseAITouristFrame",
+  role: "TOURIST_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiTourist-v11-EVO",
+
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    readOnly: true,
+    identitySafe: true,
+    scopeAware: true,
+    intentAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Provide SAFE, READ-ONLY access to tourist, user-scoped, and owner-scoped data with deterministic caching and identity stripping.",
+
+    never: Object.freeze([
+      "mutate data",
+      "expose UID or identity anchors",
+      "perform writes",
+      "perform deletes",
+      "perform updates",
+      "execute user code",
+      "use eval() or Function()",
+      "bypass scope boundaries"
+    ]),
+
+    always: Object.freeze([
+      "strip identity fields",
+      "respect tourist/user/owner scopes",
+      "apply deterministic cache-control",
+      "return frozen data bundles",
+      "log boundary violations",
+      "support Tour Guide AI intent routing"
+    ])
+  })
+});
 
 import { Personas } from "./persona.js";
 
@@ -26,35 +77,40 @@ export function createTouristAPI(db) {
   // --------------------------------------------------------------------------
   const CACHE_CONTROL = Object.freeze({
     // PUBLIC / TOURIST-SAFE (can be cached)
-    businesses:        "public,max-age=300",
-    events:            "public,max-age=300",
-    categoryIconCache: "public,max-age=600",
-    duplicateImages:   "public,max-age=600",
-    menuSources:       "public,max-age=120",
-    pendingBusinesses: "public,max-age=60",
-    pendingMenus:      "public,max-age=60",
-    pulseHistory:      "public,max-age=120",
-    environment:       "public,max-age=30",
-    power:             "public,max-age=30",
-    powerData:         "public,max-age=30",
-    powerHistory:      "public,max-age=60",
-    powerSettings:     "public,max-age=120",
+    businesses:           "public,max-age=300",
+    events:               "public,max-age=300",
+    categoryIconCache:    "public,max-age=600",
+    duplicateImages:      "public,max-age=600",
+    menuSources:          "public,max-age=120",
+    pendingBusinesses:    "public,max-age=60",
+    pendingMenus:         "public,max-age=60",
+    pulseHistory:         "public,max-age=120",
+
+    // Environment / power (tourist-safe)
+    environment:          "public,max-age=30",
+    environment_history:  "public,max-age=60",
+    TPEnvironment:        "public,max-age=30",
+    TPEnvironmentHistory: "public,max-age=60",
+    power:                "public,max-age=30",
+    powerData:            "public,max-age=30",
+    powerHistory:         "public,max-age=60",
+    powerSettings:        "public,max-age=120",
 
     // USER-SCOPED (private cache)
-    orders:            "private,max-age=60",
-    referrals:         "private,max-age=60",
-    referralClicks:    "private,max-age=60",
-    vaultHistory:      "private,max-age=60",
-    timerLogsUserTried:"private,max-age=30",
-    timerLogsUserSaved:"private,max-age=30",
+    orders:               "private,max-age=60",
+    referrals:            "private,max-age=60",
+    referralClicks:       "private,max-age=60",
+    vaultHistory:         "private,max-age=60",
+    timerLogsUserTried:   "private,max-age=30",
+    timerLogsUserSaved:   "private,max-age=30",
 
     // OWNER-ONLY (no caching)
-    functionErrors:    "no-store",
-    identityHistory:   "no-store",
-    securityViolations:"no-store",
-    settings:          "no-store",
-    timerLogsSystem:   "no-store",
-    emailLogs:         "no-store"
+    functionErrors:       "no-store",
+    identityHistory:      "no-store",
+    securityViolations:   "no-store",
+    settings:             "no-store",
+    timerLogsSystem:      "no-store",
+    emailLogs:            "no-store"
   });
 
   // --------------------------------------------------------------------------
@@ -62,35 +118,40 @@ export function createTouristAPI(db) {
   // --------------------------------------------------------------------------
   const ACCESS = Object.freeze({
     // PUBLIC / TOURIST‑SAFE
-    businesses:        { scope: "tourist" },
-    events:            { scope: "tourist" },
-    categoryIconCache: { scope: "tourist" },
-    duplicateImages:   { scope: "tourist" },
-    menuSources:       { scope: "tourist" },
-    pendingBusinesses: { scope: "tourist" },
-    pendingMenus:      { scope: "tourist" },
-    pulseHistory:      { scope: "tourist" },
-    environment:       { scope: "tourist" },
-    power:             { scope: "tourist" },
-    powerData:         { scope: "tourist" },
-    powerHistory:      { scope: "tourist" },
-    powerSettings:     { scope: "tourist" },
+    businesses:           { scope: "tourist" },
+    events:               { scope: "tourist" },
+    categoryIconCache:    { scope: "tourist" },
+    duplicateImages:      { scope: "tourist" },
+    menuSources:          { scope: "tourist" },
+    pendingBusinesses:    { scope: "tourist" },
+    pendingMenus:         { scope: "tourist" },
+    pulseHistory:         { scope: "tourist" },
+
+    environment:          { scope: "tourist" },
+    environment_history:  { scope: "tourist" },
+    TPEnvironment:        { scope: "tourist" },
+    TPEnvironmentHistory: { scope: "tourist" },
+
+    power:                { scope: "tourist" },
+    powerData:            { scope: "tourist" },
+    powerHistory:         { scope: "tourist" },
+    powerSettings:        { scope: "tourist" },
 
     // USER‑SCOPED
-    orders:            { scope: "user" },
-    referrals:         { scope: "user" },
-    referralClicks:    { scope: "user" },
-    vaultHistory:      { scope: "user" },
-    timerLogsUserTried:{ scope: "user" },
-    timerLogsUserSaved:{ scope: "user" },
+    orders:               { scope: "user" },
+    referrals:            { scope: "user" },
+    referralClicks:       { scope: "user" },
+    vaultHistory:         { scope: "user" },
+    timerLogsUserTried:   { scope: "user" },
+    timerLogsUserSaved:   { scope: "user" },
 
     // OWNER‑ONLY
-    functionErrors:    { scope: "owner" },
-    identityHistory:   { scope: "owner" },
-    securityViolations:{ scope: "owner" },
-    settings:          { scope: "owner" },
-    timerLogsSystem:   { scope: "owner" },
-    emailLogs:         { scope: "owner" }
+    functionErrors:       { scope: "owner" },
+    identityHistory:      { scope: "owner" },
+    securityViolations:   { scope: "owner" },
+    settings:             { scope: "owner" },
+    timerLogsSystem:      { scope: "owner" },
+    emailLogs:            { scope: "owner" }
   });
 
   // --------------------------------------------------------------------------
@@ -148,71 +209,186 @@ export function createTouristAPI(db) {
   }
 
   // --------------------------------------------------------------------------
+  // BUNDLE HELPERS — for intent handlers / Tour Guide AI
+  // --------------------------------------------------------------------------
+  async function buildEnvironmentBundle(context) {
+    const [
+      environment,
+      environmentHistory,
+      tpEnv,
+      tpEnvHistory
+    ] = await Promise.all([
+      fetchCollection(context, "environment"),
+      fetchCollection(context, "environment_history"),
+      fetchCollection(context, "TPEnvironment"),
+      fetchCollection(context, "TPEnvironmentHistory")
+    ]);
+
+    return {
+      data: {
+        environment: environment.data,
+        environmentHistory: environmentHistory.data,
+        TPEnvironment: tpEnv.data,
+        TPEnvironmentHistory: tpEnvHistory.data
+      },
+      cache: {
+        environment: environment.cache,
+        environmentHistory: environmentHistory.cache,
+        TPEnvironment: tpEnv.cache,
+        TPEnvironmentHistory: tpEnvHistory.cache
+      }
+    };
+  }
+
+  async function buildPowerBundle(context) {
+    const [
+      power,
+      powerData,
+      powerHistory,
+      powerSettings
+    ] = await Promise.all([
+      fetchCollection(context, "power"),
+      fetchCollection(context, "powerData"),
+      fetchCollection(context, "powerHistory"),
+      fetchCollection(context, "powerSettings")
+    ]);
+
+    return {
+      data: {
+        power: power.data,
+        powerData: powerData.data,
+        powerHistory: powerHistory.data,
+        powerSettings: powerSettings.data
+      },
+      cache: {
+        power: power.cache,
+        powerData: powerData.cache,
+        powerHistory: powerHistory.cache,
+        powerSettings: powerSettings.cache
+      }
+    };
+  }
+
+  async function buildBusinessBundle(context, businessId) {
+    const [
+      businesses,
+      menus,
+      pendingMenus,
+      duplicateImages,
+      categoryIcons
+    ] = await Promise.all([
+      fetchCollection(context, "businesses", { where: { id: businessId } }),
+      fetchCollection(context, "menuSources", { where: { businessId } }),
+      fetchCollection(context, "pendingMenus", { where: { businessId } }),
+      fetchCollection(context, "duplicateImages", { where: { businessId } }),
+      fetchCollection(context, "categoryIconCache")
+    ]);
+
+    return {
+      data: {
+        business: businesses.data[0] || null,
+        menus: menus.data,
+        pendingMenus: pendingMenus.data,
+        duplicateImages: duplicateImages.data,
+        categoryIcons: categoryIcons.data
+      },
+      cache: {
+        business: businesses.cache,
+        menus: menus.cache,
+        pendingMenus: pendingMenus.cache,
+        duplicateImages: duplicateImages.cache,
+        categoryIcons: categoryIcons.cache
+      }
+    };
+  }
+
+  async function buildAreaOverview(context) {
+    const [
+      businesses,
+      events,
+      environmentBundle,
+      powerBundle,
+      pulseHistory
+    ] = await Promise.all([
+      fetchCollection(context, "businesses"),
+      fetchCollection(context, "events"),
+      buildEnvironmentBundle(context),
+      buildPowerBundle(context),
+      fetchCollection(context, "pulseHistory")
+    ]);
+
+    return {
+      data: {
+        businesses: businesses.data,
+        events: events.data,
+        environment: environmentBundle.data,
+        power: powerBundle.data,
+        pulseHistory: pulseHistory.data
+      },
+      cache: {
+        businesses: businesses.cache,
+        events: events.cache,
+        environment: environmentBundle.cache,
+        power: powerBundle.cache,
+        pulseHistory: pulseHistory.cache
+      }
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // INTENT ROUTER — for Tour Guide / intent handlers
+  // --------------------------------------------------------------------------
+  // intent = { type: string, businessId?: string }
+  async function resolveTouristIntent(context, intent) {
+    if (!intent || !intent.type) {
+      context.logStep?.("aiTourist: resolveTouristIntent called without type.");
+      return { data: {}, cache: {} };
+    }
+
+    switch (intent.type) {
+      case "explore-area":
+        return buildAreaOverview(context);
+
+      case "check-environment":
+        return buildEnvironmentBundle(context);
+
+      case "check-power":
+        return buildPowerBundle(context);
+
+      case "view-business":
+        if (!intent.businessId) {
+          context.logStep?.("aiTourist: view-business intent without businessId.");
+          return { data: {}, cache: {} };
+        }
+        return buildBusinessBundle(context, intent.businessId);
+
+      case "list-events":
+        {
+          const events = await fetchCollection(context, "events");
+          return {
+            data: { events: events.data },
+            cache: { events: events.cache }
+          };
+        }
+
+      default:
+        context.logStep?.(`aiTourist: unknown intent type "${intent.type}".`);
+        return { data: {}, cache: {} };
+    }
+  }
+
+  // --------------------------------------------------------------------------
   // PUBLIC API — High‑Level Helpers for Tour Guide AI
   // --------------------------------------------------------------------------
   return {
-    // Tourist‑facing overview
+    // Tourist‑facing overview (area snapshot)
     async getTouristOverview(context) {
-      const [
-        businesses,
-        events,
-        environment,
-        power,
-        pulseHistory
-      ] = await Promise.all([
-        fetchCollection(context, "businesses"),
-        fetchCollection(context, "events"),
-        fetchCollection(context, "environment"),
-        fetchCollection(context, "power"),
-        fetchCollection(context, "pulseHistory")
-      ]);
-
-      return {
-        data: {
-          businesses: businesses.data,
-          events: events.data,
-          environment: environment.data,
-          power: power.data,
-          pulseHistory: pulseHistory.data
-        },
-        cache: {
-          businesses: businesses.cache,
-          events: events.cache,
-          environment: environment.cache,
-          power: power.cache,
-          pulseHistory: pulseHistory.cache
-        }
-      };
+      return buildAreaOverview(context);
     },
 
-    // Business bundle
+    // Business bundle (single business focus)
     async getBusinessBundle(context, businessId) {
-      const [
-        businesses,
-        menus,
-        pendingMenus,
-        duplicateImages
-      ] = await Promise.all([
-        fetchCollection(context, "businesses", { where: { id: businessId } }),
-        fetchCollection(context, "menuSources", { where: { businessId } }),
-        fetchCollection(context, "pendingMenus", { where: { businessId } }),
-        fetchCollection(context, "duplicateImages", { where: { businessId } })
-      ]);
-
-      return {
-        data: {
-          business: businesses.data[0] || null,
-          menus: menus.data,
-          pendingMenus: pendingMenus.data,
-          duplicateImages: duplicateImages.data
-        },
-        cache: {
-          business: businesses.cache,
-          menus: menus.cache,
-          pendingMenus: pendingMenus.cache,
-          duplicateImages: duplicateImages.cache
-        }
-      };
+      return buildBusinessBundle(context, businessId);
     },
 
     // User referrals
@@ -307,6 +483,11 @@ export function createTouristAPI(db) {
           emailLogs: emailLogs.cache
         }
       };
+    },
+
+    // Intent‑aware entrypoint for Tour Guide / CNS
+    async resolveIntent(context, intent) {
+      return resolveTouristIntent(context, intent);
     }
   };
 }

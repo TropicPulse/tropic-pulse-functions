@@ -1,37 +1,82 @@
 // ============================================================================
-//  PULSE OS v10.4 — AI SERVICE GATEWAY
-//  Safe Entry Point • Persona Router • Evolutionary Relay
-//  PURE RELAY. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
+//  PULSE OS v11‑EVO — AI SERVICE GATEWAY
+//  Dual‑Band Entry Point • Safe Relay • Deterministic Execution
+//  PURE RELAY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
+export const ServiceGatewayMeta = Object.freeze({
+  layer: "PulseAIServiceGateway",
+  role: "SERVICE_GATEWAY_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiServiceGateway-v11-EVO",
 
-import { runAI } from "./aiEngine.js";
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    relayOnly: true,
+    analysisAware: true,
+    schemaAware: true,
+    lineageAware: true,
+    slowdownAware: true,
+    tourismAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
 
-import {
-  analyzeFirestoreDoc,
-  analyzeSQLSchema,
-  detectDrift,
-  detectSlowdownPatterns,
-  validatePulseSchema
-} from "./aiTools.js";
+  contract: Object.freeze({
+    purpose:
+      "Provide a deterministic, dual-band-safe relay for analysis, audit, schema validation, drift detection, slowdown detection, route/log/error analysis, and tourism queries.",
 
-// ============================================================================
-// INTERNAL — Deterministic Relay Wrapper
-// ============================================================================
-function callAI(intent, flags, operation, request = {}) {
+    never: Object.freeze([
+      "mutate context",
+      "mutate data",
+      "override router decisions",
+      "override cortex decisions",
+      "introduce randomness",
+      "perform cognition",
+      "perform intent logic",
+      "perform writes",
+      "perform deletes",
+      "perform updates"
+    ]),
+
+    always: Object.freeze([
+      "relay operations through runAI",
+      "freeze all inputs",
+      "freeze all outputs",
+      "respect dual-band boundaries",
+      "respect persona + permissions",
+      "log deterministic steps",
+      "return unified response packets"
+    ])
+  })
+});
+
+import { runAI } from "./aiEngine-v11-Evo.js";
+import { analyzeFirestoreDoc, analyzeSQLSchema, detectDrift, detectSlowdownPatterns, validatePulseSchema } from "./aiTools.js";
+
+// ---------------------------------------------------------------------------
+// INTERNAL — Deterministic Relay Wrapper (v11‑EVO)
+// ---------------------------------------------------------------------------
+function callAI(intent, flags, operation, request = {}, dualBand = null) {
   return runAI(
     Object.freeze({
       ...request,
       intent,
       ...flags
     }),
-    operation
+    operation,
+    request.deps || {},
+    dualBand
   );
 }
 
 // ============================================================================
-// FIRESTORE ANALYSIS — Gateway Wrapper
+// FIRESTORE ANALYSIS — Dual‑Band Gateway
 // ============================================================================
-export async function runAnalyzeFirestore(docData, request = {}) {
+export async function runAnalyzeFirestore(docData, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesSchemas: true }),
@@ -40,14 +85,15 @@ export async function runAnalyzeFirestore(docData, request = {}) {
       detectSlowdownPatterns(context, docData);
       return pulseSchema;
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// SQL ANALYSIS — Gateway Wrapper
+// SQL ANALYSIS — Dual‑Band Gateway
 // ============================================================================
-export async function runAnalyzeSQL(sqlSchema, request = {}) {
+export async function runAnalyzeSQL(sqlSchema, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesSchemas: true }),
@@ -56,14 +102,15 @@ export async function runAnalyzeSQL(sqlSchema, request = {}) {
       detectSlowdownPatterns(context, sqlSchema);
       return pulseSchema;
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// DRIFT DETECTION — Gateway Wrapper
+// DRIFT DETECTION — Dual‑Band Gateway
 // ============================================================================
-export async function runDetectDrift(pulseSchema, firestoreSchema, request = {}) {
+export async function runDetectDrift(pulseSchema, firestoreSchema, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesSchemas: true }),
@@ -71,14 +118,15 @@ export async function runDetectDrift(pulseSchema, firestoreSchema, request = {})
       const drift = detectDrift(context, pulseSchema, firestoreSchema);
       return Object.freeze({ drift });
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// PULSE SCHEMA VALIDATION — Gateway Wrapper
+// PULSE SCHEMA VALIDATION — Dual‑Band Gateway
 // ============================================================================
-export async function runValidatePulse(pulseSchema, request = {}) {
+export async function runValidatePulse(pulseSchema, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesSchemas: true }),
@@ -88,14 +136,15 @@ export async function runValidatePulse(pulseSchema, request = {}) {
         valid: context.diagnostics.mismatches.length === 0
       });
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// FULL AUDIT — Gateway Wrapper
+// FULL AUDIT — Dual‑Band Gateway
 // ============================================================================
-export async function runFullAudit(pulseSchema, firestoreDoc, request = {}) {
+export async function runFullAudit(pulseSchema, firestoreDoc, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesSchemas: true }),
@@ -117,14 +166,15 @@ export async function runFullAudit(pulseSchema, firestoreDoc, request = {}) {
         slowdownCauses: context.diagnostics.slowdownCauses
       });
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// NEW v10.4 — SYSTEM ANALYSIS SERVICES
+// ROUTE ANALYSIS — Dual‑Band Gateway
 // ============================================================================
-export async function runAnalyzeRoutes(routeData, request = {}) {
+export async function runAnalyzeRoutes(routeData, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesRoutes: true }),
@@ -132,11 +182,15 @@ export async function runAnalyzeRoutes(routeData, request = {}) {
       context.logStep?.("Analyzing routing decisions...");
       return Object.freeze({ routeData });
     },
-    request
+    request,
+    dualBand
   );
 }
 
-export async function runAnalyzeLogs(logs, request = {}) {
+// ============================================================================
+// LOG ANALYSIS — Dual‑Band Gateway
+// ============================================================================
+export async function runAnalyzeLogs(logs, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesLogs: true }),
@@ -144,11 +198,15 @@ export async function runAnalyzeLogs(logs, request = {}) {
       context.logStep?.("Analyzing logs...");
       return Object.freeze({ logs });
     },
-    request
+    request,
+    dualBand
   );
 }
 
-export async function runAnalyzeErrors(errors, request = {}) {
+// ============================================================================
+// ERROR ANALYSIS — Dual‑Band Gateway
+// ============================================================================
+export async function runAnalyzeErrors(errors, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesErrors: true }),
@@ -156,14 +214,15 @@ export async function runAnalyzeErrors(errors, request = {}) {
       context.logStep?.("Analyzing errors...");
       return Object.freeze({ errors });
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// NEW v10.4 — ARCHITECTURE SERVICES
+// ARCHITECTURE EXPLANATION — Dual‑Band Gateway
 // ============================================================================
-export async function runExplainOrgan(organMeta, request = {}) {
+export async function runExplainOrgan(organMeta, request = {}, dualBand = null) {
   return callAI(
     "explain",
     Object.freeze({ touchesArchitecture: true }),
@@ -171,11 +230,12 @@ export async function runExplainOrgan(organMeta, request = {}) {
       context.logStep?.("Explaining organ...");
       return Object.freeze({ organMeta });
     },
-    request
+    request,
+    dualBand
   );
 }
 
-export async function runExplainPathway(pathway, request = {}) {
+export async function runExplainPathway(pathway, request = {}, dualBand = null) {
   return callAI(
     "explain",
     Object.freeze({ touchesArchitecture: true }),
@@ -183,14 +243,15 @@ export async function runExplainPathway(pathway, request = {}) {
       context.logStep?.("Explaining pathway...");
       return Object.freeze({ pathway });
     },
-    request
+    request,
+    dualBand
   );
 }
 
 // ============================================================================
-// NEW v10.4 — TOUR GUIDE SERVICES
+// TOUR GUIDE — Dual‑Band Gateway
 // ============================================================================
-export async function runTourGuideQuery(query, request = {}) {
+export async function runTourGuideQuery(query, request = {}, dualBand = null) {
   return callAI(
     "analyze",
     Object.freeze({ touchesTourism: true }),
@@ -198,6 +259,7 @@ export async function runTourGuideQuery(query, request = {}) {
       context.logStep?.("Running tour guide query...");
       return Object.freeze({ query });
     },
-    request
+    request,
+    dualBand
   );
 }

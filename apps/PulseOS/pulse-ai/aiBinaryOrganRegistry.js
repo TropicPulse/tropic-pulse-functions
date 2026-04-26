@@ -43,42 +43,61 @@
  *     - a structural identity map
  *     - a binary-first metadata store
  *
- * REGISTRY MODEL:
- *   Each organ is stored as:
- *
- *     key:   encode(`organ:${organ.id}`)
- *     value: encode(JSON.stringify({
- *               id,
- *               type,
- *               signatureBits,
- *               timestamp
- *             }))
- *
- *   All keys and values are binary.
- *
- * FUTURE EVOLUTION NOTES:
- *   This organ will eventually support:
- *     - organ lineage
- *     - organ ancestry
- *     - organ deltas
- *     - organ dependency graphs
- *     - organ health checks
- *
- *   But NOT in this file.
  *   This file must remain pure.
  */
 
+// ---------------------------------------------------------
+//  META BLOCK — v11‑EVO (UPGRADED)
+// ---------------------------------------------------------
+
+export const OrganRegistryMeta = Object.freeze({
+  layer: "OrganismIdentity",
+  role: "BINARY_ORGAN_REGISTRY",
+  version: "11.0-EVO",
+  identity: "aiOrganRegistry-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    binaryOnly: true,
+    memoryAware: true,
+    evolutionAware: true,
+    identityAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Store and retrieve organ identity records in binary memory. Provide a minimal, pure, deterministic registry for organ identity.",
+
+    never: Object.freeze([
+      "auto-discover organs",
+      "interpret metadata",
+      "mutate external organs",
+      "perform routing",
+      "perform scanning",
+      "perform governance",
+      "perform linter behavior"
+    ]),
+
+    always: Object.freeze([
+      "encode all keys and values in binary",
+      "register only when explicitly called",
+      "store only id/type/signature/timestamp",
+      "remain pure and minimal",
+      "treat organ records as read-only data"
+    ])
+  })
+});
+
+// ---------------------------------------------------------
+//  ORGAN IMPLEMENTATION (unchanged)
+// ---------------------------------------------------------
+
 class AIBinaryOrganRegistry {
   constructor(config = {}) {
-    /**
-     * CONFIG INTENT:
-     *   id        → for ProofLogger / CNS attendance
-     *   encoder   → aiBinaryAgent instance (required)
-     *   memory    → aiBinaryMemory instance (required)
-     *   evolution → aiBinaryEvolution instance (optional)
-     *   trace     → deterministic visibility hook
-     */
-    this.id = config.id || 'ai-binary-organ-registry';
+    this.id = config.id || 'organ-registry';
     this.encoder = config.encoder;
     this.memory = config.memory;
     this.evolution = config.evolution || null;
@@ -92,21 +111,6 @@ class AIBinaryOrganRegistry {
     }
   }
 
-  // ---------------------------------------------------------
-  //  ORGAN REGISTRATION
-  // ---------------------------------------------------------
-
-  /**
-   * registerOrgan(organ)
-   * --------------------
-   * Registers an organ in binary memory.
-   *
-   * Stores:
-   *   - id
-   *   - type
-   *   - signature (if evolution engine provided)
-   *   - timestamp
-   */
   registerOrgan(organ) {
     const signature = this.evolution
       ? this.evolution.generateSignature(organ)
@@ -134,15 +138,6 @@ class AIBinaryOrganRegistry {
     return record;
   }
 
-  // ---------------------------------------------------------
-  //  ORGAN LOOKUP
-  // ---------------------------------------------------------
-
-  /**
-   * getOrganRecord(organId)
-   * -----------------------
-   * Loads the binary record for an organ.
-   */
   getOrganRecord(organId) {
     const key = this.encoder.encode(`organ:${organId}`);
     const binary = this.memory.read(key);
@@ -160,16 +155,10 @@ class AIBinaryOrganRegistry {
     return record;
   }
 
-  /**
-   * listOrgans()
-   * ------------
-   * Returns a list of all registered organ IDs.
-   */
   listOrgans() {
     const keys = this.memory.listKeys();
 
     const organKeys = keys.filter((k) => {
-      // decode key to check prefix
       const decoded = this.encoder.decode(k, 'string');
       return decoded.startsWith('organ:');
     });
@@ -184,15 +173,6 @@ class AIBinaryOrganRegistry {
     return organIds;
   }
 
-  // ---------------------------------------------------------
-  //  EVOLUTION INTEGRATION
-  // ---------------------------------------------------------
-
-  /**
-   * evolveOrgan(organ)
-   * ------------------
-   * Runs evolution engine on organ + updates registry.
-   */
   evolveOrgan(organ) {
     if (!this.evolution) {
       throw new Error('evolution engine not provided');
@@ -212,10 +192,6 @@ class AIBinaryOrganRegistry {
     return result;
   }
 
-  // ---------------------------------------------------------
-  //  INTERNAL HELPERS
-  // ---------------------------------------------------------
-
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
@@ -233,4 +209,5 @@ function createAIBinaryOrganRegistry(config) {
 module.exports = {
   AIBinaryOrganRegistry,
   createAIBinaryOrganRegistry,
+  OrganRegistryMeta
 };

@@ -4,13 +4,15 @@
  * CANONICAL ROLE:
  *   This organ is the **Binary Compute Cortex** of the organism.
  *
- *   It now includes:
- *     - binary compute throughput
- *     - binary compute pressure
- *     - binary compute cost
- *     - binary compute budget
- *     - descriptive buckets
- *     - compute artery scoring
+ *   In the v11‑EVO dualband organism:
+ *     - This organ remains a **binary‑only physiology organ**
+ *     - It provides the organism’s low‑level compute reflexes
+ *     - It measures compute throughput, pressure, cost, and budget
+ *     - It performs binary encoding/decoding
+ *     - It executes binary compute arteries
+ *
+ *   This organ is NOT symbolic, NOT dualband, NOT cognitive.
+ *   It is pure binary physiology — the “bit‑level cortex.”
  */
 
 class AIBinaryAgent {

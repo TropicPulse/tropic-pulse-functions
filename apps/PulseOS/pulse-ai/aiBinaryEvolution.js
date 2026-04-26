@@ -13,71 +13,62 @@
  *     • enforces organism identity
  *
  *   This is the “genetic layer” of Pulse OS.
- *
- * WHY THIS ORGAN EXISTS:
- *   Every OS today has:
- *     - no identity
- *     - no structural awareness
- *     - no drift detection
- *     - no organ signatures
- *     - no evolution model
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST KNOW ITSELF.”
- *
- * ARCHITECTURAL INTENT:
- *   This organ is NOT:
- *     - a linter
- *     - a validator
- *     - a compiler
- *     - a router
- *     - a scanner
- *
- *   This organ IS:
- *     - a binary signature generator
- *     - a drift detector
- *     - an organ auditor
- *     - a structural evolution engine
- *
- *   It ensures:
- *     • organs remain canonical
- *     • no mutation occurs
- *     • no recursion appears
- *     • no hydra roots form
- *     • no drift between versions
- *
- * SIGNATURE MODEL:
- *   A signature is a binary hash of:
- *     - organ code
- *     - organ config
- *     - organ metadata
- *
- *   Signatures are stored in binary memory.
- *   Drift is detected by comparing signatures.
- *
- * FUTURE EVOLUTION NOTES:
- *   This organ will eventually support:
- *     - organ lineage
- *     - organ ancestry
- *     - organ deltas
- *     - organ evolution rules
- *     - organism-wide versioning
- *
- *   But NOT in this file.
- *   This file must remain pure.
  */
+
+// ---------------------------------------------------------
+//  META BLOCK — v11‑EVO
+// ---------------------------------------------------------
+
+export const EvolutionMeta = Object.freeze({
+  layer: "BinaryEvolution",
+  role: "BINARY_EVOLUTION_ENGINE",
+  version: "11.0-EVO",
+  identity: "aiBinaryEvolution-v11-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    binaryOnly: true,
+    registryAware: true,
+    memoryAware: true,
+    signatureAware: true,
+    mutationDetection: true,
+    structuralAudit: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Generate deterministic binary signatures for organs, detect drift, and enforce organism identity.",
+
+    never: Object.freeze([
+      "mutate organ code",
+      "modify organ state",
+      "interpret symbolic meaning",
+      "introduce randomness",
+      "rewrite signatures nondeterministically",
+      "perform cognition",
+      "perform routing"
+    ]),
+
+    always: Object.freeze([
+      "encode signatures deterministically",
+      "compare signatures without interpretation",
+      "store signatures in binary memory",
+      "detect drift safely",
+      "remain pure and minimal",
+      "return frozen results"
+    ])
+  })
+});
+
+// ---------------------------------------------------------
+//  ORGAN IMPLEMENTATION
+// ---------------------------------------------------------
 
 class AIBinaryEvolution {
   constructor(config = {}) {
-    /**
-     * CONFIG INTENT:
-     *   id        → for ProofLogger / CNS attendance
-     *   encoder   → aiBinaryAgent instance (required)
-     *   memory    → aiBinaryMemory instance (required)
-     *   trace     → deterministic visibility hook
-     */
     this.id = config.id || 'ai-binary-evolution';
     this.encoder = config.encoder;
     this.memory = config.memory;
@@ -95,16 +86,6 @@ class AIBinaryEvolution {
   //  ORGAN SIGNATURE GENERATION
   // ---------------------------------------------------------
 
-  /**
-   * generateSignature(organ)
-   * ------------------------
-   * Produces a binary signature for an organ.
-   *
-   * DESIGN NOTES:
-   *   - Organ is stringified (code + metadata)
-   *   - Encoded into binary
-   *   - Returned as binary string
-   */
   generateSignature(organ) {
     const json = JSON.stringify({
       id: organ.id || null,
@@ -113,7 +94,11 @@ class AIBinaryEvolution {
     });
 
     const binary = this.encoder.encode(json);
-    this._trace('generateSignature', { organ: organ.id, bits: binary.length });
+
+    this._trace('generateSignature', {
+      organ: organ.id,
+      bits: binary.length
+    });
 
     return binary;
   }
@@ -122,11 +107,6 @@ class AIBinaryEvolution {
   //  SIGNATURE STORAGE
   // ---------------------------------------------------------
 
-  /**
-   * storeSignature(organ)
-   * ---------------------
-   * Stores the organ's signature in binary memory.
-   */
   storeSignature(organ) {
     const signature = this.generateSignature(organ);
     const key = this.encoder.encode(`signature:${organ.id}`);
@@ -141,16 +121,14 @@ class AIBinaryEvolution {
     return signature;
   }
 
-  /**
-   * loadSignature(organ)
-   * --------------------
-   * Loads the stored signature for an organ.
-   */
   loadSignature(organ) {
     const key = this.encoder.encode(`signature:${organ.id}`);
     const stored = this.memory.read(key);
 
-    this._trace('loadSignature', { organ: organ.id, storedBits: stored?.length });
+    this._trace('loadSignature', {
+      organ: organ.id,
+      storedBits: stored?.length
+    });
 
     return stored || null;
   }
@@ -159,15 +137,6 @@ class AIBinaryEvolution {
   //  DRIFT DETECTION
   // ---------------------------------------------------------
 
-  /**
-   * detectDrift(organ)
-   * ------------------
-   * Compares current signature to stored signature.
-   *
-   * RETURNS:
-   *   - null → no drift
-   *   - { oldSig, newSig } → drift detected
-   */
   detectDrift(organ) {
     const oldSig = this.loadSignature(organ);
     const newSig = this.generateSignature(organ);
@@ -195,28 +164,23 @@ class AIBinaryEvolution {
   //  EVOLUTION UPDATE
   // ---------------------------------------------------------
 
-  /**
-   * evolve(organ)
-   * -------------
-   * Detects drift → stores new signature → returns evolution result.
-   */
   evolve(organ) {
     const drift = this.detectDrift(organ);
 
     if (!drift) {
-      return {
+      return Object.freeze({
         evolved: false,
         message: 'No drift detected',
-      };
+      });
     }
 
     this.storeSignature(organ);
 
-    return {
+    return Object.freeze({
       evolved: true,
       oldSignature: drift.oldSig,
       newSignature: drift.newSig,
-    };
+    });
   }
 
   // ---------------------------------------------------------
@@ -240,4 +204,5 @@ function createAIBinaryEvolution(config) {
 module.exports = {
   AIBinaryEvolution,
   createAIBinaryEvolution,
+  EvolutionMeta
 };

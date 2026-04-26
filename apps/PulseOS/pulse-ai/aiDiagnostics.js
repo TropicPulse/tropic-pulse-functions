@@ -1,42 +1,59 @@
 // ============================================================================
-//  PULSE OS v10.4 — AI DIAGNOSTICS
-//  Drift Tracker • Mismatch Ledger • Slowdown Sensor
-//  PURE OBSERVATION. ZERO RANDOMNESS. ZERO PERSISTENT MUTATION.
-// ============================================================================
-//
-// ROLE:
-//   • Provide a deterministic diagnostics state for any AI context.
-//   • Expose helper functions to record mismatches, drift, and slowdown causes.
-//   • Stay read-only with respect to system architecture and identity.
-//   • Be pluggable into Brainstem context or a dedicated diagnostics organ.
-//
-// CONTRACT:
-//   • No network, no filesystem, no DB access.
-//   • No eval(), no Function(), no dynamic imports.
-//   • No writes outside the provided diagnostics object.
+//  PULSE OS v11‑EVO — DIAGNOSTICS ORGAN
+//  Drift Tracker • Mismatch Ledger • Slowdown Sensor • Integrity Surface
+//  PURE OBSERVATION. ZERO RANDOMNESS. ZERO MUTATION.
 // ============================================================================
 
-// ============================================================================
-//  IDENTITY — THE DIAGNOSTICS (v10.4)
-// ============================================================================
-export const AI_DIAGNOSTICS_META = Object.freeze({
-  layer: "PulseAIDiagnostics",
-  role: "DIAGNOSTICS",
-  version: "10.4",
-  target: "full-mesh",
+export const DiagnosticsMeta = Object.freeze({
+  layer: "PulseAIDiagnosticsFrame",
+  role: "DIAGNOSTICS_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiDiagnostics-v11-EVO",
+
   evo: Object.freeze({
     driftProof: true,
-    deterministicField: true,
-    multiInstanceReady: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    diagnosticsAware: true,
+    patternAware: true,
+    schemaAware: true,
     observerOnly: true,
     architectAware: true,
-    schemaAware: true,
-    patternAware: true
+    identitySafe: true,
+    readOnly: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose: Object.freeze([
+      "Provide deterministic diagnostics state for any AI context",
+      "Record mismatches, drift, missing fields, and slowdown causes",
+      "Expose safe, read-only observation surfaces",
+      "Support organism-level introspection without mutation"
+    ]),
+
+    never: Object.freeze([
+      "mutate context identity",
+      "modify system architecture",
+      "write to external systems",
+      "introduce randomness"
+    ]),
+
+    always: Object.freeze([
+      "observe",
+      "record",
+      "annotate",
+      "stay deterministic"
+    ])
   })
 });
 
+
 // ============================================================================
-//  FACTORY — Create Diagnostics State
+// FACTORY — Create Diagnostics State
 // ============================================================================
 export function createDiagnosticsState() {
   return {
@@ -44,23 +61,18 @@ export function createDiagnosticsState() {
     missingFields: [],
     slowdownCauses: [],
     driftEvents: [],
-    driftDetected: false
+    driftDetected: false,
+    timestamp: Date.now()
   };
 }
 
 // ============================================================================
-//  HELPERS — Attach Diagnostics to a Context
+// ATTACH HELPERS — Bind Diagnostics to a Context
 // ============================================================================
-//
-// This is intentionally minimal and side-effect scoped:
-// it only mutates the provided context object at runtime.
-//
-export function attachDiagnosticsHelpers(context) {
+export function attachDiagnosticsOrgan(context) {
   if (!context) return context;
 
   const diagnostics = createDiagnosticsState();
-
-  // Attach state
   context.diagnostics = diagnostics;
 
   // --------------------------------------------------------------------------
@@ -68,6 +80,7 @@ export function attachDiagnosticsHelpers(context) {
   // --------------------------------------------------------------------------
   context.flagMismatch = (key, expected, actual) => {
     diagnostics.mismatches.push({ key, expected, actual });
+    context.trace?.push?.(`Mismatch: ${key} expected ${expected}, got ${actual}`);
   };
 
   // --------------------------------------------------------------------------
@@ -75,6 +88,7 @@ export function attachDiagnosticsHelpers(context) {
   // --------------------------------------------------------------------------
   context.flagMissingField = (key) => {
     diagnostics.missingFields.push({ key });
+    context.trace?.push?.(`Missing field: ${key}`);
   };
 
   // --------------------------------------------------------------------------
@@ -82,6 +96,7 @@ export function attachDiagnosticsHelpers(context) {
   // --------------------------------------------------------------------------
   context.flagSlowdown = (reason) => {
     diagnostics.slowdownCauses.push({ reason });
+    context.trace?.push?.(`Slowdown cause: ${reason}`);
   };
 
   // --------------------------------------------------------------------------
@@ -90,17 +105,15 @@ export function attachDiagnosticsHelpers(context) {
   context.flagDrift = (description) => {
     diagnostics.driftDetected = true;
     diagnostics.driftEvents.push({ description });
+    context.trace?.push?.(`Drift detected: ${description}`);
   };
 
   return context;
 }
 
 // ============================================================================
-//  PUBLIC API — Create Standalone Diagnostics Bundle
+// STANDALONE DIAGNOSTICS API — No Context Mutation
 // ============================================================================
-//
-// For use as a dedicated organ or standalone module without mutating context.
-//
 export function createDiagnosticsAPI() {
   const diagnostics = createDiagnosticsState();
 
@@ -122,6 +135,7 @@ export function createDiagnosticsAPI() {
   }
 
   return Object.freeze({
+    meta: DiagnosticsMeta,
     diagnostics,
     flagMismatch,
     flagMissingField,

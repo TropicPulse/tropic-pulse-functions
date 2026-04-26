@@ -19,6 +19,57 @@
 //   • Deterministic identity verification + dispatch only.
 //   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
+// ============================================================================
+// ORGAN IDENTITY — v11‑EVO‑PRIME (C2 Lymphatic Immune Dispatch)
+// ============================================================================
+export const PulseRole = {
+  type: "ImmuneDispatch",
+  subsystem: "PulseEarnLymphNodes",
+  layer: "C2-LymphaticHandshake",
+  version: "11.0-Evo-Prime",
+  identity: "PulseEarnLymphNodes-v11-Evo-Prime",
+
+  evo: {
+    // Core invariants
+    driftProof: true,
+    deterministicField: true,
+    unifiedAdvantageField: true,
+    futureEvolutionReady: true,
+
+    // Immune dispatch laws
+    immuneDispatch: true,
+    immuneSafeFinalizer: true,
+    immuneRecognition: true,
+    antigenMatching: true,
+    certifiedHandshake: true,
+    deterministicHandshake: true,
+
+    // Execution laws
+    zeroAsync: true,
+    zeroTiming: true,
+    zeroRandomness: true,
+    zeroMutation: true,
+    zeroRouting: true,
+    zeroSending: false,          // dispatch to adapter is allowed
+    zeroCompute: true,
+
+    // Dual-band + metadata
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    waveAware: true,
+    bandNormalizationAware: true,
+
+    // Earn lineage
+    earnFinalizer: true,
+    earnMarketplaceBridge: true,
+    immuneMemoryRecorder: true,
+
+    // Safety + environment
+    environmentAgnostic: true,
+    multiInstanceReady: true
+  }
+};
 
 import { PulseEarnReceptor } from "./PulseEarnReceptor.js";
 import { PulseEarnCustomReceptor } from "./PulseEarnCustomReceptorMkt.js";

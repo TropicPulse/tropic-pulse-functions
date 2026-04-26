@@ -23,7 +23,7 @@ import * as PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
 // *** Earn is dual-band ONLY — this is the ONLY Earn organ ***
 import * as PulseEarnSym from "./PULSE-EARN/PulseEarn-v11-EVO.js";
 
-import * as PulseBinaryOrganismBoot from "./PULSE-AI/aiBinary-v11-Evo.js";
+import * as PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
 
 // ---------------- BINARY ORGANS ---------------------
 import { createBinaryProxy } from "./PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";

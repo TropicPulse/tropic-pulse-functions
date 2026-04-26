@@ -7,7 +7,7 @@
 //   • Provide AI with a SAFE, READ‑ONLY view into PulseEarn economic data.
 //   • User: orders, referrals, referralClicks, vaultHistory, pulseHistory.
 //   • Owner: system‑level earning patterns, anomalies, lineage, evolution logs.
-//   • Integrates with aiEvolution for drift + schema + lineage analysis.
+//   • Integrates with aiEvolution + dual‑band organism.
 //   • Never exposes UID, resendToken, or identity anchors.
 //   • Never mutates anything.
 //
@@ -18,7 +18,47 @@
 //   • DETERMINISTIC ANALYSIS ONLY.
 // ============================================================================
 
-export function createEarnAPI(db, evolutionAPI) {
+export const EarnMeta = Object.freeze({
+  layer: "PulseAIEarnFrame",
+  role: "EARN_ORGAN",
+  version: "11.0-EVO",
+  identity: "aiEarn-v11-EVO",
+
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    readOnly: true,
+    binaryAware: true,
+    symbolicAware: true,
+    dualband: true,
+    lineageAware: true,
+    evolutionAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose: "Provide SAFE, READ-ONLY economic insight for users and owners.",
+    never: Object.freeze([
+      "mutate data",
+      "expose identity anchors",
+      "expose UID or tokens",
+      "modify economic state",
+      "perform writes"
+    ]),
+    always: Object.freeze([
+      "strip identity fields",
+      "respect user vs owner scope",
+      "use deterministic analysis",
+      "integrate organism snapshot",
+      "integrate evolution metadata"
+    ])
+  })
+});
+import { getOrganismSnapshot } from "./aiDeps.js";
+
+
+export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 
   // --------------------------------------------------------------------------
   // HELPERS — Identity‑Safe Cloning
@@ -62,8 +102,28 @@ export function createEarnAPI(db, evolutionAPI) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC API — Earn Insight
+  // DUAL‑BAND ECONOMIC INSIGHT (NEW v11‑EVO)
   // --------------------------------------------------------------------------
+  function computeBinaryEconomicPressure(snapshot) {
+    if (!snapshot?.binary?.metabolic) {
+      return { pressure: 0, load: 0, bucket: "none" };
+    }
+
+    const pressure = snapshot.binary.metabolic.pressure ?? 0;
+    const load = snapshot.binary.metabolic.load ?? 0;
+
+    let bucket = "none";
+    if (pressure >= 0.9) bucket = "critical";
+    else if (pressure >= 0.7) bucket = "high";
+    else if (pressure >= 0.4) bucket = "medium";
+    else if (pressure > 0) bucket = "low";
+
+    return { pressure, load, bucket };
+  }
+
+  // --------------------------------------------------------------------------
+  // PUBLIC API — Earn Insight (Dual‑Band + Evolution‑Aware)
+// --------------------------------------------------------------------------
   return Object.freeze({
 
     // ----------------------------------------------------------------------
@@ -84,12 +144,17 @@ export function createEarnAPI(db, evolutionAPI) {
         fetchUserScoped(context, "pulseHistory")
       ]);
 
+      const snapshot = getOrganismSnapshot(dualBand);
+      const binaryEconomics = computeBinaryEconomicPressure(snapshot);
+
       return Object.freeze({
         orders,
         referrals,
         referralClicks,
         vaultHistory,
-        pulseHistory
+        pulseHistory,
+        binaryEconomics,
+        organismSnapshot: snapshot
       });
     },
 
@@ -100,25 +165,37 @@ export function createEarnAPI(db, evolutionAPI) {
         fetchUserScoped(context, "referralClicks")
       ]);
 
-      return Object.freeze({ referrals, referralClicks });
+      const snapshot = getOrganismSnapshot(dualBand);
+
+      return Object.freeze({
+        referrals,
+        referralClicks,
+        organismSnapshot: snapshot
+      });
     },
 
     // USER — “Show me my orders.”
     async getUserOrders(context) {
       const orders = await fetchUserScoped(context, "orders");
-      return Object.freeze({ orders });
+      const snapshot = getOrganismSnapshot(dualBand);
+
+      return Object.freeze({ orders, organismSnapshot: snapshot });
     },
 
     // USER — “Show me my vault history.”
     async getUserVaultHistory(context) {
       const vaultHistory = await fetchUserScoped(context, "vaultHistory");
-      return Object.freeze({ vaultHistory });
+      const snapshot = getOrganismSnapshot(dualBand);
+
+      return Object.freeze({ vaultHistory, organismSnapshot: snapshot });
     },
 
     // USER — “Show me my pulse history (earn events).”
     async getUserPulseHistory(context) {
       const pulseHistory = await fetchUserScoped(context, "pulseHistory");
-      return Object.freeze({ pulseHistory });
+      const snapshot = getOrganismSnapshot(dualBand);
+
+      return Object.freeze({ pulseHistory, organismSnapshot: snapshot });
     },
 
     // ----------------------------------------------------------------------
@@ -137,11 +214,16 @@ export function createEarnAPI(db, evolutionAPI) {
         fetchOwnerScoped(context, "pulseHistory")
       ]);
 
+      const snapshot = getOrganismSnapshot(dualBand);
+      const binaryEconomics = computeBinaryEconomicPressure(snapshot);
+
       return Object.freeze({
         orders,
         referrals,
         referralClicks,
-        pulseHistory
+        pulseHistory,
+        binaryEconomics,
+        organismSnapshot: snapshot
       });
     },
 
@@ -159,11 +241,14 @@ export function createEarnAPI(db, evolutionAPI) {
         fetchOwnerScoped(context, "pulseHistory")
       ]);
 
+      const snapshot = getOrganismSnapshot(dualBand);
+
       return Object.freeze({
         ordersSample: orders.slice(0, 100),
         referralsSample: referrals.slice(0, 100),
         referralClicksSample: referralClicks.slice(0, 100),
-        pulseHistorySample: pulseHistory.slice(0, 100)
+        pulseHistorySample: pulseHistory.slice(0, 100),
+        organismSnapshot: snapshot
       });
     },
 

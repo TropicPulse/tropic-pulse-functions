@@ -1,72 +1,128 @@
 // ============================================================================
-//  PULSE OS v10.4 — AI CORTEX (FINAL CLEAN VERSION)
-//  Cognitive Frame • Persona Execution • Deterministic Relay
+//  PULSE OS v11‑EVO — AI EXECUTION ENGINE
+//  Dual‑Band Execution • Persona Routing • Organ Dispatch
+//  PURE EXECUTION. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
-import { createAIContext } from "./aiContext.js";
-import { checkPermission } from "./permissions.js";
-import { formatDebugReport } from "./aiDebug.js";
-import { buildAdminPanelModel } from "./aiClinician.js";
+export const ExecutionEngineMeta = Object.freeze({
+  layer: "PulseAIExecutionKernel",
+  role: "EXECUTION_ENGINE",
+  version: "11.0-EVO",
+  identity: "aiExecutionEngine-v11-EVO",
 
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    personaAware: true,
+    boundaryAware: true,
+    permissionAware: true,
+    routingAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose: "Execute AI operations through persona routing, boundaries, and dual-band context.",
+    never: Object.freeze([
+      "mutate context",
+      "mutate organs",
+      "bypass boundaries",
+      "bypass permissions",
+      "introduce randomness",
+      "alter persona logic"
+    ]),
+    always: Object.freeze([
+      "build deterministic cognitive frame",
+      "attach brainstem organs",
+      "resolve persona safely",
+      "enforce boundaries",
+      "enforce permissions",
+      "route execution through correct mode",
+      "return unified response packet"
+    ])
+  })
+});
+import { createAIContext } from "./aiContext.js";
+import { createBrainstem } from "./aiBrainstem.js";
+import { resolvePersonaV11 } from "./persona.js";
+import { routeAIRequest } from "./aiRouter-v11-Evo.js";
+import { selectBoundaryMode, canPerformDynamic } from "./boundaries.js";
+
+// Organ modes
 import { runArchitectMode } from "./modes/architect.js";
 import { runObserverMode } from "./modes/observer.js";
 import { runTourGuideMode } from "./modes/tourguide.js";
 
-import { createBrainstem } from "./aiBrainstem.js";
 
 // ============================================================================
-// PUBLIC API — Cortex Execution Wrapper (v10.4)
+//  MAIN EXECUTION ENTRY — v11‑EVO
 // ============================================================================
-export async function runAI(request = {}, operation, deps = {}) {
+export async function runAI(request = {}, operation, deps = {}, dualBand = null) {
   const { db, fsAPI, routeAPI, schemaAPI } = deps;
 
   // --------------------------------------------------------------------------
-  // 1) Build Cognitive Frame — Cortex Initialization
+  // 1) Build Cognitive Frame (identity + request normalization)
   // --------------------------------------------------------------------------
   const context = createAIContext(request);
   context.logStep?.("AI context initialized.");
 
   // --------------------------------------------------------------------------
-  // 2) Build Brainstem (Persona + Organs + Personality)
+  // 2) Build Brainstem (organs + persona + boundaries + permissions)
   // --------------------------------------------------------------------------
   const brainstem = createBrainstem(request, db, fsAPI, routeAPI, schemaAPI);
-
-  // Merge brainstem context into cortex context
   Object.assign(context, brainstem.context);
-
-  // Attach organs to context
   context.organs = brainstem.organs;
 
-  context.logStep?.(`Persona selected: ${context.personaId}`);
+  // --------------------------------------------------------------------------
+  // 3) Dual‑Band Routing (persona + archetypes + binary vitals)
+  // --------------------------------------------------------------------------
+  const routing = routeAIRequest(request, dualBand);
+  context.routing = routing;
+
+  // Persona resolution (dual‑band)
+  const persona = resolvePersonaV11({
+    personaId: routing.personaId,
+    userId: context.userId,
+    evoState: context.evoState || {},
+    routerHints: routing.dualBand,
+    binaryVitals: dualBand?.binary?.vitals?.snapshot?.() || {}
+  });
+
+  context.persona = persona;
+  context.personaId = persona.id;
 
   // --------------------------------------------------------------------------
-  // 3) Permission Enforcement — Executive Control
+  // 4) Boundary Mode (dual‑band)
   // --------------------------------------------------------------------------
-  const allowed = checkPermission(
-    context.personaId,
-    request.intent === "generate" ? "canGenerateFunctions" : "canReadFiles"
+  const boundaryMode = persona.boundaryMode;
+  context.boundaryMode = boundaryMode;
+
+  // Permission check (dual‑band)
+  const permCheck = canPerformDynamic(
+    persona.id,
+    request.domain || "system",
+    request.action || "read",
+    boundaryMode,
+    dualBand?.binary?.vitals?.snapshot?.()
   );
 
-  if (!allowed) {
-    context.logStep?.(
-      `Permission denied for persona "${context.personaId}" on intent "${request.intent}".`
-    );
+  if (!permCheck.allowed) {
+    context.logStep?.("Permission denied by dual‑band boundaries.");
     return buildAIResponse(null, context);
   }
 
-  context.logStep?.(
-    `Permission granted for persona "${context.personaId}" to perform intent "${request.intent}".`
-  );
-
   // --------------------------------------------------------------------------
-  // 4) Persona-Specific Execution Pathway
+  // 5) Persona Execution Pathway
   // --------------------------------------------------------------------------
   let result = null;
 
   try {
     context.logStep?.("Executing AI operation...");
 
-    switch (context.personaId) {
+    switch (persona.id) {
       case "architect":
         result = await runArchitectMode(request, context, operation);
         break;
@@ -80,7 +136,6 @@ export async function runAI(request = {}, operation, deps = {}) {
         break;
 
       default:
-        // Neutral mode
         result = await operation(context);
         break;
     }
@@ -94,31 +149,22 @@ export async function runAI(request = {}, operation, deps = {}) {
   }
 
   // --------------------------------------------------------------------------
-  // 5) Return Full AI Output — Cortex Output Contract (v10.4)
-  // --------------------------------------------------------------------------
+  // 6) Build Unified Response Packet (v11‑EVO)
+// --------------------------------------------------------------------------
   return buildAIResponse(result, context);
 }
 
 // ============================================================================
-// INTERNAL — Build Full AI Response (v10.4)
+//  RESPONSE BUILDER — v11‑EVO
 // ============================================================================
 function buildAIResponse(result, context) {
   return Object.freeze({
     result,
     context,
-
-    // Historian (Scribe)
-    scribeReport: formatDebugReport(context),
-
-    // Diagnostics (Clinician)
-    clinicianReport: buildAdminPanelModel(context),
-
-    // Observer (optional)
-    observerReport: context.observerReport || null,
-
-    // Identity + Boundaries
     persona: context.persona,
+    routing: context.routing,
+    boundaryMode: context.boundaryMode,
     permissions: context.permissions,
-    boundaries: context.boundaries
+    organs: context.organs
   });
 }
