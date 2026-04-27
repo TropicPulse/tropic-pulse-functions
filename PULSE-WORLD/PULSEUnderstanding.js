@@ -14,7 +14,10 @@
 //   • DO expose OS API (symbolic + binary shadow).
 //   • DO NOT expose raw organs to the outside.
 //   • DO NOT mutate Window or Page.
+//   • MAY read membrane intel from window.PulseSurface + PulseChunks portal.
 // ============================================================================
+
+
 // ============================================================================
 //  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
 //  - Understanding integrates error packets from Window + Flow + Reflex.
@@ -27,6 +30,7 @@ import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
 // ============================================================================
 import { PulseIntentMap } from "../PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
+import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
 
 
 // ============================================================================
@@ -77,13 +81,18 @@ const PULSE_UNDERSTANDING_CONTEXT = {
     binaryFirstIdentity: true,
     dualBandAware: true,
     organismWideIdentityAware: true,
-    browserOnly: true
+    browserOnly: true,
+    portalAware: true,
+    surfaceEnvironmentAware: true,
+    chunkMembraneAware: true
   }
 };
 
 
 // ============================================================================
-//  ENVIRONMENT SNAPSHOT (unchanged)
+//  ENVIRONMENT SNAPSHOT (UPGRADED — USE PORTAL IF PRESENT)
+//  - Prefer Window's PulseSurface.environment (richer, cached).
+//  - Fall back to local navigator snapshot if portal not present.
 // ============================================================================
 function buildEnvironmentSnapshot() {
   if (typeof window === "undefined") {
@@ -93,6 +102,26 @@ function buildEnvironmentSnapshot() {
       language: null,
       online: null,
       platform: null
+    };
+  }
+
+  const surfaceEnv = window.PulseSurface?.environment;
+
+  if (surfaceEnv) {
+    return {
+      runtime: surfaceEnv.runtime ?? "browser",
+      userAgent: surfaceEnv.userAgent ?? window.navigator?.userAgent ?? null,
+      language: surfaceEnv.language ?? window.navigator?.language ?? null,
+      online: surfaceEnv.online ?? window.navigator?.onLine ?? null,
+      platform: surfaceEnv.platform ?? window.navigator?.platform ?? null,
+      screen: surfaceEnv.screen ?? null,
+      device: surfaceEnv.device ?? null,
+      input: surfaceEnv.input ?? null,
+      preferences: surfaceEnv.preferences ?? null,
+      location: surfaceEnv.location ?? null,
+      network: surfaceEnv.network ?? null,
+      referrer: surfaceEnv.referrer ?? null,
+      origin: surfaceEnv.origin ?? null
     };
   }
 
@@ -122,13 +151,11 @@ function runThroughGovernor(organName, pulseOrImpulse, fn) {
 //  - Fall back to symbolic identity.
 // ============================================================================
 async function resolveIdentityBinaryFirst(ProxyBin, ProxySym) {
-  // 1) binary shadow identity (from Window)
   const shadow = window?.PulseBinary?.meta;
   if (shadow?.identity) {
     return { kind: "binary-shadow", value: shadow.identity };
   }
 
-  // 2) binary proxy identity
   if (ProxyBin && typeof ProxyBin.identityBinary === "function") {
     try {
       const binId = await ProxyBin.identityBinary();
@@ -136,7 +163,6 @@ async function resolveIdentityBinaryFirst(ProxyBin, ProxySym) {
     } catch {}
   }
 
-  // 3) symbolic identity
   if (ProxySym && typeof ProxySym.identity === "function") {
     try {
       const hybridId = await ProxySym.identity("hybrid");
@@ -155,27 +181,21 @@ async function resolveIdentityBinaryFirst(ProxyBin, ProxySym) {
 // ============================================================================
 async function resolveKernelsBinaryFirst() {
   const SymbolicKernel = await PulseOSv11Evo.Kernel;
-
-  // Binary kernel is already booted by Window
   const BinaryKernel = window?.PulseBinary ?? null;
-
   return { BinaryKernel, SymbolicKernel };
 }
+
+
 // ============================================================================
 //  KERNEL BOOTSTRAP — UNDERSTANDING LAYER (HYBRID UNDER WINDOW)
-//  - Symbolic kernel + organs boot here.
-//  - Binary organism is NOT booted here (Window already did).
-//  - Binary shadow, Flow, and PageScanner intel are integrated from window.
 // ============================================================================
 async function buildPulseKernel() {
   const { BinaryKernel, SymbolicKernel } = await resolveKernelsBinaryFirst();
 
-  // ---- binary shadow + flow + reflex (from Window) ----
   const BinaryShadow = typeof window !== "undefined" ? window.PulseBinary ?? null : null;
   const UIFlow = typeof window !== "undefined" ? window.PulseUI ?? null : null;
   const SkinReflex = typeof window !== "undefined" ? window.PulseSkinReflex ?? null : null;
 
-  // ---- binary-first core organs (shadow-aware) ----
   const BinaryBrain = BinaryKernel?.Brain ?? null;
   const BinaryEvolution = BinaryKernel?.Evolution ?? null;
   const BinarySDN = BinaryKernel?.SDN ?? null;
@@ -187,7 +207,6 @@ async function buildPulseKernel() {
   const SpinalCord = BinarySDN ?? SymbolicKernel.SDN;
   const CoreGovernor = SymbolicKernel.Governor ?? null;
 
-  // ---- memory / overlay (binary-first, fallback symbolic) ----
   const MemoryCore =
     BinaryMemoryCore ??
     SymbolicKernel.MemoryCore ??
@@ -206,7 +225,6 @@ async function buildPulseKernel() {
     SymbolicKernel.SemanticMemory ??
     (MemoryCore && MemoryCore.Semantic ? MemoryCore.Semantic : null);
 
-  // ---- Mesh / Send / Earn (binary-first, fallback symbolic) ----
   const Mesh =
     (PulseMeshBin && Object.keys(PulseMeshBin).length ? PulseMeshBin : null) ||
     PulseMeshSym;
@@ -215,10 +233,8 @@ async function buildPulseKernel() {
     (PulseSendBin && Object.keys(PulseSendBin).length ? PulseSendBin : null) ||
     PulseSendSym;
 
-  // *** Earn is dual-band ONLY — no binary organ exists ***
   const Earn = PulseEarnSym;
 
-  // ---- Router / GPU: binary-first, fallback symbolic ----
   const Router =
     (PulseRouterBin && Object.keys(PulseRouterBin).length ? PulseRouterBin : null) ||
     PulseRouterSym;
@@ -227,13 +243,12 @@ async function buildPulseKernel() {
     (PulseGPUBin && Object.keys(PulseGPUBin).length ? PulseGPUBin : null) ||
     PulseGPUSym;
 
-  // ---- symbolic proxy base (for fallback + non-binary paths) ----
   const ProxySym = PulseProxySym.createProxy
     ? PulseProxySym.createProxy({
         Router,
         Brain,
         Evolution,
-        Identity: null, // filled after identity resolution
+        Identity: null,
         Environment: PulseEnvironment,
         Governor: CoreGovernor,
         MemoryCore,
@@ -244,7 +259,6 @@ async function buildPulseKernel() {
       })
     : PulseProxySym;
 
-  // ---- binary proxy (pure binary, with symbolic fallback) ----
   const encoder = SymbolicKernel.BinaryAgent ?? null;
   let ProxyBin = null;
 
@@ -264,7 +278,6 @@ async function buildPulseKernel() {
     });
   }
 
-  // ---- identity (binary-first, using both proxies + shadow) ----
   const identityResult = await resolveIdentityBinaryFirst(ProxyBin, ProxySym);
   const identity = identityResult.value;
 
@@ -276,7 +289,6 @@ async function buildPulseKernel() {
 
   const Proxy = ProxyBin || ProxySym;
 
-  // ---- register Understanding on SDN ----
   try {
     SpinalCord?.registerExtension?.("Understanding", "extension", {
       version: "v12",
@@ -287,7 +299,6 @@ async function buildPulseKernel() {
     });
   } catch {}
 
-  // ---- optional Mesh / Send / Earn boot (symbolic + shadow-aware) ----
   try {
     if (Mesh && typeof Mesh.boot === "function") {
       Mesh.boot({
@@ -330,7 +341,6 @@ async function buildPulseKernel() {
     }
   } catch {}
 
-  // ---- dual-band impulse into SDN ----
   try {
     SpinalCord?.emitImpulse?.("Understanding", {
       modeKind: "dual",
@@ -382,18 +392,18 @@ async function buildPulseKernel() {
     UIFlow,
     SkinReflex,
 
-    Errors: PulseUIErrors,   // ← NEW
+    Errors: PulseUIErrors,
 
     Governed: {
       run: runThroughGovernor
     }
   };
 
-
   return Pulse;
 }
 
 const PulseKernelPromise = buildPulseKernel();
+
 
 // ============================================================================
 //  GLOBAL BROADCAST
@@ -425,7 +435,7 @@ if (typeof window !== "undefined") {
             BinaryShadow: PulseKernel.BinaryShadow,
             UIFlow: PulseKernel.UIFlow,
             SkinReflex: PulseKernel.SkinReflex,
-            Errors: PulseKernel.Errors   // ← NEW
+            Errors: PulseKernel.Errors
           }
         : PulseKernel;
     })
@@ -434,9 +444,24 @@ if (typeof window !== "undefined") {
         "[PulseUnderstanding v12-EVO-MAX] Kernel bootstrap failed:",
         err
       );
-      
     });
-    
+}
+
+
+// ============================================================================
+//  UNDERSTANDING PREWARM — uses portal chunk membrane if available
+//  - Optional helper: prewarm common cortical paths (maps, configs, assets).
+//  - Does NOT mutate Window or Page; only calls membrane prewarm.
+// ============================================================================
+export function prewarmUnderstanding(urls = []) {
+  if (typeof window === "undefined") return;
+  try {
+    if (Array.isArray(urls) && urls.length && window.prewarmAssets) {
+      window.prewarmAssets(urls);
+    }
+  } catch (err) {
+    console.error("[PulseUnderstanding] prewarmUnderstanding failed:", err);
+  }
 }
 
 
@@ -447,13 +472,13 @@ export const PulseUnderstanding = {
   OrganismMap: PulseOrganismMap,
   IQMap: PulseIQMap,
   Kernel: PulseKernelPromise,
-  Errors: PulseUIErrors,   // ← NEW
+  Errors: PulseUIErrors,
   Identity: () =>
     typeof window !== "undefined" ? window?.Pulse?.Identity ?? null : null,
   IdentityKind: () =>
     typeof window !== "undefined" ? window?.Pulse?.IdentityKind ?? null : null,
-  runThroughGovernor
+  runThroughGovernor,
+  prewarmUnderstanding
 };
-
 
 export default PulseUnderstanding;

@@ -3,40 +3,11 @@
 // LAYER: BRAINSTEM (CNS Bridge: Identity → Tools → Organs → Cortex)
 // ============================================================================
 //
-// ROLE (v11‑EVO):
-//   The Brainstem is the FIRST organ that receives the AI pulse.
-//   It bridges binary ↔ non-binary, long-term ↔ short-term, organism ↔ AI.
-//
-//   • Attach user + ownership state to the cognitive frame.
-//   • Load ALL cognitive tools from aiTools.js (single source of truth).
-//   • Provide deterministic access to intent, reasoning, assistant, and API tools.
-//   • Wire organs with DB, FS, Route, Schema adapters.
-//   • Enforce identity, ownership, and deterministic contracts.
-//   • NEVER mutate external systems.
-//   • NEVER override persona, permissions, or boundaries chosen by aiRouter.
-//   • NEVER introduce randomness, drift, or autonomy.
-//
-// ARCHITECTURE (v11‑EVO):
-//   Brainstem = Central Nervous System Bridge
-//     → Receives pulse
-//     → Loads cognitive tools (from aiTools.js)
-//     → Attaches identity + ownership
-//     → Wires organs
-//     → Hands off to Cortex
-//
-// EVOLUTION POLICY (NEW):
-//   • ALL cognitive evolution happens ONLY in aiTools.js.
-//   • Brainstem NEVER evolves logic — only wiring.
-//   • All AI organs import from aiTools.js (import *).
-//   • Updating aiTools.js evolves the entire AI organism instantly.
-//   • Brainstem remains stable, deterministic, and drift‑proof.
-//
-// CONTRACT:
-//   • READ‑ONLY (re: external systems).
-//   • ZERO RANDOMNESS.
-//   • ZERO AUTONOMY.
-//   • ZERO IDENTITY LEAKAGE beyond userId/owner flag.
-//   • PURE, DETERMINISTIC, PULSE‑SAFE.
+// NEW (v11‑EVO‑PREWARM):
+//   • Cognitive Prewarm Engine
+//   • Pre-initialize identity, ownership, tools, organ wiring, encoder
+//   • Zero mutation, zero drift, zero autonomy
+//   • Pure deterministic warm-up of CNS pathways
 // ============================================================================
 
 export const BrainstemMeta = Object.freeze({
@@ -57,6 +28,7 @@ export const BrainstemMeta = Object.freeze({
     cognitiveAware: true,
     packetAware: true,
     multiInstanceReady: true,
+    prewarmAware: true,        // ← NEW
     epoch: "v11-EVO"
   }),
 
@@ -86,7 +58,8 @@ export const BrainstemMeta = Object.freeze({
       "remain read-only",
       "remain drift-proof",
       "remain deterministic",
-      "remain pulse-safe"
+      "remain pulse-safe",
+      "prewarm cognitive pathways"   // ← NEW
     ])
   })
 });
@@ -96,12 +69,56 @@ import { createOrgans } from "./createOrgans.js";
 import * as aiTools from "./aiTools.js";
 
 // ============================================================================
+//  COGNITIVE PREWARM ENGINE (v11‑EVO)
+//  - Warms internal CNS pathways used on every pulse
+//  - Does NOT mutate external systems
+//  - Does NOT perform cognition
+//  - Pure deterministic warm-up
+// ============================================================================
+function prewarmBrainstem(userId, userIsOwner) {
+  try {
+    // Prewarm identity pathway
+    const _id = userId ?? null;
+    const _owner = Boolean(userIsOwner);
+
+    // Prewarm tool access
+    const toolNames = Object.keys(aiTools);
+    for (const t of toolNames) {
+      const _ = aiTools[t]; // touch tool reference
+    }
+
+    // Prewarm encoder (binary packet path)
+    if (aiTools.encode) {
+      aiTools.encode("{}"); // warm encoder
+    }
+
+    // Prewarm organ wiring logic (no mutation)
+    // We simulate organ creation with null adapters
+    createOrgans(
+      { userId: _id, userIsOwner: _owner, ...aiTools },
+      null,
+      null,
+      null,
+      null
+    );
+
+    return true;
+  } catch (err) {
+    console.error("[Brainstem Prewarm] Failed:", err);
+    return false;
+  }
+}
+
+// ============================================================================
 // CREATE BRAINSTEM — Identity + Tools + Organs
 // ============================================================================
 export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
   const { userId = null, userIsOwner: requestOwner = false } = request;
 
   const userIsOwner = Boolean(requestOwner || (userId && userId === OWNER_ID));
+
+  // ---- PREWARM CNS PATHWAYS BEFORE BUILDING CONTEXT ----
+  prewarmBrainstem(userId, userIsOwner);
 
   const context = Object.freeze({
     userId,

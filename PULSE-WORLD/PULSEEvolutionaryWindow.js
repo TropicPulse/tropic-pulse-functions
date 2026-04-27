@@ -46,7 +46,9 @@
 import * as PulseVitals from "./PULSEProofMonitor.js";
 import * as PulseLogger from "./PULSEProofLogger.js";
 
+// FRONTEND CHUNK MEMBRANE — 2026 transport layer
 import * as PulseChunks from "./PulseChunks-v1.js";
+
 // ============================================================================
 //  LOAD UNDERSTANDING (SECOND LAYER)
 //  - Understanding is descriptive only, never prescriptive.
@@ -72,13 +74,6 @@ import * as PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
 //  - UI flow coordinator, UI-only, safe to expose at membrane.
 // ============================================================================
 import * as PulseUIFlow from "./PULSE-UI/PulseUIFlow-v12-EVO.js";
-
-// ============================================================================
-//  FRONTEND CHUNK MEMBRANE (PulseChunks-v1 — 2026 transport layer)
-//  - Membrane-only, no organs. Used to chunk/cache/warm visible assets.
-//  - Makes the WINDOW a zero-latency, prewarmed, prechunked surface.
-// ============================================================================
-
 
 
 // ============================================================================
@@ -197,11 +192,12 @@ if (typeof window !== "undefined") {
   //  - This is the PORTAL SURFACE: everything visible is prechunked + cached.
   //  - Attach frontend chunker to window.
   //  - Provide fetchImage() for chunked image retrieval.
+  //  - Provide fetchChunk() + prewarm() for generic assets.
   //  - Override <img>.src to route through chunker.
   //  - Optionally intercept image fetches.
   // -------------------------------------------------------------------------
   try {
-    // Expose PulseChunks module at membrane
+    // Expose PulseChunks module at membrane (if not already)
     window.PulseChunks = window.PulseChunks || PulseChunks;
 
     // Universal chunked image fetcher
@@ -209,15 +205,37 @@ if (typeof window !== "undefined") {
       if (!url) return url;
       try {
         if (window.PulseChunks?.getImage) {
-          // Assumes PulseChunks.getImage(url) → blob URL or data URL
           return await window.PulseChunks.getImage(url);
         }
       } catch (err) {
         console.error("[PulseEvolutionaryWindow] fetchImage chunk error:", err);
       }
-      // Fallback: return original URL
       return url;
     });
+
+    // Generic chunk fetcher (CSS, JS, JSON, etc.)
+    window.fetchChunk = window.fetchChunk || (async function (url) {
+      if (!url) return null;
+      try {
+        if (window.PulseChunks?.fetchChunk) {
+          return await window.PulseChunks.fetchChunk(url);
+        }
+      } catch (err) {
+        console.error("[PulseEvolutionaryWindow] fetchChunk error:", err);
+      }
+      return null;
+    });
+
+    // Prewarm helper — can be used by any surface script
+    window.prewarmAssets = window.prewarmAssets || function (urls = []) {
+      try {
+        if (window.PulseChunks?.prewarm) {
+          window.PulseChunks.prewarm(urls);
+        }
+      } catch (err) {
+        console.error("[PulseEvolutionaryWindow] prewarmAssets error:", err);
+      }
+    };
 
     // Global <img> src override — membrane-level, no organs
     const desc = Object.getOwnPropertyDescriptor(Image.prototype, "src");
@@ -231,7 +249,6 @@ if (typeof window !== "undefined") {
           if (!url || !window.fetchImage) {
             return originalSet.call(this, url);
           }
-          // Non-blocking: set placeholder immediately if needed, then swap
           window.fetchImage(url)
             .then((blobUrl) => originalSet.call(this, blobUrl || url))
             .catch(() => originalSet.call(this, url));
@@ -262,6 +279,20 @@ if (typeof window !== "undefined") {
         return originalFetch(resource, options);
       };
     }
+
+    // Prewarm visible images on first paint (zero-latency repeat)
+    window.addEventListener("load", () => {
+      try {
+        const urls = Array.from(document.querySelectorAll("img"))
+          .map((img) => img.getAttribute("src"))
+          .filter(Boolean);
+        if (urls.length && window.prewarmAssets) {
+          window.prewarmAssets(urls);
+        }
+      } catch (err) {
+        console.error("[PulseEvolutionaryWindow] image prewarm failed:", err);
+      }
+    });
   } catch (err) {
     console.error("[PulseEvolutionaryWindow] Membrane chunk layer failed:", err);
   }
@@ -387,16 +418,11 @@ if (typeof window !== "undefined") {
 
       // -------------------------------------------------------------------
       // PULSEBAND BOOT — v12-EVO transport nerve (membrane-level, global)
-// -------------------------------------------------------------------
+      // -------------------------------------------------------------------
       try {
-        // Your PNS file already created this:
-        // window.pulseband   ← THIS IS THE REAL PULSEBAND
         if (window.pulseband && !window.PulseBand) {
-
-          // Expose globally under the correct name
           window.PulseBand = window.pulseband;
 
-          // Bridge PulseBand → Proxy Spine
           window.PulseBand.on("request", async (packet) => {
             let url, method, bodyOrQuery;
 
@@ -449,11 +475,9 @@ if (typeof window !== "undefined") {
             const res = await fetch(url + query, opts);
             const data = await res.json();
 
-            // Send response back into PulseBand
             window.PulseBand.emit("response:" + packet.sessionId, data);
           });
 
-          // Optional helper
           window.PulseBandStart = (opts) => window.PulseBand.start(opts);
         }
       } catch (err) {

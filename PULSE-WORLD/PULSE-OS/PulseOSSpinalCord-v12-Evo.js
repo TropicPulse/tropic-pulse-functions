@@ -26,6 +26,7 @@
 // • No direct GPU / FS / DOM / Network calls.
 // • Firewall-aware: refuses unsafe routes, sources, extensions, systems.
 // ============================================================================
+import { prewarmSDN } from "./PulseSDN-Prewarm-v12-EVO.js";
 
 
 // ============================================================================
@@ -526,36 +527,45 @@ export function createPulseOSSpinalCord({
     return SpinalState.healthScore;
   }
 
+// --------------------------------------------------------------------------
+// PUBLIC SPINAL CORD SURFACE
+// --------------------------------------------------------------------------
+const PulseOSSpinalCord = {
+  PulseRole,
+  SpinalState,
 
-  // --------------------------------------------------------------------------
-  // PUBLIC SPINAL CORD SURFACE
-  // --------------------------------------------------------------------------
-  const PulseOSSpinalCord = {
-    PulseRole,
-    SpinalState,
+  // Extensions / systems
+  registerExtension,
+  registerSystem,
 
-    // Extensions / systems
-    registerExtension,
-    registerSystem,
+  // Receptors
+  registerReceptor,
+  unregisterReceptor,
 
-    // Receptors
-    registerReceptor,
-    unregisterReceptor,
+  // Impulses
+  emitImpulse,
 
-    // Impulses
-    emitImpulse,
+  // Routing
+  routeToOrgan,
+  routeToBackend,
 
-    // Routing
-    routeToOrgan,
-    routeToBackend,
+  // Health
+  updateHealth,
+  getHealth
+};
 
-    // Health
-    updateHealth,
-    getHealth
-  };
+// --------------------------------------------------------------------------
+// SDN PREWARM ENGINE — Spinal Reflex Ignition
+// --------------------------------------------------------------------------
+try {
+  prewarmSDN(PulseOSSpinalCord);
+  Brain?.log?.("[PulseOSSpinalCord] SDN prewarm complete (reflex arcs hot).");
+} catch (err) {
+  warn?.("[PulseOSSpinalCord] SDN prewarm failed:", err);
+}
 
-  Brain?.log?.("[PulseOSSpinalCord v13-Evo-Max-Firewall] Initialized organism-wide dual-band spinal cord with firewall gating.");
-  Evolution?.recordLineage?.("spinal-init-v13-firewall");
+Brain?.log?.("[PulseOSSpinalCord v13-Evo-Max-Firewall] Initialized organism-wide dual-band spinal cord with firewall gating.");
+Evolution?.recordLineage?.("spinal-init-v13-firewall");
 
-  return PulseOSSpinalCord;
+return PulseOSSpinalCord;
 }
