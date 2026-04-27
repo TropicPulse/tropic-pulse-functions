@@ -49,12 +49,7 @@ import { log, warn, error as logError } from "../PULSEProofLogger.js";
 // ============================================================================
 import { bootCortex } from "../PULSE-OS/PulseOSBrainCortex.js";
 
-
-// // ============================================================================
-// //  EXTERNAL SERVICE IQ (ALLOWED)
-// // ============================================================================
-import { admin as firebase }  from "../NETLIFY/FUNCTIONS/firebase.js";
-
+const firebase = "EXTERNAL-FIREBASE-APPENDAGE";
 
 // ============================================================================
 //  VERSION MAP — v11‑EVO‑PRIME ORGANISM BLUEPRINT
