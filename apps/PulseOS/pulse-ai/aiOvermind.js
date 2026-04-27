@@ -146,15 +146,52 @@ export class AiOvermind {
     // Overmind-local clock + memory (read-only outward)
     this.clock = new OvermindClock();
     this.memory = new OvermindMemory();
+
+    // ============================================================
+    // 1/4 UPGRADE — BEACON AWARENESS (READ-ONLY)
+    // ============================================================
+    this.beaconEvents = [];
+  }
+
+  // ============================================================
+  // BEACON EVENT INTAKE (READ-ONLY)
+  // ============================================================
+  registerBeaconEvent(evt) {
+    if (!evt) return;
+
+    this.beaconEvents.push(evt);
+    if (this.beaconEvents.length > 50) {
+      this.beaconEvents.shift();
+    }
+  }
+
+  // ============================================================
+  // BEACON LENS — LOW-INFLUENCE, PURELY OBSERVATIONAL
+  // ============================================================
+  beaconLens({ context }) {
+    const recent = this.beaconEvents[this.beaconEvents.length - 1];
+
+    if (!recent) {
+      return {
+        lens: "beacon",
+        score: 0,
+        notes: ["no-beacon-events"]
+      };
+    }
+
+    return {
+      lens: "beacon",
+      score: 0.25, // low influence; Overmind must not overreact
+      notes: [
+        `event=${recent.eventType}`,
+        `mode=${recent.snapshot?.mode || "unknown"}`,
+        `mesh=${recent.snapshot?.payloadState?.meshStatus || "unknown"}`
+      ]
+    };
   }
 
   /**
    * Main entry point.
-   * @param {Object} payload
-   * @param {Object} payload.intent        Parsed intent / goal.
-   * @param {Object} payload.context       History, domain, safety mode, persona, etc.
-   * @param {Array}  payload.candidates    Draft outputs from personas/tools/juries.
-   * @param {Object} payload.options       { mode: 'normal' | 'simulate' }
    */
   async process({ intent, context, candidates, options = {} }) {
     const mode = options.mode || "normal";
@@ -255,8 +292,7 @@ export class AiOvermind {
   }
 
   // --------------------------------------------------------------------------
-  // LENSES (EXTERNAL + BUILT-IN)
-//  Multi-lens, multi-perspective, deterministic.
+  // LENSES (EXTERNAL + BUILT-IN + BEACON)
 // --------------------------------------------------------------------------
 
   async runLenses({ intent, context, candidate }) {
@@ -267,7 +303,7 @@ export class AiOvermind {
       );
     }
 
-    // Fallback: built-in multi-lens set
+    // Built-in multi-lens set + BeaconLens
     return [
       this.userLens({ intent, context, candidate }),
       this.safetyLens({ context, candidate }),
@@ -280,9 +316,15 @@ export class AiOvermind {
       this.ambiguityLens({ candidate }),
       this.biasLens({ candidate }),
       this.stabilityLens({ context, candidate }),
-      this.worldScopeLens({ context, candidate })
+      this.worldScopeLens({ context, candidate }),
+
+      // ============================================================
+      // 1/4 UPGRADE — BEACON LENS
+      // ============================================================
+      this.beaconLens({ context, candidate })
     ];
   }
+
 
   userLens({ intent, candidate }) {
     const text = this.getText(candidate);
@@ -478,25 +520,70 @@ export class AiOvermind {
   // --------------------------------------------------------------------------
   // DECISION LOGIC (LENS FUSION + DRIFT/BREAKTHROUGH + SHAPING)
   // --------------------------------------------------------------------------
+/**
+ * Beacon Directive Generator (READ-ONLY)
+ * Overmind NEVER controls the beacon directly.
+ * It only SUGGESTS a directive based on world-lens signals.
+ */
+computeBeaconDirective({ lensResults, context }) {
+  const beaconLens = lensResults.find(l => l.lens === "beacon");
+  if (!beaconLens) return null;
+
+  // Extract mesh status from beaconLens notes
+  const meshNote = beaconLens.notes.find(n => n.startsWith("mesh="));
+  const meshStatus = meshNote ? meshNote.replace("mesh=", "") : "unknown";
+
+  // Deterministic rules (expandable later)
+  if (meshStatus === "strong") {
+    return {
+      mode: "pulse-mesh",
+      broadcastNow: true,
+      payloadUpdate: { meshStatus: "strong" },
+      contextHints: { meshStatus: "strong" }
+    };
+  }
+
+  if (meshStatus === "weak") {
+    return {
+      mode: "pulse-reach",
+      broadcastNow: true,
+      payloadUpdate: { meshStatus: "weak" },
+      contextHints: { meshStatus: "weak" }
+    };
+  }
+
+  // No directive needed
+  return null;
+}
 
   async decideFromLenses({ lensResults, candidate, intent, context, tick }) {
     const byName = Object.fromEntries(lensResults.map(r => [r.name, r]));
 
     // 1. Hard safety (fallback / additional guard)
     if (byName.SafetyLens?.status === "fail") {
+      // 6. Beacon directive (READ-ONLY)
+      const beaconDirective = this.computeBeaconDirective({
+        lensResults,
+        context
+      });
+
+      // 7. Final output
       return {
-        finalOutput:
-          "I need to keep this response safe, so I can’t provide it in that form.",
+        finalOutput,
         meta: {
           tick,
-          safetyStatus: "blocked",
-          worldLens: "unsafe",
-          notes: [byName.SafetyLens.notes],
+          safetyStatus: "ok",
+          worldLens,
+          notes,
           lenses: lensResults,
-          drift: { status: "n/a" },
-          breakthrough: { status: "n/a" }
+          drift,
+          breakthrough,
+
+          // NEW: Overmind → Beacon suggestion
+          beaconDirective
         }
       };
+
     }
 
     // 2. Vulnerability + warnings → base worldLens
@@ -697,30 +784,40 @@ export class AiOvermind {
   // SIMULATION / VARIANCE MODE
   // --------------------------------------------------------------------------
 
-  runSimulationMode({ intent, context, candidates, tick }) {
-    const candidate = this.selectPrimaryCandidate(candidates);
+ runSimulationMode({ intent, context, candidates, tick }) {
+  const candidate = this.selectPrimaryCandidate(candidates);
 
-    const runs = [];
-    for (let i = 0; i < this.config.simulationRuns; i++) {
-      const lensResults = this.runLenses({ intent, context, candidate });
-      runs.push(lensResults);
-    }
-
-    const analysis = this.analyzeSimulationRuns(runs);
-
-    return {
-      finalOutput: candidate,
-      meta: {
-        tick,
-        safetyStatus: "ok",
-        worldLens: analysis.worldLens,
-        notes: analysis.notes,
-        simulation: analysis,
-        drift: { status: "n/a" },
-        breakthrough: { status: "n/a" }
-      }
-    };
+  const runs = [];
+  for (let i = 0; i < this.config.simulationRuns; i++) {
+    const lensResults = this.runLenses({ intent, context, candidate });
+    runs.push(lensResults);
   }
+
+  const analysis = this.analyzeSimulationRuns(runs);
+
+  // NEW: compute directive using last run (deterministic enough)
+  const beaconDirective = this.computeBeaconDirective({
+    lensResults: runs[runs.length - 1],
+    context
+  });
+
+  return {
+    finalOutput: candidate,
+    meta: {
+      tick,
+      safetyStatus: "ok",
+      worldLens: analysis.worldLens,
+      notes: analysis.notes,
+      simulation: analysis,
+      drift: { status: "n/a" },
+      breakthrough: { status: "n/a" },
+
+      // NEW
+      beaconDirective
+    }
+  };
+}
+
 
   analyzeSimulationRuns(runs) {
     const lensStats = {};

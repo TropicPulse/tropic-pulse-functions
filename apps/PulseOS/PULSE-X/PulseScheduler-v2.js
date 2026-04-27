@@ -246,9 +246,15 @@ export class PulseScheduler {
         options: { mode: "normal" }
       });
 
+      // NEW: Forward Overmind meta → NodeAdmin (beacon directive)
+      if (globalThis.nodeAdmin && typeof globalThis.nodeAdmin.handleOvermindMeta === "function") {
+        globalThis.nodeAdmin.handleOvermindMeta(overmindDecision.meta);
+      }
+
       reasoning.push(
         `Overmind worldLens: ${overmindDecision?.meta?.worldLens || "n/a"}`
       );
+
     } else {
       reasoning.push("Overmind skipped (no routing or disabled).");
     }

@@ -2,34 +2,52 @@
 // FILE: /apps/PulseOS/PULSE-TOOLS/PulseNodeAdmin-v11-EVO-INTELLECT.js
 // PULSE OS — v11-EVO
 // NODEADMIN ORGAN — NETWORK BRAIN / SENTINEL COMMAND / INTENT + MEMORY CORTEX
+// OVERMIND-READY • DETERMINISTIC • SYNTHETIC-ONLY
 // ============================================================================
-// ROLE & VISION:
-//   NodeAdmin is the organism’s network brain:
-//     - Circling sentinels that patrol, scan, guard, boost, and cool.
-//     - Analyzes all layers (body/home/town/node) and flags.
-//     - Decides focus, urgency, and mode (idle/scan/boost/cool/guard).
-//     - Exposes a command surface: intents, custom actions, questions, reports.
-//     - Integrates memory so it can recall what happened and why.
-//     - Bridges backend AI so higher-level intelligence can steer it.
-//
-//   It is the SENTINEL COMMAND BRAIN:
-//     - You can ask it where it is, what it sees, what it recommends.
-//     - You can push intents and custom messages into it.
-//     - It can execute actions and report back.
-//     - It can evolve by suggesting better behaviors.
-//
-// SAFETY CONTRACT:
-//   - Deterministic behavior (no randomness).
-//   - No recursion, no async drift.
-//   - No mutation outside internal state.
-//   - Purely synthetic, non-medical.
-//   - Backend AI is optional and treated as advisory.
+
+export const NodeAdminMeta = Object.freeze({
+  organId: "PulseNodeAdmin-v11-EVO",
+  role: "NODEADMIN_ORGAN",
+  version: "11.0-EVO",
+  epoch: "v11-EVO",
+  layer: "NetworkBrain",
+  safety: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRecursion: true,
+    noAsyncDrift: true,
+    syntheticOnly: true,
+    backendAdvisoryOnly: true
+  }),
+  contract: Object.freeze({
+    purpose:
+      "Network brain / sentinel command organ for Pulse nodes. Scores layers, selects focus, sets mode, executes intents, and exposes reports.",
+    never: Object.freeze([
+      "mutate external state",
+      "perform network I/O directly",
+      "bypass Overmind or boundaries",
+      "self-modify core safety rules",
+      "introduce randomness or async drift"
+    ]),
+    always: Object.freeze([
+      "remain deterministic",
+      "log decisions to internal memory",
+      "expose state via reports and snapshots",
+      "treat backend AI as advisory only",
+      "allow extension via intents, not core mutation"
+    ])
+  })
+});
+
+// ============================================================================
+// FACTORY: createPulseNodeAdmin — v11‑EVO
 // ============================================================================
 
 export function createPulseNodeAdmin({
   trace = false,
   instances = 3,
-  backendInterpreter = null   // optional: fn({ message, state }) => { intentName?, mode?, notes? }
+  backendInterpreter = null, // optional: fn({ message, state }) => { intentName?, mode?, notes? }
+  overmindBridge = null      // optional: { emit?, pullDirectives? }
 } = {}) {
 
   // ---------------------------------------------------------------------------
@@ -56,10 +74,13 @@ export function createPulseNodeAdmin({
   };
 
   // Intent registry: programmable actions NodeAdmin can execute.
-  const intentHandlers = {};
+  const intentHandlers = Object.create(null);
 
   // Backend interpreter: optional AI brain behind NodeAdmin.
   let backend = backendInterpreter;
+
+  // Overmind bridge: optional meta-controller.
+  let overmind = overmindBridge;
 
   // ---------------------------------------------------------------------------
   // MEMORY HELPERS
@@ -90,19 +111,22 @@ export function createPulseNodeAdmin({
   function registerIntent(name, handler) {
     intentHandlers[name] = handler;
     remember("intent-registered", { name });
+    emitToOvermind("intent-registered", { name });
   }
 
   function executeIntent(name, payload = {}) {
     const handler = intentHandlers[name];
     if (!handler) {
       if (trace) console.warn("[NodeAdmin] Unknown intent:", name);
-      remember("intent-missing", { name, payload });
+      const evt = remember("intent-missing", { name, payload });
+      emitToOvermind("intent-missing", evt);
       return { ok: false, error: "unknown-intent" };
     }
 
     if (trace) console.log("[NodeAdmin] Executing intent:", name, payload);
     const result = handler({ mode, sentinels, payload });
-    remember("intent-executed", { name, payload, result });
+    const evt = remember("intent-executed", { name, payload, result });
+    emitToOvermind("intent-executed", evt);
     return { ok: true, result };
   }
 
@@ -111,7 +135,51 @@ export function createPulseNodeAdmin({
   // ---------------------------------------------------------------------------
   function setBackendInterpreter(fn) {
     backend = fn;
-    remember("backend-set", { hasBackend: !!fn });
+    const evt = remember("backend-set", { hasBackend: !!fn });
+    emitToOvermind("backend-set", evt);
+  }
+
+  // ---------------------------------------------------------------------------
+  // OVERMIND BRIDGE
+  // ---------------------------------------------------------------------------
+  function attachOvermindBridge(bridge) {
+    overmind = bridge || null;
+    const evt = remember("overmind-bridge-set", { hasBridge: !!bridge });
+    emitToOvermind("overmind-bridge-set", evt);
+  }
+
+  function emitToOvermind(eventType, payload) {
+    if (!overmind || typeof overmind.emit !== "function") return;
+    // Overmind decides what to do; NodeAdmin stays deterministic.
+    overmind.emit({
+      organId: NodeAdminMeta.organId,
+      eventType,
+      payload,
+      snapshot: getStateSnapshot()
+    });
+  }
+
+  function applyDirective(directive) {
+    // Deterministic, bounded: no recursion, no async, no external I/O.
+    if (!directive || typeof directive !== "object") return { ok: false, reason: "invalid-directive" };
+
+    const { mode: nextMode, intentName, intentPayload } = directive;
+    let modeChanged = false;
+    let intentResult = null;
+
+    if (nextMode && typeof nextMode === "string") {
+      setMode(nextMode);
+      modeChanged = true;
+    }
+
+    if (intentName && typeof intentName === "string") {
+      intentResult = executeIntent(intentName, intentPayload || {});
+    }
+
+    const result = { ok: true, modeChanged, intentResult };
+    remember("directive-applied", { directive, result });
+    emitToOvermind("directive-applied", { directive, result });
+    return result;
   }
 
   // ---------------------------------------------------------------------------
@@ -119,8 +187,9 @@ export function createPulseNodeAdmin({
   // ---------------------------------------------------------------------------
   function setMode(nextMode) {
     mode = nextMode;
-    remember("mode-change", { mode });
+    const evt = remember("mode-change", { mode });
     if (trace) console.log("[NodeAdmin] mode:", mode);
+    emitToOvermind("mode-change", evt);
   }
 
   function getMode() {
@@ -182,9 +251,10 @@ export function createPulseNodeAdmin({
     }
 
     memory.lastSentinels = results;
-    remember("sentinels-updated", { mode, results });
+    const evt = remember("sentinels-updated", { mode, results });
 
     if (trace) console.log("[NodeAdmin] sentinels:", results);
+    emitToOvermind("sentinels-updated", evt);
     return results;
   }
 
@@ -232,9 +302,10 @@ export function createPulseNodeAdmin({
     };
 
     memory.lastAdvice = advice;
-    remember("advice", advice);
+    const evt = remember("advice", advice);
 
     if (trace) console.log("[NodeAdmin] advice:", advice);
+    emitToOvermind("advice", evt);
     return advice;
   }
 
@@ -251,6 +322,7 @@ export function createPulseNodeAdmin({
   // ---------------------------------------------------------------------------
   function getReport() {
     const report = {
+      organId: NodeAdminMeta.organId,
       mode,
       tick,
       sentinels: memory.lastSentinels,
@@ -258,8 +330,21 @@ export function createPulseNodeAdmin({
       memoryEvents: memory.events.slice(-20)
     };
     memory.lastReport = report;
-    remember("report", report);
+    const evt = remember("report", report);
+    emitToOvermind("report", evt);
     return report;
+  }
+
+  // Compact snapshot for Overmind / other organs.
+  function getStateSnapshot() {
+    return Object.freeze({
+      organId: NodeAdminMeta.organId,
+      mode,
+      tick,
+      sentinelCount: sentinels.length,
+      lastAdvice: memory.lastAdvice,
+      lastSentinels: memory.lastSentinels
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -277,28 +362,35 @@ export function createPulseNodeAdmin({
         "intent execution (AIS++)",
         "custom message interpretation",
         "backend AI bridge",
-        "memory log + reports"
+        "memory log + reports",
+        "Overmind directive bridge",
+        "state snapshot export"
       ]
     };
   }
 
   function getManual() {
     return {
+      meta: NodeAdminMeta,
       description: "NodeAdmin is the network brain / sentinel command organ.",
       usage: {
         setMode: "nodeAdmin.setMode('scan' | 'boost' | 'cool' | 'guard' | 'idle')",
         updateSentinels: "nodeAdmin.updateSentinels(maxLoopIndex) → sentinel states",
         analyzeAndAdvise: "nodeAdmin.analyzeAndAdvise({ body, home, town, node, flags }) → advice",
         getReport: "nodeAdmin.getReport() → current state snapshot",
+        getStateSnapshot: "nodeAdmin.getStateSnapshot() → compact state for Overmind",
         getAbilities: "nodeAdmin.getAbilities() → modes + intents + features",
         registerIntent: "nodeAdmin.registerIntent(name, handler)",
         executeIntent: "nodeAdmin.executeIntent(name, payload?)",
         executeCustom: "nodeAdmin.executeCustom(message, context?)",
         ask: "nodeAdmin.ask(question, context?)",
         getMemory: "nodeAdmin.getMemory({ limit?, type? })",
-        setBackendInterpreter: "nodeAdmin.setBackendInterpreter(fn)"
+        setBackendInterpreter: "nodeAdmin.setBackendInterpreter(fn)",
+        attachOvermindBridge: "nodeAdmin.attachOvermindBridge({ emit?, pullDirectives? })",
+        applyDirective: "nodeAdmin.applyDirective({ mode?, intentName?, intentPayload? })"
       },
-      caveat: "If a future AI or system discovers a better way to serve the organism, it may propose new intents or mode rules. These should be added via registerIntent or by extending analyzeAndAdvise, not by mutating core safety contracts."
+      caveat:
+        "If a future AI or system discovers a better way to serve the organism, it may propose new intents or mode rules. These should be added via registerIntent, applyDirective, or by extending analyzeAndAdvise, not by mutating core safety contracts."
     };
   }
 
@@ -317,21 +409,67 @@ export function createPulseNodeAdmin({
     } else if (q.includes("focus")) {
       const adv = memory.lastAdvice;
       if (adv) {
-        answer = `Focus is on '${adv.focusLayer}' with score ${adv.focusScore.toFixed(3)} in mode '${adv.suggestedMode}'.`;
+        answer = `Focus is on '${adv.focusLayer}' with score ${adv.focusScore.toFixed(
+          3
+        )} in mode '${adv.suggestedMode}'.`;
       } else {
         answer = "No recent focus advice available yet.";
       }
     } else if (q.includes("sentinel")) {
-      answer = `There are ${sentinels.length} sentinels. Last update had ${report.sentinels?.length || 0} entries.`;
+      answer = `There are ${sentinels.length} sentinels. Last update had ${
+        report.sentinels?.length || 0
+      } entries.`;
     } else if (q.includes("ability") || q.includes("can you")) {
-      answer = `I can operate in modes ${abilities.modes.join(", ")}, execute intents [${abilities.intents.join(", ")}], and provide advice, reports, and custom action execution.`;
+      answer = `I can operate in modes ${abilities.modes.join(
+        ", "
+      )}, execute intents [${abilities.intents.join(
+        ", "
+      )}], and provide advice, reports, and custom action execution.`;
     } else {
-      answer = "I don't have a direct answer for that question yet, but you can inspect my report via getReport() or extend my abilities via registerIntent or backendInterpreter.";
+      answer =
+        "I don't have a direct answer for that question yet, but you can inspect my report via getReport() or extend my abilities via registerIntent, applyDirective, or backendInterpreter.";
     }
 
-    remember("question", { question, context, answer });
+    const evt = remember("question", { question, context, answer });
+    emitToOvermind("question", evt);
     return { question, answer };
   }
+
+  function handleOvermindMeta(meta) {
+  if (!meta) return;
+
+  const directive = meta.beaconDirective;
+  if (!directive) return;
+
+  if (beaconEngine && typeof beaconEngine.applyDirective === "function") {
+    beaconEngine.applyDirective(directive);
+
+    remember("beacon-directive-applied", {
+      directive,
+      ts: Date.now()
+    });
+  }
+}
+
+  // inside createPulseNodeAdmin(...)
+  function attachBeaconEngine(beacon) {
+    beaconEngine = beacon;
+
+    // NodeAdmin → BeaconEngine intent bridge
+    nodeAdmin.registerIntent("beacon-control", ({ payload }) => {
+      return beaconEngine.handleNodeAdminIntent(payload.intentName, payload);
+    });
+
+    // BeaconEngine → NodeAdmin event bridge
+    beaconEngine.attachNodeAdminBridge({
+      onBeaconEvent: (evt) => {
+        remember("beacon-event", evt);
+      }
+    });
+
+    return { ok: true };
+  }
+
 
   // ---------------------------------------------------------------------------
   // CUSTOM ACTION INTERPRETER — EXECUTE CUSTOM MESSAGES
@@ -350,14 +488,18 @@ export function createPulseNodeAdmin({
       };
 
       const backendResult = backend({ message, state });
-      remember("custom-backend", { message, context, backendResult });
+      const evt = remember("custom-backend", { message, context, backendResult });
+      emitToOvermind("custom-backend", evt);
 
       if (backendResult) {
         if (backendResult.mode) {
           setMode(backendResult.mode);
         }
         if (backendResult.intentName) {
-          const res = executeIntent(backendResult.intentName, backendResult.payload || {});
+          const res = executeIntent(
+            backendResult.intentName,
+            backendResult.payload || {}
+          );
           return { source: "backend", backendResult, intentResult: res };
         }
         return { source: "backend", backendResult };
@@ -399,7 +541,8 @@ export function createPulseNodeAdmin({
       intentResult
     };
 
-    remember("custom-local", { message, context, result });
+    const evt = remember("custom-local", { message, context, result });
+    emitToOvermind("custom-local", evt);
     return result;
   }
 
@@ -407,6 +550,9 @@ export function createPulseNodeAdmin({
   // PUBLIC API
   // ---------------------------------------------------------------------------
   return {
+    // meta
+    meta: NodeAdminMeta,
+
     // core
     setMode,
     getMode,
@@ -417,9 +563,11 @@ export function createPulseNodeAdmin({
     registerIntent,
     executeIntent,
     executeCustom,
+    applyDirective,
 
     // introspection
     getReport,
+    getStateSnapshot,
     getAbilities,
     getManual,
     getMemory,
@@ -428,7 +576,10 @@ export function createPulseNodeAdmin({
     ask,
 
     // backend AI bridge
-    setBackendInterpreter
+    setBackendInterpreter,
+
+    // Overmind bridge
+    attachOvermindBridge
   };
 }
 
