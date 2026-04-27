@@ -70,11 +70,6 @@ import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
 // ============================================================================
 import * as PulseUIFlow from "../PULSE-UI/PulseUIFlow-v12-EVO.js";
 
-// ============================================================================
-//  PULSEBAND CLIENT (v12-EVO)
-//  - Membrane-level transport nerve for chunked payloads.
-// ============================================================================
-import PulseBandClient from "../PULSE-BAND/PulseBandClient-v12-EVO.js";
 
 
 // ============================================================================
@@ -308,17 +303,17 @@ if (typeof window !== "undefined") {
       // PULSEBAND BOOT — v12-EVO transport nerve (membrane-level, global)
       // -------------------------------------------------------------------
       try {
-        if (!window.PulseBand) {
-          const band = new PulseBandClient({
-            proxyBase: "/PULSE-PROXY/pulseband",
-            userId: window.__pulseUserId || "anonymous"
-          });
+        // Import your REAL PulseBand (PNS Nervous System)
+        // NOTE: adjust path if needed
+        const { pulseband } = await import("../PULSE-PROXY/PulseProxyPNSNervousSystem-v11-Evo.js");
 
-          // Bridge PulseBand requests to proxy endpoints
-          band.on("request", async (packet) => {
-            let url;
-            let method;
-            let bodyOrQuery;
+        if (!window.PulseBand) {
+          // Expose your real PulseBand globally
+          window.PulseBand = pulseband;
+
+          // Bridge PulseBand → Proxy Spine
+          pulseband.on("request", async (packet) => {
+            let url, method, bodyOrQuery;
 
             switch (packet.type) {
               case "start":
@@ -369,19 +364,15 @@ if (typeof window !== "undefined") {
             const res = await fetch(url + query, opts);
             const data = await res.json();
 
-            band.emit("response:" + packet.sessionId, data);
+            // Send response back into PulseBand
+            pulseband.emit("response:" + packet.sessionId, data);
           });
 
-          // Expose global PulseBand nerve
-          window.PulseBand = band;
-
-          // Optional: helper to start sessions from anywhere
-          window.PulseBandStart = function PulseBandStart(options) {
-            return band.start(options);
-          };
+          // Optional helper
+          window.PulseBandStart = (opts) => pulseband.start(opts);
         }
-      } catch (bandErr) {
-        console.error("[PulseEvolutionaryWindow] PulseBand boot failed:", bandErr);
+      } catch (err) {
+        console.error("[PulseEvolutionaryWindow] PulseBand boot failed:", err);
       }
     } catch (err) {
       console.error(
