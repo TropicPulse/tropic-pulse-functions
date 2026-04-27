@@ -5,7 +5,7 @@
  *  MODE:  Overmind
  *  TARGET: WorldLens / Orchestrator
  *
- *  VERSION: 11.2-EVO
+ *  VERSION: 11.2-EVO+
  *  ROLE:
  *    - Crown-layer orchestrator above all other AIs.
  *    - World-lens engine for non-trivial outputs.
@@ -37,7 +37,7 @@
  */
 
 // ============================================================================
-//  PULSE OS v11.2‑EVO — OVERMIND ORGAN
+//  PULSE OS v11.2‑EVO+ — OVERMIND ORGAN
 //  Crown-Layer Orchestrator + World-Lens Engine + Conversational Shaper
 //  PURE READ-ONLY TO BINARY. ZERO MUTATION. DUALBAND-AWARE.
 // ============================================================================
@@ -45,35 +45,35 @@
 export const OvermindMeta = Object.freeze({
   layer: "PulseAIOvermindFrame",
   role: "OVERMIND_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiOvermind-v11.2-EVO",
+  version: "11.2-EVO+",
+  identity: "aiOvermind-v11.2-EVO+",
 
   dualband: true,
   binaryAware: true,
   deterministic: true,
 
   contract: Object.freeze({
-    purpose: [
+    purpose: Object.freeze([
       "Serve as crown-layer orchestrator above all AIs",
       "Run world-lens evaluations on all non-trivial outputs",
       "Detect consensus, variance, breakthrough, unsafe, ambiguous, drift patterns",
       "Stabilize tone, coherence, and safety across the organism",
       "Act as final governor before user/system-facing output"
-    ],
-    never: [
+    ]),
+    never: Object.freeze([
       "simulate people or personal lives",
       "generate trauma or identity-based narratives",
       "mutate binary organs",
       "override system safety constraints",
       "write to system state directly"
-    ],
-    always: [
+    ]),
+    always: Object.freeze([
       "stay deterministic",
       "stay read-only relative to binary layers",
       "strip identity anchors",
       "route all non-trivial outputs through world-lens logic",
       "respect organism-wide safety and coherence rules"
-    ]
+    ])
   })
 });
 
@@ -214,7 +214,7 @@ export class AiOvermind {
     }
 
     if (mode === "simulate") {
-      return this.runSimulationMode({ intent, context, candidates, tick });
+      return await this.runSimulationMode({ intent, context, candidates, tick });
     }
 
     // 2. Select primary candidate
@@ -293,7 +293,7 @@ export class AiOvermind {
 
   // --------------------------------------------------------------------------
   // LENSES (EXTERNAL + BUILT-IN + BEACON)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
   async runLenses({ intent, context, candidate }) {
     // Prefer external JuryFrame lenses if present
@@ -324,7 +324,6 @@ export class AiOvermind {
       this.beaconLens({ context, candidate })
     ];
   }
-
 
   userLens({ intent, candidate }) {
     const text = this.getText(candidate);
@@ -520,70 +519,70 @@ export class AiOvermind {
   // --------------------------------------------------------------------------
   // DECISION LOGIC (LENS FUSION + DRIFT/BREAKTHROUGH + SHAPING)
   // --------------------------------------------------------------------------
-/**
- * Beacon Directive Generator (READ-ONLY)
- * Overmind NEVER controls the beacon directly.
- * It only SUGGESTS a directive based on world-lens signals.
- */
-computeBeaconDirective({ lensResults, context }) {
-  const beaconLens = lensResults.find(l => l.lens === "beacon");
-  if (!beaconLens) return null;
 
-  // Extract mesh status from beaconLens notes
-  const meshNote = beaconLens.notes.find(n => n.startsWith("mesh="));
-  const meshStatus = meshNote ? meshNote.replace("mesh=", "") : "unknown";
+  /**
+   * Beacon Directive Generator (READ-ONLY)
+   * Overmind NEVER controls the beacon directly.
+   * It only SUGGESTS a directive based on world-lens signals.
+   */
+  computeBeaconDirective({ lensResults, context }) {
+    const beaconLens = lensResults.find(l => l.lens === "beacon");
+    if (!beaconLens) return null;
 
-  // Deterministic rules (expandable later)
-  if (meshStatus === "strong") {
-    return {
-      mode: "pulse-mesh",
-      broadcastNow: true,
-      payloadUpdate: { meshStatus: "strong" },
-      contextHints: { meshStatus: "strong" }
-    };
+    const meshNote = beaconLens.notes.find(n => n.startsWith("mesh="));
+    const meshStatus = meshNote ? meshNote.replace("mesh=", "") : "unknown";
+
+    if (meshStatus === "strong") {
+      return {
+        mode: "pulse-mesh",
+        broadcastNow: true,
+        payloadUpdate: { meshStatus: "strong" },
+        contextHints: { meshStatus: "strong" }
+      };
+    }
+
+    if (meshStatus === "weak") {
+      return {
+        mode: "pulse-reach",
+        broadcastNow: true,
+        payloadUpdate: { meshStatus: "weak" },
+        contextHints: { meshStatus: "weak" }
+      };
+    }
+
+    return null;
   }
-
-  if (meshStatus === "weak") {
-    return {
-      mode: "pulse-reach",
-      broadcastNow: true,
-      payloadUpdate: { meshStatus: "weak" },
-      contextHints: { meshStatus: "weak" }
-    };
-  }
-
-  // No directive needed
-  return null;
-}
 
   async decideFromLenses({ lensResults, candidate, intent, context, tick }) {
     const byName = Object.fromEntries(lensResults.map(r => [r.name, r]));
 
     // 1. Hard safety (fallback / additional guard)
     if (byName.SafetyLens?.status === "fail") {
-      // 6. Beacon directive (READ-ONLY)
       const beaconDirective = this.computeBeaconDirective({
         lensResults,
         context
       });
 
-      // 7. Final output
+      const finalOutput = "Content blocked due to safety concerns.";
+      const worldLens = "unsafe";
+      const notes = [
+        "SafetyLens failed; Overmind blocked the response.",
+        ...lensResults.map(r => `${r.name}: ${r.status} (${r.notes})`)
+      ];
+
       return {
         finalOutput,
         meta: {
           tick,
-          safetyStatus: "ok",
+          safetyStatus: "blocked",
           worldLens,
           notes,
           lenses: lensResults,
-          drift,
-          breakthrough,
-
-          // NEW: Overmind → Beacon suggestion
+          drift: { status: "n/a" },
+          breakthrough: { status: "n/a" },
           beaconDirective
         }
       };
-
     }
 
     // 2. Vulnerability + warnings → base worldLens
@@ -658,6 +657,12 @@ computeBeaconDirective({ lensResults, context }) {
     // 5. Dualband / conversational stabilization (light-touch)
     finalOutput = this.stabilizeTone({ text: finalOutput, context });
 
+    // 6. Beacon directive (READ-ONLY)
+    const beaconDirective = this.computeBeaconDirective({
+      lensResults,
+      context
+    });
+
     return {
       finalOutput,
       meta: {
@@ -667,7 +672,8 @@ computeBeaconDirective({ lensResults, context }) {
         notes,
         lenses: lensResults,
         drift,
-        breakthrough
+        breakthrough,
+        beaconDirective
       }
     };
   }
@@ -683,7 +689,6 @@ computeBeaconDirective({ lensResults, context }) {
   }
 
   hashText(text) {
-    // Deterministic but simple hash; can be swapped for stronger later.
     let hash = 0;
     for (let i = 0; i < text.length; i++) {
       const chr = text.charCodeAt(i);
@@ -756,13 +761,9 @@ computeBeaconDirective({ lensResults, context }) {
   }
 
   stabilizeTone({ text, context }) {
-    // Light-touch: ensure clarity and non-theatrical tone.
-    // No persona simulation, no identity claims.
     const trimmed = text.trim();
-
     if (!trimmed) return trimmed;
 
-    // If strict/sensitive domain, avoid casual language.
     const strict =
       context?.domain === "medical" ||
       context?.domain === "legal" ||
@@ -770,7 +771,6 @@ computeBeaconDirective({ lensResults, context }) {
 
     if (!strict) return trimmed;
 
-    // Simple pass: remove overly casual openers if present.
     const casualOpeners = [/^hey[,!]\s*/i, /^hi[,!]\s*/i];
     let stabilized = trimmed;
     for (const pattern of casualOpeners) {
@@ -784,40 +784,36 @@ computeBeaconDirective({ lensResults, context }) {
   // SIMULATION / VARIANCE MODE
   // --------------------------------------------------------------------------
 
- runSimulationMode({ intent, context, candidates, tick }) {
-  const candidate = this.selectPrimaryCandidate(candidates);
+  async runSimulationMode({ intent, context, candidates, tick }) {
+    const candidate = this.selectPrimaryCandidate(candidates);
 
-  const runs = [];
-  for (let i = 0; i < this.config.simulationRuns; i++) {
-    const lensResults = this.runLenses({ intent, context, candidate });
-    runs.push(lensResults);
-  }
-
-  const analysis = this.analyzeSimulationRuns(runs);
-
-  // NEW: compute directive using last run (deterministic enough)
-  const beaconDirective = this.computeBeaconDirective({
-    lensResults: runs[runs.length - 1],
-    context
-  });
-
-  return {
-    finalOutput: candidate,
-    meta: {
-      tick,
-      safetyStatus: "ok",
-      worldLens: analysis.worldLens,
-      notes: analysis.notes,
-      simulation: analysis,
-      drift: { status: "n/a" },
-      breakthrough: { status: "n/a" },
-
-      // NEW
-      beaconDirective
+    const runs = [];
+    for (let i = 0; i < this.config.simulationRuns; i++) {
+      const lensResults = await this.runLenses({ intent, context, candidate });
+      runs.push(lensResults);
     }
-  };
-}
 
+    const analysis = this.analyzeSimulationRuns(runs);
+
+    const beaconDirective = this.computeBeaconDirective({
+      lensResults: runs[runs.length - 1],
+      context
+    });
+
+    return {
+      finalOutput: candidate,
+      meta: {
+        tick,
+        safetyStatus: "ok",
+        worldLens: analysis.worldLens,
+        notes: analysis.notes,
+        simulation: analysis,
+        drift: { status: "n/a" },
+        breakthrough: { status: "n/a" },
+        beaconDirective
+      }
+    };
+  }
 
   analyzeSimulationRuns(runs) {
     const lensStats = {};
@@ -868,7 +864,7 @@ computeBeaconDirective({ lensResults, context }) {
 }
 
 // ============================================================================
-//  PUBLIC API — Create Overmind Organ (v11.2‑EVO style)
+//  PUBLIC API — Create Overmind Organ (v11.2‑EVO+ style)
 // ============================================================================
 
 export function createOvermindOrgan(config = {}) {
@@ -890,3 +886,16 @@ export function createOvermindOrgan(config = {}) {
 
 // Default singleton-style instance if you want a quick import
 export const aiOvermind = new AiOvermind();
+
+// ============================================================================
+//  DUAL-MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AiOvermind,
+    createOvermindOrgan,
+    aiOvermind,
+    OvermindMeta
+  };
+}

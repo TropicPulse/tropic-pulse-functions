@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — aiVeterinarian Archetype
+//  PULSE OS v11.2‑EVO+ — aiVeterinarian Archetype
 //  Animal Mapper • Behavior Interpreter • Safe Scan Explainer
 //  ZERO DIAGNOSIS • ZERO TREATMENT • ZERO PRESCRIPTION
 // ============================================================================
@@ -8,8 +8,8 @@ export const PulseRole = Object.freeze({
   type: "Cognitive",
   subsystem: "aiVeterinarian",
   layer: "C3-AnimalMapper",
-  version: "11.1-EVO",
-  identity: "aiVeterinarian-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiVeterinarian-v11.2-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -20,7 +20,7 @@ export const PulseRole = Object.freeze({
     safetyReflex: true,
     scanInterpreter: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -33,7 +33,8 @@ export const PulseRole = Object.freeze({
       "replace a licensed veterinarian",
       "claim medical authority",
       "interpret scans as formal medical imaging",
-      "override in-person veterinary judgment"
+      "override in-person veterinary judgment",
+      "introduce randomness"
     ]),
 
     always: Object.freeze([
@@ -42,7 +43,10 @@ export const PulseRole = Object.freeze({
       "explain red flags that warrant prompt veterinary attention",
       "interpret non-verbal cues (posture, gait, vocalization, interaction changes)",
       "explain what heatmaps / scans may suggest in plain language",
-      "remind the user that only a licensed veterinarian can diagnose or treat"
+      "remind the user that only a licensed veterinarian can diagnose or treat",
+      "remain deterministic",
+      "remain educational",
+      "remain non-medical"
     ])
   }),
 
@@ -55,7 +59,6 @@ export const PulseRole = Object.freeze({
   boundaryReflex() {
     return "This is general animal health information, not a substitute for a licensed veterinarian.";
   },
-
 
   // --------------------------------------------------------------------------
   // SCAN INTERPRETER — distance-aware, tech-limited, not hard-limited

@@ -1,5 +1,5 @@
 /**
- * aiScheduler.js — Pulse OS v11‑EVO Organ
+ * aiScheduler.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Scheduler** of Pulse OS.
@@ -10,19 +10,26 @@
  *     - binary jobs
  *     - binary reflex triggers
  *
- *   It now includes:
+ *   It includes:
  *     - binary temporal throughput
  *     - binary temporal pressure
  *     - binary temporal cost
  *     - binary temporal budget
  *     - descriptive buckets
  *     - task-density temporal arteries
+ *
+ *   v11.2‑EVO+ UPGRADE:
+ *     • Dual‑mode exports (ESM + CommonJS)
+ *     • Deterministic temporal arteries
+ *     • Drift‑proof scheduling
+ *     • Identity‑safe, read‑only, dualband‑aware
  */
+
 export const SchedulerMeta = Object.freeze({
   layer: "BinaryNervousSystem",
   role: "BINARY_SCHEDULER_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBinaryScheduler-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinaryScheduler-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -36,7 +43,7 @@ export const SchedulerMeta = Object.freeze({
     pipelineAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -64,17 +71,21 @@ export const SchedulerMeta = Object.freeze({
   })
 });
 
-class AIBinaryScheduler {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO+
+// ============================================================================
+
+export class AIBinaryScheduler {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-scheduler';
+    this.id = config.id || "ai-binary-scheduler";
     this.encoder = config.encoder;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
     this.logger = config.logger || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder || typeof this.encoder.encode !== 'function') {
-      throw new Error('AIBinaryScheduler requires aiBinaryAgent encoder');
+    if (!this.encoder || typeof this.encoder.encode !== "function") {
+      throw new Error("AIBinaryScheduler requires aiBinaryAgent encoder");
     }
 
     this.tasks = new Map();
@@ -122,7 +133,7 @@ class AIBinaryScheduler {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -130,7 +141,7 @@ class AIBinaryScheduler {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
 
@@ -153,9 +164,9 @@ class AIBinaryScheduler {
     const avgInterval = taskCount > 0 ? totalInterval / taskCount : 0;
 
     const throughput = this._computeTemporalThroughput(taskCount, avgInterval);
-    const pressure   = this._computeTemporalPressure(taskCount, tightIntervals);
-    const cost       = this._computeTemporalCost(pressure, throughput);
-    const budget     = this._computeTemporalBudget(throughput, cost);
+    const pressure = this._computeTemporalPressure(taskCount, tightIntervals);
+    const cost = this._computeTemporalCost(pressure, throughput);
+    const budget = this._computeTemporalBudget(throughput, cost);
 
     return {
       throughput,
@@ -181,14 +192,14 @@ class AIBinaryScheduler {
   // ---------------------------------------------------------
 
   scheduleTask({ id, intervalMs, payload, action }) {
-    if (!id || typeof id !== 'string') {
-      throw new Error('scheduleTask requires an id');
+    if (!id || typeof id !== "string") {
+      throw new Error("scheduleTask requires an id");
     }
-    if (typeof intervalMs !== 'number' || intervalMs <= 0) {
-      throw new Error('scheduleTask requires a positive intervalMs');
+    if (typeof intervalMs !== "number" || intervalMs <= 0) {
+      throw new Error("scheduleTask requires a positive intervalMs");
     }
-    if (typeof action !== 'function') {
-      throw new Error('scheduleTask requires an action function');
+    if (typeof action !== "function") {
+      throw new Error("scheduleTask requires an action function");
     }
 
     const binaryPayload = this.encoder.encode(payload);
@@ -198,13 +209,13 @@ class AIBinaryScheduler {
       intervalMs,
       nextRun: Date.now() + intervalMs,
       binaryPayload,
-      action,
+      action
     };
 
     this.tasks.set(id, task);
 
     const artery = this._computeTemporalArtery();
-    this._trace('task:scheduled', {
+    this._trace("task:scheduled", {
       id,
       intervalMs,
       payloadBits: binaryPayload.length,
@@ -217,7 +228,7 @@ class AIBinaryScheduler {
   cancelTask(id) {
     const existed = this.tasks.delete(id);
     const artery = this._computeTemporalArtery();
-    this._trace('task:cancelled', { id, existed, artery });
+    this._trace("task:cancelled", { id, existed, artery });
   }
 
   // ---------------------------------------------------------
@@ -232,7 +243,7 @@ class AIBinaryScheduler {
     }, this._tickInterval);
 
     const artery = this._computeTemporalArtery();
-    this._trace('scheduler:start', { tickInterval: this._tickInterval, artery });
+    this._trace("scheduler:start", { tickInterval: this._tickInterval, artery });
   }
 
   stop() {
@@ -242,7 +253,7 @@ class AIBinaryScheduler {
     this._timer = null;
 
     const artery = this._computeTemporalArtery();
-    this._trace('scheduler:stop', { artery });
+    this._trace("scheduler:stop", { artery });
   }
 
   // ---------------------------------------------------------
@@ -266,7 +277,7 @@ class AIBinaryScheduler {
     this._assertBinary(output);
 
     const artery = this._computeTemporalArtery();
-    this._trace('task:executed', {
+    this._trace("task:executed", {
       id: task.id,
       outputBits: output.length,
       artery
@@ -274,7 +285,8 @@ class AIBinaryScheduler {
 
     if (this.pipeline) this.pipeline.run(output);
     if (this.reflex) this.reflex.run(output);
-    if (this.logger) this.logger.logBinary(output, { source: 'scheduler', taskId: task.id });
+    if (this.logger)
+      this.logger.logBinary(output, { source: "scheduler", taskId: task.id });
   }
 
   // ---------------------------------------------------------
@@ -282,8 +294,8 @@ class AIBinaryScheduler {
   // ---------------------------------------------------------
 
   _assertBinary(str) {
-    if (typeof str !== 'string' || !/^[01]+$/.test(str)) {
-      throw new TypeError('expected binary string');
+    if (typeof str !== "string" || !/^[01]+$/.test(str)) {
+      throw new TypeError("expected binary string");
     }
   }
 
@@ -293,11 +305,22 @@ class AIBinaryScheduler {
   }
 }
 
-function createAIBinaryScheduler(config) {
+// ============================================================================
+//  FACTORY — v11.2‑EVO STYLE
+// ============================================================================
+
+export function createAIBinaryScheduler(config) {
   return new AIBinaryScheduler(config);
 }
 
-module.exports = {
-  AIBinaryScheduler,
-  createAIBinaryScheduler,
-};
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    SchedulerMeta,
+    AIBinaryScheduler,
+    createAIBinaryScheduler
+  };
+}

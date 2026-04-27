@@ -28,7 +28,7 @@ export const ClinicianMeta = Object.freeze({
     identitySafe: true,
     readOnly: true,
 
-    packetAware: true,          // NEW — all v11‑EVO organs emit packets
+    packetAware: true,
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -56,7 +56,7 @@ export const ClinicianMeta = Object.freeze({
       "stay deterministic",
       "stay identity-safe",
       "stay schema-aware",
-      "emit deterministic clinician packets"   // NEW
+      "emit deterministic clinician packets"
     ])
   })
 });
@@ -69,9 +69,6 @@ export function createClinicianOrgan(context = {}) {
   const diagnostics = context.diagnostics || {};
   const trace = Array.isArray(context.trace) ? [...context.trace] : [];
 
-  // --------------------------------------------------------------------------
-  // SUMMARY BUILDER (Frozen)
-  // --------------------------------------------------------------------------
   function buildSummary() {
     return Object.freeze({
       mismatches: diagnostics.mismatches?.length || 0,
@@ -81,9 +78,6 @@ export function createClinicianOrgan(context = {}) {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // SAFE CONTEXT SNAPSHOT (Frozen)
-  // --------------------------------------------------------------------------
   function buildSafeContext() {
     return Object.freeze({
       personaId: context.personaId,
@@ -93,9 +87,6 @@ export function createClinicianOrgan(context = {}) {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // FLAG SUMMARY (Frozen)
-  // --------------------------------------------------------------------------
   function buildFlags() {
     return Object.freeze([
       ...(diagnostics.mismatches?.length ? [{ type: "mismatch" }] : []),
@@ -105,9 +96,6 @@ export function createClinicianOrgan(context = {}) {
     ]);
   }
 
-  // --------------------------------------------------------------------------
-  // CLINICIAN PACKET (NEW — deterministic)
-  // --------------------------------------------------------------------------
   function buildPacket() {
     const payload = {
       type: "clinician-snapshot",
@@ -118,7 +106,6 @@ export function createClinicianOrgan(context = {}) {
 
     const json = JSON.stringify(payload);
 
-    // If encoder exists in context, use it; otherwise packet is symbolic-only.
     const bits = context.encoder?.encode
       ? context.encoder.encode(json)
       : null;
@@ -130,9 +117,6 @@ export function createClinicianOrgan(context = {}) {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // PUBLIC CLINICIAN API (Frozen)
-  // --------------------------------------------------------------------------
   return Object.freeze({
     meta: ClinicianMeta,
 
@@ -154,4 +138,24 @@ export function createClinicianOrgan(context = {}) {
       return buildPacket();
     }
   });
+}
+
+// ============================================================================
+//  ESM EXPORTS
+// ============================================================================
+export {
+  createClinicianOrgan
+};
+
+export default createClinicianOrgan;
+
+// ============================================================================
+//  COMMONJS FALLBACK EXPORTS
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    ClinicianMeta,
+    createClinicianOrgan,
+    default: createClinicianOrgan
+  };
 }

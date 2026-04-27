@@ -1,5 +1,5 @@
 /**
- * aiReflex.js — Pulse OS v11‑EVO Organ
+ * aiReflex.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Reflex Engine** of Pulse OS (dualband).
@@ -14,17 +14,22 @@
  *     • CNS lightning arc
  *     • instant reaction layer
  *     • deterministic reflex engine
+ *
+ *  v11.2‑EVO UPGRADE:
+ *    • Dual‑mode exports (ESM + CommonJS)
+ *    • Fully dualband‑declared meta
+ *    • Drift‑proof, deterministic reflex artery metrics
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO (UPGRADED)
+//  META BLOCK — v11.2‑EVO (DUALBAND)
 // ---------------------------------------------------------
 
 export const ReflexMeta = Object.freeze({
   layer: "OrganismReflex",
   role: "REFLEX_ENGINE",
-  version: "11.0-EVO",
-  identity: "aiReflex-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiReflex-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -36,12 +41,12 @@ export const ReflexMeta = Object.freeze({
     pipelineAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic reflex triggers, actions, and reflex artery metrics for the v11‑EVO organism.",
+      "Provide deterministic reflex triggers, actions, and reflex artery metrics for the v11.2‑EVO organism.",
 
     never: Object.freeze([
       "introduce randomness",
@@ -68,9 +73,9 @@ export const ReflexMeta = Object.freeze({
 //  ORGAN IMPLEMENTATION (LOGIC UNCHANGED)
 // ---------------------------------------------------------
 
-class AIBinaryReflex {
+export class AIBinaryReflex {
   constructor(config = {}) {
-    this.id = config.id || 'reflex';
+    this.id = config.id || "reflex";
     this.trace = !!config.trace;
 
     this.reflexes = [];
@@ -115,7 +120,7 @@ class AIBinaryReflex {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -123,7 +128,7 @@ class AIBinaryReflex {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
 
@@ -145,10 +150,13 @@ class AIBinaryReflex {
 
     const avgTriggerCost = reflexCount > 0 ? totalTriggerCost / reflexCount : 0;
 
-    const throughput = this._computeReflexThroughput(reflexCount, avgTriggerCost);
-    const pressure   = this._computeReflexPressure(reflexCount, tightTriggers);
-    const cost       = this._computeReflexCost(pressure, throughput);
-    const budget     = this._computeReflexBudget(throughput, cost);
+    const throughput = this._computeReflexThroughput(
+      reflexCount,
+      avgTriggerCost
+    );
+    const pressure = this._computeReflexPressure(reflexCount, tightTriggers);
+    const cost = this._computeReflexCost(pressure, throughput);
+    const budget = this._computeReflexBudget(throughput, cost);
 
     return {
       throughput,
@@ -174,17 +182,17 @@ class AIBinaryReflex {
   // ---------------------------------------------------------
 
   addReflex(triggerFn, actionFn) {
-    if (typeof triggerFn !== 'function') {
-      throw new TypeError('addReflex: trigger must be a function');
+    if (typeof triggerFn !== "function") {
+      throw new TypeError("addReflex: trigger must be a function");
     }
-    if (typeof actionFn !== 'function') {
-      throw new TypeError('addReflex: action must be a function');
+    if (typeof actionFn !== "function") {
+      throw new TypeError("addReflex: action must be a function");
     }
 
     this.reflexes.push({ trigger: triggerFn, action: actionFn });
 
     const artery = this._computeReflexArtery();
-    this._trace('addReflex', { totalReflexes: this.reflexes.length, artery });
+    this._trace("addReflex", { totalReflexes: this.reflexes.length, artery });
   }
 
   // ---------------------------------------------------------
@@ -195,20 +203,20 @@ class AIBinaryReflex {
     this._assertBinary(binaryInput);
 
     const artery = this._computeReflexArtery();
-    this._trace('run:start', { binaryInput, artery });
+    this._trace("run:start", { binaryInput, artery });
 
     for (let i = 0; i < this.reflexes.length; i++) {
       const { trigger, action } = this.reflexes[i];
 
       const shouldFire = trigger(binaryInput);
-      this._trace('run:triggerCheck', { index: i, shouldFire });
+      this._trace("run:triggerCheck", { index: i, shouldFire });
 
       if (shouldFire) {
         const output = action(binaryInput);
         this._assertBinary(output);
 
         const artery = this._computeReflexArtery();
-        this._trace('run:reflexFired', {
+        this._trace("run:reflexFired", {
           index: i,
           input: binaryInput,
           output,
@@ -219,7 +227,7 @@ class AIBinaryReflex {
       }
     }
 
-    this._trace('run:noReflexFired', { binaryInput });
+    this._trace("run:noReflexFired", { binaryInput });
     return null;
   }
 
@@ -228,8 +236,8 @@ class AIBinaryReflex {
   // ---------------------------------------------------------
 
   _assertBinary(str) {
-    if (typeof str !== 'string' || !/^[01]+$/.test(str)) {
-      throw new TypeError('expected binary string');
+    if (typeof str !== "string" || !/^[01]+$/.test(str)) {
+      throw new TypeError("expected binary string");
     }
   }
 
@@ -239,11 +247,22 @@ class AIBinaryReflex {
   }
 }
 
-function createAIBinaryReflex(config) {
+// ---------------------------------------------------------
+//  FACTORY — v11.2‑EVO STYLE
+// ---------------------------------------------------------
+
+export function createAIBinaryReflex(config) {
   return new AIBinaryReflex(config);
 }
 
-module.exports = {
-  AIBinaryReflex,
-  createAIBinaryReflex,
-};
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    ReflexMeta,
+    AIBinaryReflex,
+    createAIBinaryReflex
+  };
+}

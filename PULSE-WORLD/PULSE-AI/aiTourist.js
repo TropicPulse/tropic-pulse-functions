@@ -22,24 +22,33 @@
 //   • NO executing user code.
 //   • Deterministic, scoped data access only.
 // ============================================================================
+
 export const TouristMeta = Object.freeze({
+  type: "Cognitive",
+  subsystem: "aiTourist",
   layer: "PulseAITouristFrame",
   role: "TOURIST_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiTourist-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiTourist-v11.2-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+    dualbandSafe: true,
     binaryAware: true,
     symbolicAware: true,
     readOnly: true,
+    mutationSafe: true,
     identitySafe: true,
     scopeAware: true,
     intentAware: true,
+    cacheAware: true,
+    ownerAware: true,
+    userAware: true,
+    touristAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -54,7 +63,8 @@ export const TouristMeta = Object.freeze({
       "perform updates",
       "execute user code",
       "use eval() or Function()",
-      "bypass scope boundaries"
+      "bypass scope boundaries",
+      "weaken cache-control guarantees"
     ]),
 
     always: Object.freeze([
@@ -63,9 +73,14 @@ export const TouristMeta = Object.freeze({
       "apply deterministic cache-control",
       "return frozen data bundles",
       "log boundary violations",
-      "support Tour Guide AI intent routing"
+      "support Tour Guide AI intent routing",
+      "remain read-only and deterministic"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "aiTourist is read-only, scope-aware, and identity-safe — no writes, no identity leakage, no boundary bypass.";
+  }
 });
 
 import { Personas } from "./persona.js";
@@ -362,14 +377,13 @@ export function createTouristAPI(db) {
         }
         return buildBusinessBundle(context, intent.businessId);
 
-      case "list-events":
-        {
-          const events = await fetchCollection(context, "events");
-          return {
-            data: { events: events.data },
-            cache: { events: events.cache }
-          };
-        }
+      case "list-events": {
+        const events = await fetchCollection(context, "events");
+        return {
+          data: { events: events.data },
+          cache: { events: events.cache }
+        };
+      }
 
       default:
         context.logStep?.(`aiTourist: unknown intent type "${intent.type}".`);

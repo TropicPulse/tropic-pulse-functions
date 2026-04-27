@@ -1,15 +1,17 @@
 // ============================================================================
 // FILE: /apps/PulseOS/Surface/PulseEvolutionaryWindow.js
 // PULSE EVOLUTIONARY WINDOW — v12‑EVO‑BINARY‑MAX
-// SURFACE MEMBRANE • ONE‑WAY GLASS • BINARY‑FIRST BOOT • NO MIDDLEMEN
+// PORTAL‑MEMBRANE • ONE‑WAY GLASS • ZERO‑TRUST SURFACE • NO ORGANS BEYOND GLASS
+// BINARY‑FIRST BOOT • SHADOW‑ONLY PROJECTION • PREWARMED • PRECHUNKED • ZERO‑LATENCY SURFACE
 // ============================================================================
 //
-// METAPHOR:
-// ---------
+// METAPHOR (PORTAL, NOT UI):
+// --------------------------
 //  - This is the WINDOW of the organism — the reinforced glass of the body.
 //  - Outsiders can SEE the glow of the organism (vitals, logs, understanding,
 //    binary shadow), but can NEVER TOUCH the real organs.
 //  - The organism lives BEHIND the glass; the window is a pure membrane.
+//  - This is a PORTAL‑MEMBRANE: one‑way glass into a living system, not a UI layer.
 //  - No routing, no evolution, no organs live here.
 //  - This layer is VIEW‑ONLY, SENSE‑ONLY, BOUNDARY‑ONLY.
 //
@@ -24,15 +26,16 @@
 //      • Never expose raw organs, never expose internal routes.
 //      • Never allow outside code to influence the organism.
 //
-// NO MIDDLEMEN CONTRACT:
-// ----------------------
+// NO MIDDLEMEN / PORTAL CONTRACT:
+// -------------------------------
 //  - No frontend “organs” here.
 //  - No frontend routing.
 //  - No frontend identity.
 //  - No frontend evolution.
 //  - No timers, no intervals, no async nervous system (only one boot IIFE).
 //  - Only: ProofMonitor, ProofLogger, Understanding, BinaryBoot, SurfaceEnv.
-//  - (Plus membrane‑safe transport nerves like PulseBand.)
+//  - Plus membrane‑safe transport nerves like PulseBand and PulseChunks.
+//  - This is a ZERO‑TRUST SURFACE over a FULL‑TRUST ORGANISM behind glass.
 // ============================================================================
 
 
@@ -43,7 +46,7 @@
 import * as PulseVitals from "./PULSEProofMonitor.js";
 import * as PulseLogger from "./PULSEProofLogger.js";
 
-
+import * as PulseChunks from "./PulseChunks-v1.js";
 // ============================================================================
 //  LOAD UNDERSTANDING (SECOND LAYER)
 //  - Understanding is descriptive only, never prescriptive.
@@ -56,24 +59,31 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 //  - Binary organism is the real nervous system.
 //  - This file ONLY boots it and exposes a safe shadow.
 // ============================================================================
-import PulseBinaryOrganismBoot from "../PULSE-AI/ai-v11-Evo.js";
+import PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
 
 // ============================================================================
 //  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
 //  - Safe, membrane-level, never throws, never breaks.
 // ============================================================================
-import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
+import * as PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
 
 // ============================================================================
 //  UI FLOW ENGINE (PulseUIFlow-v12-EVO)
 //  - UI flow coordinator, UI-only, safe to expose at membrane.
 // ============================================================================
-import * as PulseUIFlow from "../PULSE-UI/PulseUIFlow-v12-EVO.js";
+import * as PulseUIFlow from "./PULSE-UI/PulseUIFlow-v12-EVO.js";
+
+// ============================================================================
+//  FRONTEND CHUNK MEMBRANE (PulseChunks-v1 — 2026 transport layer)
+//  - Membrane-only, no organs. Used to chunk/cache/warm visible assets.
+//  - Makes the WINDOW a zero-latency, prewarmed, prechunked surface.
+// ============================================================================
 
 
 
 // ============================================================================
 //  SURFACE ENVIRONMENT SNAPSHOT (USER + DEVICE CONTEXT, READ‑ONLY)
+//  - Outside‑world snapshot: the organism SEES the world through this window.
 // ============================================================================
 function buildSurfaceEnvironment() {
   if (typeof window === "undefined") {
@@ -182,6 +192,80 @@ function buildSurfaceEnvironment() {
 const PulseSurfaceEnvironment = buildSurfaceEnvironment();
 
 if (typeof window !== "undefined") {
+  // -------------------------------------------------------------------------
+  // 2026-LEVEL MEMBRANE: CHUNKED, CACHED, PREWARMED VISIBLE LAYER
+  //  - This is the PORTAL SURFACE: everything visible is prechunked + cached.
+  //  - Attach frontend chunker to window.
+  //  - Provide fetchImage() for chunked image retrieval.
+  //  - Override <img>.src to route through chunker.
+  //  - Optionally intercept image fetches.
+  // -------------------------------------------------------------------------
+  try {
+    // Expose PulseChunks module at membrane
+    window.PulseChunks = window.PulseChunks || PulseChunks;
+
+    // Universal chunked image fetcher
+    window.fetchImage = window.fetchImage || (async function (url) {
+      if (!url) return url;
+      try {
+        if (window.PulseChunks?.getImage) {
+          // Assumes PulseChunks.getImage(url) → blob URL or data URL
+          return await window.PulseChunks.getImage(url);
+        }
+      } catch (err) {
+        console.error("[PulseEvolutionaryWindow] fetchImage chunk error:", err);
+      }
+      // Fallback: return original URL
+      return url;
+    });
+
+    // Global <img> src override — membrane-level, no organs
+    const desc = Object.getOwnPropertyDescriptor(Image.prototype, "src");
+    if (desc && typeof desc.set === "function") {
+      const originalSet = desc.set;
+      Object.defineProperty(Image.prototype, "src", {
+        configurable: true,
+        enumerable: desc.enumerable,
+        get: desc.get,
+        set(url) {
+          if (!url || !window.fetchImage) {
+            return originalSet.call(this, url);
+          }
+          // Non-blocking: set placeholder immediately if needed, then swap
+          window.fetchImage(url)
+            .then((blobUrl) => originalSet.call(this, blobUrl || url))
+            .catch(() => originalSet.call(this, url));
+        }
+      });
+    }
+
+    // Optional: intercept fetch() for direct image requests (CSS, etc.)
+    const originalFetch = window.fetch?.bind(window);
+    if (originalFetch && !window.__PulseFetchPatched) {
+      window.__PulseFetchPatched = true;
+      window.fetch = async function (resource, options) {
+        try {
+          const url =
+            typeof resource === "string" ? resource : resource?.url || null;
+
+          const isImage =
+            typeof url === "string" &&
+            url.match(/\.(png|jpe?g|webp|gif|avif|svg)$/i);
+
+          if (isImage && window.fetchImage) {
+            const blobUrl = await window.fetchImage(url);
+            return originalFetch(blobUrl, options);
+          }
+        } catch (err) {
+          console.error("[PulseEvolutionaryWindow] fetch image patch error:", err);
+        }
+        return originalFetch(resource, options);
+      };
+    }
+  } catch (err) {
+    console.error("[PulseEvolutionaryWindow] Membrane chunk layer failed:", err);
+  }
+
   const surfaceMeta = Object.freeze({
     layer: "PulseEvolutionaryWindow",
     role: "surface-membrane",
@@ -206,6 +290,7 @@ if (typeof window !== "undefined") {
 
 // ============================================================================
 //  SURFACE MEMBRANE INITIALIZATION
+//  - Proof that the membrane is alive and sensing, not “rendering a page.”
 // ============================================================================
 PulseVitals.start();
 PulseLogger.init();
@@ -227,6 +312,7 @@ if (typeof window !== "undefined" && window.PulseSkinReflex?.membraneAlive) {
 // ============================================================================
 //  BINARY ORGANISM + UI FLOW + PULSEBAND BOOTSTRAP (BEHIND THE GLASS)
 //  - Single boot IIFE: binary kernel + UI flow context + transport nerve.
+//  - The organism boots BEHIND the glass; this file only exposes a SHADOW.
 // ============================================================================
 if (typeof window !== "undefined") {
   (async () => {
@@ -301,7 +387,7 @@ if (typeof window !== "undefined") {
 
       // -------------------------------------------------------------------
       // PULSEBAND BOOT — v12-EVO transport nerve (membrane-level, global)
-      // -------------------------------------------------------------------
+// -------------------------------------------------------------------
       try {
         // Your PNS file already created this:
         // window.pulseband   ← THIS IS THE REAL PULSEBAND
@@ -386,6 +472,8 @@ if (typeof window !== "undefined") {
 
 // ============================================================================
 //  EXPORT — WINDOW ONLY EXPOSES MEMBRANE + UNDERSTANDING + SURFACE ENV + FLOW
+//  - This is the PORTAL API: vitals, logs, understanding, environment, UI flow.
+//  - No organs, no routes, no identity — only the glow of the organism.
 // ============================================================================
 export default Object.freeze({
   Vitals: PulseVitals,

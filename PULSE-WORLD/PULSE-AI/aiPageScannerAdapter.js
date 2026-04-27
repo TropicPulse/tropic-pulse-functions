@@ -1,43 +1,16 @@
-/**
- * aiPageScannerAdapter.js — Pulse OS v12‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Adapter for PageScanner**.
- *
- *   It is the membrane between:
- *     • PageScanner (A2 sensory organ, symbolic)
- *     • Binary Evolution Layer (machine-facing)
- *
- *   v12‑EVO UPGRADE:
- *     • Added Drift‑Intelligence Layer (read‑only)
- *     • Added lineage drift detection
- *     • Added naming drift detection
- *     • Added module‑mode drift detection
- *     • Added export drift detection
- *     • Added enriched membrane packets
- *
- *   It NEVER:
- *     • mutates PageScanner events
- *     • rewrites pages
- *     • interprets symbolic meaning
- *     • generates symbolic state
- *
- *   It ONLY:
- *     • observes drift patterns
- *     • emits drift‑intelligence metadata
- *     • encodes packets deterministically
- *     • forwards to pipeline / reflex / logger
- */
+// ============================================================================
+//  PULSE OS v12‑EVO+ — PAGE SCANNER ADAPTER ORGAN
+//  Binary Membrane • Drift‑Intelligence Layer • Deterministic Packet Adapter
+//  PURE MEMBRANE. ZERO MUTATION. ZERO RANDOMNESS.
+// ============================================================================
 
-// ---------------------------------------------------------
-//  META BLOCK — v12‑EVO
-// ---------------------------------------------------------
-
-const PageScannerAdapterMeta = Object.freeze({
+export const PageScannerAdapterMeta = Object.freeze({
+  type: "Binary",
+  subsystem: "aiPageScannerAdapter",
   layer: "OrganismMembrane",
   role: "PAGESCANNER_ADAPTER",
-  version: "12.0-EVO",
-  identity: "aiPageScannerAdapter-v12-EVO",
+  version: "12.0-EVO+",
+  identity: "aiPageScannerAdapter-v12-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -51,7 +24,7 @@ const PageScannerAdapterMeta = Object.freeze({
     packetAware: true,
     driftIntelAware: true,
     multiInstanceReady: true,
-    epoch: "v12-EVO"
+    epoch: "12.0-EVO+"
   }),
 
   contract: Object.freeze({
@@ -78,14 +51,18 @@ const PageScannerAdapterMeta = Object.freeze({
       "remain drift-proof",
       "remain non-blocking"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "PageScannerAdapter is a read-only membrane — it never mutates events or symbolic state.";
+  }
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v12‑EVO COMPLETE
-// ---------------------------------------------------------
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v12‑EVO+
+// ============================================================================
 
-class AIBinaryPageScannerAdapter {
+export class AIBinaryPageScannerAdapter {
   constructor(config = {}) {
     this.id = config.id || PageScannerAdapterMeta.identity;
     this.encoder = config.encoder;
@@ -111,15 +88,14 @@ class AIBinaryPageScannerAdapter {
     this._trace("attach", { scanner: scanner.id || "PageScanner" });
   }
 
-  // ---------------------------------------------------------
-  //  v12‑EVO DRIFT‑INTELLIGENCE LAYER (READ‑ONLY)
-  // ---------------------------------------------------------
+  // ========================================================================
+  //  v12‑EVO+ DRIFT‑INTELLIGENCE LAYER (READ‑ONLY)
+  // ========================================================================
 
   _analyzeDrift(event) {
     const srcA = event?.pageA || "";
     const srcB = event?.pageB || "";
 
-    // Extract variables
     const extractVars = (src) =>
       [...src.matchAll(/(?:const|let|var)\s+([A-Za-z0-9_]+)/g)]
         .map(m => m[1]);
@@ -127,14 +103,12 @@ class AIBinaryPageScannerAdapter {
     const varsA = extractVars(srcA);
     const varsB = extractVars(srcB);
 
-    // Normalize names
     const normalize = (name) =>
       name
         .replace(/[\d_]+$/, "")
         .replace(/(Field|State|Mode)$/i, "")
         .toLowerCase();
 
-    // Detect lineage drift
     const lineage = [];
     for (const a of varsA) {
       const normA = normalize(a);
@@ -146,7 +120,6 @@ class AIBinaryPageScannerAdapter {
       }
     }
 
-    // Module mode drift
     const esmA = /import\s+.*from\s+['"]/.test(srcA);
     const cjsA = /require\s*\(/.test(srcA);
     const esmB = /import\s+.*from\s+['"]/.test(srcB);
@@ -157,7 +130,6 @@ class AIBinaryPageScannerAdapter {
       pageB: { esm: esmB, cjs: cjsB, mixed: esmB && cjsB }
     };
 
-    // Export drift
     const hasESMExportB = /export\s+/.test(srcB);
     const hasCJSExportB = /module\.exports/.test(srcB);
 
@@ -174,9 +146,9 @@ class AIBinaryPageScannerAdapter {
     });
   }
 
-  // ---------------------------------------------------------
+  // ========================================================================
   //  PACKET BUILDER
-  // ---------------------------------------------------------
+  // ========================================================================
 
   _buildPacket(event, binary, driftIntel) {
     return Object.freeze({
@@ -195,12 +167,11 @@ class AIBinaryPageScannerAdapter {
     });
   }
 
-  // ---------------------------------------------------------
-  //  EVENT HANDLER — v12‑EVO (ENRICHED)
-  // ---------------------------------------------------------
+  // ========================================================================
+  //  EVENT HANDLER — v12‑EVO+ (ENRICHED)
+  // ========================================================================
 
   _handleScannerEvent(event) {
-    // ⭐ NEW: drift-intelligence (read-only)
     const driftIntel = this._analyzeDrift(event);
 
     const json = JSON.stringify({ event, driftIntel });
@@ -225,26 +196,21 @@ class AIBinaryPageScannerAdapter {
   }
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  FACTORY
-// ---------------------------------------------------------
-
-function createAIBinaryPageScannerAdapter(config) {
+// ============================================================================
+export function createAIBinaryPageScannerAdapter(config) {
   return new AIBinaryPageScannerAdapter(config);
 }
 
-// ---------------------------------------------------------
-//  DUAL‑MODE EXPORTS
-// ---------------------------------------------------------
-
-export {
-  AIBinaryPageScannerAdapter,
-  createAIBinaryPageScannerAdapter,
-  PageScannerAdapterMeta
-};
-
-module.exports = {
-  AIBinaryPageScannerAdapter,
-  createAIBinaryPageScannerAdapter,
-  PageScannerAdapterMeta
-};
+// ============================================================================
+//  DUAL‑MODE EXPORTS — v12‑EVO+
+// ============================================================================
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    PageScannerAdapterMeta,
+    AIBinaryPageScannerAdapter,
+    createAIBinaryPageScannerAdapter
+  };
+}

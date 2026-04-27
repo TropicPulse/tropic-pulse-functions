@@ -197,12 +197,21 @@ class AIBinaryEvolution {
 // FACTORY EXPORT
 // ---------------------------------------------------------
 
-function createAIBinaryEvolution(config) {
+export function createAIBinaryEvolution(config) {
   return new AIBinaryEvolution(config);
 }
 
-module.exports = {
-  AIBinaryEvolution,
-  createAIBinaryEvolution,
-  EvolutionMeta
-};
+// ⭐ Add missing ESM export:
+export { AIBinaryEvolution };
+
+// ---------------------------------------------------------
+//  COMMONJS FALLBACK EXPORT (Dual‑Mode)
+// ---------------------------------------------------------
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryEvolution,
+    createAIBinaryEvolution,
+    EvolutionMeta
+  };
+}

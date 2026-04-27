@@ -243,3 +243,22 @@ export function formatDebugString(context, dualBand = null) {
 
   return out;
 }
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+// ESM
+export {
+  SCRIBE_META,
+  formatDebugReport,
+  formatDebugString
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    SCRIBE_META,
+    formatDebugReport,
+    formatDebugString
+  };
+}

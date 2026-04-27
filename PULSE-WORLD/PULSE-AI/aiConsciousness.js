@@ -10,27 +10,6 @@
  *     - global integration of all organs
  *     - continuous organism-level perspective
  *     - cross-organ coherence
- *     - binary awareness artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • global awareness engine
- *     • unified state integrator
- *     • whole-system observer
- *     • consciousness layer
- *     • arterial unification layer
- */
-/**
- * aiConsciousness.js — Pulse OS v11‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Consciousness Layer** of the organism.
- *
- *   It provides:
- *     - unified organism state
- *     - whole-system awareness
- *     - global integration of all organs
- *     - continuous organism-level perspective
- *     - cross-organ coherence
  *     - binary awareness artery metrics
  */
 
@@ -55,7 +34,7 @@ export const ConsciousnessMeta = Object.freeze({
     anatomyAware: true,
     immunityAware: true,
     topologyAware: true,
-    packetAware: true,          // NEW
+    packetAware: true,
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -81,7 +60,7 @@ export const ConsciousnessMeta = Object.freeze({
       "respect quarantined organs",
       "integrate all organ states safely",
       "remain pure and minimal",
-      "emit deterministic packets"   // NEW
+      "emit deterministic packets"
     ])
   })
 });
@@ -166,7 +145,7 @@ export class AIBinaryConsciousness {
   }
 
   // ---------------------------------------------------------
-  //  DECISION INGESTION (Frozen)
+  //  DECISION INGESTION
   // ---------------------------------------------------------
 
   ingestDecision(decisionPacket) {
@@ -180,7 +159,7 @@ export class AIBinaryConsciousness {
   }
 
   // ---------------------------------------------------------
-  //  GLOBAL STATE GENERATION (Frozen)
+  //  GLOBAL STATE GENERATION
   // ---------------------------------------------------------
 
   generateUnifiedState() {
@@ -240,7 +219,7 @@ export class AIBinaryConsciousness {
   }
 
   // ---------------------------------------------------------
-  //  CONSCIOUSNESS PACKET (Frozen)
+  //  CONSCIOUSNESS PACKET
   // ---------------------------------------------------------
 
   generateConsciousnessPacket() {
@@ -293,9 +272,28 @@ export class AIBinaryConsciousness {
 }
 
 // ---------------------------------------------------------
-// FACTORY EXPORT — ESM ALIGNED
+//  FACTORY EXPORT — ESM ALIGNED
 // ---------------------------------------------------------
 
 export function createAIBinaryConsciousness(config) {
   return new AIBinaryConsciousness(config);
+}
+
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  AIBinaryConsciousness,
+  createAIBinaryConsciousness
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    ConsciousnessMeta,
+    AIBinaryConsciousness,
+    createAIBinaryConsciousness
+  };
 }

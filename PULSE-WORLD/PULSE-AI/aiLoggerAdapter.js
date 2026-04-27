@@ -1,83 +1,13 @@
-/**
- * aiLoggerAdapter.js — Pulse OS v11‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Logger Adapter** for Pulse OS.
- *
- *   It connects the Binary Evolution Layer to ProofLogger
- *   WITHOUT breaking purity, WITHOUT converting to human formats,
- *   and WITHOUT introducing drift or recursion.
- *
- * WHY THIS ORGAN EXISTS:
- *   ProofLogger is a human-facing organ:
- *     - timestamps
- *     - subsystem names
- *     - human-readable messages
- *     - structured logs
- *
- *   The Binary Evolution Layer is machine-facing:
- *     - raw binary
- *     - deterministic compute
- *     - no human formatting
- *     - no interpretation
- *
- *   These two worlds must NEVER directly touch.
- *
- *   This adapter is the **membrane** between them.
- *
- * ARCHITECTURAL INTENT:
- *   This organ:
- *     - Accepts binary input
- *     - Wraps it in a structured log packet
- *     - Sends it to ProofLogger
- *
- *   This organ does NOT:
- *     - decode binary
- *     - interpret binary
- *     - mutate binary
- *     - format binary
- *     - project binary to human-readable form
- *
- *   It simply transports binary safely across the membrane.
- *
- * PACKET MODEL:
- *   {
- *     type: "binary-event",
- *     source: "aiBinaryLoggerAdapter",
- *     bits: <binary string>,
- *     bitLength: <number>,
- *     timestamp: <ms>,
- *     meta: { ...optional metadata }
- *   }
- *
- * FUTURE EVOLUTION NOTES:
- *   This organ will eventually support:
- *     - binary deltas
- *     - binary snapshots
- *     - binary organ signatures
- *     - binary reflex traces
- *     - binary pipeline traces
- *
- *   But NOT in this file.
- *   This file must remain pure.
- */
-/**
- * /**
- * aiLoggerAdapter.js — Pulse OS v11‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Logger Adapter** for Pulse OS.
- */
-
-// ---------------------------------------------------------
-//  META BLOCK — v11‑EVO (UPGRADED)
-// ---------------------------------------------------------
+// ============================================================================
+//  aiLoggerAdapter.js — Pulse OS v11.2‑EVO Organ
+//  Binary Logger Adapter + Shadow Logger (always-on forensic logger)
+// ============================================================================
 
 const LoggerAdapterMeta = Object.freeze({
   layer: "OrganismMembrane",
   role: "LOGGER_ADAPTER",
-  version: "11.0-EVO",
-  identity: "aiLoggerAdapter-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiLoggerAdapter-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -88,8 +18,10 @@ const LoggerAdapterMeta = Object.freeze({
     pipelineAware: true,
     reflexAware: true,
     packetAware: true,
+    shadowLoggerAware: true,   // ⭐ NEW
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    readOnly: true,
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -103,13 +35,15 @@ const LoggerAdapterMeta = Object.freeze({
       "format binary",
       "project binary to human-readable form",
       "modify pipeline or reflex behavior",
-      "introduce randomness"
+      "introduce randomness",
+      "recursively log itself" // ⭐ NEW
     ]),
 
     always: Object.freeze([
       "validate binary input",
       "wrap binary in structured packets",
       "forward packets to ProofLogger",
+      "forward packets to shadowLogger (if present)", // ⭐ NEW
       "remain pure and minimal",
       "act as a safe membrane",
       "emit deterministic logger packets"
@@ -117,14 +51,27 @@ const LoggerAdapterMeta = Object.freeze({
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
-// ---------------------------------------------------------
-
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO
+// ============================================================================
 class AIBinaryLoggerAdapter {
   constructor(config = {}) {
     this.id = config.id || LoggerAdapterMeta.identity;
+
+    // Primary human-facing logger (ProofLogger)
     this.logger = config.logger;
+
+    // ⭐ NEW — ALWAYS-ON SHADOW LOGGER
+    // This logger fires NO MATTER WHAT.
+    // It must be:
+    //   - write-only
+    //   - non-blocking
+    //   - non-interpreting
+    //   - non-mutating
+    //   - non-recursive
+    //   - safe for binary-only output
+    this.shadowLogger = config.shadowLogger || null;
+
     this.trace = !!config.trace;
 
     if (!this.logger || typeof this.logger.log !== "function") {
@@ -132,24 +79,55 @@ class AIBinaryLoggerAdapter {
         "AIBinaryLoggerAdapter requires a ProofLogger-like object with .log()"
       );
     }
+
+    // shadowLogger is optional — but if provided, must have .logRaw()
+    if (this.shadowLogger && typeof this.shadowLogger.logRaw !== "function") {
+      throw new Error(
+        "shadowLogger must implement .logRaw(binaryString, meta)"
+      );
+    }
   }
 
+  // ---------------------------------------------------------------------------
+  //  PACKET BUILDER — pure, deterministic, no interpretation
+  // ---------------------------------------------------------------------------
   _buildPacket(bits, meta = {}) {
     return Object.freeze({
       type: "binary-event",
       source: this.id,
       bits,
       bitLength: bits.length,
-      timestamp: Date.now(),
+      timestamp: Date.now(), // allowed for human logs
       meta: Object.freeze(meta)
     });
   }
 
+  // ---------------------------------------------------------------------------
+  //  ALWAYS-ON SHADOW LOGGER — fires even if ProofLogger fails
+  // ---------------------------------------------------------------------------
+  _shadowLog(bits, meta) {
+    if (!this.shadowLogger) return;
+
+    try {
+      // shadowLogger MUST NOT throw
+      this.shadowLogger.logRaw(bits, meta);
+    } catch (_) {
+      // swallow errors — shadow logger must NEVER break the organism
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  PRIMARY LOGGING — ProofLogger (human-facing)
+  // ---------------------------------------------------------------------------
   logBinary(binaryStr, meta = {}) {
     this._assertBinary(binaryStr);
 
     const packet = this._buildPacket(binaryStr, meta);
 
+    // ⭐ ALWAYS log to shadow logger FIRST
+    this._shadowLog(binaryStr, meta);
+
+    // Then log to ProofLogger
     this._trace("logBinary:packet", {
       bitLength: packet.bitLength,
       meta: packet.meta
@@ -158,6 +136,9 @@ class AIBinaryLoggerAdapter {
     this.logger.log(packet);
   }
 
+  // ---------------------------------------------------------------------------
+  //  PIPELINE ATTACHMENT — logs every stage output
+  // ---------------------------------------------------------------------------
   attachToPipeline(pipeline) {
     if (!pipeline || typeof pipeline.addObserver !== "function") {
       throw new Error("attachToPipeline expects a pipeline organ");
@@ -174,6 +155,9 @@ class AIBinaryLoggerAdapter {
     this._trace("attachToPipeline", { pipeline: pipeline.id });
   }
 
+  // ---------------------------------------------------------------------------
+  //  REFLEX ATTACHMENT — logs every reflex output
+  // ---------------------------------------------------------------------------
   attachToReflex(reflex) {
     if (!reflex || typeof reflex.run !== "function") {
       throw new Error("attachToReflex expects a reflex organ");
@@ -198,40 +182,40 @@ class AIBinaryLoggerAdapter {
     this._trace("attachToReflex", { reflex: reflex.id });
   }
 
+  // ---------------------------------------------------------------------------
+  //  VALIDATION
+  // ---------------------------------------------------------------------------
   _assertBinary(str) {
     if (typeof str !== "string" || !/^[01]+$/.test(str)) {
       throw new TypeError("expected binary string");
     }
   }
 
+  // ---------------------------------------------------------------------------
+  //  TRACE (optional)
+  // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  FACTORY
-// ---------------------------------------------------------
-
-function createAIBinaryLoggerAdapter(config) {
+// ============================================================================
+export function createAIBinaryLoggerAdapter(config) {
   return new AIBinaryLoggerAdapter(config);
 }
 
-// ---------------------------------------------------------
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
+// ============================================================================
+//  DUAL‑MODE EXPORTS
+// ============================================================================
+export { LoggerAdapterMeta };
 
-// ESM
-export {
-  AIBinaryLoggerAdapter,
-  createAIBinaryLoggerAdapter,
-  LoggerAdapterMeta
-};
-
-// CommonJS
-module.exports = {
-  AIBinaryLoggerAdapter,
-  createAIBinaryLoggerAdapter,
-  LoggerAdapterMeta
-};
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryLoggerAdapter,
+    createAIBinaryLoggerAdapter,
+    LoggerAdapterMeta
+  };
+}

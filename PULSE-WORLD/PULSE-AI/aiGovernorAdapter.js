@@ -1,25 +1,29 @@
-/**
- * aiGovernorAdapter.js — Pulse OS v11.1‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Governor Adapter** (dualband).
- */
+// ============================================================================
+//  aiGovernorAdapter.js — Pulse OS v11.2‑EVO Organ
+//  Dualband Membrane • Packet Router • Evolution‑Safe Adapter
+// ============================================================================
+//
+//  CANONICAL ROLE:
+//    This organ is the **Governor Adapter** — the deterministic membrane
+//    between the Evolution Layer and the Governor.
+// ============================================================================
 
-// ---------------------------------------------------------
-//  META BLOCK — v11.1‑EVO
-// ---------------------------------------------------------
-
-const GovernorAdapterMeta = Object.freeze({
+export const GovernorAdapterMeta = Object.freeze({
   layer: "OrganismMembrane",
   role: "GOVERNOR_ADAPTER",
-  version: "11.1-EVO",
-  identity: "aiGovernorAdapter-v11.1-EVO",
+  version: "11.2-EVO",
+  identity: "aiGovernorAdapter-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     dualband: true,
     membrane: true,
+
+    packetAware: true,        // ⭐ NEW
+    evolutionAware: true,     // ⭐ NEW
+    windowAware: true,        // ⭐ NEW (safe artery snapshots)
+    bluetoothReady: true,     // ⭐ placeholder for future binary channels
 
     binaryAware: true,
     governorAware: true,
@@ -30,9 +34,8 @@ const GovernorAdapterMeta = Object.freeze({
 
     identitySafe: true,
     readOnly: true,
-
     multiInstanceReady: true,
-    epoch: "v11.1-EVO"
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -48,7 +51,8 @@ const GovernorAdapterMeta = Object.freeze({
       "modify pipeline or reflex behavior",
       "introduce randomness",
       "alter packet meaning",
-      "inject symbolic metadata"
+      "inject symbolic metadata",
+      "auto-connect bluetooth" // ⭐ NEW
     ]),
 
     always: Object.freeze([
@@ -57,16 +61,16 @@ const GovernorAdapterMeta = Object.freeze({
       "forward packets without interpretation",
       "remain pure and minimal",
       "act as a safe membrane between layers",
-      "expose membrane artery metrics"
+      "expose membrane artery metrics",
+      "prepare for future binary membrane channels" // ⭐ NEW
     ])
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v11.1‑EVO
-// ---------------------------------------------------------
-
-class AIBinaryGovernorAdapter {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO
+// ============================================================================
+export class AIBinaryGovernorAdapter {
   constructor(config = {}) {
     this.id = config.id || "governor-adapter";
 
@@ -75,6 +79,9 @@ class AIBinaryGovernorAdapter {
     this.pipeline = config.pipeline || null;
     this.reflex   = config.reflex   || null;
     this.logger   = config.logger   || null;
+
+    // Future: Bluetooth binary membrane (not active)
+    this.bluetooth = config.bluetooth || null; // ⭐ placeholder only
 
     this.trace = !!config.trace;
 
@@ -97,6 +104,9 @@ class AIBinaryGovernorAdapter {
     };
   }
 
+  // ---------------------------------------------------------------------------
+  //  FORWARD BINARY → GOVERNOR (pure membrane)
+  // ---------------------------------------------------------------------------
   forwardBinaryToGovernor(binaryStr) {
     this._assertBinary(binaryStr);
 
@@ -104,7 +114,13 @@ class AIBinaryGovernorAdapter {
       type: "binary-event",
       bits: binaryStr,
       bitLength: binaryStr.length,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+
+      // ⭐ Future: Bluetooth membrane metadata
+      bluetooth: {
+        ready: !!this.bluetooth,
+        channel: null
+      }
     };
 
     this._trace("forwardBinaryToGovernor", packet);
@@ -115,6 +131,9 @@ class AIBinaryGovernorAdapter {
     this.governor.handle(packet);
   }
 
+  // ---------------------------------------------------------------------------
+  //  FORWARD GOVERNOR DECISION → BINARY PIPELINE
+  // ---------------------------------------------------------------------------
   forwardGovernorDecision(decisionObj) {
     const json = JSON.stringify(decisionObj);
     const binary = this.encoder.encode(json);
@@ -134,6 +153,9 @@ class AIBinaryGovernorAdapter {
     return binary;
   }
 
+  // ---------------------------------------------------------------------------
+  //  PIPELINE ATTACHMENT — binary-only observer
+  // ---------------------------------------------------------------------------
   attachToPipeline(pipeline) {
     pipeline.addObserver(({ output }) => {
       this.forwardBinaryToGovernor(output);
@@ -142,6 +164,9 @@ class AIBinaryGovernorAdapter {
     this._trace("attachToPipeline", { pipeline: pipeline.id });
   }
 
+  // ---------------------------------------------------------------------------
+  //  REFLEX ATTACHMENT — binary-only observer
+  // ---------------------------------------------------------------------------
   attachToReflex(reflex) {
     const originalRun = reflex.run.bind(reflex);
 
@@ -158,40 +183,42 @@ class AIBinaryGovernorAdapter {
     this._trace("attachToReflex", { reflex: reflex.id });
   }
 
+  // ---------------------------------------------------------------------------
+  //  VALIDATION
+  // ---------------------------------------------------------------------------
   _assertBinary(str) {
     if (typeof str !== "string" || !/^[01]+$/.test(str)) {
       throw new TypeError("expected binary string");
     }
   }
 
+  // ---------------------------------------------------------------------------
+  //  TRACE
+  // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-// ---------------------------------------------------------
-// FACTORY
-// ---------------------------------------------------------
-
-function createAIBinaryGovernorAdapter(config) {
+// ============================================================================
+//  FACTORY
+// ============================================================================
+export function createAIBinaryGovernorAdapter(config) {
   return new AIBinaryGovernorAdapter(config);
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
-
-// ESM
+// ============================================================================
 export {
-  AIBinaryGovernorAdapter,
-  createAIBinaryGovernorAdapter,
   GovernorAdapterMeta
 };
 
-// CommonJS
-module.exports = {
-  AIBinaryGovernorAdapter,
-  createAIBinaryGovernorAdapter,
-  GovernorAdapterMeta
-};
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryGovernorAdapter,
+    createAIBinaryGovernorAdapter,
+    GovernorAdapterMeta
+  };
+}

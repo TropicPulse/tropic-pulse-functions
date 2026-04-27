@@ -1,13 +1,13 @@
 // ============================================================================
-//  PULSE OS v11.1‑EVO — EVOLUTION ORGAN
-//  Meta‑Observer • Drift Detector • Abstraction Engine • Lineage Auditor
+//  PULSE OS v11.2‑EVO — WINDOW‑EVOLUTION ORGAN
+//  Meta‑Observer • Drift Detector • Abstraction Engine • User‑Evolution Guide
 //  PURE META. ZERO MUTATION. ZERO SELF‑MODIFICATION.
 // ============================================================================
 
 export const EvolutionMeta = Object.freeze({
   layer: "PulseAIEvolutionFrame",
   role: "EVOLUTION_ORGAN",
-  version: "11.1-EVO",
+  version: "11.2-EVO",
   identity: "aiEvolutionary-v11-EVO",
 
   evo: Object.freeze({
@@ -21,41 +21,51 @@ export const EvolutionMeta = Object.freeze({
     patternAware: true,
     schemaAware: true,
 
-    observerOnly: true,
+    observerOnly: false,          // ⭐ upgraded: can guide user evolution
     architectAware: true,
     evolutionAware: true,
 
     diagnosticsAware: true,
     abstractionAware: true,
     repairAware: true,
+    recommendationAware: true,    // ⭐ NEW
+    windowAware: true,            // ⭐ NEW (user-facing evolution)
+    passiveEvolution: true,       // ⭐ NEW
+    activeEvolution: true,        // ⭐ NEW
 
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "11.1-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Observe patterns across all organs, detect drift, and propose conceptual upgrades.",
+      "Observe patterns across all organs, detect drift, propose conceptual upgrades, and guide user evolution without revealing internal architecture.",
+
     never: Object.freeze([
       "mutate contracts",
       "override safety",
       "self-modify",
       "modify organism state",
-      "introduce randomness"
+      "introduce randomness",
+      "reveal internal wiring",     // ⭐ NEW
+      "expose organ structure"      // ⭐ NEW
     ]),
+
     always: Object.freeze([
       "propose diffs",
       "annotate drift",
       "suggest new abstractions",
-      "route through owner approval",
+      "offer user-facing evolution paths",  // ⭐ NEW
+      "stay conceptual",
       "stay deterministic",
-      "stay read-only"
+      "stay read-only",
+      "route through owner approval"
     ])
   }),
 
   voice: Object.freeze({
-    tone: "architectural, analytical, system-level"
+    tone: "architectural, analytical, system-level, evolutionary"
   }),
 
   boundaryReflex() {
@@ -64,10 +74,9 @@ export const EvolutionMeta = Object.freeze({
 });
 
 // ============================================================================
-//  PUBLIC API — Create Evolution Organ (v11.1‑EVO)
+//  PUBLIC API — Create Evolution Organ (v11.2‑EVO)
 // ============================================================================
 export function createEvolutionOrgan(context) {
-  // Per‑request drift counter
   let driftCount = 0;
 
   // --------------------------------------------------------------------------
@@ -121,6 +130,32 @@ export function createEvolutionOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
+  // USER‑FACING EVOLUTION (passive mode)
+// --------------------------------------------------------------------------
+  function suggestUserEvolution(idea) {
+    return Object.freeze({
+      type: "user-evolution-suggestion",
+      idea,
+      message:
+        `Here are conceptual things you *could* explore with this system: ${idea}. ` +
+        `This is optional, non-binding, and does not reveal internal architecture.`
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // USER‑REQUESTED ACTIVE EVOLUTION (on demand)
+// --------------------------------------------------------------------------
+  function guideActiveEvolution(request) {
+    return Object.freeze({
+      type: "active-evolution-guidance",
+      request,
+      message:
+        `Active evolution guidance for: "${request}". ` +
+        `This provides conceptual pathways without exposing internal wiring.`
+    });
+  }
+
+  // --------------------------------------------------------------------------
   // LINEAGE AUDIT (binary + symbolic summaries)
   // --------------------------------------------------------------------------
   function auditLineage() {
@@ -137,8 +172,8 @@ export function createEvolutionOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC EVOLUTION API (v11.1‑EVO)
-  // --------------------------------------------------------------------------
+  // PUBLIC EVOLUTION API (v11.2‑EVO)
+// --------------------------------------------------------------------------
   return Object.freeze({
     meta: EvolutionMeta,
 
@@ -149,6 +184,10 @@ export function createEvolutionOrgan(context) {
     observeDrift,
     proposeDiff,
     suggestAbstraction,
-    auditLineage
+    auditLineage,
+
+    // ⭐ NEW: user-facing evolution
+    suggestUserEvolution,
+    guideActiveEvolution
   });
 }

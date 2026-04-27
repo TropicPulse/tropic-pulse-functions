@@ -1,5 +1,5 @@
 /**
- * aiPipeline.js — Pulse OS v11‑EVO Organ
+ * aiPipeline.js — Pulse OS v11.2‑EVO+ Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Compute Pipeline** of Pulse OS (dualband).
@@ -15,17 +15,22 @@
  *     • compute bloodstream
  *     • deterministic flow engine
  *     • reflex chain executor
+ *
+ *   v11.2‑EVO+ UPGRADE:
+ *     • Dual‑mode exports (ESM + CommonJS)
+ *     • Canonical v11.2‑EVO+ meta + epoch
+ *     • Explicit artery snapshot exposure
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO (UPGRADED)
+//  META BLOCK — v11.2‑EVO+ (DUALBAND)
 // ---------------------------------------------------------
 
 export const PipelineMeta = Object.freeze({
   layer: "OrganismFlow",
   role: "PIPELINE_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiPipeline-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiPipeline-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -37,7 +42,7 @@ export const PipelineMeta = Object.freeze({
     arteryAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -66,12 +71,12 @@ export const PipelineMeta = Object.freeze({
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION (LOGIC UNCHANGED)
+//  ORGAN IMPLEMENTATION — v11.2‑EVO+ (LOGIC PRESERVED)
 // ---------------------------------------------------------
 
-class AIBinaryPipeline {
+export class AIBinaryPipeline {
   constructor(config = {}) {
-    this.id = config.id || 'pipeline';
+    this.id = config.id || "pipeline";
     this.trace = !!config.trace;
 
     this.stages = [];
@@ -88,7 +93,10 @@ class AIBinaryPipeline {
     const obsFactor   = Math.min(1, observerCount / 50);
     const refFactor   = Math.min(1, reflexCount / 50);
 
-    const raw = Math.max(0, 1 - (stageFactor * 0.4 + obsFactor * 0.3 + refFactor * 0.3));
+    const raw = Math.max(
+      0,
+      1 - (stageFactor * 0.4 + obsFactor * 0.3 + refFactor * 0.3)
+    );
     return Math.min(1, raw);
   }
 
@@ -133,7 +141,7 @@ class AIBinaryPipeline {
   }
 
   // ---------------------------------------------------------
-  //  FLOW ARTERY SNAPSHOT
+  //  FLOW ARTERY SNAPSHOT (EXPOSED FOR METRICS)
   // ---------------------------------------------------------
 
   _computeFlowArtery() {
@@ -141,10 +149,18 @@ class AIBinaryPipeline {
     const observerCount = this.observers.length;
     const reflexCount = this.reflexes.length;
 
-    const throughput = this._computeFlowThroughput(stageCount, observerCount, reflexCount);
-    const pressure   = this._computeFlowPressure(stageCount, observerCount, reflexCount);
-    const cost       = this._computeFlowCost(pressure, throughput);
-    const budget     = this._computeFlowBudget(throughput, cost);
+    const throughput = this._computeFlowThroughput(
+      stageCount,
+      observerCount,
+      reflexCount
+    );
+    const pressure = this._computeFlowPressure(
+      stageCount,
+      observerCount,
+      reflexCount
+    );
+    const cost = this._computeFlowCost(pressure, throughput);
+    const budget = this._computeFlowBudget(throughput, cost);
 
     return {
       throughput,
@@ -165,38 +181,48 @@ class AIBinaryPipeline {
     };
   }
 
+  getFlowArterySnapshot() {
+    return this._computeFlowArtery();
+  }
+
   // ---------------------------------------------------------
   //  PIPELINE CONFIGURATION
   // ---------------------------------------------------------
 
   addStage(fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('addStage expects a function');
+    if (typeof fn !== "function") {
+      throw new TypeError("addStage expects a function");
     }
     this.stages.push(fn);
 
     const artery = this._computeFlowArtery();
-    this._trace('addStage', { totalStages: this.stages.length, artery });
+    this._trace("addStage", { totalStages: this.stages.length, artery });
   }
 
   addObserver(fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('addObserver expects a function');
+    if (typeof fn !== "function") {
+      throw new TypeError("addObserver expects a function");
     }
     this.observers.push(fn);
 
     const artery = this._computeFlowArtery();
-    this._trace('addObserver', { totalObservers: this.observers.length, artery });
+    this._trace("addObserver", {
+      totalObservers: this.observers.length,
+      artery
+    });
   }
 
   addReflex(fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('addReflex expects a function');
+    if (typeof fn !== "function") {
+      throw new TypeError("addReflex expects a function");
     }
     this.reflexes.push(fn);
 
     const artery = this._computeFlowArtery();
-    this._trace('addReflex', { totalReflexes: this.reflexes.length, artery });
+    this._trace("addReflex", {
+      totalReflexes: this.reflexes.length,
+      artery
+    });
   }
 
   // ---------------------------------------------------------
@@ -207,7 +233,7 @@ class AIBinaryPipeline {
     this._assertBinary(inputBinary);
 
     const artery = this._computeFlowArtery();
-    this._trace('run:start', { inputBinary, artery });
+    this._trace("run:start", { inputBinary, artery });
 
     let current = inputBinary;
 
@@ -221,14 +247,14 @@ class AIBinaryPipeline {
         obs({
           stageIndex: i,
           input: current,
-          output,
+          output
         });
       }
 
-      this._trace('run:stage', {
+      this._trace("run:stage", {
         stageIndex: i,
         input: current,
-        output,
+        output
       });
 
       current = output;
@@ -238,7 +264,7 @@ class AIBinaryPipeline {
       reflex(current);
     }
 
-    this._trace('run:end', { outputBinary: current });
+    this._trace("run:end", { outputBinary: current });
     return current;
   }
 
@@ -247,8 +273,8 @@ class AIBinaryPipeline {
   // ---------------------------------------------------------
 
   _assertBinary(str) {
-    if (typeof str !== 'string' || !/^[01]+$/.test(str)) {
-      throw new TypeError('expected binary string');
+    if (typeof str !== "string" || !/^[01]+$/.test(str)) {
+      throw new TypeError("expected binary string");
     }
   }
 
@@ -258,11 +284,22 @@ class AIBinaryPipeline {
   }
 }
 
-function createAIBinaryPipeline(config) {
+// ---------------------------------------------------------
+//  FACTORY — v11.2‑EVO+
+// ---------------------------------------------------------
+
+export function createAIBinaryPipeline(config = {}) {
   return new AIBinaryPipeline(config);
 }
 
-module.exports = {
-  AIBinaryPipeline,
-  createAIBinaryPipeline,
-};
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    PipelineMeta,
+    AIBinaryPipeline,
+    createAIBinaryPipeline
+  };
+}

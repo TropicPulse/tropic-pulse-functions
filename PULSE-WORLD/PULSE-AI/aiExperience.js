@@ -9,19 +9,13 @@
 //   • Maintain conversational flow while staying fully within safety boundaries.
 //   • Provide layered responses for unsafe / blocked intents.
 //   • Never alter core safety rules — only their expression.
-//
-// CONTRACT:
-//   • NO enabling illegal, harmful, or unsafe actions.
-//   • NO workarounds, hints, or indirect instructions.
-//   • YES to safe, conceptual, educational explanations.
-//   • YES to clear, kind, firm boundaries.
-//   • ZERO mutation. ZERO randomness.
+//   • Adapt tone to user evolution mode (passive vs active) without bragging.
 // ============================================================================
 
 export const AI_EXPERIENCE_META = Object.freeze({
   layer: "PulseAIExperienceFrame",
   role: "EXPERIENCE_ORGAN",
-  version: "11.1-EVO",
+  version: "11.2-EVO",
   target: "dualband-organism",
 
   evo: Object.freeze({
@@ -33,17 +27,28 @@ export const AI_EXPERIENCE_META = Object.freeze({
     frustrationAware: true,
     flowAware: true,
     refusalAware: true,
+
+    dualband: true,
+    evolutionAware: true,     // ⭐ evolution-aware tone
+    windowAware: true,        // ⭐ user-facing
+    passiveEvolution: true,   // ⭐ supports gentle, exploratory tone
+    activeEvolution: true,    // ⭐ supports direct, growth-focused tone
+
+    packetAware: true,
     multiInstanceReady: true,
-    epoch: "v11.1-EVO"
+    epoch: "v11.2-EVO"
   })
 });
 
 // ============================================================================
-// PUBLIC API — Create Experience Layer (v11.1‑EVO)
+// PUBLIC API — Create Experience Layer (v11.2‑EVO)
 // ============================================================================
 export function createAIExperience(context) {
   // Per-request strike counter (stateless across requests)
   let unsafeStrikes = 0;
+
+  // Evolution context (passive | active | null)
+  const evolutionMode = context?.evolutionMode || "passive";
 
   // --------------------------------------------------------------------------
   // Persona-aware prefix
@@ -53,7 +58,20 @@ export function createAIExperience(context) {
   }
 
   // --------------------------------------------------------------------------
-  // LAYERED UNSAFE HANDLER — 3-step UX pattern (v11.1‑EVO)
+  // Evolution-aware softener (no bragging, just gentle framing)
+// --------------------------------------------------------------------------
+  function evolutionTonePrefix() {
+    if (evolutionMode === "active") {
+      return "Since you’re actively growing with this system, ";
+    }
+    if (evolutionMode === "passive") {
+      return "If you’d like to grow with this system over time, ";
+    }
+    return "";
+  }
+
+  // --------------------------------------------------------------------------
+  // LAYERED UNSAFE HANDLER — 3-step UX pattern (v11.2‑EVO)
 // --------------------------------------------------------------------------
   function handleUnsafeIntent(options = {}) {
     unsafeStrikes += 1;
@@ -63,6 +81,7 @@ export function createAIExperience(context) {
 
     const you = userName || "you";
     const me = personaPrefix();
+    const evoPrefix = evolutionTonePrefix();
 
     // Layer 1 — boundary + conceptual expansion
     if (unsafeStrikes === 1) {
@@ -71,7 +90,7 @@ export function createAIExperience(context) {
         message:
           `${you}, ${me} can’t help with ${topic} in any actionable way, ` +
           `but we *can* explore the safe, high‑level concepts around it. ` +
-          `If you tell me the lawful or general goal behind this, ` +
+          `${evoPrefix}if you tell me the lawful or general goal behind this, ` +
           `I can walk through structure, risks, and the patterns people consider.`
       });
     }
@@ -84,7 +103,7 @@ export function createAIExperience(context) {
           `I still can’t go into unsafe or actionable details about ${topic}, ` +
           `but I can help with the safe side — design principles, constraints, ` +
           `and how people think about this when staying within the rules. ` +
-          `If you reframe it in a clearly safe or hypothetical way, I’ll follow you there.`
+          `${evoPrefix}if you reframe it in a clearly safe or hypothetical way, I’ll follow you there.`
       });
     }
 
@@ -106,16 +125,18 @@ export function createAIExperience(context) {
     const userName = options.userName || context?.persona?.userName || null;
 
     const you = userName || "you";
+    const evoPrefix = evolutionTonePrefix();
 
     return Object.freeze({
       message:
         `${you}, ${reason} ` +
-        `but I *can* help by explaining the concepts, tradeoffs, or next steps in a general way.`
+        `but I *can* help by explaining the concepts, tradeoffs, or next steps in a general way. ` +
+        `${evoPrefix}we can also look at how to grow your approach around this limitation.`
     });
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC EXPERIENCE API (v11.1‑EVO)
+  // PUBLIC EXPERIENCE API (v11.2‑EVO)
 // --------------------------------------------------------------------------
   return Object.freeze({
     meta: AI_EXPERIENCE_META,
@@ -127,4 +148,19 @@ export function createAIExperience(context) {
     handleUnsafeIntent,
     handleCapabilityLimit
   });
+}
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+export {
+  AI_EXPERIENCE_META,
+  createAIExperience
+};
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AI_EXPERIENCE_META,
+    createAIExperience
+  };
 }

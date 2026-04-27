@@ -95,5 +95,21 @@ export const aiDeliveryEngine = {
     return out;
   }
 };
-
 export default aiDeliveryEngine;
+
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  aiDeliveryEngine
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    aiDeliveryEngine,
+    default: aiDeliveryEngine
+  };
+}

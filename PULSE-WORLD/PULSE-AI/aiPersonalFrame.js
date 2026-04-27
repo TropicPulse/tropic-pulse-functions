@@ -1,14 +1,15 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — PERSONAL FRAME ORGAN
+//  PULSE OS v11.2‑EVO+ — PERSONAL FRAME ORGAN
 //  User-Level Preferences • Tone • Abstraction • Context Injection
 //  PURE READ-ONLY TO BINARY. GUARDED WRITES TO PERSONAL MEMORY.
+//  DUALBAND • DETERMINISTIC • SAFETY-AWARE • OVERMIND-AWARE
 // ============================================================================
 
 export const PersonalFrameMeta = Object.freeze({
   layer: "PulseAIPersonalFrame",
   role: "PERSONAL_FRAME_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiPersonalFrame-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiPersonalFrame-v11.2-EVO+",
 
   dualband: true,
   binaryAware: true,
@@ -16,29 +17,37 @@ export const PersonalFrameMeta = Object.freeze({
   safetyAware: true,
   overmindAware: true,
   routerAware: true,
+  memoryAware: true,
+  personaAware: true,
+  driftProof: true,
 
   contract: Object.freeze({
-    purpose: [
+    purpose: Object.freeze([
       "Represent user-level preferences and communication style",
       "Provide personal context to aiOvermind and personas",
       "Control abstraction level, tone, and verbosity per user",
       "Maintain personal memory lanes when allowed",
-      "Shape final output according to user profile"
-    ],
-    never: [
+      "Shape final output according to user profile",
+      "Integrate with dualband safety and persona routing"
+    ]),
+
+    never: Object.freeze([
       "mutate binary organs",
       "override system-wide safety constraints",
       "expose raw identity anchors",
       "write outside personal lanes",
-      "introduce randomness"
-    ],
-    always: [
+      "introduce randomness",
+      "simulate personas or identities"
+    ]),
+
+    always: Object.freeze([
       "stay deterministic",
       "respect owner+user gating",
       "strip identity anchors",
       "defer to aiSafetyFrame for safety decisions",
-      "integrate router safetyMode + personaId"
-    ]
+      "integrate router safetyMode + personaId",
+      "remain read-only relative to binary layers"
+    ])
   })
 });
 

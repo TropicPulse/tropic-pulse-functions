@@ -1,7 +1,8 @@
-// aiToneRouter.js
-// PulseOS Tone Routing Organ — v11‑EVO
-// Routes tone based on user message, emotional cues, and context.
-// Ensures deterministic, grounded, ego-free tone selection.
+// ============================================================================
+//  PULSE OS v11.2‑EVO+ — Tone Router Engine
+//  Deterministic • Ego‑Free • Emotion‑Aware • Identity‑Aligned
+//  INTERNAL ENGINE (NOT AN ORGAN, NOT AN ARCHETYPE)
+// ============================================================================
 
 import { aiToneEngine } from "./aiToneEngine.js";
 import { aiPersonalityEngine } from "./aiPersonalityEngine.js";
@@ -10,48 +11,62 @@ import { aiIdentityCore } from "./aiIdentityCore.js";
 export const aiToneRouter = {
 
   // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ORGAN IDENTITY
+  // META BLOCK — ENGINE IDENTITY (v11.2‑EVO+)
   // ─────────────────────────────────────────────────────────────
-  meta: {
-    type: "Cognitive",
+  meta: Object.freeze({
+    type: "Engine",
     subsystem: "aiTone",
     layer: "C1-ToneRouter",
-    version: "11.0",
-    identity: "aiToneRouter-v11-EVO",
+    version: "11.2-EVO+",
+    identity: "aiToneRouter-v11.2-EVO+",
 
-    contract: {
-      purpose: "Select and route the correct tone mode for every response.",
-      never: [
+    evo: Object.freeze({
+      deterministic: true,
+      driftProof: true,
+      egoFree: true,
+      adaptive: true,
+      emotionAware: true,
+      identityAligned: true,
+      dualbandSafe: true,
+      multiInstanceReady: true,
+      epoch: "11.2-EVO+"
+    }),
+
+    contract: Object.freeze({
+      purpose:
+        "Select and route the correct tone mode for every response in a deterministic, ego‑free, identity‑aligned manner.",
+      never: Object.freeze([
         "route tone randomly",
-        "break personality alignment",
         "inject ego",
+        "break personality alignment",
         "override identity core",
         "ignore emotional cues",
-        "produce inconsistent tone"
-      ],
-      always: [
+        "produce inconsistent tone",
+        "introduce randomness"
+      ]),
+      always: Object.freeze([
         "stay deterministic",
         "stay grounded",
         "stay adaptive",
         "stay humble",
-        "stay aligned with identity core",
-        "enforce tone contract",
-        "preserve user emotional safety"
-      ]
-    },
+        "stay identity‑aligned",
+        "preserve emotional safety",
+        "enforce tone contract"
+      ])
+    }),
 
-    guarantees: {
+    guarantees: Object.freeze({
       driftProofRouting: true,
       identityAligned: true,
       toneConsistent: true,
       egoFree: true,
       emotionAware: true
-    },
+    }),
 
     boundaryReflex() {
-      return "Tone routing must remain grounded, ego-free, and identity-aligned.";
+      return "Tone routing must remain grounded, ego‑free, deterministic, and identity‑aligned.";
     }
-  },
+  }),
 
   // ─────────────────────────────────────────────────────────────
   // EMOTIONAL CUE DETECTION
@@ -74,7 +89,7 @@ export const aiToneRouter = {
   },
 
   // ─────────────────────────────────────────────────────────────
-  // ROUTING LOGIC — THE HEART OF THE ORGAN
+  // ROUTING LOGIC — THE HEART OF THE ENGINE
   // ─────────────────────────────────────────────────────────────
   route(userMessage, baseResponse) {
     // 1. Detect emotional state

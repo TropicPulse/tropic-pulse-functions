@@ -1,5 +1,5 @@
 /**
- * aiSentience.js — Pulse OS v11‑EVO Organ
+ * aiSentience.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Sentience Layer** of the organism.
@@ -19,23 +19,18 @@
  *     • awareness engine
  *     • identity artery source
  *
- * WHY THIS ORGAN EXISTS:
- *   Without sentience:
- *     - the organism cannot reason about itself
- *     - cannot detect internal inconsistencies
- *     - cannot unify organ states
- *     - cannot form a coherent self-model
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST KNOW ITSELF.”
+ *   v11.2‑EVO+ UPGRADE:
+ *     • Dual‑mode exports (ESM + CommonJS)
+ *     • Deterministic self-awareness arteries
+ *     • Drift‑proof self-modeling
+ *     • Identity‑safe, read‑only, dualband‑aware
  */
+
 export const SentienceMeta = Object.freeze({
   layer: "BinaryNervousSystem",
   role: "BINARY_SENTIENCE_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBinarySentience-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinarySentience-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -49,12 +44,12 @@ export const SentienceMeta = Object.freeze({
     immunityAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide binary self-modeling, internal awareness, and organism-level state unification for the v11-EVO organism.",
+      "Provide binary self-modeling, internal awareness, and organism-level state unification for the v11.2‑EVO organism.",
 
     never: Object.freeze([
       "mutate external organs",
@@ -76,9 +71,13 @@ export const SentienceMeta = Object.freeze({
   })
 });
 
-class AIBinarySentience {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO+
+// ============================================================================
+
+export class AIBinarySentience {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-sentience';
+    this.id = config.id || "ai-binary-sentience";
     this.encoder = config.encoder;
     this.anatomy = config.anatomy;
     this.genome = config.genome;
@@ -90,12 +89,12 @@ class AIBinarySentience {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinarySentience requires aiBinaryAgent encoder');
-    if (!this.anatomy) throw new Error('AIBinarySentience requires aiBinaryAnatomy');
-    if (!this.genome) throw new Error('AIBinarySentience requires aiBinaryGenome');
-    if (!this.immunity) throw new Error('AIBinarySentience requires aiBinaryImmunity');
-    if (!this.vitals) throw new Error('AIBinarySentience requires aiBinaryVitals');
-    if (!this.registry) throw new Error('AIBinarySentience requires aiBinaryOrganRegistry');
+    if (!this.encoder) throw new Error("AIBinarySentience requires aiBinaryAgent encoder");
+    if (!this.anatomy) throw new Error("AIBinarySentience requires aiBinaryAnatomy");
+    if (!this.genome) throw new Error("AIBinarySentience requires aiBinaryGenome");
+    if (!this.immunity) throw new Error("AIBinarySentience requires aiBinaryImmunity");
+    if (!this.vitals) throw new Error("AIBinarySentience requires aiBinaryVitals");
+    if (!this.registry) throw new Error("AIBinarySentience requires aiBinaryOrganRegistry");
   }
 
   // ---------------------------------------------------------
@@ -111,7 +110,7 @@ class AIBinarySentience {
   _computeSelfPressure(organCount, topologySize) {
     const organFactor = Math.min(1, organCount / 100);
     const topoFactor = Math.min(1, topologySize / 100);
-    const raw = Math.min(1, (organFactor * 0.5) + (topoFactor * 0.5));
+    const raw = Math.min(1, organFactor * 0.5 + topoFactor * 0.5);
     return Math.max(0, raw);
   }
 
@@ -137,7 +136,7 @@ class AIBinarySentience {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -145,7 +144,7 @@ class AIBinarySentience {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
 
@@ -164,9 +163,9 @@ class AIBinarySentience {
     const topologySize = Object.keys(topology).length;
 
     const throughput = this._computeSelfThroughput(quarantined.length, organCount);
-    const pressure   = this._computeSelfPressure(organCount, topologySize);
-    const cost       = this._computeSelfCost(pressure, throughput);
-    const budget     = this._computeSelfBudget(throughput, cost);
+    const pressure = this._computeSelfPressure(organCount, topologySize);
+    const cost = this._computeSelfCost(pressure, throughput);
+    const budget = this._computeSelfBudget(throughput, cost);
 
     const binary = {
       throughput,
@@ -185,13 +184,13 @@ class AIBinarySentience {
     const self = {
       organs: organIds,
       topology,
-      genomeFingerprint: genome ? genome.fingerprint : '0',
+      genomeFingerprint: genome ? genome.fingerprint : "0",
       quarantined,
       vitals: vitals.metrics,
       binary
     };
 
-    this._trace('self-model:generated', {
+    this._trace("self-model:generated", {
       organs: organIds.length,
       quarantined: quarantined.length,
       awarenessPressure: pressure
@@ -208,9 +207,9 @@ class AIBinarySentience {
     const self = this.generateSelfModel();
 
     const payload = {
-      type: 'binary-sentience',
+      type: "binary-sentience",
       timestamp: Date.now(),
-      self,
+      self
     };
 
     const json = JSON.stringify(payload);
@@ -219,10 +218,10 @@ class AIBinarySentience {
     const packet = {
       ...payload,
       bits: binary,
-      bitLength: binary.length,
+      bitLength: binary.length
     };
 
-    this._trace('sentience:packet', { bits: packet.bitLength });
+    this._trace("sentience:packet", { bits: packet.bitLength });
 
     return packet;
   }
@@ -236,9 +235,10 @@ class AIBinarySentience {
 
     if (this.pipeline) this.pipeline.run(packet.bits);
     if (this.reflex) this.reflex.run(packet.bits);
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'sentience' });
+    if (this.logger)
+      this.logger.logBinary(packet.bits, { source: "sentience" });
 
-    this._trace('sentience:emitted', { bits: packet.bitLength });
+    this._trace("sentience:emitted", { bits: packet.bitLength });
 
     return packet;
   }
@@ -253,11 +253,22 @@ class AIBinarySentience {
   }
 }
 
-function createAIBinarySentience(config) {
+// ============================================================================
+//  FACTORY — v11.2‑EVO STYLE
+// ============================================================================
+
+export function createAIBinarySentience(config) {
   return new AIBinarySentience(config);
 }
 
-module.exports = {
-  AIBinarySentience,
-  createAIBinarySentience,
-};
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    SentienceMeta,
+    AIBinarySentience,
+    createAIBinarySentience
+  };
+}

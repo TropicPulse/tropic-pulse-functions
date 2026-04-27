@@ -204,9 +204,11 @@ export {
   createAIBinaryOrganRegistry
 };
 
+if (typeof module !== "undefined") {
 // CommonJS
 module.exports = {
   OrganRegistryMeta,
   AIBinaryOrganRegistry,
   createAIBinaryOrganRegistry
+};
 };

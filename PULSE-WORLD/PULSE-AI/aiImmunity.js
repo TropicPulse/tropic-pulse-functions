@@ -1,5 +1,5 @@
 /**
- * aiImmunity.js — Pulse OS v11‑EVO Organ
+ * aiImmunity.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Immune System** of the organism.
@@ -26,34 +26,7 @@
  *     • binary sanitation layer
  *     • internal immune artery source
  *
- * WHY THIS ORGAN EXISTS:
- *   Without immunity:
- *     - one corrupted packet can poison the organism
- *     - one failing organ can cascade failures
- *     - drift can spread unchecked
- *     - watchdog alerts cannot be acted upon
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST DEFEND ITSELF.”
- *
- * ARCHITECTURAL INTENT:
- *   This organ is NOT:
- *     - a watchdog (detects failures)
- *     - a vitals system (scores health)
- *     - a governor (makes decisions)
- *
- *   This organ IS:
- *     - a binary immune layer
- *     - a quarantine engine
- *     - a packet sanitizer
- *     - a structural isolator
- *     - an immune artery pressure regulator
- *
- * IMMUNITY MODEL (v11‑EVO, binary‑first, no timestamps):
- *
- *   Immune response packet (logical shape):
+ *   IMMUNITY MODEL (v11‑EVO, binary‑first, no timestamps):
  *
  *     {
  *       type: "binary-immune-response",
@@ -63,23 +36,22 @@
  *       bits: <binary>,
  *       bitLength: <number>,
  *       cycle: <number>,          // deterministic local immune cycle
- *       band: "binary",           // binary-first highway
+ *       band: "binary",
  *       highway: "binary_first_dualband"
  *     }
- *
- *   Entire immune response is encoded into binary.
  */
+
 // ============================================================================
-// ORGAN IDENTITY — v11‑EVO‑PRIME (B2 Binary Immune System)
+//  ORGAN IDENTITY — v11.2‑EVO (B2 Binary Immune System)
 // ============================================================================
-export const PulseRole = {
+export const PulseRole = Object.freeze({
   type: "ImmuneCore",
   subsystem: "AIBinaryImmunity",
   layer: "B2-BinaryImmuneSystem",
-  version: "11.0-Evo-Prime",
-  identity: "AIBinaryImmunity-v11-Evo-Prime",
+  version: "11.2-EVO",
+  identity: "AIBinaryImmunity-v11.2-EVO",
 
-  evo: {
+  evo: Object.freeze({
     // Core invariants
     driftProof: true,
     deterministicField: true,
@@ -113,19 +85,22 @@ export const PulseRole = {
 
     // Safety + environment
     environmentAgnostic: true,
-    multiInstanceReady: true
-  }
-};
+    multiInstanceReady: true,
+
+    // Window + future channels
+    windowAware: true,           // ⭐ NEW: safe immune snapshots
+    bluetoothReady: true         // ⭐ NEW: placeholder for future immune channels
+  })
+});
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO + Dualband + Binary‑First Highway
+//  META BLOCK — v11.2‑EVO + Dualband + Binary‑First Highway
 // ---------------------------------------------------------
-
 export const ImmunityMeta = Object.freeze({
   layer: "BinaryDefense",
   role: "BINARY_IMMUNE_SYSTEM",
-  version: "11.0-EVO",
-  identity: "aiBinaryImmunity-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinaryImmunity-v11.2-EVO",
   band: "dualband",
   highway: "binary_first_dualband",
   intent: "binary_immune_defense",
@@ -136,6 +111,7 @@ export const ImmunityMeta = Object.freeze({
     binaryOnly: true,
     dualBand: true,
     binaryFirst: true,
+
     immuneCore: true,
     quarantineEngine: true,
     pipelineAware: true,
@@ -145,8 +121,12 @@ export const ImmunityMeta = Object.freeze({
     unifiedAdvantageField: true,
     advantageCascadeAware: true,
     intentFieldAware: true,
+
+    windowAware: true,           // ⭐ NEW: window-safe immune summaries
+    bluetoothReady: true,        // ⭐ NEW: future immune packet channels
+
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -175,10 +155,9 @@ export const ImmunityMeta = Object.freeze({
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
+//  ORGAN IMPLEMENTATION — v11.2‑EVO
 // ---------------------------------------------------------
-
-class AIBinaryImmunity {
+export class AIBinaryImmunity {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-immunity";
     this.encoder = config.encoder;
@@ -197,12 +176,27 @@ class AIBinaryImmunity {
 
     this.quarantined = new Set();
     this.cycle = 0; // deterministic local immune cycle (no timestamps)
+
+    // Window-safe immune snapshot (no timestamps, no randomness)
+    this.immuneArtery = {
+      lastAnomaly: null,
+      lastOrganId: null,
+      lastBinary: null,
+      lastCycle: 0,
+      quarantinedCount: 0,
+      snapshot: () => Object.freeze({
+        lastAnomaly: this.immuneArtery.lastAnomaly,
+        lastOrganId: this.immuneArtery.lastOrganId,
+        lastBinary: this.immuneArtery.lastBinary,
+        lastCycle: this.immuneArtery.lastCycle,
+        quarantinedCount: this.quarantined.size
+      })
+    };
   }
 
   // ---------------------------------------------------------
   //  BINARY IMMUNE ARTERY METRICS (deterministic, bounded [0,1])
   // ---------------------------------------------------------
-
   _computeSanitationThroughput(anomalySeverity) {
     const raw = 1 - anomalySeverity;
     return Math.max(0, Math.min(1, raw));
@@ -249,8 +243,7 @@ class AIBinaryImmunity {
 
   // ---------------------------------------------------------
   //  IMMUNE RESPONSE GENERATION (binary-first, no timestamps)
-// ---------------------------------------------------------
-
+  // ---------------------------------------------------------
   _nextCycle() {
     this.cycle += 1;
     return this.cycle;
@@ -286,7 +279,13 @@ class AIBinaryImmunity {
       cycle,
       band: "binary",
       highway: "binary_first_dualband",
-      meta: ImmunityMeta
+      meta: ImmunityMeta,
+
+      // Future: bluetooth immune metadata (no routing, no auto-connect)
+      bluetooth: {
+        ready: false,
+        channel: null
+      }
     };
 
     const json = JSON.stringify(payload);
@@ -297,6 +296,13 @@ class AIBinaryImmunity {
       bits: encoded,
       bitLength: encoded.length
     };
+
+    // Update window-safe immune snapshot
+    this.immuneArtery.lastAnomaly = anomaly;
+    this.immuneArtery.lastOrganId = organId;
+    this.immuneArtery.lastBinary = binary;
+    this.immuneArtery.lastCycle = cycle;
+    this.immuneArtery.quarantinedCount = this.quarantined.size;
 
     this._trace("immune:generated", packet);
 
@@ -318,7 +324,6 @@ class AIBinaryImmunity {
   // ---------------------------------------------------------
   //  PACKET SANITIZATION
   // ---------------------------------------------------------
-
   sanitize(binary) {
     if (typeof binary !== "string" || !/^[01]+$/.test(binary)) {
       const length = typeof binary === "string" ? binary.length : 1;
@@ -336,7 +341,6 @@ class AIBinaryImmunity {
   // ---------------------------------------------------------
   //  ORGAN QUARANTINE
   // ---------------------------------------------------------
-
   quarantineOrgan(organId) {
     this.quarantined.add(organId);
 
@@ -358,9 +362,8 @@ class AIBinaryImmunity {
   }
 
   // ---------------------------------------------------------
-  //  SIGNATURE DRIFT DETECTION
-  // ---------------------------------------------------------
-
+  //  SIGNATURE DRIFT DETECTION (evolution-aware)
+// ---------------------------------------------------------
   checkOrgan(organId) {
     const record = this.registry.getOrganRecord(organId);
     if (!record) return;
@@ -377,7 +380,6 @@ class AIBinaryImmunity {
   // ---------------------------------------------------------
   //  ORGANISM-WIDE IMMUNE SWEEP
   // ---------------------------------------------------------
-
   sweep() {
     const organIds = this.registry.listOrgans();
 
@@ -393,20 +395,31 @@ class AIBinaryImmunity {
   // ---------------------------------------------------------
   //  INTERNAL HELPERS
   // ---------------------------------------------------------
-
   _trace(event, payload) {
     if (!this.trace) return;
-    // v11‑EVO: tracing is allowed but not required; no timestamps here.
+    // v11.2‑EVO: tracing is allowed but not required; no timestamps here.
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-function createAIBinaryImmunity(config) {
+// ---------------------------------------------------------
+//  FACTORY
+// ---------------------------------------------------------
+export function createAIBinaryImmunity(config) {
   return new AIBinaryImmunity(config);
 }
 
-module.exports = {
-  AIBinaryImmunity,
-  createAIBinaryImmunity,
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+export {
   ImmunityMeta
 };
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryImmunity,
+    createAIBinaryImmunity,
+    ImmunityMeta
+  };
+}

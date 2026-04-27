@@ -7,7 +7,7 @@
 export const ExecutionEngineMeta = Object.freeze({
   layer: "PulseAIExecutionKernel",
   role: "EXECUTION_ENGINE",
-  version: "11.1-EVO", // bumped to align with Router/Cortex/Safety/Experience
+  version: "11.1-EVO", // aligned with Router/Cortex/Safety/Experience
   identity: "aiExecutionEngine-v11-EVO",
 
   evo: Object.freeze({
@@ -105,7 +105,7 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
 
   // --------------------------------------------------------------------------
   // 4) Boundary Mode (dual‑band)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   const boundaryMode = persona.boundaryMode;
   context.boundaryMode = boundaryMode;
 
@@ -176,4 +176,19 @@ function buildAIResponse(result, context) {
     permissions: context.permissions,
     organs: context.organs
   });
+}
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+// ESM named exports already above
+export default runAI;
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    ExecutionEngineMeta,
+    runAI,
+    default: runAI
+  };
 }

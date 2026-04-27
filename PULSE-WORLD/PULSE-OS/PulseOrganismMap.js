@@ -18,6 +18,7 @@
 //        - Backend organs live in PULSE‑* folders
 //        - Frontend shells live outside the organism (PULSEAdmin, PULSEDirectory…)
 //
+//
 //  CONTRACT:
 //  ---------
 //  • Must remain deterministic, static, and text‑only
@@ -90,6 +91,9 @@ export const PulseOrganismMap = {
         // Binary scanners
         "BinaryMRI","BinaryWaveScanner","BinaryLoopScanner",
 
+        // File / code cognition (symbolic-only, lives with AI cortex)
+        "PulseFileScanner-v11-Evo",
+
         // Archetypes
         "BinaryDoctor","BinaryCommunicator"
       ]
@@ -102,8 +106,8 @@ export const PulseOrganismMap = {
       role: "Core Memory System",
       root: "PULSE-CORE",   // REAL folder
       organs: [
-        "PulseBinaryCoreOverlay","PulseCoreAIMemoryAdapter","PulseCoreBrain","PulseCoreEarnMemoryAdapter","PulseCoreEvolution","PulseCoreGovernor","PulseCoreGPUMemoryAdapter","PulseCoreLayers"
-        ,"PulseCoreMemory","PulseCoreMeshMemoryAdapter","PulseCoreProxyMemoryAdapter","PulseCoreRouterMemoryAdapter","PulseCoreSendMemoryAdapter"
+        "PulseBinaryCoreOverlay","PulseCoreAIMemoryAdapter","PulseCoreBrain","PulseCoreEarnMemoryAdapter","PulseCoreEvolution","PulseCoreGovernor","PulseCoreGPUMemoryAdapter","PulseCoreLayers",
+        "PulseCoreMemory","PulseCoreMeshMemoryAdapter","PulseCoreProxyMemoryAdapter","PulseCoreRouterMemoryAdapter","PulseCoreSendMemoryAdapter"
       ]
     },
 
@@ -249,7 +253,7 @@ export const PulseOrganismMap = {
     // ----------------------------------------------------------------------
     // PULSE‑DYNAMIC — Evolutionary UI (front‑of‑organism)
     //  Text/UI layer; binary stays underneath as nervous system.
-// ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     "pulse-dynamic": {
       role: "Dynamic Page System / Evolutionary UI",
       root: "PULSE-UI",      // REAL UI organism folder
@@ -264,7 +268,7 @@ export const PulseOrganismMap = {
   // ========================================================================
   // ALIASES — Compact but complete (legacy → v11 → binary)
   //  NOTE: These are TEXT‑ONLY mappings; execution lives in PULSE‑* folders.
-// ========================================================================
+  // ========================================================================
   aliases: {
     base: {
       PulseBand: {
@@ -332,7 +336,7 @@ export const PulseOrganismMap = {
     // --------------------------------------------------------------------
     // BINARY ROUTE CHAIN — v11‑EVO‑BINARY (no middlemen)
     //  This is the “game‑change” path: binary‑first, binary‑on‑binary hardware.
-// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
     binaryRouteChain: {
       old: [],
       now: [

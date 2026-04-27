@@ -55,7 +55,7 @@ export const BrainstemMeta = Object.freeze({
     readOnly: true,
     organismAware: true,
     cognitiveAware: true,
-    packetAware: true,          // NEW
+    packetAware: true,
     multiInstanceReady: true,
     epoch: "v11-EVO"
   }),
@@ -82,7 +82,7 @@ export const BrainstemMeta = Object.freeze({
       "attach ownership deterministically",
       "load cognitive tools from aiTools.js",
       "wire organs deterministically",
-      "emit deterministic brainstem packets",   // NEW
+      "emit deterministic brainstem packets",
       "remain read-only",
       "remain drift-proof",
       "remain deterministic",
@@ -101,30 +101,18 @@ import * as aiTools from "./aiTools.js";
 export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
   const { userId = null, userIsOwner: requestOwner = false } = request;
 
-  // -------------------------------------------------------------------------
-  // OWNERSHIP RESOLUTION (Deterministic)
-  // -------------------------------------------------------------------------
   const userIsOwner = Boolean(requestOwner || (userId && userId === OWNER_ID));
 
-  // -------------------------------------------------------------------------
-  // BRAINSTEM CONTEXT (Merged into Cognitive Frame by aiCortex)
-  // -------------------------------------------------------------------------
   const context = Object.freeze({
     userId,
     userIsOwner,
     ...aiTools
   });
 
-  // -------------------------------------------------------------------------
-  // ORGANS (Environment Adapters)
-  // -------------------------------------------------------------------------
   const organs = Object.freeze(
     createOrgans(context, db, fsAPI, routeAPI, schemaAPI)
   );
 
-  // -------------------------------------------------------------------------
-  // BRAINSTEM PACKET (Deterministic)
-  // -------------------------------------------------------------------------
   const packetPayload = {
     type: "brainstem-activation",
     timestamp: Date.now(),
@@ -144,9 +132,6 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
     bitLength: packetBits ? packetBits.length : 0
   });
 
-  // -------------------------------------------------------------------------
-  // RETURN CNS ORGANISM (Frozen)
-  // -------------------------------------------------------------------------
   return Object.freeze({
     meta: BrainstemMeta,
     context,
@@ -156,6 +141,21 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
 }
 
 // ============================================================================
-// EXPORT (v11‑EVO)
+//  ESM EXPORTS (v11‑EVO)
 // ============================================================================
+export {
+  createBrainstem
+};
+
 export default createBrainstem;
+
+// ============================================================================
+//  COMMONJS FALLBACK EXPORTS
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    BrainstemMeta,
+    createBrainstem,
+    default: createBrainstem
+  };
+}

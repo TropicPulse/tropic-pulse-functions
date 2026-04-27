@@ -306,3 +306,25 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 
   return Object.freeze(api);
 }
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+// ESM
+export {
+  EarnMeta,
+  createEarnAPI
+};
+
+// Default (ESM)
+export default createEarnAPI;
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    EarnMeta,
+    createEarnAPI,
+    default: createEarnAPI
+  };
+}

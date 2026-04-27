@@ -152,3 +152,25 @@ export function createContextEngine(config = {}) {
     }
   });
 }
+
+// ============================================================================
+//  ESM EXPORTS
+// ============================================================================
+export {
+  AiContextEngine,
+  createContextEngine
+};
+
+export default createContextEngine;
+
+// ============================================================================
+//  COMMONJS FALLBACK EXPORTS
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    ContextEngineMeta,
+    AiContextEngine,
+    createContextEngine,
+    default: createContextEngine
+  };
+}

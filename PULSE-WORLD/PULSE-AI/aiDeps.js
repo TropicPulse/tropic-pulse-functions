@@ -192,3 +192,34 @@ const depsSurface = Object.freeze({
 });
 
 export default depsSurface;
+
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  DepsMeta,
+  getDb,
+  getFsAPI,
+  getRouteAPI,
+  getSchemaAPI,
+  getOrganismSnapshot,
+  emitDepsPacket,
+  depsSurface
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    DepsMeta,
+    getDb,
+    getFsAPI,
+    getRouteAPI,
+    getSchemaAPI,
+    getOrganismSnapshot,
+    emitDepsPacket,
+    depsSurface,
+    default: depsSurface
+  };
+}

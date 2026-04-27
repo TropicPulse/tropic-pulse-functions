@@ -42,7 +42,11 @@ export const BoundariesMeta = Object.freeze({
   })
 });
 
-export function createBoundariesEngine({ context = {} } = {}) {
+// ---------------------------------------------------------
+//  ENGINE IMPLEMENTATION
+// ---------------------------------------------------------
+
+function createBoundariesEngine({ context = {} } = {}) {
   function resolve(personaId, mode, binaryVitals = {}) {
     const staticBoundaries = getBoundariesForPersona(personaId);
 
@@ -68,4 +72,23 @@ export function createBoundariesEngine({ context = {} } = {}) {
     resolve,
     check
   });
+}
+
+// ---------------------------------------------------------
+//  ESM EXPORTS
+// ---------------------------------------------------------
+
+export {
+  createBoundariesEngine
+};
+
+// ---------------------------------------------------------
+//  COMMONJS FALLBACK EXPORTS
+// ---------------------------------------------------------
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    BoundariesMeta,
+    createBoundariesEngine
+  };
 }

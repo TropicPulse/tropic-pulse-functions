@@ -1,5 +1,5 @@
 /**
- * aiAnatomy.js — Pulse OS v11‑EVO Organ
+ * aiAnatomy.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Anatomy Map** of the organism.
@@ -20,14 +20,14 @@
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO
+//  META BLOCK — v11.2‑EVO
 // ---------------------------------------------------------
 
 export const AnatomyMeta = Object.freeze({
   layer: "Anatomy",
   role: "STRUCTURAL_MAP",
-  version: "11.0-EVO",
-  identity: "aiAnatomy-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiAnatomy-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -35,9 +35,10 @@ export const AnatomyMeta = Object.freeze({
     structuralAware: true,
     topologyAware: true,
     memoryAware: true,
-    binaryEncoding: true,   // emits binary packets, not binary-first compute
+    coreMemoryAware: true,   // works with PulseCoreMemory-backed organs
+    binaryEncoding: true,    // emits binary packets, not binary-first compute
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -77,8 +78,12 @@ export class AIAnatomy {
     if (!this.encoder || typeof this.encoder.encode !== "function") {
       throw new Error("AIAnatomy requires aiBinaryAgent encoder");
     }
-    if (!this.memory || typeof this.memory.write !== "function") {
-      throw new Error("AIAnatomy requires aiBinaryMemory");
+    if (
+      !this.memory ||
+      typeof this.memory.write !== "function" ||
+      typeof this.memory.read !== "function"
+    ) {
+      throw new Error("AIAnatomy requires a binary memory organ with write/read");
     }
 
     this.topology = new Map();
@@ -308,9 +313,17 @@ export class AIAnatomy {
 }
 
 // ---------------------------------------------------------
-// FACTORY EXPORT
+// FACTORY EXPORT (ESM + CommonJS)
 // ---------------------------------------------------------
 
 export function createAIAnatomy(config) {
   return new AIAnatomy(config);
+}
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIAnatomy,
+    createAIAnatomy,
+    AnatomyMeta
+  };
 }

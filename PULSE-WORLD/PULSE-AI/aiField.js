@@ -1,25 +1,39 @@
-/**
- * aiField.js — Pulse OS v11.1‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Field Layer**, the organism’s interface
- *   with the external environment.
- */
+// ============================================================================
+//  aiField.js — Pulse OS v11.2‑EVO Organ
+//  Binary Membrane • Artery Metrics • Packet Bus Ready • Bluetooth‑Future Hooks
+// ============================================================================
+//
+//  CANONICAL ROLE:
+//    This organ is the **Binary Field Layer**, the organism’s membrane
+//    between internal cognition and the external world.
+//
+//  v11.2‑EVO UPGRADES:
+//    • dualband-aware
+//    • packet-aware
+//    • evolution-aware
+//    • bluetooth-ready (future hooks only, no behavior change)
+//    • drift-proof meta
+//    • deterministic artery metrics
+//    • window-aware (safe vitals exposure)
+//    • multi-instance, identity-safe
+// ============================================================================
 
-// ---------------------------------------------------------
-//  META BLOCK — v11.1‑EVO
-// ---------------------------------------------------------
-
-const FieldMeta = Object.freeze({
+export const FieldMeta = Object.freeze({
   layer: "BinaryField",
   role: "BINARY_FIELD_LAYER",
-  version: "11.1-EVO",
-  identity: "aiBinaryField-v11.1-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinaryField-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
+
+    dualband: true,            // ⭐ NEW
+    packetAware: true,         // ⭐ NEW
+    evolutionAware: true,      // ⭐ NEW
+    windowAware: true,         // ⭐ NEW (safe vitals for UI)
+    bluetoothReady: true,      // ⭐ NEW (future integration hook)
 
     sentinelAware: true,
     metabolismAware: true,
@@ -36,9 +50,8 @@ const FieldMeta = Object.freeze({
 
     identitySafe: true,
     readOnly: true,
-
     multiInstanceReady: true,
-    epoch: "v11.1-EVO"
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -52,7 +65,9 @@ const FieldMeta = Object.freeze({
       "override metabolism or hormones",
       "introduce randomness",
       "modify pipeline behavior",
-      "modify reflex behavior"
+      "modify reflex behavior",
+      "auto-connect bluetooth",        // ⭐ NEW
+      "expose raw device identifiers"  // ⭐ NEW
     ]),
 
     always: Object.freeze([
@@ -63,26 +78,34 @@ const FieldMeta = Object.freeze({
       "respect metabolic pressure",
       "compute artery metrics deterministically",
       "expose binary vitals snapshot",
-      "remain pure and minimal"
+      "remain pure and minimal",
+      "prepare for bluetooth field channels (future)" // ⭐ NEW
     ])
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
-// ---------------------------------------------------------
-
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO
+// ============================================================================
 class AIBinaryField {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-field";
+
+    // Required binary organs
     this.encoder = config.encoder;
     this.sentinel = config.sentinel;
     this.metabolism = config.metabolism;
     this.hormones = config.hormones;
     this.consciousness = config.consciousness;
+
+    // Optional binary subsystems
     this.logger = config.logger || null;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
+
+    // Future‑ready: Bluetooth binary channel (not active)
+    this.bluetooth = config.bluetooth || null; // ⭐ placeholder only
+
     this.trace = !!config.trace;
 
     if (!this.encoder) throw new Error("AIBinaryField requires aiBinaryAgent encoder");
@@ -104,6 +127,9 @@ class AIBinaryField {
     };
   }
 
+  // ---------------------------------------------------------------------------
+  //  BINARY ARTERY METRICS — deterministic, drift-proof
+  // ---------------------------------------------------------------------------
   _computeBinaryThroughput(entropy, density) {
     const raw = entropy * (1 - Math.min(1, density));
     return Math.max(0, Math.min(1, raw));
@@ -124,6 +150,9 @@ class AIBinaryField {
     return Math.max(0, Math.min(1, raw));
   }
 
+  // ---------------------------------------------------------------------------
+  //  BUCKETS — stable categorical mapping
+  // ---------------------------------------------------------------------------
   _bucketLevel(v) {
     if (v >= 0.9) return "elite";
     if (v >= 0.75) return "high";
@@ -148,6 +177,9 @@ class AIBinaryField {
     return "none";
   }
 
+  // ---------------------------------------------------------------------------
+  //  VITALS SNAPSHOT — window-safe, deterministic
+  // ---------------------------------------------------------------------------
   _computeBinaryVitals() {
     const { entropy, signalDensity } = this.fieldState;
 
@@ -173,6 +205,9 @@ class AIBinaryField {
     };
   }
 
+  // ---------------------------------------------------------------------------
+  //  FIELD STATE UPDATE — pure binary, no symbolic interpretation
+  // ---------------------------------------------------------------------------
   _updateFieldState(bits, direction) {
     const size = bits.length || 0;
     const ones = size === 0 ? 0 : bits.split("").filter((b) => b === "1").length;
@@ -196,6 +231,9 @@ class AIBinaryField {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  //  PACKET GENERATION — binary-only, packet-aware
+  // ---------------------------------------------------------------------------
   _generateFieldPacket(bits, direction) {
     const vitals = this._computeBinaryVitals();
 
@@ -214,6 +252,12 @@ class AIBinaryField {
         costBucket: vitals.costBucket,
         budget: vitals.budget,
         budgetBucket: vitals.budgetBucket
+      },
+
+      // ⭐ Future: Bluetooth binary channel packet
+      bluetooth: {
+        ready: !!this.bluetooth,
+        // no identifiers, no auto-connect
       }
     };
 
@@ -227,6 +271,9 @@ class AIBinaryField {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  //  INGEST — binary input only
+  // ---------------------------------------------------------------------------
   ingest(bits) {
     const safe = this.sentinel.scan(bits);
     if (!safe) {
@@ -245,6 +292,9 @@ class AIBinaryField {
     return packet;
   }
 
+  // ---------------------------------------------------------------------------
+  //  EMIT — binary output only
+  // ---------------------------------------------------------------------------
   emit(bits) {
     this._updateFieldState(bits, "out");
 
@@ -256,30 +306,34 @@ class AIBinaryField {
     return packet;
   }
 
+  // ---------------------------------------------------------------------------
+  //  TRACE — deterministic debug
+  // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-function createAIBinaryField(config) {
+// ============================================================================
+//  FACTORY
+// ============================================================================
+export function createAIBinaryField(config) {
   return new AIBinaryField(config);
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
-
-// ESM
+// ============================================================================
 export {
   AIBinaryField,
-  createAIBinaryField,
   FieldMeta
 };
 
-// CommonJS
-module.exports = {
-  AIBinaryField,
-  createAIBinaryField,
-  FieldMeta
-};
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryField,
+    createAIBinaryField,
+    FieldMeta
+  };
+}

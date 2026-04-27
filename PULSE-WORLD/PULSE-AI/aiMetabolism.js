@@ -1,49 +1,49 @@
-/**
- * aiMetabolism.js — Pulse OS v11‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Metabolism Engine** of the organism.
- *
- *   It manages:
- *     - compute load
- *     - resource budgeting
- *     - binary flow pressure
- *     - organ energy distribution
- *     - overload prevention
- *     - starvation prevention
- *     - binary metabolic artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • energy system
- *     • load balancer
- *     • resource allocator
- *     • metabolic regulator
- *     • binary energy artery source
- *
- * WHY THIS ORGAN EXISTS:
- *   Without metabolism:
- *     - pipeline overloads
- *     - reflex storms occur
- *     - scheduler drift increases
- *     - heartbeat becomes unstable
- *     - immunity cannot respond in time
- *     - organism collapses under load
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST MAINTAIN INTERNAL BALANCE.”
- */
+// ============================================================================
+//  aiMetabolism.js — Pulse OS v11.2‑EVO Organ
+//  Binary Metabolism Engine • BinaryCore • Deterministic • Metabolic Artery Metrics
+// ----------------------------------------------------------------------------
+//  CANONICAL ROLE:
+//    This organ is the **Binary Metabolism Engine** of the organism.
+//
+//    It manages:
+//      • compute load
+//      • resource budgeting
+//      • binary flow pressure
+//      • organ energy distribution
+//      • overload prevention
+//      • starvation prevention
+//      • binary metabolic artery metrics (throughput, pressure, cost, budget)
+//
+//    It is the organism’s:
+//      • energy system
+//      • load balancer
+//      • resource allocator
+//      • metabolic regulator
+//      • binary energy artery source
+//
+//  WHY THIS ORGAN EXISTS:
+//    Without metabolism:
+//      • pipeline overloads
+//      • reflex storms occur
+//      • scheduler drift increases
+//      • heartbeat becomes unstable
+//      • immunity cannot respond in time
+//      • organism collapses under load
+//
+//    Pulse OS v11.2‑EVO breaks this pattern.
+//
+//    This organ enforces:
+//      “THE ORGANISM MUST MAINTAIN INTERNAL BALANCE.”
+// ============================================================================
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO
+//  META BLOCK — v11.2‑EVO
 // ---------------------------------------------------------
-
 export const MetabolismMeta = Object.freeze({
   layer: "BinaryCore",
   role: "BINARY_METABOLISM_ENGINE",
-  version: "11.0-EVO",
-  identity: "aiBinaryMetabolism-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinaryMetabolism-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -54,7 +54,7 @@ export const MetabolismMeta = Object.freeze({
     vitalsAware: true,
     energyAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -79,13 +79,12 @@ export const MetabolismMeta = Object.freeze({
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
-// ---------------------------------------------------------
-
-class AIBinaryMetabolism {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO
+// ============================================================================
+export class AIBinaryMetabolism {
   constructor(config = {}) {
-    this.id = config.id || 'ai-binary-metabolism';
+    this.id = config.id || MetabolismMeta.identity;
     this.encoder = config.encoder;
     this.pipeline = config.pipeline;
     this.scheduler = config.scheduler || null;
@@ -94,8 +93,12 @@ class AIBinaryMetabolism {
     this.logger = config.logger || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinaryMetabolism requires aiBinaryAgent encoder');
-    if (!this.pipeline) throw new Error('AIBinaryMetabolism requires aiBinaryPipeline');
+    if (!this.encoder) {
+      throw new Error("AIBinaryMetabolism requires aiBinaryAgent encoder");
+    }
+    if (!this.pipeline) {
+      throw new Error("AIBinaryMetabolism requires aiBinaryPipeline");
+    }
 
     this.loadHistory = [];
     this.pressure = 0;
@@ -105,7 +108,6 @@ class AIBinaryMetabolism {
   // ---------------------------------------------------------
   //  BINARY METABOLIC ARTERY METRICS
   // ---------------------------------------------------------
-
   _computeEnergyThroughput(load) {
     const raw = 1 - load;
     return Math.max(0, Math.min(1, raw));
@@ -113,7 +115,7 @@ class AIBinaryMetabolism {
 
   _computeEnergyPressure(load, avgSize) {
     const sizeFactor = Math.min(1, avgSize / 50000);
-    const raw = Math.min(1, (load * 0.6) + (sizeFactor * 0.4));
+    const raw = Math.min(1, load * 0.6 + sizeFactor * 0.4);
     return Math.max(0, raw);
   }
 
@@ -139,7 +141,7 @@ class AIBinaryMetabolism {
     if (v >= 0.9) return "overload";
     if (v >= 0.7) return "high";
     if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
+    if (v > 0) return "low";
     return "none";
   }
 
@@ -147,14 +149,13 @@ class AIBinaryMetabolism {
     if (v >= 0.8) return "heavy";
     if (v >= 0.5) return "moderate";
     if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
+    if (v > 0) return "negligible";
     return "none";
   }
 
   // ---------------------------------------------------------
   //  LOAD MEASUREMENT
   // ---------------------------------------------------------
-
   recordLoad(bits) {
     const size = bits.length;
     this.loadHistory.push(size);
@@ -163,42 +164,26 @@ class AIBinaryMetabolism {
       this.loadHistory.shift();
     }
 
-    this._trace('load:recorded', { size });
+    this._trace("load:recorded", { size });
   }
 
   _computeLoad() {
     if (this.loadHistory.length === 0) return 0;
 
     const max = Math.max(...this.loadHistory);
-    const avg = this.loadHistory.reduce((a, b) => a + b, 0) / this.loadHistory.length;
+    const avg =
+      this.loadHistory.reduce((a, b) => a + b, 0) / this.loadHistory.length;
 
     const load = Math.min(1, avg / (max || 1));
 
-    this._trace('load:computed', { load });
+    this._trace("load:computed", { load });
 
     return load;
   }
 
   // ---------------------------------------------------------
-  //  PRESSURE + BUDGET
-  // ---------------------------------------------------------
-
-  _computePressure(load) {
-    const pressure = load;
-    this._trace('pressure:computed', { pressure });
-    return pressure;
-  }
-
-  _computeBudget(pressure) {
-    const budget = Math.max(0, 1 - pressure);
-    this._trace('budget:computed', { budget });
-    return budget;
-  }
-
-  // ---------------------------------------------------------
   //  METABOLIC PACKET
   // ---------------------------------------------------------
-
   generateMetabolicPacket() {
     const load = this._computeLoad();
     const avgSize = this.loadHistory.length
@@ -225,7 +210,7 @@ class AIBinaryMetabolism {
     };
 
     const payload = {
-      type: 'binary-metabolism',
+      type: "binary-metabolism",
       timestamp: Date.now(),
       load,
       pressure,
@@ -239,10 +224,10 @@ class AIBinaryMetabolism {
     const packet = {
       ...payload,
       bits: encoded,
-      bitLength: encoded.length,
+      bitLength: encoded.length
     };
 
-    this._trace('metabolism:packet', { bits: packet.bitLength });
+    this._trace("metabolism:packet", { bits: packet.bitLength });
 
     return packet;
   }
@@ -250,15 +235,26 @@ class AIBinaryMetabolism {
   // ---------------------------------------------------------
   //  METABOLIC EMISSION
   // ---------------------------------------------------------
-
   emitMetabolism() {
     const packet = this.generateMetabolicPacket();
 
-    if (this.pipeline) this.pipeline.run(packet.bits);
-    if (this.scheduler) this.scheduler.scheduleTask;
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'metabolism' });
+    if (this.pipeline && typeof this.pipeline.run === "function") {
+      this.pipeline.run(packet.bits);
+    }
 
-    this._trace('metabolism:emitted', { bits: packet.bitLength });
+    if (this.scheduler && typeof this.scheduler.scheduleTask === "function") {
+      this.scheduler.scheduleTask({
+        type: "metabolism",
+        bits: packet.bits,
+        source: this.id
+      });
+    }
+
+    if (this.logger && typeof this.logger.logBinary === "function") {
+      this.logger.logBinary(packet.bits, { source: "metabolism" });
+    }
+
+    this._trace("metabolism:emitted", { bits: packet.bitLength });
 
     return packet;
   }
@@ -266,19 +262,26 @@ class AIBinaryMetabolism {
   // ---------------------------------------------------------
   //  INTERNAL HELPERS
   // ---------------------------------------------------------
-
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-function createAIBinaryMetabolism(config) {
+// ============================================================================
+//  FACTORY
+// ============================================================================
+export function createAIBinaryMetabolism(config) {
   return new AIBinaryMetabolism(config);
 }
 
-module.exports = {
-  AIBinaryMetabolism,
-  createAIBinaryMetabolism,
-  MetabolismMeta
-};
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryMetabolism,
+    createAIBinaryMetabolism,
+    MetabolismMeta
+  };
+}

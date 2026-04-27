@@ -14,6 +14,7 @@
 //   • Binary is always post‑render, handled by GPU / Send / Binary organs.
 //   • Brain is the CNS identity + contract kernel, not a router, not a GPU.
 // ============================================================================
+
 export const PulseOSBrainMeta = Object.freeze({
   layer: "PulseOSBrain",
   role: "CNS_BRAIN_ORGAN",
@@ -30,7 +31,7 @@ export const PulseOSBrainMeta = Object.freeze({
     symbolicPrimary: true,
     binaryAware: true,
     dualBandAware: true,
-    nonExecutableBrain: true,        // never executes binary payloads
+    nonExecutableBrain: true,
     notRouter: true,
     notGPU: true,
 
@@ -97,8 +98,6 @@ import { bootCortex } from "./PulseOSBrainCortex.js";
 
 // ============================================================================
 // 0) THE REAL CNS BRAIN — EXPORTED AS PulseOSBrain
-//    • Symbolic-primary CNS kernel
-//    • Binary-aware, dualband, non-executable
 // ============================================================================
 export const PulseOSBrain = {
 
@@ -118,24 +117,21 @@ export const PulseOSBrain = {
       advantageCascadeAware: true,
       unifiedAdvantageField: true,
 
-      // Contracts — organism-wide
       routingContract: "PulseRouter-v11.0",
       osOrganContract: "PulseOS-v11.0",
       earnCompatibility: "PulseEarn-v11.0",
       proxyCompatibility: "PulseProxySpine-v11.0",
       gpuCompatibility: "PulseGPU-v11.0",
 
-      // Continuance / loop-theory awareness (conceptual only)
       loopTheoryAware: true,
       continuanceAware: true,
 
-      // v11‑EVO‑BINARY‑MAX — dualband CNS
-      dualMode: true,                 // symbolic + binary surfaces
-      symbolicPrimary: true,          // SYMBOLIC is source of truth
-      binaryPostRenderOnly: true,     // binary only after render
-      binaryCompressionAware: true,   // knows compression contracts
-      binaryNonExecutable: true,      // NEVER executes binary
-      organismWideIdentityField: true // single CNS identity field
+      dualMode: true,
+      symbolicPrimary: true,
+      binaryPostRenderOnly: true,
+      binaryCompressionAware: true,
+      binaryNonExecutable: true,
+      organismWideIdentityField: true
     }
   },
 
@@ -143,14 +139,12 @@ export const PulseOSBrain = {
   // CNS Intelligence Layer — structural reasoning, not routing
   // -------------------------------------------------------------------------
   BrainIntel: {
-    // Degradation classifier → how CNS should route around damage
     classifyDegradation(healthScore) {
       if (healthScore >= 0.85) return "direct";
       if (healthScore >= 0.15) return "bypass";
       return "routeAround";
     },
 
-    // Identity scoring for design-loaded organs
     scoreIdentityMatch(signature, module) {
       let score = 0;
       if (module?.PulseRole?.type === signature.type) score += 1;
@@ -158,7 +152,6 @@ export const PulseOSBrain = {
       return score;
     },
 
-    // Fallback to long-term memory (v11: TEXT/DESIGN hint via IQ)
     fallbackToMemory() {
       const iq = PulseOSBrain.PulseIQMap || PulseIQMap;
       const route = iq.getRecoveryRoute
@@ -171,10 +164,8 @@ export const PulseOSBrain = {
     },
 
     // -----------------------------------------------------------------------
-    // v11 DUAL-MODE SURFACES (SYMBOLIC + BINARY VIEW)
+    // Symbolic + Binary organism identity surfaces
     // -----------------------------------------------------------------------
-
-    // Symbolic view of organism identity (source of truth)
     getSymbolicOrganismIdentity() {
       return {
         role: PulseOSBrain.PulseRole,
@@ -184,29 +175,21 @@ export const PulseOSBrain = {
       };
     },
 
-    // Binary view — NON-EXECUTABLE, post-render compression surface
-    // This is intentionally descriptive only:
-    //   • Brain does NOT encode bytes
-    //   • Brain does NOT send packets
-    //   • Brain only describes what GPU/Send/Binary organs may compress.
     getBinaryOrganismDescriptor() {
       const symbolic = this.getSymbolicOrganismIdentity();
 
-      // Deterministic, metadata-only descriptor
       const descriptor = {
         version: PulseOSBrain.PulseRole.version,
         identity: PulseOSBrain.PulseRole.identity,
         subsystem: PulseOSBrain.PulseRole.subsystem,
         layer: PulseOSBrain.PulseRole.layer,
 
-        // Dualband CNS flags
         dualMode: true,
         symbolicPrimary: true,
-        binaryFirst: true,          // binary-first transport in the organism
-        binaryPostRenderOnly: true, // but only after symbolic render
+        binaryFirst: true,
+        binaryPostRenderOnly: true,
         binaryNonExecutable: true,
 
-        // We do NOT compute bytes here; we just describe the shape.
         encoding: {
           format: "application/pulse-organism+json",
           suggestedTransport: "PulseGPU-v11.0",
@@ -217,36 +200,58 @@ export const PulseOSBrain = {
 
       return {
         descriptor,
-        // Symbolic snapshot is included so GPU/Send/Binary can compress it later.
         symbolicSnapshot: symbolic
       };
     }
   },
 
   // -------------------------------------------------------------------------
-  // CNS Infrastructure (wired from IQ — TEXT + LOGGING + APPENDAGES)
+  // CNS Infrastructure (wired from IQ)
   // -------------------------------------------------------------------------
   log: PulseIQMap.log,
   warn: PulseIQMap.warn,
   logError: PulseIQMap.logError,
   firebase: PulseIQMap.firebase,
 
-  // ⭐ MAP EXPORTS
-  PulseIntentMap: null,                 // filled by Evolution / cognitiveBootstrap
-  PulseIQMap: PulseIQMap,               // IQ lives in Brain (design + logging)
-  PulseOrganismMap: PulseOrganismMap,   // default; Evolution may override
+  PulseIntentMap: null,
+  PulseIQMap: PulseIQMap,
+  PulseOrganismMap: PulseOrganismMap,
 
-  // ⭐ Cognitive wiring
   intent: null,
   understanding: null,
-  evolution: null,   // attached by Evolution
-  cortex: null
+  evolution: null,
+  cortex: null,
+
+  // -------------------------------------------------------------------------
+  // ⭐ CNS → Scanner Delegation Surface (symbolic-only)
+  //    • Brain does NOT import scanner
+  //    • Brain does NOT execute scanner
+  //    • Brain delegates to Cortex if Cortex exposes scanFile
+  //    • Evolution MAY enhance Cortex later, but is not required
+  // -------------------------------------------------------------------------
+  scanFile(filePath) {
+    const cortex = PulseOSBrain.cortex;
+
+    if (cortex && typeof cortex.scanFile === "function") {
+      return cortex.scanFile(filePath);
+    }
+
+    const warnFn = PulseOSBrain.warn || PulseIQMap.warn;
+    warnFn("🧠 [PulseOSBrain] scanFile called but Cortex has no scanFile surface.", {
+      filePath
+    });
+
+    return {
+      ok: false,
+      error: "SCANNER_UNAVAILABLE",
+      filePath
+    };
+  }
 };
 
 
 // ============================================================================
 // 1) ROLE VALIDATION — CNS Gatekeeper
-//    Ensures only correct organs attach to CNS surfaces.
 // ============================================================================
 export function validatePulseRole(module, expectedType, expectedSubsystem) {
   if (!module?.PulseRole) return false;
@@ -267,7 +272,6 @@ export function validatePulseRole(module, expectedType, expectedSubsystem) {
 
 // ============================================================================
 // 2) STRUCTURAL ERROR INTELLIGENCE — Drift Surface
-//    CNS-level structural mismatch reporting (non-fatal, drift-aware).
 // ============================================================================
 export function structuralError(expected, found, extraContext = {}) {
   const payload = {
@@ -290,7 +294,6 @@ export function structuralError(expected, found, extraContext = {}) {
 
 // ============================================================================
 // 3) EVOLUTION + ORGAN LOADING — Design-Driven CNS Logic
-//    v11‑EVO: Evolution decides which organs to attach; Brain validates.
 // ============================================================================
 export async function loadOrganByDesign(designIdentity, expectedType, expectedSubsys) {
   const evolveRaw =
@@ -320,14 +323,9 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 
 // ============================================================================
 // 4) COGNITIVE BOOTSTRAP — Evolution → PulseOSBrain → Cortex
-//    • Evolution calls this (NOT Understanding).
-//    • Boots Cortex with Brain as CNS parent.
-//    • Initializes Nervous System + organs.
-//    • Records lineage + scans drift.
 // ============================================================================
 export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
-  // Attach intent + understanding to Brain surface
   if (intent) {
     PulseOSBrain.intent = intent;
     PulseOSBrain.PulseIntentMap = intent;
@@ -340,7 +338,6 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
   if (iqMap) {
     PulseOSBrain.PulseIQMap = iqMap;
 
-    // v11: rewire CNS infrastructure to injected IQ
     if (iqMap.log) PulseOSBrain.log = iqMap.log;
     if (iqMap.warn) PulseOSBrain.warn = iqMap.warn;
     if (iqMap.logError) PulseOSBrain.logError = iqMap.logError;
@@ -349,9 +346,6 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
   PulseOSBrain.understanding = understanding;
 
-  // Evolution is attached by PulseOSEvolution before this is called:
-  // PulseOSBrain.evolution = Evolution;
-
   // Boot Cortex with PulseOSBrain as CNS parent
   PulseOSBrain.cortex = bootCortex({ Brain: PulseOSBrain });
 
@@ -359,7 +353,7 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
   PulseOSBrain.cortex?.initializeNervousSystem?.();
   PulseOSBrain.cortex?.initializeOrgans?.();
 
-  // Let Evolution observe the boot + scan drift + record lineage
+  // Evolution may observe boot, but is not required
   PulseOSBrain.evolution?.recordLineage?.("brain-cognitive-bootstrap");
   PulseOSBrain.evolution?.scanDrift?.(PulseOSBrain);
 

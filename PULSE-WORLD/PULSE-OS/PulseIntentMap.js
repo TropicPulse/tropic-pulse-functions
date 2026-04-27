@@ -238,5 +238,41 @@ export const PulseIntentMap = {
     scannerReadableOutput: true,        // Scanner must produce human-readable reports.
     scannerNoInternalLeakage: true      // Scanner must not expose internal organs.
 
+  },
+    // ========================================================================
+  // 10. INTENTS — DECLARATIVE, NON‑EVOLVABLE, FOUNDER‑DEFINED
+  //  These define WHAT the organism is allowed to understand.
+  //  They do NOT define behavior. They do NOT define handlers.
+  //  They are static, deterministic, and symbolic‑only.
+  // ========================================================================
+  intents: {
+
+    // ----------------------------------------------------------------------
+    // FILE SCANNING INTENT — symbolic-only cognition
+    // ----------------------------------------------------------------------
+    scanFile: {
+      allowed: true,                 // Organism may understand "scanFile"
+      symbolicOnly: true,            // Intent is symbolic-only
+      backendAllowed: true,          // Backend scanning permitted (filesystem)
+      noMutation: true,              // Scanner cannot mutate files
+      noExecution: true,             // Scanner cannot execute code
+      cognitionLayer: "Cortex",      // Intent resolves through Cortex
+      organ: "PulseFileScanner-v11-Evo",
+      description: "Scan a file and return a symbolic structural analysis."
+    },
+
+    // Optional aliases (all symbolic-only)
+    analyzeFile: {
+      aliasOf: "scanFile",
+      allowed: true,
+      symbolicOnly: true
+    },
+
+    codeScan: {
+      aliasOf: "scanFile",
+      allowed: true,
+      symbolicOnly: true
+    }
   }
+
 };

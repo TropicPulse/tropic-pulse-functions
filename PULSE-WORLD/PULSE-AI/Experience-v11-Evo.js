@@ -1,44 +1,62 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — EXPERIENCE FRAME ORGAN
+//  PULSE OS v11.2‑EVO+ — EXPERIENCE FRAME ORGAN
 //  Conversational Repair • Misalignment Handling • UX Harmonization
 //  PURE FUNCTIONAL ON INPUT/OUTPUT. NO BINARY MUTATION.
 // ============================================================================
 
 export const ExperienceFrameMeta = Object.freeze({
+  type: "Cognitive",
+  subsystem: "aiExperienceFrame",
   layer: "PulseAIExperienceFrame",
   role: "EXPERIENCE_FRAME_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiExperienceFrame-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiExperienceFrame-v11.2-EVO+",
 
-  dualband: true,
-  deterministic: true,
-  safetyAware: true,
-  personalAware: true,
-  overmindAware: true,
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: false,
+    symbolicAware: true,
+    safetyAware: true,
+    personalAware: true,
+    overmindAware: true,
+    readOnly: true,
+    mutationSafe: true,
+    nonBlocking: true,
+    multiInstanceReady: true,
+    epoch: "11.2-EVO+"
+  }),
 
   contract: Object.freeze({
-    purpose: [
+    purpose: Object.freeze([
       "Act as final UX layer after Overmind and SafetyFrame",
       "Repair misalignment, confusion, and frustration when detectable",
       "Harmonize tone with user-level preferences (PersonalFrame)",
       "Expose safe, clear explanations of refusals and constraints",
       "Stabilize conversational experience across personas and organs"
-    ],
-    never: [
+    ]),
+
+    never: Object.freeze([
       "override core safety decisions",
       "bypass Overmind or SafetyFrame",
       "invent permissions or capabilities",
       "mutate binary organs or system state",
       "introduce randomness"
-    ],
-    always: [
+    ]),
+
+    always: Object.freeze([
       "stay deterministic for same inputs",
       "respect safety + persona contracts",
       "defer to SafetyFrame on safety conflicts",
       "defer to PersonalFrame for tone shaping when available",
       "prefer clarity and repair over blame or confusion"
-    ]
-  })
+    ])
+  }),
+
+  boundaryReflex() {
+    return "ExperienceFrame only reshapes UX text — it never changes safety, permissions, or binary state.";
+  }
 });
 
 // ============================================================================
@@ -62,13 +80,10 @@ export class AiExperienceFrame {
     const safetyStatus = meta?.safetyStatus || "ok";
     const worldLens = meta?.worldLens || "consensus";
 
-    // 1) Build an experience state
     const state = this.buildExperienceState({ context, base, meta });
 
-    // 2) Apply repair / clarification if needed
     let repaired = this.applyRepairLogic({ base, state });
 
-    // 3) Apply PersonalFrame tone shaping (if present)
     if (this.personalFrame?.shapeOutput) {
       try {
         const shaped = await this.personalFrame.shapeOutput({
@@ -155,12 +170,10 @@ export class AiExperienceFrame {
   applyRepairLogic({ base, state }) {
     let text = base;
 
-    // 1) If refusal: clarify why, and what is possible instead
     if (state.hasRefusal) {
       text = this.ensureRefusalClarity(text);
     }
 
-    // 2) If ambiguity: add a brief clarifier
     if (state.hasAmbiguity) {
       text = this.appendClarifier(
         text,
@@ -168,7 +181,6 @@ export class AiExperienceFrame {
       );
     }
 
-    // 3) If frustration: acknowledge and orient
     if (state.hasFrustration) {
       text = this.prependAcknowledgement(
         text,
@@ -223,4 +235,16 @@ export function createExperienceFrameOrgan(config = {}) {
       return core.shapeExperience(payload);
     }
   });
+}
+
+// ---------------------------------------------------------------------------
+//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+// ---------------------------------------------------------------------------
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    ExperienceFrameMeta,
+    AiExperienceFrame,
+    createExperienceFrameOrgan
+  };
 }

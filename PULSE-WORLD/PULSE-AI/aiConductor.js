@@ -170,9 +170,11 @@ export {
   createAIConductor
 };
 
+if (typeof module !== "undefined") {
 // CommonJS
 module.exports = {
   ConductorMeta,
   AIConductor,
   createAIConductor
+};
 };

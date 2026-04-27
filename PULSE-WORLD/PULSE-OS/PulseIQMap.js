@@ -35,6 +35,7 @@
 //    • mesh / send / pulse expectations
 //    • dynamic wrapper page expectations
 //    • new v11‑EVO organs: PulseBand, Cleanup, HistoryRepair, Spine
+//    • v11‑EVO cognition: PulseFileScanner / code analysis awareness
 //
 //  IQ IS THE “DESIGN BRAIN” — NOT THE EXECUTION BRAIN.
 // ============================================================================
@@ -95,7 +96,11 @@ const VERSION_MAP = {
 
   // Core memory (design‑only awareness for next pass)
   coreMemory: "v11‑CORE‑MEMORY",
-  coreBinaryMemory: "v11‑CORE‑BINARY"
+  coreBinaryMemory: "v11‑CORE‑BINARY",
+
+  // Cognition / file intelligence (design‑only awareness)
+  fileScanner: "v11‑EVO‑PRIME",       // PulseFileScanner
+  codeAnalyzer: "v11‑EVO‑PRIME"       // PulseCodeAnalyzer (optional)
 };
 
 
@@ -112,6 +117,7 @@ const TOP_LEVEL_ROUTES = {
   settings: "/settings",
   organism: "/organism",
   scanner: "/scanner",
+  scannerFile: "/scanner/file",
   forms: "/forms",
   proxy: "/proxy",
   fallback: "/"
@@ -122,13 +128,14 @@ function inferTopLevelFromPath(path = "") {
 
   const lower = path.toLowerCase();
 
-  if (lower.startsWith("/send"))      return TOP_LEVEL_ROUTES.send;
-  if (lower.startsWith("/earn"))      return TOP_LEVEL_ROUTES.earn;
-  if (lower.startsWith("/settings"))  return TOP_LEVEL_ROUTES.settings;
-  if (lower.startsWith("/organism"))  return TOP_LEVEL_ROUTES.organism;
-  if (lower.startsWith("/scanner"))   return TOP_LEVEL_ROUTES.scanner;
-  if (lower.startsWith("/forms"))     return TOP_LEVEL_ROUTES.forms;
-  if (lower.startsWith("/proxy"))     return TOP_LEVEL_ROUTES.proxy;
+  if (lower.startsWith("/send"))          return TOP_LEVEL_ROUTES.send;
+  if (lower.startsWith("/earn"))          return TOP_LEVEL_ROUTES.earn;
+  if (lower.startsWith("/settings"))      return TOP_LEVEL_ROUTES.settings;
+  if (lower.startsWith("/organism"))      return TOP_LEVEL_ROUTES.organism;
+  if (lower.startsWith("/scanner/file"))  return TOP_LEVEL_ROUTES.scannerFile;
+  if (lower.startsWith("/scanner"))       return TOP_LEVEL_ROUTES.scanner;
+  if (lower.startsWith("/forms"))         return TOP_LEVEL_ROUTES.forms;
+  if (lower.startsWith("/proxy"))         return TOP_LEVEL_ROUTES.proxy;
   if (lower.startsWith("/dash") || lower.startsWith("/home"))
     return TOP_LEVEL_ROUTES.dashboard;
 
@@ -157,7 +164,7 @@ export const PulseIQMap = {
 
   // -------------------------------------------------------------------------
   // ORGANISM EXPECTATIONS (TEXT‑ONLY)
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
   organs: {
     // Core OS
     kernel: ["PulseKernel"],
@@ -261,6 +268,12 @@ export const PulseIQMap = {
       "BinaryLoopScanner"
     ],
 
+    // NEW: Cognition / file intelligence (TEXT‑ONLY expectations)
+    fileScanner: [
+      "PulseFileScanner",         // symbolic-only file cognition organ
+      "PulseCodeAnalyzer"         // optional analyzer (design‑only awareness)
+    ],
+
     archetypes: [
       "BinaryDoctor",
       "BinaryCommunicator",
@@ -347,6 +360,12 @@ export const PulseIQMap = {
       "PulseEvolutionaryPage"
     ],
 
+    // NEW: File scanner / code diagnostics view
+    "/scanner/file": [
+      "PulseFileScanner",
+      "PulseEvolutionaryPage"
+    ],
+
     // Proxy / backend observability (front‑of‑house views)
     "/proxy": [
       "PulseProxySpine",
@@ -382,12 +401,17 @@ export const PulseIQMap = {
       "PulseOSHealer",
       "GlobalHealer",
       "PulseProxyHealer"
+    ],
+    // design-only awareness of scanner-related drift
+    scannerOrgans: [
+      "PulseFileScanner",
+      "PulseCodeAnalyzer"
     ]
   },
 
   // -------------------------------------------------------------------------
   // ROUTING HELPERS (TEXT‑ONLY)
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
   topLevelRoutes: TOP_LEVEL_ROUTES,
 
   getTopLevelRouteFor(path) {

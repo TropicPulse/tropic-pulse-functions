@@ -153,9 +153,11 @@ export {
   createAIBinaryHeartbeat
 };
 
+if (typeof module !== "undefined") {
 // CommonJS
 module.exports = {
   HeartbeatMeta,
   AIBinaryHeartbeat,
   createAIBinaryHeartbeat
+};
 };

@@ -1,13 +1,13 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — AI SERVICE GATEWAY
+//  PULSE OS v11.2‑EVO — AI SERVICE GATEWAY
 //  Dual‑Band Entry Point • Safe Relay • Deterministic Execution
 //  PURE RELAY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 export const ServiceGatewayMeta = Object.freeze({
   layer: "PulseAIServiceGateway",
   role: "SERVICE_GATEWAY_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiServiceGateway-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiServiceGateway-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -21,8 +21,12 @@ export const ServiceGatewayMeta = Object.freeze({
     lineageAware: true,
     slowdownAware: true,
     tourismAware: true,
+    permissionAware: true,
+    routerAware: true,
+    overmindAware: true,
+    readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -55,10 +59,16 @@ export const ServiceGatewayMeta = Object.freeze({
 });
 
 import { runAI } from "./aiEngine-v11-Evo.js";
-import { analyzeFirestoreDoc, analyzeSQLSchema, detectDrift, detectSlowdownPatterns, validatePulseSchema } from "./aiTools.js";
+import {
+  analyzeFirestoreDoc,
+  analyzeSQLSchema,
+  detectDrift,
+  detectSlowdownPatterns,
+  validatePulseSchema
+} from "./aiTools.js";
 
 // ---------------------------------------------------------------------------
-// INTERNAL — Deterministic Relay Wrapper (v11‑EVO)
+// INTERNAL — Deterministic Relay Wrapper (v11.2‑EVO)
 // ---------------------------------------------------------------------------
 function callAI(intent, flags, operation, request = {}, dualBand = null) {
   return runAI(
@@ -262,4 +272,24 @@ export async function runTourGuideQuery(query, request = {}, dualBand = null) {
     request,
     dualBand
   );
+}
+
+// ============================================================================
+// DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    ServiceGatewayMeta,
+    runAnalyzeFirestore,
+    runAnalyzeSQL,
+    runDetectDrift,
+    runValidatePulse,
+    runFullAudit,
+    runAnalyzeRoutes,
+    runAnalyzeLogs,
+    runAnalyzeErrors,
+    runExplainOrgan,
+    runExplainPathway,
+    runTourGuideQuery
+  };
 }

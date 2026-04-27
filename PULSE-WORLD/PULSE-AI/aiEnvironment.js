@@ -1,12 +1,13 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ENVIRONMENT ORGAN
+//  PULSE OS v11‑EVO — ENVIRONMENT ORGAN (FINAL UPGRADE)
 //  World State • Internal Flags • Drift Awareness • Dual‑Band Logging
 //  PURE READ‑ONLY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
+
 export const EnvironmentMeta = Object.freeze({
   layer: "PulseAIEnvironmentFrame",
   role: "ENVIRONMENT_ORGAN",
-  version: "11.0-EVO",
+  version: "11.1-EVO",
   identity: "aiEnvironment-v11-EVO",
 
   evo: Object.freeze({
@@ -18,6 +19,7 @@ export const EnvironmentMeta = Object.freeze({
     anomalyAware: true,
     environmentAware: true,
     evolutionAware: true,
+    packetAware: true,          // ⭐ NEW
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
@@ -120,7 +122,7 @@ export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
 
   // --------------------------------------------------------------------------
   // PUBLIC API — Environment Insight (Dual‑Band + Logging)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   return Object.freeze({
 
     // ----------------------------------------------------------------------
@@ -247,4 +249,20 @@ export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
       return evolutionAPI.analyzeRoute(context, "environment");
     }
   });
+}
+
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+export {
+  EnvironmentMeta,
+  createEnvironmentAPI
+};
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    EnvironmentMeta,
+    createEnvironmentAPI
+  };
 }

@@ -521,18 +521,22 @@ function createCortex(config) {
   return new AIDualBandCortex(config);
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
+// ============================================================================
 
 // ESM
 export {
   CortexMeta,
-  AIDualBandCortex
+  AIDualBandCortex,
+  createCortex
 };
 
 // CommonJS
-module.exports = {
-  CortexMeta,
-  AIDualBandCortex
-};
+if (typeof module !== "undefined") {
+  module.exports = {
+    CortexMeta,
+    AIDualBandCortex,
+    createCortex
+  };
+}

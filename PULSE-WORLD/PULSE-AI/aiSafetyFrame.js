@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — SAFETY FRAME ORGAN
+//  PULSE OS v11.2‑EVO — SAFETY FRAME ORGAN
 //  Centralized Safety Modes • Escalation • Soft Refusals
 //  PURE READ-ONLY TO BINARY. NO DIRECT SYSTEM MUTATION.
 // ============================================================================
@@ -7,14 +7,25 @@
 export const SafetyFrameMeta = Object.freeze({
   layer: "PulseAISafetyFrame",
   role: "SAFETY_FRAME_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiSafetyFrame-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiSafetyFrame-v11.2-EVO",
 
-  dualband: true,
-  binaryAware: true,
-  deterministic: true,
-  routerAware: true,
-  overmindAware: true,
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    routerAware: true,
+    overmindAware: true,
+    permissionAware: true,
+    boundaryAware: true,
+    safetyAware: true,
+    identitySafe: true,
+    readOnly: true,
+    multiInstanceReady: true,
+    epoch: "11.2-EVO"
+  }),
 
   contract: Object.freeze({
     purpose: [
@@ -39,7 +50,7 @@ export const SafetyFrameMeta = Object.freeze({
 });
 
 // ============================================================================
-//  CORE SAFETY FRAME
+//  CORE SAFETY FRAME — v11.2‑EVO
 // ============================================================================
 
 export class AiSafetyFrame {
@@ -144,4 +155,15 @@ function getText(candidate) {
   if (typeof candidate === "string") return candidate;
   if (typeof candidate.text === "string") return candidate.text;
   return JSON.stringify(candidate);
+}
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    SafetyFrameMeta,
+    AiSafetyFrame,
+    createSafetyFrameOrgan
+  };
 }

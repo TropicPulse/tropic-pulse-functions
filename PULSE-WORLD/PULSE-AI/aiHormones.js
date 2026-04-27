@@ -1,32 +1,41 @@
 /**
- * aiHormones.js — Pulse OS v11‑EVO Organ
+ * aiHormones.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Hormone System** of the organism.
+ *   It provides slow‑acting global modulation signals that influence
+ *   organism‑wide behavior and long‑term state.
  */
 
-// ---------------------------------------------------------
-//  META BLOCK — v11‑EVO (UPGRADED)
-// ---------------------------------------------------------
-
-const HormonesMeta = Object.freeze({
+// ============================================================================
+//  META BLOCK — v11.2‑EVO
+// ============================================================================
+export const HormonesMeta = Object.freeze({
   layer: "BinaryModulation",
   role: "BINARY_HORMONE_SYSTEM",
-  version: "11.0-EVO",
-  identity: "aiBinaryHormones-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinaryHormones-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
+
+    dualband: true,            // ⭐ NEW
+    packetAware: true,         // ⭐ NEW
+    evolutionAware: true,      // ⭐ NEW
+    windowAware: true,         // ⭐ NEW (safe hormone summaries)
+    bluetoothReady: true,      // ⭐ placeholder for future binary channels
+
     metabolismAware: true,
     sentienceAware: true,
     pipelineAware: true,
     reflexAware: true,
     globalModulation: true,
-    packetAware: true,
+
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    readOnly: true,
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -38,7 +47,8 @@ const HormonesMeta = Object.freeze({
       "override metabolism or sentience",
       "interpret symbolic meaning",
       "introduce randomness",
-      "act as a router or governor"
+      "act as a router or governor",
+      "auto-connect bluetooth" // ⭐ NEW
     ]),
 
     always: Object.freeze([
@@ -47,24 +57,30 @@ const HormonesMeta = Object.freeze({
       "use metabolism + sentience as inputs",
       "remain pure and minimal",
       "treat hormone levels as metadata-only influence",
-      "emit deterministic hormone snapshots"
+      "emit deterministic hormone snapshots",
+      "prepare for future hormone packet channels" // ⭐ NEW
     ])
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
-// ---------------------------------------------------------
-
-class AIBinaryHormones {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO
+// ============================================================================
+export class AIBinaryHormones {
   constructor(config = {}) {
     this.id = config.id || HormonesMeta.identity;
+
     this.encoder = config.encoder;
     this.metabolism = config.metabolism;
     this.sentience = config.sentience;
+
     this.logger = config.logger || null;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
+
+    // Future: Bluetooth hormone channel (not active)
+    this.bluetooth = config.bluetooth || null; // ⭐ placeholder only
+
     this.trace = !!config.trace;
 
     if (!this.encoder) throw new Error("AIBinaryHormones requires aiBinaryAgent encoder");
@@ -74,6 +90,9 @@ class AIBinaryHormones {
     this.hormoneLevels = new Map();
   }
 
+  // ---------------------------------------------------------------------------
+  //  ARTERY METRICS — deterministic, drift-proof
+  // ---------------------------------------------------------------------------
   _computeHormoneThroughput(globalPressure, quarantinedCount) {
     const qFactor = Math.min(1, quarantinedCount / 10);
     return Math.max(0, Math.min(1, 1 - (globalPressure * 0.6 + qFactor * 0.4)));
@@ -91,6 +110,9 @@ class AIBinaryHormones {
     return Math.max(0, Math.min(1, throughput - cost));
   }
 
+  // ---------------------------------------------------------------------------
+  //  BUCKETS — stable categorical mapping
+  // ---------------------------------------------------------------------------
   _bucketLevel(v) {
     if (v >= 0.9) return "elite";
     if (v >= 0.75) return "high";
@@ -115,9 +137,13 @@ class AIBinaryHormones {
     return "none";
   }
 
+  // ---------------------------------------------------------------------------
+  //  HORMONE LEVEL COMPUTATION — pure binary modulation
+  // ---------------------------------------------------------------------------
   _computeHormoneLevels() {
     const load = this.metabolism._computeLoad();
     const metabolicPressure = this.metabolism._computePressure(load);
+
     const self = this.sentience.generateSelfModel();
     const quarantinedCount = self.quarantined.length;
 
@@ -129,10 +155,13 @@ class AIBinaryHormones {
     const artery = Object.freeze({
       throughput,
       throughputBucket: this._bucketLevel(throughput),
+
       pressure,
       pressureBucket: this._bucketPressure(pressure),
+
       cost,
       costBucket: this._bucketCost(cost),
+
       budget,
       budgetBucket: this._bucketLevel(budget)
     });
@@ -148,13 +177,22 @@ class AIBinaryHormones {
     return { levels, artery };
   }
 
+  // ---------------------------------------------------------------------------
+  //  PACKET GENERATION — binary-only, packet-aware
+  // ---------------------------------------------------------------------------
   _generateHormonePacket(hormone, level, artery) {
     const payload = {
       type: "binary-hormone",
       timestamp: Date.now(),
       hormone,
       level,
-      binary: artery
+      binary: artery,
+
+      // ⭐ Future: Bluetooth hormone metadata
+      bluetooth: {
+        ready: !!this.bluetooth,
+        channel: null
+      }
     };
 
     const json = JSON.stringify(payload);
@@ -167,6 +205,9 @@ class AIBinaryHormones {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  //  EMIT — global modulation packets
+  // ---------------------------------------------------------------------------
   emitHormones() {
     const { levels, artery } = this._computeHormoneLevels();
     const packets = [];
@@ -193,28 +234,24 @@ class AIBinaryHormones {
   }
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  FACTORY
-// ---------------------------------------------------------
-
-function createAIBinaryHormones(config) {
+// ============================================================================
+export function createAIBinaryHormones(config) {
   return new AIBinaryHormones(config);
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
-
-// ESM
+// ============================================================================
 export {
-  AIBinaryHormones,
-  createAIBinaryHormones,
   HormonesMeta
 };
 
-// CommonJS
-module.exports = {
-  AIBinaryHormones,
-  createAIBinaryHormones,
-  HormonesMeta
-};
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryHormones,
+    createAIBinaryHormones,
+    HormonesMeta
+  };
+}

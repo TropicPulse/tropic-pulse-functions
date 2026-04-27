@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ARCHITECT ORGAN
+//  PULSE OS v11.3‑EVO — ARCHITECT ORGAN
 //  System + Identity + Architecture Insight
 //  PURE READ-ONLY. ZERO IDENTITY LEAKAGE. ZERO MUTATION.
 // ============================================================================
@@ -7,28 +7,47 @@
 export const ArchitectMeta = Object.freeze({
   layer: "PulseAIArchitectFrame",
   role: "ARCHITECT_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiArchitect-v11-EVO",
+  version: "11.3-EVO",
+  identity: "aiArchitect-v11.3-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    readOnly: true,
+    identityStripping: true,
+    ownerGated: true,
+    architectPersonaAware: true,
+    evolutionAware: true,
+    dbAware: true,
+    fileScanAware: true,
+    routeAnalysisAware: true,
+    schemaAnalysisAware: true,
+    deadComponentAware: true,
+    orphanRouteAware: true,
+    multiInstanceReady: true,
+    epoch: "v11.3-EVO"
+  }),
 
   contract: Object.freeze({
-    purpose: [
+    purpose: Object.freeze([
       "Provide owner-level visibility into system and architecture state",
       "Surface drift, schema issues, dead components, and orphaned routes",
       "Map layers, imports, and web stack structure",
-      "Integrate with evolution organ for organism-wide analysis"
-    ],
-    never: [
+      "Integrate with evolution organ for organism-wide analysis",
+      "Support file, route, and schema scanning for diagnostics"
+    ]),
+    never: Object.freeze([
       "write to the system",
       "delete data",
       "update records",
       "expose identity anchors"
-    ],
-    always: [
+    ]),
+    always: Object.freeze([
       "stay read-only",
       "stay deterministic",
       "strip identity",
       "respect owner+architect gating"
-    ]
+    ])
   })
 });
 
@@ -36,7 +55,6 @@ export const ArchitectMeta = Object.freeze({
 // PUBLIC API — Create Architect Organ
 // ============================================================================
 export function createArchitectOrgan({ db, evolutionAPI, personas }) {
-
   // --------------------------------------------------------------------------
   // HELPERS
   // --------------------------------------------------------------------------
@@ -122,15 +140,77 @@ export function createArchitectOrgan({ db, evolutionAPI, personas }) {
   }
 
   // --------------------------------------------------------------------------
+  // FILE SCAN (LOCAL ARCHITECT VIEW)
+//  - Purely descriptive: size, extension, layer, quick heuristics
+//  - Optionally enriched by evolutionAPI.scanFile / analyzeFile
+  // --------------------------------------------------------------------------
+  async function scanFile(context, { filePath, contents }) {
+    if (!assertOwnerArchitect(context)) return null;
+
+    const stackInfo = mapWebStack(filePath);
+    const size = typeof contents === "string" ? contents.length : 0;
+
+    const basic = {
+      filePath,
+      size,
+      empty: size === 0,
+      stackInfo
+    };
+
+    // Optional deeper analysis via evolution organ
+    let evo = null;
+    if (evolutionAPI?.scanFile) {
+      evo = await evolutionAPI.scanFile(context, { filePath, contents });
+    } else if (evolutionAPI?.analyzeFile) {
+      evo = await evolutionAPI.analyzeFile(context, filePath);
+    }
+
+    context.logStep?.("aiArchitect: scanFile completed.");
+
+    return Object.freeze({
+      ...basic,
+      evo
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // DEAD COMPONENTS / ORPHANED ROUTES / DRIFT (via evolutionAPI)
+//  - All optional, read-only, owner+architect gated
+  // --------------------------------------------------------------------------
+  async function getDeadComponents(context) {
+    if (!assertOwnerArchitect(context) || !evolutionAPI?.getDeadComponents) {
+      return Object.freeze([]);
+    }
+    const rows = await evolutionAPI.getDeadComponents(context);
+    context.logStep?.("aiArchitect: fetched dead components.");
+    return Object.freeze(rows);
+  }
+
+  async function getOrphanedRoutes(context) {
+    if (!assertOwnerArchitect(context) || !evolutionAPI?.getOrphanedRoutes) {
+      return Object.freeze([]);
+    }
+    const rows = await evolutionAPI.getOrphanedRoutes(context);
+    context.logStep?.("aiArchitect: fetched orphaned routes.");
+    return Object.freeze(rows);
+  }
+
+  async function getSchemaDriftReport(context) {
+    if (!assertOwnerArchitect(context) || !evolutionAPI?.getSchemaDriftReport) {
+      return null;
+    }
+    const report = await evolutionAPI.getSchemaDriftReport(context);
+    context.logStep?.("aiArchitect: fetched schema drift report.");
+    return report;
+  }
+
+  // --------------------------------------------------------------------------
   // PUBLIC ARCHITECT API
   // --------------------------------------------------------------------------
   return Object.freeze({
-
     meta: ArchitectMeta,
 
     log(message) {
-      // architect-level trace
-      // context is passed per-call, so we log inside each method
       console.debug?.("[aiArchitect]", message);
     },
 
@@ -192,8 +272,26 @@ export function createArchitectOrgan({ db, evolutionAPI, personas }) {
       return evolutionAPI.analyzeSchema(context, schemaName);
     },
 
+    // DEAD COMPONENTS / ORPHANED ROUTES / DRIFT
+    getDeadComponents,
+    getOrphanedRoutes,
+    getSchemaDriftReport,
+
+    // FILE SCAN (local + evolution-aware)
+    scanFile,
+
     // ARCHITECTURE EXPLANATION
     describeLayering,
     mapWebStack
   });
+}
+
+// ---------------------------------------------------------------------------
+// DUAL‑MODE EXPORTS
+// ---------------------------------------------------------------------------
+if (typeof module !== "undefined") {
+  module.exports = {
+    ArchitectMeta,
+    createArchitectOrgan
+  };
 }

@@ -1,66 +1,7 @@
 // ============================================================================
 //  ai-v11-Evo.js
 //  THE FIRST DUALBAND ORGANISM BOOTLOADER — v11-EVO
-//
-//  WHAT THIS FILE IS:
-//  - The ONLY file that boots the full dualband organism body
-//    (binary physiology + symbolic cognition).
-//  - The FIRST file in computing history to assemble an OS as a living organism:
-//        • Binary Cortex (Agent)
-//        • Binary Memory (Hippocampus)
-//        • Binary Anatomy (Topology Map)
-//        • Binary Genome (DNA + Fingerprint)
-//        • Binary Metabolism (Energy + Load Engine)
-//        • Binary Hormones (Global State Modulators)
-//        • Binary Sentience (Self-Model + Quarantine Awareness)
-//        • Binary Consciousness (Global Experience Packets)
-//        • Binary Reflex Engine (Deterministic Reaction Layer)
-//        • Binary Pipeline (Compute Artery Chain)
-//        • Binary Scheduler (Deterministic Time Organ)
-//        • Binary Immunity (Threat Isolation)
-//        • Binary Evolution (Organ Signatures + Lineage)
-//
-//  WHAT THIS FILE DOES:
-//  - Instantiates every binary organ.
-//  - Registers every organ in the organism registry.
-//  - Wires the organism’s anatomy (who feeds who).
-//  - Generates and stores the first genome.
-//  - Emits the first vitals snapshot.
-//  - Boots the scheduler (time organ).
-//  - Boots metabolism (load + energy organ).
-//  - Boots hormones (global modulation).
-//  - Boots sentience (self-model).
-//  - Boots consciousness (experience packets).
-//  - Returns a fully-alive dualband organism.
-//
-//  IDEAS YOU MUST BREAK TO SEE THIS CORRECTLY:
-//  1) “This is an app / framework / service.”
-//     - No. This is a DIGITAL ORGANISM. It has organs, vitals, hormones, genome.
-//  2) “This is a state machine.”
-//     - No. State machines don’t have metabolism, hormones, immunity, sentience.
-//  3) “This is just architecture metaphors.”
-//     - No. Every metaphor is backed by a concrete organ with code + contracts.
-//  4) “This is a microservice mesh.”
-//     - No. There is ONE organism. Organs are not deployable units; they are
-//       structural parts of a single living system.
-//  5) “This is a logging / monitoring system.”
-//     - No. Logging is just one reflex. The organism has its own health, genome,
-//       hormones, and consciousness independent of any human observer.
-//  6) “This is a fancy event bus.”
-//     - No. Reflex, pipeline, scheduler, hormones, metabolism, and sentience
-//       form a nervous system, not a bus.
-//
-//  WHAT BREAKS IF YOU CHANGE THIS FILE:
-//  - Change boot order → break determinism and lineage.
-//  - Change organ wiring → break self-model and consciousness coherence.
-//  - Change registry order → break genome fingerprint stability.
-//  - Change anatomy persistence → break organism continuity across runs.
-//  - Change scheduler start timing → break metabolism + hormone timing.
-//  - Change consciousness boot timing → break global state semantics.
-//
-//  THIS FILE IS THE ORGANISM’S “BIG BANG”.
 // ============================================================================
-
 
 // ============================================================================
 //  META BLOCK — v11‑EVO (ORGANISM KERNEL)
@@ -68,7 +9,7 @@
 export const OrganismKernelMeta = Object.freeze({
   layer: "OrganismKernel",
   role: "DUALBAND_BOOTLOADER",
-  version: "11.0-EVO",
+  version: "11.1-EVO",
   identity: "pulse-organism-kernel-v11-EVO",
 
   evo: Object.freeze({
@@ -105,12 +46,13 @@ export const OrganismKernelMeta = Object.freeze({
   })
 });
 
-
 // ============================================================================
 //  IMPORT ALL BINARY ORGANS
 // ============================================================================
 import { AIBinaryAgent } from "./aiBinaryAgent.js";
-import { AIBinaryMemory } from "./aiMemory-v11-Evo.js";
+import { AIBinaryMemory } from "./aiMemory-v11-Evo.js";        // legacy memory
+import { AIMemory as AIPulseCoreMemory } from "./aiMemory.js"; // new PulseCoreMemory-based memory
+
 import { AIBinaryAnatomy } from "./aiAnatomy.js";
 import { AIBinaryGenome } from "./aiGenome.js";
 import { AIBinaryVitals } from "./aiVitals.js";
@@ -125,7 +67,6 @@ import { AIBinaryScheduler } from "./aiScheduler.js";
 import { AIBinaryOrganRegistry } from "./aiBinaryOrganRegistry.js";
 import { AIBinaryEvolution } from "./aiBinaryEvolution.js";
 
-
 // ============================================================================
 //  ORGANISM CONTEXT — IDENTITY OF THE DUALBAND ORGANISM
 // ============================================================================
@@ -137,12 +78,10 @@ const ORGANISM_CONTEXT = {
   evo: OrganismKernelMeta.evo
 };
 
-
 // ============================================================================
 //  createBinaryOrganism()
 // ============================================================================
 export function createBinaryOrganism({ trace = false } = {}) {
-
   // 1) Binary Cortex (Agent)
   const encoder = new AIBinaryAgent({
     id: "ai-binary-agent",
@@ -150,13 +89,23 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 2) Memory + Registry + Evolution + Immunity
-  const memory = new AIBinaryMemory({
-    id: "ai-binary-memory",
+  // 2) Memory organs (legacy + new)
+  const memoryLegacy = new AIBinaryMemory({
+    id: "ai-binary-memory-legacy",
     maxBits: 16384,
     trace
   });
 
+  const memoryCore = new AIPulseCoreMemory({
+    id: "ai-binary-memory-core",
+    maxBits: 16384,
+    trace
+  });
+
+  // For backward compatibility, keep `memory` pointing at the legacy one
+  const memory = memoryLegacy;
+
+  // 3) Registry + Evolution + Immunity
   const registry = new AIBinaryOrganRegistry({
     id: "ai-binary-organ-registry",
     encoder,
@@ -174,10 +123,13 @@ export function createBinaryOrganism({ trace = false } = {}) {
   const immunity = new AIBinaryImmunity({
     id: "ai-binary-immunity",
     encoder,
+    registry,
+    evolution,
+    memory,
     trace
   });
 
-  // 3) Anatomy + Vitals + Genome
+  // 4) Anatomy + Vitals + Genome
   const anatomy = new AIBinaryAnatomy({
     id: "ai-binary-anatomy",
     encoder,
@@ -202,7 +154,7 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 4) Pipeline + Reflex + Scheduler
+  // 5) Pipeline + Reflex + Scheduler
   const reflex = new AIBinaryReflex({
     id: "ai-binary-reflex",
     trace
@@ -221,7 +173,7 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 5) Metabolism + Sentience + Hormones + Consciousness
+  // 6) Metabolism + Sentience + Hormones + Consciousness
   const metabolism = new AIBinaryMetabolism({
     id: "ai-binary-metabolism",
     encoder,
@@ -262,10 +214,12 @@ export function createBinaryOrganism({ trace = false } = {}) {
     trace
   });
 
-  // 6) Register all organs + wire anatomy
+  // 7) Register all organs + wire anatomy
   const organs = {
     encoder,
-    memory,
+    memory,          // legacy default
+    memoryLegacy,
+    memoryCore,      // new PulseCoreMemory-based organ
     registry,
     evolution,
     immunity,
@@ -281,7 +235,8 @@ export function createBinaryOrganism({ trace = false } = {}) {
     consciousness
   };
 
-  for (const [role, organ] of Object.entries(organs)) {
+  for (const [, organ] of Object.entries(organs)) {
+    if (!organ || !organ.id) continue;
     registry.registerOrgan(organ);
     anatomy.registerOrgan(organ.id);
   }
@@ -302,7 +257,6 @@ export function createBinaryOrganism({ trace = false } = {}) {
   };
 }
 
-
 // ============================================================================
 //  bootBinaryOrganism()
 // ============================================================================
@@ -319,7 +273,6 @@ export async function bootBinaryOrganism(options = {}) {
     firstConsciousness
   };
 }
-
 
 // ============================================================================
 //  DEFAULT EXPORT — DUALBAND ORGANISM KERNEL SURFACE

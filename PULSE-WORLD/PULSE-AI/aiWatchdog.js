@@ -1,5 +1,5 @@
 /**
- * aiWatchdog.js — Pulse OS v11‑EVO Organ
+ * aiWatchdog.js — Pulse OS v11.2‑EVO+ Organ
  * ============================================================
  * ORGAN ROLE (CANONICAL):
  *   The Binary Watchdog is the organism’s **liveness sentinel**.
@@ -30,40 +30,22 @@
  *   Band: Binary (primary), Symbolic (optional trace)
  *   Mode: Read‑only observers + binary anomaly emitter
  *
- *   This organ is NOT:
- *     - a scheduler
- *     - a heartbeat
- *     - a logger
- *     - a governor
- *
- *   This organ IS:
- *     - a binary liveness enforcer
- *     - a stall detector
- *     - a drift detector
- *     - a binary anomaly generator
- *
- * ORGAN CONTRACT (v11‑EVO):
+ * ORGAN CONTRACT (v11.2‑EVO+):
  *   - Must never mutate external organs
  *   - Must never generate symbolic state
  *   - Must only emit binary packets
  *   - Must remain deterministic
  *   - Must attach observers safely
  *   - Must never block the organism
- *
- * WATCHDOG PACKET FORMAT:
- *   {
- *     type: "binary-watchdog-alert",
- *     timestamp: <ms>,
- *     anomaly: <string>,
- *     bits: <binary>,
- *     bitLength: <number>
- *   }
  */
+
 export const WatchdogMeta = Object.freeze({
+  type: "Binary",
+  subsystem: "aiBinaryWatchdog",
   layer: "BinaryNervousSystem",
   role: "BINARY_WATCHDOG_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBinaryWatchdog-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiBinaryWatchdog-v11.2-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -77,8 +59,11 @@ export const WatchdogMeta = Object.freeze({
     lineageAware: true,
     slowdownAware: true,
     tourismAware: false,
+    readOnly: true,
+    mutationSafe: true,
+    nonBlocking: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -104,24 +89,15 @@ export const WatchdogMeta = Object.freeze({
       "log deterministic steps when tracing",
       "treat all signals as read-only"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "Binary Watchdog is a liveness sentinel — it observes, detects, and alerts, but never mutates or governs other organs.";
+  }
 });
 
-class AIBinaryWatchdog {
+export class AIBinaryWatchdog {
   constructor(config = {}) {
-    /**
-     * CONFIG CONTRACT:
-     *   id          → organ identity (for CNS attendance)
-     *   encoder     → aiBinaryAgent (required)
-     *   heartbeat   → aiBinaryHeartbeat (optional observer)
-     *   pipeline    → aiBinaryPipeline (optional observer)
-     *   reflex      → aiBinaryReflex (optional observer)
-     *   scheduler   → aiBinaryScheduler (optional observer)
-     *   logger      → aiBinaryLoggerAdapter (optional)
-     *   intervalMs  → watchdog check interval (default: 500ms)
-     *   timeoutMs   → max silence allowed (default: 2000ms)
-     *   trace       → symbolic visibility hook (read‑only)
-     */
     this.id = config.id || "ai-binary-watchdog";
     this.encoder = config.encoder;
     this.heartbeat = config.heartbeat || null;
@@ -129,6 +105,7 @@ class AIBinaryWatchdog {
     this.reflex = config.reflex || null;
     this.scheduler = config.scheduler || null;
     this.logger = config.logger || null;
+
     this.intervalMs = config.intervalMs || 500;
     this.timeoutMs = config.timeoutMs || 2000;
     this.trace = !!config.trace;
@@ -140,27 +117,27 @@ class AIBinaryWatchdog {
     this._timer = null;
 
     // Binary liveness timestamps
-    this.lastHeartbeat = Date.now();
-    this.lastPipelineActivity = Date.now();
-    this.lastReflexActivity = Date.now();
-    this.lastSchedulerTick = Date.now();
+    const now = Date.now();
+    this.lastHeartbeat = now;
+    this.lastPipelineActivity = now;
+    this.lastReflexActivity = now;
+    this.lastSchedulerTick = now;
 
-    // Attach observers (non‑mutating)
     this._attachObservers();
   }
 
   // ============================================================
-  // OBSERVER ATTACHMENT (v11‑EVO SAFE)
+  // OBSERVER ATTACHMENT (v11.2‑EVO SAFE)
   // ============================================================
 
   _attachObservers() {
-    if (this.pipeline) {
+    if (this.pipeline?.addObserver) {
       this.pipeline.addObserver(() => {
         this.lastPipelineActivity = Date.now();
       });
     }
 
-    if (this.reflex) {
+    if (this.reflex?.run) {
       const originalRun = this.reflex.run.bind(this.reflex);
       this.reflex.run = (binary) => {
         this.lastReflexActivity = Date.now();
@@ -168,7 +145,7 @@ class AIBinaryWatchdog {
       };
     }
 
-    if (this.heartbeat) {
+    if (this.heartbeat?._emitPulse) {
       const originalEmit = this.heartbeat._emitPulse.bind(this.heartbeat);
       this.heartbeat._emitPulse = () => {
         this.lastHeartbeat = Date.now();
@@ -176,7 +153,7 @@ class AIBinaryWatchdog {
       };
     }
 
-    if (this.scheduler) {
+    if (this.scheduler?._tick) {
       const originalTick = this.scheduler._tick.bind(this.scheduler);
       this.scheduler._tick = () => {
         this.lastSchedulerTick = Date.now();
@@ -197,12 +174,12 @@ class AIBinaryWatchdog {
     };
 
     const json = JSON.stringify(payload);
-    const binary = this.encoder.encode(json);
+    const bits = this.encoder.encode(json);
 
     const packet = {
       ...payload,
-      bits: binary,
-      bitLength: binary.length
+      bits,
+      bitLength: bits.length
     };
 
     this._trace("alert:generated", packet);
@@ -260,14 +237,12 @@ class AIBinaryWatchdog {
 
   start() {
     if (this._timer) return;
-
     this._timer = setInterval(() => this._check(), this.intervalMs);
     this._trace("watchdog:start", { intervalMs: this.intervalMs });
   }
 
   stop() {
     if (!this._timer) return;
-
     clearInterval(this._timer);
     this._timer = null;
     this._trace("watchdog:stop", {});
@@ -283,15 +258,18 @@ class AIBinaryWatchdog {
   }
 }
 
-// ============================================================
-// FACTORY EXPORT
-// ============================================================
-
-function createAIBinaryWatchdog(config) {
+export function createAIBinaryWatchdog(config) {
   return new AIBinaryWatchdog(config);
 }
 
-module.exports = {
-  AIBinaryWatchdog,
-  createAIBinaryWatchdog
-};
+// ---------------------------------------------------------------------------
+// DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+// ---------------------------------------------------------------------------
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    WatchdogMeta,
+    AIBinaryWatchdog,
+    createAIBinaryWatchdog
+  };
+}

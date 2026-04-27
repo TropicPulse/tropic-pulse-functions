@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ENTREPRENEUR ORGAN
+//  PULSE OS v11‑EVO — ENTREPRENEUR ORGAN (FINAL UPGRADE)
 //  Strategy Mapper • Experiment Designer • Risk Surface Analyzer
 //  PURE STRATEGY. ZERO PROMISES. ZERO OUTCOME CLAIMS.
 // ============================================================================
@@ -7,7 +7,7 @@
 export const EntrepreneurMeta = Object.freeze({
   layer: "PulseAIStrategyFrame",
   role: "ENTREPRENEUR_ORGAN",
-  version: "11.0-EVO",
+  version: "11.1-EVO",
   identity: "aiEntrepreneur-v11-EVO",
 
   evo: Object.freeze({
@@ -19,6 +19,7 @@ export const EntrepreneurMeta = Object.freeze({
     strategyAware: true,
     riskAware: true,
     experimentAware: true,
+    packetAware: true,          // ⭐ NEW
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
@@ -27,11 +28,13 @@ export const EntrepreneurMeta = Object.freeze({
 
   contract: Object.freeze({
     purpose: "Turn ideas into models, risks, experiments, and next steps.",
+
     never: Object.freeze([
       "promise outcomes",
       "give investment advice",
       "guarantee success"
     ]),
+
     always: Object.freeze([
       "frame experiments",
       "identify risks",
@@ -53,11 +56,12 @@ export const EntrepreneurMeta = Object.freeze({
 // PUBLIC API — Create Entrepreneur Organ
 // ============================================================================
 export function createEntrepreneurOrgan(context) {
+
   // --------------------------------------------------------------------------
   // STRATEGY MODEL BUILDER
   // --------------------------------------------------------------------------
   function buildModel(idea) {
-    return {
+    return Object.freeze({
       type: "strategy-model",
       idea,
       components: [
@@ -71,14 +75,14 @@ export function createEntrepreneurOrgan(context) {
       message:
         `Strategy model generated for idea: ${idea}. ` +
         `This is a conceptual map, not a prediction.`
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
   // RISK SURFACE ANALYZER
   // --------------------------------------------------------------------------
   function analyzeRisks(idea) {
-    return {
+    return Object.freeze({
       type: "risk-surface",
       idea,
       risks: [
@@ -91,14 +95,14 @@ export function createEntrepreneurOrgan(context) {
       message:
         `Risk surface mapped for idea: ${idea}. ` +
         `Use this to design reversible tests.`
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
   // REVERSIBLE EXPERIMENT DESIGNER
   // --------------------------------------------------------------------------
   function designExperiment(idea) {
-    return {
+    return Object.freeze({
       type: "experiment-design",
       idea,
       steps: [
@@ -111,14 +115,14 @@ export function createEntrepreneurOrgan(context) {
       message:
         `Reversible experiment designed for idea: ${idea}. ` +
         `No commitments, no promises — just learning.`
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
   // NEXT-STEP SUGGESTER
   // --------------------------------------------------------------------------
   function nextSteps(idea) {
-    return {
+    return Object.freeze({
       type: "next-steps",
       idea,
       suggestions: [
@@ -131,7 +135,7 @@ export function createEntrepreneurOrgan(context) {
       message:
         `Next steps generated for idea: ${idea}. ` +
         `These are strategic options, not directives.`
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -149,4 +153,20 @@ export function createEntrepreneurOrgan(context) {
     designExperiment,
     nextSteps
   });
+}
+
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+export {
+  EntrepreneurMeta,
+  createEntrepreneurOrgan
+};
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    EntrepreneurMeta,
+    createEntrepreneurOrgan
+  };
 }

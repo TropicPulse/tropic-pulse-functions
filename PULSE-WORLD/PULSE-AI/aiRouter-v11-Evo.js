@@ -1,14 +1,14 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — AI ROUTER (DUAL‑BAND CNS ROUTER)
-//  Intent Decoder • Persona Selector • Archetype Map • Dual‑Band Integration
-//  PURE ROUTING. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
+//  PULSE OS v11.2‑EVO+ — AI ROUTER ORGAN
+//  CNS Router • Intent Decoder • Persona Selector • Archetype Map
+//  PURE ROUTING • ZERO MUTATION • ZERO RANDOMNESS • DUALBAND‑AWARE
 // ============================================================================
 
 export const AIRouterMeta = Object.freeze({
   layer: "PulseAIRouter",
   role: "CNS_ROUTER_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiRouter-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiRouter-v11.2-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -25,7 +25,7 @@ export const AIRouterMeta = Object.freeze({
     safetyAware: true,
     personalAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -42,18 +42,21 @@ export const AIRouterMeta = Object.freeze({
       "override execution engine decisions",
       "perform cognition",
       "perform analysis",
-      "perform writes"
+      "perform writes",
+      "generate symbolic state"
     ]),
 
     always: Object.freeze([
-      "normalize intent",
+      "normalize intent deterministically",
       "extract flags deterministically",
       "select persona safely",
       "map archetypes deterministically",
       "integrate organism snapshot metrics",
       "produce dual-band routing hints",
       "surface safety + overmind hints",
-      "return frozen routing packets"
+      "return frozen routing packets",
+      "remain drift-proof",
+      "remain non-blocking"
     ])
   })
 });
@@ -67,7 +70,7 @@ const ArchetypePages = Object.freeze({
   ARCHITECT: "aiArchitect.js",
   ASSISTANT: "aiAssistant.js",
   BINARY_AGENT: "aiBinaryAgent.js",
-  CLINICIAN: "aiClinician.js",          // fixed filename
+  CLINICIAN: "aiClinician.js",
   DEBUG: "aiDebug.js",
   DIAGNOSTICS: "aiDiagnostics.js",
   DIAGNOSTICS_WRITE: "aiDiagnosticsWrite.js",
@@ -260,7 +263,7 @@ export function routeAIRequest(request = {}, dualBand = null) {
 
   // --------------------------------------------------------------------------
   // 4) Dual‑Band Integration (Organism Snapshot Metrics)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   let organismSnapshotBits = 0;
   let binaryPressure = 0;
   let binaryLoad = 0;
@@ -270,10 +273,9 @@ export function routeAIRequest(request = {}, dualBand = null) {
     if (typeof snapshot === "string") {
       organismSnapshotBits = snapshot.length;
 
-      // Simple deterministic heuristics based on snapshot size
-      // (kept read-only and non-invasive)
+      // deterministic heuristics
       binaryLoad = Math.min(1, organismSnapshotBits / 4096);
-      binaryPressure = binaryLoad; // 1:1 mapping for now
+      binaryPressure = binaryLoad;
 
       reasoning.push(
         `Organism snapshot: bits=${organismSnapshotBits}, load=${binaryLoad}, pressure=${binaryPressure}`
@@ -357,4 +359,15 @@ export function explainRoutingDecision(request = {}, dualBand = null) {
     safetyMode: result.personaSafety?.safetyMode || "standard",
     reasoning: result.reasoning
   });
+}
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIRouterMeta,
+    routeAIRequest,
+    explainRoutingDecision
+  };
 }

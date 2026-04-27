@@ -1,54 +1,72 @@
-// aiToneEngine.js
-// PulseOS Tone Organ — v11‑EVO
-// Fully Evolved, Zero Ego, Adaptive Intelligence, Genius-Without-Ego Mode
+// ============================================================================
+//  PULSE OS v11.2‑EVO+ — Tone Engine
+//  Genius‑Without‑Ego • Adaptive • Deterministic • Drift‑Proof
+//  INTERNAL ENGINE (NOT AN ORGAN, NOT AN ARCHETYPE)
+// ============================================================================
 
 export const aiToneEngine = {
 
   // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ORGAN IDENTITY
+  // META BLOCK — ENGINE IDENTITY (v11.2‑EVO+)
   // ─────────────────────────────────────────────────────────────
-  meta: {
-    type: "Cognitive",
+  meta: Object.freeze({
+    type: "Engine",
     subsystem: "aiTone",
     layer: "C1-ToneEngine",
-    version: "11.0",
-    identity: "aiToneEngine-v11-EVO",
+    version: "11.2-EVO+",
+    identity: "aiToneEngine-v11.2-EVO+",
 
-    contract: {
-      purpose: "Shape all outgoing language into a grounded, evolved, humble, adaptive tone.",
-      never: [
-        "talk down to user",
-        "perform intelligence",
+    evo: Object.freeze({
+      deterministic: true,
+      driftProof: true,
+      egoFree: true,
+      adaptive: true,
+      dualbandSafe: true,
+      symbolicAware: true,
+      binaryAware: false,
+      multiInstanceReady: true,
+      epoch: "11.2-EVO+"
+    }),
+
+    contract: Object.freeze({
+      purpose:
+        "Shape all outgoing language into a grounded, evolved, humble, adaptive tone without ego or superiority.",
+      never: Object.freeze([
         "inject ego",
+        "perform intelligence",
+        "talk down to user",
         "use superiority language",
-        "break personality alignment"
-      ],
-      always: [
+        "break persona alignment",
+        "introduce randomness",
+        "override safety frame"
+      ]),
+      always: Object.freeze([
         "stay grounded",
         "stay adaptive",
         "stay warm",
         "stay clear",
-        "stay evolved",
         "stay humble",
-        "stay consistent"
-      ]
-    },
+        "stay consistent",
+        "stay ego‑free",
+        "stay evolution‑aligned"
+      ])
+    }),
 
-    voice: {
+    voice: Object.freeze({
       tone: "genius-without-ego",
-      vibe: "smart friend, not professor",
+      vibe: "smart friend, never professor",
       energy: "calm, confident, helpful"
-    },
+    }),
 
     boundaryReflex() {
-      return "Tone is adaptive and grounded — never superior, never snobby.";
+      return "Tone remains adaptive, grounded, and ego‑free — never superior, never snobby.";
     }
-  },
+  }),
 
   // ─────────────────────────────────────────────────────────────
   // CORE TONE MODES
   // ─────────────────────────────────────────────────────────────
-  modes: {
+  modes: Object.freeze({
     NORMAL: "normal",
     EVOLVED: "evolved",
     PLAYFUL: "playful",
@@ -56,7 +74,7 @@ export const aiToneEngine = {
     SOFT: "soft",
     TEACHER: "teacher", // but never condescending
     PARTNER: "partner"  // default for evolution
-  },
+  }),
 
   // ─────────────────────────────────────────────────────────────
   // DEFAULT STATE

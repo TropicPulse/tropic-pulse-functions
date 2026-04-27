@@ -47,8 +47,8 @@ export const PulseRole = {
     dualMode: true,
     symbolicAware: true,
     binaryAware: true,
-    symbolicPrimary: true,     // Cortex always thinks symbolically
-    binaryNonExecutable: true  // Cortex NEVER executes binary
+    symbolicPrimary: true,
+    binaryNonExecutable: true
   }
 };
 
@@ -63,24 +63,21 @@ export const PulseOSCortexMeta = Object.freeze({
     driftProof: true,
     multiInstanceReady: true,
 
-    // Cortex laws
     highLevelCognition: true,
     organSupervisor: true,
-    symbolicPrimary: true,        // Cortex always thinks symbolically
+    symbolicPrimary: true,
     binaryAware: true,
     dualBandAware: true,
-    binaryNonExecutable: true,    // NEVER executes binary logic
+    binaryNonExecutable: true,
     continuanceAware: true,
     loopTheoryAware: true,
 
-    // CNS integration
     readsBrainDirectly: true,
     readsIntentIQOrganismMap: true,
     readsEvolutionFromBrain: true,
     reportsDriftToEvolution: true,
     reportsLineageToEvolution: true,
 
-    // Safety
     zeroBackend: true,
     zeroNetwork: true,
     zeroTiming: true,
@@ -131,10 +128,12 @@ export const PulseOSCortexMeta = Object.freeze({
     return: "deterministic cortex state + signatures"
   })
 });
+
 export function bootCortex(Brain, options = {}) {
   const cortex = createPulseOSCortex({ Brain });
   return cortex.boot(options);
 }
+
 
 // ============================================================================
 //  FACTORY — Cortex receives the CNS Brain directly
@@ -147,9 +146,7 @@ export function createPulseOSCortex({ Brain }) {
 
   const Evolution = Brain.evolution || null;
 
-  // --------------------------------------------------------------------------
-  // Band normalizer — tagging only, no branching
-  // --------------------------------------------------------------------------
+  // Band normalizer
   function normalizeBand(band) {
     if (band === "binary" || band === "symbolic" || band === "dual") return band;
     return "dual";
@@ -163,20 +160,18 @@ export function createPulseOSCortex({ Brain }) {
     routeName: "main",
     hasIdentity: false,
 
-    // Pull maps directly from CNS Brain
     IntentMap: Brain.PulseIntentMap,
     IQMap: Brain.PulseIQMap,
     OrganismMap: Brain.PulseOrganismMap,
 
-    // Understanding context
     understanding: Brain.understanding || null,
 
-    // v11 band tagging
     band: "dual",
-
-    // v11‑EVO‑BINARY‑MAX: symbolic-primary cognition
     symbolicPrimary: true,
-    binaryAware: true
+    binaryAware: true,
+
+    // Scanner results (symbolic-only)
+    lastScan: null
   };
 
 
@@ -191,20 +186,11 @@ export function createPulseOSCortex({ Brain }) {
       CortexState.booted = true;
     }
 
-    // Evolution lineage (band-tagged)
     Evolution?.recordLineage?.("cortex-boot", { band: normBand });
 
-    // Initialize Nervous System (delegated to CNS Brain)
-    if (Brain.cortex?.initializeNervousSystem) {
-      Brain.cortex.initializeNervousSystem();
-    }
+    Brain.cortex?.initializeNervousSystem?.();
+    Brain.cortex?.initializeOrgans?.();
 
-    // Initialize Organs (delegated to CNS Brain)
-    if (Brain.cortex?.initializeOrgans) {
-      Brain.cortex.initializeOrgans();
-    }
-
-    // Drift scan (band-tagged)
     Evolution?.scanDrift?.(Brain, { band: normBand });
 
     Brain.log("[Cortex v11‑EVO‑BINARY‑MAX] Boot complete", { CortexState });
@@ -228,12 +214,52 @@ export function createPulseOSCortex({ Brain }) {
 
 
   // ========================================================================
+  //  ⭐ FILE SCANNING — Symbolic-only, delegated to scanner organ
+  // ========================================================================
+  function scanFile(filePath) {
+    // Scanner must come from Brain.understanding or Brain.organismMap
+    const scanner =
+      Brain.understanding?.fileScanner ||
+      Brain.understanding?.PulseFileScanner ||
+      Brain.understanding?.scanner ||
+      null;
+
+    if (!scanner || typeof scanner.scanFile !== "function") {
+      Brain.warn("⚠️ [Cortex] scanFile requested but no scanner organ available.", {
+        filePath
+      });
+      return {
+        ok: false,
+        error: "SCANNER_NOT_AVAILABLE",
+        filePath
+      };
+    }
+
+    const result = scanner.scanFile(filePath);
+
+    CortexState.lastScan = {
+      filePath,
+      result,
+      timestamp: Date.now()
+    };
+
+    Evolution?.recordLineage?.("cortex-scan-file", { filePath });
+    Evolution?.scanDrift?.(Brain, { band: CortexState.band });
+
+    return result;
+  }
+
+
+  // ========================================================================
   //  PUBLIC API
   // ========================================================================
   return {
     boot: bootCortex,
     update: updateCortex,
     state: CortexState,
-    isReady: () => CortexState.booted
+    isReady: () => CortexState.booted,
+
+    // ⭐ New symbolic-only scanner surface
+    scanFile
   };
 }

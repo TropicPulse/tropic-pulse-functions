@@ -1,10 +1,10 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — THE INSTRUMENTS
+//  PULSE OS v11.2‑EVO+ — THE INSTRUMENTS
 //  Cognitive Analysis Organ • Diagnostic Tools • Evolutionary Sensors
 //  PURE ANALYSIS. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
 // ============================================================================
 //
-// ROLE (v11‑EVO):
+// ROLE (v11.2‑EVO+):
 //   The INSTRUMENTS organ provides:
 //     • Schema analysis
 //     • Drift detection
@@ -17,7 +17,7 @@
 //   They NEVER mutate data, NEVER modify external systems,
 //   NEVER introduce randomness, and NEVER override Router/Cortex decisions.
 //
-// ARCHITECTURE (v11‑EVO):
+// ARCHITECTURE (v11.2‑EVO+):
 //   INSTRUMENTS = Cognitive Analysis Organ
 //     → Reads data
 //     → Translates to PulseFields
@@ -26,7 +26,7 @@
 //     → Reports diagnostics
 //     → Feeds Cortex, Router, Evolution, Brain
 //
-// EVOLUTION POLICY (NEW):
+// EVOLUTION POLICY:
 //   • INSTRUMENTS contains ONLY analysis logic.
 //   • NO cognitive logic lives here.
 //   • NO intent logic lives here.
@@ -35,7 +35,7 @@
 //   • ALL cognition lives in aiTools.js.
 //   • INSTRUMENTS is imported BY aiTools.js.
 //
-// SECURITY POLICY (v11‑EVO+):
+// SECURITY POLICY (v11.2‑EVO+):
 //   • This file contains NO secure logic.
 //   • Secure CNS logic belongs ONLY in Brainstem.
 //   • This file must remain pure, deterministic, and read‑only.
@@ -49,16 +49,19 @@
 // ============================================================================
 
 export const AI_INSTRUMENTS_META = Object.freeze({
+  type: "Cognitive",
+  subsystem: "aiInstruments",
   layer: "PulseAIInstruments",
   role: "INSTRUMENTS_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiInstruments-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiInstruments-v11.2-EVO+",
   target: "full-mesh",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+    dualbandSafe: true,
     binaryAware: true,
     symbolicAware: true,
     schemaAware: true,
@@ -67,13 +70,16 @@ export const AI_INSTRUMENTS_META = Object.freeze({
     advantageAware: true,
     evolutionAware: true,
     observerOnly: true,
+    readOnly: true,
+    mutationSafe: true,
     architectAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO+"
   }),
 
   contract: Object.freeze({
-    purpose: "Provide PURE deterministic analysis for schemas, drift, slowdown, routes, logs, errors, and evolutionary patterns.",
+    purpose:
+      "Provide PURE deterministic analysis for schemas, drift, slowdown, routes, logs, errors, and evolutionary patterns.",
     never: Object.freeze([
       "mutate data",
       "modify external systems",
@@ -81,7 +87,8 @@ export const AI_INSTRUMENTS_META = Object.freeze({
       "override router decisions",
       "override cortex decisions",
       "perform cognition",
-      "perform intent handling"
+      "perform intent handling",
+      "leak identity anchors"
     ]),
     always: Object.freeze([
       "analyze schemas",
@@ -92,9 +99,15 @@ export const AI_INSTRUMENTS_META = Object.freeze({
       "analyze errors",
       "detect evolutionary patterns",
       "translate binary/symbolic → PulseFields",
+      "remain read‑only",
+      "remain deterministic",
       "report diagnostics only"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "INSTRUMENTS is read‑only, deterministic, and analysis‑only — never mutating, never random, never overriding CNS decisions.";
+  }
 });
 
 // ============================================================================
@@ -103,7 +116,6 @@ export const AI_INSTRUMENTS_META = Object.freeze({
 import { translateFirestoreDocument } from "../PULSE-translator/firestoreToPulse.js";
 import { translateSQLSchema } from "../PULSE-translator/sqlToPulse.js";
 import { validatePulseField } from "../PULSE-SPECS/pulseFields.js";
-
 
 // ============================================================================
 // SECTION 3 — FIRESTORE ANALYSIS
@@ -130,7 +142,6 @@ export function analyzeFirestoreDoc(context, docData = {}) {
   return pulseSchema;
 }
 
-
 // ============================================================================
 // SECTION 4 — SQL ANALYSIS
 // ============================================================================
@@ -151,7 +162,6 @@ export function analyzeSQLSchema(context, sqlSchema = {}) {
   detectSlowdownPatterns(context, sqlSchema);
   return pulseSchema;
 }
-
 
 // ============================================================================
 // SECTION 5 — DRIFT DETECTION
@@ -178,7 +188,6 @@ export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
   return context.diagnostics?.driftDetected;
 }
 
-
 // ============================================================================
 // SECTION 6 — SLOWDOWN DETECTION
 // ============================================================================
@@ -203,7 +212,6 @@ export function detectSlowdownPatterns(context, data) {
   }
 }
 
-
 // ============================================================================
 // SECTION 7 — PULSE SCHEMA VALIDATION
 // ============================================================================
@@ -218,7 +226,6 @@ export function validatePulseSchema(context, schema = {}) {
     }
   }
 }
-
 
 // ============================================================================
 // SECTION 8 — ROUTE ANALYSIS
@@ -242,7 +249,6 @@ export function analyzeRoute(context, pathway = {}) {
   return pathway;
 }
 
-
 // ============================================================================
 // SECTION 9 — LOG ANALYSIS
 // ============================================================================
@@ -261,7 +267,6 @@ export function analyzeLogs(context, logs = []) {
   return logs;
 }
 
-
 // ============================================================================
 // SECTION 10 — ERROR ANALYSIS
 // ============================================================================
@@ -273,14 +278,13 @@ export function analyzeErrors(context, errors = []) {
     return [];
   }
 
-  const critical = errors.filter(e => e?.severity === "critical");
+  const critical = errors.filter((e) => e?.severity === "critical");
   if (critical.length > 0) {
     context.flagDrift?.("Critical errors detected in system logs.");
   }
 
   return errors;
 }
-
 
 // ============================================================================
 // SECTION 11 — EVOLUTIONARY PATTERN DETECTION

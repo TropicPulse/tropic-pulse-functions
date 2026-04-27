@@ -1,5 +1,5 @@
 /**
- * aiVitals.js — Pulse OS v11‑EVO Organ
+ * aiVitals.js — Pulse OS v11.2‑EVO+ Organ
  * ============================================================
  * ORGAN ROLE (CANONICAL):
  *   The Binary Vitals Engine is the organism’s **health artery**.
@@ -36,7 +36,7 @@
  *     - a vitals generator
  *     - a binary artery monitor
  *
- * ORGAN CONTRACT (v11‑EVO):
+ * ORGAN CONTRACT (v11.2‑EVO+):
  *   - Must never mutate external organs
  *   - Must never generate symbolic state
  *   - Must only emit binary packets
@@ -54,11 +54,14 @@
  *     bitLength: <number>
  *   }
  */
+
 export const VitalsMeta = Object.freeze({
+  type: "Binary",
+  subsystem: "aiBinaryVitals",
   layer: "BinaryNervousSystem",
   role: "BINARY_VITALS_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBinaryVitals-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiBinaryVitals-v11.2-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -72,8 +75,11 @@ export const VitalsMeta = Object.freeze({
     lineageAware: true,
     slowdownAware: true,
     tourismAware: false,
+    readOnly: true,
+    mutationSafe: true,
+    nonBlocking: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -99,10 +105,14 @@ export const VitalsMeta = Object.freeze({
       "log deterministic steps when tracing",
       "remain non-blocking"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "Binary Vitals is read-only, deterministic, and binary-only — it evaluates health but never mutates or governs other organs.";
+  }
 });
 
-class AIBinaryVitals {
+export class AIBinaryVitals {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-vitals";
     this.encoder = config.encoder;
@@ -203,7 +213,7 @@ class AIBinaryVitals {
   }
 
   _evolutionDrift() {
-    // v11‑EVO placeholder — evolution organ will supply real drift soon
+    // v11.2‑EVO+ placeholder — evolution organ will supply real drift soon
     return 1;
   }
 
@@ -302,11 +312,18 @@ class AIBinaryVitals {
   }
 }
 
-function createAIBinaryVitals(config) {
+export function createAIBinaryVitals(config) {
   return new AIBinaryVitals(config);
 }
 
-module.exports = {
-  AIBinaryVitals,
-  createAIBinaryVitals
-};
+// ---------------------------------------------------------------------------
+// DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+// ---------------------------------------------------------------------------
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    VitalsMeta,
+    AIBinaryVitals,
+    createAIBinaryVitals
+  };
+}

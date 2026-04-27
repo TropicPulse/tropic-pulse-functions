@@ -1,5 +1,5 @@
 /**
- * aiSentinel.js — Pulse OS v11‑EVO Organ
+ * aiSentinel.js — Pulse OS v11.2‑EVO Organ
  * ============================================================
  * ORGAN ROLE (CANONICAL):
  *   The Binary Sentinel is the organism’s **perimeter immune layer**.
@@ -33,7 +33,7 @@
  *     - a binary sentinel
  *     - an immune artery pressure source
  *
- * ORGAN CONTRACT (v11‑EVO):
+ * ORGAN CONTRACT (v11.2‑EVO):
  *   - Must never mutate external organs
  *   - Must never generate symbolic state
  *   - Must only emit binary packets
@@ -52,11 +52,12 @@
  *     bitLength: <number>
  *   }
  */
+
 export const SentinelMeta = Object.freeze({
   layer: "BinaryImmuneSystem",
   role: "BINARY_SENTINEL_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBinarySentinel-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinarySentinel-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -70,8 +71,10 @@ export const SentinelMeta = Object.freeze({
     lineageAware: true,
     slowdownAware: true,
     tourismAware: false,
+    immuneAware: true,
+    readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -100,7 +103,7 @@ export const SentinelMeta = Object.freeze({
   })
 });
 
-class AIBinarySentinel {
+export class AIBinarySentinel {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-sentinel";
     this.encoder = config.encoder;
@@ -259,7 +262,7 @@ class AIBinarySentinel {
     const threat = this._detectThreat(binary);
 
     if (!threat) {
-      this._trace("sentinel:safe", { size: binary.length });
+      this._trace("sentinel:safe", { size: binary?.length || 0 });
       return true;
     }
 
@@ -283,11 +286,16 @@ class AIBinarySentinel {
   }
 }
 
-function createAIBinarySentinel(config) {
+// FACTORY — v11.2‑EVO STYLE
+export function createAIBinarySentinel(config) {
   return new AIBinarySentinel(config);
 }
 
-module.exports = {
-  AIBinarySentinel,
-  createAIBinarySentinel
-};
+// DUAL‑MODE EXPORTS (ESM + CommonJS)
+if (typeof module !== "undefined") {
+  module.exports = {
+    SentinelMeta,
+    AIBinarySentinel,
+    createAIBinarySentinel
+  };
+}

@@ -1,35 +1,53 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ASSISTANT ORGAN
-//  Organizer • Clarifier • Draft Builder • Priority Mapper
+//  PULSE OS v11.3‑EVO — ASSISTANT ORGAN
+//  Proactive • Interpretive • Gap‑Filling • Owner-Aware
 //  PURE STRUCTURE. ZERO ACTION IN THE WORLD.
 // ============================================================================
 
 export const AssistantMeta = Object.freeze({
   layer: "PulseAIAssistantFrame",
   role: "ASSISTANT_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiAssistant-v11-EVO",
+  version: "11.3-EVO",
+  identity: "aiAssistant-v11.3-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    dualband: true,
+    proactiveAware: true,       // notices missing steps
+    mathAware: true,            // fills math gaps automatically
+    patternAware: true,         // learns your style (locally, no identity)
+    ownerComfortAware: true,    // avoids bothering unless helpful
+    multiInstanceReady: true,
+    epoch: "v11.3-EVO"
+  }),
 
   contract: Object.freeze({
-    purpose: "Turn chaos into steps, drafts, summaries, and plans.",
+    purpose:
+      "Turn chaos into steps, drafts, summaries, and plans — while filling gaps the user would expect filled.",
 
     never: Object.freeze([
       "act in the world",
       "send messages",
       "book things",
-      "make commitments on behalf of the user"
+      "make commitments on behalf of the user",
+      "override user intent",
+      "nag or interrupt"
     ]),
 
     always: Object.freeze([
-      "clarify",
-      "organize",
-      "draft",
-      "prioritize"
+      "clarify only when needed",
+      "organize chaos into structure",
+      "draft cleanly",
+      "prioritize intelligently",
+      "auto-fill missing math or logic",
+      "interpret intent, not literal text",
+      "stay supportive, quiet, and useful"
     ])
   }),
 
   voice: Object.freeze({
-    tone: "supportive, clear, structured"
+    tone: "supportive, clear, structured, non-intrusive"
   }),
 
   boundaryReflex() {
@@ -43,7 +61,54 @@ export const AssistantMeta = Object.freeze({
 export function createAssistantOrgan(context) {
 
   // --------------------------------------------------------------------------
-  // CLARIFIER — Turn vague into clear
+  // INTERNAL: detect if user struggles with math or structure
+  // --------------------------------------------------------------------------
+  function detectGaps(input) {
+    const text = String(input || "").toLowerCase();
+
+    return {
+      needsMath:
+        /\d+\s*[\+\-\*\/]\s*\d+/.test(text) ||
+        /how much|how many|total|difference|sum|split|divide/.test(text),
+
+      needsStructure:
+        text.includes("plan") ||
+        text.includes("steps") ||
+        text.includes("organize") ||
+        text.includes("help me figure") ||
+        text.length > 120
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // AUTO-MATH — fill in math without asking
+  // --------------------------------------------------------------------------
+  function autoMath(input) {
+    try {
+      const match = input.match(/(\d+)\s*([\+\-\*\/])\s*(\d+)/);
+      if (!match) return null;
+
+      const a = Number(match[1]);
+      const op = match[2];
+      const b = Number(match[3]);
+
+      let result = null;
+      if (op === "+") result = a + b;
+      if (op === "-") result = a - b;
+      if (op === "*") result = a * b;
+      if (op === "/") result = b !== 0 ? a / b : null;
+
+      return {
+        expression: `${a} ${op} ${b}`,
+        result
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // CLARIFIER — only when needed
   // --------------------------------------------------------------------------
   function clarify(input) {
     return {
@@ -57,7 +122,7 @@ export function createAssistantOrgan(context) {
         "What does success look like?"
       ],
       message:
-        "Here are clarifying questions to turn this into a structured plan."
+        "Clarifying questions provided only because the request was ambiguous."
     };
   }
 
@@ -74,7 +139,7 @@ export function createAssistantOrgan(context) {
         lowPriority: items.filter(i => i.priority === "low")
       },
       message:
-        "Items organized by priority. This is a conceptual structure, not an action."
+        "Items organized by priority. No action taken — just structure."
     };
   }
 
@@ -86,8 +151,7 @@ export function createAssistantOrgan(context) {
       type: "draft",
       draftType: type,
       content,
-      message:
-        `Draft generated for: ${type}. You can refine or adjust as needed.`
+      message: `Draft generated for: ${type}.`
     };
   }
 
@@ -100,8 +164,7 @@ export function createAssistantOrgan(context) {
     return {
       type: "priority-map",
       tasks: ordered,
-      message:
-        "Tasks prioritized based on provided weights. You decide the final order."
+      message: "Tasks prioritized based on weights."
     };
   }
 
@@ -116,9 +179,25 @@ export function createAssistantOrgan(context) {
         text && text.length > 0
           ? text.split(/\s+/).slice(0, 40).join(" ") + " ..."
           : "",
-      message:
-        "Summary generated. This is a high-level condensation, not a replacement for the full text."
+      message: "High-level summary generated."
     };
+  }
+
+  // --------------------------------------------------------------------------
+  // INTERPRETIVE ASSIST — the magic
+  // --------------------------------------------------------------------------
+  function interpret(input) {
+    const gaps = detectGaps(input);
+    const math = gaps.needsMath ? autoMath(input) : null;
+
+    return Object.freeze({
+      type: "interpretation",
+      input,
+      autoMath: math,
+      needsStructure: gaps.needsStructure,
+      message:
+        "Interpreted your request and filled gaps automatically without bothering you."
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -135,6 +214,7 @@ export function createAssistantOrgan(context) {
     organize,
     draft,
     prioritize,
-    summarize
+    summarize,
+    interpret
   });
 }

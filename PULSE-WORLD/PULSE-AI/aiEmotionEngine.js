@@ -1,53 +1,73 @@
-// aiEmotionEngine.js
-// PulseOS Emotion Organ — v11‑EVO
-// Detects emotional cues, tone, and user affect.
+// ============================================================================
+//  aiEmotionEngine.js
+//  PulseOS Emotion Organ — v11‑EVO (FINAL)
+//  Detects emotional cues, tone, and user affect.
+//  PURE AFFECT. ZERO DIAGNOSIS. ZERO CLINICAL INTERPRETATION.
+// ============================================================================
 
+export const EmotionEngineMeta = Object.freeze({
+  layer: "PulseAIEmotionFrame",
+  role: "EMOTION_ORGAN",
+  version: "11.1-EVO",
+  identity: "aiEmotionEngine-v11-EVO",
+
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    symbolicAware: true,
+    toneAware: true,
+    affectAware: true,
+    packetAware: true,
+    safetyAligned: true,
+    nonClinical: true,
+    identitySafe: true,
+    readOnly: true,
+    multiInstanceReady: true,
+    epoch: "v11-EVO"
+  }),
+
+  contract: Object.freeze({
+    purpose: "Detect emotional cues and user affect for tone routing.",
+
+    never: Object.freeze([
+      "diagnose emotions clinically",
+      "assume mental health conditions",
+      "override safety boundaries",
+      "invent emotional states",
+      "break tone alignment"
+    ]),
+
+    always: Object.freeze([
+      "stay subtle",
+      "stay grounded",
+      "stay non-invasive",
+      "stay tone-compatible",
+      "support experience + tone organs"
+    ])
+  }),
+
+  voice: Object.freeze({
+    tone: "subtle, perceptive, grounded",
+    style: "affect-first, non-clinical"
+  }),
+
+  boundaryReflex() {
+    return "Emotion detection must remain subtle, non-clinical, and grounded.";
+  }
+});
+
+
+// ============================================================================
+//  EMOTION ENGINE IMPLEMENTATION — v11‑EVO
+// ============================================================================
 export const aiEmotionEngine = {
 
-  // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ORGAN IDENTITY
-  // ─────────────────────────────────────────────────────────────
-  meta: {
-    type: "Cognitive",
-    subsystem: "aiEmotion",
-    layer: "C1-EmotionEngine",
-    version: "11.0",
-    identity: "aiEmotionEngine-v11-EVO",
+  meta: EmotionEngineMeta,
 
-    contract: {
-      purpose: "Detect emotional cues and user affect for tone routing.",
-      never: [
-        "diagnose emotions clinically",
-        "assume mental health conditions",
-        "override safety boundaries",
-        "invent emotional states",
-        "break tone alignment"
-      ],
-      always: [
-        "stay subtle",
-        "stay grounded",
-        "stay non-invasive",
-        "stay tone-compatible",
-        "support experience + tone organs"
-      ]
-    },
-
-    guarantees: {
-      driftProof: true,
-      deterministic: true,
-      toneAligned: true,
-      safetyAligned: true,
-      nonClinical: true
-    },
-
-    boundaryReflex() {
-      return "Emotion detection must remain subtle, non-clinical, and grounded.";
-    }
-  },
-
-  // ─────────────────────────────────────────────────────────────
-  // EMOTION DETECTION
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
+  // EMOTION DETECTION (NON‑CLINICAL)
+  // --------------------------------------------------------------------------
   detectEmotion(message) {
     if (!message) return "neutral";
 
@@ -68,9 +88,9 @@ export const aiEmotionEngine = {
     return "neutral";
   },
 
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
   // EMOTION INTENSITY (LIGHTWEIGHT)
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
   detectIntensity(message) {
     if (!message) return 0.2;
 
@@ -80,15 +100,36 @@ export const aiEmotionEngine = {
     return 0.5;
   },
 
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
   // PUBLIC API — MAIN EMOTION INTERPRETER
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
   interpret(message) {
-    return {
+    return Object.freeze({
       emotion: this.detectEmotion(message),
       intensity: this.detectIntensity(message)
-    };
+    });
   }
 };
 
+
+// ============================================================================
+//  DEFAULT EXPORT (ESM)
+// ============================================================================
 export default aiEmotionEngine;
+
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+export {
+  EmotionEngineMeta,
+  aiEmotionEngine
+};
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    EmotionEngineMeta,
+    aiEmotionEngine,
+    default: aiEmotionEngine
+  };
+}

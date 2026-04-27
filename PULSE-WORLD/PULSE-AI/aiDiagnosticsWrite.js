@@ -108,3 +108,20 @@ export function createDiagnosticsWriteOrgan({ context, backend }) {
     writeRun
   });
 }
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  DiagnosticsWriteMeta,
+  createDiagnosticsWriteOrgan
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    DiagnosticsWriteMeta,
+    createDiagnosticsWriteOrgan
+  };
+}

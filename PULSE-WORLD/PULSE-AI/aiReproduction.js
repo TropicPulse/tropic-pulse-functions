@@ -1,5 +1,5 @@
 /**
- * aiReproduction.js — Pulse OS v11‑EVO Organ
+ * aiReproduction.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Binary Reproduction System** of the organism.
@@ -56,11 +56,16 @@
  *
  *   Entire reproduction event is encoded into binary.
  */
+
+// ============================================================================
+//  META BLOCK — v11.2‑EVO (DUALBAND + DUAL‑MODE EXPORTS)
+// ============================================================================
+
 export const ReproductionMeta = Object.freeze({
   layer: "BinaryOrganism",
   role: "BINARY_REPRODUCTION_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBinaryReproduction-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiBinaryReproduction-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -74,12 +79,12 @@ export const ReproductionMeta = Object.freeze({
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic organism cloning, genome duplication, and lineage-safe replication for the v11-EVO organism.",
+      "Provide deterministic organism cloning, genome duplication, and lineage-safe replication for the v11.2‑EVO organism.",
 
     never: Object.freeze([
       "use randomness",
@@ -104,7 +109,11 @@ export const ReproductionMeta = Object.freeze({
   })
 });
 
-class AIBinaryReproduction {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO (LOGIC UNCHANGED)
+// ============================================================================
+
+export class AIBinaryReproduction {
   constructor(config = {}) {
     /**
      * CONFIG INTENT:
@@ -119,7 +128,7 @@ class AIBinaryReproduction {
      *   reflex      → aiBinaryReflex instance (optional)
      *   trace       → deterministic visibility hook
      */
-    this.id = config.id || 'ai-binary-reproduction';
+    this.id = config.id || "ai-binary-reproduction";
     this.encoder = config.encoder;
     this.genome = config.genome;
     this.ancestry = config.ancestry || null;
@@ -129,9 +138,15 @@ class AIBinaryReproduction {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error('AIBinaryReproduction requires aiBinaryAgent encoder');
-    if (!this.genome) throw new Error('AIBinaryReproduction requires aiBinaryGenome');
-    if (!this.factory) throw new Error('AIBinaryReproduction requires organism factory');
+    if (!this.encoder) {
+      throw new Error("AIBinaryReproduction requires aiBinaryAgent encoder");
+    }
+    if (!this.genome) {
+      throw new Error("AIBinaryReproduction requires aiBinaryGenome");
+    }
+    if (!this.factory) {
+      throw new Error("AIBinaryReproduction requires organism factory");
+    }
   }
 
   // ---------------------------------------------------------
@@ -144,7 +159,6 @@ class AIBinaryReproduction {
 
     // deterministic, drift-proof, lineage-safe
     const suffix = fp.slice(0, 8);
-
     const childId = `${parentId}-child-${suffix}`;
 
     this._trace("child:id:generated", { parentId, childId });
@@ -152,18 +166,17 @@ class AIBinaryReproduction {
     return childId;
   }
 
-
   // ---------------------------------------------------------
   //  REPRODUCTION PACKET
   // ---------------------------------------------------------
 
   _generateReproductionPacket(parentId, childId, genome) {
     const payload = {
-      type: 'binary-reproduction',
+      type: "binary-reproduction",
       timestamp: Date.now(),
       parentId,
       childId,
-      genomeFingerprint: genome.fingerprint,
+      genomeFingerprint: genome.fingerprint
     };
 
     const json = JSON.stringify(payload);
@@ -172,13 +185,13 @@ class AIBinaryReproduction {
     const packet = {
       ...payload,
       bits: binary,
-      bitLength: binary.length,
+      bitLength: binary.length
     };
 
-    this._trace('reproduction:packet', {
+    this._trace("reproduction:packet", {
       parentId,
       childId,
-      bits: packet.bitLength,
+      bits: packet.bitLength
     });
 
     return packet;
@@ -197,7 +210,7 @@ class AIBinaryReproduction {
     // 1. Get current genome
     const genome = this.genome.loadGenome();
     if (!genome) {
-      throw new Error('AIBinaryReproduction: no genome available for cloning');
+      throw new Error("AIBinaryReproduction: no genome available for cloning");
     }
 
     // 2. Generate child ID
@@ -207,7 +220,7 @@ class AIBinaryReproduction {
     const childConfig = {
       ...parentConfig,
       organismId: childId,
-      genome,
+      genome
     };
 
     // 4. Create new organism instance
@@ -219,24 +232,26 @@ class AIBinaryReproduction {
     // 6. Emit packet
     if (this.pipeline) this.pipeline.run(packet.bits);
     if (this.reflex) this.reflex.run(packet.bits);
-    if (this.logger) this.logger.logBinary(packet.bits, { source: 'reproduction' });
+    if (this.logger) {
+      this.logger.logBinary(packet.bits, { source: "reproduction" });
+    }
 
     // 7. Register in ancestry (if available)
-    if (this.ancestry && typeof this.ancestry.recordReproduction === 'function') {
+    if (this.ancestry && typeof this.ancestry.recordReproduction === "function") {
       this.ancestry.recordReproduction({
         parentId,
         childId,
         genomeFingerprint: genome.fingerprint,
-        timestamp: packet.timestamp,
+        timestamp: packet.timestamp
       });
     }
 
-    this._trace('reproduction:clone', { parentId, childId });
+    this._trace("reproduction:clone", { parentId, childId });
 
     return {
       childId,
       childOrganism,
-      packet,
+      packet
     };
   }
 
@@ -257,9 +272,9 @@ class AIBinaryReproduction {
       results.push(result);
     }
 
-    this._trace('reproduction:spawnMany', {
+    this._trace("reproduction:spawnMany", {
       parentId,
-      count: results.length,
+      count: results.length
     });
 
     return results;
@@ -275,15 +290,22 @@ class AIBinaryReproduction {
   }
 }
 
-// ---------------------------------------------------------
-// FACTORY EXPORT
-// ---------------------------------------------------------
+// ============================================================================
+//  FACTORY — v11.2‑EVO STYLE
+// ============================================================================
 
-function createAIBinaryReproduction(config) {
+export function createAIBinaryReproduction(config) {
   return new AIBinaryReproduction(config);
 }
 
-module.exports = {
-  AIBinaryReproduction,
-  createAIBinaryReproduction,
-};
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    ReproductionMeta,
+    AIBinaryReproduction,
+    createAIBinaryReproduction
+  };
+}

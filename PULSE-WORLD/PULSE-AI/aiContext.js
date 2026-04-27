@@ -11,12 +11,10 @@ export const COGNITIVE_FRAME_META = Object.freeze({
   identity: "aiCognitiveFrame-v11-EVO",
 
   evo: Object.freeze({
-    // Core identity
     driftProof: true,
     deterministic: true,
     dualband: true,
 
-    // Awareness
     personaAware: true,
     boundaryAware: true,
     permissionAware: true,
@@ -37,11 +35,9 @@ export const COGNITIVE_FRAME_META = Object.freeze({
     experienceFrameAware: true,
     overmindAware: true,
 
-    // Safety
     identitySafe: true,
     readOnly: true,
 
-    // Lifecycle
     multiInstanceReady: true,
     epoch: "v11-EVO"
   })
@@ -56,13 +52,10 @@ export function createCognitiveFrame({
   routing = {},
   organismSnapshot = null
 } = {}) {
-  // --------------------------------------------------------------------------
-  // 1) BASE CONTEXT — Deterministic, Zero Mutation
-  // --------------------------------------------------------------------------
+
   const context = {
     meta: COGNITIVE_FRAME_META,
 
-    // Request echo (read‑only snapshot)
     request: Object.freeze({
       intent: request.intent || null,
       domain: request.domain || null,
@@ -70,24 +63,19 @@ export function createCognitiveFrame({
       userId: request.userId || null
     }),
 
-    // Persona + boundaries + permissions (symbolic)
     personaId: routing.personaId || null,
     persona: routing.persona || null,
     permissions: routing.permissions || null,
     boundaries: routing.boundaries || null,
 
-    // Dual‑band hints
     dualBand: routing.dualBand || null,
 
-    // Organism state (if provided)
     organism: organismSnapshot || null,
     binaryVitals: organismSnapshot?.binary || null,
     symbolicState: organismSnapshot?.symbolic || null,
 
-    // SAFE reasoning trace (not chain‑of‑thought)
     trace: Array.isArray(routing.reasoning) ? [...routing.reasoning] : [],
 
-    // Diagnostics
     diagnostics: {
       mismatches: [],
       missingFields: [],
@@ -99,40 +87,34 @@ export function createCognitiveFrame({
     routing
   };
 
-  // --------------------------------------------------------------------------
-  // TRACE HELPERS — Cognitive Breadcrumbs
-  // --------------------------------------------------------------------------
+  // TRACE HELPERS
   context.logStep = function logStep(message) {
     this.trace.push(String(message || ""));
   };
 
-  // --------------------------------------------------------------------------
-  // DIAGNOSTIC HELPERS — Cognitive Integrity Checks
-  // --------------------------------------------------------------------------
-  context.flagMismatch = function flagMismatch(key, expected, actual) {
+  // DIAGNOSTIC HELPERS
+  context.flagMismatch = function (key, expected, actual) {
     this.diagnostics.mismatches.push({ key, expected, actual });
     this.trace.push(`Mismatch: "${key}" expected ${expected}, got ${actual}`);
   };
 
-  context.flagMissingField = function flagMissingField(key) {
+  context.flagMissingField = function (key) {
     this.diagnostics.missingFields.push({ key });
     this.trace.push(`Missing field: "${key}"`);
   };
 
-  context.flagSlowdown = function flagSlowdown(reason) {
+  context.flagSlowdown = function (reason) {
     this.diagnostics.slowdownCauses.push({ reason });
     this.trace.push(`Slowdown cause: ${reason}`);
   };
 
-  context.flagDrift = function flagDrift(description) {
+  context.flagDrift = function (description) {
     this.diagnostics.driftDetected = true;
     this.diagnostics.driftEvents.push({ description });
     this.trace.push(`Drift detected: ${description}`);
   };
 
-  // --------------------------------------------------------------------------
-  // ABA ANCHOR — Stable Point Management
-  // --------------------------------------------------------------------------
+  // ABA ANCHOR
   context.ABA = {
     stablePoint: null,
 
@@ -151,9 +133,7 @@ export function createCognitiveFrame({
     }
   };
 
-  // --------------------------------------------------------------------------
-  // ABSTRACTION TRACKING — General ↔ Specific
-  // --------------------------------------------------------------------------
+  // ABSTRACTION TRACKING
   context.abstraction = {
     level: "general",
 
@@ -164,9 +144,7 @@ export function createCognitiveFrame({
     }
   };
 
-  // --------------------------------------------------------------------------
   // DRIFT DETECTION + REPAIR
-  // --------------------------------------------------------------------------
   context.drift = {
     detect(condition, note = "Cognitive drift detected.") {
       if (condition) {
@@ -182,9 +160,7 @@ export function createCognitiveFrame({
     }
   };
 
-  // --------------------------------------------------------------------------
-  // LAYERED REPAIR REFLEX (Confusion / Misalignment)
-// --------------------------------------------------------------------------
+  // LAYERED REPAIR REFLEX
   context.repair = {
     attempts: 0,
 
@@ -203,9 +179,7 @@ export function createCognitiveFrame({
     }
   };
 
-  // --------------------------------------------------------------------------
-  // WINDOW PRINCIPLE — Maximum Safe Information
-  // --------------------------------------------------------------------------
+  // WINDOW PRINCIPLE
   context.window = {
     explainSafe(topic = "that") {
       return (
@@ -215,9 +189,7 @@ export function createCognitiveFrame({
     }
   };
 
-  // --------------------------------------------------------------------------
   // FRUSTRATION‑AWARE TONE
-  // --------------------------------------------------------------------------
   context.frustration = {
     soothe() {
       return (
@@ -227,13 +199,31 @@ export function createCognitiveFrame({
     }
   };
 
-  // --------------------------------------------------------------------------
-  // OPTIONAL: INTENT CONTEXT ATTACHMENT (Self‑Contained)
-// --------------------------------------------------------------------------
+  // OPTIONAL INTENT CONTEXT
   if (request.intentContext) {
     context.intentContext = Object.freeze({ ...request.intentContext });
     context.logStep("Intent handler context attached.");
   }
 
   return Object.freeze(context);
+}
+
+// ============================================================================
+//  ESM EXPORTS
+// ============================================================================
+export {
+  createCognitiveFrame
+};
+
+export default createCognitiveFrame;
+
+// ============================================================================
+//  COMMONJS FALLBACK EXPORTS
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    COGNITIVE_FRAME_META,
+    createCognitiveFrame,
+    default: createCognitiveFrame
+  };
 }

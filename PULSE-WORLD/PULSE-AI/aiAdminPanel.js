@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ADMIN PANEL DIAGNOSTICS ORGAN
+//  PULSE OS v11.2‑EVO — ADMIN PANEL DIAGNOSTICS ORGAN
 //  Summary Cards • Issue Table • Trace • Meta
 //  PURE OBSERVATION. ZERO MUTATION. ZERO IDENTITY LEAKAGE.
 // ============================================================================
@@ -7,33 +7,47 @@
 export const AdminDiagnosticsMeta = Object.freeze({
   layer: "PulseAIAdminDiagnosticsFrame",
   role: "ADMIN_DIAGNOSTICS_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiAdminDiagnostics-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiAdminDiagnostics-v11.2-EVO",
+
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    dualband: true,
+    windowAware: true,          // safe for UI surfaces
+    packetAware: false,
+    readOnly: true,
+    multiInstanceReady: true,
+    epoch: "v11.2-EVO"
+  }),
 
   contract: Object.freeze({
-    purpose: [
+    purpose: Object.freeze([
       "Transform diagnostics into UI-facing structures",
       "Provide summary cards, issue lists, and trace output",
       "Support admin dashboards and debugging tools",
       "Stay read-only and identity-safe"
-    ],
-    never: [
+    ]),
+    never: Object.freeze([
       "mutate diagnostics",
       "modify context",
       "expose identity anchors",
-      "write to external systems"
-    ],
-    always: [
+      "write to external systems",
+      "change organism state"
+    ]),
+    always: Object.freeze([
       "summarize",
       "structure",
       "format",
-      "stay deterministic"
-    ]
+      "stay deterministic",
+      "stay ego-free",
+      "stay admin-facing only"
+    ])
   })
 });
 
 // ============================================================================
-// PUBLIC API — Create Admin Diagnostics Organ
+//  PUBLIC API — Create Admin Diagnostics Organ
 // ============================================================================
 export function createAdminDiagnosticsOrgan(context) {
   const diagnostics = context?.diagnostics || {};

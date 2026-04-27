@@ -1,12 +1,67 @@
+/**
+ * ========================================================================
+ *  PULSE OS — PERMISSIONS ENGINE (v11.2‑EVO+)
+ *  Dual‑Band Safety Contract • Deterministic • Drift‑Proof • Persona‑Aware
+ * ========================================================================
+ *
+ *  CANONICAL ROLE:
+ *    The Permissions Engine is the **deterministic safety contract resolver**
+ *    for all personas, tools, and AI layers inside Pulse OS.
+ *
+ *    It resolves:
+ *      • persona‑scoped permissions
+ *      • owner‑override permissions
+ *      • universal forbidden actions
+ *      • dualband safety boundaries
+ *
+ *    It is the **final authority** on:
+ *      • what an AI persona may do
+ *      • what an AI persona may NOT do
+ *      • what requires owner‑level override
+ *
+ *  WHY THIS ORGAN EXISTS:
+ *    Without a deterministic permissions engine:
+ *      • personas drift
+ *      • boundaries blur
+ *      • forbidden actions leak
+ *      • safety frames become inconsistent
+ *      • system‑wide coherence collapses
+ *
+ *    Pulse OS v11.2‑EVO+ enforces:
+ *        “ALL CAPABILITIES MUST BE RESOLVED CANONICALLY.”
+ *
+ *  ARCHITECTURAL INTENT:
+ *    This organ is NOT:
+ *      • a router
+ *      • a governor
+ *      • a safety frame
+ *      • a cognition engine
+ *
+ *    This organ IS:
+ *      • the capability contract resolver
+ *      • the persona boundary enforcer
+ *      • the universal forbidden‑action gatekeeper
+ *      • the deterministic permissions oracle
+ *
+ *  FUTURE EVOLUTION NOTES:
+ *    v12‑EVO will add:
+ *      • lineage‑aware permission drift detection
+ *      • persona‑mode deltas
+ *      • symbolic‑binary hybrid permissions
+ *      • multi‑organism permission inheritance
+ *
+ *    But NOT in this file.
+ *    This file must remain pure, minimal, deterministic.
+ */
 // ============================================================================
-//  v11‑EVO — PERMISSIONS ENGINE (Dual‑Band Safety Contract)
+//  v11.2‑EVO — PERMISSIONS ENGINE (Dual‑Band Safety Contract)
+//  Dual‑mode exports: ESM + CommonJS
 // ============================================================================
-
 export const PermissionsMeta = Object.freeze({
   layer: "PulseAIPermissionsLayer",
   role: "PERMISSIONS_ENGINE",
-  version: "11.1-EVO",
-  identity: "aiPermissionsEngine-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiPermissionsEngine-v11.2-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -15,8 +70,10 @@ export const PermissionsMeta = Object.freeze({
     permissionAware: true,
     boundaryAware: true,
     personaAware: true,
+    ownerAware: true,
+    forbiddenAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -28,7 +85,9 @@ export const PermissionsMeta = Object.freeze({
       "introduce randomness",
       "invent permissions",
       "override forbidden actions",
-      "override SafetyFrame decisions"
+      "override SafetyFrame decisions",
+      "bypass persona boundaries",
+      "bypass owner authority"
     ]),
 
     always: Object.freeze([
@@ -36,10 +95,13 @@ export const PermissionsMeta = Object.freeze({
       "respect persona permissions",
       "respect owner override",
       "remain deterministic",
-      "remain read-only"
+      "remain read-only",
+      "resolve capabilities canonically",
+      "enforce dualband boundaries"
     ])
   })
 });
+
 
 export function createPermissionsEngine({ context = {} } = {}) {
   const userIsOwner = context.userIsOwner === true;
@@ -67,4 +129,15 @@ export function createPermissionsEngine({ context = {} } = {}) {
     resolve,
     check
   });
+}
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    PermissionsMeta,
+    createPermissionsEngine
+  };
 }

@@ -143,3 +143,24 @@ export function createDiagnosticsAPI() {
     flagDrift
   });
 }
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  DiagnosticsMeta,
+  createDiagnosticsState,
+  attachDiagnosticsOrgan,
+  createDiagnosticsAPI
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    DiagnosticsMeta,
+    createDiagnosticsState,
+    attachDiagnosticsOrgan,
+    createDiagnosticsAPI
+  };
+}

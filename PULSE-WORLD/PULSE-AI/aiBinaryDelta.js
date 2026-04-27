@@ -158,12 +158,21 @@ class AIBinaryDelta {
 // FACTORY EXPORT
 // ---------------------------------------------------------
 
-function createAIBinaryDelta(config) {
+export function createAIBinaryDelta(config) {
   return new AIBinaryDelta(config);
 }
 
-module.exports = {
-  AIBinaryDelta,
-  createAIBinaryDelta,
-  DeltaMeta
-};
+// ⭐ Missing ESM export added:
+export { AIBinaryDelta };
+
+// ---------------------------------------------------------
+//  COMMONJS FALLBACK EXPORT (Dual‑Mode)
+// ---------------------------------------------------------
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryDelta,
+    createAIBinaryDelta,
+    DeltaMeta
+  };
+}

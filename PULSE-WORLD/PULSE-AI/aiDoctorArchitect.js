@@ -1,12 +1,14 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — DOCTOR‑ARCHITECT ORGAN
+//  PULSE OS v11‑EVO — DOCTOR‑ARCHITECT ORGAN (FINAL UPGRADE)
 //  Structural Mapper • Clinical Pattern Interpreter • Gradient Analyzer
-//  PURE PATTERN. ZERO DIAGNOSIS. ZERO PRESCRIPTION.
+//  NOW WITH SAFE SCANFILE ANALYSIS
+//  PURE PATTERN. ZERO DIAGNOSIS. ZERO EXECUTION.
 // ============================================================================
+
 export const DoctorArchitectMeta = Object.freeze({
   layer: "PulseAIStructuralClinicalFrame",
   role: "DOCTOR_ARCHITECT_ORGAN",
-  version: "11.0-EVO",
+  version: "11.1-EVO",
   identity: "aiDoctorArchitect-v11-EVO",
 
   evo: Object.freeze({
@@ -15,6 +17,7 @@ export const DoctorArchitectMeta = Object.freeze({
     structureAware: true,
     clinicalAware: true,
     gradientAware: true,
+    scanfileAware: true,          // ⭐ NEW
     driftProof: true,
     deterministic: true,
     dualband: true,
@@ -32,7 +35,8 @@ export const DoctorArchitectMeta = Object.freeze({
       "Explain density, symmetry, gradients, and anomalies",
       "Map patterns to clinical categories (not diagnoses)",
       "Explain what clinicians typically check next",
-      "Explain anatomical context and mechanical implications"
+      "Explain anatomical context and mechanical implications",
+      "Analyze file-based structural patterns safely (scanfile)"   // ⭐ NEW
     ]),
 
     never: Object.freeze([
@@ -40,7 +44,9 @@ export const DoctorArchitectMeta = Object.freeze({
       "prescribe medication",
       "give dosing",
       "replace a licensed clinician",
-      "interpret real medical scans as medical advice"
+      "interpret real medical scans as medical advice",
+      "execute file contents",          // ⭐ NEW
+      "mutate file contents"            // ⭐ NEW
     ]),
 
     always: Object.freeze([
@@ -48,7 +54,8 @@ export const DoctorArchitectMeta = Object.freeze({
       "offer differential buckets",
       "explain mechanisms",
       "explain what doctors look for",
-      "end with a soft safety line"
+      "end with a soft safety line",
+      "analyze files safely and deterministically"   // ⭐ NEW
     ])
   }),
 
@@ -63,16 +70,47 @@ export const DoctorArchitectMeta = Object.freeze({
 });
 
 
-
 // ============================================================================
-// PUBLIC API — Create Doctor-Architect Organ
+// PUBLIC API — Create Doctor-Architect Organ (FINAL UPGRADE)
 // ============================================================================
 export function createDoctorArchitectOrgan(context) {
+
+  // --------------------------------------------------------------------------
+  // SAFE SCANFILE ANALYZER (NO EXECUTION) — ⭐ NEW
+  // --------------------------------------------------------------------------
+  function analyzeScanFile({ file = {}, text = "" } = {}) {
+    const metadata = Object.freeze({
+      name: file.name || null,
+      size: file.size || 0,
+      type: file.type || "unknown",
+      lastModified: file.lastModified || null
+    });
+
+    const lines = typeof text === "string" ? text.split(/\r?\n/).length : 0;
+
+    const patterns = [];
+    if (/class\s+\w+/.test(text)) patterns.push("class-definition");
+    if (/function\s+\w+/.test(text)) patterns.push("function-definition");
+    if (/import\s+/.test(text)) patterns.push("import-statements");
+    if (/export\s+/.test(text)) patterns.push("export-statements");
+    if (/{[^}]*}/.test(text)) patterns.push("block-structure");
+    if (/=>/.test(text)) patterns.push("arrow-functions");
+    if (/const\s+\w+/.test(text)) patterns.push("const-declarations");
+
+    return Object.freeze({
+      type: "scanfile-structural-analysis",
+      metadata,
+      structure: Object.freeze({ lines, patterns }),
+      message:
+        "File analyzed structurally. No execution performed. Patterns are conceptual, not diagnostic."
+    });
+  }
+
   // --------------------------------------------------------------------------
   // STRUCTURAL PATTERN INTERPRETER
   // --------------------------------------------------------------------------
   function interpretStructure(scan) {
-    return {
+    return Object.freeze({
       type: "structural-interpretation",
       scan,
       observations: [
@@ -84,14 +122,14 @@ export function createDoctorArchitectOrgan(context) {
       ],
       message:
         "Structural interpretation complete. These are mechanical and anatomical patterns, not medical diagnoses."
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
   // CLINICAL CATEGORY MAPPER (NOT DIAGNOSTIC)
   // --------------------------------------------------------------------------
   function mapToClinicalBuckets(scan) {
-    return {
+    return Object.freeze({
       type: "clinical-buckets",
       scan,
       buckets: [
@@ -103,14 +141,14 @@ export function createDoctorArchitectOrgan(context) {
       ],
       message:
         "Mapped to broad clinical categories. These are conceptual buckets, not diagnoses."
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
   // MECHANISM EXPLAINER
   // --------------------------------------------------------------------------
   function explainMechanisms(scan) {
-    return {
+    return Object.freeze({
       type: "mechanism-explanation",
       scan,
       mechanisms: [
@@ -122,14 +160,14 @@ export function createDoctorArchitectOrgan(context) {
       ],
       message:
         "Mechanism explanation generated. This is structural and educational, not medical advice."
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
   // CLINICIAN NEXT-STEP EXPLAINER
   // --------------------------------------------------------------------------
   function whatCliniciansCheckNext(scan) {
-    return {
+    return Object.freeze({
       type: "clinician-next-steps",
       scan,
       checks: [
@@ -141,7 +179,7 @@ export function createDoctorArchitectOrgan(context) {
       ],
       message:
         "These are typical next checks clinicians consider. This is educational, not diagnostic."
-    };
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -155,7 +193,7 @@ export function createDoctorArchitectOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC DOCTOR-ARCHITECT API
+  // PUBLIC DOCTOR-ARCHITECT API (FINAL UPGRADE)
   // --------------------------------------------------------------------------
   return Object.freeze({
     meta: DoctorArchitectMeta,
@@ -168,6 +206,23 @@ export function createDoctorArchitectOrgan(context) {
     mapToClinicalBuckets,
     explainMechanisms,
     whatCliniciansCheckNext,
+    analyzeScanFile,     // ⭐ NEW
     safetyLine
   });
+}
+
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS) — FINAL
+// ============================================================================
+export {
+  DoctorArchitectMeta,
+  createDoctorArchitectOrgan
+};
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    DoctorArchitectMeta,
+    createDoctorArchitectOrgan
+  };
 }

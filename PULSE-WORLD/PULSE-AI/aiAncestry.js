@@ -1,5 +1,5 @@
 /**
- * aiAncestry.js — Pulse OS v11‑EVO Organ
+ * aiAncestry.js — Pulse OS v11.2‑EVO Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   This organ is the **Ancestry System** of the organism.
@@ -19,14 +19,14 @@
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO
+//  META BLOCK — v11.2‑EVO
 // ---------------------------------------------------------
 
 export const AncestryMeta = Object.freeze({
   layer: "Ancestry",
   role: "ANCESTRY_SYSTEM",
-  version: "11.0-EVO",
-  identity: "aiAncestry-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiAncestry-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -35,8 +35,12 @@ export const AncestryMeta = Object.freeze({
     memoryAware: true,
     lineageAware: true,
     reproductionAware: true,
+    binaryEventAware: true,   // emits ancestry-event packets
+    pipelineAware: true,
+    reflexAware: true,
+    loggerAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -79,8 +83,12 @@ export class AIAncestry {
     if (!this.encoder || typeof this.encoder.encode !== "function") {
       throw new Error("AIAncestry requires aiBinaryAgent encoder");
     }
-    if (!this.memory || typeof this.memory.write !== "function") {
-      throw new Error("AIAncestry requires aiBinaryMemory");
+    if (
+      !this.memory ||
+      typeof this.memory.write !== "function" ||
+      typeof this.memory.read !== "function"
+    ) {
+      throw new Error("AIAncestry requires a binary memory organ with write/read");
     }
 
     this.lineage = [];
@@ -214,9 +222,17 @@ export class AIAncestry {
 }
 
 // ---------------------------------------------------------
-// FACTORY EXPORT
+// FACTORY EXPORT (ESM + CommonJS)
 // ---------------------------------------------------------
 
 export function createAIAncestry(config) {
   return new AIAncestry(config);
+}
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIAncestry,
+    createAIAncestry,
+    AncestryMeta
+  };
 }

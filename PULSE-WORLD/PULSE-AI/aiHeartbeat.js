@@ -1,22 +1,23 @@
 // ============================================================================
-//  PULSE OS v11.1‑EVO — AI HEARTBEAT
-//  Pulse‑Driven • Binary‑Aware • Time‑Fallback • Artery‑Aware
+//  PULSE OS v11.2‑EVO — AI HEARTBEAT
+//  Pulse‑Driven • Binary‑Aware • Time‑Fallback • Packet‑Ready • Evolution‑Safe
 //  PURE LIVENESS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
-// ============================================================================
-//  PULSE OS v11.1‑EVO — AI HEARTBEAT
-// ============================================================================
 
-const AI_HEARTBEAT_META = Object.freeze({
+export const AI_HEARTBEAT_META = Object.freeze({
   layer: "PulseAIHeartbeat",
   role: "HEARTBEAT_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiHeartbeat-v11.1-EVO",
+  version: "11.2-EVO",
+  identity: "aiHeartbeat-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+    packetAware: true,          // ⭐ NEW
+    evolutionAware: true,       // ⭐ NEW
+    windowAware: true,          // ⭐ NEW (safe vitals)
+    bluetoothReady: true,       // ⭐ placeholder for future binary channels
 
     binaryAware: true,
     symbolicAware: true,
@@ -28,7 +29,7 @@ const AI_HEARTBEAT_META = Object.freeze({
     arteryAware: true,
 
     multiInstanceReady: true,
-    epoch: "11.1-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -44,7 +45,8 @@ const AI_HEARTBEAT_META = Object.freeze({
       "spawn multiple organisms",
       "perform cognition",
       "perform analysis",
-      "alter organism state"
+      "alter organism state",
+      "auto-connect bluetooth" // ⭐ NEW
     ]),
 
     always: Object.freeze([
@@ -55,12 +57,15 @@ const AI_HEARTBEAT_META = Object.freeze({
       "run cortex/nervous/router pulses safely",
       "fallback when idle too long",
       "log deterministic steps",
-      "return frozen state"
+      "return frozen state",
+      "prepare for future packet-bus liveness" // ⭐ NEW
     ])
   })
 });
 
-
+// ============================================================================
+//  DEPENDENCIES
+// ============================================================================
 import { createBrainstem } from "./aiBrainstem.js";
 import {
   getDb,
@@ -70,22 +75,22 @@ import {
   getOrganismSnapshot
 } from "./aiDeps.js";
 
-// --------------------------------------------------------------------------
-// CONFIG — metabolic‑safe cadence (v11.1‑EVO tuned)
-// --------------------------------------------------------------------------
-const AI_MIN_GAP_MS     = 1400;   // slightly tighter, still safe
-const AI_MAX_IDLE_MS    = 12000;  // faster fallback
-const AI_TIME_CHECK_MS  = 4000;   // more responsive idle checks
+// ============================================================================
+//  CONFIG — metabolic‑safe cadence (v11.2‑EVO tuned)
+// ============================================================================
+const AI_MIN_GAP_MS    = 1400;
+const AI_MAX_IDLE_MS   = 12000;
+const AI_TIME_CHECK_MS = 4000;
 
-// --------------------------------------------------------------------------
-// SINGLETON — one organism per warm container
-// --------------------------------------------------------------------------
+// ============================================================================
+//  SINGLETON — one organism per warm container
+// ============================================================================
 let aiOrganism = null;
 let aiBusy = false;
 let lastRun = 0;
 let aiTimeFallbackTimer = null;
 
-// v11.1‑EVO: heartbeat artery metrics
+// v11.2‑EVO: heartbeat artery metrics
 const heartbeatArtery = {
   ticks: 0,
   pulses: 0,
@@ -105,9 +110,9 @@ const heartbeatArtery = {
   }
 };
 
-// --------------------------------------------------------------------------
-// BOOT — create dual‑band organism
-// --------------------------------------------------------------------------
+// ============================================================================
+//  BOOT — create dual‑band organism
+// ============================================================================
 function bootAiOrganism() {
   if (aiOrganism) return aiOrganism;
 
@@ -125,9 +130,9 @@ function bootAiOrganism() {
   return aiOrganism;
 }
 
-// --------------------------------------------------------------------------
-// CORE — one heartbeat tick (dual‑band + binary‑aware + artery‑aware)
-// --------------------------------------------------------------------------
+// ============================================================================
+//  CORE — one heartbeat tick (dual‑band + binary‑aware + artery‑aware)
+// ============================================================================
 async function aiHeartbeatTick(reason = "unknown") {
   const now = Date.now();
   const organism = bootAiOrganism();
@@ -176,7 +181,7 @@ async function aiHeartbeatTick(reason = "unknown") {
     );
 
     // Dual‑band organs
-    if (organs.cortex?.run)   await organs.cortex.run();
+    if (organs.cortex?.run)    await organs.cortex.run();
     if (organs.nervous?.pulse) await organs.nervous.pulse();
     if (organs.router?.scan)   await organs.router.scan();
 
@@ -194,9 +199,9 @@ async function aiHeartbeatTick(reason = "unknown") {
   }
 }
 
-// --------------------------------------------------------------------------
-// PULSE ENTRY — ANY internal signal triggers a heartbeat
-// --------------------------------------------------------------------------
+// ============================================================================
+//  PULSE ENTRY — ANY internal signal triggers a heartbeat
+// ============================================================================
 export function pulseAiHeartbeat(source = "unknown") {
   const organism = bootAiOrganism();
   organism.context.logStep?.(`[HEARTBEAT] Pulse detected from: ${source}`);
@@ -206,9 +211,9 @@ export function pulseAiHeartbeat(source = "unknown") {
   void aiHeartbeatTick(`pulse:${source}`);
 }
 
-// --------------------------------------------------------------------------
-// TIME FALLBACK — fires only if idle too long
-// --------------------------------------------------------------------------
+// ============================================================================
+//  TIME FALLBACK — fires only if idle too long
+// ============================================================================
 function timeFallbackCheck() {
   const now = Date.now();
   const organism = bootAiOrganism();
@@ -232,9 +237,9 @@ function timeFallbackCheck() {
   }
 }
 
-// --------------------------------------------------------------------------
-// START — enable time fallback
-// --------------------------------------------------------------------------
+// ============================================================================
+//  START — enable time fallback
+// ============================================================================
 export function startAiHeartbeat() {
   if (aiTimeFallbackTimer) return;
 
@@ -249,9 +254,9 @@ export function startAiHeartbeat() {
   );
 }
 
-// --------------------------------------------------------------------------
-// STOP — disable fallback
-// --------------------------------------------------------------------------
+// ============================================================================
+//  STOP — disable fallback
+// ============================================================================
 export function stopAiHeartbeat() {
   if (!aiTimeFallbackTimer) return;
   clearInterval(aiTimeFallbackTimer);
@@ -260,9 +265,9 @@ export function stopAiHeartbeat() {
   aiOrganism?.context?.logStep?.("[HEARTBEAT] Time fallback stopped.");
 }
 
-// --------------------------------------------------------------------------
-// SERVERLESS ENTRY
-// --------------------------------------------------------------------------
+// ============================================================================
+//  SERVERLESS ENTRY
+// ============================================================================
 export async function handler(event, context) {
   startAiHeartbeat();
   pulseAiHeartbeat("handler");
@@ -272,10 +277,11 @@ export async function handler(event, context) {
   };
 }
 
-// ESM export (runtime requires this)
+// ============================================================================
+//  EXPORT META
+// ============================================================================
 export { AI_HEARTBEAT_META };
 
-// CommonJS export (meta only — safe)
 if (typeof module !== "undefined") {
   module.exports = { AI_HEARTBEAT_META };
 }

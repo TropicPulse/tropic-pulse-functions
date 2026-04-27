@@ -1,6 +1,7 @@
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/PULSE-AI/aiPower.js
 // LAYER: POWER ORGAN (Grid + Continuance + Drift Awareness)
+// PULSE OS v11.2‑EVO+ — READ‑ONLY • DUALBAND • DETERMINISTIC
 // ============================================================================
 //
 // ROLE:
@@ -17,11 +18,12 @@
 //   • ZERO RANDOMNESS.
 //   • DETERMINISTIC ANALYSIS ONLY.
 // ============================================================================
+
 export const PowerMeta = Object.freeze({
   layer: "PulseAIPowerFrame",
   role: "POWER_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiPower-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiPower-v11.2-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -36,7 +38,7 @@ export const PowerMeta = Object.freeze({
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO"
   }),
 
   contract: Object.freeze({
@@ -50,7 +52,8 @@ export const PowerMeta = Object.freeze({
       "expose UID or identity anchors",
       "introduce randomness",
       "override evolution logic",
-      "override router or cortex decisions"
+      "override router or cortex decisions",
+      "generate symbolic state"
     ]),
 
     always: Object.freeze([
@@ -60,7 +63,9 @@ export const PowerMeta = Object.freeze({
       "detect fluctuations and outages safely",
       "integrate organism snapshot",
       "log deterministic steps",
-      "return frozen results"
+      "return frozen results",
+      "remain drift-proof",
+      "remain non-blocking"
     ])
   })
 });
@@ -305,7 +310,7 @@ export function createPowerAPI(db, evolutionAPI, dualBand = null) {
 
     // ----------------------------------------------------------------------
     // OWNER‑ONLY — EVOLUTIONARY DRIFT (via aiEvolution)
-// ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     async getPowerEvolutionOverview(context) {
       if (!context.userIsOwner || !evolutionAPI?.analyzeSchema) return null;
       context.logStep?.("aiPower: schema drift analysis");
@@ -324,4 +329,14 @@ export function createPowerAPI(db, evolutionAPI, dualBand = null) {
       return evolutionAPI.analyzeRoute(context, "power");
     }
   });
+}
+
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    PowerMeta,
+    createPowerAPI
+  };
 }

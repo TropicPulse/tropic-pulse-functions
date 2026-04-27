@@ -181,3 +181,20 @@ export function createDoctorOrgan(context) {
     safetyLine
   });
 }
+// ---------------------------------------------------------
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ---------------------------------------------------------
+
+// ESM
+export {
+  DoctorMeta,
+  createDoctorOrgan
+};
+
+// CommonJS
+if (typeof module !== "undefined") {
+  module.exports = {
+    DoctorMeta,
+    createDoctorOrgan
+  };
+}

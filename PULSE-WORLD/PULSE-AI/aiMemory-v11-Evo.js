@@ -1,38 +1,37 @@
-/**
- * aiMemory.js — Pulse OS v11‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Memory Layer** of Pulse OS (dualband).
- *
- *   It stores:
- *     - binary segments
- *     - binary keys
- *     - binary values
- *     - binary snapshots
- *
- *   It is the organism’s:
- *     • hippocampus
- *     • structural memory engine
- *     • persistent substrate
- *     • memory artery source
- *
- *   It includes:
- *     - memory throughput
- *     - memory pressure
- *     - memory cost
- *     - memory budget
- *     - descriptive buckets
- */
+// ============================================================================
+//  aiMemory.js — Pulse OS v11.2‑EVO Organ
+//  Pure PulseCoreMemory Adapter • Dualband • Binary‑Only • Zero Local State
+// ----------------------------------------------------------------------------
+//  CANONICAL ROLE:
+//    This organ is the **Memory Layer Adapter** of Pulse OS (dualband).
+//
+//    It does NOT own storage.
+//    It does NOT cache locally.
+//    It does NOT interpret symbolic state.
+//
+//    It ONLY:
+//      • validates binary keys + values
+//      • forwards reads/writes to PulseCoreMemory
+//      • computes memory artery metrics (throughput, pressure, cost, budget)
+//      • exposes window‑safe memory snapshots
+//
+//  STORAGE TRUTH:
+//    • All real storage lives in PulseCoreMemory.
+//    • All caching, speed, and power optimizations are handled by PulseCoreMemory
+//      and lower layers — organism‑wide, not per‑organ.
+// ============================================================================
+
+// You can adjust this import path to your actual PulseCoreMemory location.
+import { PulseCoreMemory } from "./pulseCoreMemory.js";
 
 // ---------------------------------------------------------
-//  META BLOCK — v11‑EVO (UPGRADED)
+//  META BLOCK — v11.2‑EVO
 // ---------------------------------------------------------
-
 export const MemoryMeta = Object.freeze({
   layer: "OrganismMemory",
   role: "MEMORY_LAYER",
-  version: "11.0-EVO",
-  identity: "aiMemory-v11-EVO",
+  version: "11.2-EVO",
+  identity: "aiMemory-v11.2-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -40,44 +39,59 @@ export const MemoryMeta = Object.freeze({
     dualband: true,
     binaryAware: true,
     memoryAware: true,
+    packetAware: true,
+    windowAware: true,
+    bluetoothReady: true,      // future memory event channels
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    readOnly: false,           // can write via PulseCoreMemory
+    epoch: "v11.2-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic memory storage with artery metrics for throughput, pressure, cost, and budget.",
+      "Provide deterministic memory access over PulseCoreMemory with artery metrics for throughput, pressure, cost, and budget.",
 
     never: Object.freeze([
       "store non-binary data",
       "interpret symbolic state",
-      "mutate external organs",
-      "introduce randomness"
+      "mutate external organs directly",
+      "introduce randomness",
+      "maintain its own storage backend",
+      "bypass PulseCoreMemory"
     ]),
 
     always: Object.freeze([
       "validate binary inputs",
-      "store keys and values in binary",
-      "compute memory artery metrics",
+      "use PulseCoreMemory as the single source of truth",
+      "compute memory artery metrics deterministically",
       "remain pure and minimal",
-      "treat all memory segments as read-only data"
+      "treat all memory segments as read-only data from this organ’s perspective"
     ])
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION (LOGIC UNCHANGED)
-// ---------------------------------------------------------
-
-class AIMemory {
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.2‑EVO (PulseCoreMemory‑only)
+// ============================================================================
+export class AIMemory {
   constructor(config = {}) {
-    this.id = config.id || 'memory';
-    this.maxBits = config.maxBits || 4096;
+    this.id = config.id || MemoryMeta.identity;
+
+    // PulseCoreMemory instance (organism‑wide memory spine)
+    this.core = config.core || PulseCoreMemory;
     this.trace = !!config.trace;
 
-    this.segments = new Map();
+    // Max bits is now a logical constraint, not a storage limit.
+    this.maxBits = config.maxBits || 4096;
+
+    if (!this.core || typeof this.core.writeBinary !== "function" || typeof this.core.readBinary !== "function") {
+      throw new Error("AIMemory requires PulseCoreMemory with writeBinary(key, value) and readBinary(key)");
+    }
   }
 
+  // --------------------------------------------------------------------------
+  //  ARTERY METRICS — computed from PulseCoreMemory metadata
+  // --------------------------------------------------------------------------
   _computeMemoryThroughput(segmentCount, avgSize) {
     const countFactor = Math.min(1, segmentCount / 100);
     const sizeFactor = Math.min(1, avgSize / this.maxBits);
@@ -124,20 +138,16 @@ class AIMemory {
     return "none";
   }
 
+  // PulseCoreMemory is assumed to expose a metadata view.
+  // If not, you can adapt this to your actual API.
   _computeMemoryArtery() {
-    const keys = Array.from(this.segments.keys());
-    const segmentCount = keys.length;
+    const meta = this.core.getBinaryMeta
+      ? this.core.getBinaryMeta()
+      : { segmentCount: 0, totalBits: 0, avgSize: 0 };
 
-    let totalBits = 0;
-    let avgSize = 0;
-
-    if (segmentCount > 0) {
-      for (const key of keys) {
-        const val = this.segments.get(key);
-        totalBits += key.length + val.length;
-      }
-      avgSize = totalBits / segmentCount;
-    }
+    const segmentCount = meta.segmentCount || 0;
+    const totalBits = meta.totalBits || 0;
+    const avgSize = meta.avgSize || 0;
 
     const throughput = this._computeMemoryThroughput(segmentCount, avgSize);
     const pressure   = this._computeMemoryPressure(totalBits, this.maxBits);
@@ -163,70 +173,101 @@ class AIMemory {
     };
   }
 
+  // --------------------------------------------------------------------------
+  //  WRITE — forwards directly to PulseCoreMemory
+  // --------------------------------------------------------------------------
   write(keyBin, valueBin) {
     this._assertBinary(keyBin);
     this._assertBinary(valueBin);
 
-    if (valueBin.length > this.maxBits) {
-      this._trace('write:truncated', { keyBin, originalBits: valueBin.length });
-      valueBin = valueBin.slice(-this.maxBits);
+    let toStore = valueBin;
+    if (toStore.length > this.maxBits) {
+      this._trace("write:truncated", { keyBin, originalBits: toStore.length });
+      toStore = toStore.slice(-this.maxBits);
     }
 
-    this.segments.set(keyBin, valueBin);
+    this.core.writeBinary(keyBin, toStore);
 
     const artery = this._computeMemoryArtery();
-    this._trace('write', { keyBin, valueBin, artery });
+    this._trace("write", { keyBin, valueBits: toStore.length, artery });
   }
 
+  // --------------------------------------------------------------------------
+  //  READ — forwards directly to PulseCoreMemory
+  // --------------------------------------------------------------------------
   read(keyBin) {
     this._assertBinary(keyBin);
-    const value = this.segments.get(keyBin);
 
+    const value = this.core.readBinary(keyBin);
     const artery = this._computeMemoryArtery();
-    this._trace('read', { keyBin, value, artery });
+
+    this._trace("read", { keyBin, valueBits: value ? value.length : 0, artery });
 
     return value;
   }
 
+  // --------------------------------------------------------------------------
+  //  DELETE — forwards directly to PulseCoreMemory
+  // --------------------------------------------------------------------------
   delete(keyBin) {
     this._assertBinary(keyBin);
-    const existed = this.segments.delete(keyBin);
+
+    const existed = this.core.deleteBinary
+      ? this.core.deleteBinary(keyBin)
+      : false;
 
     const artery = this._computeMemoryArtery();
-    this._trace('delete', { keyBin, existed, artery });
+    this._trace("delete", { keyBin, existed, artery });
   }
 
+  // --------------------------------------------------------------------------
+  //  LIST KEYS — delegated to PulseCoreMemory
+  // --------------------------------------------------------------------------
   listKeys() {
-    const keys = Array.from(this.segments.keys());
-    const artery = this._computeMemoryArtery();
+    const keys = this.core.listBinaryKeys
+      ? this.core.listBinaryKeys()
+      : [];
 
-    this._trace('listKeys', { keys, artery });
+    const artery = this._computeMemoryArtery();
+    this._trace("listKeys", { keyCount: keys.length, artery });
+
     return keys;
   }
 
+  // --------------------------------------------------------------------------
+  //  SNAPSHOT — window‑safe binary snapshot of memory state
+  // --------------------------------------------------------------------------
   snapshot() {
-    const keys = Array.from(this.segments.keys()).sort();
-    let out = '';
+    // PulseCoreMemory may expose a snapshot; if not, we synthesize one.
+    let out = "";
 
-    for (const key of keys) {
-      const val = this.segments.get(key);
-      out += key + val;
+    if (this.core.snapshotBinary) {
+      out = this.core.snapshotBinary(this.maxBits);
+    } else {
+      const keys = this.listKeys().slice().sort();
+      for (const key of keys) {
+        const val = this.core.readBinary(key) || "";
+        out += key + val;
+      }
     }
 
     if (out.length > this.maxBits) {
-      this._trace('snapshot:truncated', { originalBits: out.length });
+      this._trace("snapshot:truncated", { originalBits: out.length });
       out = out.slice(-this.maxBits);
     }
 
     const artery = this._computeMemoryArtery();
-    this._trace('snapshot', { bits: out.length, artery });
+    this._trace("snapshot", { bits: out.length, artery });
 
     return out;
   }
 
+  // --------------------------------------------------------------------------
+  //  VALIDATION + TRACE
+  // --------------------------------------------------------------------------
   _assertBinary(str) {
-    if (typeof str !== 'string' || !/^[01]+$/.test(str)) {
-      throw new TypeError('expected binary string');
+    if (typeof str !== "string" || !/^[01]+$/.test(str)) {
+      throw new TypeError("expected binary string");
     }
   }
 
@@ -236,12 +277,20 @@ class AIMemory {
   }
 }
 
-function createAIMemory(config) {
+// ============================================================================
+//  FACTORY
+// ============================================================================
+export function createAIMemory(config) {
   return new AIMemory(config);
 }
 
-module.exports = {
-  AIMemory,
-  createAIMemory,
-  MemoryMeta
-};
+// ============================================================================
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+// ============================================================================
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIMemory,
+    createAIMemory,
+    MemoryMeta
+  };
+}

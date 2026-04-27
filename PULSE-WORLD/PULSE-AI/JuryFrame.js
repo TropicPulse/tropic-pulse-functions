@@ -1,41 +1,56 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — JURY FRAME ORGAN
+//  PULSE OS v11.2‑EVO+ — JURY FRAME ORGAN
 //  World-Lens Registry for aiOvermind
 //  PURE FUNCTIONAL • ZERO STATE • ZERO MUTATION
 // ============================================================================
 
 export const JuryFrameMeta = Object.freeze({
+  type: "Cognitive",
+  subsystem: "aiJuryFrame",
   layer: "PulseAIJuryFrame",
   role: "JURY_FRAME_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiJuryFrame-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiJuryFrame-v11.2-EVO+",
 
-  dualband: true,
-  deterministic: true,
-  binaryAware: false,
-  safetyAware: true,
-  overmindAware: true,
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: false,
+    symbolicAware: true,
+    safetyAware: true,
+    overmindAware: true,
+    readOnly: true,
+    mutationSafe: true,
+    nonBlocking: true,
+    multiInstanceReady: true,
+    epoch: "11.2-EVO+"
+  }),
 
   contract: Object.freeze({
-    purpose: [
+    purpose: Object.freeze([
       "Provide reusable world-lens functions to aiOvermind",
       "Centralize lens logic for consistency and auditing",
       "Support consensus, variance, ambiguity, and breakthrough detection"
-    ],
-    never: [
+    ]),
+    never: Object.freeze([
       "store state",
       "mutate context",
       "write to memory",
       "override aiSafetyFrame",
       "introduce randomness"
-    ],
-    always: [
+    ]),
+    always: Object.freeze([
       "stay pure and functional",
       "return deterministic results",
       "be composable by aiOvermind",
       "respect safety and persona boundaries"
-    ]
-  })
+    ])
+  }),
+
+  boundaryReflex() {
+    return "JuryFrame is pure and stateless — it only evaluates candidates, never mutates context or safety.";
+  }
 });
 
 // ============================================================================
@@ -183,4 +198,15 @@ function getText(candidate) {
   if (typeof candidate === "string") return candidate;
   if (typeof candidate.text === "string") return candidate.text;
   return JSON.stringify(candidate);
+}
+
+// ---------------------------------------------------------------------------
+//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+// ---------------------------------------------------------------------------
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    JuryFrameMeta,
+    createJuryFrame
+  };
 }

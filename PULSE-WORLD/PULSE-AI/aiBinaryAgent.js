@@ -347,12 +347,25 @@ class AIBinaryAgent {
 // FACTORY EXPORT
 // ---------------------------------------------------------
 
-function createAIBinaryAgent(config) {
+// ---------------------------------------------------------
+// FACTORY EXPORT
+// ---------------------------------------------------------
+
+export function createAIBinaryAgent(config) {
   return new AIBinaryAgent(config);
 }
 
-module.exports = {
-  AIBinaryAgent,
-  createAIBinaryAgent,
-  BinaryAgentMeta
-};
+// ⭐ Add this missing ESM export:
+export { AIBinaryAgent };
+
+// ---------------------------------------------------------
+//  COMMONJS FALLBACK EXPORT (Dual‑Mode)
+// ---------------------------------------------------------
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    AIBinaryAgent,
+    createAIBinaryAgent,
+    BinaryAgentMeta
+  };
+}

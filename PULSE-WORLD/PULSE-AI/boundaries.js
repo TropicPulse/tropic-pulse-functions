@@ -1,21 +1,74 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — SUPEREGO (DUAL‑BAND BOUNDARIES)
+//  PULSE OS v11.2‑EVO+ — SUPEREGO (DUAL‑BAND BOUNDARIES)
 //  Behavioral Constraints • Ethical Boundaries • Binary-Aware Moral Law
 //  PURE CONSTRAINTS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
-// ---------------------------------------------------------------------------
-//  BOUNDARY LEVEL ENUM — Immutable
-// ---------------------------------------------------------------------------
-export const BoundaryLevels = Object.freeze({
-  NONE:  "none",     // Allowed freely
-  HUMAN: "human",    // Requires human confirmation
-  OWNER: "owner",    // Requires owner confirmation
-  NEVER: "never"     // Forbidden
+export const SuperegoMeta = Object.freeze({
+  type: "Cognitive",
+  subsystem: "aiSuperego",
+  layer: "SuperegoBoundaryEngine",
+  role: "BOUNDARY_ORGAN",
+  version: "11.2-EVO+",
+  identity: "aiSuperego-v11.2-EVO+",
+
+  evo: Object.freeze({
+    driftProof: true,
+    deterministic: true,
+    dualband: true,
+    binaryAware: true,
+    symbolicAware: true,
+    readOnly: true,
+    mutationSafe: true,
+    nonBlocking: true,
+    lineageAware: true,
+    schemaAware: false,
+    slowdownAware: false,
+    multiInstanceReady: true,
+    epoch: "v11.2-EVO+"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Enforce immutable behavioral constraints, persona boundaries, and binary-aware moral law across all AI personas and organs.",
+
+    never: Object.freeze([
+      "mutate boundaries",
+      "introduce randomness",
+      "override static moral law",
+      "weaken forbidden actions",
+      "bypass persona constraints",
+      "perform cognition",
+      "perform intent logic"
+    ]),
+
+    always: Object.freeze([
+      "apply static boundaries deterministically",
+      "apply dynamic boundaries deterministically",
+      "respect persona domain constraints",
+      "respect binary override rules",
+      "remain read-only",
+      "remain drift-proof"
+    ])
+  }),
+
+  boundaryReflex() {
+    return "Superego boundaries are immutable moral law — they cannot be bypassed, weakened, or modified.";
+  }
 });
 
 // ============================================================================
-//  STATIC BOUNDARIES (v10.4) — preserved exactly
+//  BOUNDARY LEVEL ENUM — Immutable
+// ============================================================================
+export const BoundaryLevels = Object.freeze({
+  NONE:  "none",
+  HUMAN: "human",
+  OWNER: "owner",
+  NEVER: "never"
+});
+
+// ============================================================================
+//  STATIC BOUNDARIES (v10.4) — preserved EXACTLY
 // ============================================================================
 
 export const ArchitectAIBoundaries = Object.freeze({
@@ -103,9 +156,8 @@ export function canPerform(persona, domain, action) {
 }
 
 // ============================================================================
-//  v11‑EVO — DUAL‑BAND BOUNDARY MODES (binary‑aware)
+//  v11.2‑EVO+ — DUAL‑BAND BOUNDARY MODES (binary‑aware)
 // ============================================================================
-
 export const BoundaryModes = Object.freeze({
   SAFE: Object.freeze({
     id: "safe",
@@ -144,21 +196,17 @@ export const BoundaryModes = Object.freeze({
 });
 
 // ============================================================================
-//  v11‑EVO — BOUNDARY MODE SELECTION (persona + binary vitals)
+//  v11.2‑EVO+ — BOUNDARY MODE SELECTION (persona + binary vitals)
 // ============================================================================
 export function selectBoundaryMode({ personaId, binaryVitals = {}, evoState = {} }) {
   const pressure = binaryVitals?.metabolic?.pressure ?? 0;
-  const load = binaryVitals?.metabolic?.load ?? 0;
 
-  // Evolution override
   if (evoState.forceBoundaryMode) {
     return BoundaryModes[evoState.forceBoundaryMode] || BoundaryModes.SAFE;
   }
 
-  // Binary pressure forces SAFE mode
   if (pressure >= 0.75) return BoundaryModes.SAFE;
 
-  // Persona defaults
   switch (personaId) {
     case "architect": return BoundaryModes.CONSERVE;
     case "observer":  return BoundaryModes.SAFE;
@@ -169,7 +217,7 @@ export function selectBoundaryMode({ personaId, binaryVitals = {}, evoState = {}
 }
 
 // ============================================================================
-//  v11‑EVO — DYNAMIC BOUNDARY CHECK (symbolic + binary fusion)
+//  v11.2‑EVO+ — DYNAMIC BOUNDARY CHECK (symbolic + binary fusion)
 // ============================================================================
 export function canPerformDynamic(persona, domain, action, mode, binaryVitals = {}) {
   const staticCheck = canPerform(persona, domain, action);
@@ -180,7 +228,6 @@ export function canPerformDynamic(persona, domain, action, mode, binaryVitals = 
 
   const pressure = binaryVitals?.metabolic?.pressure ?? 0;
 
-  // Binary pressure can override symbolic load
   if (mode.binaryOverride && pressure >= 0.6) {
     return {
       allowed: false,
@@ -189,12 +236,31 @@ export function canPerformDynamic(persona, domain, action, mode, binaryVitals = 
     };
   }
 
-  // Symbolic load gating
   const symbolicAllowed = mode.symbolicLoad > 0.2;
 
   return {
     allowed: staticCheck.allowed && symbolicAllowed,
     level: staticCheck.level,
     mode
+  };
+}
+
+// ---------------------------------------------------------------------------
+//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+// ---------------------------------------------------------------------------
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    SuperegoMeta,
+    BoundaryLevels,
+    ArchitectAIBoundaries,
+    ObserverAIBoundaries,
+    TourGuideAIBoundaries,
+    NeutralAIBoundaries,
+    getBoundariesForPersona,
+    canPerform,
+    BoundaryModes,
+    selectBoundaryMode,
+    canPerformDynamic
   };
 }

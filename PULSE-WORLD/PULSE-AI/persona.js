@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — THE IDENTITY LAYER (DUAL‑BAND)
+//  PULSE OS v11.2‑EVO+ — THE IDENTITY LAYER (DUAL‑BAND)
 //  Self‑Definition • Role Assignment • Binary‑Aware Identity Drift
 //  PURE IDENTITY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -22,13 +22,15 @@ import {
 } from "./boundaries.js";
 
 // ============================================================================
-// META — Persona Engine (v11‑EVO)
+// META — Persona Engine (v11.2‑EVO+)
 // ============================================================================
 export const PersonaMeta = Object.freeze({
+  type: "Cognitive",
+  subsystem: "aiPersona",
   layer: "PulseAIIdentityLayer",
   role: "PERSONA_ENGINE",
-  version: "11.1-EVO",
-  identity: "aiPersonaEngine-v11-EVO",
+  version: "11.2-EVO+",
+  identity: "aiPersonaEngine-v11.2-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -40,7 +42,7 @@ export const PersonaMeta = Object.freeze({
     boundaryAware: true,
     permissionAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    epoch: "11.2-EVO+"
   }),
 
   contract: Object.freeze({
@@ -63,7 +65,11 @@ export const PersonaMeta = Object.freeze({
       "select boundary mode deterministically",
       "remain read-only and identity-only"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "Persona resolution is identity-only and read-only — it cannot grant power beyond Ego and Boundaries.";
+  }
 });
 
 // ============================================================================
@@ -148,7 +154,7 @@ export function getPersona(personaId, userId = null) {
 }
 
 // ============================================================================
-//  v11‑EVO — ARCHETYPE MAP (non-destructive)
+//  v11.2‑EVO+ — ARCHETYPE MAP (non-destructive)
 // ============================================================================
 export const PersonaArchetypes = Object.freeze({
   architect: "aiArchitect.js",
@@ -159,7 +165,7 @@ export const PersonaArchetypes = Object.freeze({
 });
 
 // ============================================================================
-//  v11‑EVO — DUAL‑BAND BIAS (binary vs symbolic)
+//  v11.2‑EVO+ — DUAL‑BAND BIAS (binary vs symbolic)
 // ============================================================================
 export const PersonaBandBias = Object.freeze({
   architect: "binary-heavy",
@@ -170,7 +176,7 @@ export const PersonaBandBias = Object.freeze({
 });
 
 // ============================================================================
-//  v11‑EVO — EVOLUTIONARY DRIFT RULES
+//  v11.2‑EVO+ — EVOLUTIONARY DRIFT RULES
 // ============================================================================
 export const PersonaEvolutionRules = Object.freeze({
   architect: Object.freeze({
@@ -201,7 +207,7 @@ export const PersonaEvolutionRules = Object.freeze({
 });
 
 // ============================================================================
-//  v11‑EVO — PERSONA ENGINE (Dual‑Band Identity Fusion)
+//  v11.2‑EVO+ — PERSONA ENGINE (Dual‑Band Identity Fusion)
 // ============================================================================
 export function resolvePersonaV11({
   personaId,
@@ -232,23 +238,19 @@ export function resolvePersonaV11({
   return Object.freeze({
     ...base,
 
-    // v11‑EVO identity extensions
     archetypePage: PersonaArchetypes[personaId] || null,
     bandBias: PersonaBandBias[personaId] || "balanced",
     evolutionRules: PersonaEvolutionRules[personaId] || {},
     boundaryMode,
 
-    // Router → Persona → Cortex hint propagation
     routerHints
   });
 }
 
 // ============================================================================
-//  v11‑EVO — PUBLIC ENGINE FACTORY (used by Brainstem)
+//  v11.2‑EVO+ — PUBLIC ENGINE FACTORY (used by Brainstem)
 // ============================================================================
 export function createPersonaEngine({ context = {}, db } = {}) {
-  // Engine is pure: no internal state, no randomness.
-  // We just expose a deterministic resolve() API around resolvePersonaV11.
   function resolve({ personaId, evoState = {}, routerHints = {}, binaryVitals = {} } = {}) {
     const userId = context.userId || null;
 
@@ -265,4 +267,23 @@ export function createPersonaEngine({ context = {}, db } = {}) {
     meta: PersonaMeta,
     resolve
   });
+}
+
+// ---------------------------------------------------------------------------
+//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+// ---------------------------------------------------------------------------
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    PersonaMeta,
+    OWNER_ID,
+    Personas,
+    PersonaRegistry,
+    PersonaArchetypes,
+    PersonaBandBias,
+    PersonaEvolutionRules,
+    getPersona,
+    resolvePersonaV11,
+    createPersonaEngine
+  };
 }
