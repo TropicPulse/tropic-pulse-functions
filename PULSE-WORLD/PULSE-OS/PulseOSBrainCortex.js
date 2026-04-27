@@ -131,6 +131,10 @@ export const PulseOSCortexMeta = Object.freeze({
     return: "deterministic cortex state + signatures"
   })
 });
+export function bootCortex(Brain, options = {}) {
+  const cortex = createPulseOSCortex({ Brain });
+  return cortex.boot(options);
+}
 
 // ============================================================================
 //  FACTORY — Cortex receives the CNS Brain directly
