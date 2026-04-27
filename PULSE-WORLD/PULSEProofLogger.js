@@ -1,5 +1,5 @@
 // ============================================================================
-//  PulseProofLogger.js — v11‑EVO
+//  PulseProofLogger.js — v12‑EVO
 //  PROOF LOGGER • RECORD LAYER • EVOLUTION LEDGER • EXTERNAL WITNESS
 //
 //  METAPHOR:
@@ -8,12 +8,13 @@
 //  - It does NOT influence the organism — it only documents it.
 //  - It is the black box recorder of Pulse OS.
 //
-//  v11‑EVO UPGRADE:
+//  v12‑EVO UPGRADE:
 //  - Binary‑aware: can log binary arteries (BinaryProxy / BinaryRouter / Mesh / Send / Pulse).
 //  - Dual‑band: understands legacy + v11‑EVO subsystems without changing behavior.
 //  - Deterministic formatting: no randomness, no hidden branches.
 //  - Telemetry packets are pure records, safe to persist or replay.
 //  - Still ZERO routing, ZERO healing, ZERO compute, ZERO mutation.
+//  - NEW: Backend‑safe Firebase logging for every log/warn/error/critical.
 // ============================================================================
 
 
@@ -24,11 +25,11 @@ const _c = { ...console };
 
 
 // ============================================================================
-//  VERSION MAP — Proof Layer Genome (v11‑EVO)
+//  VERSION MAP — Proof Layer Genome (v12‑EVO)
 // ============================================================================
 export const PulseVersion = {
-  proof: "11.0",
-  logger: "11.0",
+  proof: "12.0",
+  logger: "12.0",
   renderer: "11.0",
   legacy: "10.x"
 };
@@ -128,13 +129,33 @@ function normalizeArgs(args) {
 
 
 // ============================================================================
-//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v11‑EVO)
+//  FIREBASE LOGGING BRIDGE — FRONTEND → PULSE‑WORLD BACKEND
+// ============================================================================
+async function sendToFirebase(level, message, rest) {
+  try {
+    // Avoid blowing up in non‑browser environments
+    if (typeof fetch === "undefined") return;
+
+    await fetch("/PULSE-WORLD/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ level, message, rest })
+    });
+  } catch (e) {
+    _c.warn("PulseProofLogger: Firebase logging failed:", e);
+  }
+}
+
+
+// ============================================================================
+//  CORE LOGGING FUNCTIONS — RENDERER ONLY (v11‑EVO + Firebase bridge)
 // ============================================================================
 export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
 
   if (raw) {
     _c.log(message, ...rest);
+    sendToFirebase("log", message, rest);
     return;
   }
 
@@ -146,6 +167,8 @@ export function log(...args) {
     `color:${color}; font-weight:bold;`,
     ...rest
   );
+
+  sendToFirebase("log", message, rest);
 }
 
 export function warn(...args) {
@@ -157,6 +180,8 @@ export function warn(...args) {
     "color:#FFEE58; font-weight:bold;",
     ...rest
   );
+
+  sendToFirebase("warn", message, rest);
 }
 
 export function error(...args) {
@@ -168,6 +193,8 @@ export function error(...args) {
     "color:#EF5350; font-weight:bold;",
     ...rest
   );
+
+  sendToFirebase("error", message, rest);
 }
 
 export function critical(...args) {
@@ -180,6 +207,8 @@ export function critical(...args) {
   );
   _c.error(`%c${message}`, "color:#D32F2F; font-weight:bold;", ...rest);
   _c.groupEnd();
+
+  sendToFirebase("critical", message, rest);
 }
 
 
@@ -217,7 +246,7 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
     data,
     meta: {
       layer: "PulseProofLogger",
-      version: "11.0",
+      version: "12.0",
       subsystem,
       event
     }
@@ -246,7 +275,7 @@ export const VitalsLogger = {
   makeTelemetryPacket,
   meta: {
     layer: "PulseProofLogger",
-    version: "11.0"
+    version: "12.0"
   }
 };
 
@@ -260,7 +289,7 @@ export const logger = {
   makeTelemetryPacket,
   meta: {
     layer: "PulseProofLogger",
-    version: "11.0"
+    version: "12.0"
   }
 };
 
