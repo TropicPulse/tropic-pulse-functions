@@ -12,7 +12,7 @@
 //   • ZERO mutation of A1 reflex payloads
 //   • ZERO interference with A1 timing/state rules
 // ============================================================================
-import * as PulseUIErrors from "../PULSE-WORLD/PULSE-UI/PulseUIErrors-v12-EVO.js";
+import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
 
 const PageScannerV12 = Object.freeze({
 
@@ -447,7 +447,7 @@ function emitReflexSenseReport(context = {}) {
 // PULSE OS v12 — SKIN REFLEX (A1 → A2 → Router → Backend/Binary Nervous System)
 //  • route() is the dualband nervous entry: binary-first, text fallback
 // ============================================================================
-import { route } from "./PULSE-WORLD/PULSE-OS/PulseOSCNSNervousSystem.js";
+import { route } from "./PULSE-OS/PulseOSCNSNervousSystem.js";
 // ============================================================================
 // ROUTE MEMORY — v12‑EVO‑BINARY‑MAX
 //  • Stores degradation, tiers, DNA tags

@@ -23,8 +23,8 @@
 // Imports
 // -------------------------
 
-import * as PulseWorldRegioning from "../PULSE-WORLD/PULSE-REGIONING/index.js";
-import * as PulseWorldFinality from "../PULSE-WORLD/PULSE-FINALITY/index.js";
+import * as PulseWorldRegioning from "../PULSE-REGIONING/index.js";
+import * as PulseWorldFinality from "../PULSE-FINALITY/index.js";
 
 import MultiOrganismSupportAPI from "../PULSE-ORGANS/MultiOrganismSupport-v11-Evo.js";
 import ExecutionPhysicsAPI from "../PULSE-ORGANS/ExecutionPhysics-v11-Evo.js";

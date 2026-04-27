@@ -232,7 +232,7 @@ import { updateUserMetrics as recordUserMetrics } from "./PULSE-OS/PulseUserMetr
 import startPulseTimer from "./PulseProxyHeart.js";
 import startPulseOS from "./PULSE-OS/PulseOS.js";
 import startPulseOSHealer from "./PULSE-OS/PulseOSHealer.js";
-import startGlobalHealer from "../PULSE-WORLD/PULSE-OS/GlobalHealer.js";
+import startGlobalHealer from "../PULSE-OS/GlobalHealer.js";
 
 // ============================================================================
 //  SINGLE‑BOOT GUARDS — v11.1

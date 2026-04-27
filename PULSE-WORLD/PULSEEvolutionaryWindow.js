@@ -56,19 +56,19 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 //  - Binary organism is the real nervous system.
 //  - This file ONLY boots it and exposes a safe shadow.
 // ============================================================================
-import PulseBinaryOrganismBoot from "../PULSE-WORLD/PULSE-AI/ai-v11-Evo.js";
+import PulseBinaryOrganismBoot from "../PULSE-AI/ai-v11-Evo.js";
 
 // ============================================================================
 //  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
 //  - Safe, membrane-level, never throws, never breaks.
 // ============================================================================
-import * as PulseUIErrors from "../PULSE-WORLD/PULSE-UI/PulseUIErrors-v12-EVO.js";
+import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
 
 // ============================================================================
 //  UI FLOW ENGINE (PulseUIFlow-v12-EVO)
 //  - UI flow coordinator, UI-only, safe to expose at membrane.
 // ============================================================================
-import * as PulseUIFlow from "../PULSE-WORLD/PULSE-UI/PulseUIFlow-v12-EVO.js";
+import * as PulseUIFlow from "../PULSE-UI/PulseUIFlow-v12-EVO.js";
 
 
 
