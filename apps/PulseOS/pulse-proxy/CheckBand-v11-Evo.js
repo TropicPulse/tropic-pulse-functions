@@ -27,6 +27,89 @@
 //   • Deterministic, loggable, replayable, binary‑aware
 //   • Snapshots are metadata‑only, safe for OS‑Healer + GlobalHealer
 // ============================================================================
+export const PulseOSCheckBandMeta = Object.freeze({
+  layer: "PulseProxyAdrenalSystem",
+  role: "BAND_CONTROLLER_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "CheckBand-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Adrenal laws
+    adrenalOrgan: true,
+    instanceBandController: true,
+    deterministicScaling: true,
+    binaryFirstOrganism: true,
+    dualBandAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+    pulseSendAware: true,
+
+    // Execution prohibitions
+    zeroTimers: true,
+    zeroAsyncLoops: true,
+    zeroDateNow: true,
+    zeroRandomness: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroNetworkFetch: true,        // Firestore allowed, fetch not allowed
+    zeroFrontendAccess: true,
+    zeroWindowAccess: true,
+
+    // Environment
+    localAware: true,
+    internetAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "UserScoresSnapshot",
+      "ProxyContext",
+      "DualBandContext"
+    ],
+    output: [
+      "InstanceBandShape",
+      "WorkerLaunchPlan",
+      "WorkerShutdownPlan",
+      "CheckBandDiagnostics",
+      "CheckBandSignatures",
+      "CheckBandHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11-EVO",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "CheckBand-v9",
+      "CheckBand-v10",
+      "CheckBand-v11",
+      "CheckBand-v11-Evo",
+      "CheckBand-v11-Evo-Binary"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic"],
+    default: "binary",
+    behavior: "adrenal-scaling"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "UserScores → deterministic band → worker launch/shutdown",
+    adaptive: "binary-first scaling surfaces",
+    return: "deterministic instance band + signatures"
+  })
+});
 
 
 // ============================================================================

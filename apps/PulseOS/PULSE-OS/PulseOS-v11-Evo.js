@@ -37,6 +37,76 @@
 //    - When the binary kernel runs, the reflex organism comes online.
 //    - Together, they form the dual-mode creature.
 // ============================================================================
+export const PulseOSKernelMeta = Object.freeze({
+  layer: "PulseOSKernel",
+  role: "ORGANISM_BOOTLOADER",
+  version: "v11.2-EVO-SYMBOLIC",
+  identity: "PulseOS-v11-EVO-Symbolic",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+
+    // Symbolic kernel contract
+    symbolicNative: true,
+    dualMode: true,
+    binaryAware: true,
+    binaryReady: true,
+    organismBootloader: true,
+    zeroDriftIdentity: true,
+    unifiedAdvantageField: true,
+    continuanceAware: true,
+    legacyBridgeCapable: true,
+
+    // Environment
+    browserOnly: true,
+    worldLensAware: false,
+
+    // Safety
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseOSGovernor",
+      "PulseOSBrain",
+      "PulseOSEvolution",
+      "PulseSpinalCord",
+      "OrganRegistry"
+    ],
+    output: [
+      "SymbolicOrganismKernel",
+      "SymbolicBootDiagnostics",
+      "SymbolicBootSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSKernel-v9",
+      "PulseOSKernel-v10",
+      "PulseOSKernel-v11",
+      "PulseOSKernel-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "kernel-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "symbolic organism bootloader (organ wiring + artery activation)",
+    adaptive: "binary-aware dual-mode overlay",
+    return: "online symbolic organism kernel + boot signatures"
+  })
+});
 
 
 

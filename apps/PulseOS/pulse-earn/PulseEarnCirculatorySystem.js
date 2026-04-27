@@ -30,6 +30,65 @@
 //   • Deterministic job selection only.
 //   • Dual-band is metadata-only (no non-deterministic branching).
 // ============================================================================
+export const PulseEarnCirculatorySystemMeta = Object.freeze({
+  layer: "PulseEarnCirculatorySystem",
+  role: "CIRCULATORY_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnCirculatorySystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureRouter: true,
+    dualBandAware: true,
+    binaryAware: true,
+    evolutionAware: true,
+    healingMetadataAware: true,
+    loopFieldAware: true,
+    waveFieldAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MarketplaceList",
+      "MarketplaceHealth",
+      "DualBandContext",
+      "ReputationWeights",
+      "RoutingCycleState"
+    ],
+    output: [
+      "BestJobSelection",
+      "RoutingDiagnostics",
+      "RoutingSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnCirculatorySystem-v10",
+      "PulseEarnCirculatorySystem-v11",
+      "PulseEarnCirculatorySystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic routing + health evaluation",
+    adaptive: "reputation weighting + advantage surfaces",
+    return: "deterministic best-job selection"
+  })
+});
 
 
 // ============================================================================

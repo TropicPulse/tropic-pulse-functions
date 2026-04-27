@@ -75,6 +75,90 @@ export const PulseRole = {
     multiInstanceReady: true
   }
 };
+export const PulseOSMucusMembraneMeta = Object.freeze({
+  layer: "PulseOSMucusMembrane",
+  role: "A0_MUCUS_BARRIER_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSMucusMembrane-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Barrier laws
+    pureBarrierOrgan: true,
+    epithelialBarrier: true,
+    oneWaySignal: true,
+    passiveBarrier: true,
+    offlineAbsolute: true,
+    environmentAgnostic: true,
+    executionContextAgnostic: true,
+
+    // Safety prohibitions
+    zeroTiming: true,
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroState: true,
+    zeroMutation: true,
+    zeroExternalMutation: true,
+    zeroRetry: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindowAccess: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualModeAware: true,
+    pressureAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "FrontendSignal",
+      "EnvironmentContext",
+      "DualBandContext"
+    ],
+    output: [
+      "SafeDeterministicSignal",
+      "MucusBarrierDiagnostics",
+      "MucusBarrierSignatures",
+      "MucusBarrierHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSMucusMembrane-v9",
+      "PulseOSMucusMembrane-v10",
+      "PulseOSMucusMembrane-v11",
+      "PulseOSMucusMembrane-v11-Evo",
+      "PulseOSMucusMembrane-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "pure-barrier"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "environment → safe signal → organism",
+    adaptive: "binary-tagged metadata surfaces",
+    return: "deterministic one-way signal + signatures"
+  })
+});
 
 // ============================================================================
 // PURE MUCOSAL SIGNAL BUILDER (Frontend → Organism)

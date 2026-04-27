@@ -100,6 +100,100 @@ export const MAX_INSTANCES = 32;
 export const FUNCTION_LOGS_COLLECTION     = "FUNCTION_LOGS";
 export const PROXY_HEALER_LOGS_COLLECTION = "ProxyHealerLogs";
 
+export const PulseProxyHealerMeta = Object.freeze({
+  layer: "PulseProxyHealer",
+  role: "IMMUNE_PATROL_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyHealer-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministicImmuneScan: true,
+    driftProof: true,
+    zeroDriftPressure: true,
+    multiInstanceReady: true,
+    backendOnly: true,
+    binaryCore: true,
+    symbolicWrapper: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    immunePressureAware: true,
+    immuneMisconfigurationAware: true,
+    immuneVitalsAware: true,
+    failOpenSafe: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,
+    zeroCompute: true,              // no business compute; only threshold checks
+    zeroRandomness: true,
+    zeroDateNow: true,
+    zeroTimers: true,               // caller provides timing
+    zeroAsyncLoops: true,
+    zeroNetworkMutation: true,
+    zeroExternalMutation: true,     // except immune logs
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "HealthSnapshot",
+      "MetricsSnapshot",
+      "UserScoresSnapshot",
+      "DualBandContext",
+      "AdvantageContext"
+    ],
+    output: [
+      "ImmuneScanResult",
+      "ImmuneBandSignature",
+      "ImmuneBinaryField",
+      "ImmuneWaveField",
+      "ImmuneDiagnostics",
+      "ImmuneHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyHealer-v7",
+      "PulseProxyHealer-v8",
+      "PulseProxyHealer-v9",
+      "PulseProxyHealer-v10",
+      "PulseProxyHealer-v11",
+      "PulseProxyHealer-v11-Evo",
+      "PulseProxyHealer-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic", "dual"],
+    default: "binary",
+    behavior: "immune-patrol"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "health + metrics + scores → immune scan → immune surfaces",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic immune surfaces + signatures"
+  })
+});
 
 // ============================================================================
 //  SHARED HELPERS — deterministic, no randomness

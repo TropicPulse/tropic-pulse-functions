@@ -76,6 +76,108 @@ export const PulseRole = {
     aiCompatibility: "PulseAI-v12"
   }
 };
+export const PulseOSSpinalCordMeta = Object.freeze({
+  layer: "PulseOSSpinalCord",
+  role: "CENTRAL_SPINE_ORGAN",
+  version: "v12-EVO-MAX",
+  identity: "PulseOSSpinalCord-v12-EVO-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    continuanceAware: true,
+
+    // Nervous system laws
+    trueOrganismSpine: true,
+    routeRoot: true,
+    dualBandSpine: true,
+    binaryAware: true,
+    symbolicAware: true,
+    dualModeAware: true,
+    strictBandSeparation: true,
+    extensionAware: true,
+    systemAware: true,
+    routeChainAware: true,
+
+    // Advantage field + loop theory
+    unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+    loopTheoryAware: true,
+
+    // Wiring laws
+    pureWiring: true,
+    noCognition: true,
+    noBusinessLogic: true,
+    noCompute: true,
+    deterministicRouting: true,
+    modeKindOnlyDecisions: true,
+    extensionIdOnlyDecisions: true,
+
+    // Safety prohibitions
+    zeroTimestamps: true,
+    zeroRandomness: true,
+    zeroBackend: true,
+    zeroNetwork: true,
+    zeroDOM: true,
+    zeroGPUCalls: true,
+    zeroFS: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Memory + overlay alignment
+    memorySpineAligned: true,
+    binaryOverlayAware: true,
+    coreGovernorAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "Impulse",
+      "ImpulseBand",
+      "ExtensionId",
+      "OrganismContext",
+      "DualBandContext"
+    ],
+    output: [
+      "SpineRoute",
+      "SpineDiagnostics",
+      "SpineSignatures",
+      "SpineHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v12-EVO",
+    parent: "PulseOS-v12-EVO-MAX",
+    ancestry: [
+      "PulseOSSpinalCord-v9",
+      "PulseOSSpinalCord-v10",
+      "PulseOSSpinalCord-v11",
+      "PulseOSSpinalCord-v11-Evo",
+      "PulseOSSpinalCord-v11-Evo-Max",
+      "PulseOSSpinalCord-v12-Evo-Max"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "symbolic",
+    behavior: "central-spine"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "impulse → band separation → route root → Router/Cortex/Brain",
+    adaptive: "binary-overlay + extension-aware routing surfaces",
+    return: "deterministic spine route + signatures"
+  })
+});
 
 
 // ============================================================================

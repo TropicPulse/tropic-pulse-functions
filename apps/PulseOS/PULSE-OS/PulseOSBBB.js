@@ -72,6 +72,89 @@
 //      - PulseSendSystem-v11
 //      - PulseGPU-v11 (metadata only, no GPU calls)
 // ============================================================================
+export const PulseOSOuterBBBMeta = Object.freeze({
+  layer: "PulseOSOuterBBB",
+  role: "OS_OUTER_BBB_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseOSOuterBBB-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Barrier laws
+    pureShellStateEngine: true,
+    purePermissionEngine: true,
+    environmentalFilter: true,
+    identitySentinel: true,
+    permissionValve: true,
+    cortexPerimeter: true,
+    offlineAutonomy: true,
+
+    // Safety contract
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroFilesystem: true,
+    zeroCompute: true,
+    zeroUI: true,
+    zeroIdentityMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroBinaryExecution: true,
+    zeroMutationOutsideOrgan: true,
+
+    // Dualband awareness
+    dualBandAware: true,
+    symbolicSurface: true,
+    binaryCompressionSurface: true,
+    healingMetadataAware: false,
+
+    // Continuance + loop
+    loopTheoryAware: true,
+    continuanceAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "RouteContext",
+      "ShellEnvironment",
+      "DualBandContext"
+    ],
+    output: [
+      "OuterBBBPermissionState",
+      "OuterBBBRouteClassification",
+      "OuterBBBDiagnostics",
+      "OuterBBBSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSOuterBBB-v9",
+      "PulseOSOuterBBB-v10",
+      "PulseOSOuterBBB-v11"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "environmental filter → shell permission → identity gate",
+    adaptive: "dualband metadata surfaces (symbolic + binary compression)",
+    return: "deterministic shell permission + route classification"
+  })
+});
 
 
 // ============================================================================

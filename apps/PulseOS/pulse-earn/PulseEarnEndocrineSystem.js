@@ -21,6 +21,62 @@
 //   • NO filesystem, NO timestamps.
 //   • Deterministic scoring only.
 // ============================================================================
+export const PulseEarnEndocrineSystemMeta = Object.freeze({
+  layer: "PulseEarnEndocrineSystem",
+  role: "EARN_ENDOCRINE_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnEndocrineSystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureIntelligenceEngine: true,
+    reputationAware: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MarketplaceId",
+      "EndocrineSignals",
+      "DualBandContext"
+    ],
+    output: [
+      "ReputationScore",
+      "EndocrineDiagnostics",
+      "EndocrineSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnEndocrineSystem-v10",
+      "PulseEarnEndocrineSystem-v11",
+      "PulseEarnEndocrineSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic reputation scoring",
+    adaptive: "EMA blending + binary/wave endocrine surfaces",
+    return: "stable reputation signal for routing/selection"
+  })
+});
 
 
 // ============================================================================

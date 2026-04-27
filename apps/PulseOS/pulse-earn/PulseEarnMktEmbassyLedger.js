@@ -19,6 +19,69 @@
 //   • Deterministic validation only.
 //   • Public API must remain unchanged.
 // ============================================================================
+export const PulseEarnMktEmbassyLedgerMeta = Object.freeze({
+  layer: "PulseEarnMktEmbassyLedger",
+  role: "EARN_MARKETPLACE_REGISTRY",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMktEmbassyLedger-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureRegistry: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true,
+    identityVerificationStrict: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MarketplaceAdapters",
+      "AdapterIdentityMetadata",
+      "DualBandContext"
+    ],
+    output: [
+      "ValidatedMarketplaceRoster",
+      "EmbassyDiagnostics",
+      "EmbassySignatures",
+      "EmbassyHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMktEmbassyLedger-v9",
+      "PulseEarnMktEmbassyLedger-v10",
+      "PulseEarnMktEmbassyLedger-v11",
+      "PulseEarnMktEmbassyLedger-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic adapter validation + roster construction",
+    adaptive: "binary/wave surfaces + band signatures",
+    return: "deterministic marketplace roster + signatures"
+  })
+});
 
 
 // ---------------------------------------------------------------------------

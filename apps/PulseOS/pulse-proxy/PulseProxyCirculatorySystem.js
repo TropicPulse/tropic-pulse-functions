@@ -94,6 +94,109 @@ const INSTANCE_HEARTBEAT_MS = 5000;
 //  INTERNAL STATE — Active “cells” per user
 // ============================================================================
 const activeWorkers = new Map(); // userId -> worker[]
+export const PulseProxyAdrenalSystemMeta = Object.freeze({
+  layer: "PulseProxyAdrenalSystem",
+  role: "ADRENAL_SYSTEM_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyAdrenalSystem-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Adrenal laws
+    adrenalOrgan: true,
+    reflexSafe: true,
+    fightOrFlightReflex: true,
+    instanceCirculationOrgan: true,
+    stressScaling: true,
+    capacityScaling: true,
+    dynamicBandReflex: true,
+    unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+    circulationAware: true,
+    stressFieldAware: true,
+    capacityFieldAware: true,
+    backendOnly: true,
+    governorReady: true,
+
+    // Execution prohibitions
+    zeroRandomness: true,
+    zeroNondeterminism: true,
+    zeroExternalMutation: true,
+    zeroSymbolicContaminationInBinary: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroTimers: true,
+    zeroAsyncLoops: true,
+    zeroDateNow: true,
+    zeroNetworkFetch: true,     // Firestore allowed
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroAI: true,
+    zeroRouting: true,
+    zeroIQ: true,
+
+    // Awareness
+    dualMode: true,
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    localAware: true,
+    internetAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "UserScoresSnapshot",
+      "OrchestratorMode",
+      "StressContext",
+      "CapacityContext",
+      "DualBandContext"
+    ],
+    output: [
+      "AdrenalScalingPlan",
+      "WorkerLaunchPlan",
+      "WorkerShutdownPlan",
+      "AdrenalBandSignature",
+      "AdrenalBinaryField",
+      "AdrenalWaveField",
+      "AdrenalDiagnostics",
+      "AdrenalHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyAdrenalSystem-v7",
+      "PulseProxyAdrenalSystem-v8",
+      "PulseProxyAdrenalSystem-v9",
+      "PulseProxyAdrenalSystem-v10",
+      "PulseProxyAdrenalSystem-v11",
+      "PulseProxyAdrenalSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "symbolic",
+    behavior: "adrenal-circulation"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "stress + capacity → circulation scaling → worker plan",
+    adaptive: "dynamic symbolic→binary shift under stress",
+    return: "deterministic adrenal surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

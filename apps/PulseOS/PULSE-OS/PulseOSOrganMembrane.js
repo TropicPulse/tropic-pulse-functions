@@ -76,6 +76,89 @@ export const PulseRole = {
     multiInstanceReady: true
   }
 };
+export const PulseOSOrganMembraneMeta = Object.freeze({
+  layer: "PulseOSOrganMembrane",
+  role: "A3_ORGAN_REFLEX_MEMBRANE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSOrganMembrane-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Membrane laws
+    epithelialReflex: true,
+    organLevelBarrier: true,
+    meshSentinel: true,
+    meshLevel: true,
+    healingTriggerOnly: true,
+    degradationAnnotator: true,
+    dnaTagger: true,
+    oneWayReflex: true,
+
+    // Safety prohibitions
+    zeroTiming: true,
+    zeroState: true,
+    zeroMutation: true,
+    zeroCompute: true,
+    zeroRoutingInfluence: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: false,          // A3 is symbolic-only today
+    dualBandReady: true,
+    environmentAgnostic: true,
+    guardedWindowAccess: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MeshErrorEvent",
+      "MeshContext",
+      "DualBandContext"
+    ],
+    output: [
+      "OrganReflexEvent",
+      "OrganMembraneDiagnostics",
+      "OrganMembraneSignatures",
+      "OrganMembraneHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSOrganMembrane-v9",
+      "PulseOSOrganMembrane-v10",
+      "PulseOSOrganMembrane-v11",
+      "PulseOSOrganMembrane-v11-Evo",
+      "PulseOSOrganMembrane-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "organ-reflex"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "mesh error → reflex classification → healing trigger",
+    adaptive: "symbolic-only reflex with dual-band metadata",
+    return: "deterministic organ reflex event + signatures"
+  })
+});
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS

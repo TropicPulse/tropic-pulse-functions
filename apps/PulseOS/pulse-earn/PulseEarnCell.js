@@ -29,6 +29,63 @@
 //   • Band is metadata-only (no non-deterministic branching).
 // ============================================================================
 
+export const PulseEarnCellMeta = Object.freeze({
+  layer: "PulseEarnCell",
+  role: "CELL_WORKER",
+  version: "v11.2-EVO",
+  identity: "PulseEarnCell-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureCompute: true,
+    safeSandbox: true,
+    dualBandAware: true,
+    binaryAware: true,
+    evolutionAware: true,
+    healingMetadataAware: true,
+    waveFieldAware: true,
+    loopFieldAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "EarnCellJob",
+      "DualBandContext"
+    ],
+    output: [
+      "EarnCellResult",
+      "EarnCellDiagnostics",
+      "EarnCellSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnCell-v10",
+      "PulseEarnCell-v11",
+      "PulseEarnCell-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic compute",
+    adaptive: "healing metadata + advantage surfaces",
+    return: "deterministic structured output"
+  })
+});
 
 // ============================================================================
 // CELL CONTEXT METADATA (v11-Evo)

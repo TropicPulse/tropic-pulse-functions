@@ -44,6 +44,86 @@
 // VERSION TAG:
 //   version: 11.0-Evo-Prime
 // ============================================================================
+export const PulseOSRouteDownAlertMeta = Object.freeze({
+  layer: "PulseOSRouteDownAlert",
+  role: "IMMUNE_ALERT_NODE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSRouteDownAlert-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Immune alert laws
+    immuneAlertNode: true,
+    routeFailureSentinel: true,
+    immuneEventReceiver: true,
+    immuneMetadataEmitter: true,
+    driftAware: true,
+    organismAware: true,
+    routerAware: true,
+    gpuAware: true,
+    proxyAware: true,
+
+    // Safety prohibitions
+    zeroTiming: true,
+    zeroRandomness: true,
+    zeroNetworkCalls: true,
+    zeroBackendMutation: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroEnvironmentAccess: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "RouteFailureEvent",
+      "FrontendPayload",
+      "DualBandContext"
+    ],
+    output: [
+      "ImmuneAlert",
+      "RouteDownDiagnostics",
+      "RouteDownSignatures",
+      "RouteDownHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "RouteDownAlert-v9",
+      "RouteDownAlert-v10",
+      "RouteDownAlert-v11",
+      "RouteDownAlert-v11-Evo",
+      "RouteDownAlert-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "immune-alert"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "route failure → immune alert → safe JSON response",
+    adaptive: "binary-tagged immune surfaces",
+    return: "deterministic immune alert metadata + signatures"
+  })
+});
 
 export const handler = async (event) => {
   try {

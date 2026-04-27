@@ -65,6 +65,102 @@ export const PulseRole = {
     futureEvolutionReady: true
   }
 };
+export const PulseProxyInnerAgentMeta = Object.freeze({
+  layer: "PulseProxyInnerAgent",
+  role: "INNER_AGENT_ORGANISM_BRIDGE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyInnerAgent-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Inner Agent laws
+    innerBridge: true,
+    backendOnly: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    deterministicDispatch: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    failOpenSafe: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,             // no routing intelligence
+    zeroCompute: true,             // no business compute
+    zeroMarketplace: true,
+    zeroScoring: true,
+    zeroGPU: true,
+    zeroOSKernelLogic: true,
+    zeroRandomness: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ImpulseType",
+      "SymbolicPayload",
+      "BinaryPayload",
+      "BackendContext"
+    ],
+    output: [
+      "InnerAgentDispatchResult",
+      "InnerAgentBandSignature",
+      "InnerAgentBinaryField",
+      "InnerAgentWaveField",
+      "InnerAgentDiagnostics",
+      "InnerAgentHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "Endpoint-v7",
+      "Endpoint-v8",
+      "Endpoint-v9",
+      "Endpoint-v9.3",
+      "Endpoint-v10",
+      "Endpoint-v11",
+      "PulseProxyInnerAgent-v11-Evo",
+      "PulseProxyInnerAgent-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "dual",
+    behavior: "inner-agent-bridge"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "typed impulse → deterministic dispatch → unified return",
+    adaptive: "dual-band overlays + fail-open surfaces",
+    return: "deterministic dispatch surfaces + signatures"
+  })
+});
 
 // ============================================================================
 //  FACTORY — dependencies injected by backend spine / endpoint

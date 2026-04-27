@@ -72,6 +72,91 @@ export const PulseRole = {
   }
 };
 
+export const PulseOSEvolutionMeta = Object.freeze({
+  layer: "PulseOSEvolution",
+  role: "CNS_EVOLUTION_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSEvolution-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Evolution laws
+    cnsEvolutionEngine: true,
+    organismEvolutionEngine: true,
+    organEvolutionEngine: true,
+    lineageTracker: true,
+    driftScanner: true,
+    structuralDriftAware: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBandAware: true,
+    binaryNonExecutable: true,
+    futureEvolutionReady: true,
+
+    // Wiring laws
+    attachesIntentToBrain: true,
+    attachesOrganismMapToBrain: true,
+    attachesIQMapToBrain: true,
+    attachesEvolutionToBrain: true,
+    bootsBrain: true,          // which boots Cortex
+
+    // Safety
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroDateNow: true,
+    zeroUserCode: true,
+    worldLensAware: true,
+
+    // Loop + continuance
+    loopTheoryAware: true,
+    continuanceAware: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseIQMap",
+      "PulseOrganismMap",
+      "IntentMap",
+      "DualBandContext"
+    ],
+    output: [
+      "EvolutionState",
+      "EvolutionDiagnostics",
+      "EvolutionSignatures",
+      "EvolutionHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSEvolution-v9",
+      "PulseOSEvolution-v10",
+      "PulseOSEvolution-v11",
+      "PulseOSEvolution-v11-Evo",
+      "PulseOSEvolution-v11-EVO-BINARY"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "evolution-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "attach → boot → scan drift → track lineage",
+    adaptive: "binary-aware tagging + dual-band metadata",
+    return: "deterministic evolution state + signatures"
+  })
+});
 
 // ============================================================================
 //  EVOLUTION ENGINE — The CNS growth organ (v11‑EVO‑BINARY‑MAX)

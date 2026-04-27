@@ -33,6 +33,86 @@
 //   • NO OS inspection, NO hardware probing.
 //   • Deterministic phenotype only.
 // ============================================================================
+export const PulseEarnSkeletalSystemMeta = Object.freeze({
+  layer: "PulseEarnSkeletalSystem",
+  role: "EARN_SKELETAL_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnSkeletalSystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+
+    // Capability engine laws
+    pureCapabilityEngine: true,
+    deterministicPhenotype: true,
+    deterministicStructuralLimits: true,
+    deterministicPhysiologicalBaselines: true,
+
+    // Safety laws
+    zeroAI: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroCrypto: true,
+    zeroHardwareProbing: true,
+    zeroOSInspection: true,
+
+    // Band + metadata
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+
+    // Environment
+    worldLensAware: false,
+    multiInstanceReady: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PhenotypeConfigOverride",
+      "DualBandContext"
+    ],
+    output: [
+      "DevicePhenotype",
+      "StructuralDiagnostics",
+      "PhysiologicalDiagnostics",
+      "SkeletalSignatures",
+      "SkeletalHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnSkeletalSystem-v9",
+      "PulseEarnSkeletalSystem-v10",
+      "PulseEarnSkeletalSystem-v11",
+      "PulseEarnSkeletalSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only",
+    priority: "symbolic-first"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic phenotype → structural limits → physiological baselines",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic phenotype + structural + physiological signatures"
+  })
+});
 
 
 // ---------------------------------------------------------------------------

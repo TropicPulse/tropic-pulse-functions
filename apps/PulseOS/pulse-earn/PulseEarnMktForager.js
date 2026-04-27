@@ -17,6 +17,69 @@
 //   • NO network, NO async, NO randomness, NO timestamps.
 //   • READ‑ONLY except healing metadata.
 // ============================================================================
+export const PulseEarnMktForagerMeta = Object.freeze({
+  layer: "PulseEarnMktForager",
+  role: "EARN_MARKETPLACE_RECEPTOR",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMktForager-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReceptor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "SaladTaskDNA",
+      "DualBandContext",
+      "ReceptorNormalizationRules"
+    ],
+    output: [
+      "ReceptorPingResult",
+      "ReceptorJobList",
+      "ReceptorSubmissionResult",
+      "ReceptorNormalizationResult",
+      "ReceptorSignatures",
+      "ForagerHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMktForager-v9",
+      "PulseEarnMktForager-v10",
+      "PulseEarnMktForager-v11",
+      "PulseEarnMktForager-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic Salad receptor phenotype",
+    adaptive: "binary/wave surfaces + band signatures",
+    return: "deterministic ping/fetchJobs/submitResult"
+  })
+});
 
 
 // ============================================================================

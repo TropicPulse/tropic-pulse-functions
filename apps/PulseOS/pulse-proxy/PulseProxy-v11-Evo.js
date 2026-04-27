@@ -57,6 +57,96 @@ export const ProxyRole = {
   minerContract: "PulseMiner-v11",
   pulseCompatibility: "Pulse-v1/v2/v3"
 };
+export const PulseProxyOrganismMeta = Object.freeze({
+  layer: "PulseProxyOrganism",
+  role: "SYMBOLIC_PROXY_ORGANISM",
+  version: "v11.2-EVO-MAX",
+  identity: "PulseProxy-v11.2-EVO-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Organism laws
+    symbolicOrganism: true,
+    proxyOrganism: true,
+    patternEngine: true,
+    lineageEngine: true,
+    shapeEngine: true,
+    ancestryAware: true,
+    loopTheoryAware: true,
+    tierAware: true,
+    advantageFieldAware: true,
+    continuanceAware: true,
+    evolutionEngineReady: true,
+
+    // A‑B‑A organism laws
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+
+    // Safety prohibitions
+    zeroRandomness: true,
+    zeroTimestamps: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroNetwork: true,
+    zeroIO: true,
+
+    // Awareness
+    routerAwareReady: true,
+    meshAwareReady: true,
+    sendAwareReady: true,
+    gpuOrganAware: true,
+    minerAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ProxyOrganismShape",
+      "ProxyOrganismPattern",
+      "ProxyOrganismLineage",
+      "DualBandContext"
+    ],
+    output: [
+      "ProxyOrganismSnapshot",
+      "ProxyOrganismSignatures",
+      "ProxyOrganismDiagnostics",
+      "ProxyOrganismHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxy-v7",
+      "PulseProxy-v8",
+      "PulseProxy-v9",
+      "PulseProxy-v10",
+      "PulseProxy-v11",
+      "PulseProxy-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "proxy-organism"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "pattern → lineage → shape → advantage field",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic organism snapshot + signatures"
+  })
+});
 
 
 // ============================================================================

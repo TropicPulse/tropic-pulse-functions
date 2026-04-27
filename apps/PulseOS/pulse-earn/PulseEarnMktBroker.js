@@ -17,6 +17,69 @@
 //   • READ‑ONLY except healing metadata.
 //   • NEVER mutate external objects.
 // ============================================================================
+export const PulseEarnMktBrokerMeta = Object.freeze({
+  layer: "PulseEarnMktBroker",
+  role: "EARN_MARKETPLACE_RECEPTOR",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMktBroker-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReceptor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "RunPodTaskDNA",
+      "DualBandContext",
+      "ReceptorNormalizationRules"
+    ],
+    output: [
+      "ReceptorRegisterResult",
+      "ReceptorJobRequestResult",
+      "ReceptorSubmissionResult",
+      "ReceptorNormalizationResult",
+      "ReceptorSignatures",
+      "RunPodHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMktBroker-v9",
+      "PulseEarnMktBroker-v10",
+      "PulseEarnMktBroker-v11",
+      "PulseEarnMktBroker-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic RunPod receptor phenotype",
+    adaptive: "binary/wave surfaces + band signatures",
+    return: "deterministic registerDevice/requestJob/submitJob"
+  })
+});
 
 
 // ============================================================================

@@ -26,16 +26,10 @@
 // • Binary‑aware but NEVER executes binary logic directly.
 // ============================================================================
 
-
-// ============================================================================
-// ORGAN IMPORTS — COMPLETE THE CONNECTION (Membranes → CNS)
-// ============================================================================
-import { PulseOSShortTermMemory } from "../PULSE-OS/PulseOSShortTermMemory.js";
-
-
 // ============================================================================
 // ORGAN IDENTITY — v11‑EVO‑BINARY‑MAX CNS COMMUNICATION ORGAN
 // ============================================================================
+
 export const PulseRole = {
   type: "NervousSystem",
   subsystem: "CNS",
@@ -67,6 +61,96 @@ export const PulseRole = {
     continuanceAware: true
   }
 };
+
+export const PulseOSCNSNervousSystemMeta = Object.freeze({
+  layer: "PulseOSCNSNervousSystem",
+  role: "CNS_COMMUNICATION_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSCNSNervousSystem-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // CNS communication laws
+    cnsCommunicationOrgan: true,
+    frontendBackendBridge: true,
+    offlineOnlineDualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBandAware: true,
+    binaryNonExecutable: true,
+
+    // Routing laws
+    deterministicRouting: true,
+    proxySpineOnly: true,
+    localFirstRouting: true,
+    guardedGlobalAccess: true,
+    routerHealingAware: true,
+    routeDownAlertAware: true,
+
+    // Safety
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroFilesystem: true,
+    zeroUserCode: true,
+    zeroRandomness: true,
+    zeroDateNow: true,
+    worldLensAware: true,
+
+    // Continuance + loop theory
+    loopTheoryAware: true,
+    continuanceAware: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "RouteRequest",
+      "DualBandContext",
+      "ProxySpineInjection",
+      "ShortTermMemory"
+    ],
+    output: [
+      "CNSRouteResult",
+      "CNSDiagnostics",
+      "CNSSignatures",
+      "CNSHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSCNSNervousSystem-v9",
+      "PulseOSCNSNervousSystem-v10",
+      "PulseOSCNSNervousSystem-v11",
+      "PulseOSCNSNervousSystem-v11-Evo",
+      "PulseOSCNSNervousSystem-v11-EVO-BINARY"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "cns-routing"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "symbolic routing → proxy spine → healing + drift reporting",
+    adaptive: "binary-tagged payloads + dual-band metadata",
+    return: "deterministic CNS route result + signatures"
+  })
+});
+
+
+// ============================================================================
+// ORGAN IMPORTS — COMPLETE THE CONNECTION (Membranes → CNS)
+// ============================================================================
+import { PulseOSShortTermMemory } from "../PULSE-OS/PulseOSShortTermMemory.js";
+
 
 
 // ============================================================================

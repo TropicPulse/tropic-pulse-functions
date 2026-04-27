@@ -17,6 +17,68 @@
 //   • NO network, NO async, NO randomness, NO timestamps.
 //   • READ‑ONLY except healing metadata.
 // ============================================================================
+export const PulseEarnMktAmbassadorMeta = Object.freeze({
+  layer: "PulseEarnMktAmbassador",
+  role: "EARN_MARKETPLACE_RECEPTOR",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMktAmbassador-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReceptor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "AkashLeaseDNA",
+      "DualBandContext",
+      "ReceptorNormalizationRules"
+    ],
+    output: [
+      "ReceptorPingResult",
+      "ReceptorJobList",
+      "ReceptorSubmissionResult",
+      "ReceptorSignatures",
+      "AmbassadorHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMktAmbassador-v9",
+      "PulseEarnMktAmbassador-v10",
+      "PulseEarnMktAmbassador-v11",
+      "PulseEarnMktAmbassador-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic receptor DNA → stable phenotype",
+    adaptive: "binary/wave surfaces + band signatures",
+    return: "deterministic ping/fetchJobs/submitResult"
+  })
+});
 
 
 // ============================================================================

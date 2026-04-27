@@ -54,6 +54,85 @@ export const PulseRole = {
     multiInstanceReady: true
   }
 };
+export const PulseEarnReflexRouterMeta = Object.freeze({
+  layer: "PulseEarnReflexRouter",
+  role: "EARN_REFLEX_ROUTER_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnReflexRouter-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReflexSynapse: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+
+    // Reflex‑synapse laws
+    reflexSynapse: true,
+    reflexHandoffOnly: true,
+    reflexDeterministic: true,
+    reflexInstanceLaw: true,
+
+    // Execution laws
+    zeroRouting: true,
+    zeroSending: true,
+    zeroCompute: true,
+    zeroAsync: true,
+    zeroUserCode: true,
+    zeroMutation: true,
+    zeroTiming: true,
+
+    // Environment
+    multiInstanceReady: true,
+    environmentAgnostic: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "EarnReflexOrganism",
+      "ReflexSliceContext",
+      "DualBandContext"
+    ],
+    output: [
+      "ReflexRouterHandoff",
+      "ReflexRouterDiagnostics",
+      "ReflexRouterSignatures",
+      "ReflexRouterHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnReflexRouter-v9",
+      "PulseEarnReflexRouter-v10",
+      "PulseEarnReflexRouter-v11",
+      "PulseEarnReflexRouter-v11-Evo",
+      "PulseEarnReflexRouter-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only",
+    priority: "symbolic-first"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic reflex → Earn handoff",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic EarnReflex handoff + router signatures"
+  })
+});
 
 
 // ============================================================================

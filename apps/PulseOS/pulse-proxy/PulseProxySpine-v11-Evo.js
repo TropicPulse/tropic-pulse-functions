@@ -86,6 +86,102 @@ const PROXY_CONTEXT = {
   selfRepairable: true,
   evo: PulseRole.evo
 };
+export const PulseProxySpineMeta = Object.freeze({
+  layer: "PulseProxySpine",
+  role: "BACKEND_SPINE_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxySpine-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    backendOnly: true,
+    symbolicBackend: true,
+    dualModeEvolution: false,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    clusterCoherence: true,
+    zeroDriftCloning: true,
+    reflexPropagation: true,
+    organismClusterBoost: true,
+    cognitiveComputeLink: true,
+    failOpenSafe: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,
+    zeroMarketplace: true,
+    zeroScoring: true,
+    zeroBusinessLogic: true,
+    zeroOSKernelLogic: true,
+    zeroGPULogic: true,
+    zeroRandomness: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsyncLoops: true,
+    zeroNetworkMutation: true,
+    zeroExternalMutation: true,     // except healingState
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: false,
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: false,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "TPProxyRequest",
+      "VitalsSnapshot",
+      "HealerContext",
+      "BackendContext"
+    ],
+    output: [
+      "SpineIngressResult",
+      "SpineBandSignature",
+      "SpineWaveField",
+      "SpineDiagnostics",
+      "SpineHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxySpine-v7",
+      "PulseProxySpine-v8",
+      "PulseProxySpine-v9",
+      "PulseProxySpine-v10",
+      "PulseProxySpine-v11",
+      "PulseProxySpine-v11.1",
+      "PulseProxySpine-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "backend-spine"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "TPProxy ingress → vitals pump → OS-healer feed",
+    adaptive: "wave-field overlays (no binary mode)",
+    return: "deterministic spine surfaces + signatures"
+  })
+});
 
 log(
   "%c🟦 PulseProxySpine v11.1 online — backend spine + vitals pump active.",

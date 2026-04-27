@@ -15,6 +15,55 @@
 //  • Band-aware, but band is metadata-only (no behavioral non-determinism).
 //  • All “memory” is structural (derived from inputs), not temporal.
 // ============================================================================
+export const EarnMeta = Object.freeze({
+  layer: "PulseEarn",
+  role: "EARN_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarn-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    bandAware: true,
+    binaryAware: true,
+    evolutionAware: true,
+    lineageAware: true,
+    patternAware: true,
+    shapeAware: true,
+    worldLensAware: true,
+    multiInstanceAware: true,
+    waveFieldAware: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "EarnInputShape",
+      "DualBandContext",
+      "EvolutionSurface",
+      "AdvantageField",
+      "CohortWaveState"
+    ],
+    output: [
+      "EarnOutputShape",
+      "EarnDiagnostics",
+      "EarnSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseProxy-v11-EVO",
+    ancestry: ["PulseOS-v10", "PulseEarn-v10.4", "PulseEarn-v11"]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  })
+});
 
 
 // ============================================================================

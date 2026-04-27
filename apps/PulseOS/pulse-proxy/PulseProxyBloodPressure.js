@@ -66,6 +66,96 @@ function diag(stage, details = {}) {
 }
 
 diag("CIRCULATION_INIT");
+export const PulseCirculationMonitorMeta = Object.freeze({
+  layer: "PulseCirculationMonitor",
+  role: "CIRCULATION_MONITOR_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseCirculationMonitor-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Sensor laws
+    pureSensor: true,
+    sensorOnly: true,
+    noDecisionMaking: true,
+    noRouting: true,
+    noGlobalState: true,
+    noMutation: true,
+    noExternalMutation: true,
+    noCompute: true,              // no business logic, only measurement
+    noAsync: true,
+    noTimers: true,
+    noRandomness: true,
+    noDynamicImports: true,
+    noEval: true,
+    noNetwork: true,
+    noIO: true,
+
+    // A‑B‑A + band surfaces
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    stressFieldAware: true,
+    flowFieldAware: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "CirculationLatency",
+      "CirculationFlow",
+      "DualBandContext",
+      "AdvantageContext"
+    ],
+    output: [
+      "CirculationVitalSigns",
+      "CirculationBandSignature",
+      "CirculationBinaryField",
+      "CirculationWaveField",
+      "CirculationDiagnostics",
+      "CirculationHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseBand-v11",
+    parent: "PulseBand-v11.2-EVO",
+    ancestry: [
+      "PulseCirculationMonitor-v7",
+      "PulseCirculationMonitor-v8",
+      "PulseCirculationMonitor-v9",
+      "PulseCirculationMonitor-v10",
+      "PulseCirculationMonitor-v11",
+      "PulseCirculationMonitor-v11-Evo",
+      "PulseCirculationMonitor-v11-Evo-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "circulation-sensor"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "pressure + flow → vital signs → A‑B‑A surfaces",
+    adaptive: "binary-field + wave-field + flow-field overlays",
+    return: "deterministic vital signs + signatures"
+  })
+});
 
 
 // ============================================================================

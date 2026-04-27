@@ -21,6 +21,90 @@
 //   • Safe for organisms that grow new layers over time
 //   • Deterministic: same snapshot → same signature
 // ============================================================================
+export const PulseOSSurvivalInstinctsMeta = Object.freeze({
+  layer: "PulseOSSurvivalInstincts",
+  role: "STRUCTURAL_MEMORY_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSSurvivalInstincts-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Structural memory laws
+    structuralMemoryOrgan: true,
+    organismIdentityAnchor: true,
+    survivalInstincts: true,
+    evolutionSentinel: true,
+    lastSafeConfigurationKeeper: true,
+    structuralSignatureBuilder: true,
+    lineageAware: true,
+    organismGrowthSafe: true,
+
+    // Execution prohibitions
+    zeroMutationOfImpulses: true,
+    zeroBusinessLogic: true,
+    zeroPayloadCompute: true,
+    zeroTimestamps: true,
+    zeroRandomness: true,
+    zeroTimers: true,
+    zeroNetwork: true,
+    zeroRouting: true,
+    zeroEnvironmentAccess: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualModeAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "OrganismStructure",
+      "RouteDNA",
+      "EvolutionContext",
+      "DualBandContext"
+    ],
+    output: [
+      "StructuralSignature",
+      "EvolutionDetection",
+      "InstinctsDiagnostics",
+      "InstinctsHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSSurvivalInstincts-v9",
+      "PulseOSSurvivalInstincts-v10",
+      "PulseOSSurvivalInstincts-v11",
+      "PulseOSSurvivalInstincts-v11-Evo",
+      "PulseOSSurvivalInstincts-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "structural-memory"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "organism structure → structural signature → evolution detection",
+    adaptive: "binary-tagged structural overlays",
+    return: "deterministic structural memory + signatures"
+  })
+});
 
 
 // ============================================================================

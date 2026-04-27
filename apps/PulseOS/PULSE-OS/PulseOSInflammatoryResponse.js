@@ -60,6 +60,87 @@ export const HEALER_CONTEXT_V11 = {
     zeroCompute: true
   }
 };
+export const PulseOSHealerMeta = Object.freeze({
+  layer: "PulseOSHealer",
+  role: "INFLAMMATORY_RESPONSE_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSHealer-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Immune laws
+    inflammatoryResponseOrgan: true,
+    pureImmuneTransformer: true,
+    deterministicImmuneSurface: true,
+    deterministicField: true,
+    irritationToSignatureMapping: true,
+    irritationToHealerLogMapping: true,
+    irritationToFunctionHintMapping: true,
+
+    // Execution prohibitions
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroTimers: true,
+    zeroDateNow: true,
+    zeroDB: true,
+    zeroMarketplace: true,
+    zeroExternalMutation: true,
+    zeroCompute: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Dual-band awareness
+    dualBandAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    binaryNonExecutable: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "OSEvent",
+      "SubsystemHealerLog",
+      "DualBandContext"
+    ],
+    output: [
+      "HealerLogEntry",
+      "DriftSignature",
+      "FunctionLogHint",
+      "HealerHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSHealer-v9",
+      "PulseOSHealer-v10",
+      "PulseOSHealer-v11",
+      "PulseOSHealer-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "immune-transformer"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "irritation event → immune transformation → drift signature",
+    adaptive: "binary-tagged irritation surfaces",
+    return: "deterministic immune artifacts + signatures"
+  })
+});
 
 
 // ============================================================================

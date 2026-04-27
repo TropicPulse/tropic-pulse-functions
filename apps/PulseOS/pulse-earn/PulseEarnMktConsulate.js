@@ -22,6 +22,70 @@
 //   • NO executing user code.
 //   • Deterministic, explainable heuristics + signatures only.
 // ============================================================================
+export const PulseEarnMktConsulateMeta = Object.freeze({
+  layer: "PulseEarnMktConsulate",
+  role: "EARN_CONSULATE_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMktConsulate-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureIntelligenceLayer: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true,
+    driftProof: true,
+    explainableHeuristics: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MarketplaceJobLists",
+      "MarketplaceReceptorMetadata",
+      "DualBandContext",
+      "ConsulateCacheState"
+    ],
+    output: [
+      "PrioritizedJobList",
+      "ConsulateDiagnostics",
+      "ConsulateSignatures",
+      "ConsulateHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMktConsulate-v9",
+      "PulseEarnMktConsulate-v10",
+      "PulseEarnMktConsulate-v11",
+      "PulseEarnMktConsulate-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic ingestion → fingerprinting → factoring",
+    adaptive: "money-per-second scoring + binary/wave surfaces",
+    return: "deterministic prioritized job list + signatures"
+  })
+});
 
 import { RegisteredMarketplaces } from "./PulseEarnMktEmbassyLedger.js";
 

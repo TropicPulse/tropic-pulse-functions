@@ -14,6 +14,77 @@
 //   • Binary is always post‑render, handled by GPU / Send / Binary organs.
 //   • Brain is the CNS identity + contract kernel, not a router, not a GPU.
 // ============================================================================
+export const PulseOSBrainMeta = Object.freeze({
+  layer: "PulseOSBrain",
+  role: "CNS_BRAIN_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSBrain-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+
+    // Brain laws
+    cnsIdentityKernel: true,
+    cnsContractKernel: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBandAware: true,
+    nonExecutableBrain: true,        // never executes binary payloads
+    notRouter: true,
+    notGPU: true,
+
+    // Import laws
+    importsPulseIQMapOnly: true,
+    importsOrganismMapOnly: true,
+    importsCortexBootOnly: true,
+
+    // Safety
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    worldLensAware: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseIQMap",
+      "PulseOrganismMap",
+      "CortexBootConfig"
+    ],
+    output: [
+      "CNSIdentity",
+      "CNSContracts",
+      "CNSDiagnostics",
+      "CNSBootSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSBrain-v9",
+      "PulseOSBrain-v10",
+      "PulseOSBrain-v11",
+      "PulseOSBrain-v11-Evo",
+      "PulseOSBrain-v11-EVO-BINARY-MAX"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "organism-brain"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "CNS identity + contract kernel (symbolic-primary, dualband-aware)",
+    adaptive: "binary-aware overlays via GPU/Send/Binary organs",
+    return: "online CNS identity + contracts + boot signatures"
+  })
+});
 
 
 // ============================================================================

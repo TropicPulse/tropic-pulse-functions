@@ -26,6 +26,64 @@
 //   • Immutable across versions unless explicitly ratified.
 //   • v11‑Evo adds ONLY metadata + signatures OUTSIDE the schema.
 // ============================================================================
+export const PulseEarnGenomeCoreMeta = Object.freeze({
+  layer: "PulseEarnGenomeCore",
+  role: "EARN_GENOME_CORE",
+  version: "v11.2-EVO",
+  identity: "PulseEarnGenomeCore-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    immutable: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureStaticSchema: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    worldLensAware: false,
+    constitutional: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseEarnJobSchema (immutable)",
+      "DualBandContext (metadata-only)"
+    ],
+    output: [
+      "GenomeSignatures",
+      "BinaryFieldSignatures",
+      "WaveFieldSignatures",
+      "ConstitutionalMetadata"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnGenomeCore-v9",
+      "PulseEarnGenomeCore-v10",
+      "PulseEarnGenomeCore-v11",
+      "PulseEarnGenomeCore-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "immutable static schema",
+    adaptive: "signature surfaces (binary + wave)",
+    return: "deterministic constitutional metadata"
+  })
+});
 
 
 // ============================================================================

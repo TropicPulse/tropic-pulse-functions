@@ -4,6 +4,64 @@
 //  NO PulseSendSystem, NO network, NO routing, NO loops.
 //  Only: build LegacyEarn v1 + Pulse-compatible envelope and return it.
 // ============================================================================
+export const PulseEarnContinuancePulseMeta = Object.freeze({
+  layer: "PulseEarnContinuancePulse",
+  role: "EARN_CONTINUANCE_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnContinuancePulse-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureBuilder: true,
+    safeFallback: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    factoringAware: true,
+    worldLensAware: false,
+    loopTheorySafe: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "EarnImpulse",
+      "DualBandContext",
+      "LegacyLineage",
+      "PatternShape"
+    ],
+    output: [
+      "LegacyEarnV1",
+      "PulseCompatibleEarnEnvelope",
+      "ContinuanceDiagnostics"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnContinuancePulse-v10",
+      "PulseEarnContinuancePulse-v11",
+      "PulseEarnContinuancePulse-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic legacy Earn v1 builder",
+    adaptive: "binary/wave/factoring surfaces",
+    return: "deterministic Pulse-compatible envelope"
+  })
+});
 
 // Deterministic cycle counter (replaces timestamps)
 let continuanceCycle = 0;

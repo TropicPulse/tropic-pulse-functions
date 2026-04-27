@@ -19,6 +19,72 @@
 //   • READ‑ONLY except deterministic config override.
 //   • NEVER mutate job objects.
 // ============================================================================
+export const PulseEarnReceptorMeta = Object.freeze({
+  layer: "PulseEarnReceptor",
+  role: "EARN_STANDARD_RECEPTOR",
+  version: "v11.2-EVO",
+  identity: "PulseEarnReceptor-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReceptor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true,
+    deterministicConfigOverride: true,
+    neverMutateJobObjects: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ReceptorConfigDNA",
+      "DualBandContext",
+      "MarketplaceSignal",
+      "ReceptorNormalizationRules"
+    ],
+    output: [
+      "ReceptorPingResult",
+      "ReceptorJobList",
+      "ReceptorSubmissionResult",
+      "ReceptorSignatures",
+      "ReceptorHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnReceptor-v9",
+      "PulseEarnReceptor-v10",
+      "PulseEarnReceptor-v11",
+      "PulseEarnReceptor-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic receptor DNA → stable phenotype",
+    adaptive: "binary/wave surfaces + band signatures",
+    return: "deterministic ping/fetchJobs/submitResult"
+  })
+});
 
 
 // ============================================================================

@@ -70,6 +70,110 @@ const PULSENET_CONTEXT = {
   selfRepairable: true,
   evo: PulseRole.evo
 };
+export const PulseNetSynapseMeta = Object.freeze({
+  layer: "PulseNetSynapse",
+  role: "NEURAL_SIGNAL_ROUTING_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseNetSynapse-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    parallelSafe: true,
+
+    // Synapse laws
+    synapticIntegrity: true,
+    deterministicImpulseFlow: true,
+    binaryFirst: true,
+    dualModeEvolution: true,
+    offlineFirst: true,
+    tinySyncReady: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    clusterCoherence: true,
+    zeroDriftCloning: true,
+    reflexPropagation: true,
+    organismClusterBoost: true,
+    cognitiveComputeLink: true,
+
+    // Execution prohibitions
+    zeroRandomness: true,
+    zeroJSONInBinary: true,
+    zeroWindowInBinary: true,
+    zeroFetchInBinary: true,
+    zeroTimestamps: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsyncLoops: true,
+    zeroNetworkMutation: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroRoutingIntelligence: true,
+    zeroBusinessLogic: true,
+    zeroMarketplaceLogic: true,
+    zeroGPUExecution: true,
+    zeroDOM: true,
+
+    // Awareness
+    binaryAware: true,
+    symbolicAware: true,
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "BinaryImpulse",
+      "SymbolicImpulse",
+      "SynapseContext",
+      "DualBandContext",
+      "AdvantageContext"
+    ],
+    output: [
+      "SynapseImpulseFlow",
+      "SynapseBandSignature",
+      "SynapseBinaryField",
+      "SynapseWaveField",
+      "SynapseDiagnostics",
+      "SynapseHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseNet-v11",
+    parent: "PulseNet-v11.2-EVO",
+    ancestry: [
+      "PulseNetSynapse-v7",
+      "PulseNetSynapse-v8",
+      "PulseNetSynapse-v9",
+      "PulseNetSynapse-v9.3",
+      "PulseNetSynapse-v10",
+      "PulseNetSynapse-v11",
+      "PulseNetSynapse-v11-Evo",
+      "PulseNetSynapse-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic", "dual"],
+    default: "binary",
+    behavior: "synapse-routing"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary impulse → symbolic wrapper → unified neural flow",
+    adaptive: "tiny-sync + offline-first overlays",
+    return: "deterministic synapse surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

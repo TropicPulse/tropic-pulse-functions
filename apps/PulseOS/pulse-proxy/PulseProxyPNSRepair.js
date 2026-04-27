@@ -73,6 +73,98 @@ const REPAIR_CONTEXT = {
 };
 
 const MAX_BATCH = 500;
+export const PulseHistoryRepairMeta = Object.freeze({
+  layer: "PulseHistoryRepair",
+  role: "SHORT_TERM_MEMORY_REPAIR_ENGINE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseHistoryRepair-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    backendOnly: true,
+    symbolicBackend: true,
+    boundedScan: true,
+    timerSafe: true,
+    idempotentRepair: true,
+    failOpenSafe: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    memoryRepairEngine: true,
+    lineageSafe: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,
+    zeroCompute: true,              // no business logic
+    zeroRandomness: true,
+    zeroDateNow: true,
+    zeroTimers: true,               // caller provides timing
+    zeroAsyncLoops: true,
+    zeroNetwork: true,              // Firestore allowed
+    zeroIO: true,
+    zeroExternalMutation: true,     // except intended Firestore writes
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: false,             // no binary partner
+    bandAware: true,                // symbolic band only
+    waveFieldAware: true,
+    binaryFieldAware: false,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "RepairScheduleTick",
+      "PulseHistorySnapshot",
+      "PulseHistoryDeadEntries",
+      "PulseHistoryMissingFields"
+    ],
+    output: [
+      "RepairResult",
+      "RepairBandSignature",
+      "RepairWaveField",
+      "RepairDiagnostics",
+      "RepairHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseHistoryRepair-v7",
+      "PulseHistoryRepair-v8",
+      "PulseHistoryRepair-v9",
+      "PulseHistoryRepair-v10",
+      "PulseHistoryRepair-v11",
+      "PulseHistoryRepair-v11-Evo",
+      "PulseHistoryRepair-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "short-term-memory-repair"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "scheduled tick → bounded repair → symbolic surfaces",
+    adaptive: "wave-field overlays (no binary mode)",
+    return: "deterministic repair surfaces + signatures"
+  })
+});
 
 // ============================================================================
 // BACKEND ENTRY POINT (CALLED BY HEARTBEAT / OSKernel)

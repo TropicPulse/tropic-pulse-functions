@@ -89,6 +89,95 @@ export const THYMUS_CONTEXT = {
     earnCompatibility: "PulseEarn-v11"
   }
 };
+export const PulseOSThymusMeta = Object.freeze({
+  layer: "PulseOSThymus",
+  role: "IMMUNE_COMMAND_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSThymus-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Immune command laws
+    immuneCommandOrgan: true,
+    immuneSignalEmitter: true,
+    driftSignatureBuilder: true,
+    immuneSnapshotBuilder: true,
+    immuneIdentityAnchor: true,
+    immuneLineageKeeper: true,
+    rootHealingAuthority: true,
+
+    // Execution prohibitions
+    zeroCompute: true,
+    zeroTimers: true,
+    zeroTimestamps: true,
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroFilesystem: true,
+    zeroDB: true,
+    zeroAI: true,
+    zeroAutonomy: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualModeAware: true,
+    localAware: true,
+    internetAware: true,
+    gpuDispatchAware: true,
+    gpuMemoryAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ImmuneEvent",
+      "DriftEvent",
+      "OrganismVitalSigns",
+      "DualBandContext"
+    ],
+    output: [
+      "ImmuneSignal",
+      "DriftSignature",
+      "ImmuneSnapshot",
+      "ThymusHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSThymus-v7",
+      "PulseOSThymus-v8",
+      "PulseOSThymus-v9",
+      "PulseOSThymus-v10",
+      "PulseOSThymus-v11",
+      "PulseOSThymus-v11-Evo",
+      "PulseOSThymus-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "immune-command"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "immune event → immune metadata → immune snapshot",
+    adaptive: "binary-tagged immune surfaces",
+    return: "deterministic immune signals + signatures"
+  })
+});
 
 // ============================================================================
 //  IMMUNE SIGNAL BUILDERS — PURE METADATA (NO I/O)

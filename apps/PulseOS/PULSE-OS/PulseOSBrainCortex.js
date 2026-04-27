@@ -52,6 +52,85 @@ export const PulseRole = {
   }
 };
 
+export const PulseOSCortexMeta = Object.freeze({
+  layer: "PulseOSCortex",
+  role: "CORTEX_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSCortex-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Cortex laws
+    highLevelCognition: true,
+    organSupervisor: true,
+    symbolicPrimary: true,        // Cortex always thinks symbolically
+    binaryAware: true,
+    dualBandAware: true,
+    binaryNonExecutable: true,    // NEVER executes binary logic
+    continuanceAware: true,
+    loopTheoryAware: true,
+
+    // CNS integration
+    readsBrainDirectly: true,
+    readsIntentIQOrganismMap: true,
+    readsEvolutionFromBrain: true,
+    reportsDriftToEvolution: true,
+    reportsLineageToEvolution: true,
+
+    // Safety
+    zeroBackend: true,
+    zeroNetwork: true,
+    zeroTiming: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    worldLensAware: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseOSBrain",
+      "PulseIQMap",
+      "PulseOrganismMap",
+      "EvolutionState",
+      "DualBandContext"
+    ],
+    output: [
+      "CortexState",
+      "CortexDiagnostics",
+      "CortexSignatures",
+      "CortexHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSCortex-v9",
+      "PulseOSCortex-v10",
+      "PulseOSCortex-v11",
+      "PulseOSCortex-v11-Evo",
+      "PulseOSCortex-v11-Evo-BinaryMax"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "cortex-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "symbolic cognition → organ supervision → drift reporting",
+    adaptive: "binary-aware tagging + dual-band metadata",
+    return: "deterministic cortex state + signatures"
+  })
+});
 
 // ============================================================================
 //  FACTORY — Cortex receives the CNS Brain directly

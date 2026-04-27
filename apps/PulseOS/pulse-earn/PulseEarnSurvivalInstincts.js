@@ -29,6 +29,92 @@
 //   • NO timestamps, NO randomness.
 //   • Internal healing state is allowed to mutate; external objects are not.
 // ============================================================================
+export const PulseEarnSurvivalInstinctsMeta = Object.freeze({
+  layer: "PulseEarnSurvivalInstincts",
+  role: "EARN_SURVIVAL_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnSurvivalInstincts-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+
+    // Scoring engine laws
+    pureScoringEngine: true,
+    deterministicCompatibility: true,
+    deterministicProfitability: true,
+    deterministicEvolutionaryScaling: true,
+    deterministicFairnessDefense: true,
+
+    // Safety laws
+    zeroAI: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroCrypto: true,
+    zeroOSInspection: true,
+    zeroHardwareProbing: true,
+
+    // Mutation rules
+    neverMutateJobObjects: true,
+    internalHealingStateAllowed: true,
+
+    // Band + metadata
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+
+    // Environment
+    worldLensAware: false,
+    multiInstanceReady: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MarketplaceJob",
+      "DevicePhenotype",
+      "DualBandContext"
+    ],
+    output: [
+      "SurvivalScore",
+      "SurvivalDecision",
+      "SurvivalDiagnostics",
+      "SurvivalSignatures",
+      "SurvivalHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnSurvivalInstincts-v9",
+      "PulseEarnSurvivalInstincts-v10",
+      "PulseEarnSurvivalInstincts-v11",
+      "PulseEarnSurvivalInstincts-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only",
+    priority: "symbolic-first"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic compatibility → evolutionary scaling → fairness defense",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic survival score + decision + signatures"
+  })
+});
 
 
 // ---------------------------------------------------------------------------

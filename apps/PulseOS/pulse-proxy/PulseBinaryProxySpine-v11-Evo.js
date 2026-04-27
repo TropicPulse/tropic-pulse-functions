@@ -61,6 +61,103 @@ export const PulseRoleBinary = {
     futureEvolutionReady: true
   }
 };
+export const PulseProxySpineBinaryMeta = Object.freeze({
+  layer: "PulseProxySpineBinary",
+  role: "BINARY_BACKEND_SPINE_CORE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxySpineBinary-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    parallelSafe: true,
+    zeroDriftCloning: true,
+
+    // Binary spine laws
+    binaryCore: true,
+    backendOnly: true,
+    pureBrainstemMath: true,
+    vitalsMath: true,
+    rateLimitField: true,
+    healabilityField: true,
+    nodeRegionDescriptor: true,
+    clusterCoherence: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    cognitiveComputeLink: true,
+
+    // Absolute prohibitions
+    noImports: true,
+    noIO: true,
+    noNetwork: true,
+    noRedis: true,
+    noMailer: true,
+    noFilesystem: true,
+    noGlobals: true,
+    noWindow: true,
+    noProcess: true,
+    noTimers: true,
+    noDateNow: true,
+    noAsync: true,
+    noRandomness: true,
+    noLogging: true,
+    noConsole: true,
+    noExternalMutation: true,
+    noDynamicImports: true,
+    noEval: true,
+
+    // Awareness
+    binaryAware: true,
+    symbolicAware: false,       // symbolic spine calls into this, not vice‑versa
+    dualModeEvolution: true,
+    futureEvolutionReady: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "BinaryVitalsContext",
+      "BinaryRateLimitContext",
+      "BinaryNodeRegionContext",
+      "BinaryHealabilityContext"
+    ],
+    output: [
+      "BinaryVitalsSnapshot",
+      "BinaryRateLimitSnapshot",
+      "BinaryNodeRegionSnapshot",
+      "BinaryHealabilitySnapshot",
+      "BinarySpineSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxySpineBinary-v9",
+      "PulseProxySpineBinary-v10",
+      "PulseProxySpineBinary-v11",
+      "PulseProxySpineBinary-v11-Evo",
+      "PulseProxySpineBinary-v11-Evo-Max"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary"],
+    default: "binary",
+    behavior: "binary-brainstem"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary inputs → deterministic brainstem math → binary outputs",
+    adaptive: "binary-only backend surfaces",
+    return: "pure binary vitals + rate-limit + healability + signatures"
+  })
+});
 
 
 // ============================================================================

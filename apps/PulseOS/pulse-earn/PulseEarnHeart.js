@@ -25,6 +25,67 @@
 //   • PulseSendSystem + Metabolism are injected, not imported.
 //   • Dual-band + binary + wave metadata are structural-only, no behavior change.
 // ============================================================================
+export const PulseEarnHeartMeta = Object.freeze({
+  layer: "PulseEarnHeart",
+  role: "EARN_HEART_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnHeart-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureRuntime: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    metabolismInjected: true,
+    lymphNodesInjected: true,
+    nervousSystemInjected: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "NextMarketplaceJob",
+      "MetabolismExecutor",
+      "LymphNodeSubmitter",
+      "DualBandContext"
+    ],
+    output: [
+      "CardiacCycleResult",
+      "CardiacDiagnostics",
+      "CardiacSignatures",
+      "HeartHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnHeart-v9",
+      "PulseEarnHeart-v10",
+      "PulseEarnHeart-v11",
+      "PulseEarnHeart-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic cardiac cycle (pull → execute → submit)",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic cardiac result + healing metadata"
+  })
+});
 
 import { getNextMarketplaceJob } from "./PulseEarnNervousSystem-v11-Evo.js";
 import { executePulseEarnJob } from "./PulseEarnMetabolism-v11-Evo.js";

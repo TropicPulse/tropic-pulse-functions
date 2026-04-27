@@ -39,6 +39,98 @@ export const PulseRole = {
     binaryFieldAware: true
   }
 };
+export const PulseProxyHeartMeta = Object.freeze({
+  layer: "PulseProxyHeart",
+  role: "CARDIAC_PACEMAKER_ENGINE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyHeart-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Heart laws
+    pureWrapper: true,
+    pacemakerOnly: true,
+    saNodeOnly: true,
+    organismClockOrchestrator: true,
+    heartbeatRelay: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+
+    // Execution prohibitions
+    zeroLogic: true,
+    zeroRouting: true,
+    zeroCompute: true,
+    zeroIQ: true,
+    zeroRandomness: true,
+    zeroTimestamps: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    backendOnly: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PacemakerSignal",
+      "HeartbeatContext",
+      "DualBandContext"
+    ],
+    output: [
+      "HeartbeatRelay",
+      "HeartBandSignature",
+      "HeartBinaryField",
+      "HeartWaveField",
+      "HeartDiagnostics",
+      "HeartHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyHeart-v7",
+      "PulseProxyHeart-v8",
+      "PulseProxyHeart-v9",
+      "PulseProxyHeart-v10",
+      "PulseProxyHeart-v11",
+      "PulseProxyHeart-v11-Evo",
+      "PulseProxyHeart-v11-Evo-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "pacemaker-wrapper"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "pacemaker → wrapper → heartbeat relay",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic heartbeat surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

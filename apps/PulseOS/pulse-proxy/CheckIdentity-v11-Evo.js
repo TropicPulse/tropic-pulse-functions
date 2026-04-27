@@ -22,6 +22,92 @@
 //   • Binary‑first nervous system compliance
 //   • Dualband compression required
 // ============================================================================
+export const PulseOSCheckIdentityMeta = Object.freeze({
+  layer: "PulseProxyIdentityEngine",
+  role: "BINARY_FIRST_IDENTITY_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "CheckIdentity-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    lineageSafe: true,
+    replaySafe: true,
+
+    // Identity laws
+    identityEngine: true,
+    binaryFirstIdentity: true,
+    dualBandIdentity: true,
+    symbolicAware: true,
+    binaryAware: true,
+    dualModeAware: true,
+    lineageAware: true,
+    driftMarkerAware: true,
+    deviceTrustAware: true,
+    compressionAware: true,
+    offlineSurvivalReady: true,
+
+    // Execution prohibitions
+    zeroMutationOfInput: true,
+    zeroRandomness: true,
+    zeroTimers: true,
+    zeroDateNow: true,
+    zeroNetworkFetch: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroAI: true,
+    zeroAutonomy: true,
+
+    // Environment
+    localAware: true,
+    internetAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "IdentityPayload",
+      "BinaryIdentityContext",
+      "DualBandContext",
+      "DeviceTrustContext"
+    ],
+    output: [
+      "AuthoritativeIdentitySnapshot",
+      "IdentityDiagnostics",
+      "IdentitySignatures",
+      "IdentityHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11-EVO",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "CheckIdentity-v7",
+      "CheckIdentity-v8",
+      "CheckIdentity-v9",
+      "CheckIdentity-v10",
+      "CheckIdentity-v11",
+      "CheckIdentity-v11-Evo",
+      "CheckIdentity-v11-Evo-Binary"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic", "dual"],
+    default: "binary",
+    behavior: "identity-engine"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "symbolic identity → binary compression → symbolic return",
+    adaptive: "binary-first identity overlays",
+    return: "deterministic identity snapshot + signatures"
+  })
+});
 
 
 // ============================================================================

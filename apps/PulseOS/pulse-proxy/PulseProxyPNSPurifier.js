@@ -96,6 +96,97 @@ const logCleanup = (stage, details = {}) => {
     })}`
   );
 };
+export const PulseBandPurifierMeta = Object.freeze({
+  layer: "PulseBandPurifier",
+  role: "PULSEBAND_PURIFIER_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseBandPurifier-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    backendOnly: true,
+    symbolicBackend: true,
+    boundedScan: true,
+    timerSafe: true,
+    idempotentCleanup: true,
+    failOpenSafe: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    pulseBandAware: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,
+    zeroCompute: true,              // no business logic
+    zeroRandomness: true,
+    zeroDateNow: true,
+    zeroTimers: true,               // caller provides timing
+    zeroAsyncLoops: true,
+    zeroNetwork: true,              // Firestore allowed
+    zeroIO: true,
+    zeroExternalMutation: true,     // except intended Firestore writes
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: false,             // no binary partner
+    bandAware: true,                // symbolic band only
+    waveFieldAware: true,
+    binaryFieldAware: false,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "CleanupScheduleTick",
+      "PulseBandSessionSnapshot",
+      "PulseBandErrorSnapshot",
+      "PulseBandRedownloadSnapshot"
+    ],
+    output: [
+      "CleanupResult",
+      "CleanupBandSignature",
+      "CleanupWaveField",
+      "CleanupDiagnostics",
+      "CleanupHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseBandPurifier-v7",
+      "PulseBandPurifier-v8",
+      "PulseBandPurifier-v9",
+      "PulseBandPurifier-v10",
+      "PulseBandPurifier-v11",
+      "PulseBandPurifier-v11-Evo",
+      "PulseBandPurifier-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic"],
+    default: "symbolic",
+    behavior: "purifier-backend"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "scheduled tick → bounded cleanup → symbolic surfaces",
+    adaptive: "wave-field overlays (no binary mode)",
+    return: "deterministic cleanup surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

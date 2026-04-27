@@ -73,6 +73,101 @@ const BASE_MEMORY_CONTEXT = {
   dualband: true
 };
 
+export const PulseOSCheckRouterMemoryMeta = Object.freeze({
+  layer: "PulseProxyNetworkHealer",
+  role: "NETWORK_MEMORY_HEALER_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "CheckRouterMemory-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    lineageSafe: true,
+    replaySafe: true,
+
+    // Healer laws
+    networkMemoryHealer: true,
+    binaryFirstHealer: true,
+    dualBandRepairEngine: true,
+    logIntakeOrgan: true,
+    driftDetector: true,
+    malformedEntryDetector: true,
+    nonBinaryCoreDetector: true,
+    proxyBypassDetector: true,
+    lineagePreserver: true,
+    timestampPreserver: true,
+    safeBatchReturner: true,
+
+    // Execution prohibitions
+    zeroMutationOfInput: true,
+    zeroSyntheticTimestamps: true,
+    zeroRandomness: true,
+    zeroTimers: true,
+    zeroDateNow: true,
+    zeroAsyncLoops: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroNetworkFetch: true,     // Firestore reads allowed, fetch not allowed
+    zeroFrontendAccess: true,
+    zeroWindowAccess: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+    memoryContextAware: true,
+    routerContextAware: true,
+    proxyContextAware: true,
+
+    // Environment
+    localAware: true,
+    internetAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "RouterMemoryBatch",
+      "ProxyContext",
+      "DualBandContext"
+    ],
+    output: [
+      "HealedRouterMemoryBatch",
+      "NetworkHealerDiagnostics",
+      "NetworkHealerSignatures",
+      "NetworkHealerHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11-EVO",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "CheckRouterMemory-v7",
+      "CheckRouterMemory-v8",
+      "CheckRouterMemory-v9",
+      "CheckRouterMemory-v10",
+      "CheckRouterMemory-v11",
+      "CheckRouterMemory-v11-Evo",
+      "CheckRouterMemory-v11-Evo-Binary"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic"],
+    default: "binary",
+    behavior: "network-memory-healer"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "router memory batch → binary-first healing → safe batch return",
+    adaptive: "dualband repair surfaces + lineage preservation",
+    return: "deterministic healed log batch + signatures"
+  })
+});
 
 // ============================================================================
 // MODE RESOLUTION — A/B/A‑safe routing metadata

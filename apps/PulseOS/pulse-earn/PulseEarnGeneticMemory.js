@@ -18,6 +18,65 @@
 //   • NO network calls, NO filesystem, NO timestamps.
 //   • Deterministic hashing + safe in‑memory storage only.
 // ============================================================================
+export const PulseEarnGeneticMemoryMeta = Object.freeze({
+  layer: "PulseEarnGeneticMemory",
+  role: "EARN_GENETIC_MEMORY_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnGeneticMemory-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    purePacketEngine: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    genomeSafe: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "fileId",
+      "packetIndex",
+      "PacketData",
+      "DualBandContext"
+    ],
+    output: [
+      "GeneExistsFlag",
+      "GeneWriteResult",
+      "GeneSynthesisResult",
+      "GeneticSignatures",
+      "GeneticHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnGeneticMemory-v10",
+      "PulseEarnGeneticMemory-v11",
+      "PulseEarnGeneticMemory-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic genome lookup + hashing",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic gene existence/write/synthesis result"
+  })
+});
 
 
 // ============================================================================

@@ -27,6 +27,85 @@
 //    - When THIS file runs, the *binary creature* comes online.
 //    - This is the reflex ignition — the organism’s heartbeat.
 // ============================================================================
+export const PulseBinaryOSMeta = Object.freeze({
+  layer: "PulseBinaryOSKernel",
+  role: "BINARY_ORGANISM_BOOTLOADER",
+  version: "v11.2-EVO-MAX",
+  identity: "PulseBinaryOS-v11-EVO-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+
+    // Binary kernel contract
+    binaryNative: true,
+    dualModeOrganism: true,
+    reflexEngineCore: true,
+    organismBootloader: true,
+    zeroDriftIdentity: true,
+    mutationFreeCore: true,
+
+    // Hard binary rules
+    noDateNow: true,
+    noConsole: true,
+    noWindow: true,
+    noRandomness: true,
+    noMetaMutation: true,
+    noSymbolicLogging: true,
+    noBrowserDependencies: true,
+
+    // Awareness
+    memoryCoreAware: true,
+    binaryOverlayAware: true,
+    spinalCordAware: true,
+    symbolicCortexAware: true,
+
+    // Safety
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseOSGovernor",
+      "PulseOSBrain",
+      "PulseOSEvolution",
+      "PulseSpinalCord"
+    ],
+    output: [
+      "BinaryOrganismKernel",
+      "BinaryBootDiagnostics",
+      "BinaryBootSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseBinaryOS-v9",
+      "PulseBinaryOS-v10",
+      "PulseBinaryOS-v11",
+      "PulseBinaryOS-v11-EVO",
+      "PulseBinaryOS-v11-EVO-MAX"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary"],
+    default: "binary",
+    behavior: "kernel-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary-native organism bootloader (reflex ignition)",
+    adaptive: "symbolic-aware dual-mode overlay",
+    return: "online binary organism kernel + boot signatures"
+  })
+});
 
 
 // ============================================================================

@@ -87,6 +87,105 @@ export const ORCHESTRATOR_MODES = {
   DRAIN: "drain"
 };
 
+export const PulseProxyAdrenalSystemMeta = Object.freeze({
+  layer: "PulseProxyAdrenalSystem",
+  role: "ADRENAL_SYSTEM_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyAdrenalSystem-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Adrenal laws
+    adrenalOrgan: true,
+    fightOrFlightReflex: true,
+    stressScaling: true,
+    instanceOrchestrator: true,
+    dynamicBandReflex: true,
+    symbolicToBinaryShift: true,
+    binaryFieldEmitter: true,
+    waveFieldEmitter: true,
+    bandSignatureEmitter: true,
+    stressFieldAware: true,
+    unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+    governorReady: true,
+    reflexSafe: true,
+    backendOnly: true,
+
+    // Execution prohibitions
+    zeroRandomness: true,
+    zeroNondeterminism: true,
+    zeroExternalMutation: true,
+    zeroSymbolicContaminationInBinary: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroTimers: true,
+    zeroAsyncLoops: true,
+    zeroDateNow: true,
+    zeroNetworkFetch: true,     // Firestore allowed
+    zeroWindow: true,
+    zeroDOM: true,
+
+    // Awareness
+    dualMode: true,
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    localAware: true,
+    internetAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "UserScoresSnapshot",
+      "OrchestratorMode",
+      "StressContext",
+      "DualBandContext"
+    ],
+    output: [
+      "AdrenalScalingPlan",
+      "WorkerLaunchPlan",
+      "WorkerShutdownPlan",
+      "AdrenalBandSignature",
+      "AdrenalBinaryField",
+      "AdrenalWaveField",
+      "AdrenalDiagnostics",
+      "AdrenalHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyAdrenalSystem-v9",
+      "PulseProxyAdrenalSystem-v10",
+      "PulseProxyAdrenalSystem-v11",
+      "PulseProxyAdrenalSystem-v11-Evo",
+      "PulseProxyAdrenalSystem-v11-Evo-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "symbolic",
+    behavior: "adrenal-reflex"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "stress → band reflex → scaling plan",
+    adaptive: "dynamic symbolic→binary shift",
+    return: "deterministic adrenal surfaces + signatures"
+  })
+});
 
 // ============================================================================
 //  PHYSIOLOGICAL LIMITS

@@ -74,6 +74,102 @@ export const PROXY_OUTER_AGENT_CONTEXT = {
   purpose: "External interface + job courier + credit sync",
   evo: PulseRole.evo
 };
+export const PulseProxyOuterAgentMeta = Object.freeze({
+  layer: "PulseProxyOuterAgent",
+  role: "EXTERNAL_NEGOTIATOR_BOUNDARY_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyOuterAgent-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Outer Agent laws
+    boundaryOrgan: true,
+    externalNegotiator: true,
+    jobCourier: true,
+    deviceAmbassador: true,
+    marketplaceBoundary: true,
+    backendPreferred: true,
+    binaryFirst: true,
+    dualModeEvolution: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,
+    zeroCompute: true,
+    zeroMarketplaceLogic: true,
+    zeroOSStateMutation: true,
+    zeroRandomness: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetworkMutation: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    binaryAware: true,
+    symbolicAware: true,
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "NegotiationPayload",
+      "BinaryDescriptor",
+      "SymbolicPayload",
+      "DualBandContext"
+    ],
+    output: [
+      "OuterAgentNegotiationResult",
+      "OuterAgentBandSignature",
+      "OuterAgentBinaryField",
+      "OuterAgentWaveField",
+      "OuterAgentDiagnostics",
+      "OuterAgentHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyOuterAgent-v7",
+      "PulseProxyOuterAgent-v8",
+      "PulseProxyOuterAgent-v9",
+      "PulseProxyOuterAgent-v10",
+      "PulseProxyOuterAgent-v11",
+      "PulseProxyOuterAgent-v11-Evo",
+      "PulseProxyOuterAgent-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic", "dual"],
+    default: "binary",
+    behavior: "outer-agent-negotiator"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary descriptor → negotiation → symbolic fallback",
+    adaptive: "dual-band overlays + boundary-safe negotiation",
+    return: "deterministic negotiation surfaces + signatures"
+  })
+});
 
 const AGENT_DIAGNOSTICS_ENABLED =
   (typeof G.PULSE_AGENT_DIAGNOSTICS === "boolean" && G.PULSE_AGENT_DIAGNOSTICS === true) ||

@@ -130,6 +130,110 @@ const nervousLog = (stage, details = {}) => {
 };
 
 nervousLog("NERVOUS_INIT", { meta: PULSEBAND_CONTEXT });
+export const PulseBandSymbolicMeta = Object.freeze({
+  layer: "PulseBandSymbolic",
+  role: "PNS_SYMBOLIC_NERVOUS_SYSTEM",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseBandSymbolic-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    parallelSafe: true,
+
+    // Nervous system laws
+    symbolicPNS: true,
+    sensorimotorIntegration: true,
+    connectivityMirror: true,
+    gpuWarmupControl: true,
+    reflexPropagation: true,
+    nervousEventEmitter: true,
+    nervousSnapshotEngine: true,
+    nervousLiveMirror: true,
+    nervousGpuPerformanceMirror: true,
+    dualModeEvolution: true,
+    unifiedAdvantageField: true,
+    cortexSync: true,
+    brainSync: true,
+    evolutionSync: true,
+
+    // Execution prohibitions
+    zeroConsole: true,
+    zeroRouting: true,
+    zeroMarketplace: true,
+    zeroScoring: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroRandomness: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,
+    zeroWindowMutation: true,
+    zeroDOM: true,
+    zeroGPUExecution: true, // GPU is read-only
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ImpulseTraveler",
+      "GpuNervousState",
+      "BinaryPnsSnapshot",
+      "DualBandContext",
+      "AdvantageContext"
+    ],
+    output: [
+      "PnsLiveSnapshot",
+      "PnsGpuPerformanceSnapshot",
+      "PnsNervousEvent",
+      "PnsBandSignature",
+      "PnsBinaryField",
+      "PnsWaveField",
+      "PnsDiagnostics",
+      "PnsHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseBand-v11",
+    parent: "PulseBand-v11.2-EVO",
+    ancestry: [
+      "PulseBand-v7",
+      "PulseBand-v8",
+      "PulseBand-v9",
+      "PulseBand-v10",
+      "PulseBand-v11",
+      "PulseBand-v11-Evo",
+      "PulseBand-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "symbolic",
+    behavior: "pns-symbolic"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary nervous math → symbolic nervous mirror → CNS/PNS sync",
+    adaptive: "binary-field + wave-field overlays + GPU warmup surfaces",
+    return: "deterministic nervous surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

@@ -132,3 +132,93 @@ export const PulseProxyPNSNervousSystemBinary = {
     };
   }
 };
+
+export const PulseProxyPNSNervousSystemBinaryMeta = Object.freeze({
+  layer: "PulseBandBinaryCore",
+  role: "PNS_NERVOUS_SYSTEM_BINARY",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyPNSNervousSystemBinary-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+    parallelSafe: true,
+    zeroDriftCloning: true,
+
+    // Nervous system laws
+    binaryNervousSystem: true,
+    deterministicNervousMath: true,
+    latencyClassComputer: true,
+    spikeDetector: true,
+    gpuPerfMirrorBuilder: true,
+    snapshotBuilder: true,
+    liveMirrorBuilder: true,
+
+    // Absolute prohibitions
+    noWindow: true,
+    noDOM: true,
+    noGPU: true,
+    noFetch: true,
+    noImports: true,
+    noSideEffects: true,
+    noLogs: true,
+    noTimers: true,
+    noAsync: true,
+    noRandomness: true,
+    noExternalMutation: true,
+    noDynamicImports: true,
+    noEval: true,
+
+    // Awareness
+    binaryAware: true,
+    symbolicAware: false,       // symbolic PulseBand reads from this, not vice‑versa
+    dualModeEvolution: true,
+    unifiedAdvantageField: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "BinaryNervousSnapshot",
+      "BinaryPerfContext",
+      "BinaryLatencyContext",
+      "BinarySpikeContext"
+    ],
+    output: [
+      "BinaryLatencyClass",
+      "BinarySpikeReport",
+      "BinaryGPUMirror",
+      "BinaryNervousSnapshotOut",
+      "BinaryNervousSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseBand-v11",
+    parent: "PulseBand-v11.2-EVO",
+    ancestry: [
+      "PulseProxyPNSNervousSystemBinary-v9",
+      "PulseProxyPNSNervousSystemBinary-v10",
+      "PulseProxyPNSNervousSystemBinary-v11",
+      "PulseProxyPNSNervousSystemBinary-v11-Evo",
+      "PulseProxyPNSNervousSystemBinary-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary"],
+    default: "binary",
+    behavior: "binary-nervous-math"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary nervous input → deterministic math → binary nervous output",
+    adaptive: "binary-only nervous surfaces",
+    return: "pure binary nervous metadata + signatures"
+  })
+});
+

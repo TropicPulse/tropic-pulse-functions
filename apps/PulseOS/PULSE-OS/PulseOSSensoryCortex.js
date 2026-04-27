@@ -30,6 +30,92 @@
 //   • No mutation of impulse or hops
 //   • No timestamps generated here (may pass through existing hop timestamps)
 // ============================================================================
+export const PulseOSSensoryCortexMeta = Object.freeze({
+  layer: "PulseOSSensoryCortex",
+  role: "SENSORY_CORTEX_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSSensoryCortex-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Sensory cortex laws
+    sensoryCortexOrgan: true,
+    pureDiagnostics: true,
+    perceptionOnly: true,
+    executionContextVisualizer: true,
+    dualBandNerveMap: true,
+    forwardReturnMapping: true,
+    driftSentinel: true,
+    versionDriftDetector: true,
+    pressureSnapshotAware: true,
+    executionContextAware: true,
+
+    // Safety prohibitions
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroMutation: true,
+    zeroExternalMutation: true,
+    zeroCompute: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "Impulse",
+      "ImpulsePath",
+      "DualBandContext",
+      "ExecutionContext",
+      "PressureSnapshot"
+    ],
+    output: [
+      "NerveMapForward",
+      "NerveMapReturn",
+      "NerveMapDiagnostics",
+      "NerveMapSignatures",
+      "SensoryHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSSensoryCortex-v9",
+      "PulseOSSensoryCortex-v10",
+      "PulseOSSensoryCortex-v11",
+      "PulseOSSensoryCortex-v11-Evo",
+      "PulseOSSensoryCortex-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "sensory-diagnostics"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "impulse.path → nerve scoring → forward/return maps",
+    adaptive: "binary-tagged pathways + executionContext overlays",
+    return: "UI-ready nerve chains + signatures"
+  })
+});
 
 
 // ============================================================================

@@ -32,6 +32,99 @@ export const PulseRole = {
   }
 };
 
+export const PulseTelemetryOrganMeta = Object.freeze({
+  layer: "PulseTelemetryBloodstream",
+  role: "TELEMETRY_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseTelemetryOrgan-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Telemetry laws
+    pureTelemetry: true,
+    sensorOnly: true,
+    noDecisionMaking: true,
+    noRouting: true,
+    noGlobalState: true,
+    noMutation: true,
+    noExternalMutation: true,
+    noCompute: true,              // no business logic, only measurement
+    noAsync: true,
+    noTimers: true,
+    noRandomness: true,
+    noDynamicImports: true,
+    noEval: true,
+    noNetwork: true,
+    noIO: true,
+    noBackend: true,
+    noDOM: true,
+    noWindow: true,
+    noGPU: true,
+
+    // A‑B‑A + band surfaces
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    meshPulseReady: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "TelemetrySnapshot",
+      "SubsystemHeartbeat",
+      "MeshPulseContext",
+      "DualBandContext"
+    ],
+    output: [
+      "TelemetryVitalSigns",
+      "TelemetryBandSignature",
+      "TelemetryBinaryField",
+      "TelemetryWaveField",
+      "TelemetryDiagnostics",
+      "TelemetryHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseTelemetry-v11",
+    parent: "PulseTelemetry-v11.2-EVO",
+    ancestry: [
+      "PulseTelemetryOrgan-v7",
+      "PulseTelemetryOrgan-v8",
+      "PulseTelemetryOrgan-v9",
+      "PulseTelemetryOrgan-v10",
+      "PulseTelemetryOrgan-v11",
+      "PulseTelemetryOrgan-v11-Evo",
+      "PulseTelemetryOrgan-v11-Evo-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "telemetry-sensor"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "metrics → vital signs → A‑B‑A surfaces",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic telemetry surfaces + signatures"
+  })
+});
 
 // ============================================================================
 // INTERNAL STATE — Telemetry Bloodstream (bounded)

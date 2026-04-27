@@ -9,7 +9,6 @@
 //  - Optional ReflexRouter hook (window.PulseEarnReflexRouter)
 //  - Dual-band aware (symbolic + binary pulses)
 // ============================================================================
-
 export const GOVERNOR_CONTEXT_V11 = {
   organ: "PulseOSGovernor",
   layer: "C-Layer",
@@ -32,6 +31,90 @@ export const GOVERNOR_CONTEXT_V11 = {
     zeroTiming: true
   }
 };
+
+export const PulseOSGovernorMeta = Object.freeze({
+  layer: "PulseOSGovernor",
+  role: "GLOBAL_LOOP_GOVERNOR_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSGovernor-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Governor laws
+    globalLoopGuard: true,
+    reentryFirewall: true,
+    multiInstanceSlicer: true,
+    deterministicNeuron: true,
+    deterministicPulseLaw: true,
+    unifiedAdvantageField: true,
+
+    // Execution prohibitions
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroRouting: true,
+    zeroMarketplace: true,
+    zeroTiming: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Reflex integration (optional hooks)
+    reflexHookAllowed: true,
+    reflexRouterHookAllowed: true,
+
+    // Dual-band awareness
+    dualBandAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    binaryNonExecutable: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "OrganPulse",
+      "OrganContext",
+      "DualBandContext"
+    ],
+    output: [
+      "GovernedPulse",
+      "GovernorDiagnostics",
+      "GovernorSignatures",
+      "GovernorHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSGovernor-v9",
+      "PulseOSGovernor-v10",
+      "PulseOSGovernor-v11",
+      "PulseOSGovernor-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "governor-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "global loop guard → re-entry firewall → multi-instance slicing",
+    adaptive: "binary-tagged metadata surfaces",
+    return: "deterministic governed pulse + signatures"
+  })
+});
 
 const activeOrgans     = new Set();
 const activeModules    = new Set();

@@ -16,6 +16,70 @@
 //   • NO network, NO fetch, NO async, NO randomness.
 //   • NEVER mutate external objects.
 // ============================================================================
+export const PulseEarnMktAuctioneerMeta = Object.freeze({
+  layer: "PulseEarnMktAuctioneer",
+  role: "EARN_MARKETPLACE_RECEPTOR",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMktAuctioneer-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReceptor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true,
+    volatilityDeterministic: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "VastAIDNA",
+      "DualBandContext",
+      "ReceptorNormalizationRules"
+    ],
+    output: [
+      "ReceptorPingResult",
+      "ReceptorJobList",
+      "ReceptorSubmissionResult",
+      "ReceptorNormalizationResult",
+      "ReceptorSignatures",
+      "AuctioneerHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMktAuctioneer-v9",
+      "PulseEarnMktAuctioneer-v10",
+      "PulseEarnMktAuctioneer-v11",
+      "PulseEarnMktAuctioneer-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic Vast.ai receptor phenotype",
+    adaptive: "binary/wave surfaces + volatility inference",
+    return: "deterministic ping/fetchJobs/normalizeJob/submitResult"
+  })
+});
 
 
 // ============================================================================

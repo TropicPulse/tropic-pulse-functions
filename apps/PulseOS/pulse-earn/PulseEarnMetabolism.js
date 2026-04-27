@@ -22,6 +22,69 @@
 //   • Deterministic output only.
 //   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
+export const PulseEarnMetabolismMeta = Object.freeze({
+  layer: "PulseEarnMetabolism",
+  role: "EARN_METABOLISM_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMetabolism-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureExecutionBridge: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroAI: true,
+    zeroUserCode: true,
+    zeroAsync: true,
+    safeToolSelection: true,
+    safeExecution: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PulseEarnJob",
+      "DualBandContext",
+      "MetabolicBlueprint",
+      "SafeToolset"
+    ],
+    output: [
+      "MetabolicResult",
+      "MetabolicDiagnostics",
+      "MetabolicSignatures",
+      "MetabolicHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMetabolism-v9",
+      "PulseEarnMetabolism-v10",
+      "PulseEarnMetabolism-v11",
+      "PulseEarnMetabolism-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "validate job → deterministic tool selection",
+    adaptive: "binary/wave metabolic surfaces + dual-band signatures",
+    return: "deterministic metabolic output + healing metadata"
+  })
+});
 
 
 // ============================================================================

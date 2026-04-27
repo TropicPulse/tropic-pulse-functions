@@ -56,6 +56,110 @@ export const PulseRole = {
     hypothalamusCycleAware: true
   }
 };
+export const PulseUserScoringMeta = Object.freeze({
+  layer: "PulseUserScoringHypothalamus",
+  role: "HYPOTHALAMUS_HOMEOSTASIS_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseUserScoring-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Hypothalamus laws
+    homeostasisRegulation: true,
+    endocrineRegulation: true,
+    trustScoreEngine: true,
+    meshScoreEngine: true,
+    phaseEngine: true,
+    hubDetection: true,
+    instanceAllocator: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    backendOnly: true,
+
+    // Execution prohibitions
+    zeroIQ: true,
+    zeroRouting: true,
+    zeroCompute: true,              // no business logic beyond scoring math
+    zeroRandomness: true,
+    zeroTimestamps: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,     // except writing UserScores
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // A‑B‑A + band surfaces
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    hypothalamusCycleAware: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "UserMetricsSnapshot",
+      "DualBandContext",
+      "AdvantageContext"
+    ],
+    output: [
+      "UserScoresSnapshot",
+      "TrustScore",
+      "MeshScore",
+      "Phase",
+      "HubFlag",
+      "InstanceAllocation",
+      "HypothalamusBandSignature",
+      "HypothalamusBinaryField",
+      "HypothalamusWaveField",
+      "HypothalamusDiagnostics",
+      "HypothalamusHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseUserScoring-v7",
+      "PulseUserScoring-v8",
+      "PulseUserScoring-v9",
+      "PulseUserScoring-v10",
+      "PulseUserScoring-v11",
+      "PulseUserScoring-v11-Evo",
+      "PulseUserScoring-v11-Evo-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "hypothalamus-homeostasis"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "metrics → homeostasis math → user scores",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic homeostasis surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

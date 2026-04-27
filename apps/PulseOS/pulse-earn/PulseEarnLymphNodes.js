@@ -22,6 +22,72 @@
 // ============================================================================
 // ORGAN IDENTITY — v11‑EVO‑PRIME (C2 Lymphatic Immune Dispatch)
 // ============================================================================
+export const PulseEarnImmuneSystemMeta = Object.freeze({
+  layer: "PulseEarnImmuneSystem",
+  role: "EARN_IMMUNE_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnImmuneSystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureHealing: true,
+    driftDetectionOnly: true,
+    dualBandAware: true,
+    binaryAware: true,
+    binaryFirst: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroAI: true,
+    zeroUserCode: true,
+    zeroAsync: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "EarnSubsystemHealingStates",
+      "DualBandContext",
+      "BinaryField",
+      "WaveField"
+    ],
+    output: [
+      "ImmuneDiagnostics",
+      "ImmuneSignatures",
+      "DeterministicRepairActions",
+      "ImmuneHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnImmuneSystem-v9",
+      "PulseEarnImmuneSystem-v10",
+      "PulseEarnImmuneSystem-v11",
+      "PulseEarnImmuneSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "binary",
+    behavior: "metadata-only",
+    priority: "binary-first"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic drift detection across Earn subsystems",
+    adaptive: "binary-first immune surfaces + wave metadata",
+    return: "deterministic repair actions + immune diagnostics"
+  })
+});
+
+
 export const PulseRole = {
   type: "ImmuneDispatch",
   subsystem: "PulseEarnLymphNodes",

@@ -19,6 +19,61 @@
 //   • NEVER mutate job objects.
 //   • READ‑ONLY except deterministic config caching.
 // ============================================================================
+export const PulseEarnCustomReceptorMeta = Object.freeze({
+  layer: "PulseEarnCustomReceptor",
+  role: "EARN_RECEPTOR_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnCustomReceptor-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReceptor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    evolutionAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "DeterministicMarketplaceConfig",
+      "DualBandContext"
+    ],
+    output: [
+      "ReceptorPingResult",
+      "ReceptorJobList",
+      "ReceptorSubmissionResult",
+      "ReceptorSignatures"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnCustomReceptor-v10",
+      "PulseEarnCustomReceptor-v11",
+      "PulseEarnCustomReceptor-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic receptor expression from static DNA",
+    adaptive: "binaryField + waveField + band signatures",
+    return: "deterministic receptor interface (ping/fetchJobs/submitResult)"
+  })
+});
 
 
 // ============================================================================

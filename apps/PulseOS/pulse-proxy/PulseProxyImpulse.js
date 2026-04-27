@@ -38,6 +38,101 @@ const IMPULSE_CONTEXT = {
     unifiedAdvantageField: true
   }
 };
+export const PulseOSImpulseEngineMeta = Object.freeze({
+  layer: "PulseOSImpulseEngine",
+  role: "NEURAL_IMPULSE_LIFECYCLE_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSImpulseEngine-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Impulse laws
+    binaryFirstImpulseCore: true,
+    symbolicImpulseWrapper: true,
+    legacyV93Surface: true,
+    deterministicLineage: true,
+    deterministicShapeSignature: true,
+    deterministicEvolutionStage: true,
+    unifiedReturnEndpoint: true,
+    dualModeReady: true,
+    unifiedAdvantageField: true,
+    binaryAware: true,
+    symbolicAware: true,
+
+    // Execution prohibitions
+    zeroRandomness: true,
+    zeroJSON: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroExternalMutation: true,
+    zeroDateNow: true,
+    zeroComputeOutsideImpulse: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ImpulsePayload",
+      "BinaryImpulseContext",
+      "SymbolicImpulseContext",
+      "DualBandContext"
+    ],
+    output: [
+      "BinaryImpulse",
+      "SymbolicImpulse",
+      "ImpulseLineage",
+      "ImpulseShapeSignature",
+      "ImpulseEvolutionStage",
+      "ImpulseReturnSurface",
+      "ImpulseDiagnostics",
+      "ImpulseHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseImpulseEngine-v7",
+      "PulseImpulseEngine-v8",
+      "PulseImpulseEngine-v9",
+      "PulseImpulseEngine-v9.3",
+      "PulseImpulseEngine-v10",
+      "PulseImpulseEngine-v11",
+      "PulseImpulseEngine-v11-Evo",
+      "PulseImpulseEngine-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic", "dual"],
+    default: "binary",
+    behavior: "impulse-lifecycle"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary impulse → symbolic wrapper → unified return",
+    adaptive: "legacy v9.3 surface + dual-band overlays",
+    return: "deterministic impulse surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

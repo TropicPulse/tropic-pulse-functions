@@ -60,6 +60,89 @@ export const PulseRole = {
     multiInstanceReady: true
   }
 };
+export const PulseOSTissueMembraneMeta = Object.freeze({
+  layer: "PulseOSTissueMembrane",
+  role: "A2_TISSUE_REFLEX_MEMBRANE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSTissueMembrane-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Membrane laws
+    epithelialReflex: true,
+    tissueLevelBarrier: true,
+    midLayerSentinel: true,
+    healingTriggerOnly: true,
+    degradationAnnotator: true,
+    dnaTagger: true,
+    oneWayReflex: true,
+
+    // Safety prohibitions
+    zeroTiming: true,
+    zeroState: true,
+    zeroMutation: true,
+    zeroCompute: true,
+    zeroRoutingInfluence: true,
+    zeroAsync: true,
+    zeroRandomness: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+    bandNormalizationAware: true,
+    environmentAgnostic: true,
+    guardedWindowAccess: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MidLayerErrorEvent",
+      "MidLayerContext",
+      "DualBandContext"
+    ],
+    output: [
+      "TissueReflexEvent",
+      "TissueMembraneDiagnostics",
+      "TissueMembraneSignatures",
+      "TissueMembraneHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSTissueMembrane-v9",
+      "PulseOSTissueMembrane-v10",
+      "PulseOSTissueMembrane-v11",
+      "PulseOSTissueMembrane-v11-Evo",
+      "PulseOSTissueMembrane-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "tissue-reflex"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "mid-layer error → reflex classification → healing trigger",
+    adaptive: "binary-tagged reflex surfaces",
+    return: "deterministic tissue reflex event + signatures"
+  })
+});
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS (v11‑safe)

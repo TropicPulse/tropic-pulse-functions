@@ -17,6 +17,86 @@
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
 // ============================================================================
+export const PulseEarnSendSystemMeta = Object.freeze({
+  layer: "PulseEarnSendSystem",
+  role: "EARN_SEND_CONDUCTOR",
+  version: "v11.2-EVO",
+  identity: "PulseEarnSendSystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+
+    // GOVERNED laws
+    governedSinglePass: true,
+    governedNoLoops: true,
+    governedNoAsync: true,
+    governedNoNetwork: true,
+    governedNoCompute: true,
+    governedNoGPU: true,
+    governedNoMiner: true,
+    governedNoTimestamps: true,
+    governedNoMutationOutsideInstance: true,
+
+    // Band + metadata
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+
+    // Safety
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    worldLensAware: false,
+
+    // Environment
+    multiInstanceReady: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "EarnOrganism",
+      "PulseSendSystem",
+      "ContinuancePulse",
+      "DualBandContext"
+    ],
+    output: [
+      "SendConductorResult",
+      "SendConductorDiagnostics",
+      "SendConductorSignatures",
+      "SendConductorHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnSendSystem-v9",
+      "PulseEarnSendSystem-v10",
+      "PulseEarnSendSystem-v11",
+      "PulseEarnSendSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only",
+    priority: "symbolic-first"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic Earn → Pulse → Send conductor",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic send result + healing metadata"
+  })
+});
 
 import { createEarn, evolveEarn } from "./PulseEarn-v11-Evo.js";
 import { PulseEarnContinuancePulse } from "./PulseEarnContinuancePulse-v11-Evo.js";

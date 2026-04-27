@@ -105,6 +105,100 @@ const IDENTITY_STORAGE_KEYS = [
   "tp_identity_v10",
   "tp_identity_v9"
 ];
+export const PulseOSIdentityBBBMeta = Object.freeze({
+  layer: "PulseOSIdentityBBB",
+  role: "BLOOD_BRAIN_BARRIER_IDENTITY_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSIdentityBBB-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Identity laws
+    identityGate: true,
+    trustFilter: true,
+    coreSecurityOrgan: true,
+    centralizedIdentityAuthority: true,
+    lineageAuthority: true,
+    modeAuthority: true,
+    bandAuthority: true,
+    binaryFieldEmitter: true,
+    waveFieldEmitter: true,
+    abaBandAware: true,
+
+    // Execution prohibitions
+    zeroImports: true,
+    zeroRandomness: true,
+    zeroTimestamps: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroEnvironmentAccess: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualBandAware: true,
+    lineageAware: true,
+    patternAware: true,
+    shapeAware: true,
+    evolutionAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "IdentityPayload",
+      "IdentityMode",
+      "DualBandContext",
+      "LineageContext"
+    ],
+    output: [
+      "IdentitySnapshot",
+      "IdentitySignature",
+      "IdentityBandSignature",
+      "IdentityBinaryField",
+      "IdentityWaveField",
+      "IdentityDiagnostics",
+      "IdentityHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseIdentity-v7",
+      "PulseIdentity-v8",
+      "PulseIdentity-v9",
+      "PulseIdentity-v10",
+      "PulseIdentity-v11",
+      "PulseIdentity-v11-Evo",
+      "PulseIdentity-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "symbolic",
+    behavior: "identity-gate"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "identity → verification → trust filter → identity snapshot",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic identity snapshot + signatures"
+  })
+});
 
 
 // ============================================================================

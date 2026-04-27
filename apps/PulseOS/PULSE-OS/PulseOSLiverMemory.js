@@ -64,6 +64,93 @@ export const MEMORY_CONTEXT = {
   }
 };
 
+export const PulseOSMemoryMeta = Object.freeze({
+  layer: "PulseOSMemory",
+  role: "OS_LIVER_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSMemory-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Liver laws — metabolic archive
+    metabolicArchiveOrgan: true,
+    pureMetadataBuilder: true,
+    snapshotMetadataBuilder: true,
+    driftSignatureBuilder: true,
+    restorePointBuilder: true,
+    restorePlanBuilder: true,
+
+    // Execution prohibitions
+    zeroTiming: true,
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroDB: true,
+    zeroState: true,
+    zeroMutation: true,
+    zeroExternalMutation: true,
+    zeroCompute: true,
+    zeroLoops: true,
+    zeroTimers: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Dual-band awareness
+    dualBandAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    binaryNonExecutable: true,
+
+    // Environment
+    localAware: true,
+    internetAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "OrganismSnapshot",
+      "SubsystemSnapshot",
+      "DriftEvent",
+      "DualBandContext"
+    ],
+    output: [
+      "SnapshotMetadata",
+      "DriftSignature",
+      "RestorePointMetadata",
+      "RestorePlanMetadata",
+      "MemoryHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSMemory-v9",
+      "PulseOSMemory-v10",
+      "PulseOSMemory-v11",
+      "PulseOSMemory-v11-Evo",
+      "PulseOSMemory-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metabolic-archive"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "snapshot → drift signature → restore metadata",
+    adaptive: "binary-tagged metadata surfaces",
+    return: "deterministic metabolic archive metadata + signatures"
+  })
+});
 
 // ============================================================================
 // 1. SNAPSHOT METADATA — OS + Subsystem State Capture

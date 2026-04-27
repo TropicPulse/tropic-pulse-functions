@@ -60,6 +60,100 @@ export const LIMBIC_SHADOW_CONTEXT = {
     futureEvolutionReady: true
   }
 };
+export const PulseLimbicShadowMeta = Object.freeze({
+  layer: "PulseLimbicShadow",
+  role: "UNIFIED_PROJECTION_INSTINCT_LAYER",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseLimbicShadow-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Limbic Shadow laws
+    pureFacade: true,
+    projectionOnly: true,
+    instinctSurface: true,
+    unifiedProjectionLayer: true,
+    unifiedAdvantageField: true,
+    dualBandProjection: true,
+    binaryAware: true,
+    symbolicAware: true,
+    routingOpaque: true,
+    subsystemBoundaryHidden: true,
+
+    // Execution prohibitions
+    zeroLogic: true,
+    zeroState: true,
+    zeroSideEffects: true,
+    zeroRouting: true,
+    zeroOrchestration: true,
+    zeroMutation: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroRandomness: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroWindowMutation: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "ProjectionContext",
+      "DualBandContext",
+      "AdvantageContext"
+    ],
+    output: [
+      "UnifiedProjectionSurface",
+      "LimbicBandSignature",
+      "LimbicBinaryField",
+      "LimbicWaveField",
+      "LimbicDiagnostics",
+      "LimbicHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseLimbicShadow-v7",
+      "PulseLimbicShadow-v8",
+      "PulseLimbicShadow-v9",
+      "PulseLimbicShadow-v10",
+      "PulseLimbicShadow-v11",
+      "PulseLimbicShadow-v11-Evo",
+      "PulseLimbicShadow-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary", "dual"],
+    default: "dual",
+    behavior: "limbic-projection"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "wired organs → unified projection → instinct surface",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic projection surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

@@ -35,6 +35,99 @@ export const PulseRole = {
   }
 };
 
+export const PulseProxyHeartbeatMeta = Object.freeze({
+  layer: "PulseProxyHeartbeat",
+  role: "PACEMAKER_TIMER_ENGINE",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyHeartbeat-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Heartbeat laws
+    pacemakerOnly: true,
+    saNodeOnly: true,
+    heartbeatCycleAware: true,
+    heartbeatRelay: true,
+    pulseHistoryRepair: true,
+    logoutTimerOrgan: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true,
+    backendOnly: true,
+
+    // Execution prohibitions
+    zeroLogic: true,
+    zeroRouting: true,
+    zeroCompute: true,
+    zeroIQ: true,
+    zeroRandomness: true,
+    zeroTimestamps: true,
+    zeroDateNow: true,
+    zeroTimers: true,            // caller provides timing
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroWindow: true,
+    zeroDOM: true,
+    zeroGPU: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "PacemakerTick",
+      "HeartbeatCycleContext",
+      "DualBandContext"
+    ],
+    output: [
+      "HeartbeatCycle",
+      "HeartbeatBandSignature",
+      "HeartbeatBinaryField",
+      "HeartbeatWaveField",
+      "HeartbeatDiagnostics",
+      "HeartbeatHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyHeartbeat-v7",
+      "PulseProxyHeartbeat-v8",
+      "PulseProxyHeartbeat-v9",
+      "PulseProxyHeartbeat-v10",
+      "PulseProxyHeartbeat-v11",
+      "PulseProxyHeartbeat-v11-Evo",
+      "PulseProxyHeartbeat-v11-Evo-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "pacemaker-timer"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "tick → pacemaker → heartbeat cycle",
+    adaptive: "binary-field + wave-field overlays",
+    return: "deterministic heartbeat surfaces + signatures"
+  })
+});
 
 // ============================================================================
 // INTERNAL HELPERS — deterministic, pure, zero randomness

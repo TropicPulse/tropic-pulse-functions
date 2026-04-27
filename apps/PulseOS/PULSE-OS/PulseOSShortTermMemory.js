@@ -40,6 +40,89 @@ const MEMORY_CONTEXT = {
     dispatchAware: true
   }
 };
+export const PulseOSShortTermMemoryMeta = Object.freeze({
+  layer: "PulseOSShortTermMemory",
+  role: "SHORT_TERM_NEURAL_MEMORY_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOSShortTermMemory-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Hippocampal laws
+    shortTermNeuralBuffer: true,
+    hippocampalBuffer: true,
+    neuralMemoryOrgan: true,
+    offlineAbsolute: true,
+    zeroMutationAfterInsertion: true,
+    immutableEntries: true,
+    preHeartFlushBuffer: true,
+
+    // Execution prohibitions
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroTiming: true,
+    zeroStateMutation: true,
+    zeroExternalMutation: true,
+    zeroCompute: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+
+    // Awareness
+    symbolicAware: true,
+    binaryAware: true,
+    dualModeAware: true,
+    executionContextAware: true,
+    pressureAware: true,
+    dispatchAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "LogEntry",
+      "ImpulseContext",
+      "DualBandContext",
+      "ExecutionContext"
+    ],
+    output: [
+      "ShortTermMemorySnapshot",
+      "ShortTermMemoryDiagnostics",
+      "ShortTermMemorySignatures",
+      "ShortTermMemoryHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "PulseOSShortTermMemory-v9",
+      "PulseOSShortTermMemory-v10",
+      "PulseOSShortTermMemory-v11",
+      "PulseOSShortTermMemory-v11-Evo",
+      "PulseOSShortTermMemory-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "short-term-memory"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "log entry → immutable insertion → pre-heart snapshot",
+    adaptive: "binary-tagged metadata surfaces",
+    return: "deterministic short-term memory snapshot + signatures"
+  })
+});
 
 // ============================================================================
 // HELPERS — deterministic structural signature

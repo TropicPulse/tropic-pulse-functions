@@ -8,7 +8,6 @@
 //  - v11: Diagnostics + Signatures + Pattern Surface
 //  - v11+ A-B-A: Dual-band + binary + wave (metadata-only, deterministic)
 // ============================================================================
-
 // ============================================================================
 // ORGAN IDENTITY — v11‑EVO‑PRIME (B1 Sub‑Healer Reflex Arc)
 // ============================================================================
@@ -57,7 +56,77 @@ export const PulseRole = {
     multiInstanceReady: true
   }
 };
+export const PulseEarnReflexMeta = Object.freeze({
+  layer: "PulseEarnReflex",
+  role: "EARN_REFLEX_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnReflex-v11.2-EVO",
 
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureReflex: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    reflexArc: true,
+    reflexDeterministic: true,
+    reflexInstanceLaw: true,
+    reflexHandoffOnly: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroRouting: true,
+    zeroSending: true,
+    zeroCompute: true,
+    zeroAsync: true,
+    zeroUserCode: true,
+    zeroMutation: true,
+    multiInstanceReady: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "GovernorEvent",
+      "ReflexSliceContext",
+      "DualBandContext"
+    ],
+    output: [
+      "EarnReflexOrganism",
+      "ReflexDiagnostics",
+      "ReflexSignatures",
+      "ReflexHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnReflex-v9",
+      "PulseEarnReflex-v10",
+      "PulseEarnReflex-v11",
+      "PulseEarnReflex-v11-Evo",
+      "PulseEarnReflex-v11-Evo-Prime"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only",
+    priority: "symbolic-first"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic reflex organism builder",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "EarnReflex organism + reflex signatures"
+  })
+});
 // ============================================================================
 // INTERNAL STATE — deterministic, drift-proof
 // ============================================================================

@@ -28,6 +28,73 @@
 //   • Deterministic job intake + result forwarding only.
 //   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
+export const PulseEarnNervousSystemMeta = Object.freeze({
+  layer: "PulseEarnNervousSystem",
+  role: "EARN_NERVOUS_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnNervousSystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureInterface: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true,
+    deterministicReputationUpdates: true,
+    deterministicJobIntake: true,
+    deterministicResultForwarding: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MarketplaceJob",
+      "DeviceProfile",
+      "DualBandContext",
+      "ReputationSignals",
+      "CirculatoryRouting"
+    ],
+    output: [
+      "NervousJobIntakeResult",
+      "NervousResultForwardingResult",
+      "NervousDiagnostics",
+      "NervousSignatures",
+      "NervousHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnNervousSystem-v9",
+      "PulseEarnNervousSystem-v10",
+      "PulseEarnNervousSystem-v11",
+      "PulseEarnNervousSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic sensory intake → deterministic motor output",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic job intake + deterministic result forwarding"
+  })
+});
 
 import { updateMarketplaceReputation, computeReputationSignals } from "./PulseEarnEndocrineSystem-v11-Evo.js";
 import { getNextJob } from "./PulseEarnCirculatorySystem-v11-Evo.js";

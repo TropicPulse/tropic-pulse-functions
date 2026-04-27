@@ -35,6 +35,86 @@ export const BinaryProxyRole = {
     abaBandAware: true
   }
 };
+export const PulseOSBinaryProxyMeta = Object.freeze({
+  layer: "BinaryProxy",
+  role: "PURE_BINARY_NERVE_ROOT",
+  version: "v11.2-EVO-BINARY-MAX-ABA",
+  identity: "BinaryProxy-v11.2-EVO-BINARY-MAX-ABA",
+
+  guarantees: Object.freeze({
+    // Absolute binary laws
+    binaryOnly: true,
+    binaryFirst: true,
+    binaryNerveRoot: true,
+    abaBandAware: true,
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Absolute prohibitions
+    noSymbolicLogic: true,
+    noRouting: true,
+    noOrgans: true,
+    noEvolution: true,
+    noLineage: true,
+    noPatterns: true,
+    noCompute: true,
+    noRandomness: true,
+    noMutation: true,
+    noExternalMutation: true,
+    noDynamicImports: true,
+    noEval: true,
+    noJSONExternal: true,
+    noObjectsExternal: true,
+
+    // Fallback behavior
+    symbolicFallback: true,
+    deterministicFallback: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "BinaryArray",
+      "BinaryBandContext"
+    ],
+    output: [
+      "BinaryExchange",
+      "BinarySignature",
+      "BinaryCycleSignature",
+      "BinaryWaveField",
+      "BinaryField"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "BinaryOrganism-v11",
+    parent: "BinaryOrganism-v11.2-EVO",
+    ancestry: [
+      "BinaryProxy-v9",
+      "BinaryProxy-v10",
+      "BinaryProxy-v11",
+      "BinaryProxy-v11-Evo",
+      "BinaryProxy-v11-Evo-Max",
+      "BinaryProxy-v11-Evo-Max-ABA"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary"],
+    default: "binary",
+    behavior: "binary-nerve-root"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary input → binary exchange → binary output",
+    adaptive: "ABA band signatures only",
+    return: "pure binary nerve output + signatures"
+  })
+});
 
 export function createBinaryProxy({
   encoder,

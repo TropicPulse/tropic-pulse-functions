@@ -21,6 +21,106 @@
 //  • Zero mutation outside instance.
 //  • Binary is NEVER executed, only described (phenotype/surface fields).
 // ============================================================================
+export const PulseProxyFrontMeta = Object.freeze({
+  layer: "PulseProxyFront",
+  role: "BINARY_FIRST_PROXY_FRONT",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseProxyFront-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Proxy‑front laws
+    binaryFirst: true,
+    symbolicFallback: true,
+    binaryAsDataOnly: true,
+    routePlanner: true,
+    earnedRouteMemory: true,
+    bandSignatureEmitter: true,
+    dnaTagEmitter: true,
+    binaryPhenotypeEmitter: true,
+    binarySurfaceEmitter: true,
+
+    // Execution prohibitions
+    zeroImports: true,
+    zeroRandomness: true,
+    zeroTimestamps: true,
+    zeroDateNow: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroIO: true,
+    zeroExternalMutation: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroRouting: true,        // not a router
+    zeroCompute: true,        // no business logic
+    zeroAI: true,             // no inference
+    zeroWindow: true,
+    zeroDOM: true,
+
+    // Awareness
+    bandAware: true,
+    waveFieldAware: true,
+    binaryFieldAware: true,
+    dualMode: true,
+    localAware: true,
+    internetAware: true,
+
+    // Environment
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "BinaryBits",
+      "Pattern",
+      "PageId",
+      "SourceId",
+      "PreviousRouteMemory",
+      "DualBandContext"
+    ],
+    output: [
+      "ProxyFrontDecision",
+      "RouteKey",
+      "BinaryField",
+      "BandSignature",
+      "DnaTag",
+      "ProxyFrontDiagnostics",
+      "ProxyFrontHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseProxy-v11",
+    parent: "PulseProxy-v11.2-EVO",
+    ancestry: [
+      "PulseProxyFront-v7",
+      "PulseProxyFront-v8",
+      "PulseProxyFront-v9",
+      "PulseProxyFront-v10",
+      "PulseProxyFront-v11",
+      "PulseProxyFront-v11-Evo",
+      "PulseProxyFront-v11-Evo-Binary",
+      "PulseProxyFront-v11-Evo-Binary-Max"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["binary", "symbolic"],
+    default: "binary",
+    behavior: "proxy-front"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "binary descriptor → route plan → symbolic fallback",
+    adaptive: "earned route memory + binary phenotype surfaces",
+    return: "deterministic proxy-front surfaces + signatures"
+  })
+});
 
 
 // ============================================================================

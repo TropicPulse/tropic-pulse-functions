@@ -27,6 +27,71 @@
 //   • PulseSendSystem is injected, not imported.
 //   • Dual-band + binary + wave metadata are structural-only.
 // ============================================================================
+export const PulseEarnMuscleSystemMeta = Object.freeze({
+  layer: "PulseEarnMuscleSystem",
+  role: "EARN_MUSCLE_ORGAN",
+  version: "v11.2-EVO",
+  identity: "PulseEarnMuscleSystem-v11.2-EVO",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    noRandomness: true,
+    noRealTime: true,
+    noExternalIO: true,
+    pureSupervisor: true,
+    dualBandAware: true,
+    binaryAware: true,
+    waveFieldAware: true,
+    healingMetadataAware: true,
+    worldLensAware: false,
+    zeroNetwork: true,
+    zeroAsync: true,
+    zeroAI: true,
+    zeroUserCode: true,
+    injectedPulseSendSystem: true,
+    injectedLymphNodes: true,
+    injectedNervousSystem: true
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "NextMarketplaceJob",
+      "PulseSendSystemExecutor",
+      "LymphNodeSubmitter",
+      "DualBandContext"
+    ],
+    output: [
+      "ContractionResult",
+      "MuscleDiagnostics",
+      "MuscleSignatures",
+      "MuscleHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseEarn-v11.2-EVO",
+    ancestry: [
+      "PulseEarnMuscleSystem-v9",
+      "PulseEarnMuscleSystem-v10",
+      "PulseEarnMuscleSystem-v11",
+      "PulseEarnMuscleSystem-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "metadata-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "deterministic contraction cycle (fetch → execute → submit)",
+    adaptive: "binary/wave surfaces + dual-band signatures",
+    return: "deterministic contraction output + healing metadata"
+  })
+});
 
 import { fetchJobFromMarketplace } from "./PulseEarnNervousSystem-v11-Evo.js";
 import { submitMarketplaceResult } from "./PulseEarnLymphNodes-v11-Evo.js";

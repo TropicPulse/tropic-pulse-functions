@@ -9,7 +9,6 @@
 //  ALL dependencies are external workers (DB, time, network).
 //  This organ ONLY builds immune artifacts from mesh drift events.
 // ============================================================================
-
 export const GLOBAL_HEALER_CONTEXT_V11 = Object.freeze({
   organ: "GlobalHealer",
   layer: "C-Layer",
@@ -51,6 +50,89 @@ export const GLOBAL_HEALER_CONTEXT_V11 = Object.freeze({
     earnCompatibility: "PulseEarn-v11.0"
   })
 });
+export const PulseOSGlobalHealerMeta = Object.freeze({
+  layer: "GlobalHealer",
+  role: "IMMUNE_COORDINATOR_ORGAN",
+  version: "v11.2-EVO-BINARY-MAX",
+  identity: "PulseOS-GlobalHealer-v11.2-EVO-BINARY-MAX",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    multiInstanceReady: true,
+
+    // Immune system laws
+    topLevelImmuneCoordinator: true,
+    deterministicImmuneSurface: true,
+    deterministicField: true,
+    healerStackAware: true,
+    fpinTheoryAware: true,
+    intentFieldAware: true,
+    loopTheoryAware: true,
+    futureEvolutionReady: true,
+
+    // Execution prohibitions
+    zeroNetwork: true,
+    zeroBackend: true,
+    zeroTiming: true,
+    zeroState: true,
+    zeroMutationOutsideOrgan: true,
+    zeroUserCode: true,
+    zeroDynamicImports: true,
+    zeroEval: true,
+    zeroCompute: true,
+
+    // Dual-band awareness
+    dualBandAware: true,
+    symbolicAware: true,
+    binaryAware: true,
+    binaryNonExecutable: true,
+
+    // Environment
+    localAware: true,
+    internetAware: true,
+    worldLensAware: false
+  }),
+
+  contract: Object.freeze({
+    input: [
+      "MeshDriftEvent",
+      "ImmuneContext",
+      "DualBandContext"
+    ],
+    output: [
+      "ImmuneArtifact",
+      "HealerDiagnostics",
+      "HealerSignatures",
+      "HealerHealingState"
+    ]
+  }),
+
+  lineage: Object.freeze({
+    root: "PulseOS-v11-EVO",
+    parent: "PulseOS-v11.2-EVO",
+    ancestry: [
+      "GlobalHealer-v9",
+      "GlobalHealer-v10",
+      "GlobalHealer-v11",
+      "GlobalHealer-v11-Evo"
+    ]
+  }),
+
+  bands: Object.freeze({
+    supported: ["symbolic", "binary"],
+    default: "symbolic",
+    behavior: "immune-only"
+  }),
+
+  architecture: Object.freeze({
+    pattern: "A-B-A",
+    baseline: "drift event → immune artifact → organism healing",
+    adaptive: "binary-tagged metadata surfaces",
+    return: "deterministic immune artifact + signatures"
+  })
+});
+
 
 // ============================================================================
 // PURE BUILDERS — NO TIME, NO DB, NO SIDE EFFECTS
