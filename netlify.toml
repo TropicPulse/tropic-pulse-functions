@@ -1,0 +1,4 @@
+[build]
+  base = "PULSEX"
+  publish = "PULSEX"
+  functions = "PULSE-WORLD/netlify/functions"

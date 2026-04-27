@@ -39,7 +39,7 @@ import * as PulseProxySym from "./PULSE-WORLD/PULSE-PROXY/PulseProxy-v11-EVO.js"
 import * as PulseRouterSym from "./PULSE-ROUTER/PulseRouter-v11-EVO.js";
 import * as PulseGPUSym from "./PULSE-WORLD/PULSE-GPU/PulseGPU-v11-EVO.js";
 import * as PulseMeshSym from "./PULSE-WORLD/PULSE-MESH/PulseMesh-v11-EVO.js";
-import * as PulseSendSym from "./PULSE-WORLD/PULSE-SEND/PulseSend-v11-EVO.js";
+import * as PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
 import * as PulseEarnSym from "./PULSE-WORLD/PULSE-EARN/PulseEarn-v11-EVO.js";
 
 
@@ -54,7 +54,7 @@ import { createBinaryProxy } from "./PULSE-WORLD/PULSE-PROXY/PulseBinaryProxy-v1
 import * as PulseRouterBin from "./PULSE-ROUTER/PulseBinaryRouter-v11-EVO.js";
 import * as PulseGPUBin from "./PULSE-WORLD/PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
 import * as PulseMeshBin from "./PULSE-WORLD/PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
-import * as PulseSendBin from "./PULSE-WORLD/PULSE-SEND/PulseBinarySend-v11-EVO.js";
+import * as PulseSendBin from "./PULSE-SEND/PulseBinarySend-v11-EVO.js";
 
 
 // ============================================================================

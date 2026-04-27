@@ -149,7 +149,7 @@ export const PulseOSCNSNervousSystemMeta = Object.freeze({
 // ============================================================================
 // ORGAN IMPORTS — COMPLETE THE CONNECTION (Membranes → CNS)
 // ============================================================================
-import { PulseOSShortTermMemory } from "../PULSE-OS/PulseOSShortTermMemory.js";
+import { PulseOSShortTermMemory } from "./PulseOSShortTermMemory.js";
 
 
 

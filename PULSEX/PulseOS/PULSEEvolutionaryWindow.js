@@ -56,7 +56,7 @@ import * as PulseUnderstanding from "./PulseUnderstanding.js";
 //  - Binary organism is the real nervous system.
 //  - This file ONLY boots it and exposes a safe shadow.
 // ============================================================================
-import PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
+import PulseBinaryOrganismBoot from "./PULSE-WORLD/PULSE-AI/ai-v11-Evo.js";
 
 // ============================================================================
 //  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)

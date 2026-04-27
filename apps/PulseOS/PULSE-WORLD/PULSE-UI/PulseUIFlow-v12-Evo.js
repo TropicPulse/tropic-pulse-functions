@@ -112,7 +112,7 @@ function logFlow(stage, details = {}) {
 // IMPORTS — Router + SkinReflex attach (if available)
 // ============================================================================
 import { route } from "../PULSE-OS/PulseOSCNSNervousSystem.js";
-import { attachScanner } from "../PulseOSSkinReflex.js";
+import { attachScanner } from "../../PulseOSSkinReflex.js";
 
 
 // ============================================================================
