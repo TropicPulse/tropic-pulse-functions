@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /apps/PulseOS/Brain/PulseIQMap.js
+// FILE: /apps/PulseOS/PulseIQMap.js
 // PULSE OS — v11‑EVO ORGANISM IQ MAP
 // “THE IQ WAREHOUSE / IMPORT CORTEX / KNOWLEDGE APPENDAGE STORE”
 // ============================================================================

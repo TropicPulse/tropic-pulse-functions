@@ -27,7 +27,6 @@ import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
 // ============================================================================
 import { PulseIntentMap } from "../PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
-import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
 
 
 // ============================================================================

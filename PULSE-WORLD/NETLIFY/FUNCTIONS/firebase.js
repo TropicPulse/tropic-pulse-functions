@@ -1,4 +1,4 @@
-// FILE: tropic-pulse-functions/netlify/lib/firebase.js
+// FILE: tropic-pulse-functions/PULSE-WORLD/netlify/functions/firebase.js
 
 import admin from "firebase-admin";
 
