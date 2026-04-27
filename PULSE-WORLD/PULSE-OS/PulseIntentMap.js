@@ -18,6 +18,10 @@ export const PulseIntentMap = {
     founderAuthority: true,            // Founder intent overrides all other logic.
     immutableIntentMap: true,          // This file cannot be mutated at runtime.
     noSelfLaw: true,                   // Organism cannot create laws for itself.
+        // Required cognition systems
+    fileScannerRequired: true,          // PulseFileScanner must exist.
+    codeAnalysisAllowed: true,          // Symbolic-only code analysis permitted.
+    forbidCodeMutation: true,           // Scanner cannot mutate or rewrite files.
 
     // ----------------------------------------------------------------------
     // ORGANISM IDENTITY — REAL SYSTEMS, REAL FOLDERS, REAL ARCHITECTURE
@@ -72,7 +76,12 @@ export const PulseIntentMap = {
     binaryFirstEvolution: true,         // Binary organism evolves first.
     forbidNonBinaryCore: true,          // No non‑binary core evolution.
     forbidMiddleLayerEvolution: true,   // No new middleware brains.
-    requireBinaryContractLock: true     // Binary contracts must be locked.
+    requireBinaryContractLock: true,     // Binary contracts must be locked.
+        // Evolution boundaries for scanning
+    forbidScannerMutation: true,        // Scanner cannot evolve into a mutator.
+    forbidScannerExecution: true,       // Scanner cannot execute scanned code.
+    scannerSymbolicOnly: true          // Scanner must remain symbolic-primary.
+
   },
 
   // ========================================================================
@@ -114,7 +123,12 @@ export const PulseIntentMap = {
     forbidBinaryCorruption: true,
     requireBinaryValidation: true,
     requireBinaryTraceability: true,
-    forbidBinaryShadowPaths: true
+    forbidBinaryShadowPaths: true,
+        // Scanner safety
+    requireScannerDeterminism: true,    // Scanner must be deterministic.
+    forbidScannerBinaryPaths: true,     // Scanner cannot invoke binary compute.
+    forbidScannerShadowPaths: true     // Scanner cannot bypass organism map.
+
   },
 
   // ========================================================================
@@ -157,7 +171,11 @@ export const PulseIntentMap = {
     detectNonBinaryCoreUsage: true,
     detectProxyBypass: true,
     detectMiddleLayerInsertion: true,
-    detectTextFirstRegression: true
+    detectTextFirstRegression: true,
+        // Drift detection for scanning
+    detectScannerLayerViolation: true,  // Scanner must stay in cognition layer.
+    detectScannerExecutionAttempt: true // Detect if scanner tries to execute code.
+
   },
 
   // ========================================================================
@@ -215,6 +233,10 @@ export const PulseIntentMap = {
     // Binary UX
     seamlessBinaryPaths: true,
     forbidBinaryLeakage: true,
-    forbidTranslatorUX: true
+    forbidTranslatorUX: true,
+        // UX for scanning
+    scannerReadableOutput: true,        // Scanner must produce human-readable reports.
+    scannerNoInternalLeakage: true      // Scanner must not expose internal organs.
+
   }
 };
