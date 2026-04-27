@@ -786,37 +786,22 @@ export async function attachScanner() {
 
       return {
         identity,
-        route: null,
-        healed: false
+        route: null
       };
     }
 
-    // AFTER FIRST LOAD → CHECK IF HEALING IS NEEDED
-    const routeInfo = routeCheck();   // <-- this will be updated next
-    const needsHealing = routeInfo?.needsHealing === true;
+    // AFTER FIRST LOAD → JUST REPORT CONTINUITY
+    const routeInfo = routeCheck();
 
-    if (!needsHealing) {
-      // continuity OK → DO NOT HEAL
-      logProtector("SCANNER_CONTINUITY_OK", routeInfo);
-      return {
-        identity,
-        route: routeInfo,
-        healed: false
-      };
-    }
-
-    // continuity broken → HEAL ONLY NOW
-    const healResult = routeHeal(routeInfo);
-
-    logProtector("SCANNER_ROUTE_HEAL_APPLIED", {
-      routeInfo,
-      healResult
+    logProtector("SCANNER_ATTACH_COMPLETE", {
+      pageName: routeInfo?.pageName || "unknown",
+      lastPage: routeInfo?.lastPage || null,
+      trustedDevice: !!identity.trustedDevice
     });
 
     return {
       identity,
-      route: routeInfo,
-      healed: true
+      route: routeInfo
     };
 
   } catch (err) {
