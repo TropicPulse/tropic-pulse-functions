@@ -43,6 +43,7 @@ const error = global.error || console.error;
 // ============================================================================
 //  SPINE IDENTITY — v11.1 (symbolic backend only, no binary partner)
 // ============================================================================
+// (unchanged)
 export const PulseRole = {
   type: "Organ",
   subsystem: "PulseProxy",
@@ -54,8 +55,8 @@ export const PulseRole = {
     driftProof: true,
     deterministic: true,
     backendOnly: true,
-    symbolicBackend: true,      // explicit: this is the symbolic spine
-    dualModeEvolution: false,   // no binary twin for this organ
+    symbolicBackend: true,
+    dualModeEvolution: false,
     noIQ: true,
     noRouting: true,
     noCompute: true,
@@ -74,6 +75,7 @@ export const PulseRole = {
 // ============================================================================
 //  HUMAN‑READABLE CONTEXT MAP — Spine Identity (v11.1)
 // ============================================================================
+// (unchanged)
 const PROXY_CONTEXT = {
   layer: PulseRole.layer,
   role: PulseRole.identity,
@@ -121,7 +123,7 @@ export const PulseProxySpineMeta = Object.freeze({
     zeroTimers: true,
     zeroAsyncLoops: true,
     zeroNetworkMutation: true,
-    zeroExternalMutation: true,     // except healingState
+    zeroExternalMutation: true,
     zeroDynamicImports: true,
     zeroEval: true,
     zeroWindow: true,
@@ -190,8 +192,8 @@ log(
 
 // ============================================================================
 //  HEALING METADATA — OS-visible heartbeat for PulseProxyHealer (v11.1)
-//  NOTE: This is symbolic state only; no business logic is encoded here.
 // ============================================================================
+// (unchanged)
 const healingState = {
   ...PROXY_CONTEXT,
   lastRequestTs: null,
@@ -211,35 +213,31 @@ const healingState = {
   mode: "online"
 };
 
-// Optional: read‑only export for OS healers / dashboards
 export function getSpineHealingState() {
   return { ...healingState };
 }
 
 // ============================================================================
 //  DOWNSTREAM ORGANS — Packet Engine, Metrics, OS‑level organs
-//  (unchanged wiring, but explicitly documented as symbolic links)
 // ============================================================================
-
-// Packet Engine (PulseEarn organ)
+// (unchanged)
 import {
   readPacketExists,
   writePacket,
   generatePacketData
 } from "./PULSE-EARN/PacketEngine.js";
 
-// ICU Vitals Monitor
 import { updateUserMetrics as recordUserMetrics } from "./PULSE-OS/PulseUserMetrics.js";
 
-// OS‑level organs (Heart, OSKernel, Immune Layers)
 import startPulseTimer from "./PulseProxyHeart.js";
 import startPulseOS from "./PULSE-OS/PulseOS.js";
 import startPulseOSHealer from "./PULSE-OS/PulseOSHealer.js";
 import startGlobalHealer from "../PULSE-OS/GlobalHealer.js";
 
 // ============================================================================
-//  SINGLE‑BOOT GUARDS — v11.1 (idempotent, process‑local)
+//  SINGLE‑BOOT GUARDS — v11.1
 // ============================================================================
+// (unchanged)
 if (!global.__pulseTimerStarted) {
   log("%c[SPINE BOOT] Starting Pulse Timer loop…", "color:#9C27B0; font-weight:bold;");
   startPulseTimer();
@@ -265,14 +263,21 @@ if (!global.__globalHealerStarted) {
 }
 
 // ============================================================================
-//  APP + ENV — v11.1 (symbolic spine shell, no business logic)
+//  APP + ENV — v11.1
 // ============================================================================
+// (unchanged)
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// ⬇️ NEW: backend-only PulseChunker-v12-Evo base URL
+const CHUNKER_BASE =
+  process.env.PULSE_CHUNKER_BASE ||
+  "https://us-central1-YOUR_PROJECT.cloudfunctions.net";
 
 // ============================================================================
 //  ENV + IDENTITY + MODE — v11.1
 // ============================================================================
+// (unchanged)
 const SMTP_PASS = process.env.EMAIL_PASSWORD;
 const ALERT_EMAIL_TO = "FordFamilyDelivery@gmail.com";
 const ALERT_EMAIL_FROM = `"Tropic Pulse" <Sales@TropicPulse.bz>`;
@@ -315,8 +320,9 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================================================
-//  GLOBAL REQUEST MIDDLEWARE — v11.1 (healingState pump)
+//  GLOBAL REQUEST MIDDLEWARE — v11.1
 // ============================================================================
+// (unchanged)
 app.use((req, res, next) => {
   res.setHeader("X-Pulse-Version", PULSE_VERSION);
   res.setHeader("X-Pulse-Node", NODE_ID);
@@ -330,8 +336,9 @@ app.use((req, res, next) => {
 });
 
 // ============================================================================
-//  REDIS — v11.1 (Fail‑open, drift‑proof, symbolic cache wiring)
+//  REDIS — v11.1
 // ============================================================================
+// (unchanged)
 let redis = null;
 let redisReady = false;
 
@@ -365,8 +372,9 @@ if (process.env.REDIS_URL) {
 }
 
 // ============================================================================
-//  VAULT PATCH (Lore) — unchanged (lore versioning is independent)
+//  VAULT PATCH (Lore) — unchanged
 // ============================================================================
+// (unchanged)
 export const VAULT_PATCH_TWILIGHT = {
   signature: "Twilight",
   invoked: "2026-04-11T01:00:00-02:00",
@@ -378,23 +386,10 @@ export const VAULT_PATCH_TWILIGHT = {
   note: "Named 'Twilight' because it was created in the quiet hours before dawn."
 };
 
-// (rest of routes / handlers can remain exactly as you have them)
 // ============================================================================
-//  END SPINE HEADER v11.1 — organism-correct, symbolic-only backend spine
+//  MAILER — v11.0
 // ============================================================================
-// ============================================================================
-//  MAILER — v11.0 (Critical alerts only, fail‑open, healer‑aware)
-// ============================================================================
-//
-// ROLE (v11.0):
-//   • Sends only critical OS / proxy failures to a fixed alert inbox.
-//   • Never blocks the request path — failures are fail‑open + logged.
-//   • No marketing, no campaigns, no user‑facing flows.
-//
-// SAFETY (v11.0):
-//   • Missing / broken SMTP config → mailer disabled, not fatal.
-//   • Errors surface via healingState.lastEmailError for OS‑level healers.
-// ============================================================================
+// (unchanged)
 const transporter =
   SMTP_HOST && SMTP_USER && SMTP_PASS
     ? nodemailer.createTransport({
@@ -417,13 +412,8 @@ if (transporter) {
   );
 }
 
-/**
- * sendCriticalEmail (v11.0)
- * Symbolic, best‑effort alert channel for spine / proxy failures.
- * Never throws; all errors are logged into healingState.
- */
 async function sendCriticalEmail(subject, payload) {
-  if (!transporter) return; // fail‑open: no mailer, no crash
+  if (!transporter) return;
 
   try {
     await transporter.sendMail({
@@ -442,19 +432,8 @@ async function sendCriticalEmail(subject, payload) {
 
 // ============================================================================
 //  UNIVERSAL PROXY — TPProxy v11.0
-//  Unified Fetch Gateway • Safe Fail‑Open • Vitals Pump • Advantage‑Aware
 // ============================================================================
-//
-// ROLE (v11.0):
-//   • Thin, organism‑correct fetch gateway for shell / mesh.
-//   • Provides caching (Redis), vitals (metrics), offline awareness.
-//   • No scoring, no marketplace, no routing intelligence.
-//
-// SAFETY CONTRACT (v11.0):
-//   • Fail‑open: Redis / upstream / mailer failures never crash the spine.
-//   • Deterministic X‑Pulse‑* headers for healers + dashboards.
-//   • Only mutates healingState + metrics; no cross‑subsystem writes.
-// ============================================================================
+// (unchanged logic; still uses global fetch)
 app.get("/TPProxy", async (req, res) => {
   healingState.lastTPProxyCall = Date.now();
 
@@ -489,9 +468,6 @@ app.get("/TPProxy", async (req, res) => {
 
   const start = Date.now();
 
-  // ========================================================================
-  //  OFFLINE MODE — Local‑Only Behavior (v11.0, deterministic)
-// ========================================================================
   if (OFFLINE_MODE) {
     const durationMs = Date.now() - start;
 
@@ -516,13 +492,9 @@ app.get("/TPProxy", async (req, res) => {
       .json(payload);
   }
 
-  // ========================================================================
-  //  ONLINE MODE — Full Internet‑Enabled Proxy Behavior (v11.0)
-// ========================================================================
   try {
     let warmDuration = 0;
 
-    // Optional warm connection for latency smoothing / advantage
     if (rememberMe) {
       const warmStart = Date.now();
       await warmConnection(target);
@@ -530,9 +502,6 @@ app.get("/TPProxy", async (req, res) => {
       healingState.lastWarmConnection = warmStart;
     }
 
-    // --------------------------------------------------------------------
-    //  REDIS CACHE HIT — advantage‑aware, fail‑open
-    // --------------------------------------------------------------------
     if (rememberMe && redisReady) {
       const cachedRaw = await redis.get(cacheKey);
       if (cachedRaw) {
@@ -553,9 +522,6 @@ app.get("/TPProxy", async (req, res) => {
       }
     }
 
-    // --------------------------------------------------------------------
-    //  UPSTREAM FETCH — single hop, no routing logic
-    // --------------------------------------------------------------------
     const upstreamRes = await fetch(target);
     const contentType =
       upstreamRes.headers.get("content-type") || "application/octet-stream";
@@ -563,7 +529,6 @@ app.get("/TPProxy", async (req, res) => {
     const buf = Buffer.from(await upstreamRes.arrayBuffer());
     const bytes = buf.length;
 
-    // Cache write is best‑effort; failures are non‑fatal
     if (rememberMe && redisReady) {
       await redis.set(
         cacheKey,
@@ -602,7 +567,6 @@ app.get("/TPProxy", async (req, res) => {
 
     recordUserMetrics(userId, { event: "error", durationMs });
 
-    // Critical alert is best‑effort; failure is logged but not fatal
     await sendCriticalEmail("[PULSE CRITICAL] Proxy failure", {
       target,
       error: msg,
@@ -621,16 +585,76 @@ app.get("/TPProxy", async (req, res) => {
     res.status(502).json({ error: "pulse_proxy_failed" });
   }
 });
+
+// ============================================================================
+//  PULSEBAND CHUNKER BRIDGE — v11.3 → PulseChunker-v12-Evo
+// ============================================================================
+
+app.post("/PULSE-PROXY/pulseband/session", async (req, res) => {
+  try {
+    const upstream = await fetch(`${CHUNKER_BASE}/createPulseBandSession`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+    const data = await upstream.json();
+    res.json(data);
+  } catch (err) {
+    const msg = String(err);
+    warn("[PULSEBAND SESSION] Bridge failed:", msg);
+    res.status(502).json({ success: false, error: "pulseband_session_bridge_failed" });
+  }
+});
+
+app.get("/PULSE-PROXY/pulseband/next", async (req, res) => {
+  try {
+    const qs = new URLSearchParams(req.query).toString();
+    const upstream = await fetch(`${CHUNKER_BASE}/getNextPulseBandChunk?${qs}`);
+    const data = await upstream.json();
+    res.json(data);
+  } catch (err) {
+    const msg = String(err);
+    warn("[PULSEBAND NEXT] Bridge failed:", msg);
+    res.status(502).json({ success: false, error: "pulseband_next_bridge_failed" });
+  }
+});
+
+app.post("/PULSE-PROXY/pulseband/ack", async (req, res) => {
+  try {
+    const upstream = await fetch(`${CHUNKER_BASE}/ackPulseBandChunk`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+    const data = await upstream.json();
+    res.json(data);
+  } catch (err) {
+    const msg = String(err);
+    warn("[PULSEBAND ACK] Bridge failed:", msg);
+    res.status(502).json({ success: false, error: "pulseband_ack_bridge_failed" });
+  }
+});
+
+app.post("/PULSE-PROXY/pulseband/redownload", async (req, res) => {
+  try {
+    const upstream = await fetch(`${CHUNKER_BASE}/logPulseBandRedownload`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+    const data = await upstream.json();
+    res.json(data);
+  } catch (err) {
+    const msg = String(err);
+    warn("[PULSEBAND REDOWNLOAD] Bridge failed:", msg);
+    res.status(502).json({ success: false, error: "pulseband_redownload_bridge_failed" });
+  }
+});
+
 // ============================================================================
 //  HEALTH — PROXY VITALS SNAPSHOT (v11.0)
-//  OS‑Visible Health Card • Redis Status • Event Loop Lag
 // ============================================================================
-//
-// ROLE (v11.0):
-//   • Exposes a lightweight, read‑only health snapshot for OS healers / dashboards.
-//   • Reports Redis status, uptime, protocol, and event loop lag.
-//   • No mutations beyond healingState.lastHealthCheck.
-// ============================================================================
+// (unchanged)
 app.get("/PULSE-PROXY/health", async (req, res) => {
   const now = Date.now();
   healingState.lastHealthCheck = now;
@@ -666,14 +690,8 @@ app.get("/PULSE-PROXY/health", async (req, res) => {
 
 // ============================================================================
 //  METRICS — ICU‑Grade Telemetry (v11.0)
-//  CPU / Memory / Event Loop Lag • Cache Status • Drift‑Safe Snapshot
 // ============================================================================
-//
-// ROLE (v11.0):
-//   • Provides ICU‑style telemetry for backend observability.
-//   • CPU, memory, event loop lag, cache status, and cold‑start awareness.
-//   • Read‑only; no cross‑subsystem writes.
-// ============================================================================
+// (unchanged)
 app.get("/PULSE-PROXY/metrics", async (req, res) => {
   const now = Date.now();
   healingState.lastMetricsCheck = now;
@@ -719,13 +737,8 @@ app.get("/PULSE-PROXY/metrics", async (req, res) => {
 
 // ============================================================================
 //  NODE INFO — BACKEND BODY CARD (v11.0)
-//  Node Identity • TLS / HTTP • Uptime • Redis Status
 // ============================================================================
-//
-// ROLE (v11.0):
-//   • Exposes node‑level identity and runtime envelope for debuggers / healers.
-//   • No business logic, no routing decisions.
-// ============================================================================
+// (unchanged)
 app.get("/PULSE-PROXY/node", async (req, res) => {
   const now = Date.now();
   healingState.lastNodeCheck = now;
@@ -762,13 +775,8 @@ app.get("/PULSE-PROXY/node", async (req, res) => {
 
 // ============================================================================
 //  PING — REFLEX TEST (v11.0)
-//  Minimal Reflex • No Side Effects
 // ============================================================================
-//
-// ROLE (v11.0):
-//   • Simple reflex endpoint for liveness checks.
-//   • No writes beyond healingState.lastPingCheck.
-// ============================================================================
+// (unchanged)
 app.get("/PULSE-PROXY/ping", async (req, res) => {
   const t0 = Date.now();
   healingState.lastPingCheck = t0;
