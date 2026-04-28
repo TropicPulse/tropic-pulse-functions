@@ -457,9 +457,7 @@ export function createAIBinaryImmunity(config) {
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ---------------------------------------------------------
-export {
-  ImmunityMeta
-};
+
 
 if (typeof module !== "undefined") {
   module.exports = {
