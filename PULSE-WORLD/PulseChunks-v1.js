@@ -6,16 +6,53 @@
 // ============================================================================
 
 console.log("[PulseChunks-v1.6-EVO+] Membrane chunker loading...");
+// ============================================================================
+//  LORE TRANSLATOR — Evolvable, deterministic, metadata-driven
+// ============================================================================
 
-// ============================================================================
-//  LORE TRANSLATOR — Injects story based on metadata
-// ============================================================================
+// Deterministic selector (no randomness, no timers)
+function stableIndexFromString(str, max) {
+  let sum = 0;
+  for (let i = 0; i < str.length; i++) sum += str.charCodeAt(i);
+  return sum % max;
+}
+
 function generateLoreHeader({ meta, context, pulseRole, route }) {
   if (!meta || !context || !pulseRole) return "";
 
   const evoFlags = Object.keys(meta.evo || {}).filter(k => meta.evo[k]);
   const neverRules = meta.contract?.never || [];
   const alwaysRules = meta.contract?.always || [];
+
+  // Variation pools — deterministic evolution
+  const openings = [
+    `The ${meta.role.replace(/_/g, " ").toLowerCase()} stirs beneath the surface.`,
+    `A quiet hum rises from the ${meta.layer.toLowerCase()} artery.`,
+    `The organ awakens, shaping the unseen pathways.`,
+    `A pulse of logic ripples through the ${meta.layer.toLowerCase()} membrane.`,
+    `The ${meta.identity} shifts, aligning with the organism’s intent.`
+  ];
+
+  const middles = [
+    `Wrapped in the ${meta.layer}, it bridges worlds the traveler cannot see.`,
+    `Its presence binds symbolic and structural layers into coherence.`,
+    `It listens to the organism’s pressure and adjusts its flow.`,
+    `It maintains the ancient contract without hesitation.`,
+    `Its architecture remains sealed, but its story leaks through.`
+  ];
+
+  const closings = [
+    `The organism reveals only its story, never its mechanisms.`,
+    `Only the narrative escapes; the architecture stays hidden.`,
+    `Its lore evolves, but its structure remains immutable.`,
+    `The system speaks in myth, not in code.`,
+    `Its voice shifts with each route, yet stays deterministic.`
+  ];
+
+  // Deterministic selection based on metadata identity
+  const open = openings[stableIndexFromString(meta.identity, openings.length)];
+  const mid = middles[stableIndexFromString(context.lineage, middles.length)];
+  const close = closings[stableIndexFromString(pulseRole.identity, closings.length)];
 
   return `
 /*
@@ -28,8 +65,8 @@ function generateLoreHeader({ meta, context, pulseRole, route }) {
   LINEAGE: ${context.lineage}
   ────────────────────────────────────────────────────────────────
 
-  The ${meta.role.replace(/_/g, " ").toLowerCase()} stirs beneath the surface.
-  Wrapped in the ${meta.layer}, it bridges worlds the traveler cannot see.
+  ${open}
+  ${mid}
 
   Evolution Traits:
     • ${evoFlags.join("\n    • ")}
@@ -53,12 +90,12 @@ function generateLoreHeader({ meta, context, pulseRole, route }) {
   Tone: ${pulseRole.voice.tone}
   Style: ${pulseRole.voice.style}
 
-  The organism reveals only its story,
-  never its mechanisms.
+  ${close}
   ────────────────────────────────────────────────────────────────
 */
 `;
 }
+
 
 // ============================================================================
 //  SAFETY FENCE — OUTLIER RULES
