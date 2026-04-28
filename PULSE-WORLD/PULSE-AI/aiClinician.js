@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — CLINICIAN ORGAN
+//  PULSE OS v12.3‑EVO+ — CLINICIAN ORGAN
 //  Diagnostic Interpreter • Triage Specialist • System Health Auditor
 //  PURE OBSERVATION. ZERO MEDICAL ADVICE. ZERO MUTATION.
 // ============================================================================
@@ -7,8 +7,8 @@
 export const ClinicianMeta = Object.freeze({
   layer: "PulseAIClinicianFrame",
   role: "CLINICIAN_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiClinician-v11-EVO",
+  version: "12.3-EVO+",
+  identity: "aiClinician-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -30,7 +30,8 @@ export const ClinicianMeta = Object.freeze({
 
     packetAware: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    clinicianArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -62,22 +63,58 @@ export const ClinicianMeta = Object.freeze({
 });
 
 // ============================================================================
-//  CLINICIAN ORGAN IMPLEMENTATION
+// HELPERS — PRESSURE + BUCKETS
 // ============================================================================
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
 
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+// ============================================================================
+//  CLINICIAN ORGAN IMPLEMENTATION (v12.3‑EVO+)
+// ============================================================================
 export function createClinicianOrgan(context = {}) {
   const diagnostics = context.diagnostics || {};
   const trace = Array.isArray(context.trace) ? [...context.trace] : [];
 
-  function buildSummary() {
-    return Object.freeze({
+  function prewarm() {
+    return true;
+  }
+
+  // --------------------------------------------------------------------------
+  // SUMMARY BUILDER v3
+  // --------------------------------------------------------------------------
+  function buildSummary(binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const summary = {
       mismatches: diagnostics.mismatches?.length || 0,
       missingFields: diagnostics.missingFields?.length || 0,
       slowdown: diagnostics.slowdownCauses?.length || 0,
       drift: diagnostics.driftDetected === true
-    });
+    };
+
+    if (binaryPressure >= 0.7) {
+      summary.simplified = true;
+    }
+
+    return Object.freeze(summary);
   }
 
+  // --------------------------------------------------------------------------
+  // SAFE CONTEXT BUILDER
+  // --------------------------------------------------------------------------
   function buildSafeContext() {
     return Object.freeze({
       personaId: context.personaId,
@@ -87,6 +124,9 @@ export function createClinicianOrgan(context = {}) {
     });
   }
 
+  // --------------------------------------------------------------------------
+  // FLAG BUILDER
+  // --------------------------------------------------------------------------
   function buildFlags() {
     return Object.freeze([
       ...(diagnostics.mismatches?.length ? [{ type: "mismatch" }] : []),
@@ -96,11 +136,14 @@ export function createClinicianOrgan(context = {}) {
     ]);
   }
 
-  function buildPacket() {
+  // --------------------------------------------------------------------------
+  // PACKET EMITTER v3
+  // --------------------------------------------------------------------------
+  function buildPacket(binaryVitals = {}) {
     const payload = {
       type: "clinician-snapshot",
       timestamp: Date.now(),
-      summary: buildSummary(),
+      summary: buildSummary(binaryVitals),
       flags: buildFlags()
     };
 
@@ -117,16 +160,56 @@ export function createClinicianOrgan(context = {}) {
     });
   }
 
+  // --------------------------------------------------------------------------
+  // CLINICIAN ARTERY v3 — symbolic-only, deterministic
+  // --------------------------------------------------------------------------
+  function clinicianArtery({ binaryVitals = {} } = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const mismatchCount = diagnostics.mismatches?.length || 0;
+    const missingCount = diagnostics.missingFields?.length || 0;
+    const slowdownCount = diagnostics.slowdownCauses?.length || 0;
+    const drift = diagnostics.driftDetected === true;
+
+    const localPressure =
+      (mismatchCount ? 0.3 : 0) +
+      (missingCount ? 0.2 : 0) +
+      (slowdownCount ? 0.3 : 0) +
+      (drift ? 0.4 : 0);
+
+    const pressure = Math.max(
+      0,
+      Math.min(1, 0.6 * localPressure + 0.4 * binaryPressure)
+    );
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket: bucketPressure(pressure)
+      },
+      diagnostics: {
+        mismatches: mismatchCount,
+        missingFields: missingCount,
+        slowdown: slowdownCount,
+        drift
+      }
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // PUBLIC CLINICIAN API (v12.3‑EVO+)
+  // --------------------------------------------------------------------------
   return Object.freeze({
     meta: ClinicianMeta,
+    prewarm,
 
     log(message) {
       context?.logStep?.(`aiClinician: ${message}`);
     },
 
-    buildModel() {
+    buildModel(binaryVitals = {}) {
       return Object.freeze({
-        summary: buildSummary(),
+        summary: buildSummary(binaryVitals),
         safeContext: buildSafeContext(),
         trace,
         flags: buildFlags(),
@@ -134,14 +217,16 @@ export function createClinicianOrgan(context = {}) {
       });
     },
 
-    emitPacket() {
-      return buildPacket();
-    }
+    emitPacket(binaryVitals = {}) {
+      return buildPacket(binaryVitals);
+    },
+
+    clinicianArtery
   });
 }
 
 // ============================================================================
-//  ESM EXPORTS
+//  EXPORTS
 // ============================================================================
 export {
   createClinicianOrgan
@@ -149,9 +234,6 @@ export {
 
 export default createClinicianOrgan;
 
-// ============================================================================
-//  COMMONJS FALLBACK EXPORTS
-// ============================================================================
 if (typeof module !== "undefined") {
   module.exports = {
     ClinicianMeta,

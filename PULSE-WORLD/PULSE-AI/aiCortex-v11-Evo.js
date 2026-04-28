@@ -146,6 +146,59 @@ const CortexMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  CORTEX PREWARM ENGINE — v11.1‑EVO
+// ---------------------------------------------------------
+export function prewarmAICortex(config = {}) {
+  try {
+    const { encoder, trace } = config;
+
+    // Warm binary cognition artery
+    const binaryMetrics = {
+      throughput: 1,
+      pressure: 1,
+      cost: 1,
+      budget: 1,
+      buckets: [1, 1, 1]
+    };
+
+    // Warm symbolic cognition artery
+    const symbolicMetrics = {
+      intent: "prewarm",
+      confidence: 1,
+      semanticLoad: 1,
+      contextDepth: 1,
+      persona: "none",
+      boundaryMode: "safe"
+    };
+
+    // Warm fused decision packet
+    const fused = {
+      type: "binary-cortex-decision",
+      timestamp: 0,
+      pattern: "prewarm-pattern",
+      decision: "prewarm-decision",
+      binary: binaryMetrics,
+      symbolic: symbolicMetrics,
+      band: {
+        primary: "binary",
+        secondary: "symbolic",
+        fusion: "binary-primary-symbolic-fallback"
+      }
+    };
+
+    // Warm binary encoding of fused packet
+    if (encoder?.encode) {
+      const bits = encoder.encode(JSON.stringify(fused));
+      encoder.decode?.(bits, "string");
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[AICortex Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ---------------------------------------------------------
 //  CORTEX CLASS — HEADER

@@ -23,7 +23,7 @@
  *
  *   It emits:
  *     - binary watchdog alerts
- *     - anomaly packets
+ *     - anomaly packets (raw bits or chunk handles)
  *
  * ARCHITECTURAL POSITION:
  *   Layer: Binary Nervous System (BNS)
@@ -33,7 +33,7 @@
  * ORGAN CONTRACT (v11.2‑EVO+):
  *   - Must never mutate external organs
  *   - Must never generate symbolic state
- *   - Must only emit binary packets
+ *   - Must only emit binary packets or chunk handles
  *   - Must remain deterministic
  *   - Must attach observers safely
  *   - Must never block the organism
@@ -83,7 +83,7 @@ export const WatchdogMeta = Object.freeze({
 
     always: Object.freeze([
       "observe binary activity",
-      "emit binary-only anomaly packets",
+      "emit binary-only anomaly packets or chunk handles",
       "apply deterministic timing rules",
       "attach observers safely",
       "log deterministic steps when tracing",
@@ -100,6 +100,7 @@ export class AIBinaryWatchdog {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-watchdog";
     this.encoder = config.encoder;
+    this.chunker = config.chunker || null; // optional global chunker
     this.heartbeat = config.heartbeat || null;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
@@ -123,7 +124,44 @@ export class AIBinaryWatchdog {
     this.lastReflexActivity = now;
     this.lastSchedulerTick = now;
 
+    // Cached last alert (read-only snapshot)
+    this._lastAlert = null;
+
+    this._prewarm();
     this._attachObservers();
+  }
+
+  // ============================================================
+  // PREWARM HOOKS (NON-BLOCKING, OPTIONAL)
+  // ============================================================
+
+  _prewarm() {
+    // Encoder / chunker prewarm
+    if (typeof this.encoder.prewarm === "function") {
+      this.encoder.prewarm();
+      this._trace("prewarm:encoder", {});
+    }
+
+    if (this.chunker && typeof this.chunker.prewarm === "function") {
+      this.chunker.prewarm();
+      this._trace("prewarm:chunker", {});
+    }
+
+    // Pipeline / reflex / scheduler prewarm (if they expose it)
+    if (this.pipeline && typeof this.pipeline.prewarm === "function") {
+      this.pipeline.prewarm();
+      this._trace("prewarm:pipeline", {});
+    }
+
+    if (this.reflex && typeof this.reflex.prewarm === "function") {
+      this.reflex.prewarm();
+      this._trace("prewarm:reflex", {});
+    }
+
+    if (this.scheduler && typeof this.scheduler.prewarm === "function") {
+      this.scheduler.prewarm();
+      this._trace("prewarm:scheduler", {});
+    }
   }
 
   // ============================================================
@@ -163,7 +201,7 @@ export class AIBinaryWatchdog {
   }
 
   // ============================================================
-  // BINARY ANOMALY PACKET GENERATION
+  // BINARY ANOMALY PACKET GENERATION (CHUNK-AWARE)
   // ============================================================
 
   _generateAlert(anomaly) {
@@ -176,12 +214,23 @@ export class AIBinaryWatchdog {
     const json = JSON.stringify(payload);
     const bits = this.encoder.encode(json);
 
+    let emittedBits = bits;
+
+    // Optional: route through chunker, returning a handle instead of raw bits
+    if (this.chunker && typeof this.chunker.chunk === "function") {
+      emittedBits = this.chunker.chunk(bits, {
+        source: "watchdog",
+        anomaly
+      });
+    }
+
     const packet = {
       ...payload,
-      bits,
-      bitLength: bits.length
+      bits: emittedBits,
+      bitLength: typeof emittedBits === "string" ? emittedBits.length : bits.length
     };
 
+    this._lastAlert = packet;
     this._trace("alert:generated", packet);
     return packet;
   }
@@ -246,6 +295,14 @@ export class AIBinaryWatchdog {
     clearInterval(this._timer);
     this._timer = null;
     this._trace("watchdog:stop", {});
+  }
+
+  // ============================================================
+  // READ-ONLY SNAPSHOTS
+  // ============================================================
+
+  getLastAlert() {
+    return this._lastAlert;
   }
 
   // ============================================================

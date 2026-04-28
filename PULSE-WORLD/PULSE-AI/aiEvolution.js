@@ -22,8 +22,8 @@
 export const AI_EVOLUTION_META = Object.freeze({
   layer: "PulseAIEvolution",
   role: "EVOLUTION_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiEvolution-v11-EVO",
+  version: "11.3-EVO",
+  identity: "aiEvolution-v11.3-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -52,7 +52,7 @@ export const AI_EVOLUTION_META = Object.freeze({
     readOnly: true,
     architectOnly: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO"
+    epoch: "11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -83,7 +83,88 @@ import { Personas } from "./persona.js";
 import { getOrganismSnapshot } from "./aiDeps.js";
 
 // ============================================================================
-//  FACTORY — Evolution Organ (v11.2‑EVO, dual‑band + recommendations)
+//  INTERNAL CACHES — deterministic, in‑memory, per‑scope
+// ============================================================================
+
+const EVO_CACHE = Object.freeze({
+  organismOverview: new Map(), // key: "organism", value: { packet, expiresAt }
+  fileAnalysis: new Map(),     // key: filePath
+  schemaAnalysis: new Map(),   // key: schemaName
+  routeAnalysis: new Map()     // key: routePrefix
+});
+
+const ORGANISM_OVERVIEW_TTL_MS = 5 * 60 * 1000;  // 5 minutes
+const FILE_ANALYSIS_TTL_MS     = 60 * 1000;      // 60 seconds
+const SCHEMA_ANALYSIS_TTL_MS   = 60 * 1000;      // 60 seconds
+const ROUTE_ANALYSIS_TTL_MS    = 60 * 1000;      // 60 seconds;
+
+function getCached(map, key) {
+  const entry = map.get(key);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    map.delete(key);
+    return null;
+  }
+  return entry.packet;
+}
+
+function setCached(map, key, packet, ttlMs) {
+  if (!ttlMs || ttlMs <= 0) return;
+  map.set(key, {
+    packet,
+    expiresAt: Date.now() + ttlMs
+  });
+}
+
+// ============================================================================
+//  PREWARM ENGINE — v11.3‑EVO
+// ============================================================================
+//
+// Warms:
+//   • fsAPI.getAllFiles()
+//   • routeAPI.getRouteMap()
+//   • schemaAPI.getAllSchemas()
+//   • organism snapshot summarizer
+//   • detectors + recommendation engine
+// ============================================================================
+
+export async function prewarmEvolutionOrgan(fsAPI, routeAPI, schemaAPI, dualBand = null, { trace = false } = {}) {
+  try {
+    if (trace) console.log("[aiEvolution] prewarm: starting");
+
+    // Warm heavy providers
+    const [files, routes, schemas] = await Promise.all([
+      fsAPI.getAllFiles().catch(() => []),
+      routeAPI.getRouteMap().catch(() => []),
+      schemaAPI.getAllSchemas().catch(() => [])
+    ]);
+
+    // Warm detectors on small synthetic sample
+    const sampleFiles = Array.isArray(files) ? files.slice(0, 5) : [];
+    const sampleRoutes = Array.isArray(routes) ? routes.slice(0, 5) : [];
+    const sampleSchemas = Array.isArray(schemas) ? schemas.slice(0, 5) : [];
+
+    detectUnusedImports(sampleFiles[0] || null);
+    detectDeadComponents(sampleFiles);
+    detectOrphanedRoutes(sampleRoutes);
+    detectSchemaDrift(sampleSchemas);
+    detectOrganDrift(sampleFiles);
+    detectPageDrift(sampleFiles);
+    detectPulseEarnDrift(sampleFiles);
+
+    const snapshot = getOrganismSnapshot(dualBand);
+    summarizeSnapshot(snapshot);
+
+    if (trace) console.log("[aiEvolution] prewarm: complete");
+    return true;
+  } catch (err) {
+    console.error("[aiEvolution] prewarm failed:", err);
+    return false;
+  }
+}
+
+// ============================================================================
+//  FACTORY — Evolution Organ (v11.3‑EVO, dual‑band + recommendations)
 // ============================================================================
 
 export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) {
@@ -147,13 +228,29 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
   }
 
   // --------------------------------------------------------------------------
-  // PACKET EMITTER — Evolution Packets
+  // CHUNKING — keep packets bounded + deterministic
   // --------------------------------------------------------------------------
-  function emitEvolutionPacket(type, payload) {
+  function chunkArray(arr, size = 200) {
+    if (!Array.isArray(arr) || size <= 0) return [];
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += size) {
+      chunks.push(Object.freeze(arr.slice(i, i + size)));
+    }
+    return Object.freeze(chunks);
+  }
+
+  // --------------------------------------------------------------------------
+  // PACKET EMITTER — Evolution Packets v2
+  // --------------------------------------------------------------------------
+  function emitEvolutionPacket(type, payload, { severity = "info", driftLevel = "none" } = {}) {
     return Object.freeze({
       meta: AI_EVOLUTION_META,
       packetType: `evo-${type}`,
+      packetId: `evo-${type}-${Date.now()}`,
       timestamp: Date.now(),
+      organismEpoch: AI_EVOLUTION_META.evo.epoch,
+      severity,
+      driftLevel,
       ...payload
     });
   }
@@ -419,7 +516,7 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC API — Evolutionary Insight (v11.2‑EVO)
+  // PUBLIC API — Evolutionary Insight (v11.3‑EVO)
 // --------------------------------------------------------------------------
   return Object.freeze({
     // ----------------------------------------------------------------------
@@ -427,6 +524,13 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
     // ----------------------------------------------------------------------
     async getOrganismOverview(context) {
       if (!assertOwnerArchitect(context)) return null;
+
+      const cacheKey = "organism";
+      const cached = getCached(EVO_CACHE.organismOverview, cacheKey);
+      if (cached) {
+        context.logStep?.("aiEvolution: organism overview cache hit.");
+        return cached;
+      }
 
       const [files, routes, schemas] = await Promise.all([
         fsAPI.getAllFiles(),
@@ -463,18 +567,37 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
         patterns
       });
 
-      return emitEvolutionPacket("organism-overview", Object.freeze({
-        unusedImports: unusedImports.map(stripIdentityAnchors),
-        orphanedRoutes: orphanedRoutes.map(stripIdentityAnchors),
-        deadComponents: deadComponents.map(stripIdentityAnchors),
-        schemaDrift: schemaDrift.map(stripIdentityAnchors),
-        organDrift: organDrift.map(stripIdentityAnchors),
-        pageDrift: pageDrift.map(stripIdentityAnchors),
-        pulseEarnDrift,
-        snapshotSummary,
-        patterns,
-        recommendations
-      }));
+      const driftLevel =
+        schemaDrift.length > 0 ||
+        organDrift.length > 0 ||
+        pageDrift.length > 0 ||
+        deadComponents.length > 0 ||
+        orphanedRoutes.length > 0
+          ? "present"
+          : "none";
+
+      const packet = emitEvolutionPacket(
+        "organism-overview",
+        Object.freeze({
+          unusedImports: chunkArray(unusedImports.map(stripIdentityAnchors)),
+          orphanedRoutes: chunkArray(orphanedRoutes.map(stripIdentityAnchors)),
+          deadComponents: chunkArray(deadComponents.map(stripIdentityAnchors)),
+          schemaDrift: chunkArray(schemaDrift.map(stripIdentityAnchors)),
+          organDrift: chunkArray(organDrift.map(stripIdentityAnchors)),
+          pageDrift: chunkArray(pageDrift.map(stripIdentityAnchors)),
+          pulseEarnDrift,
+          snapshotSummary,
+          patterns,
+          recommendations
+        }),
+        {
+          severity: driftLevel === "present" ? "warn" : "info",
+          driftLevel
+        }
+      );
+
+      setCached(EVO_CACHE.organismOverview, cacheKey, packet, ORGANISM_OVERVIEW_TTL_MS);
+      return packet;
     },
 
     // ----------------------------------------------------------------------
@@ -483,37 +606,36 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
     async analyzeFile(context, filePath) {
       if (!assertOwnerArchitect(context)) return null;
 
+      const cacheKey = filePath;
+      const cached = getCached(EVO_CACHE.fileAnalysis, cacheKey);
+      if (cached) {
+        context.logStep?.(`aiEvolution: file analysis cache hit "${filePath}".`);
+        return cached;
+      }
+
       const file = await fsAPI.getFile(filePath);
       if (!file) return null;
 
       const unusedImports = detectUnusedImports(file);
 
-      return emitEvolutionPacket("file-analysis", Object.freeze({
-        unusedImports,
-        references: file.references || [],
-        exports: file.exports || [],
-        deadPaths: file.deadPaths || [],
-        type: file.type || null,
-        name: file.name || filePath
-      }));
-    },
+      const packet = emitEvolutionPacket(
+        "file-analysis",
+        Object.freeze({
+          unusedImports,
+          references: file.references || [],
+          exports: file.exports || [],
+          deadPaths: file.deadPaths || [],
+          type: file.type || null,
+          name: file.name || filePath
+        }),
+        {
+          severity: unusedImports.length > 0 ? "info" : "info",
+          driftLevel: unusedImports.length > 0 ? "present" : "none"
+        }
+      );
 
-    // ----------------------------------------------------------------------
-    // ROUTE‑LEVEL ANALYSIS
-    // ----------------------------------------------------------------------
-    async analyzeRoute(context, routeId) {
-      if (!assertOwnerArchitect(context)) return null;
-
-      const route = await routeAPI.getRoute(routeId);
-      if (!route) return null;
-
-      const orphaned = !route.inbound && !route.outbound;
-
-      return emitEvolutionPacket("route-analysis", Object.freeze({
-        inbound: route.inbound,
-        outbound: route.outbound,
-        orphaned
-      }));
+      setCached(EVO_CACHE.fileAnalysis, cacheKey, packet, FILE_ANALYSIS_TTL_MS);
+      return packet;
     },
 
     // ----------------------------------------------------------------------
@@ -522,30 +644,71 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
     async analyzeSchema(context, schemaName) {
       if (!assertOwnerArchitect(context)) return null;
 
-      const schema = await schemaAPI.getSchema(schemaName);
-      if (!schema) return null;
+      const cacheKey = schemaName;
+      const cached = getCached(EVO_CACHE.schemaAnalysis, cacheKey);
+      if (cached) {
+        context.logStep?.(`aiEvolution: schema analysis cache hit "${schemaName}".`);
+        return cached;
+      }
 
-      const drift = detectSchemaDrift([schema]);
+      const schemas = await schemaAPI.getAllSchemas();
+      const target = Array.isArray(schemas)
+        ? schemas.filter(s => s.name === schemaName)
+        : [];
 
-      return emitEvolutionPacket("schema-analysis", Object.freeze({
-        schema: stripIdentityAnchors(schema),
-        drift
-      }));
+      const drift = detectSchemaDrift(target);
+
+      const packet = emitEvolutionPacket(
+        "schema-analysis",
+        Object.freeze({
+          schema: schemaName,
+          schemaDrift: drift.map(stripIdentityAnchors)
+        }),
+        {
+          severity: drift.length > 0 ? "warn" : "info",
+          driftLevel: drift.length > 0 ? "present" : "none"
+        }
+      );
+
+      setCached(EVO_CACHE.schemaAnalysis, cacheKey, packet, SCHEMA_ANALYSIS_TTL_MS);
+      return packet;
     },
 
     // ----------------------------------------------------------------------
-    // ORGANISM STATE (dual‑band snapshot)
-// ----------------------------------------------------------------------
-    async getOrganismState(context) {
+    // ROUTE‑LEVEL ANALYSIS
+    // ----------------------------------------------------------------------
+    async analyzeRoute(context, routePrefix) {
       if (!assertOwnerArchitect(context)) return null;
 
-      const snapshot = getOrganismSnapshot(dualBand);
-      const summary = summarizeSnapshot(snapshot);
+      const cacheKey = routePrefix;
+      const cached = getCached(EVO_CACHE.routeAnalysis, cacheKey);
+      if (cached) {
+        context.logStep?.(`aiEvolution: route analysis cache hit "${routePrefix}".`);
+        return cached;
+      }
 
-      return emitEvolutionPacket("organism-state", Object.freeze({
-        snapshot,
-        summary
-      }));
+      const routes = await routeAPI.getRouteMap();
+      const scoped = Array.isArray(routes)
+        ? routes.filter(r => (r.path || "").startsWith(routePrefix))
+        : [];
+
+      const orphaned = detectOrphanedRoutes(scoped);
+
+      const packet = emitEvolutionPacket(
+        "route-analysis",
+        Object.freeze({
+          routePrefix,
+          routes: scoped.map(stripIdentityAnchors),
+          orphanedRoutes: orphaned.map(stripIdentityAnchors)
+        }),
+        {
+          severity: orphaned.length > 0 ? "warn" : "info",
+          driftLevel: orphaned.length > 0 ? "present" : "none"
+        }
+      );
+
+      setCached(EVO_CACHE.routeAnalysis, cacheKey, packet, ROUTE_ANALYSIS_TTL_MS);
+      return packet;
     }
   });
 }
@@ -561,6 +724,7 @@ export {
 if (typeof module !== "undefined") {
   module.exports = {
     AI_EVOLUTION_META,
-    createEvolutionAPI
+    createEvolutionAPI,
+    prewarmEvolutionOrgan
   };
 }

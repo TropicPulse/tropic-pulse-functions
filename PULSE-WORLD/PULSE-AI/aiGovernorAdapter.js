@@ -1,5 +1,5 @@
 // ============================================================================
-//  aiGovernorAdapter.js — Pulse OS v11.2‑EVO Organ
+//  aiGovernorAdapter.js — Pulse OS v11.3‑EVO Organ
 //  Dualband Membrane • Packet Router • Evolution‑Safe Adapter
 // ============================================================================
 //
@@ -11,8 +11,8 @@
 export const GovernorAdapterMeta = Object.freeze({
   layer: "OrganismMembrane",
   role: "GOVERNOR_ADAPTER",
-  version: "11.2-EVO",
-  identity: "aiGovernorAdapter-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiGovernorAdapter-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -20,10 +20,10 @@ export const GovernorAdapterMeta = Object.freeze({
     dualband: true,
     membrane: true,
 
-    packetAware: true,        // ⭐ NEW
-    evolutionAware: true,     // ⭐ NEW
-    windowAware: true,        // ⭐ NEW (safe artery snapshots)
-    bluetoothReady: true,     // ⭐ placeholder for future binary channels
+    packetAware: true,
+    evolutionAware: true,
+    windowAware: true,
+    bluetoothReady: true,
 
     binaryAware: true,
     governorAware: true,
@@ -35,7 +35,7 @@ export const GovernorAdapterMeta = Object.freeze({
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -52,7 +52,7 @@ export const GovernorAdapterMeta = Object.freeze({
       "introduce randomness",
       "alter packet meaning",
       "inject symbolic metadata",
-      "auto-connect bluetooth" // ⭐ NEW
+      "auto-connect bluetooth"
     ]),
 
     always: Object.freeze([
@@ -62,13 +62,48 @@ export const GovernorAdapterMeta = Object.freeze({
       "remain pure and minimal",
       "act as a safe membrane between layers",
       "expose membrane artery metrics",
-      "prepare for future binary membrane channels" // ⭐ NEW
+      "prepare for future binary membrane channels"
     ])
   })
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO
+//  PACKET EMITTER — deterministic, membrane-scoped
+// ============================================================================
+function emitGovernorAdapterPacket(type, payload) {
+  return Object.freeze({
+    meta: GovernorAdapterMeta,
+    packetType: `gov-adapter-${type}`,
+    timestamp: Date.now(),
+    epoch: GovernorAdapterMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ============================================================================
+//  PREWARM — optional, dualband-aware
+// ============================================================================
+export function prewarmGovernorAdapter(dualBand = null, { trace = false } = {}) {
+  try {
+    const pressure = dualBand?.binary?.metabolic?.pressure ?? 0;
+
+    const packet = emitGovernorAdapterPacket("prewarm", {
+      message: "Governor adapter prewarmed and membrane artery aligned.",
+      binaryPressure: pressure
+    });
+
+    if (trace) console.log("[aiGovernorAdapter] prewarm", packet);
+    return packet;
+  } catch (err) {
+    return emitGovernorAdapterPacket("prewarm-error", {
+      error: String(err),
+      message: "Governor adapter prewarm failed."
+    });
+  }
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.3‑EVO
 // ============================================================================
 export class AIBinaryGovernorAdapter {
   constructor(config = {}) {
@@ -80,9 +115,7 @@ export class AIBinaryGovernorAdapter {
     this.reflex   = config.reflex   || null;
     this.logger   = config.logger   || null;
 
-    // Future: Bluetooth binary membrane (not active)
-    this.bluetooth = config.bluetooth || null; // ⭐ placeholder only
-
+    this.bluetooth = config.bluetooth || null;
     this.trace = !!config.trace;
 
     if (!this.encoder?.encode) {
@@ -96,52 +129,88 @@ export class AIBinaryGovernorAdapter {
       packetsIn: 0,
       packetsOut: 0,
       lastPacketBits: 0,
-      snapshot: () => Object.freeze({
-        packetsIn: this.artery.packetsIn,
-        packetsOut: this.artery.packetsOut,
-        lastPacketBits: this.artery.lastPacketBits
-      })
+      snapshot: () => Object.freeze(this._snapshotArtery())
     };
   }
 
   // ---------------------------------------------------------------------------
-  //  FORWARD BINARY → GOVERNOR (pure membrane)
+  //  ARTERY SNAPSHOT + BUCKETS
   // ---------------------------------------------------------------------------
+  _snapshotArtery() {
+    const { packetsIn, packetsOut, lastPacketBits } = this.artery;
+    const load = Math.min(1, (packetsIn + packetsOut) / 1000);
+    const pressure = Math.min(1, lastPacketBits / 65536);
+
+    return {
+      packetsIn,
+      packetsOut,
+      lastPacketBits,
+      load,
+      loadBucket: this._bucketLoad(load),
+      pressure,
+      pressureBucket: this._bucketPressure(pressure)
+    };
+  }
+
+  _bucketLoad(v) {
+    if (v >= 0.9) return "saturated";
+    if (v >= 0.7) return "high";
+    if (v >= 0.4) return "medium";
+    if (v > 0)   return "low";
+    return "idle";
+  }
+
+  _bucketPressure(v) {
+    if (v >= 0.9) return "overload";
+    if (v >= 0.7) return "high";
+    if (v >= 0.4) return "medium";
+    if (v > 0)   return "low";
+    return "none";
+  }
+
+  // ---------------------------------------------------------------------------
+  //  FORWARD BINARY → GOVERNOR (pure membrane)
+// ---------------------------------------------------------------------------
   forwardBinaryToGovernor(binaryStr) {
     this._assertBinary(binaryStr);
 
-    const packet = {
-      type: "binary-event",
+    const packet = emitGovernorAdapterPacket("forward-in", {
       bits: binaryStr,
       bitLength: binaryStr.length,
-      timestamp: Date.now(),
-
-      // ⭐ Future: Bluetooth membrane metadata
       bluetooth: {
         ready: !!this.bluetooth,
         channel: null
       }
-    };
+    });
 
     this._trace("forwardBinaryToGovernor", packet);
 
     this.artery.packetsIn++;
     this.artery.lastPacketBits = packet.bitLength;
 
-    this.governor.handle(packet);
+    this.governor.handle({
+      type: "binary-event",
+      bits: packet.bits,
+      bitLength: packet.bitLength,
+      timestamp: packet.timestamp,
+      bluetooth: packet.bluetooth
+    });
   }
 
   // ---------------------------------------------------------------------------
   //  FORWARD GOVERNOR DECISION → BINARY PIPELINE
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   forwardGovernorDecision(decisionObj) {
     const json = JSON.stringify(decisionObj);
     const binary = this.encoder.encode(json);
 
-    this._trace("forwardGovernorDecision", {
+    const packet = emitGovernorAdapterPacket("forward-out", {
       decision: decisionObj,
-      bits: binary.length
+      bits: binary,
+      bitLength: binary.length
     });
+
+    this._trace("forwardGovernorDecision", packet);
 
     this.artery.packetsOut++;
     this.artery.lastPacketBits = binary.length;
@@ -155,7 +224,7 @@ export class AIBinaryGovernorAdapter {
 
   // ---------------------------------------------------------------------------
   //  PIPELINE ATTACHMENT — binary-only observer
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   attachToPipeline(pipeline) {
     pipeline.addObserver(({ output }) => {
       this.forwardBinaryToGovernor(output);
@@ -166,14 +235,14 @@ export class AIBinaryGovernorAdapter {
 
   // ---------------------------------------------------------------------------
   //  REFLEX ATTACHMENT — binary-only observer
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   attachToReflex(reflex) {
     const originalRun = reflex.run.bind(reflex);
 
     reflex.run = (binaryInput) => {
       const result = originalRun(binaryInput);
 
-      if (result !== null) {
+      if (result !== null && typeof result === "string") {
         this.forwardBinaryToGovernor(result);
       }
 
@@ -184,8 +253,17 @@ export class AIBinaryGovernorAdapter {
   }
 
   // ---------------------------------------------------------------------------
-  //  VALIDATION
+  //  WINDOW-SAFE ARTERY SNAPSHOT
+// ---------------------------------------------------------------------------
+  snapshotMembrane() {
+    return emitGovernorAdapterPacket("snapshot", {
+      artery: this._snapshotArtery()
+    });
+  }
+
   // ---------------------------------------------------------------------------
+  //  VALIDATION
+// ---------------------------------------------------------------------------
   _assertBinary(str) {
     if (typeof str !== "string" || !/^[01]+$/.test(str)) {
       throw new TypeError("expected binary string");
@@ -194,7 +272,7 @@ export class AIBinaryGovernorAdapter {
 
   // ---------------------------------------------------------------------------
   //  TRACE
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
@@ -219,6 +297,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     AIBinaryGovernorAdapter,
     createAIBinaryGovernorAdapter,
-    GovernorAdapterMeta
+    GovernorAdapterMeta,
+    prewarmGovernorAdapter
   };
 }

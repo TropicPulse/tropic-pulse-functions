@@ -1,6 +1,33 @@
 // aiDeliveryEngine.js
 // PulseOS Delivery Organ — v11‑EVO
 // Ensures information is delivered cleanly, clearly, deterministically, and without drift.
+// ---------------------------------------------------------
+//  DELIVERY ENGINE PREWARM — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmDeliveryEngine() {
+  try {
+    const warmText = `
+      This   is   a   prewarm   test.  .
+      
+      
+      With --- dashes — and em-dashes.
+    `;
+
+    // Warm deliver()
+    aiDeliveryEngine.deliver(warmText);
+
+    // Warm structure()
+    aiDeliveryEngine.structure(warmText);
+
+    // Warm finalize()
+    aiDeliveryEngine.finalize(warmText);
+
+    return true;
+  } catch (err) {
+    console.error("[DeliveryEngine Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 export const aiDeliveryEngine = {
 
@@ -100,6 +127,7 @@ export default aiDeliveryEngine;
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ---------------------------------------------------------
+prewarmDeliveryEngine();
 
 // ESM
 export {

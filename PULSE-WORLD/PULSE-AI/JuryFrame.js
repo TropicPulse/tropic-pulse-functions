@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — JURY FRAME ORGAN
+//  PULSE OS v12.3‑EVO+ — JURY FRAME ORGAN
 //  World-Lens Registry for aiOvermind
 //  PURE FUNCTIONAL • ZERO STATE • ZERO MUTATION
 // ============================================================================
@@ -9,14 +9,14 @@ export const JuryFrameMeta = Object.freeze({
   subsystem: "aiJuryFrame",
   layer: "PulseAIJuryFrame",
   role: "JURY_FRAME_ORGAN",
-  version: "11.2-EVO+",
-  identity: "aiJuryFrame-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiJuryFrame-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
-    binaryAware: false,
+    binaryAware: true,
     symbolicAware: true,
     safetyAware: true,
     overmindAware: true,
@@ -24,14 +24,16 @@ export const JuryFrameMeta = Object.freeze({
     mutationSafe: true,
     nonBlocking: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO+"
+    worldLensArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
     purpose: Object.freeze([
       "Provide reusable world-lens functions to aiOvermind",
       "Centralize lens logic for consistency and auditing",
-      "Support consensus, variance, ambiguity, and breakthrough detection"
+      "Support consensus, variance, ambiguity, and breakthrough detection",
+      "Emit a read-only world-lens artery snapshot for Overmind and Sentience"
     ]),
     never: Object.freeze([
       "store state",
@@ -49,9 +51,52 @@ export const JuryFrameMeta = Object.freeze({
   }),
 
   boundaryReflex() {
-    return "JuryFrame is pure and stateless — it only evaluates candidates, never mutates context or safety.";
+    return "JuryFrame is pure and stateless — it only evaluates candidates and emits world-lens health, never mutates context or safety.";
   }
 });
+
+// ============================================================================
+//  HELPERS — BUCKETS + PRESSURE
+// ============================================================================
+
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+function bucketLevel(v) {
+  if (v >= 0.9) return "elite";
+  if (v >= 0.75) return "high";
+  if (v >= 0.5) return "medium";
+  if (v >= 0.25) return "low";
+  return "critical";
+}
+
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism && typeof binaryVitals.layered.organism.pressure === "number") {
+    return binaryVitals.layered.organism.pressure;
+  }
+  if (binaryVitals?.binary && typeof binaryVitals.binary.pressure === "number") {
+    return binaryVitals.binary.pressure;
+  }
+  if (binaryVitals?.metabolic && typeof binaryVitals.metabolic.pressure === "number") {
+    return binaryVitals.metabolic.pressure;
+  }
+  return 0;
+}
+
+function extractBoundaryPressure(boundaryArtery = {}) {
+  if (typeof boundaryArtery?.vitals?.pressure === "number") {
+    return boundaryArtery.vitals.pressure;
+  }
+  if (typeof boundaryArtery?.pressure === "number") {
+    return boundaryArtery.pressure;
+  }
+  return 0;
+}
 
 // ============================================================================
 //  LENS DEFINITIONS (PURE FUNCTIONS)
@@ -169,6 +214,93 @@ function makeConsistencyLens() {
 }
 
 // ============================================================================
+//  WORLD-LENS FUSION + ARTERY (PURE)
+// ============================================================================
+
+function fuseWorldLens(lensResults = []) {
+  let passCount = 0;
+  let warnCount = 0;
+  let failCount = 0;
+
+  for (const r of lensResults) {
+    if (!r || !r.status) continue;
+    if (r.status === "pass") passCount += 1;
+    else if (r.status === "warn") warnCount += 1;
+    else if (r.status === "fail") failCount += 1;
+  }
+
+  let worldLens = "consensus";
+
+  if (failCount > 0) {
+    worldLens = "blocked";
+  } else if (warnCount > 0 && passCount > 0) {
+    worldLens = "ambiguous";
+  } else if (warnCount > 0 && passCount === 0) {
+    worldLens = "risky";
+  }
+
+  return {
+    worldLens,
+    counts: {
+      pass: passCount,
+      warn: warnCount,
+      fail: failCount
+    }
+  };
+}
+
+function computeWorldLensArtery({ lensResults = [], binaryVitals = {}, boundaryArtery = {} }) {
+  const fusion = fuseWorldLens(lensResults);
+  const binaryPressure = extractBinaryPressure(binaryVitals);
+  const boundaryPressure = extractBoundaryPressure(boundaryArtery);
+
+  const lensPressureLocal =
+    fusion.counts.fail > 0
+      ? 1
+      : fusion.counts.warn > 0
+      ? 0.6
+      : 0.1;
+
+  const fusedPressure = Math.max(
+    0,
+    Math.min(
+      1,
+      0.5 * lensPressureLocal +
+        0.3 * binaryPressure +
+        0.2 * boundaryPressure
+    )
+  );
+
+  const throughput = Math.max(0, Math.min(1, 1 - fusedPressure));
+  const cost = Math.max(0, Math.min(1, fusedPressure * (1 - throughput)));
+  const budget = Math.max(0, Math.min(1, throughput - cost));
+
+  return {
+    organism: {
+      pressure: fusedPressure,
+      cost,
+      budget,
+      pressureBucket: bucketPressure(fusedPressure),
+      budgetBucket: bucketLevel(budget)
+    },
+    lenses: {
+      worldLens: fusion.worldLens,
+      passCount: fusion.counts.pass,
+      warnCount: fusion.counts.warn,
+      failCount: fusion.counts.fail
+    },
+    boundaries: {
+      pressure: boundaryPressure,
+      pressureBucket: bucketPressure(boundaryPressure)
+    },
+    binary: {
+      pressure: binaryPressure,
+      pressureBucket: bucketPressure(binaryPressure)
+    }
+  };
+}
+
+// ============================================================================
 //  PUBLIC API — Create Jury Frame Organ
 // ============================================================================
 
@@ -182,10 +314,42 @@ export function createJuryFrame({ safetyAPI } = {}) {
     makeConsistencyLens()
   ]);
 
+  function evaluate({ context = {}, intent = {}, candidate, binaryVitals = {}, boundaryArtery = {} }) {
+    const results = lenses.map(lens =>
+      lens({ context, intent, candidate })
+    );
+
+    const artery = computeWorldLensArtery({
+      lensResults: results,
+      binaryVitals,
+      boundaryArtery
+    });
+
+    return Object.freeze({
+      lenses: results,
+      worldLens: artery.lenses.worldLens,
+      artery
+    });
+  }
+
   return Object.freeze({
     meta: JuryFrameMeta,
+
     getLenses() {
       return lenses;
+    },
+
+    evaluate,
+
+    getWorldLensArterySnapshot({ context = {}, intent = {}, candidate, binaryVitals = {}, boundaryArtery = {} }) {
+      const results = lenses.map(lens =>
+        lens({ context, intent, candidate })
+      );
+      return computeWorldLensArtery({
+        lensResults: results,
+        binaryVitals,
+        boundaryArtery
+      });
     }
   });
 }
@@ -201,7 +365,7 @@ function getText(candidate) {
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {

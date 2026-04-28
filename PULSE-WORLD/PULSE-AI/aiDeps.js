@@ -56,6 +56,51 @@ export const DepsMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  DEPS PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmDepsLayer() {
+  try {
+    // Warm DB adapter
+    const db = getDb({ trace: false });
+    db.getCollection("prewarm");
+    db.getDocument("prewarm", "id");
+
+    // Warm FS adapter
+    const fs = getFsAPI({ trace: false });
+    fs.getAllFiles();
+    fs.getFile("/prewarm");
+
+    // Warm Route adapter
+    const routes = getRouteAPI({ trace: false });
+    routes.getRouteMap();
+    routes.getRoute("prewarm");
+
+    // Warm Schema adapter
+    const schema = getSchemaAPI({ trace: false });
+    schema.getAllSchemas();
+    schema.getSchema("prewarm");
+
+    // Warm organism snapshot
+    const warmDualBand = {
+      binary: { vitals: { snapshot: () => ({ load: 0, pressure: 0 }) } },
+      symbolic: {
+        personaEngine: { getActivePersona: () => "ARCHITECT" },
+        boundariesEngine: { getMode: () => "safe" },
+        permissionsEngine: { snapshot: () => ({ allow: true }) }
+      }
+    };
+    getOrganismSnapshot(warmDualBand);
+
+    // Warm deps packet
+    emitDepsPacket();
+
+    return true;
+  } catch (err) {
+    console.error("[Deps Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ============================================================================
 //  DATABASE API — Firestore/SQL/KV Compatible Adapter
@@ -181,6 +226,8 @@ export function emitDepsPacket() {
 // ============================================================================
 //  EXPORT — v11‑EVO Dependency Harness (Frozen)
 // ============================================================================
+prewarmDepsLayer();   // ← PREWARM HERE
+
 const depsSurface = Object.freeze({
   meta: DepsMeta,
   getDb,
@@ -190,6 +237,7 @@ const depsSurface = Object.freeze({
   getOrganismSnapshot,
   emitDepsPacket
 });
+
 
 export default depsSurface;
 

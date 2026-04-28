@@ -61,6 +61,37 @@ export const BinaryAgentMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  BINARY AGENT PREWARM ENGINE — v11-EVO
+// ---------------------------------------------------------
+export function prewarmAIBinaryAgent(config = {}) {
+  try {
+    const { encoder, compute, trace } = config;
+
+    // Warm encoder encode/decode
+    if (encoder?.encode && encoder?.decode) {
+      const warmJson = JSON.stringify({ id: "prewarm", bits: 0 });
+      const warmBits = encoder.encode(warmJson);
+      encoder.decode(warmBits, "string");
+    }
+
+    // Warm binary compute arteries
+    if (typeof compute === "function") {
+      compute(encoder.encode("prewarm-compute"));
+    }
+
+    // Warm pressure/throughput meters if present
+    if (config.measurePressure) config.measurePressure();
+    if (config.measureThroughput) config.measureThroughput();
+    if (config.measureCost) config.measureCost();
+    if (config.measureBudget) config.measureBudget();
+
+    return true;
+  } catch (err) {
+    console.error("[AIBinaryAgent Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ---------------------------------------------------------
 //  ORGAN IMPLEMENTATION
@@ -347,13 +378,11 @@ class AIBinaryAgent {
 // FACTORY EXPORT
 // ---------------------------------------------------------
 
-// ---------------------------------------------------------
-// FACTORY EXPORT
-// ---------------------------------------------------------
-
 export function createAIBinaryAgent(config) {
+  prewarmAIBinaryAgent(config); // one-time binary cortex warm-up
   return new AIBinaryAgent(config);
 }
+
 
 // ⭐ Add this missing ESM export:
 export { AIBinaryAgent };

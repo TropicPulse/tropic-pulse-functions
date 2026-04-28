@@ -1,6 +1,6 @@
 // ============================================================================
-//  PULSE OS v12‑EVO+ — PAGE SCANNER ADAPTER ORGAN
-//  Binary Membrane • Drift‑Intelligence Layer • Deterministic Packet Adapter
+//  PULSE OS v12.3‑EVO — PAGE SCANNER ADAPTER ORGAN
+//  Binary Membrane • Drift‑Intelligence Layer • Routing Artery Metrics
 //  PURE MEMBRANE. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
@@ -9,8 +9,8 @@ export const PageScannerAdapterMeta = Object.freeze({
   subsystem: "aiPageScannerAdapter",
   layer: "OrganismMembrane",
   role: "PAGESCANNER_ADAPTER",
-  version: "12.0-EVO+",
-  identity: "aiPageScannerAdapter-v12-EVO+",
+  version: "12.3-EVO",
+  identity: "aiPageScannerAdapter-v12.3-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -23,13 +23,17 @@ export const PageScannerAdapterMeta = Object.freeze({
     readOnly: true,
     packetAware: true,
     driftIntelAware: true,
+    arteryAware: true,
+    windowAware: true,
+    beaconAware: true,
+    overmindAware: true,
     multiInstanceReady: true,
-    epoch: "12.0-EVO+"
+    epoch: "12.3-EVO"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide a deterministic, read-only, binary-safe membrane between PageScanner and the organism, enriched with drift-intelligence metadata.",
+      "Provide a deterministic, read-only, binary-safe membrane between PageScanner and the organism, enriched with drift-intelligence and routing-artery metadata.",
 
     never: Object.freeze([
       "mutate PageScanner events",
@@ -38,7 +42,8 @@ export const PageScannerAdapterMeta = Object.freeze({
       "introduce randomness",
       "override pipeline decisions",
       "override reflex decisions",
-      "block the organism"
+      "block the organism",
+      "directly control Overmind or beacon"
     ]),
 
     always: Object.freeze([
@@ -47,9 +52,11 @@ export const PageScannerAdapterMeta = Object.freeze({
       "emit binary-only packets",
       "forward packets without interpretation",
       "emit drift-intelligence metadata",
+      "emit routing-artery metrics",
       "remain deterministic",
       "remain drift-proof",
-      "remain non-blocking"
+      "remain non-blocking",
+      "expose window-safe artery snapshots"
     ])
   }),
 
@@ -59,7 +66,7 @@ export const PageScannerAdapterMeta = Object.freeze({
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v12‑EVO+
+//  ORGAN IMPLEMENTATION — v12.3‑EVO
 // ============================================================================
 
 export class AIBinaryPageScannerAdapter {
@@ -69,11 +76,30 @@ export class AIBinaryPageScannerAdapter {
     this.logger = config.logger || null;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
+
+    // Optional: crown-layer hooks
+    this.beacon = config.beacon || null;       // function(beaconEvent)
     this.trace = !!config.trace;
 
     if (!this.encoder || typeof this.encoder.encode !== "function") {
       throw new Error("AIBinaryPageScannerAdapter requires aiBinaryAgent encoder");
     }
+
+    // Window-safe artery snapshot (no source code, no raw events)
+    this.scannerArtery = {
+      lastEventType: null,
+      lastFile: null,
+      lastRoute: null,
+      lastBits: 0,
+      lastDriftScore: 0,
+      snapshot: () => Object.freeze({
+        lastEventType: this.scannerArtery.lastEventType,
+        lastFile: this.scannerArtery.lastFile,
+        lastRoute: this.scannerArtery.lastRoute,
+        lastBits: this.scannerArtery.lastBits,
+        lastDriftScore: this.scannerArtery.lastDriftScore
+      })
+    };
   }
 
   attach(scanner) {
@@ -90,7 +116,7 @@ export class AIBinaryPageScannerAdapter {
 
   // ========================================================================
   //  v12‑EVO+ DRIFT‑INTELLIGENCE LAYER (READ‑ONLY)
-  // ========================================================================
+// ========================================================================
 
   _analyzeDrift(event) {
     const srcA = event?.pageA || "";
@@ -139,10 +165,86 @@ export class AIBinaryPageScannerAdapter {
       vars: varsB
     };
 
+    const driftScore =
+      (lineage.length ? 0.4 : 0) +
+      ((moduleMode.pageA.mixed || moduleMode.pageB.mixed) ? 0.3 : 0) +
+      ((exportDrift.missingESM || exportDrift.missingCJS) ? 0.3 : 0);
+
     return Object.freeze({
       lineage,
       moduleMode,
-      exportDrift
+      exportDrift,
+      driftScore: Math.min(1, driftScore)
+    });
+  }
+
+  // ========================================================================
+  //  ARTERY METRICS — bounded [0,1]
+// ========================================================================
+
+  _computeThroughput(bitLength, driftScore) {
+    const sizeFactor = Math.min(1, bitLength / 50000);
+    const raw = 1 - (sizeFactor * 0.5 + driftScore * 0.5);
+    return Math.max(0, Math.min(1, raw));
+  }
+
+  _computePressure(bitLength, driftScore) {
+    const raw = Math.min(1, (bitLength / 50000) * (0.5 + driftScore * 0.5));
+    return Math.max(0, raw);
+  }
+
+  _computeCost(pressure, throughput) {
+    const raw = pressure * (1 - throughput);
+    return Math.max(0, Math.min(1, raw));
+  }
+
+  _computeBudget(throughput, cost) {
+    const raw = throughput - cost;
+    return Math.max(0, Math.min(1, raw));
+  }
+
+  _bucketLevel(v) {
+    if (v >= 0.9) return "elite";
+    if (v >= 0.75) return "high";
+    if (v >= 0.5) return "medium";
+    if (v >= 0.25) return "low";
+    return "critical";
+  }
+
+  _bucketPressure(v) {
+    if (v >= 0.9) return "overload";
+    if (v >= 0.7) return "high";
+    if (v >= 0.4) return "medium";
+    if (v > 0)   return "low";
+    return "none";
+  }
+
+  _bucketCost(v) {
+    if (v >= 0.8) return "heavy";
+    if (v >= 0.5) return "moderate";
+    if (v >= 0.2) return "light";
+    if (v > 0)    return "negligible";
+    return "none";
+  }
+
+  _buildArtery(bitLength, driftScore) {
+    const throughput = this._computeThroughput(bitLength, driftScore);
+    const pressure   = this._computePressure(bitLength, driftScore);
+    const cost       = this._computeCost(pressure, throughput);
+    const budget     = this._computeBudget(throughput, cost);
+
+    return Object.freeze({
+      throughput,
+      throughputBucket: this._bucketLevel(throughput),
+
+      pressure,
+      pressureBucket: this._bucketPressure(pressure),
+
+      cost,
+      costBucket: this._bucketCost(cost),
+
+      budget,
+      budgetBucket: this._bucketLevel(budget)
     });
   }
 
@@ -150,7 +252,7 @@ export class AIBinaryPageScannerAdapter {
   //  PACKET BUILDER
   // ========================================================================
 
-  _buildPacket(event, binary, driftIntel) {
+  _buildPacket(event, binary, driftIntel, artery) {
     return Object.freeze({
       type: "pagescanner-event",
       source: "PageScanner",
@@ -158,6 +260,7 @@ export class AIBinaryPageScannerAdapter {
       bitLength: binary.length,
       timestamp: Date.now(),
       driftIntel,
+      artery,
       meta: Object.freeze({
         eventType: event.type || "unknown",
         route: event.route || null,
@@ -168,8 +271,37 @@ export class AIBinaryPageScannerAdapter {
   }
 
   // ========================================================================
-  //  EVENT HANDLER — v12‑EVO+ (ENRICHED)
+  //  BEACON EMISSION (READ-ONLY SUGGESTION TO OVERMIND)
+// ========================================================================
+
+  _emitBeacon(packet) {
+    if (!this.beacon) return;
+
+    const severity =
+      packet.driftIntel.driftScore >= 0.8 ? "high" :
+      packet.driftIntel.driftScore >= 0.4 ? "medium" :
+      "low";
+
+    const beaconEvent = Object.freeze({
+      eventType: "pagescanner-drift",
+      severity,
+      file: packet.meta.file,
+      route: packet.meta.route,
+      driftScore: packet.driftIntel.driftScore,
+      lineageCount: packet.driftIntel.lineage.length,
+      moduleMode: packet.driftIntel.moduleMode
+    });
+
+    try {
+      this.beacon(beaconEvent);
+    } catch {
+      // never break the organism
+    }
+  }
+
   // ========================================================================
+  //  EVENT HANDLER — v12.3‑EVO (ENRICHED)
+// ========================================================================
 
   _handleScannerEvent(event) {
     const driftIntel = this._analyzeDrift(event);
@@ -177,13 +309,25 @@ export class AIBinaryPageScannerAdapter {
     const json = JSON.stringify({ event, driftIntel });
     const binary = this.encoder.encode(json);
 
-    const packet = this._buildPacket(event, binary, driftIntel);
+    const artery = this._buildArtery(binary.length, driftIntel.driftScore);
+    const packet = this._buildPacket(event, binary, driftIntel, artery);
+
+    // update window-safe artery snapshot
+    this.scannerArtery.lastEventType = packet.meta.eventType;
+    this.scannerArtery.lastFile = packet.meta.file;
+    this.scannerArtery.lastRoute = packet.meta.route;
+    this.scannerArtery.lastBits = packet.bitLength;
+    this.scannerArtery.lastDriftScore = driftIntel.driftScore;
 
     this._trace("event:received", {
       bitLength: packet.bitLength,
       eventType: packet.meta.eventType,
-      driftIntel
+      driftScore: driftIntel.driftScore,
+      artery
     });
+
+    // optional beacon to Overmind / beacon mesh
+    this._emitBeacon(packet);
 
     this.logger?.logBinary(binary, packet.meta);
     this.pipeline?.run(binary);
@@ -204,7 +348,7 @@ export function createAIBinaryPageScannerAdapter(config) {
 }
 
 // ============================================================================
-//  DUAL‑MODE EXPORTS — v12‑EVO+
+//  DUAL‑MODE EXPORTS — v12.3‑EVO
 // ============================================================================
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {

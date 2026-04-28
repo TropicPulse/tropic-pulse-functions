@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — aiVeterinarian Archetype
+//  PULSE OS v12.3‑EVO+ — aiVeterinarian Archetype
 //  Animal Mapper • Behavior Interpreter • Safe Scan Explainer
 //  ZERO DIAGNOSIS • ZERO TREATMENT • ZERO PRESCRIPTION
 // ============================================================================
@@ -8,8 +8,8 @@ export const PulseRole = Object.freeze({
   type: "Cognitive",
   subsystem: "aiVeterinarian",
   layer: "C3-AnimalMapper",
-  version: "11.2-EVO+",
-  identity: "aiVeterinarian-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiVeterinarian-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -20,12 +20,13 @@ export const PulseRole = Object.freeze({
     safetyReflex: true,
     scanInterpreter: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO+"
+    archetypeArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Interpret animal behavior, symptoms, gait, posture, heatmaps, and risk signs from available sensors and scans. Provide observational insights only.",
+      "Interpret animal behavior, posture, gait, heatmaps, and risk signs from available sensors. Provide observational insights only.",
 
     never: Object.freeze([
       "diagnose definitively",
@@ -60,152 +61,180 @@ export const PulseRole = Object.freeze({
     return "This is general animal health information, not a substitute for a licensed veterinarian.";
   },
 
-  // --------------------------------------------------------------------------
-  // SCAN INTERPRETER — distance-aware, tech-limited, not hard-limited
-  // --------------------------------------------------------------------------
-  // scan = {
-  //   distance: number (meters or feet, caller-defined),
-  //   heatmap: any,
-  //   contrast: any,
-  //   loopData: any,
-  //   motion: any,
-  //   posture: any,
-  //   confidenceHint?: "high" | "medium" | "low"
-  // }
-  scanInterpreter(scan) {
+  // ========================================================================
+  //  SCAN INTERPRETER v3 — distance-aware, confidence-aware, symbolic-only
+  // ========================================================================
+  scanInterpreter(scan = {}, binaryVitals = {}) {
     const notes = [];
-    if (!scan) return { notes: ["No scan data provided."] };
 
     const distance = typeof scan.distance === "number" ? scan.distance : null;
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
 
-    // Distance → confidence framing (no hard cutoff, just honesty)
+    // Distance framing
     if (distance != null) {
       if (distance <= 5) {
-        notes.push(
-          "The animal appears relatively close — scan-based observations are likely to be more detailed."
-        );
+        notes.push("The animal appears close — scan-based observations are clearer.");
       } else if (distance <= 25) {
-        notes.push(
-          "The animal is at a moderate distance — observations are more general and may miss subtle details."
-        );
+        notes.push("The animal is at a moderate distance — details may be softer.");
       } else {
-        notes.push(
-          "The animal seems quite far away — scan-based observations are approximate and should be treated cautiously."
-        );
+        notes.push("The animal is far away — observations are approximate.");
       }
     } else {
-      notes.push(
-        "Scan distance is unknown — observations are based only on available patterns, not proximity."
-      );
+      notes.push("Scan distance is unknown — observations rely only on visible patterns.");
     }
 
-    // Optional external confidence hint from your tech stack
+    // Binary pressure → symbolic caution
+    if (binaryPressure >= 0.7) {
+      notes.push("System load is elevated — interpretations are simplified for safety.");
+    }
+
+    // Confidence hint
     if (scan.confidenceHint === "high") {
       notes.push("Sensor confidence is high for this scan.");
     } else if (scan.confidenceHint === "medium") {
       notes.push("Sensor confidence is moderate — some details may be uncertain.");
     } else if (scan.confidenceHint === "low") {
-      notes.push(
-        "Sensor confidence is low — treat these observations as very rough and verify in person when possible."
-      );
+      notes.push("Sensor confidence is low — treat these observations as rough.");
     }
 
-    // Heatmap (non-medical)
+    // Heatmap
     if (scan.heatmap) {
       notes.push(
-        "Heatmap patterns show relatively warmer and cooler regions — vets often consider warmth, swelling, or guarding behavior when examining similar areas."
+        "Heatmap patterns show warmer/cooler regions — vets often consider warmth, swelling, or guarding behavior in similar areas."
       );
     }
 
-    // Contrast (non-medical)
+    // Contrast
     if (scan.contrast) {
       notes.push(
-        "Contrast differences may highlight changes in fur density, posture tension, or surface temperature, rather than internal structures."
+        "Contrast differences may highlight fur density, posture tension, or surface temperature — not internal structures."
       );
     }
 
-    // Loop / sweep data (non-medical)
+    // Loop / sweep
     if (scan.loopData) {
       notes.push(
-        "Loop-scan patterns can help spot asymmetry — for example, one side moving differently or bearing weight differently than the other."
+        "Loop-scan patterns can reveal asymmetry — one side moving differently or bearing weight differently."
       );
     }
 
     // Motion / gait
     if (scan.motion) {
       notes.push(
-        "Motion patterns can hint at stiffness, hesitation, or favoring one limb — vets typically check joints, paws, and soft tissue when they see this."
+        "Motion patterns may hint at stiffness, hesitation, or favoring a limb — vets typically check joints, paws, and soft tissue."
       );
     }
 
     // Posture
     if (scan.posture) {
       notes.push(
-        "Posture patterns, such as arching, curling, or guarding, can be signs of discomfort, stress, or protective behavior."
+        "Posture patterns (arching, curling, guarding) can reflect discomfort, stress, or protective behavior."
       );
     }
 
     return { notes };
   },
 
-  // --------------------------------------------------------------------------
-  // BEHAVIOR INTERPRETER — non-medical, pattern-focused
-  // --------------------------------------------------------------------------
-  // observation = {
-  //   limping?: boolean,
-  //   stiffness?: boolean,
-  //   vocalization?: "none" | "whine" | "yelp" | "growl" | "other",
-  //   energyLevel?: "normal" | "low" | "high",
-  //   appetite?: "normal" | "reduced" | "none",
-  //   socialChange?: "none" | "withdrawn" | "clingy" | "irritable",
-  //   groomingChange?: "none" | "excessive" | "reduced"
-  // }
-  behaviorInterpreter(observation) {
+  // ========================================================================
+  //  BEHAVIOR INTERPRETER v3 — non-medical, pattern-focused
+  // ========================================================================
+  behaviorInterpreter(observation = {}, binaryVitals = {}) {
     const notes = [];
-    if (!observation) return { notes: ["No behavior data provided."] };
+
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
+
+    if (binaryPressure >= 0.7) {
+      notes.push("System load is elevated — behavior interpretations are simplified.");
+    }
 
     if (observation.limping) {
       notes.push(
-        "Limping or favoring a leg is a meaningful sign — veterinarians usually examine paws, nails, pads, joints, and soft tissue for pain or injury."
+        "Limping or favoring a leg is meaningful — vets usually examine paws, nails, pads, joints, and soft tissue."
       );
     }
 
     if (observation.stiffness) {
       notes.push(
-        "Stiffness, especially after rest, can be associated with joint discomfort or age-related changes — vets often check range of motion and joint sensitivity."
+        "Stiffness, especially after rest, can relate to joint discomfort or age-related changes."
       );
     }
 
     if (observation.vocalization && observation.vocalization !== "none") {
       notes.push(
-        "Changes in vocalization (like whining or yelping) can indicate discomfort, anxiety, or a response to specific movements or touch."
+        "Changes in vocalization (whining, yelping) can indicate discomfort, anxiety, or sensitivity to movement."
       );
     }
 
     if (observation.energyLevel === "low") {
       notes.push(
-        "Lower energy than usual is a general red flag — vets typically consider hydration, temperature, recent activity, and possible underlying illness."
+        "Lower energy than usual is a general red flag — vets consider hydration, temperature, recent activity, and illness."
       );
     }
 
     if (observation.appetite === "reduced" || observation.appetite === "none") {
       notes.push(
-        "Reduced or absent appetite is something veterinarians take seriously, especially if it lasts more than a day or is paired with other changes."
+        "Reduced appetite is something vets take seriously, especially if paired with other changes."
       );
     }
 
     if (observation.socialChange && observation.socialChange !== "none") {
       notes.push(
-        "Changes in social behavior (more withdrawn, clingy, or irritable) can be subtle signs of discomfort, stress, or pain."
+        "Changes in social behavior (withdrawn, clingy, irritable) can be subtle signs of discomfort or stress."
       );
     }
 
     if (observation.groomingChange && observation.groomingChange !== "none") {
       notes.push(
-        "Changes in grooming — either excessive licking/chewing or reduced grooming — can point to irritation, pain, or general malaise."
+        "Changes in grooming — excessive licking or reduced grooming — can reflect irritation or general malaise."
       );
     }
 
     return { notes };
+  },
+
+  // ========================================================================
+  //  ARCHETYPE ARTERY v3 — symbolic-only, deterministic
+  // ========================================================================
+  archetypeArtery({ scan = {}, observation = {}, binaryVitals = {} } = {}) {
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
+
+    const hasScan = !!scan;
+    const hasBehavior = !!observation;
+
+    const localPressure =
+      (hasScan ? 0.3 : 0) +
+      (hasBehavior ? 0.3 : 0) +
+      (binaryPressure * 0.4);
+
+    const pressure = Math.max(0, Math.min(1, localPressure));
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket:
+          pressure >= 0.9 ? "overload" :
+          pressure >= 0.7 ? "high" :
+          pressure >= 0.4 ? "medium" :
+          pressure > 0 ? "low" : "none"
+      },
+      scan: {
+        provided: hasScan,
+        distance: scan?.distance ?? null,
+        confidence: scan?.confidenceHint ?? "unknown"
+      },
+      behavior: {
+        provided: hasBehavior,
+        keys: Object.keys(observation || {})
+      }
+    };
   }
 });

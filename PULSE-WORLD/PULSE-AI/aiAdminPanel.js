@@ -1,24 +1,25 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO — ADMIN PANEL DIAGNOSTICS ORGAN
-//  Summary Cards • Issue Table • Trace • Meta
+//  PULSE OS v12.3‑EVO+ — ADMIN PANEL DIAGNOSTICS ORGAN
+//  Summary Cards • Issue Table • Trace • Meta • Diagnostics-Artery v3
 //  PURE OBSERVATION. ZERO MUTATION. ZERO IDENTITY LEAKAGE.
 // ============================================================================
 
 export const AdminDiagnosticsMeta = Object.freeze({
   layer: "PulseAIAdminDiagnosticsFrame",
   role: "ADMIN_DIAGNOSTICS_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiAdminDiagnostics-v11.2-EVO",
+  version: "12.3-EVO+",
+  identity: "aiAdminDiagnostics-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     dualband: true,
-    windowAware: true,          // safe for UI surfaces
+    windowAware: true,
     packetAware: false,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    diagnosticsArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -47,20 +48,47 @@ export const AdminDiagnosticsMeta = Object.freeze({
 });
 
 // ============================================================================
-//  PUBLIC API — Create Admin Diagnostics Organ
+// HELPERS — PRESSURE + BUCKETS
 // ============================================================================
-export function createAdminDiagnosticsOrgan(context) {
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
+
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0)   return "low";
+  return "none";
+}
+
+// ============================================================================
+//  PUBLIC API — Create Admin Diagnostics Organ (v12.3‑EVO+)
+// ============================================================================
+export function createAdminDiagnosticsOrgan(context = {}) {
   const diagnostics = context?.diagnostics || {};
   const trace = Array.isArray(context?.trace) ? [...context.trace] : [];
 
+  function prewarm() {
+    return true;
+  }
+
   // --------------------------------------------------------------------------
-  // SUMMARY CARDS
+  // SUMMARY CARDS v3 — binary-pressure-aware
   // --------------------------------------------------------------------------
-  function buildSummaryCards() {
+  function buildSummaryCards(binaryVitals = {}) {
     const mismatchCount = diagnostics.mismatches?.length || 0;
     const missingCount = diagnostics.missingFields?.length || 0;
     const slowdownCount = diagnostics.slowdownCauses?.length || 0;
     const drift = diagnostics.driftDetected === true;
+
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const simplified = binaryPressure >= 0.7;
 
     return Object.freeze([
       {
@@ -80,7 +108,7 @@ export function createAdminDiagnosticsOrgan(context) {
         title: "Field Mismatches",
         icon: mismatchCount ? "error" : "check",
         severity: mismatchCount ? "error" : "ok",
-        count: mismatchCount,
+        count: simplified ? Math.min(mismatchCount, 5) : mismatchCount,
         description:
           mismatchCount
             ? `${mismatchCount} mismatched fields.`
@@ -91,7 +119,7 @@ export function createAdminDiagnosticsOrgan(context) {
         title: "Missing Fields",
         icon: missingCount ? "warning" : "check",
         severity: missingCount ? "warning" : "ok",
-        count: missingCount,
+        count: simplified ? Math.min(missingCount, 5) : missingCount,
         description:
           missingCount
             ? `${missingCount} missing fields.`
@@ -102,7 +130,7 @@ export function createAdminDiagnosticsOrgan(context) {
         title: "Performance Signals",
         icon: slowdownCount ? "turtle" : "bolt",
         severity: slowdownCount ? "warning" : "ok",
-        count: slowdownCount,
+        count: simplified ? Math.min(slowdownCount, 5) : slowdownCount,
         description:
           slowdownCount
             ? `${slowdownCount} slowdown patterns detected.`
@@ -119,12 +147,16 @@ export function createAdminDiagnosticsOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
-  // ISSUE LIST
+  // ISSUE LIST v3 — binary-pressure-aware
   // --------------------------------------------------------------------------
-  function buildIssueList() {
+  function buildIssueList(binaryVitals = {}) {
     const issues = [];
 
-    (diagnostics.mismatches || []).forEach((m) => {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+    const simplified = binaryPressure >= 0.7;
+
+    (diagnostics.mismatches || []).forEach((m, index) => {
+      if (simplified && index >= 10) return;
       issues.push({
         type: "mismatch",
         severity: "error",
@@ -134,7 +166,8 @@ export function createAdminDiagnosticsOrgan(context) {
       });
     });
 
-    (diagnostics.missingFields || []).forEach((f) => {
+    (diagnostics.missingFields || []).forEach((f, index) => {
+      if (simplified && index >= 10) return;
       issues.push({
         type: "missing",
         severity: "warning",
@@ -145,6 +178,7 @@ export function createAdminDiagnosticsOrgan(context) {
     });
 
     (diagnostics.slowdownCauses || []).forEach((s, index) => {
+      if (simplified && index >= 10) return;
       issues.push({
         type: "slowdown",
         severity: "warning",
@@ -169,30 +203,70 @@ export function createAdminDiagnosticsOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC ADMIN DIAGNOSTICS API
+  // ADMIN DIAGNOSTICS ARTERY v3 — symbolic-only, deterministic
+  // --------------------------------------------------------------------------
+  function diagnosticsArtery({ binaryVitals = {} } = {}) {
+    const mismatchCount = diagnostics.mismatches?.length || 0;
+    const missingCount = diagnostics.missingFields?.length || 0;
+    const slowdownCount = diagnostics.slowdownCauses?.length || 0;
+    const drift = diagnostics.driftDetected === true;
+
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const localPressure =
+      (mismatchCount ? 0.3 : 0) +
+      (missingCount ? 0.2 : 0) +
+      (slowdownCount ? 0.3 : 0) +
+      (drift ? 0.4 : 0);
+
+    const pressure = Math.max(
+      0,
+      Math.min(1, 0.6 * localPressure + 0.4 * binaryPressure)
+    );
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket: bucketPressure(pressure)
+      },
+      diagnostics: {
+        mismatches: mismatchCount,
+        missingFields: missingCount,
+        slowdown: slowdownCount,
+        drift
+      }
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // PUBLIC ADMIN DIAGNOSTICS API (v12.3‑EVO+)
   // --------------------------------------------------------------------------
   return Object.freeze({
     meta: AdminDiagnosticsMeta,
+    prewarm,
 
     log(message) {
       context?.logStep?.(`aiAdminDiagnostics: ${message}`);
     },
 
-    buildModel(options = {}) {
-      const summaryCards = buildSummaryCards();
-      const issueList = buildIssueList();
+    buildModel({ binaryVitals = {}, meta = {} } = {}) {
+      const summaryCards = buildSummaryCards(binaryVitals);
+      const issueList = buildIssueList(binaryVitals);
 
       return Object.freeze({
         summaryCards,
         issueList,
         trace,
+        artery: diagnosticsArtery({ binaryVitals }),
         meta: Object.freeze({
           personaId: context.personaId,
           driftDetected: diagnostics.driftDetected === true,
           totalIssues: issueList.length,
-          ...options.meta
+          ...meta
         })
       });
-    }
+    },
+
+    diagnosticsArtery
   });
 }

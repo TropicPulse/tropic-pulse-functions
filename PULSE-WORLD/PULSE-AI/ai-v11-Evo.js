@@ -1,16 +1,16 @@
 // ============================================================================
-//  ai-v11-Evo.js
-//  THE FIRST DUALBAND ORGANISM BOOTLOADER — v11-EVO
+//  ai-v12.3-EVO+.js
+//  DUALBAND ORGANISM BOOTLOADER — v12.3-EVO+
 // ============================================================================
 
 // ============================================================================
-//  META BLOCK — v11‑EVO (ORGANISM KERNEL)
+//  META BLOCK — v12.3‑EVO+ (ORGANISM KERNEL)
 // ============================================================================
 export const OrganismKernelMeta = Object.freeze({
   layer: "OrganismKernel",
   role: "DUALBAND_BOOTLOADER",
-  version: "11.1-EVO",
-  identity: "pulse-organism-kernel-v11-EVO",
+  version: "12.3-EVO+",
+  identity: "pulse-organism-kernel-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -19,7 +19,8 @@ export const OrganismKernelMeta = Object.freeze({
     organism: true,
     bootloader: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    organismArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -74,14 +75,156 @@ const ORGANISM_CONTEXT = {
   layer: OrganismKernelMeta.layer,
   role: OrganismKernelMeta.role,
   version: OrganismKernelMeta.version,
-  lineage: "pulse-organism-v11-evo",
+  lineage: "pulse-organism-v12.3-evo",
   evo: OrganismKernelMeta.evo
 };
 
 // ============================================================================
-//  createBinaryOrganism()
+//  BINARY ORGANISM PREWARM ENGINE — v12.3-EVO+
+// ============================================================================
+export function prewarmBinaryOrganism(config = {}) {
+  try {
+    const { trace = false } = config;
+
+    // 1) Prewarm Binary Agent (encoder/decoder)
+    const warmAgent = new AIBinaryAgent({ id: "prewarm-agent", maxBits: 1024, trace });
+    warmAgent.encode?.("prewarm");
+    warmAgent.decode?.(warmAgent.encode?.("prewarm"), "string");
+
+    // 2) Prewarm Memory (legacy + core)
+    const warmLegacy = new AIBinaryMemory({ id: "prewarm-memory-legacy", maxBits: 2048, trace });
+    const warmCore   = new AIPulseCoreMemory({ id: "prewarm-memory-core", maxBits: 2048, trace });
+
+    const k = warmAgent.encode("prewarm-key");
+    const v = warmAgent.encode("prewarm-value");
+
+    warmLegacy.write(k, v);
+    warmLegacy.read(k);
+    warmLegacy.listKeys?.();
+
+    warmCore.write(k, v);
+    warmCore.read(k);
+    warmCore.listKeys?.();
+
+    // 3) Prewarm Evolution + Registry
+    const warmRegistry = new AIBinaryOrganRegistry({
+      id: "prewarm-registry",
+      encoder: warmAgent,
+      memory: warmLegacy,
+      trace
+    });
+
+    const warmEvolution = new AIBinaryEvolution({
+      id: "prewarm-evolution",
+      encoder: warmAgent,
+      memory: warmLegacy,
+      trace
+    });
+
+    warmEvolution.generateSignature({ id: "prewarm-organ", constructor: { name: "PrewarmOrgan" } });
+    warmRegistry.registerOrgan({ id: "prewarm-organ", constructor: { name: "PrewarmOrgan" } });
+
+    // 4) Prewarm Anatomy + Genome
+    const warmAnatomy = new AIBinaryAnatomy({
+      id: "prewarm-anatomy",
+      encoder: warmAgent,
+      memory: warmLegacy,
+      trace
+    });
+
+    warmAnatomy.registerOrgan("prewarm-organ");
+    warmAnatomy.store();
+
+    const warmGenome = new AIBinaryGenome({
+      id: "prewarm-genome",
+      encoder: warmAgent,
+      registry: warmRegistry,
+      evolution: warmEvolution,
+      memory: warmLegacy,
+      trace
+    });
+
+    warmGenome.storeGenome();
+
+    // 5) Prewarm Reflex + Pipeline + Scheduler
+    const warmReflex = new AIBinaryReflex({ id: "prewarm-reflex", trace });
+    const warmPipeline = new AIBinaryPipeline({ id: "prewarm-pipeline", trace });
+
+    const warmScheduler = new AIBinaryScheduler({
+      id: "prewarm-scheduler",
+      encoder: warmAgent,
+      pipeline: warmPipeline,
+      reflex: warmReflex,
+      trace
+    });
+
+    warmScheduler.tick?.();
+
+    // 6) Prewarm Metabolism + Sentience + Hormones + Consciousness
+    const warmVitals = new AIBinaryVitals({
+      id: "prewarm-vitals",
+      encoder: warmAgent,
+      memory: warmLegacy,
+      evolution: warmEvolution,
+      trace
+    });
+
+    const warmMetabolism = new AIBinaryMetabolism({
+      id: "prewarm-metabolism",
+      encoder: warmAgent,
+      pipeline: warmPipeline,
+      scheduler: warmScheduler,
+      vitals: warmVitals,
+      trace
+    });
+
+    const warmSentience = new AIBinarySentience({
+      id: "prewarm-sentience",
+      encoder: warmAgent,
+      anatomy: warmAnatomy,
+      genome: warmGenome,
+      immunity: null,
+      vitals: warmVitals,
+      registry: warmRegistry,
+      trace
+    });
+
+    const warmHormones = new AIBinaryHormones({
+      id: "prewarm-hormones",
+      encoder: warmAgent,
+      metabolism: warmMetabolism,
+      sentience: warmSentience,
+      trace
+    });
+
+    const warmConsciousness = new AIBinaryConsciousness({
+      id: "prewarm-consciousness",
+      encoder: warmAgent,
+      sentience: warmSentience,
+      metabolism: warmMetabolism,
+      hormones: warmHormones,
+      vitals: warmVitals,
+      anatomy: warmAnatomy,
+      immunity: null,
+      trace
+    });
+
+    warmConsciousness.generateConsciousnessPacket?.();
+
+    return true;
+  } catch (err) {
+    console.error("[BinaryOrganism Prewarm] Failed:", err);
+    return false;
+  }
+}
+
+// ============================================================================
+//  createBinaryOrganism() — v12.3‑EVO+
 // ============================================================================
 export function createBinaryOrganism({ trace = false } = {}) {
+  // Prewarm the entire binary organism physiology
+  prewarmBinaryOrganism({ trace });
+
   // 1) Binary Cortex (Agent)
   const encoder = new AIBinaryAgent({
     id: "ai-binary-agent",
@@ -258,7 +401,7 @@ export function createBinaryOrganism({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  bootBinaryOrganism()
+//  bootBinaryOrganism() — v12.3‑EVO+
 // ============================================================================
 export async function bootBinaryOrganism(options = {}) {
   const organism = createBinaryOrganism(options);

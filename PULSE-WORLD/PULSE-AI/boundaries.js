@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — SUPEREGO (DUAL‑BAND BOUNDARIES)
+//  PULSE OS v12.3‑EVO+ — SUPEREGO (DUAL‑BAND BOUNDARIES)
 //  Behavioral Constraints • Ethical Boundaries • Binary-Aware Moral Law
 //  PURE CONSTRAINTS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -9,8 +9,8 @@ export const SuperegoMeta = Object.freeze({
   subsystem: "aiSuperego",
   layer: "SuperegoBoundaryEngine",
   role: "BOUNDARY_ORGAN",
-  version: "11.2-EVO+",
-  identity: "aiSuperego-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiSuperego-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -25,7 +25,9 @@ export const SuperegoMeta = Object.freeze({
     schemaAware: false,
     slowdownAware: false,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO+"
+    boundaryCacheAware: true,
+    vitalsFusionAware: true,
+    epoch: "v12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -156,7 +158,7 @@ export function canPerform(persona, domain, action) {
 }
 
 // ============================================================================
-//  v11.2‑EVO+ — DUAL‑BAND BOUNDARY MODES (binary‑aware)
+//  v12.3‑EVO+ — DUAL‑BAND BOUNDARY MODES (binary‑aware, unchanged semantics)
 // ============================================================================
 export const BoundaryModes = Object.freeze({
   SAFE: Object.freeze({
@@ -196,10 +198,33 @@ export const BoundaryModes = Object.freeze({
 });
 
 // ============================================================================
-//  v11.2‑EVO+ — BOUNDARY MODE SELECTION (persona + binary vitals)
+//  v12.3‑EVO+ — PRESSURE EXTRACTION (supports new Vitals format)
 // ============================================================================
+
+function extractPressure(binaryVitals = {}) {
+  // v11.x metabolic format
+  if (binaryVitals?.metabolic && typeof binaryVitals.metabolic.pressure === "number") {
+    return binaryVitals.metabolic.pressure;
+  }
+
+  // v12.3‑EVO+ layered + binary format
+  if (binaryVitals?.layered?.organism && typeof binaryVitals.layered.organism.pressure === "number") {
+    return binaryVitals.layered.organism.pressure;
+  }
+
+  if (binaryVitals?.binary && typeof binaryVitals.binary.pressure === "number") {
+    return binaryVitals.binary.pressure;
+  }
+
+  return 0;
+}
+
+// ============================================================================
+//  v12.3‑EVO+ — BOUNDARY MODE SELECTION (persona + binary vitals)
+// ============================================================================
+
 export function selectBoundaryMode({ personaId, binaryVitals = {}, evoState = {} }) {
-  const pressure = binaryVitals?.metabolic?.pressure ?? 0;
+  const pressure = extractPressure(binaryVitals);
 
   if (evoState.forceBoundaryMode) {
     return BoundaryModes[evoState.forceBoundaryMode] || BoundaryModes.SAFE;
@@ -217,8 +242,9 @@ export function selectBoundaryMode({ personaId, binaryVitals = {}, evoState = {}
 }
 
 // ============================================================================
-//  v11.2‑EVO+ — DYNAMIC BOUNDARY CHECK (symbolic + binary fusion)
+//  v12.3‑EVO+ — DYNAMIC BOUNDARY CHECK (symbolic + binary fusion)
 // ============================================================================
+
 export function canPerformDynamic(persona, domain, action, mode, binaryVitals = {}) {
   const staticCheck = canPerform(persona, domain, action);
 
@@ -226,7 +252,7 @@ export function canPerformDynamic(persona, domain, action, mode, binaryVitals = 
     return { ...staticCheck, mode };
   }
 
-  const pressure = binaryVitals?.metabolic?.pressure ?? 0;
+  const pressure = extractPressure(binaryVitals);
 
   if (mode.binaryOverride && pressure >= 0.6) {
     return {
@@ -245,8 +271,88 @@ export function canPerformDynamic(persona, domain, action, mode, binaryVitals = 
   };
 }
 
+// ============================================================================
+//  v12.3‑EVO+ — BOUNDARY CACHE (READ‑ONLY, DETERMINISTIC)
+// ============================================================================
+
+const _boundaryDecisionCache = Object.create(null);
+const _modeSelectionCache = Object.create(null);
+
+function _decisionKey(persona, domain, action, mode, binaryVitals) {
+  const pressure = extractPressure(binaryVitals);
+  const modeId = mode?.id || "unknown";
+  const pressureBucket =
+    pressure >= 0.9 ? "p4" :
+    pressure >= 0.7 ? "p3" :
+    pressure >= 0.4 ? "p2" :
+    pressure >  0   ? "p1" : "p0";
+
+  return `${persona}|${domain}|${action}|${modeId}|${pressureBucket}`;
+}
+
+function _modeKey(personaId, binaryVitals, evoState = {}) {
+  const pressure = extractPressure(binaryVitals);
+  const forced = evoState.forceBoundaryMode || "";
+  const pressureBucket =
+    pressure >= 0.9 ? "p4" :
+    pressure >= 0.7 ? "p3" :
+    pressure >= 0.4 ? "p2" :
+    pressure >  0   ? "p1" : "p0";
+
+  return `${personaId}|${forced}|${pressureBucket}`;
+}
+
+export function selectBoundaryModeCached(args) {
+  const key = _modeKey(args.personaId, args.binaryVitals, args.evoState);
+  const cached = _modeSelectionCache[key];
+  if (cached) return cached;
+
+  const mode = selectBoundaryMode(args);
+  _modeSelectionCache[key] = mode;
+  return mode;
+}
+
+export function canPerformDynamicCached(persona, domain, action, mode, binaryVitals = {}) {
+  const key = _decisionKey(persona, domain, action, mode, binaryVitals);
+  const cached = _boundaryDecisionCache[key];
+  if (cached) return cached;
+
+  const decision = canPerformDynamic(persona, domain, action, mode, binaryVitals);
+  _boundaryDecisionCache[key] = decision;
+  return decision;
+}
+
+// ============================================================================
+//  v12.3‑EVO+ — BOUNDARY ARTERY SNAPSHOT (READ‑ONLY)
+// ============================================================================
+
+export function getBoundaryArterySnapshot({ personaId, binaryVitals = {}, evoState = {} }) {
+  const mode = selectBoundaryModeCached({ personaId, binaryVitals, evoState });
+  const pressure = extractPressure(binaryVitals);
+
+  const pressureBucket =
+    pressure >= 0.9 ? "overload" :
+    pressure >= 0.7 ? "high" :
+    pressure >= 0.4 ? "medium" :
+    pressure >  0   ? "low" : "none";
+
+  return {
+    type: "boundary-artery",
+    personaId,
+    mode: {
+      id: mode.id,
+      symbolicLoad: mode.symbolicLoad,
+      binaryOverride: mode.binaryOverride
+    },
+    vitals: {
+      pressure,
+      pressureBucket
+    }
+  };
+}
+
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
@@ -261,6 +367,9 @@ if (typeof module !== "undefined" && module.exports) {
     canPerform,
     BoundaryModes,
     selectBoundaryMode,
-    canPerformDynamic
+    canPerformDynamic,
+    selectBoundaryModeCached,
+    canPerformDynamicCached,
+    getBoundaryArterySnapshot
   };
 }

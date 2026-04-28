@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ENTREPRENEUR ORGAN (FINAL UPGRADE)
+//  PULSE OS v12.3‑EVO+ — ENTREPRENEUR ORGAN
 //  Strategy Mapper • Experiment Designer • Risk Surface Analyzer
 //  PURE STRATEGY. ZERO PROMISES. ZERO OUTCOME CLAIMS.
 // ============================================================================
@@ -7,8 +7,8 @@
 export const EntrepreneurMeta = Object.freeze({
   layer: "PulseAIStrategyFrame",
   role: "ENTREPRENEUR_ORGAN",
-  version: "11.1-EVO",
-  identity: "aiEntrepreneur-v11-EVO",
+  version: "12.3-EVO+",
+  identity: "aiEntrepreneur-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -19,11 +19,12 @@ export const EntrepreneurMeta = Object.freeze({
     strategyAware: true,
     riskAware: true,
     experimentAware: true,
-    packetAware: true,          // ⭐ NEW
+    packetAware: true,
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11-EVO"
+    strategyArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -38,7 +39,8 @@ export const EntrepreneurMeta = Object.freeze({
     always: Object.freeze([
       "frame experiments",
       "identify risks",
-      "suggest reversible tests"
+      "suggest reversible tests",
+      "remain conceptual and non‑directive"
     ])
   }),
 
@@ -51,16 +53,43 @@ export const EntrepreneurMeta = Object.freeze({
   }
 });
 
+// ============================================================================
+//  HELPERS — PRESSURE + BUCKETS
+// ============================================================================
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
+
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
 
 // ============================================================================
-// PUBLIC API — Create Entrepreneur Organ
+//  PUBLIC API — Create Entrepreneur Organ
 // ============================================================================
-export function createEntrepreneurOrgan(context) {
+export function createEntrepreneurOrgan(context = {}) {
 
-  // --------------------------------------------------------------------------
-  // STRATEGY MODEL BUILDER
-  // --------------------------------------------------------------------------
-  function buildModel(idea) {
+  // -------------------------------------------------------------------------
+  // PREWARM (symbolic-only)
+  // -------------------------------------------------------------------------
+  function prewarm() {
+    return true;
+  }
+
+  // -------------------------------------------------------------------------
+  // STRATEGY MODEL BUILDER v3
+  // -------------------------------------------------------------------------
+  function buildModel(idea, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
     return Object.freeze({
       type: "strategy-model",
       idea,
@@ -74,75 +103,120 @@ export function createEntrepreneurOrgan(context) {
       ],
       message:
         `Strategy model generated for idea: ${idea}. ` +
-        `This is a conceptual map, not a prediction.`
+        (binaryPressure >= 0.7
+          ? "System load is elevated — model simplified for clarity."
+          : "This is a conceptual map, not a prediction.")
     });
   }
 
-  // --------------------------------------------------------------------------
-  // RISK SURFACE ANALYZER
-  // --------------------------------------------------------------------------
-  function analyzeRisks(idea) {
+  // -------------------------------------------------------------------------
+  // RISK SURFACE ANALYZER v3
+  // -------------------------------------------------------------------------
+  function analyzeRisks(idea, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const risks = [
+      "execution risk",
+      "market risk",
+      "timing risk",
+      "resource risk",
+      "complexity risk"
+    ];
+
     return Object.freeze({
       type: "risk-surface",
       idea,
-      risks: [
-        "execution risk",
-        "market risk",
-        "timing risk",
-        "resource risk",
-        "complexity risk"
-      ],
+      risks,
       message:
         `Risk surface mapped for idea: ${idea}. ` +
-        `Use this to design reversible tests.`
+        (binaryPressure >= 0.7
+          ? "System load is elevated — risk categories simplified."
+          : "Use this to design reversible tests.")
     });
   }
 
-  // --------------------------------------------------------------------------
-  // REVERSIBLE EXPERIMENT DESIGNER
-  // --------------------------------------------------------------------------
-  function designExperiment(idea) {
+  // -------------------------------------------------------------------------
+  // REVERSIBLE EXPERIMENT DESIGNER v3
+  // -------------------------------------------------------------------------
+  function designExperiment(idea, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const steps = [
+      "define smallest testable unit",
+      "set a falsifiable hypothesis",
+      "choose a reversible action",
+      "measure one signal only",
+      "evaluate without sunk-cost bias"
+    ];
+
     return Object.freeze({
       type: "experiment-design",
       idea,
-      steps: [
-        "define smallest testable unit",
-        "set a falsifiable hypothesis",
-        "choose a reversible action",
-        "measure one signal only",
-        "evaluate without sunk-cost bias"
-      ],
+      steps,
       message:
         `Reversible experiment designed for idea: ${idea}. ` +
-        `No commitments, no promises — just learning.`
+        (binaryPressure >= 0.7
+          ? "Simplified due to system load — keep tests small and reversible."
+          : "No commitments, no promises — just learning.")
     });
   }
 
-  // --------------------------------------------------------------------------
-  // NEXT-STEP SUGGESTER
-  // --------------------------------------------------------------------------
-  function nextSteps(idea) {
+  // -------------------------------------------------------------------------
+  // NEXT-STEP SUGGESTER v3
+  // -------------------------------------------------------------------------
+  function nextSteps(idea, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const suggestions = [
+      "validate assumptions",
+      "run a micro-test",
+      "interview potential users",
+      "map constraints",
+      "identify reversible paths"
+    ];
+
     return Object.freeze({
       type: "next-steps",
       idea,
-      suggestions: [
-        "validate assumptions",
-        "run a micro-test",
-        "interview potential users",
-        "map constraints",
-        "identify reversible paths"
-      ],
+      suggestions,
       message:
         `Next steps generated for idea: ${idea}. ` +
-        `These are strategic options, not directives.`
+        (binaryPressure >= 0.7
+          ? "System load is elevated — suggestions simplified."
+          : "These are strategic options, not directives.")
     });
   }
 
-  // --------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // STRATEGY ARTERY v3 — symbolic-only, deterministic
+  // -------------------------------------------------------------------------
+  function strategyArtery({ idea = "", binaryVitals = {} } = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const localPressure = idea ? 0.3 : 0;
+    const pressure = Math.max(
+      0,
+      Math.min(1, 0.6 * localPressure + 0.4 * binaryPressure)
+    );
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket: bucketPressure(pressure)
+      },
+      idea: {
+        provided: !!idea,
+        length: idea.length
+      }
+    };
+  }
+
+  // -------------------------------------------------------------------------
   // PUBLIC ENTREPRENEUR API
-  // --------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   return Object.freeze({
     meta: EntrepreneurMeta,
+    prewarm,
 
     log(message) {
       context?.logStep?.(`aiEntrepreneur: ${message}`);
@@ -151,10 +225,10 @@ export function createEntrepreneurOrgan(context) {
     buildModel,
     analyzeRisks,
     designExperiment,
-    nextSteps
+    nextSteps,
+    strategyArtery
   });
 }
-
 
 // ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)

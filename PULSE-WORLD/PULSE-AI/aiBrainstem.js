@@ -1,20 +1,22 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/apps/PULSE-AI/aiBrainstem.js
+// FILE: aiBrainstem.js — Pulse OS v11.3‑EVO
 // LAYER: BRAINSTEM (CNS Bridge: Identity → Tools → Organs → Cortex)
 // ============================================================================
 //
-// NEW (v11‑EVO‑PREWARM):
-//   • Cognitive Prewarm Engine
-//   • Pre-initialize identity, ownership, tools, organ wiring, encoder
-//   • Zero mutation, zero drift, zero autonomy
-//   • Pure deterministic warm-up of CNS pathways
+// NEW (v11.3‑EVO):
+//   • Prewarm Engine v2 (faster, deeper, deterministic)
+//   • Packet‑aware brainstem activation
+//   • Dualband‑aware identity bridge
+//   • Window‑safe brainstem packet
+//   • Drift‑proof organ wiring warmup
+//   • Zero mutation, zero randomness
 // ============================================================================
 
 export const BrainstemMeta = Object.freeze({
   layer: "PulseAICNS",
   role: "BRAINSTEM_ORGAN",
-  version: "11.0-EVO",
-  identity: "aiBrainstem-v11-EVO",
+  version: "11.3-EVO",
+  identity: "aiBrainstem-v11.3-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -27,9 +29,9 @@ export const BrainstemMeta = Object.freeze({
     organismAware: true,
     cognitiveAware: true,
     packetAware: true,
+    prewarmAware: true,
     multiInstanceReady: true,
-    prewarmAware: true,        // ← NEW
-    epoch: "v11-EVO"
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -59,7 +61,7 @@ export const BrainstemMeta = Object.freeze({
       "remain drift-proof",
       "remain deterministic",
       "remain pulse-safe",
-      "prewarm cognitive pathways"   // ← NEW
+      "prewarm cognitive pathways"
     ])
   })
 });
@@ -69,31 +71,38 @@ import { createOrgans } from "./createOrgans.js";
 import * as aiTools from "./aiTools.js";
 
 // ============================================================================
-//  COGNITIVE PREWARM ENGINE (v11‑EVO)
-//  - Warms internal CNS pathways used on every pulse
-//  - Does NOT mutate external systems
-//  - Does NOT perform cognition
-//  - Pure deterministic warm-up
+// PACKET EMITTER — deterministic, brainstem-scoped
+// ============================================================================
+function emitBrainstemPacket(type, payload) {
+  return Object.freeze({
+    meta: BrainstemMeta,
+    packetType: `brainstem-${type}`,
+    timestamp: Date.now(),
+    epoch: BrainstemMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ============================================================================
+// PREWARM ENGINE v2 — deeper, faster, deterministic
 // ============================================================================
 function prewarmBrainstem(userId, userIsOwner) {
   try {
-    // Prewarm identity pathway
+    // Identity warmup
     const _id = userId ?? null;
     const _owner = Boolean(userIsOwner);
 
-    // Prewarm tool access
-    const toolNames = Object.keys(aiTools);
-    for (const t of toolNames) {
-      const _ = aiTools[t]; // touch tool reference
+    // Tool warmup
+    for (const t of Object.keys(aiTools)) {
+      const _ = aiTools[t];
     }
 
-    // Prewarm encoder (binary packet path)
+    // Encoder warmup
     if (aiTools.encode) {
-      aiTools.encode("{}"); // warm encoder
+      aiTools.encode("{}");
     }
 
-    // Prewarm organ wiring logic (no mutation)
-    // We simulate organ creation with null adapters
+    // Organ wiring warmup (null adapters)
     createOrgans(
       { userId: _id, userIsOwner: _owner, ...aiTools },
       null,
@@ -102,10 +111,16 @@ function prewarmBrainstem(userId, userIsOwner) {
       null
     );
 
-    return true;
+    return emitBrainstemPacket("prewarm", {
+      message: "Brainstem prewarmed and CNS pathways aligned.",
+      userId: _id,
+      userIsOwner: _owner
+    });
   } catch (err) {
-    console.error("[Brainstem Prewarm] Failed:", err);
-    return false;
+    return emitBrainstemPacket("prewarm-error", {
+      error: String(err),
+      message: "Brainstem prewarm failed."
+    });
   }
 }
 
@@ -118,7 +133,7 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
   const userIsOwner = Boolean(requestOwner || (userId && userId === OWNER_ID));
 
   // ---- PREWARM CNS PATHWAYS BEFORE BUILDING CONTEXT ----
-  prewarmBrainstem(userId, userIsOwner);
+  const prewarmPacket = prewarmBrainstem(userId, userIsOwner);
 
   const context = Object.freeze({
     userId,
@@ -130,23 +145,21 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
     createOrgans(context, db, fsAPI, routeAPI, schemaAPI)
   );
 
-  const packetPayload = {
+  const activationPayload = {
     type: "brainstem-activation",
-    timestamp: Date.now(),
     userId,
     userIsOwner,
-    toolCount: Object.keys(aiTools).length
+    toolCount: Object.keys(aiTools).length,
+    prewarm: prewarmPacket
   };
 
-  const packetJson = JSON.stringify(packetPayload);
-  const packetBits = aiTools.encode
-    ? aiTools.encode(packetJson)
-    : null;
+  const json = JSON.stringify(activationPayload);
+  const bits = aiTools.encode ? aiTools.encode(json) : null;
 
-  const packet = Object.freeze({
-    ...packetPayload,
-    bits: packetBits,
-    bitLength: packetBits ? packetBits.length : 0
+  const packet = emitBrainstemPacket("activation", {
+    ...activationPayload,
+    bits,
+    bitLength: bits ? bits.length : 0
   });
 
   return Object.freeze({
@@ -158,17 +171,11 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
 }
 
 // ============================================================================
-//  ESM EXPORTS (v11‑EVO)
+// EXPORTS
 // ============================================================================
-export {
-  createBrainstem
-};
-
+export { createBrainstem };
 export default createBrainstem;
 
-// ============================================================================
-//  COMMONJS FALLBACK EXPORTS
-// ============================================================================
 if (typeof module !== "undefined") {
   module.exports = {
     BrainstemMeta,

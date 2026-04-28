@@ -54,6 +54,59 @@ const OrganRegistryMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  BINARY ORGAN REGISTRY PREWARM ENGINE — v11.1‑EVO
+// ---------------------------------------------------------
+export function prewarmAIBinaryOrganRegistry(config = {}) {
+  try {
+    const { encoder, memory, evolution } = config;
+
+    if (!encoder?.encode || !memory?.write || !memory?.read) {
+      return false;
+    }
+
+    // Warm encoder encode/decode
+    const warmJson = JSON.stringify({
+      id: "prewarm-organ",
+      type: "Prewarm",
+      signatureBits: 0,
+      timestamp: 0
+    });
+
+    const warmKey = encoder.encode("organ:prewarm");
+    const warmVal = encoder.encode(warmJson);
+
+    // Warm memory write/read
+    memory.write(warmKey, warmVal);
+    const _read = memory.read(warmKey);
+
+    // Warm decode
+    if (_read) {
+      encoder.decode(_read, "string");
+    }
+
+    // Warm listKeys
+    if (typeof memory.listKeys === "function") {
+      const _keys = memory.listKeys();
+      for (const k of _keys) {
+        encoder.decode(k, "string");
+      }
+    }
+
+    // Warm evolution signature path
+    if (evolution?.generateSignature) {
+      evolution.generateSignature({
+        id: "prewarm-organ",
+        constructor: { name: "PrewarmOrgan" }
+      });
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[AIBinaryOrganRegistry Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ---------------------------------------------------------
 //  ORGAN IMPLEMENTATION — v11.1‑EVO
@@ -190,8 +243,11 @@ class AIBinaryOrganRegistry {
 // ---------------------------------------------------------
 
 function createAIBinaryOrganRegistry(config) {
+  // Prewarm registry binary pathways
+  prewarmAIBinaryOrganRegistry(config);
   return new AIBinaryOrganRegistry(config);
 }
+
 
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)

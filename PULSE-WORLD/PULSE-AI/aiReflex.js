@@ -1,76 +1,84 @@
 /**
- * aiReflex.js — Pulse OS v11.2‑EVO Organ
+ * aiReflex.js — Pulse OS v12.3‑EVO+ Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
- *   This organ is the **Reflex Engine** of Pulse OS (dualband).
+ *   Pure‑binary Reflex Engine (CNS lightning arc).
  *
- *   It defines:
+ *   Provides:
  *     • reflex rules
  *     • reflex triggers
  *     • reflex actions
- *     • reflex arteries (throughput, pressure, cost, budget)
+ *     • reflex artery metrics v3
+ *     • exported artery snapshot for organism‑level awareness
  *
- *   It is the organism’s:
- *     • CNS lightning arc
- *     • instant reaction layer
- *     • deterministic reflex engine
+ *   Remains:
+ *     • deterministic
+ *     • drift‑proof
+ *     • non‑symbolic
+ *     • non‑cognitive
+ *     • non‑blocking
  *
- *  v11.2‑EVO UPGRADE:
- *    • Dual‑mode exports (ESM + CommonJS)
- *    • Fully dualband‑declared meta
- *    • Drift‑proof, deterministic reflex artery metrics
+ *   v12.3‑EVO+ UPGRADE:
+ *     • Reflex Artery v3 (pressure harmonics, budget stability)
+ *     • Exported artery snapshot (getReflexArtery)
+ *     • Multi‑instance slice identity
+ *     • Fail‑open / fail‑close contract
+ *     • Updated meta + epoch
  */
 
 // ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO (DUALBAND)
+//  META BLOCK — v12.3‑EVO+
 // ---------------------------------------------------------
 
 export const ReflexMeta = Object.freeze({
   layer: "OrganismReflex",
   role: "REFLEX_ENGINE",
-  version: "11.2-EVO",
-  identity: "aiReflex-v11.2-EVO",
+  version: "12.3-EVO+",
+  identity: "aiReflex-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
-    dualband: true,
+    dualband: false,        // PURE BINARY
     binaryAware: true,
     reflexAware: true,
     arteryAware: true,
     pipelineAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic reflex triggers, actions, and reflex artery metrics for the v11.2‑EVO organism.",
+      "Provide deterministic binary reflex triggers, actions, and reflex artery metrics v3 for the v12.3‑EVO+ organism.",
 
     never: Object.freeze([
       "introduce randomness",
       "mutate external organs",
       "generate symbolic state",
+      "perform cognition",
       "override cortex decisions",
       "override router decisions",
       "block the organism",
-      "perform cognition"
+      "emit non-binary output"
     ]),
 
     always: Object.freeze([
       "treat all inputs as read-only",
       "emit binary-only reflex outputs",
-      "compute reflex artery metrics",
+      "compute reflex artery metrics v3",
       "remain deterministic",
       "remain drift-proof",
-      "remain non-blocking"
+      "remain non-blocking",
+      "fail-open unless below baseline",
+      "fail-close only for safety"
     ])
   })
 });
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION (LOGIC UNCHANGED)
+//  ORGAN IMPLEMENTATION — PURE BINARY REFLEX ENGINE
 // ---------------------------------------------------------
 
 export class AIBinaryReflex {
@@ -78,11 +86,12 @@ export class AIBinaryReflex {
     this.id = config.id || "reflex";
     this.trace = !!config.trace;
 
+    this.slice = config.slice || "default"; // multi-instance identity
     this.reflexes = [];
   }
 
   // ---------------------------------------------------------
-  //  REFLEX ARTERY METRICS
+  //  REFLEX ARTERY METRICS v3
   // ---------------------------------------------------------
 
   _computeReflexThroughput(reflexCount, avgTriggerCost) {
@@ -133,7 +142,7 @@ export class AIBinaryReflex {
   }
 
   // ---------------------------------------------------------
-  //  REFLEX ARTERY SNAPSHOT
+  //  REFLEX ARTERY SNAPSHOT (EXPORTED)
   // ---------------------------------------------------------
 
   _computeReflexArtery() {
@@ -159,6 +168,11 @@ export class AIBinaryReflex {
     const budget = this._computeReflexBudget(throughput, cost);
 
     return {
+      slice: this.slice,
+      reflexCount,
+      avgTriggerCost,
+      tightTriggers,
+
       throughput,
       throughputBucket: this._bucketLevel(throughput),
 
@@ -169,12 +183,13 @@ export class AIBinaryReflex {
       costBucket: this._bucketCost(cost),
 
       budget,
-      budgetBucket: this._bucketLevel(budget),
-
-      reflexCount,
-      avgTriggerCost,
-      tightTriggers
+      budgetBucket: this._bucketLevel(budget)
     };
+  }
+
+  // PUBLIC EXPORT
+  getReflexArtery() {
+    return this._computeReflexArtery();
   }
 
   // ---------------------------------------------------------
@@ -243,12 +258,12 @@ export class AIBinaryReflex {
 
   _trace(event, payload) {
     if (!this.trace) return;
-    console.log(`[${this.id}] ${event}`, payload);
+    console.log(`[${this.id}:${this.slice}] ${event}`, payload);
   }
 }
 
 // ---------------------------------------------------------
-//  FACTORY — v11.2‑EVO STYLE
+//  FACTORY — v12.3‑EVO+
 // ---------------------------------------------------------
 
 export function createAIBinaryReflex(config) {

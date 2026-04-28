@@ -62,12 +62,85 @@ export const EarnMeta = Object.freeze({
 });
 
 import { getOrganismSnapshot } from "./aiDeps.js";
+// ---------------------------------------------------------
+//  EARN PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmEarnOrgan(db, evolutionAPI, dualBand) {
+  try {
+    // Warm identity stripping
+    const warmRecord = {
+      uid: "x",
+      userId: "y",
+      resendToken: "z",
+      identityRoot: "root",
+      sessionRoot: "session",
+      deviceFingerprint: "fp",
+      value: 123
+    };
+
+    // Warm stripIdentity
+    const _ = {
+      ...warmRecord,
+      ...Object.fromEntries(Object.entries(warmRecord).filter(([k]) => ![
+        "uid",
+        "userId",
+        "resendToken",
+        "identityRoot",
+        "sessionRoot",
+        "deviceFingerprint"
+      ].includes(k)))
+    };
+
+    // Warm DB adapters
+    db.getCollection?.("orders", { where: { userId: "prewarm" } });
+    db.getDocument?.("orders", "prewarm");
+
+    // Warm organism snapshot
+    getOrganismSnapshot(dualBand);
+
+    // Warm binary economic pressure
+    const warmSnapshot = {
+      binary: { metabolic: { pressure: 0.2, load: 0.1 } }
+    };
+
+    // Warm computeBinaryEconomicPressure
+    const pressure = warmSnapshot.binary.metabolic.pressure;
+    const load = warmSnapshot.binary.metabolic.load;
+    const bucket = pressure >= 0.9 ? "critical"
+      : pressure >= 0.7 ? "high"
+      : pressure >= 0.4 ? "medium"
+      : pressure > 0 ? "low"
+      : "none";
+
+    // Warm earn packet
+    const warmPacket = {
+      type: "earn-prewarm",
+      timestamp: Date.now(),
+      payload: { pressure, load, bucket }
+    };
+
+    // Warm evolution API (owner only)
+    evolutionAPI?.getOrganismOverview?.({ userIsOwner: true });
+    evolutionAPI?.analyzeSchema?.({ userIsOwner: true }, "pulseEarn");
+    evolutionAPI?.analyzeFile?.({ userIsOwner: true }, "PulseEarn-v11-Evo.js");
+    evolutionAPI?.analyzeRoute?.({ userIsOwner: true }, "earn");
+
+    return true;
+  } catch (err) {
+    console.error("[Earn Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ============================================================================
 //  EARN ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
 // ============================================================================
 
 export function createEarnAPI(db, evolutionAPI, dualBand = null) {
+
+  // ⭐ PREWARM THE EARN ORGAN
+  prewarmEarnOrgan(db, evolutionAPI, dualBand);
+
 
   // --------------------------------------------------------------------------
   // IDENTITY‑SAFE CLONING

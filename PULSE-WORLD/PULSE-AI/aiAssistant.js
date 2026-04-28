@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.3‑EVO — ASSISTANT ORGAN
+//  PULSE OS v12.3‑EVO+ — ASSISTANT ORGAN
 //  Proactive • Interpretive • Gap‑Filling • Owner-Aware
 //  PURE STRUCTURE. ZERO ACTION IN THE WORLD.
 // ============================================================================
@@ -7,19 +7,22 @@
 export const AssistantMeta = Object.freeze({
   layer: "PulseAIAssistantFrame",
   role: "ASSISTANT_ORGAN",
-  version: "11.3-EVO",
-  identity: "aiAssistant-v11.3-EVO",
+  version: "12.3-EVO+",
+  identity: "aiAssistant-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     dualband: true,
-    proactiveAware: true,       // notices missing steps
-    mathAware: true,            // fills math gaps automatically
-    patternAware: true,         // learns your style (locally, no identity)
-    ownerComfortAware: true,    // avoids bothering unless helpful
+
+    proactiveAware: true,
+    mathAware: true,
+    patternAware: true,
+    ownerComfortAware: true,
+
     multiInstanceReady: true,
-    epoch: "v11.3-EVO"
+    assistantArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -56,9 +59,32 @@ export const AssistantMeta = Object.freeze({
 });
 
 // ============================================================================
-// PUBLIC API — Create Assistant Organ
+// HELPERS — PRESSURE + BUCKETS
 // ============================================================================
-export function createAssistantOrgan(context) {
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
+
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+// ============================================================================
+// PUBLIC API — Create Assistant Organ (v12.3‑EVO+)
+// ============================================================================
+export function createAssistantOrgan(context = {}) {
+
+  function prewarm() {
+    return true;
+  }
 
   // --------------------------------------------------------------------------
   // INTERNAL: detect if user struggles with math or structure
@@ -81,9 +107,11 @@ export function createAssistantOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
-  // AUTO-MATH — fill in math without asking
+  // AUTO-MATH v3 — fill in math without asking
   // --------------------------------------------------------------------------
-  function autoMath(input) {
+  function autoMath(input, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
     try {
       const match = input.match(/(\d+)\s*([\+\-\*\/])\s*(\d+)/);
       if (!match) return null;
@@ -100,7 +128,10 @@ export function createAssistantOrgan(context) {
 
       return {
         expression: `${a} ${op} ${b}`,
-        result
+        result:
+          binaryPressure >= 0.7
+            ? Number(result.toFixed(2))
+            : result
       };
     } catch {
       return null;
@@ -129,15 +160,22 @@ export function createAssistantOrgan(context) {
   // --------------------------------------------------------------------------
   // ORGANIZER — Turn chaos into structure
   // --------------------------------------------------------------------------
-  function organize(items = []) {
+  function organize(items = [], binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const grouped = {
+      highPriority: items.filter(i => i.priority === "high"),
+      mediumPriority: items.filter(i => i.priority === "medium"),
+      lowPriority: items.filter(i => i.priority === "low")
+    };
+
     return {
       type: "organization",
       items,
-      grouped: {
-        highPriority: items.filter(i => i.priority === "high"),
-        mediumPriority: items.filter(i => i.priority === "medium"),
-        lowPriority: items.filter(i => i.priority === "low")
-      },
+      grouped:
+        binaryPressure >= 0.7
+          ? { highPriority: grouped.highPriority }
+          : grouped,
       message:
         "Items organized by priority. No action taken — just structure."
     };
@@ -146,11 +184,16 @@ export function createAssistantOrgan(context) {
   // --------------------------------------------------------------------------
   // DRAFT BUILDER — Turn ideas into text
   // --------------------------------------------------------------------------
-  function draft(type, content) {
+  function draft(type, content, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
     return {
       type: "draft",
       draftType: type,
-      content,
+      content:
+        binaryPressure >= 0.7
+          ? String(content).slice(0, 200)
+          : content,
       message: `Draft generated for: ${type}.`
     };
   }
@@ -158,12 +201,17 @@ export function createAssistantOrgan(context) {
   // --------------------------------------------------------------------------
   // PRIORITY MAPPER — Turn tasks into a sequence
   // --------------------------------------------------------------------------
-  function prioritize(tasks = []) {
+  function prioritize(tasks = [], binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
     const ordered = [...tasks].sort((a, b) => (a.weight || 0) - (b.weight || 0));
 
     return {
       type: "priority-map",
-      tasks: ordered,
+      tasks:
+        binaryPressure >= 0.7
+          ? ordered.slice(0, 3)
+          : ordered,
       message: "Tasks prioritized based on weights."
     };
   }
@@ -171,14 +219,16 @@ export function createAssistantOrgan(context) {
   // --------------------------------------------------------------------------
   // SUMMARY BUILDER — Turn content into a digest
   // --------------------------------------------------------------------------
-  function summarize(text) {
+  function summarize(text, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const words = text?.split(/\s+/) || [];
+    const slice = binaryPressure >= 0.7 ? 20 : 40;
+
     return {
       type: "summary",
       originalLength: text?.length || 0,
-      summary:
-        text && text.length > 0
-          ? text.split(/\s+/).slice(0, 40).join(" ") + " ..."
-          : "",
+      summary: words.slice(0, slice).join(" ") + " ...",
       message: "High-level summary generated."
     };
   }
@@ -186,9 +236,9 @@ export function createAssistantOrgan(context) {
   // --------------------------------------------------------------------------
   // INTERPRETIVE ASSIST — the magic
   // --------------------------------------------------------------------------
-  function interpret(input) {
+  function interpret(input, binaryVitals = {}) {
     const gaps = detectGaps(input);
-    const math = gaps.needsMath ? autoMath(input) : null;
+    const math = gaps.needsMath ? autoMath(input, binaryVitals) : null;
 
     return Object.freeze({
       type: "interpretation",
@@ -201,10 +251,39 @@ export function createAssistantOrgan(context) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC ASSISTANT API
+  // ASSISTANT ARTERY v3 — symbolic-only, deterministic
+  // --------------------------------------------------------------------------
+  function assistantArtery({ input = "", binaryVitals = {} } = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const gaps = detectGaps(input);
+
+    const localPressure =
+      (gaps.needsMath ? 0.3 : 0) +
+      (gaps.needsStructure ? 0.3 : 0) +
+      (binaryPressure * 0.4);
+
+    const pressure = Math.max(0, Math.min(1, localPressure));
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket: bucketPressure(pressure)
+      },
+      input: {
+        length: input.length,
+        needsMath: gaps.needsMath,
+        needsStructure: gaps.needsStructure
+      }
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // PUBLIC ASSISTANT API (v12.3‑EVO+)
   // --------------------------------------------------------------------------
   return Object.freeze({
     meta: AssistantMeta,
+    prewarm,
 
     log(message) {
       context?.logStep?.(`aiAssistant: ${message}`);
@@ -215,6 +294,7 @@ export function createAssistantOrgan(context) {
     draft,
     prioritize,
     summarize,
-    interpret
+    interpret,
+    assistantArtery
   });
 }

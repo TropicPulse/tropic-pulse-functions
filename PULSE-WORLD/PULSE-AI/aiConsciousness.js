@@ -64,6 +64,75 @@ export const ConsciousnessMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  CONSCIOUSNESS PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmAIBinaryConsciousness(config = {}) {
+  try {
+    const {
+      encoder,
+      sentience,
+      metabolism,
+      hormones,
+      vitals,
+      anatomy,
+      immunity,
+      trace
+    } = config;
+
+    // Warm self-model
+    sentience?.generateSelfModel?.();
+
+    // Warm metabolic packet
+    metabolism?.generateMetabolicPacket?.();
+
+    // Warm hormone emission
+    hormones?.emitHormones?.();
+
+    // Warm vitals
+    vitals?.generateVitals?.();
+
+    // Warm topology snapshot
+    anatomy?.snapshot?.();
+
+    // Warm quarantined set
+    if (immunity?.quarantined) {
+      Array.from(immunity.quarantined);
+    }
+
+    // Warm awareness metrics
+    const throughput = 1;
+    const pressure = 1;
+    const cost = 1;
+    const budget = 1;
+
+    // Warm consciousness packet encoding
+    if (encoder?.encode) {
+      const warmPayload = {
+        type: "binary-consciousness",
+        timestamp: 0,
+        state: {
+          selfModel: {},
+          metabolism: {},
+          hormones: [],
+          vitals: {},
+          topology: {},
+          quarantined: [],
+          decisions: [],
+          binary: { throughput, pressure, cost, budget }
+        }
+      };
+
+      const bits = encoder.encode(JSON.stringify(warmPayload));
+      encoder.decode?.(bits, "string");
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[AIBinaryConsciousness Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ---------------------------------------------------------
 //  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
@@ -276,8 +345,10 @@ export class AIBinaryConsciousness {
 // ---------------------------------------------------------
 
 export function createAIBinaryConsciousness(config) {
+  prewarmAIBinaryConsciousness(config);   // ← PREWARM HERE
   return new AIBinaryConsciousness(config);
 }
+
 
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)

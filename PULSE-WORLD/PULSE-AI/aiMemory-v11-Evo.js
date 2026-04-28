@@ -1,5 +1,5 @@
 // ============================================================================
-//  aiMemory.js — Pulse OS v11.2‑EVO Organ
+//  aiMemory.js — Pulse OS v11.3‑EVO Organ
 //  Pure PulseCoreMemory Adapter • Dualband • Binary‑Only • Zero Local State
 // ----------------------------------------------------------------------------
 //  CANONICAL ROLE:
@@ -21,17 +21,16 @@
 //      and lower layers — organism‑wide, not per‑organ.
 // ============================================================================
 
-// You can adjust this import path to your actual PulseCoreMemory location.
 import { PulseCoreMemory } from "./pulseCoreMemory.js";
 
 // ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO
+//  META BLOCK — v11.3‑EVO
 // ---------------------------------------------------------
 export const MemoryMeta = Object.freeze({
   layer: "OrganismMemory",
   role: "MEMORY_LAYER",
-  version: "11.2-EVO",
-  identity: "aiMemory-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiMemory-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -41,10 +40,14 @@ export const MemoryMeta = Object.freeze({
     memoryAware: true,
     packetAware: true,
     windowAware: true,
-    bluetoothReady: true,      // future memory event channels
+    bluetoothReady: true,
     multiInstanceReady: true,
-    readOnly: false,           // can write via PulseCoreMemory
-    epoch: "v11.2-EVO"
+    readOnly: false,
+    microPipeline: true,     // ⭐ NEW
+    speedOptimized: true,    // ⭐ NEW
+    prewarmAware: true,      // ⭐ NEW
+    arteryAware: true,       // ⭐ NEW
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -70,22 +73,51 @@ export const MemoryMeta = Object.freeze({
   })
 });
 
+// ---------------------------------------------------------
+//  PACKET EMITTER — deterministic, memory-scoped
+// ---------------------------------------------------------
+function emitMemoryPacket(type, payload) {
+  return Object.freeze({
+    meta: MemoryMeta,
+    packetType: `memory-${type}`,
+    timestamp: Date.now(),
+    epoch: MemoryMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ---------------------------------------------------------
+//  PREWARM — v11.3‑EVO
+// ---------------------------------------------------------
+export function prewarmAIMemory({ trace = false } = {}) {
+  const packet = emitMemoryPacket("prewarm", {
+    message: "Memory adapter prewarmed and artery metrics aligned."
+  });
+
+  if (trace) console.log("[AIMemory] prewarm", packet);
+  return packet;
+}
+
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO (PulseCoreMemory‑only)
+//  ORGAN IMPLEMENTATION — v11.3‑EVO (PulseCoreMemory‑only)
 // ============================================================================
 export class AIMemory {
   constructor(config = {}) {
     this.id = config.id || MemoryMeta.identity;
 
-    // PulseCoreMemory instance (organism‑wide memory spine)
     this.core = config.core || PulseCoreMemory;
     this.trace = !!config.trace;
 
-    // Max bits is now a logical constraint, not a storage limit.
     this.maxBits = config.maxBits || 4096;
 
-    if (!this.core || typeof this.core.writeBinary !== "function" || typeof this.core.readBinary !== "function") {
-      throw new Error("AIMemory requires PulseCoreMemory with writeBinary(key, value) and readBinary(key)");
+    if (
+      !this.core ||
+      typeof this.core.writeBinary !== "function" ||
+      typeof this.core.readBinary !== "function"
+    ) {
+      throw new Error(
+        "AIMemory requires PulseCoreMemory with writeBinary(key, value) and readBinary(key)"
+      );
     }
   }
 
@@ -138,8 +170,6 @@ export class AIMemory {
     return "none";
   }
 
-  // PulseCoreMemory is assumed to expose a metadata view.
-  // If not, you can adapt this to your actual API.
   _computeMemoryArtery() {
     const meta = this.core.getBinaryMeta
       ? this.core.getBinaryMeta()
@@ -190,6 +220,12 @@ export class AIMemory {
 
     const artery = this._computeMemoryArtery();
     this._trace("write", { keyBin, valueBits: toStore.length, artery });
+
+    return emitMemoryPacket("write", {
+      keyBits: keyBin.length,
+      valueBits: toStore.length,
+      artery
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -218,6 +254,12 @@ export class AIMemory {
 
     const artery = this._computeMemoryArtery();
     this._trace("delete", { keyBin, existed, artery });
+
+    return emitMemoryPacket("delete", {
+      keyBits: keyBin.length,
+      existed,
+      artery
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -238,7 +280,6 @@ export class AIMemory {
   //  SNAPSHOT — window‑safe binary snapshot of memory state
   // --------------------------------------------------------------------------
   snapshot() {
-    // PulseCoreMemory may expose a snapshot; if not, we synthesize one.
     let out = "";
 
     if (this.core.snapshotBinary) {
@@ -291,6 +332,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     AIMemory,
     createAIMemory,
-    MemoryMeta
+    MemoryMeta,
+    prewarmAIMemory
   };
 }

@@ -1,30 +1,37 @@
-/**
- * aiBinaryHeartbeat.js — Pulse OS v11.1‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Heartbeat** of the organism.
- */
+// ============================================================================
+//  aiBinaryHeartbeat.js — Pulse OS v11.3‑EVO Organ
+//  Binary Heartbeat • Liveness Rhythm • Artery Metrics • Packet‑Ready
+// ============================================================================
+//
+//  CANONICAL ROLE:
+//    This organ is the **Binary Heartbeat** of the organism.
+//    Emits deterministic binary pulses for liveness, rhythm, and sync.
+// ============================================================================
 
-// ---------------------------------------------------------
-//  META BLOCK — v11.1‑EVO
-// ---------------------------------------------------------
-
-const HeartbeatMeta = Object.freeze({
+export const HeartbeatMeta = Object.freeze({
   layer: "BinaryRhythm",
   role: "BINARY_HEARTBEAT",
-  version: "11.1-EVO",
-  identity: "aiBinaryHeartbeat-v11.1-EVO",
+  version: "11.3-EVO",
+  identity: "aiBinaryHeartbeat-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
+
     livenessAware: true,
     reflexAware: true,
     pipelineAware: true,
     arteryAware: true,
+
+    dualband: true,        // ⭐ NEW
+    packetAware: true,     // ⭐ NEW
+    windowAware: true,     // ⭐ NEW (safe artery snapshot)
+    bluetoothReady: true,  // ⭐ NEW (future rhythm channels)
+
     multiInstanceReady: true,
-    epoch: "v11.1-EVO"
+    readOnly: true,
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -38,7 +45,8 @@ const HeartbeatMeta = Object.freeze({
       "act as a router",
       "mutate external organs",
       "depend on timers",
-      "depend on intervals"
+      "depend on intervals",
+      "auto-connect bluetooth"
     ]),
 
     always: Object.freeze([
@@ -52,11 +60,45 @@ const HeartbeatMeta = Object.freeze({
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v11.1‑EVO
-// ---------------------------------------------------------
+// ============================================================================
+//  PACKET EMITTER — deterministic, heartbeat-scoped
+// ============================================================================
+function emitHeartbeatPacket(type, payload) {
+  return Object.freeze({
+    meta: HeartbeatMeta,
+    packetType: `heartbeat-${type}`,
+    timestamp: Date.now(),
+    epoch: HeartbeatMeta.evo.epoch,
+    ...payload
+  });
+}
 
-class AIBinaryHeartbeat {
+// ============================================================================
+//  PREWARM — optional, dualband-aware
+// ============================================================================
+export function prewarmBinaryHeartbeat(dualBand = null, { trace = false } = {}) {
+  try {
+    const pressure = dualBand?.binary?.metabolic?.pressure ?? 0;
+
+    const packet = emitHeartbeatPacket("prewarm", {
+      message: "Binary heartbeat prewarmed and rhythm metrics aligned.",
+      binaryPressure: pressure
+    });
+
+    if (trace) console.log("[aiBinaryHeartbeat] prewarm", packet);
+    return packet;
+  } catch (err) {
+    return emitHeartbeatPacket("prewarm-error", {
+      error: String(err),
+      message: "Binary heartbeat prewarm failed."
+    });
+  }
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.3‑EVO
+// ============================================================================
+export class AIBinaryHeartbeat {
   constructor(config = {}) {
     this.id       = config.id || "ai-binary-heartbeat";
     this.encoder  = config.encoder;
@@ -64,6 +106,9 @@ class AIBinaryHeartbeat {
     this.reflex   = config.reflex   || null;
     this.logger   = config.logger   || null;
     this.trace    = !!config.trace;
+
+    // Future: Bluetooth rhythm channel (not active)
+    this.bluetooth = config.bluetooth || null;
 
     if (!this.encoder?.encode) {
       throw new Error("AIBinaryHeartbeat requires aiBinaryAgent encoder");
@@ -73,46 +118,87 @@ class AIBinaryHeartbeat {
       pulses: 0,
       lastBits: 0,
       lastEntropy: 0,
-      snapshot: () => Object.freeze({
-        pulses: this.artery.pulses,
-        lastBits: this.artery.lastBits,
-        lastEntropy: this.artery.lastEntropy
-      })
+      snapshot: () => Object.freeze(this._snapshotArtery())
     };
   }
 
-  _computeEntropy(bits) {
-    const ones = [...bits].filter(b => b === "1").length;
-    return ones / Math.max(1, bits.length);
+  // ---------------------------------------------------------------------------
+  //  ARTERY SNAPSHOT — window-safe
+  // ---------------------------------------------------------------------------
+  _snapshotArtery() {
+    const { pulses, lastBits, lastEntropy } = this.artery;
+    const load = Math.min(1, pulses / 1000);
+
+    return {
+      pulses,
+      lastBits,
+      lastEntropy,
+      load,
+      loadBucket: this._bucketLoad(load),
+      entropyBucket: this._bucketEntropy(lastEntropy)
+    };
   }
 
+  _bucketLoad(v) {
+    if (v >= 0.9) return "saturated";
+    if (v >= 0.7) return "high";
+    if (v >= 0.4) return "medium";
+    if (v > 0)   return "low";
+    return "idle";
+  }
+
+  _bucketEntropy(v) {
+    if (v >= 0.9) return "chaotic";
+    if (v >= 0.7) return "rich";
+    if (v >= 0.4) return "balanced";
+    if (v > 0)   return "sparse";
+    return "flat";
+  }
+
+  // ---------------------------------------------------------------------------
+  //  ENTROPY
+  // ---------------------------------------------------------------------------
+  _computeEntropy(bits) {
+    if (!bits || bits.length === 0) return 0;
+    let ones = 0;
+    for (let i = 0; i < bits.length; i++) {
+      if (bits[i] === "1") ones++;
+    }
+    return ones / bits.length;
+  }
+
+  // ---------------------------------------------------------------------------
+  //  PULSE GENERATION — deterministic
+  // ---------------------------------------------------------------------------
   _generatePulse() {
     const payload = {
       type: "binary-heartbeat",
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      bluetooth: {
+        ready: !!this.bluetooth,
+        channel: null
+      }
     };
 
     const json = JSON.stringify(payload);
     const bits = this.encoder.encode(json);
-
     const entropy = this._computeEntropy(bits);
-
-    const packet = {
-      ...payload,
-      bits,
-      bitLength: bits.length,
-      entropy
-    };
 
     this.artery.pulses++;
     this.artery.lastBits = bits.length;
     this.artery.lastEntropy = entropy;
 
-    this._trace("pulse:generated", packet);
-
-    return packet;
+    return emitHeartbeatPacket("pulse", {
+      bits,
+      bitLength: bits.length,
+      entropy,
+      bluetooth: payload.bluetooth
+    });
   }
 
+  // ---------------------------------------------------------------------------
+  //  EMIT — binary-only
+  // ---------------------------------------------------------------------------
   emit() {
     const pulse = this._generatePulse();
 
@@ -128,36 +214,34 @@ class AIBinaryHeartbeat {
     return pulse;
   }
 
+  // ---------------------------------------------------------------------------
+  //  TRACE
+  // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  FACTORY
-// ---------------------------------------------------------
-
-function createAIBinaryHeartbeat(config) {
+// ============================================================================
+export function createAIBinaryHeartbeat(config) {
   return new AIBinaryHeartbeat(config);
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
-
-// ESM
+// ============================================================================
 export {
-  HeartbeatMeta,
-  AIBinaryHeartbeat,
-  createAIBinaryHeartbeat
+  HeartbeatMeta
 };
 
 if (typeof module !== "undefined") {
-// CommonJS
-module.exports = {
-  HeartbeatMeta,
-  AIBinaryHeartbeat,
-  createAIBinaryHeartbeat
-};
-};
+  module.exports = {
+    HeartbeatMeta,
+    AIBinaryHeartbeat,
+    createAIBinaryHeartbeat,
+    prewarmBinaryHeartbeat
+  };
+}

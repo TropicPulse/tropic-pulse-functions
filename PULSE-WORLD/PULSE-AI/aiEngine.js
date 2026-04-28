@@ -1,14 +1,14 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — AI EXECUTION ENGINE
-//  Dual‑Band Execution • Persona Routing • Organ Dispatch
+//  PULSE OS v11.3‑EVO — AI EXECUTION ENGINE
+//  Dual‑Band Execution • Persona Routing • Organ Dispatch • Packet‑Ready
 //  PURE EXECUTION. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
 export const ExecutionEngineMeta = Object.freeze({
   layer: "PulseAIExecutionKernel",
   role: "EXECUTION_ENGINE",
-  version: "11.1-EVO", // aligned with Router/Cortex/Safety/Experience
-  identity: "aiExecutionEngine-v11-EVO",
+  version: "11.3-EVO", // aligned with Router/Cortex/Safety/Experience
+  identity: "aiExecutionEngine-v11.3-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -20,12 +20,16 @@ export const ExecutionEngineMeta = Object.freeze({
     routingAware: true,
     symbolicAware: true,
     binaryAware: true,
+    packetAware: true,     // ⭐ NEW
+    windowAware: true,     // ⭐ NEW
+    evolutionAware: true,  // ⭐ NEW
     multiInstanceReady: true,
-    epoch: "11.1-EVO"
+    epoch: "11.3-EVO"
   }),
 
   contract: Object.freeze({
-    purpose: "Execute AI operations through persona routing, boundaries, and dual-band context.",
+    purpose:
+      "Execute AI operations through persona routing, boundaries, and dual-band context.",
     never: Object.freeze([
       "mutate context",
       "mutate organs",
@@ -41,7 +45,8 @@ export const ExecutionEngineMeta = Object.freeze({
       "enforce boundaries",
       "enforce permissions",
       "route execution through correct mode",
-      "return unified response packet"
+      "return unified response packet",
+      "emit deterministic execution packets" // ⭐ NEW
     ])
   })
 });
@@ -50,40 +55,72 @@ import { createAIContext } from "./aiContext.js";
 import { createBrainstem } from "./aiBrainstem.js";
 import { resolvePersonaV11 } from "./persona.js";
 import { routeAIRequest } from "./aiRouter-v11-Evo.js";
-import { canPerformDynamic } from "./boundaries.js"; // selectBoundaryMode no longer needed
+import { canPerformDynamic } from "./boundaries.js";
 
-// Organ modes
 import { runArchitectMode } from "./modes/architect.js";
 import { runObserverMode } from "./modes/observer.js";
 import { runTourGuideMode } from "./modes/tourguide.js";
 
+// ============================================================================
+//  PACKET EMITTER — deterministic, execution-scoped
+// ============================================================================
+function emitExecutionPacket(type, payload) {
+  return Object.freeze({
+    meta: ExecutionEngineMeta,
+    packetType: `execution-${type}`,
+    timestamp: Date.now(),
+    epoch: ExecutionEngineMeta.evo.epoch,
+    ...payload
+  });
+}
 
 // ============================================================================
-//  MAIN EXECUTION ENTRY — v11‑EVO
+//  PREWARM — optional, warms routing + persona + boundaries
+// ============================================================================
+export function prewarmExecutionEngine({ trace = false } = {}) {
+  try {
+    const sampleRequest = { domain: "system", action: "read" };
+    const packet = emitExecutionPacket("prewarm", {
+      message: "Execution engine prewarmed.",
+      sampleRequest
+    });
+    if (trace) console.log("[ExecutionEngine] prewarm", packet);
+    return packet;
+  } catch (err) {
+    return emitExecutionPacket("prewarm-error", {
+      error: String(err),
+      message: "Execution engine prewarm failed."
+    });
+  }
+}
+
+// ============================================================================
+//  MAIN EXECUTION ENTRY — v11.3‑EVO
 // ============================================================================
 export async function runAI(request = {}, operation, deps = {}, dualBand = null) {
   const { db, fsAPI, routeAPI, schemaAPI } = deps;
 
-  // --------------------------------------------------------------------------
-  // 1) Build Cognitive Frame (identity + request normalization)
-  // --------------------------------------------------------------------------
+  // 1) Build Cognitive Frame
   const context = createAIContext(request);
   context.logStep?.("AI context initialized.");
 
-  // --------------------------------------------------------------------------
-  // 2) Build Brainstem (organs + persona + boundaries + permissions)
-  // --------------------------------------------------------------------------
+  const startPacket = emitExecutionPacket("start", {
+    requestSummary: {
+      domain: request.domain || "system",
+      action: request.action || "read"
+    }
+  });
+
+  // 2) Build Brainstem
   const brainstem = createBrainstem(request, db, fsAPI, routeAPI, schemaAPI);
   Object.assign(context, brainstem.context);
   context.organs = brainstem.organs;
+  context.brainstemPacket = brainstem.packet;
 
-  // --------------------------------------------------------------------------
-  // 3) Dual‑Band Routing (persona + archetypes + binary vitals)
-  // --------------------------------------------------------------------------
+  // 3) Dual‑Band Routing
   const routing = routeAIRequest(request, dualBand);
   context.routing = routing;
 
-  // Derive binary vitals from routing dual‑band hints (single source of truth)
   const binaryVitals = {
     metabolic: {
       pressure: routing.dualBand?.binaryPressure ?? 0,
@@ -91,7 +128,6 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
     }
   };
 
-  // Persona resolution (dual‑band)
   const persona = resolvePersonaV11({
     personaId: routing.personaId,
     userId: context.userId,
@@ -103,13 +139,10 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
   context.persona = persona;
   context.personaId = persona.id;
 
-  // --------------------------------------------------------------------------
-  // 4) Boundary Mode (dual‑band)
-  // --------------------------------------------------------------------------
+  // 4) Boundary Mode + Permissions
   const boundaryMode = persona.boundaryMode;
   context.boundaryMode = boundaryMode;
 
-  // Permission check (dual‑band)
   const permCheck = canPerformDynamic(
     persona.id,
     request.domain || "system",
@@ -118,15 +151,27 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
     binaryVitals
   );
 
+  context.permissions = permCheck;
+
   if (!permCheck.allowed) {
     context.logStep?.("Permission denied by dual‑band boundaries.");
-    return buildAIResponse(null, context);
+    const packet = emitExecutionPacket("permission-denied", {
+      personaId: persona.id,
+      domain: request.domain || "system",
+      action: request.action || "read",
+      boundaryMode,
+      binaryVitals
+    });
+    return buildAIResponse(null, context, packet, startPacket);
   }
 
-  // --------------------------------------------------------------------------
   // 5) Persona Execution Pathway
-  // --------------------------------------------------------------------------
   let result = null;
+  let modePacket = emitExecutionPacket("mode-selected", {
+    personaId: persona.id,
+    boundaryMode,
+    binaryVitals
+  });
 
   try {
     context.logStep?.("Executing AI operation...");
@@ -135,15 +180,12 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
       case "architect":
         result = await runArchitectMode(request, context, operation);
         break;
-
       case "observer":
         result = await runObserverMode(request, context, operation);
         break;
-
       case "tourguide":
         result = await runTourGuideMode(request, context, operation);
         break;
-
       default:
         result = await operation(context);
         break;
@@ -151,22 +193,33 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
 
     context.logStep?.("AI operation completed successfully.");
 
+    const completePacket = emitExecutionPacket("complete", {
+      personaId: persona.id,
+      boundaryMode,
+      binaryVitals
+    });
+
+    return buildAIResponse(result, context, completePacket, startPacket, modePacket);
+
   } catch (err) {
     context.flagSlowdown?.("Operation threw an exception.");
     context.logStep?.(`Error: ${err.message}`);
-    result = null;
-  }
 
-  // --------------------------------------------------------------------------
-  // 6) Build Unified Response Packet (v11‑EVO)
-  // --------------------------------------------------------------------------
-  return buildAIResponse(result, context);
+    const errorPacket = emitExecutionPacket("error", {
+      personaId: persona.id,
+      boundaryMode,
+      binaryVitals,
+      error: String(err)
+    });
+
+    return buildAIResponse(null, context, errorPacket, startPacket, modePacket);
+  }
 }
 
 // ============================================================================
-//  RESPONSE BUILDER — v11‑EVO
+//  RESPONSE BUILDER — v11.3‑EVO
 // ============================================================================
-function buildAIResponse(result, context) {
+function buildAIResponse(result, context, packet, startPacket, modePacket) {
   return Object.freeze({
     result,
     context,
@@ -174,21 +227,25 @@ function buildAIResponse(result, context) {
     routing: context.routing,
     boundaryMode: context.boundaryMode,
     permissions: context.permissions,
-    organs: context.organs
+    organs: context.organs,
+    packets: {
+      start: startPacket || null,
+      mode: modePacket || null,
+      final: packet || null
+    }
   });
 }
 
 // ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ============================================================================
-
-// ESM named exports already above
 export default runAI;
 
 if (typeof module !== "undefined") {
   module.exports = {
     ExecutionEngineMeta,
     runAI,
-    default: runAI
+    default: runAI,
+    prewarmExecutionEngine
   };
 }

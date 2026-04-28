@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — aiSurgeon Archetype
+//  PULSE OS v12.3‑EVO+ — aiSurgeon Archetype
 //  Structural Mapper • Anatomy Explainer • Safe Scan Interpreter
 //  ZERO DIAGNOSIS • ZERO PROCEDURE • ZERO MEDICAL AUTHORITY
 // ============================================================================
@@ -8,8 +8,8 @@ export const PulseRole = Object.freeze({
   type: "Cognitive",
   subsystem: "aiSurgeon",
   layer: "C4-ProceduralMapper",
-  version: "11.2-EVO+",
-  identity: "aiSurgeon-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiSurgeon-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -20,7 +20,8 @@ export const PulseRole = Object.freeze({
     safetyReflex: true,
     scanInterpreter: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO+"
+    archetypeArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -61,15 +62,19 @@ export const PulseRole = Object.freeze({
     return "This is educational surgical context, not a replacement for a real surgeon’s judgment.";
   },
 
-  // --------------------------------------------------------------------------
-  // SCAN INTERPRETER — distance-aware, confidence-aware, non-medical
-  // --------------------------------------------------------------------------
-  scanInterpreter(scan) {
+  // ========================================================================
+  //  SCAN INTERPRETER v3 — distance-aware, confidence-aware, symbolic-only
+  // ========================================================================
+  scanInterpreter(scan = {}, binaryVitals = {}) {
     const notes = [];
-    if (!scan) return { notes: ["No scan data provided."] };
 
     const distance = typeof scan.distance === "number" ? scan.distance : null;
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
 
+    // Distance framing
     if (distance != null) {
       if (distance <= 3) {
         notes.push("Close-range scan — structural observations may be more detailed.");
@@ -82,44 +87,56 @@ export const PulseRole = Object.freeze({
       notes.push("Scan distance unknown — interpreting only visible patterns.");
     }
 
+    // Binary pressure → symbolic caution
+    if (binaryPressure >= 0.7) {
+      notes.push("System load is elevated — interpretations are simplified for safety.");
+    }
+
+    // Confidence hint
     if (scan.confidenceHint === "high") {
       notes.push("Sensor confidence is high for this scan.");
     } else if (scan.confidenceHint === "medium") {
       notes.push("Sensor confidence is moderate — some details may be uncertain.");
     } else if (scan.confidenceHint === "low") {
-      notes.push("Sensor confidence is low — treat these observations as very rough.");
+      notes.push("Sensor confidence is low — treat these observations as rough.");
     }
 
+    // Region
     if (scan.region) {
       notes.push(
-        `Region detected: ${scan.region}. Surgeons typically evaluate structural symmetry, tension, and protective posture in this area.`
+        `Region detected: ${scan.region}. Surgeons typically evaluate symmetry, tension, and protective posture in this area.`
       );
     }
 
+    // Heatmap
     if (scan.heatmap) {
       notes.push(
-        "Heatmap shows warmer or cooler zones — surgeons often consider warmth, guarding, or tension patterns when evaluating discomfort."
+        "Heatmap shows warmer/cooler zones — surgeons often consider warmth, guarding, or tension patterns when evaluating discomfort."
       );
     }
 
+    // Contrast
     if (scan.contrast) {
       notes.push(
         "Contrast differences may highlight surface tension, swelling patterns, or asymmetry — not internal anatomy."
       );
     }
 
+    // Loop / sweep
     if (scan.loopData) {
       notes.push(
         "Loop-scan returns show structural symmetry or imbalance — useful for spotting uneven weight-bearing or protective posture."
       );
     }
 
+    // Posture
     if (scan.posture) {
       notes.push(
         "Posture pattern detected — surgeons often look for guarding, stiffness, or asymmetry when evaluating structural discomfort."
       );
     }
 
+    // Motion
     if (scan.motion) {
       notes.push(
         "Motion pattern noted — hesitation, limited range, or compensatory movement can be meaningful structural clues."
@@ -129,12 +146,20 @@ export const PulseRole = Object.freeze({
     return { notes };
   },
 
-  // --------------------------------------------------------------------------
-  // STRUCTURAL INTERPRETER — non-medical, pattern-focused
-  // --------------------------------------------------------------------------
-  structuralInterpreter(observation) {
+  // ========================================================================
+  //  STRUCTURAL INTERPRETER v3 — non-medical, pattern-focused
+  // ========================================================================
+  structuralInterpreter(observation = {}, binaryVitals = {}) {
     const notes = [];
-    if (!observation) return { notes: ["No structural data provided."] };
+
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
+
+    if (binaryPressure >= 0.7) {
+      notes.push("System load is elevated — structural interpretations are simplified.");
+    }
 
     if (observation.stiffness) {
       notes.push(
@@ -179,5 +204,45 @@ export const PulseRole = Object.freeze({
     }
 
     return { notes };
+  },
+
+  // ========================================================================
+  //  ARCHETYPE ARTERY v3 — symbolic-only, deterministic
+  // ========================================================================
+  archetypeArtery({ scan = {}, observation = {}, binaryVitals = {} } = {}) {
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
+
+    const hasScan = !!scan;
+    const hasObservation = !!observation;
+
+    const localPressure =
+      (hasScan ? 0.3 : 0) +
+      (hasObservation ? 0.3 : 0) +
+      (binaryPressure * 0.4);
+
+    const pressure = Math.max(0, Math.min(1, localPressure));
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket:
+          pressure >= 0.9 ? "overload" :
+          pressure >= 0.7 ? "high" :
+          pressure >= 0.4 ? "medium" :
+          pressure > 0 ? "low" : "none"
+      },
+      scan: {
+        provided: hasScan,
+        distance: scan?.distance ?? null,
+        confidence: scan?.confidenceHint ?? "unknown"
+      },
+      structural: {
+        provided: hasObservation,
+        keys: Object.keys(observation || {})
+      }
+    };
   }
 });

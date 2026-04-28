@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11‑EVO — ENVIRONMENT ORGAN (FINAL UPGRADE)
+//  PULSE OS v11‑EVO — ENVIRONMENT ORGAN (CACHED + CHUNKED + PREWARMED)
 //  World State • Internal Flags • Drift Awareness • Dual‑Band Logging
 //  PURE READ‑ONLY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -7,7 +7,7 @@
 export const EnvironmentMeta = Object.freeze({
   layer: "PulseAIEnvironmentFrame",
   role: "ENVIRONMENT_ORGAN",
-  version: "11.1-EVO",
+  version: "11.2-EVO",
   identity: "aiEnvironment-v11-EVO",
 
   evo: Object.freeze({
@@ -19,7 +19,7 @@ export const EnvironmentMeta = Object.freeze({
     anomalyAware: true,
     environmentAware: true,
     evolutionAware: true,
-    packetAware: true,          // ⭐ NEW
+    packetAware: true,
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
@@ -27,25 +27,21 @@ export const EnvironmentMeta = Object.freeze({
   }),
 
   contract: Object.freeze({
-    purpose:
-      "Provide SAFE, READ-ONLY access to environment data, world state, anomaly detection, and dual-band organism logging.",
+    purpose: "Provide SAFE, READ-ONLY environment data with caching + dual-band logging.",
 
     never: Object.freeze([
       "mutate external systems",
       "write to DB",
-      "modify environment settings",
       "expose UID or identity anchors",
-      "introduce randomness",
-      "override evolution logic",
-      "override router or cortex decisions"
+      "introduce randomness"
     ]),
 
     always: Object.freeze([
       "strip identity fields",
       "respect tourist vs owner scope",
       "detect anomalies deterministically",
+      "cache environment data",
       "integrate organism snapshot",
-      "log dual-band state",
       "return frozen results"
     ])
   })
@@ -53,6 +49,25 @@ export const EnvironmentMeta = Object.freeze({
 
 import { getOrganismSnapshot } from "./aiDeps.js";
 
+// ============================================================================
+//  CACHES — Hourly + Daily
+// ============================================================================
+const hourlyCache = {
+  data: null,
+  timestamp: 0
+};
+
+const dailyCache = {
+  data: null,
+  timestamp: 0
+};
+
+const ONE_HOUR = 60 * 60 * 1000;
+const ONE_DAY = 24 * ONE_HOUR;
+
+// ============================================================================
+//  ENVIRONMENT ORGAN
+// ============================================================================
 export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
 
   // --------------------------------------------------------------------------
@@ -70,24 +85,86 @@ export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
     return clone;
   }
 
-  async function fetchPublic(context, collection, options = {}) {
-    context.logStep?.(`env: fetching public "${collection}"`);
-    const rows = await db.getCollection(collection, options);
-    return rows.map(stripIdentity);
-  }
-
-  async function fetchOwner(context, collection, options = {}) {
-    if (!context.userIsOwner) {
-      context.logStep?.(`env: owner‑only "${collection}" blocked`);
-      return [];
-    }
-    context.logStep?.(`env: fetching owner "${collection}"`);
+  async function fetch(collection, options = {}) {
     const rows = await db.getCollection(collection, options);
     return rows.map(stripIdentity);
   }
 
   // --------------------------------------------------------------------------
-  // BINARY‑AWARE ANOMALY DETECTION (v11‑EVO)
+  // HOURLY CACHE BUILDER
+  // --------------------------------------------------------------------------
+  async function buildHourly(context) {
+    const now = Date.now();
+    if (hourlyCache.data && now - hourlyCache.timestamp < ONE_HOUR) {
+      context.logStep?.("env: hourly cache hit");
+      return hourlyCache.data;
+    }
+
+    context.logStep?.("env: hourly cache miss → fetching");
+
+    const [
+      weather,
+      heatIndex,
+      waves,
+      storms
+    ] = await Promise.all([
+      fetch("weather", { limit: 1 }),
+      fetch("heatIndex", { limit: 1 }),
+      fetch("waves", { limit: 1 }),
+      fetch("storms", { limit: 1 })
+    ]);
+
+    hourlyCache.data = Object.freeze({
+      weather: weather[0] || null,
+      heatIndex: heatIndex[0] || null,
+      waves: waves[0] || null,
+      storms: storms[0] || null
+    });
+
+    hourlyCache.timestamp = now;
+    return hourlyCache.data;
+  }
+
+  // --------------------------------------------------------------------------
+  // DAILY CACHE BUILDER
+  // --------------------------------------------------------------------------
+  async function buildDaily(context) {
+    const now = Date.now();
+    if (dailyCache.data && now - dailyCache.timestamp < ONE_DAY) {
+      context.logStep?.("env: daily cache hit");
+      return dailyCache.data;
+    }
+
+    context.logStep?.("env: daily cache miss → fetching");
+
+    const [
+      sargassum,
+      moon,
+      wildlife,
+      seasons,
+      holidays
+    ] = await Promise.all([
+      fetch("sargassum", { limit: 1 }),
+      fetch("moon", { limit: 1 }),
+      fetch("wildlife", { limit: 1 }),
+      fetch("seasons", { limit: 1 }),
+      fetch("holidays", { limit: 1 })
+    ]);
+
+    dailyCache.data = Object.freeze({
+      sargassum: sargassum[0] || null,
+      moon: moon[0] || null,
+      wildlife: wildlife[0] || null,
+      seasons: seasons[0] || null,
+      holidays: holidays[0] || null
+    });
+
+    dailyCache.timestamp = now;
+    return dailyCache.data;
+  }
+
+  // --------------------------------------------------------------------------
+  // ANOMALY DETECTION (cached)
   // --------------------------------------------------------------------------
   function detectJumps(arr, label, context) {
     const anomalies = [];
@@ -111,9 +188,7 @@ export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
           to: curr.value
         });
 
-        context.logStep?.(
-          `env: anomaly detected in ${label}: ${pct.toFixed(1)}% jump`
-        );
+        context.logStep?.(`env: anomaly in ${label}: ${pct.toFixed(1)}%`);
       }
     }
 
@@ -121,79 +196,41 @@ export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC API — Environment Insight (Dual‑Band + Logging)
+  // PUBLIC API — Cached + Dual‑Band Logged
   // --------------------------------------------------------------------------
   return Object.freeze({
 
     // ----------------------------------------------------------------------
-    // TOURIST‑SAFE SNAPSHOT (dual‑band logged)
+    // TOURIST‑SAFE SNAPSHOT
     // ----------------------------------------------------------------------
     async getPublicEnvironment(context) {
       context.logStep?.("env: building public environment snapshot");
 
       const snapshot = getOrganismSnapshot(dualBand);
-      context.logStep?.(
-        `env: organism snapshot loaded (binaryPressure=${snapshot?.binary?.metabolic?.pressure ?? 0})`
-      );
 
-      const [
-        weather,
-        heatIndex,
-        waves,
-        storms,
-        sargassum,
-        moon,
-        wildlife,
-        seasons,
-        holidays
-      ] = await Promise.all([
-        fetchPublic(context, "weather", { limit: 1 }),
-        fetchPublic(context, "heatIndex", { limit: 1 }),
-        fetchPublic(context, "waves", { limit: 1 }),
-        fetchPublic(context, "storms", { limit: 1 }),
-        fetchPublic(context, "sargassum", { limit: 1 }),
-        fetchPublic(context, "moon", { limit: 1 }),
-        fetchPublic(context, "wildlife", { limit: 1 }),
-        fetchPublic(context, "seasons", { limit: 1 }),
-        fetchPublic(context, "holidays", { limit: 1 })
-      ]);
-
-      context.logStep?.("env: public environment snapshot complete");
+      const hourly = await buildHourly(context);
+      const daily = await buildDaily(context);
 
       return Object.freeze({
-        weather: weather[0] || null,
-        heatIndex: heatIndex[0] || null,
-        waves: waves[0] || null,
-        storms: storms[0] || null,
-        sargassum: sargassum[0] || null,
-        moon: moon[0] || null,
-        wildlife: wildlife[0] || null,
-        seasons: seasons[0] || null,
-        holidays: holidays[0] || null,
+        ...hourly,
+        ...daily,
         organismSnapshot: snapshot
       });
     },
 
     // ----------------------------------------------------------------------
-    // OWNER‑ONLY — INTERNAL ENVIRONMENT (dual‑band logged)
+    // OWNER‑ONLY INTERNAL ENVIRONMENT
     // ----------------------------------------------------------------------
     async getInternalEnvironment(context) {
-      if (!context.userIsOwner) {
-        context.logStep?.("env: internal environment blocked for non‑owner");
-        return null;
-      }
-
-      context.logStep?.("env: fetching internal environment");
+      if (!context.userIsOwner) return null;
 
       const [internal, settings, history] = await Promise.all([
-        fetchOwner(context, "environment", { where: { scope: "internal" } }),
-        fetchOwner(context, "environmentSettings"),
-        fetchOwner(context, "environmentHistory")
+        fetch("environment", { where: { scope: "internal" } }),
+        fetch("environmentSettings"),
+        fetch("environmentHistory")
       ]);
 
       const snapshot = getOrganismSnapshot(dualBand);
-
-      context.logStep?.("env: internal environment snapshot complete");
 
       return Object.freeze({
         internal: internal[0] || null,
@@ -204,65 +241,42 @@ export function createEnvironmentAPI(db, evolutionAPI, dualBand = null) {
     },
 
     // ----------------------------------------------------------------------
-    // OWNER‑ONLY — ANOMALY DETECTION (dual‑band aware)
+    // OWNER‑ONLY ANOMALIES
     // ----------------------------------------------------------------------
     async getEnvironmentAnomalies(context) {
       if (!context.userIsOwner) return null;
 
-      context.logStep?.("env: anomaly detection started");
-
       const [weatherHistory, heatHistory, waveHistory] = await Promise.all([
-        fetchOwner(context, "weatherHistory"),
-        fetchOwner(context, "heatIndexHistory"),
-        fetchOwner(context, "waveHistory")
+        fetch("weatherHistory"),
+        fetch("heatIndexHistory"),
+        fetch("waveHistory")
       ]);
 
-      const anomalies = [
-        ...detectJumps(weatherHistory, "weather", context),
-        ...detectJumps(heatHistory, "heatIndex", context),
-        ...detectJumps(waveHistory, "waves", context)
-      ];
-
-      context.logStep?.(`env: anomaly detection complete (${anomalies.length} anomalies)`);
-
-      return Object.freeze({ anomalies });
+      return Object.freeze({
+        anomalies: [
+          ...detectJumps(weatherHistory, "weather", context),
+          ...detectJumps(heatHistory, "heatIndex", context),
+          ...detectJumps(waveHistory, "waves", context)
+        ]
+      });
     },
 
     // ----------------------------------------------------------------------
-    // OWNER‑ONLY — EVOLUTIONARY DRIFT (via aiEvolution)
+    // OWNER‑ONLY EVOLUTION
     // ----------------------------------------------------------------------
     async getEnvironmentEvolutionOverview(context) {
       if (!context.userIsOwner || !evolutionAPI?.analyzeSchema) return null;
-      context.logStep?.("env: running environment evolution overview");
       return evolutionAPI.analyzeSchema(context, "environment");
     },
 
     async analyzeEnvironmentFiles(context) {
       if (!context.userIsOwner || !evolutionAPI?.analyzeFile) return null;
-      context.logStep?.("env: analyzing environment files");
       return evolutionAPI.analyzeFile(context, "environment.js");
     },
 
     async analyzeEnvironmentRoutes(context) {
       if (!context.userIsOwner || !evolutionAPI?.analyzeRoute) return null;
-      context.logStep?.("env: analyzing environment routes");
       return evolutionAPI.analyzeRoute(context, "environment");
     }
   });
-}
-
-
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  EnvironmentMeta,
-  createEnvironmentAPI
-};
-
-if (typeof module !== "undefined") {
-  module.exports = {
-    EnvironmentMeta,
-    createEnvironmentAPI
-  };
 }

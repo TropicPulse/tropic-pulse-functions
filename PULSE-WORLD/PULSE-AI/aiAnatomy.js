@@ -1,33 +1,14 @@
-/**
- * aiAnatomy.js — Pulse OS v11.2‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Anatomy Map** of the organism.
- *
- *   It defines:
- *     - organ topology
- *     - structural connections
- *     - directional flows
- *     - organ adjacency
- *     - organism blueprint
- *     - structural artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • circulatory diagram
- *     • wiring map
- *     • structural skeleton
- *     • connectivity truth source
- */
-
-// ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO
-// ---------------------------------------------------------
+// ============================================================================
+//  PULSE OS v12.3‑EVO+ — ANATOMY ORGAN
+//  Structural Map • Connectivity Skeleton • Organism Blueprint
+//  PURE STRUCTURE. ZERO ROUTING. ZERO COMPUTE.
+// ============================================================================
 
 export const AnatomyMeta = Object.freeze({
   layer: "Anatomy",
   role: "STRUCTURAL_MAP",
-  version: "11.2-EVO",
-  identity: "aiAnatomy-v11.2-EVO",
+  version: "12.3-EVO+",
+  identity: "aiAnatomy-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -37,8 +18,9 @@ export const AnatomyMeta = Object.freeze({
     memoryAware: true,
     coreMemoryAware: true,   // works with PulseCoreMemory-backed organs
     binaryEncoding: true,    // emits binary packets, not binary-first compute
+    anatomyArteryAware: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -64,10 +46,44 @@ export const AnatomyMeta = Object.freeze({
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
-// ---------------------------------------------------------
+// ============================================================================
+// HELPERS — PRESSURE + BUCKETS
+// ============================================================================
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
 
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0)   return "low";
+  return "none";
+}
+
+function bucketLevel(v) {
+  if (v >= 0.9) return "elite";
+  if (v >= 0.75) return "high";
+  if (v >= 0.5) return "medium";
+  if (v >= 0.25) return "low";
+  return "critical";
+}
+
+function bucketCost(v) {
+  if (v >= 0.8) return "heavy";
+  if (v >= 0.5) return "moderate";
+  if (v >= 0.2) return "light";
+  if (v > 0)    return "negligible";
+  return "none";
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v12.3‑EVO+
+// ============================================================================
 export class AIAnatomy {
   constructor(config = {}) {
     this.id = config.id || AnatomyMeta.identity;
@@ -87,6 +103,10 @@ export class AIAnatomy {
     }
 
     this.topology = new Map();
+  }
+
+  prewarm() {
+    return true;
   }
 
   // ---------------------------------------------------------
@@ -116,34 +136,6 @@ export class AIAnatomy {
     return Math.max(0, Math.min(1, raw));
   }
 
-  _bucketLevel(v) {
-    if (v >= 0.9) return "elite";
-    if (v >= 0.75) return "high";
-    if (v >= 0.5) return "medium";
-    if (v >= 0.25) return "low";
-    return "critical";
-  }
-
-  _bucketPressure(v) {
-    if (v >= 0.9) return "overload";
-    if (v >= 0.7) return "high";
-    if (v >= 0.4) return "medium";
-    if (v > 0)   return "low";
-    return "none";
-  }
-
-  _bucketCost(v) {
-    if (v >= 0.8) return "heavy";
-    if (v >= 0.5) return "moderate";
-    if (v >= 0.2) return "light";
-    if (v > 0)    return "negligible";
-    return "none";
-  }
-
-  // ---------------------------------------------------------
-  //  STRUCTURAL ARTERY SNAPSHOT
-  // ---------------------------------------------------------
-
   _computeStructuralArtery() {
     const organIds = Array.from(this.topology.keys());
     const organCount = organIds.length;
@@ -163,16 +155,16 @@ export class AIAnatomy {
 
     return Object.freeze({
       throughput,
-      throughputBucket: this._bucketLevel(throughput),
+      throughputBucket: bucketLevel(throughput),
 
       pressure,
-      pressureBucket: this._bucketPressure(pressure),
+      pressureBucket: bucketPressure(pressure),
 
       cost,
-      costBucket: this._bucketCost(cost),
+      costBucket: bucketCost(cost),
 
       budget,
-      budgetBucket: this._bucketLevel(budget),
+      budgetBucket: bucketLevel(budget),
 
       organCount,
       connectionCount
@@ -225,10 +217,10 @@ export class AIAnatomy {
   }
 
   // ---------------------------------------------------------
-  //  ANATOMY SNAPSHOT
-  // ---------------------------------------------------------
-
-  snapshot() {
+  //  ANATOMY SNAPSHOT (binary‑encoded)
+//  - optionally binary‑pressure‑aware (for logging only)
+// ---------------------------------------------------------
+  snapshot(binaryVitals = {}) {
     const obj = {};
 
     for (const [organId, data] of this.topology.entries()) {
@@ -240,12 +232,14 @@ export class AIAnatomy {
     }
 
     const artery = this._computeStructuralArtery();
+    const binaryPressure = extractBinaryPressure(binaryVitals);
 
     const payload = {
       type: "anatomy-snapshot",
       timestamp: Date.now(),
       topology: obj,
-      artery
+      artery,
+      pressure: binaryPressure
     };
 
     const json = JSON.stringify(payload);
@@ -254,12 +248,14 @@ export class AIAnatomy {
     const packet = Object.freeze({
       ...payload,
       bits: binary,
-      bitLength: binary.length
+      bitLength: binary.length,
+      pressureBucket: bucketPressure(binaryPressure)
     });
 
     this._trace("snapshot", {
       organs: Object.keys(obj).length,
-      artery
+      artery,
+      pressure: binaryPressure
     });
 
     return packet;
@@ -269,8 +265,8 @@ export class AIAnatomy {
   //  ANATOMY STORAGE
   // ---------------------------------------------------------
 
-  store() {
-    const snap = this.snapshot();
+  store(binaryVitals = {}) {
+    const snap = this.snapshot(binaryVitals);
 
     const key = this.encoder.encode("anatomy:current");
     const value = snap.bits;
@@ -300,6 +296,38 @@ export class AIAnatomy {
     });
 
     return Object.freeze(topology);
+  }
+
+  // ---------------------------------------------------------
+  //  ANATOMY ARTERY v3 — symbolic-only, deterministic
+  // ---------------------------------------------------------
+  anatomyArtery({ binaryVitals = {} } = {}) {
+    const artery = this._computeStructuralArtery();
+    const binaryPressure = extractBinaryPressure(binaryVitals);
+
+    const localPressure =
+      (artery.pressure || 0) * 0.6 +
+      (artery.cost || 0) * 0.4;
+
+    const pressure = Math.max(
+      0,
+      Math.min(1, 0.6 * localPressure + 0.4 * binaryPressure)
+    );
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket: bucketPressure(pressure)
+      },
+      anatomy: {
+        throughput: artery.throughput,
+        pressure: artery.pressure,
+        cost: artery.cost,
+        budget: artery.budget,
+        organCount: artery.organCount,
+        connectionCount: artery.connectionCount
+      }
+    };
   }
 
   // ---------------------------------------------------------

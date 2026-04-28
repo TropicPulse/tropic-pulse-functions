@@ -46,6 +46,91 @@ export const ContextEngineMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  CONTEXT ENGINE PREWARM — v11.1‑EVO
+// ---------------------------------------------------------
+export function prewarmContextEngine(config = {}) {
+  try {
+    const { safetyFrame, experienceFrame } = config;
+
+    // Create a warm instance
+    const warm = new AiContextEngine({ safetyFrame, experienceFrame });
+
+    // Warm brainstem snapshot
+    const warmBrainstem = {
+      context: { userId: "prewarm", userIsOwner: false },
+      organs: { encoder: {}, memory: {} }
+    };
+
+    // Warm request
+    const warmRequest = {
+      intent: "prewarm",
+      safetyMode: "standard"
+    };
+
+    // Warm router packet
+    const warmRouter = {
+      personaId: "ARCHITECT",
+      personaSafety: { safetyMode: "standard" },
+      flags: { stable: true },
+      reasoning: ["prewarm"],
+      dualBand: {
+        primary: "binary",
+        secondary: "symbolic",
+        binaryPressure: 0,
+        binaryLoad: 0,
+        symbolicLoadAllowed: 0.3
+      },
+      overmind: {
+        intent: "prewarm",
+        personaId: "ARCHITECT",
+        safetyMode: "standard",
+        flags: { stable: true }
+      }
+    };
+
+    // Warm persona
+    const warmPersona = {
+      id: "ARCHITECT",
+      label: "Architect",
+      scope: "system",
+      permissions: { allow: true },
+      boundaries: { mode: "safe" },
+      boundaryMode: "safe",
+      bandBias: "balanced"
+    };
+
+    // Warm binaryVitals
+    const warmBinaryVitals = {
+      throughput: 1,
+      pressure: 0,
+      cost: 0,
+      budget: 1
+    };
+
+    // Warm dualBand hints
+    const warmDualBand = {
+      organism: {
+        organismSnapshot: () => ({ snapshot: "prewarm" })
+      }
+    };
+
+    // Build warm context frame
+    warm.buildContextFrame({
+      brainstem: warmBrainstem,
+      request: warmRequest,
+      routerPacket: warmRouter,
+      persona: warmPersona,
+      binaryVitals: warmBinaryVitals,
+      dualBand: warmDualBand
+    });
+
+    return true;
+  } catch (err) {
+    console.error("[ContextEngine Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ============================================================================
 //  CORE IMPLEMENTATION
@@ -140,6 +225,8 @@ export class AiContextEngine {
 // ============================================================================
 
 export function createContextEngine(config = {}) {
+  prewarmContextEngine(config);   // ← PREWARM HERE
+
   const core = new AiContextEngine({
     safetyFrame: config.safetyFrame || null,
     experienceFrame: config.experienceFrame || null
@@ -152,6 +239,7 @@ export function createContextEngine(config = {}) {
     }
   });
 }
+
 
 // ============================================================================
 //  ESM EXPORTS

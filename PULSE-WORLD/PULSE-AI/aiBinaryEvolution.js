@@ -62,6 +62,37 @@ export const EvolutionMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  BINARY EVOLUTION PREWARM ENGINE — v11-EVO
+//  - Warms encoder + memory + signature paths.
+//  - No cognition, no routing, no mutation of organs.
+// ---------------------------------------------------------
+export function prewarmAIBinaryEvolution(config = {}) {
+  try {
+    const { encoder, memory } = config;
+
+    if (!encoder || typeof encoder.encode !== "function") {
+      return false;
+    }
+    if (!memory || typeof memory.write !== "function" || typeof memory.read !== "function") {
+      return false;
+    }
+
+    // Warm encoder with small deterministic payloads
+    const warmJson = JSON.stringify({ id: "prewarm", keys: ["id", "keys", "type"] });
+    const warmBits = encoder.encode(warmJson);
+    const warmKey = encoder.encode("signature:prewarm-organ");
+
+    // Warm memory write/read path
+    memory.write(warmKey, warmBits);
+    const _stored = memory.read(warmKey);
+
+    return true;
+  } catch (err) {
+    console.error("[AIBinaryEvolution Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ---------------------------------------------------------
 //  ORGAN IMPLEMENTATION
@@ -198,8 +229,11 @@ class AIBinaryEvolution {
 // ---------------------------------------------------------
 
 export function createAIBinaryEvolution(config) {
+  // One-time binary evolution prewarm for this encoder/memory pair
+  prewarmAIBinaryEvolution(config);
   return new AIBinaryEvolution(config);
 }
+
 
 // ⭐ Add missing ESM export:
 export { AIBinaryEvolution };

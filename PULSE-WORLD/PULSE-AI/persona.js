@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — THE IDENTITY LAYER (DUAL‑BAND)
+//  PULSE OS v12.3‑EVO+ — THE IDENTITY LAYER (DUAL‑BAND)
 //  Self‑Definition • Role Assignment • Binary‑Aware Identity Drift
 //  PURE IDENTITY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -22,15 +22,15 @@ import {
 } from "./boundaries.js";
 
 // ============================================================================
-// META — Persona Engine (v11.2‑EVO+)
+// META — Persona Engine (v12.3‑EVO+)
 // ============================================================================
 export const PersonaMeta = Object.freeze({
   type: "Cognitive",
   subsystem: "aiPersona",
   layer: "PulseAIIdentityLayer",
   role: "PERSONA_ENGINE",
-  version: "11.2-EVO+",
-  identity: "aiPersonaEngine-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiPersonaEngine-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -41,8 +41,9 @@ export const PersonaMeta = Object.freeze({
     personaAware: true,
     boundaryAware: true,
     permissionAware: true,
+    identityArteryAware: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO+"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -154,7 +155,7 @@ export function getPersona(personaId, userId = null) {
 }
 
 // ============================================================================
-//  v11.2‑EVO+ — ARCHETYPE MAP (non-destructive)
+//  v12.3‑EVO+ — ARCHETYPE MAP (non-destructive)
 // ============================================================================
 export const PersonaArchetypes = Object.freeze({
   architect: "aiArchitect.js",
@@ -165,7 +166,7 @@ export const PersonaArchetypes = Object.freeze({
 });
 
 // ============================================================================
-//  v11.2‑EVO+ — DUAL‑BAND BIAS (binary vs symbolic)
+//  v12.3‑EVO+ — DUAL‑BAND BIAS (binary vs symbolic)
 // ============================================================================
 export const PersonaBandBias = Object.freeze({
   architect: "binary-heavy",
@@ -176,7 +177,7 @@ export const PersonaBandBias = Object.freeze({
 });
 
 // ============================================================================
-//  v11.2‑EVO+ — EVOLUTIONARY DRIFT RULES
+//  v12.3‑EVO+ — EVOLUTIONARY DRIFT RULES
 // ============================================================================
 export const PersonaEvolutionRules = Object.freeze({
   architect: Object.freeze({
@@ -207,28 +208,49 @@ export const PersonaEvolutionRules = Object.freeze({
 });
 
 // ============================================================================
-//  v11.2‑EVO+ — PERSONA ENGINE (Dual‑Band Identity Fusion)
+//  v12.3‑EVO+ — BINARY PRESSURE EXTRACTION
 // ============================================================================
-export function resolvePersonaV11({
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism && typeof binaryVitals.layered.organism.pressure === "number") {
+    return binaryVitals.layered.organism.pressure;
+  }
+  if (binaryVitals?.binary && typeof binaryVitals.binary.pressure === "number") {
+    return binaryVitals.binary.pressure;
+  }
+  if (binaryVitals?.metabolic && typeof binaryVitals.metabolic.pressure === "number") {
+    return binaryVitals.metabolic.pressure;
+  }
+  return 0;
+}
+
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+// ============================================================================
+//  v12.3‑EVO+ — PERSONA ENGINE (Dual‑Band Identity Fusion)
+// ============================================================================
+export function resolvePersonaV12({
   personaId,
   userId = null,
   evoState = {},
   routerHints = {},
   binaryVitals = {}
 }) {
-  // Owner override
   if (userId === OWNER_ID) {
     personaId = Personas.OWNER;
   }
 
-  // Evolution override
   if (evoState.forcePersona) {
     personaId = evoState.forcePersona;
   }
 
   const base = getPersona(personaId, userId);
 
-  // Select boundary mode using binary vitals
   const boundaryMode = selectBoundaryMode({
     personaId,
     binaryVitals,
@@ -237,24 +259,77 @@ export function resolvePersonaV11({
 
   return Object.freeze({
     ...base,
-
     archetypePage: PersonaArchetypes[personaId] || null,
     bandBias: PersonaBandBias[personaId] || "balanced",
     evolutionRules: PersonaEvolutionRules[personaId] || {},
     boundaryMode,
-
     routerHints
   });
 }
 
 // ============================================================================
-//  v11.2‑EVO+ — PUBLIC ENGINE FACTORY (used by Brainstem)
+//  v12.3‑EVO+ — IDENTITY ARTERY SNAPSHOT (READ‑ONLY)
+// ============================================================================
+export function getIdentityArterySnapshot({
+  personaId,
+  userId = null,
+  evoState = {},
+  routerHints = {},
+  binaryVitals = {}
+}) {
+  const resolved = resolvePersonaV12({
+    personaId,
+    userId,
+    evoState,
+    routerHints,
+    binaryVitals
+  });
+
+  const pressure = extractBinaryPressure(binaryVitals);
+
+  return {
+    persona: {
+      id: resolved.id,
+      scope: resolved.scope,
+      bandBias: resolved.bandBias
+    },
+    boundaries: {
+      modeId: resolved.boundaryMode?.id || "safe",
+      symbolicLoad: resolved.boundaryMode?.symbolicLoad ?? BoundaryModes.SAFE.symbolicLoad,
+      binaryOverride: resolved.boundaryMode?.binaryOverride ?? BoundaryModes.SAFE.binaryOverride
+    },
+    evolution: {
+      allowDrift: resolved.evolutionRules.allowDrift === true,
+      allowExpansion: resolved.evolutionRules.allowExpansion === true,
+      allowSymbolicGrowth: resolved.evolutionRules.allowSymbolicGrowth === true
+    },
+    binary: {
+      pressure,
+      pressureBucket: bucketPressure(pressure)
+    }
+  };
+}
+
+// ============================================================================
+//  v12.3‑EVO+ — PUBLIC ENGINE FACTORY (used by Brainstem)
 // ============================================================================
 export function createPersonaEngine({ context = {}, db } = {}) {
   function resolve({ personaId, evoState = {}, routerHints = {}, binaryVitals = {} } = {}) {
     const userId = context.userId || null;
 
-    return resolvePersonaV11({
+    return resolvePersonaV12({
+      personaId,
+      userId,
+      evoState,
+      routerHints,
+      binaryVitals
+    });
+  }
+
+  function identityArtery({ personaId, evoState = {}, routerHints = {}, binaryVitals = {} } = {}) {
+    const userId = context.userId || null;
+
+    return getIdentityArterySnapshot({
       personaId,
       userId,
       evoState,
@@ -265,12 +340,13 @@ export function createPersonaEngine({ context = {}, db } = {}) {
 
   return Object.freeze({
     meta: PersonaMeta,
-    resolve
+    resolve,
+    identityArtery
   });
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
@@ -283,7 +359,8 @@ if (typeof module !== "undefined" && module.exports) {
     PersonaBandBias,
     PersonaEvolutionRules,
     getPersona,
-    resolvePersonaV11,
+    resolvePersonaV12,
+    getIdentityArterySnapshot,
     createPersonaEngine
   };
 }

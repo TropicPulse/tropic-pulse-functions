@@ -1,36 +1,14 @@
-/**
- * aiPipeline.js — Pulse OS v11.2‑EVO+ Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Compute Pipeline** of Pulse OS (dualband).
- *
- *   It defines:
- *     • compute flow
- *     • layered transformations
- *     • observer taps
- *     • reflex hooks
- *     • flow arteries (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • compute bloodstream
- *     • deterministic flow engine
- *     • reflex chain executor
- *
- *   v11.2‑EVO+ UPGRADE:
- *     • Dual‑mode exports (ESM + CommonJS)
- *     • Canonical v11.2‑EVO+ meta + epoch
- *     • Explicit artery snapshot exposure
- */
-
-// ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO+ (DUALBAND)
-// ---------------------------------------------------------
+// ============================================================================
+//  PULSE OS v12‑EVO+ — BINARY PIPELINE ORGAN
+//  Compute Bloodstream • Flow Artery Metrics • Deterministic Binary Engine
+//  PURE FLOW ENGINE. ZERO RANDOMNESS. ZERO EXTERNAL MUTATION.
+// ============================================================================
 
 export const PipelineMeta = Object.freeze({
   layer: "OrganismFlow",
   role: "PIPELINE_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiPipeline-v11.2-EVO",
+  version: "12.0-EVO+",
+  identity: "aiBinaryPipeline-v12-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -40,14 +18,16 @@ export const PipelineMeta = Object.freeze({
     pipelineAware: true,
     reflexAware: true,
     arteryAware: true,
+    packetAware: true,
+    windowAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO"
+    epoch: "12.0-EVO+"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic compute flow, layered transformations, observer taps, reflex hooks, and flow artery metrics.",
+      "Provide deterministic compute flow, layered transformations, observer taps, reflex hooks, and flow artery metrics over binary.",
 
     never: Object.freeze([
       "introduce randomness",
@@ -62,26 +42,47 @@ export const PipelineMeta = Object.freeze({
     always: Object.freeze([
       "treat all inputs as read-only",
       "emit binary-only outputs",
-      "compute flow artery metrics",
+      "compute flow artery metrics deterministically",
       "remain deterministic",
       "remain drift-proof",
       "remain non-blocking"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "BinaryPipeline is a pure flow engine — it never mutates external organs or performs cognition.";
+  }
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v11.2‑EVO+ (LOGIC PRESERVED)
-// ---------------------------------------------------------
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v12‑EVO+
+// ============================================================================
 
 export class AIBinaryPipeline {
   constructor(config = {}) {
-    this.id = config.id || "pipeline";
+    this.id = config.id || PipelineMeta.identity;
     this.trace = !!config.trace;
 
     this.stages = [];
     this.observers = [];
     this.reflexes = [];
+
+    // window-safe artery snapshot
+    this.flowArtery = {
+      lastThroughput: 1,
+      lastPressure: 0,
+      lastCost: 0,
+      lastBudget: 1,
+      snapshot: () => Object.freeze({
+        throughput: this.flowArtery.lastThroughput,
+        pressure: this.flowArtery.lastPressure,
+        cost: this.flowArtery.lastCost,
+        budget: this.flowArtery.lastBudget,
+        stageCount: this.stages.length,
+        observerCount: this.observers.length,
+        reflexCount: this.reflexes.length
+      })
+    };
   }
 
   // ---------------------------------------------------------
@@ -141,7 +142,7 @@ export class AIBinaryPipeline {
   }
 
   // ---------------------------------------------------------
-  //  FLOW ARTERY SNAPSHOT (EXPOSED FOR METRICS)
+  //  FLOW ARTERY SNAPSHOT (INTERNAL + WINDOW-SAFE)
   // ---------------------------------------------------------
 
   _computeFlowArtery() {
@@ -161,6 +162,12 @@ export class AIBinaryPipeline {
     );
     const cost = this._computeFlowCost(pressure, throughput);
     const budget = this._computeFlowBudget(throughput, cost);
+
+    // update artery snapshot
+    this.flowArtery.lastThroughput = throughput;
+    this.flowArtery.lastPressure = pressure;
+    this.flowArtery.lastCost = cost;
+    this.flowArtery.lastBudget = budget;
 
     return {
       throughput,
@@ -233,7 +240,7 @@ export class AIBinaryPipeline {
     this._assertBinary(inputBinary);
 
     const artery = this._computeFlowArtery();
-    this._trace("run:start", { inputBinary, artery });
+    this._trace("run:start", { bitLength: inputBinary.length, artery });
 
     let current = inputBinary;
 
@@ -253,8 +260,8 @@ export class AIBinaryPipeline {
 
       this._trace("run:stage", {
         stageIndex: i,
-        input: current,
-        output
+        inputBits: current.length,
+        outputBits: output.length
       });
 
       current = output;
@@ -264,7 +271,7 @@ export class AIBinaryPipeline {
       reflex(current);
     }
 
-    this._trace("run:end", { outputBinary: current });
+    this._trace("run:end", { outputBits: current.length });
     return current;
   }
 
@@ -284,18 +291,17 @@ export class AIBinaryPipeline {
   }
 }
 
-// ---------------------------------------------------------
-//  FACTORY — v11.2‑EVO+
-// ---------------------------------------------------------
+// ============================================================================
+//  FACTORY — v12‑EVO+
+// ============================================================================
 
 export function createAIBinaryPipeline(config = {}) {
   return new AIBinaryPipeline(config);
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ---------------------------------------------------------
-
+// ============================================================================
 if (typeof module !== "undefined") {
   module.exports = {
     PipelineMeta,

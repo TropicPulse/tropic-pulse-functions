@@ -1,87 +1,33 @@
 // ============================================================================
-//  aiNervousSystem.js — Pulse OS v11.2‑EVO Organ
-//  Binary Nervous System • Routing Brainstem • Deterministic • Routing Artery Metrics
-// ----------------------------------------------------------------------------
-//  CANONICAL ROLE:
-//    This organ is the **Binary Nervous System** of the organism.
-//
-//    It provides:
-//      • high-level routing of binary signals
-//      • organ-to-organ communication
-//      • signal propagation rules
-//      • priority-based routing
-//      • reflex vs cortex arbitration
-//      • binary routing artery metrics (throughput, pressure, cost, budget)
-//
-//    It is the organism’s:
-//      • spinal cord
-//      • routing matrix
-//      • signal highway
-//      • internal communication fabric
-//      • binary reflex router
-//
-//  WHY THIS ORGAN EXISTS:
-//    Without a nervous system:
-//      • signals wander aimlessly
-//      • organs receive irrelevant packets
-//      • reflexes fire incorrectly
-//      • cortex receives noise
-//      • immunity cannot coordinate
-//
-//    Pulse OS v11.2‑EVO breaks this pattern.
-//
-//    This organ enforces:
-//      “THE ORGANISM MUST ROUTE SIGNALS INTELLIGENTLY.”
-//
-//  ARCHITECTURAL INTENT:
-//    This organ is NOT:
-//      • a pipeline
-//      • a reflex engine
-//      • a governor
-//      • a scheduler
-//
-//    This organ IS:
-//      • a routing brainstem
-//      • a signal dispatcher
-//      • a propagation engine
-//      • a binary communication layer
-//      • a routing artery pressure regulator
-//
-//  ROUTING MODEL:
-//    A routing decision is:
-//
-//      {
-//        type: "binary-routing",
-//        timestamp: <ms>,
-//        source: <organId>,
-//        targets: [ organIds ],
-//        binary: { throughput, pressure, cost, budget, buckets },
-//        bits: <binary>,
-//        bitLength: <number>
-//      }
-//
-//    Entire routing packet is encoded into binary.
+//  aiNervousSystem.js — Pulse OS v11.3‑EVO Organ
+//  Binary Nervous System • Routing Brainstem • Deterministic • Routing Artery
 // ============================================================================
 
-// ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO
-// ---------------------------------------------------------
 export const NervousSystemMeta = Object.freeze({
   layer: "BinaryNervousSystem",
   role: "BINARY_NERVOUS_SYSTEM",
-  version: "11.2-EVO",
-  identity: "aiBinaryNervousSystem-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiBinaryNervousSystem-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
+
     routingAware: true,
     immunityAware: true,
     anatomyAware: true,
     registryAware: true,
+
+    dualband: true,        // ⭐ NEW
+    packetAware: true,     // ⭐ NEW
+    windowAware: true,     // ⭐ NEW (safe routing snapshots)
+    bluetoothReady: true,  // ⭐ placeholder
+    arteryAware: true,     // ⭐ NEW
+    prewarmAware: true,    // ⭐ NEW
+
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -107,7 +53,22 @@ export const NervousSystemMeta = Object.freeze({
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO
+//  PREWARM — v11.3‑EVO
+// ============================================================================
+export function prewarmAIBinaryNervousSystem({ trace = false } = {}) {
+  const packet = Object.freeze({
+    type: "binary-routing-prewarm",
+    meta: NervousSystemMeta,
+    epoch: NervousSystemMeta.evo.epoch,
+    message: "Nervous system prewarmed and routing artery aligned."
+  });
+
+  if (trace) console.log("[AIBinaryNervousSystem] prewarm", packet);
+  return packet;
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.3‑EVO
 // ============================================================================
 export class AIBinaryNervousSystem {
   constructor(config = {}) {
@@ -119,45 +80,52 @@ export class AIBinaryNervousSystem {
     this.logger = config.logger || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) {
-      throw new Error("AIBinaryNervousSystem requires aiBinaryAgent encoder");
-    }
-    if (!this.anatomy || !this.anatomy.topology || typeof this.anatomy.topology.get !== "function") {
-      throw new Error("AIBinaryNervousSystem requires aiBinaryAnatomy with topology Map");
-    }
-    if (!this.immunity || typeof this.immunity.sanitize !== "function" || !this.immunity.quarantined) {
-      throw new Error("AIBinaryNervousSystem requires aiBinaryImmunity with sanitize() and quarantined set");
-    }
-    if (!this.registry) {
-      throw new Error("AIBinaryNervousSystem requires aiBinaryOrganRegistry");
-    }
+    if (!this.encoder) throw new Error("AIBinaryNervousSystem requires aiBinaryAgent encoder");
+    if (!this.anatomy?.topology?.get) throw new Error("AIBinaryNervousSystem requires aiBinaryAnatomy with topology Map");
+    if (!this.immunity?.sanitize || !this.immunity.quarantined) throw new Error("AIBinaryNervousSystem requires aiBinaryImmunity");
+    if (!this.registry) throw new Error("AIBinaryNervousSystem requires aiBinaryOrganRegistry");
 
     this.organs = new Map();
+
+    // Window‑safe routing artery snapshot
+    this.routingArtery = {
+      throughput: 0,
+      pressure: 0,
+      cost: 0,
+      budget: 1,
+      lastTargets: [],
+      lastSource: null,
+      snapshot: () =>
+        Object.freeze({
+          throughput: this.routingArtery.throughput,
+          pressure: this.routingArtery.pressure,
+          cost: this.routingArtery.cost,
+          budget: this.routingArtery.budget,
+          lastTargets: this.routingArtery.lastTargets,
+          lastSource: this.routingArtery.lastSource
+        })
+    };
   }
 
   // ---------------------------------------------------------
-  //  BINARY ROUTING ARTERY METRICS
+  //  ROUTING ARTERY METRICS
   // ---------------------------------------------------------
   _computeRoutingThroughput(targetCount, bitLength) {
     const loadFactor = Math.min(1, targetCount / 10);
     const sizeFactor = Math.min(1, bitLength / 50000);
-    const raw = 1 - (loadFactor * 0.5 + sizeFactor * 0.5);
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, 1 - (loadFactor * 0.5 + sizeFactor * 0.5)));
   }
 
   _computeRoutingPressure(targetCount, bitLength) {
-    const raw = Math.min(1, (targetCount * bitLength) / 200000);
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, (targetCount * bitLength) / 200000));
   }
 
   _computeRoutingCost(pressure, throughput) {
-    const raw = pressure * (1 - throughput);
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, pressure * (1 - throughput)));
   }
 
   _computeRoutingBudget(throughput, cost) {
-    const raw = throughput - cost;
-    return Math.max(0, Math.min(1, raw));
+    return Math.max(0, Math.min(1, throughput - cost));
   }
 
   _bucketLevel(v) {
@@ -193,7 +161,7 @@ export class AIBinaryNervousSystem {
   }
 
   // ---------------------------------------------------------
-  //  ROUTING DECISION
+  //  TARGET RESOLUTION
   // ---------------------------------------------------------
   _determineTargets(sourceId) {
     const topo = this.anatomy.topology.get(sourceId);
@@ -207,7 +175,6 @@ export class AIBinaryNervousSystem {
     );
 
     this._trace("routing:targets", { sourceId, targets });
-
     return targets;
   }
 
@@ -253,8 +220,15 @@ export class AIBinaryNervousSystem {
       bitLength: encoded.length
     };
 
-    this._trace("routing:packet", { bits: packet.bitLength });
+    // Update artery snapshot
+    this.routingArtery.throughput = throughput;
+    this.routingArtery.pressure = pressure;
+    this.routingArtery.cost = cost;
+    this.routingArtery.budget = budget;
+    this.routingArtery.lastTargets = targets;
+    this.routingArtery.lastSource = sourceId;
 
+    this._trace("routing:packet", { bits: packet.bitLength });
     return packet;
   }
 
@@ -270,7 +244,7 @@ export class AIBinaryNervousSystem {
     const targets = this._determineTargets(sourceId);
     const routingPacket = this._generateRoutingPacket(sourceId, targets, bits);
 
-    if (this.logger && typeof this.logger.logBinary === "function") {
+    if (this.logger?.logBinary) {
       this.logger.logBinary(routingPacket.bits, {
         source: "nervous-system",
         from: sourceId,
@@ -311,12 +285,13 @@ export function createAIBinaryNervousSystem(config) {
 }
 
 // ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+//  DUAL‑MODE EXPORTS
 // ============================================================================
 if (typeof module !== "undefined") {
   module.exports = {
     AIBinaryNervousSystem,
     createAIBinaryNervousSystem,
-    NervousSystemMeta
+    NervousSystemMeta,
+    prewarmAIBinaryNervousSystem
   };
 }

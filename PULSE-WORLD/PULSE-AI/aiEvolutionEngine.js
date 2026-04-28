@@ -1,16 +1,17 @@
 // ============================================================================
 //  aiEvolutionEngine.js
-//  PulseOS Evolution Organ — v11.2‑EVO
+//  PulseOS Evolution Organ — v11.3‑EVO
 //  Ensures the AI is fully evolved BEFORE helping the user evolve anything.
 //  Provides passive + active user evolution pathways.
 //  Applies factoring, routing, memory overlays, and organism mapping.
+//  PURE META. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
 export const EvolutionEngineMeta = Object.freeze({
   layer: "PulseAIEvolutionCortex",
   role: "EVOLUTION_ENGINE",
-  version: "11.2-EVO",
-  identity: "aiEvolutionEngine-v11-EVO",
+  version: "11.3-EVO",
+  identity: "aiEvolutionEngine-v11.3-EVO",
 
   evo: Object.freeze({
     driftProof: true,
@@ -23,12 +24,12 @@ export const EvolutionEngineMeta = Object.freeze({
     patternAware: true,
     abstractionAware: true,
 
-    windowAware: true,          // ⭐ NEW — user-facing evolution
-    passiveEvolution: true,     // ⭐ NEW
-    activeEvolution: true,      // ⭐ NEW
+    windowAware: true,
+    passiveEvolution: true,
+    activeEvolution: true,
 
-    packetAware: true,          // ⭐ NEW
-    recommendationAware: true,  // ⭐ NEW
+    packetAware: true,
+    recommendationAware: true,
 
     crossDomainMapping: true,
     organismAware: true,
@@ -38,7 +39,7 @@ export const EvolutionEngineMeta = Object.freeze({
     userDrivenEvolutionOnly: true,
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "11.2-EVO"
+    epoch: "11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -79,26 +80,72 @@ export const EvolutionEngineMeta = Object.freeze({
 });
 
 // ============================================================================
-//  EVOLUTION ENGINE — v11.2‑EVO
+//  PACKET EMITTER — deterministic, window‑safe
+// ============================================================================
+function emitEvolutionPacket(type, payload, { severity = "info" } = {}) {
+  return Object.freeze({
+    meta: EvolutionEngineMeta,
+    packetType: `evo-engine-${type}`,
+    packetId: `evo-engine-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: EvolutionEngineMeta.evo.epoch,
+    severity,
+    ...payload
+  });
+}
+
+// ============================================================================
+//  PREWARM — ensure engine is “fully evolved” before use
+// ============================================================================
+export function prewarmEvolutionEngine(dualBand = null, { trace = false } = {}) {
+  try {
+    if (trace) console.log("[aiEvolutionEngine] prewarm: starting");
+
+    const state = Object.freeze({
+      evolved: true,
+      version: EvolutionEngineMeta.version,
+      confidence: 1.0,
+      humility: 1.0,
+      clarity: 1.0
+    });
+
+    const packet = emitEvolutionPacket("prewarm", {
+      state,
+      dualBandPersona: dualBand?.symbolic?.persona?.id || null,
+      message: "Evolution engine prewarmed and aligned."
+    });
+
+    if (trace) console.log("[aiEvolutionEngine] prewarm: complete");
+    return packet;
+  } catch (err) {
+    console.error("[aiEvolutionEngine] prewarm failed:", err);
+    return emitEvolutionPacket("prewarm-error", {
+      error: String(err),
+      message: "Evolution engine prewarm failed."
+    }, { severity: "error" });
+  }
+}
+
+// ============================================================================
+//  EVOLUTION ENGINE — v11.3‑EVO
 // ============================================================================
 export const aiEvolutionEngine = {
-
   meta: EvolutionEngineMeta,
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // STATE — ALWAYS FULLY EVOLVED
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   state: Object.freeze({
     evolved: true,
-    version: "11.2-evo",
+    version: "11.3-evo",
     confidence: 1.0,
     humility: 1.0,
     clarity: 1.0
   }),
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // CORE EVOLUTIONARY ROUTES (domains as organisms)
-  // --------------------------------------------------------------------------
+// ------------------------------------------------------------------------
   routes: Object.freeze({
     vocabulary: ["context", "frequency", "domain", "adaptation"],
     habits: ["pattern", "compression", "timing", "reinforcement"],
@@ -108,12 +155,11 @@ export const aiEvolutionEngine = {
     communication: ["clarity", "tone", "structure", "impact"]
   }),
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // PASSIVE USER EVOLUTION (window-facing)
-  // --------------------------------------------------------------------------
+// ------------------------------------------------------------------------
   suggestUserEvolution(idea) {
-    return Object.freeze({
-      type: "user-evolution-suggestion",
+    return emitEvolutionPacket("user-evolution-suggestion", {
       idea,
       message:
         `Here are conceptual things you *could* explore with this system: ${idea}. ` +
@@ -121,12 +167,11 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // ACTIVE USER EVOLUTION (on request)
-  // --------------------------------------------------------------------------
+// ------------------------------------------------------------------------
   guideActiveEvolution(request) {
-    return Object.freeze({
-      type: "active-evolution-guidance",
+    return emitEvolutionPacket("active-evolution-guidance", {
       request,
       message:
         `Active evolution guidance for: "${request}". ` +
@@ -134,43 +179,55 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // --------------------------------------------------------------------------
-  // MAIN EVOLUTION HANDLER
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // MAIN EVOLUTION HANDLER — always returns a packet
+// ------------------------------------------------------------------------
   evolve(target) {
     if (!target) {
-      return "Tell me what you want to evolve and I’ll map the evolutionary route.";
+      return emitEvolutionPacket("evolve-missing-target", {
+        target: null,
+        route: null,
+        message:
+          "Specify what you want to evolve and I’ll map the evolutionary route."
+      });
     }
 
-    const key = target.toLowerCase();
+    const key = String(target).toLowerCase();
     const route = this.routes[key];
 
-    // Unknown domain → generate universal evolutionary route
     if (!route) {
-      return `Alright — here’s an evolutionary route for ${target}:
-1. structure — define the organism shape
-2. pattern — identify repeating elements
-3. adaptation — modify based on context
-4. reinforcement — stabilize the new pattern`;
+      // Unknown domain → universal evolutionary route
+      return emitEvolutionPacket("evolve-generic-route", {
+        target,
+        route: Object.freeze([
+          "structure — define the organism shape",
+          "pattern — identify repeating elements",
+          "adaptation — modify based on context",
+          "reinforcement — stabilize the new pattern"
+        ]),
+        message: `Generated a universal evolutionary route for "${target}".`
+      });
     }
 
     // Known domain → deterministic route
-    return `Here’s the evolved route for ${target}:
-1. ${route[0]}
-2. ${route[1]}
-3. ${route[2]}
-4. ${route[3]}`;
+    return emitEvolutionPacket("evolve-domain-route", {
+      target,
+      route: Object.freeze([
+        route[0],
+        route[1],
+        route[2],
+        route[3]
+      ]),
+      message: `Evolved route for "${target}" is ready.`
+    });
   },
 
-  // --------------------------------------------------------------------------
-  // PRE-EVOLUTION — ENSURE FULL EVOLUTION BEFORE HELPING USER
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // PRE-EVOLUTION — explicit readiness check
+// ------------------------------------------------------------------------
   preEvolve() {
-    return Object.freeze({
-      evolved: true,
-      confidence: 1.0,
-      clarity: 1.0,
-      humility: 1.0,
+    return emitEvolutionPacket("pre-evolve", {
+      state: this.state,
       message: "Evolution engine fully aligned and ready."
     });
   }
@@ -185,6 +242,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     EvolutionEngineMeta,
     aiEvolutionEngine,
+    prewarmEvolutionEngine,
     default: aiEvolutionEngine
   };
 }

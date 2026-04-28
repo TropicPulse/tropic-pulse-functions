@@ -42,16 +42,80 @@ export const COGNITIVE_FRAME_META = Object.freeze({
     epoch: "v11-EVO"
   })
 });
+// ---------------------------------------------------------
+//  COGNITIVE FRAME PREWARM ENGINE — v11.1‑EVO
+// ---------------------------------------------------------
+export function prewarmCognitiveFrame() {
+  try {
+    // Warm request parsing
+    const warmRequest = {
+      intent: "prewarm",
+      domain: "system",
+      action: "init",
+      userId: "prewarm-user"
+    };
+
+    // Warm routing snapshot
+    const warmRouting = {
+      personaId: "ARCHITECT",
+      persona: { id: "ARCHITECT" },
+      permissions: { allow: true },
+      boundaries: { mode: "safe" },
+      dualBand: true,
+      reasoning: ["prewarm"],
+      flags: { stable: true }
+    };
+
+    // Warm organism snapshot
+    const warmOrganism = {
+      binary: { throughput: 1, pressure: 0, cost: 0, budget: 1 },
+      symbolic: { state: "prewarm" }
+    };
+
+    // Construct a warm frame
+    const frame = createCognitiveFrame({
+      request: warmRequest,
+      routing: warmRouting,
+      organismSnapshot: warmOrganism
+    });
+
+    // Touch diagnostics helpers
+    frame.flagMismatch?.("test", "expected", "actual");
+    frame.flagMissingField?.("missingField");
+    frame.flagSlowdown?.("prewarm");
+    frame.flagDrift?.("prewarm drift");
+
+    // Touch ABA
+    frame.ABA.setStablePoint?.({ snapshot: "prewarm" });
+    frame.ABA.resetToStablePoint?.();
+
+    // Touch abstraction
+    frame.abstraction.updateLevel?.("prewarm");
+
+    // Touch repair reflex
+    frame.repair.next?.();
+    frame.repair.next?.();
+
+    // Touch window principle
+    frame.window.explainSafe?.("prewarm");
+
+    // Touch frustration tone
+    frame.frustration.soothe?.();
+
+    return true;
+  } catch (err) {
+    console.error("[CognitiveFrame Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ============================================================================
 //  createCognitiveFrame — Self‑Contained Cognitive Context
 // ============================================================================
 
-export function createCognitiveFrame({
-  request = {},
-  routing = {},
-  organismSnapshot = null
-} = {}) {
+export function createCognitiveFrame(options = {}) {
+  prewarmCognitiveFrame();   // ← PREWARM HERE
+  const { request = {}, routing = {}, organismSnapshot = null } = options;
 
   const context = {
     meta: COGNITIVE_FRAME_META,

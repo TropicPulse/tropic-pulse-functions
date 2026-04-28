@@ -56,6 +56,31 @@ export const EmotionEngineMeta = Object.freeze({
     return "Emotion detection must remain subtle, non-clinical, and grounded.";
   }
 });
+// ---------------------------------------------------------
+//  EMOTION ENGINE PREWARM — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmEmotionEngine() {
+  try {
+    const warmSamples = [
+      "lol this is funny",
+      "idk I'm confused",
+      "I'm angry about this",
+      "I want to evolve the system",
+      "neutral baseline"
+    ];
+
+    for (const msg of warmSamples) {
+      aiEmotionEngine.detectEmotion(msg);
+      aiEmotionEngine.detectIntensity(msg);
+      aiEmotionEngine.interpret(msg);
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[EmotionEngine Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 
 // ============================================================================

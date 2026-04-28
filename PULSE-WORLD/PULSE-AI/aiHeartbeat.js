@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO — AI HEARTBEAT
+//  PULSE OS v11.3‑EVO — AI HEARTBEAT
 //  Pulse‑Driven • Binary‑Aware • Time‑Fallback • Packet‑Ready • Evolution‑Safe
 //  PURE LIVENESS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -7,17 +7,17 @@
 export const AI_HEARTBEAT_META = Object.freeze({
   layer: "PulseAIHeartbeat",
   role: "HEARTBEAT_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiHeartbeat-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiHeartbeat-v11.3-EVO",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
-    packetAware: true,          // ⭐ NEW
-    evolutionAware: true,       // ⭐ NEW
-    windowAware: true,          // ⭐ NEW (safe vitals)
-    bluetoothReady: true,       // ⭐ placeholder for future binary channels
+    packetAware: true,
+    evolutionAware: true,
+    windowAware: true,
+    bluetoothReady: true,
 
     binaryAware: true,
     symbolicAware: true,
@@ -29,7 +29,7 @@ export const AI_HEARTBEAT_META = Object.freeze({
     arteryAware: true,
 
     multiInstanceReady: true,
-    epoch: "11.2-EVO"
+    epoch: "11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -46,7 +46,7 @@ export const AI_HEARTBEAT_META = Object.freeze({
       "perform cognition",
       "perform analysis",
       "alter organism state",
-      "auto-connect bluetooth" // ⭐ NEW
+      "auto-connect bluetooth"
     ]),
 
     always: Object.freeze([
@@ -58,10 +58,23 @@ export const AI_HEARTBEAT_META = Object.freeze({
       "fallback when idle too long",
       "log deterministic steps",
       "return frozen state",
-      "prepare for future packet-bus liveness" // ⭐ NEW
+      "prepare for future packet-bus liveness"
     ])
   })
 });
+
+// ============================================================================
+//  PACKET EMITTER — deterministic, heartbeat-scoped
+// ============================================================================
+function emitHeartbeatPacket(type, payload) {
+  return Object.freeze({
+    meta: AI_HEARTBEAT_META,
+    packetType: `ai-heartbeat-${type}`,
+    timestamp: Date.now(),
+    epoch: AI_HEARTBEAT_META.evo.epoch,
+    ...payload
+  });
+}
 
 // ============================================================================
 //  DEPENDENCIES
@@ -90,7 +103,7 @@ let aiBusy = false;
 let lastRun = 0;
 let aiTimeFallbackTimer = null;
 
-// v11.2‑EVO: heartbeat artery metrics
+// v11.3‑EVO: heartbeat artery metrics (packet‑aware)
 const heartbeatArtery = {
   ticks: 0,
   pulses: 0,
@@ -109,6 +122,19 @@ const heartbeatArtery = {
     });
   }
 };
+
+// ============================================================================
+//  PREWARM — optional, dualband-aware
+// ============================================================================
+export function prewarmAiHeartbeat(dualBand = null, { trace = false } = {}) {
+  const pressure = dualBand?.binary?.metabolic?.pressure ?? 0;
+  const packet = emitHeartbeatPacket("prewarm", {
+    message: "AI heartbeat prewarmed and liveness metrics aligned.",
+    binaryPressure: pressure
+  });
+  if (trace) console.log("[AI_HEARTBEAT] prewarm", packet);
+  return packet;
+}
 
 // ============================================================================
 //  BOOT — create dual‑band organism
@@ -152,6 +178,12 @@ async function aiHeartbeatTick(reason = "unknown") {
     context.logStep?.(
       `[HEARTBEAT] Skipped (cooldown). reason=${reason}, delta=${now - lastRun}ms`
     );
+    emitHeartbeatPacket("tick-skip", {
+      reason: "cooldown",
+      deltaMs: now - lastRun,
+      pressure,
+      load
+    });
     return;
   }
 
@@ -159,6 +191,11 @@ async function aiHeartbeatTick(reason = "unknown") {
   if (aiBusy) {
     heartbeatArtery.skips++;
     context.logStep?.(`[HEARTBEAT] Skipped (busy). reason=${reason}`);
+    emitHeartbeatPacket("tick-skip", {
+      reason: "busy",
+      pressure,
+      load
+    });
     return;
   }
 
@@ -168,6 +205,11 @@ async function aiHeartbeatTick(reason = "unknown") {
     context.logStep?.(
       `[HEARTBEAT] Skipped (binary pressure=${pressure}). reason=${reason}`
     );
+    emitHeartbeatPacket("tick-skip", {
+      reason: "pressure",
+      pressure,
+      load
+    });
     return;
   }
 
@@ -175,11 +217,16 @@ async function aiHeartbeatTick(reason = "unknown") {
   lastRun = now;
   heartbeatArtery.ticks++;
 
-  try {
-    context.logStep?.(
-      `[HEARTBEAT] Tick start. reason=${reason}, pressure=${pressure}, load=${load}`
-    );
+  const startPacket = emitHeartbeatPacket("tick-start", {
+    reason,
+    pressure,
+    load
+  });
+  context.logStep?.(
+    `[HEARTBEAT] Tick start. reason=${reason}, pressure=${pressure}, load=${load}`
+  );
 
+  try {
     // Dual‑band organs
     if (organs.cortex?.run)    await organs.cortex.run();
     if (organs.nervous?.pulse) await organs.nervous.pulse();
@@ -191,12 +238,25 @@ async function aiHeartbeatTick(reason = "unknown") {
     if (organs.power?.update)     await organs.power.update?.();
 
     context.logStep?.("[HEARTBEAT] Tick complete.");
+    emitHeartbeatPacket("tick-complete", {
+      reason,
+      pressure,
+      load
+    });
   } catch (err) {
     console.error("[HEARTBEAT] Tick error:", err);
     context.logStep?.(`[HEARTBEAT] Error: ${err.message}`);
+    emitHeartbeatPacket("tick-error", {
+      reason,
+      error: String(err),
+      pressure,
+      load
+    });
   } finally {
     aiBusy = false;
   }
+
+  return startPacket;
 }
 
 // ============================================================================
@@ -229,11 +289,19 @@ function timeFallbackCheck() {
     context.logStep?.(
       `[HEARTBEAT] Time fallback triggered (idle=${idleFor}ms, pressure=${pressure})`
     );
+    emitHeartbeatPacket("time-fallback", {
+      idleMs: idleFor,
+      pressure
+    });
     void aiHeartbeatTick("time-fallback");
   } else {
     context.logStep?.(
       `[HEARTBEAT] Time fallback check: idle=${idleFor}ms (no tick)`
     );
+    emitHeartbeatPacket("time-check", {
+      idleMs: idleFor,
+      pressure
+    });
   }
 }
 
@@ -252,6 +320,11 @@ export function startAiHeartbeat() {
   aiOrganism.context.logStep?.(
     `[HEARTBEAT] Time fallback active; check=${AI_TIME_CHECK_MS}ms, maxIdle=${AI_MAX_IDLE_MS}ms`
   );
+
+  emitHeartbeatPacket("start", {
+    checkMs: AI_TIME_CHECK_MS,
+    maxIdleMs: AI_MAX_IDLE_MS
+  });
 }
 
 // ============================================================================
@@ -263,6 +336,16 @@ export function stopAiHeartbeat() {
   aiTimeFallbackTimer = null;
 
   aiOrganism?.context?.logStep?.("[HEARTBEAT] Time fallback stopped.");
+  emitHeartbeatPacket("stop", {});
+}
+
+// ============================================================================
+//  WINDOW‑SAFE ARTERY SNAPSHOT
+// ============================================================================
+export function snapshotAiHeartbeat() {
+  return emitHeartbeatPacket("snapshot", {
+    artery: heartbeatArtery.snapshot()
+  });
 }
 
 // ============================================================================
@@ -283,5 +366,12 @@ export async function handler(event, context) {
 export { AI_HEARTBEAT_META };
 
 if (typeof module !== "undefined") {
-  module.exports = { AI_HEARTBEAT_META };
+  module.exports = {
+    AI_HEARTBEAT_META,
+    startAiHeartbeat,
+    stopAiHeartbeat,
+    pulseAiHeartbeat,
+    snapshotAiHeartbeat,
+    prewarmAiHeartbeat
+  };
 }

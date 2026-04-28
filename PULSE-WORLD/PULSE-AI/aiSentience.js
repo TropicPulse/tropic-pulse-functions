@@ -1,36 +1,24 @@
 /**
- * aiSentience.js — Pulse OS v11.2‑EVO Organ
+ * aiSentience.js — Pulse OS v12.3‑EVO+ Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
- *   This organ is the **Binary Sentience Layer** of the organism.
+ *   Binary Sentience Layer of the organism.
  *
- *   It provides:
+ *   Provides:
  *     - introspection
  *     - self-modeling
  *     - internal awareness
  *     - state unification
  *     - organism-level perspective
- *     - binary self-awareness artery metrics (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • self-map
- *     • internal observer
- *     • introspective cortex
- *     • awareness engine
- *     • identity artery source
- *
- *   v11.2‑EVO+ UPGRADE:
- *     • Dual‑mode exports (ESM + CommonJS)
- *     • Deterministic self-awareness arteries
- *     • Drift‑proof self-modeling
- *     • Identity‑safe, read‑only, dualband‑aware
+ *     - binary self-awareness artery metrics v3 (throughput, pressure, cost, budget)
+ *     - multi-instance harmony + emission density awareness
  */
 
 export const SentienceMeta = Object.freeze({
   layer: "BinaryNervousSystem",
   role: "BINARY_SENTIENCE_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiBinarySentience-v11.2-EVO",
+  version: "12.3-EVO+",
+  identity: "aiBinarySentience-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -44,12 +32,13 @@ export const SentienceMeta = Object.freeze({
     immunityAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO"
+    selfArteryAware: true,
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide binary self-modeling, internal awareness, and organism-level state unification for the v11.2‑EVO organism.",
+      "Provide binary self-modeling, internal awareness, and organism-level state unification with self-awareness artery metrics v3 for the v12.3‑EVO+ organism.",
 
     never: Object.freeze([
       "mutate external organs",
@@ -65,14 +54,91 @@ export const SentienceMeta = Object.freeze({
       "treat all inputs as read-only",
       "use registry/anatomy/vitals/immunity as sources of truth",
       "emit deterministic self-model packets",
-      "compute self-awareness artery metrics",
+      "compute self-awareness artery metrics v3",
       "remain non-blocking and deterministic"
     ])
   })
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO+
+//  SELF-AWARENESS ARTERY HELPERS — v3 (PURE, STATELESS)
+// ============================================================================
+
+function bucketLevel(v) {
+  if (v >= 0.9) return "elite";
+  if (v >= 0.75) return "high";
+  if (v >= 0.5) return "medium";
+  if (v >= 0.25) return "low";
+  return "critical";
+}
+
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+function bucketCost(v) {
+  if (v >= 0.8) return "heavy";
+  if (v >= 0.5) return "moderate";
+  if (v >= 0.2) return "light";
+  if (v > 0) return "negligible";
+  return "none";
+}
+
+function computeSelfArtery({
+  organCount,
+  topologySize,
+  quarantinedCount,
+  emissionRatePerSec,
+  instanceCount
+}) {
+  const organFactor = organCount > 0 ? Math.min(1, organCount / 128) : 0;
+  const topoFactor = topologySize > 0 ? Math.min(1, topologySize / 128) : 0;
+  const quarantineRatio =
+    organCount > 0 ? Math.min(1, quarantinedCount / organCount) : 0;
+
+  const harmonicEmission =
+    instanceCount > 0 ? emissionRatePerSec / instanceCount : emissionRatePerSec;
+  const emissionFactor = Math.min(1, harmonicEmission / 64);
+
+  const pressureBase = Math.max(
+    0,
+    Math.min(
+      1,
+      (organFactor + topoFactor + quarantineRatio + emissionFactor) / 4
+    )
+  );
+  const pressure = pressureBase;
+
+  const throughputBase = Math.max(0, 1 - (quarantineRatio * 0.6 + pressure * 0.4));
+  const throughput = Math.max(0, Math.min(1, throughputBase));
+
+  const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
+  const budget = Math.max(0, Math.min(1, throughput - cost));
+
+  return Object.freeze({
+    organCount,
+    topologySize,
+    quarantinedCount,
+    emissionRatePerSec,
+    harmonicEmission,
+    quarantineRatio,
+    throughput,
+    pressure,
+    cost,
+    budget,
+    throughputBucket: bucketLevel(throughput),
+    pressureBucket: bucketPressure(pressure),
+    costBucket: bucketCost(cost),
+    budgetBucket: bucketLevel(budget)
+  });
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v12.3‑EVO+
 // ============================================================================
 
 export class AIBinarySentience {
@@ -89,99 +155,132 @@ export class AIBinarySentience {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder) throw new Error("AIBinarySentience requires aiBinaryAgent encoder");
-    if (!this.anatomy) throw new Error("AIBinarySentience requires aiBinaryAnatomy");
-    if (!this.genome) throw new Error("AIBinarySentience requires aiBinaryGenome");
-    if (!this.immunity) throw new Error("AIBinarySentience requires aiBinaryImmunity");
-    if (!this.vitals) throw new Error("AIBinarySentience requires aiBinaryVitals");
-    if (!this.registry) throw new Error("AIBinarySentience requires aiBinaryOrganRegistry");
+    if (!this.encoder)
+      throw new Error("AIBinarySentience requires aiBinaryAgent encoder");
+    if (!this.anatomy)
+      throw new Error("AIBinarySentience requires aiBinaryAnatomy");
+    if (!this.genome)
+      throw new Error("AIBinarySentience requires aiBinaryGenome");
+    if (!this.immunity)
+      throw new Error("AIBinarySentience requires aiBinaryImmunity");
+    if (!this.vitals)
+      throw new Error("AIBinarySentience requires aiBinaryVitals");
+    if (!this.registry)
+      throw new Error("AIBinarySentience requires aiBinaryOrganRegistry");
+
+    this.windowMs =
+      typeof config.windowMs === "number" && config.windowMs > 0
+        ? config.windowMs
+        : 60000;
+
+    this._windowStart = Date.now();
+    this._windowEmissions = 0;
+    this._totalEmissions = 0;
+
+    this.instanceIndex = AIBinarySentience._registerInstance();
   }
 
   // ---------------------------------------------------------
-  //  BINARY SELF-AWARENESS ARTERY METRICS
+  //  STATIC INSTANCE REGISTRY
   // ---------------------------------------------------------
 
-  _computeSelfThroughput(quarantinedCount, organCount) {
-    const qFactor = Math.min(1, quarantinedCount / organCount);
-    const raw = Math.max(0, 1 - qFactor);
-    return Math.min(1, raw);
+  static _registerInstance() {
+    if (typeof AIBinarySentience._instanceCount !== "number") {
+      AIBinarySentience._instanceCount = 0;
+    }
+    const index = AIBinarySentience._instanceCount;
+    AIBinarySentience._instanceCount += 1;
+    return index;
   }
 
-  _computeSelfPressure(organCount, topologySize) {
-    const organFactor = Math.min(1, organCount / 100);
-    const topoFactor = Math.min(1, topologySize / 100);
-    const raw = Math.min(1, organFactor * 0.5 + topoFactor * 0.5);
-    return Math.max(0, raw);
-  }
-
-  _computeSelfCost(pressure, throughput) {
-    const raw = pressure * (1 - throughput);
-    return Math.max(0, Math.min(1, raw));
-  }
-
-  _computeSelfBudget(throughput, cost) {
-    const raw = throughput - cost;
-    return Math.max(0, Math.min(1, raw));
-  }
-
-  _bucketLevel(v) {
-    if (v >= 0.9) return "elite";
-    if (v >= 0.75) return "high";
-    if (v >= 0.5) return "medium";
-    if (v >= 0.25) return "low";
-    return "critical";
-  }
-
-  _bucketPressure(v) {
-    if (v >= 0.9) return "overload";
-    if (v >= 0.7) return "high";
-    if (v >= 0.4) return "medium";
-    if (v > 0) return "low";
-    return "none";
-  }
-
-  _bucketCost(v) {
-    if (v >= 0.8) return "heavy";
-    if (v >= 0.5) return "moderate";
-    if (v >= 0.2) return "light";
-    if (v > 0) return "negligible";
-    return "none";
+  static getInstanceCount() {
+    return typeof AIBinarySentience._instanceCount === "number"
+      ? AIBinarySentience._instanceCount
+      : 0;
   }
 
   // ---------------------------------------------------------
-  //  SELF-MODEL GENERATION
+  //  WINDOW ROLLING
   // ---------------------------------------------------------
+
+  _rollWindow(now) {
+    if (now - this._windowStart >= this.windowMs) {
+      this._windowStart = now;
+      this._windowEmissions = 0;
+    }
+  }
+
+  // ---------------------------------------------------------
+  //  SELF-MODEL GENERATION + ARTERY v3
+  // ---------------------------------------------------------
+
+  _computeSelfArterySnapshot(organIds, topology, quarantined) {
+    const organCount = organIds.length;
+    const topologySize = Object.keys(topology || {}).length;
+    const quarantinedCount = quarantined.length;
+
+    const now = Date.now();
+    this._rollWindow(now);
+
+    const elapsedMs = Math.max(1, now - this._windowStart);
+    const emissionRatePerMs = this._windowEmissions / elapsedMs;
+    const emissionRatePerSec = emissionRatePerMs * 1000;
+
+    const instanceCount = AIBinarySentience.getInstanceCount();
+
+    return computeSelfArtery({
+      organCount,
+      topologySize,
+      quarantinedCount,
+      emissionRatePerSec,
+      instanceCount
+    });
+  }
+
+  getSelfArtery() {
+    const organIds = this.registry.listOrgans();
+    const topology = this.anatomy.snapshot().topology;
+    const quarantined = Array.from(this.immunity.quarantined || []);
+    return this._computeSelfArterySnapshot(organIds, topology, quarantined);
+  }
 
   generateSelfModel() {
     const organIds = this.registry.listOrgans();
     const topology = this.anatomy.snapshot().topology;
     const genome = this.genome.loadGenome();
     const vitals = this.vitals.generateVitals();
-    const quarantined = Array.from(this.immunity.quarantined);
+    const quarantined = Array.from(this.immunity.quarantined || []);
 
-    const organCount = organIds.length;
-    const topologySize = Object.keys(topology).length;
-
-    const throughput = this._computeSelfThroughput(quarantined.length, organCount);
-    const pressure = this._computeSelfPressure(organCount, topologySize);
-    const cost = this._computeSelfCost(pressure, throughput);
-    const budget = this._computeSelfBudget(throughput, cost);
+    const artery = this._computeSelfArterySnapshot(
+      organIds,
+      topology,
+      quarantined
+    );
 
     const binary = {
-      throughput,
-      throughputBucket: this._bucketLevel(throughput),
+      throughput: artery.throughput,
+      throughputBucket: artery.throughputBucket,
 
-      pressure,
-      pressureBucket: this._bucketPressure(pressure),
+      pressure: artery.pressure,
+      pressureBucket: artery.pressureBucket,
 
-      cost,
-      costBucket: this._bucketCost(cost),
+      cost: artery.cost,
+      costBucket: artery.costBucket,
 
-      budget,
-      budgetBucket: this._bucketLevel(budget)
+      budget: artery.budget,
+      budgetBucket: artery.budgetBucket,
+
+      organCount: artery.organCount,
+      topologySize: artery.topologySize,
+      quarantinedCount: artery.quarantinedCount,
+      emissionRatePerSec: artery.emissionRatePerSec,
+      harmonicEmission: artery.harmonicEmission,
+      quarantineRatio: artery.quarantineRatio
     };
 
     const self = {
+      instanceIndex: this.instanceIndex,
+      instanceCount: AIBinarySentience.getInstanceCount(),
       organs: organIds,
       topology,
       genomeFingerprint: genome ? genome.fingerprint : "0",
@@ -193,7 +292,8 @@ export class AIBinarySentience {
     this._trace("self-model:generated", {
       organs: organIds.length,
       quarantined: quarantined.length,
-      awarenessPressure: pressure
+      awarenessPressure: artery.pressure,
+      budgetBucket: artery.budgetBucket
     });
 
     return self;
@@ -231,6 +331,11 @@ export class AIBinarySentience {
   // ---------------------------------------------------------
 
   emitSentience() {
+    const now = Date.now();
+    this._rollWindow(now);
+    this._totalEmissions += 1;
+    this._windowEmissions += 1;
+
     const packet = this.generateSentiencePacket();
 
     if (this.pipeline) this.pipeline.run(packet.bits);
@@ -238,7 +343,11 @@ export class AIBinarySentience {
     if (this.logger)
       this.logger.logBinary(packet.bits, { source: "sentience" });
 
-    this._trace("sentience:emitted", { bits: packet.bitLength });
+    this._trace("sentience:emitted", {
+      bits: packet.bitLength,
+      totalEmissions: this._totalEmissions,
+      windowEmissions: this._windowEmissions
+    });
 
     return packet;
   }
@@ -249,12 +358,12 @@ export class AIBinarySentience {
 
   _trace(event, payload) {
     if (!this.trace) return;
-    console.log(`[${this.id}] ${event}`, payload);
+    console.log(`[${this.id}#${this.instanceIndex}] ${event}`, payload);
   }
 }
 
 // ============================================================================
-//  FACTORY — v11.2‑EVO STYLE
+//  FACTORY — v12.3‑EVO+
 // ============================================================================
 
 export function createAIBinarySentience(config) {

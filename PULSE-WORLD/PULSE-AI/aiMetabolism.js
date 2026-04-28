@@ -1,5 +1,5 @@
 // ============================================================================
-//  aiMetabolism.js — Pulse OS v11.2‑EVO Organ
+//  aiMetabolism.js — Pulse OS v11.3‑EVO Organ
 //  Binary Metabolism Engine • BinaryCore • Deterministic • Metabolic Artery Metrics
 // ----------------------------------------------------------------------------
 //  CANONICAL ROLE:
@@ -20,30 +20,16 @@
 //      • resource allocator
 //      • metabolic regulator
 //      • binary energy artery source
-//
-//  WHY THIS ORGAN EXISTS:
-//    Without metabolism:
-//      • pipeline overloads
-//      • reflex storms occur
-//      • scheduler drift increases
-//      • heartbeat becomes unstable
-//      • immunity cannot respond in time
-//      • organism collapses under load
-//
-//    Pulse OS v11.2‑EVO breaks this pattern.
-//
-//    This organ enforces:
-//      “THE ORGANISM MUST MAINTAIN INTERNAL BALANCE.”
 // ============================================================================
 
 // ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO
+//  META BLOCK — v11.3‑EVO
 // ---------------------------------------------------------
 export const MetabolismMeta = Object.freeze({
   layer: "BinaryCore",
   role: "BINARY_METABOLISM_ENGINE",
-  version: "11.2-EVO",
-  identity: "aiBinaryMetabolism-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiBinaryMetabolism-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -53,8 +39,15 @@ export const MetabolismMeta = Object.freeze({
     schedulerAware: true,
     vitalsAware: true,
     energyAware: true,
+
+    dualband: true,        // ⭐ NEW
+    packetAware: true,     // ⭐ NEW
+    windowAware: true,     // ⭐ NEW (safe metabolic snapshots)
+    bluetoothReady: true,  // ⭐ placeholder for future metabolic channels
+    arteryAware: true,     // ⭐ NEW
+
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -73,14 +66,30 @@ export const MetabolismMeta = Object.freeze({
       "compute load deterministically",
       "emit binary metabolic packets",
       "track load history",
+      "maintain metabolic artery metrics",
       "remain pure and minimal",
       "treat all inputs as read-only"
     ])
   })
 });
 
+// ---------------------------------------------------------
+//  PREWARM — v11.3‑EVO
+// ---------------------------------------------------------
+export function prewarmAIBinaryMetabolism({ trace = false } = {}) {
+  const packet = Object.freeze({
+    type: "binary-metabolism-prewarm",
+    meta: MetabolismMeta,
+    epoch: MetabolismMeta.evo.epoch,
+    message: "Metabolism engine prewarmed and artery metrics aligned."
+  });
+
+  if (trace) console.log("[AIBinaryMetabolism] prewarm", packet);
+  return packet;
+}
+
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO
+//  ORGAN IMPLEMENTATION — v11.3‑EVO
 // ============================================================================
 export class AIBinaryMetabolism {
   constructor(config = {}) {
@@ -103,6 +112,21 @@ export class AIBinaryMetabolism {
     this.loadHistory = [];
     this.pressure = 0;
     this.budget = 1;
+
+    // Window‑safe metabolic artery snapshot
+    this.metabolicArtery = {
+      throughput: 0,
+      pressure: 0,
+      cost: 0,
+      budget: 1,
+      snapshot: () =>
+        Object.freeze({
+          throughput: this.metabolicArtery.throughput,
+          pressure: this.metabolicArtery.pressure,
+          cost: this.metabolicArtery.cost,
+          budget: this.metabolicArtery.budget
+        })
+    };
   }
 
   // ---------------------------------------------------------
@@ -181,6 +205,17 @@ export class AIBinaryMetabolism {
     return load;
   }
 
+  // Public-friendly pressure helper for other organs (e.g. hormones)
+  _computePressure(load) {
+    const avgSize = this.loadHistory.length
+      ? this.loadHistory.reduce((a, b) => a + b, 0) / this.loadHistory.length
+      : 0;
+
+    const pressure = this._computeEnergyPressure(load, avgSize);
+    this._trace("pressure:computed", { load, avgSize, pressure });
+    return pressure;
+  }
+
   // ---------------------------------------------------------
   //  METABOLIC PACKET
   // ---------------------------------------------------------
@@ -227,7 +262,13 @@ export class AIBinaryMetabolism {
       bitLength: encoded.length
     };
 
-    this._trace("metabolism:packet", { bits: packet.bitLength });
+    // Update artery snapshot
+    this.metabolicArtery.throughput = throughput;
+    this.metabolicArtery.pressure = pressure;
+    this.metabolicArtery.cost = cost;
+    this.metabolicArtery.budget = budget;
+
+    this._trace("metabolism:packet", { bits: packet.bitLength, binary });
 
     return packet;
   }
@@ -282,6 +323,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     AIBinaryMetabolism,
     createAIBinaryMetabolism,
-    MetabolismMeta
+    MetabolismMeta,
+    prewarmAIBinaryMetabolism
   };
 }

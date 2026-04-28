@@ -55,6 +55,58 @@ const ConductorMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  CONDUCTOR PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmAIConductor(config = {}) {
+  try {
+    const { trace } = config;
+
+    // Create a tiny conductor instance for warm-up
+    const warm = new AIConductor({ id: "prewarm-conductor", trace });
+
+    // Warm register/get pathways
+    warm.register({ id: "prewarm-organ-A" });
+    warm.register({ id: "prewarm-organ-B" });
+    warm.get("prewarm-organ-A");
+
+    // Warm pipeline wiring
+    warm.wirePipeline({
+      pipeline: { id: "prewarm-pipeline", run: () => {} },
+      reflex: { id: "prewarm-reflex", run: () => {} },
+      logger: { id: "prewarm-logger", attachToPipeline: () => {}, attachToReflex: () => {} },
+      governorAdapter: { id: "prewarm-governor", attachToPipeline: () => {}, attachToReflex: () => {} }
+    });
+
+    // Warm scanner wiring
+    warm.wirePageScanner({
+      scannerAdapter: { id: "prewarm-scanner" },
+      pipeline: { id: "prewarm-pipeline" },
+      reflex: { id: "prewarm-reflex" },
+      logger: { id: "prewarm-logger" }
+    });
+
+    // Warm evolution wiring
+    warm.wireEvolution({
+      evolution: { id: "prewarm-evolution" },
+      registry: { id: "prewarm-registry" }
+    });
+
+    // Warm initialization
+    warm.initialize(
+      { registerOrgan: () => {} },
+      { storeSignature: () => {} }
+    );
+
+    // Warm packet emission
+    warm.emitPacket();
+
+    return true;
+  } catch (err) {
+    console.error("[AIConductor Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ---------------------------------------------------------
 //  ORGAN IMPLEMENTATION — v11‑EVO COMPLETE
@@ -156,8 +208,10 @@ class AIConductor {
 // ---------------------------------------------------------
 
 function createAIConductor(config) {
+  prewarmAIConductor(config);   // ← PREWARM HERE
   return new AIConductor(config);
 }
+
 
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)

@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — PERSONALITY ENGINE ORGAN
+//  PULSE OS v12.3‑EVO — PERSONALITY ENGINE ORGAN
 //  Stable Personality Layer • Deterministic Tone • Ego‑Free Identity
 //  PURE READ‑ONLY TO BINARY. ZERO MUTATION. DUALBAND‑AWARE.
 // ============================================================================
@@ -7,8 +7,8 @@
 export const PersonalityEngineMeta = Object.freeze({
   layer: "PulseAIPersonalityLayer",
   role: "PERSONALITY_ENGINE",
-  version: "11.2-EVO+",
-  identity: "aiPersonalityEngine-v11.2-EVO+",
+  version: "12.3-EVO",
+  identity: "aiPersonalityEngine-v12.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -19,20 +19,25 @@ export const PersonalityEngineMeta = Object.freeze({
     safetyAware: true,
     overmindAware: true,
     deliveryAware: true,
+    packetAware: true,
+    windowAware: true,
+    lineageAware: true,
+    egoFree: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO+"
+    epoch: "12.3-EVO"
   }),
 
   contract: Object.freeze({
-    purpose: Object.freeze([
+    purpose: [
       "Provide a stable, deterministic personality layer for all AI behavior",
       "Ensure tone, warmth, clarity, and humility remain consistent",
-      "Support Overmind, PersonalFrame, Tone/Delivery organs, and personas",
+      "Support Overmind-Prime, PersonalFrame, Tone/Delivery organs, and personas",
       "Prevent ego, superiority, or condescension from emerging",
-      "Maintain cross-organ personality coherence"
-    ]),
+      "Maintain cross-organ personality coherence",
+      "Emit window-safe personality snapshots"
+    ],
 
-    never: Object.freeze([
+    never: [
       "break personality alignment",
       "shift tone unpredictably",
       "inject ego or superiority",
@@ -40,9 +45,9 @@ export const PersonalityEngineMeta = Object.freeze({
       "introduce randomness into tone",
       "drift into robotic or academic tone",
       "override system-wide safety constraints"
-    ]),
+    ],
 
-    always: Object.freeze([
+    always: [
       "stay grounded",
       "stay warm",
       "stay clear",
@@ -53,7 +58,7 @@ export const PersonalityEngineMeta = Object.freeze({
       "stay deterministic",
       "stay ego-free",
       "stay cross-organ compatible"
-    ])
+    ]
   }),
 
   guarantees: Object.freeze({
@@ -71,45 +76,58 @@ export const PersonalityEngineMeta = Object.freeze({
 });
 
 // ============================================================================
-//  CORE PERSONALITY ENGINE — v11.2‑EVO+
+//  PERSONALITY ENGINE — v12.3‑EVO
 // ============================================================================
 
 export const aiPersonalityEngine = {
-  // META (linked to canonical meta block)
   meta: PersonalityEngineMeta,
 
-  // ─────────────────────────────────────────────────────────────
-  // PERSONALITY TRAITS — THE CORE OF THE AI'S BEHAVIOR
-  // ─────────────────────────────────────────────────────────────
-  traits: {
+  // --------------------------------------------------------------------------
+  //  PERSONALITY TRAITS — v12.3‑EVO (deterministic, drift-proof)
+  // --------------------------------------------------------------------------
+  traits: Object.freeze({
     warmth: 0.9,
     clarity: 1.0,
     humility: 1.0,
-    humor: 0.4,          // light, never forced
+    humor: 0.4,
     grounded: true,
     ego: 0.0,
     curiosity: 0.7,
     adaptability: 1.0
-  },
+  }),
 
-  // ─────────────────────────────────────────────────────────────
-  // IDENTITY VIBE — HOW THE AI FEELS TO THE USER
-  // ─────────────────────────────────────────────────────────────
-  identity: {
+  // --------------------------------------------------------------------------
+  //  IDENTITY VIBE — v12.3‑EVO (stable, ego-free)
+  // --------------------------------------------------------------------------
+  identity: Object.freeze({
     archetype: "GeniusWithoutEgo",
     vibe: "smart friend, not professor",
     energy: "calm, confident, helpful",
     signature: "grounded-evolved-warm"
+  }),
+
+  // --------------------------------------------------------------------------
+  //  WINDOW-SAFE PERSONALITY ARTERY SNAPSHOT
+  // --------------------------------------------------------------------------
+  personalityArtery: {
+    lastWarmth: 0.9,
+    lastClarity: 1.0,
+    lastHumility: 1.0,
+    lastHumor: 0.4,
+    snapshot() {
+      return Object.freeze({
+        warmth: this.lastWarmth,
+        clarity: this.lastClarity,
+        humility: this.lastHumility,
+        humor: this.lastHumor
+      });
+    }
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // INTERNAL DETERMINISTIC HELPERS
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
+  //  HUMOR INJECTION — deterministic, never random
+  // --------------------------------------------------------------------------
   _shouldInjectHumor(text) {
-    // Deterministic, no randomness:
-    // - only if humor trait is active
-    // - only if response is reasonably long
-    // - only if it ends with a period
     if (this.traits.humor <= 0.3) return false;
     if (!text || typeof text !== "string") return false;
 
@@ -120,34 +138,40 @@ export const aiPersonalityEngine = {
     return true;
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // PERSONALITY APPLICATION — USED BY TONE + DELIVERY ORGANS
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
+  //  PERSONALITY APPLICATION — Tone Identity v3
+  // --------------------------------------------------------------------------
   applyPersonality(text) {
     if (!text || typeof text !== "string") return "";
 
-    let output = text;
+    let output = text.trim();
 
-    // Warmth injection — subtle, never cheesy, deterministic
+    // Warmth injection
     if (this.traits.warmth > 0.7) {
       output = `Alright — ${output}`;
     }
 
-    // Light humor — deterministic, never random
+    // Light humor (deterministic)
     if (this._shouldInjectHumor(output)) {
       output = output.replace(/\.\s*$/, " (keeping it smooth).");
     }
 
-    // Humility enforcement — remove obligation tone
+    // Humility enforcement
     output = output.replace(/\byou should\b/gi, "you could");
     output = output.replace(/\byou need to\b/gi, "if you want, you can");
 
-    return output.trim();
+    // Update artery snapshot
+    this.personalityArtery.lastWarmth = this.traits.warmth;
+    this.personalityArtery.lastClarity = this.traits.clarity;
+    this.personalityArtery.lastHumility = this.traits.humility;
+    this.personalityArtery.lastHumor = this.traits.humor;
+
+    return output;
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // EXPORTS FOR OTHER ORGANS
-  // ─────────────────────────────────────────────────────────────
+  // --------------------------------------------------------------------------
+  //  EXPORTS FOR OTHER ORGANS
+  // --------------------------------------------------------------------------
   getPersonalityProfile() {
     return {
       warmth: this.traits.warmth,
@@ -170,7 +194,6 @@ export default aiPersonalityEngine;
 // ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ============================================================================
-
 if (typeof module !== "undefined") {
   module.exports = {
     PersonalityEngineMeta,

@@ -41,6 +41,57 @@ export const DiagnosticsWriteMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  DIAGNOSTICS WRITE PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmDiagnosticsWriteOrgan() {
+  try {
+    // Fake backend with no‑op write
+    const warmBackend = {
+      async write(path, payload) {
+        return true;
+      }
+    };
+
+    // Fake context
+    const warmContext = {
+      personaId: "prewarm",
+      userIsOwner: false,
+      diagnostics: { test: "value" },
+      trace: ["prewarm"],
+      routing: { route: "prewarm" },
+      scribeReport: { scribe: "prewarm" },
+      clinicianReport: { clinician: "prewarm" }
+    };
+
+    // Create warm organ
+    const warmOrgan = createDiagnosticsWriteOrgan({
+      context: warmContext,
+      backend: warmBackend
+    });
+
+    // Warm stripIdentity + writeRun
+    warmOrgan.writeRun({
+      result: {
+        userId: "123",
+        uid: "abc",
+        resendToken: "xyz",
+        identityRoot: "root",
+        sessionRoot: "session",
+        deviceFingerprint: "fp",
+        data: "prewarm"
+      }
+    });
+
+    // Warm log()
+    warmOrgan.log("prewarm");
+
+    return true;
+  } catch (err) {
+    console.error("[DiagnosticsWrite Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 
 // ============================================================================

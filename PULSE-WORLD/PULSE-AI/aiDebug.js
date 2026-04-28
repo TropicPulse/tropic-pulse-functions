@@ -35,6 +35,80 @@ export const SCRIBE_META = Object.freeze({
   })
 });
 
+// ---------------------------------------------------------
+//  SCRIBE PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmScribe() {
+  try {
+    // Warm fake diagnostics
+    const warmDiagnostics = {
+      mismatches: [{ key: "prewarm", expected: "x", actual: "y" }],
+      missingFields: [{ key: "missing" }],
+      slowdownCauses: [{ reason: "prewarm" }],
+      driftDetected: true
+    };
+
+    // Warm fake binary snapshot
+    const warmBinary = {
+      metabolic: { load: 0.1, pressure: 0.2 }
+    };
+
+    // Warm fake symbolic snapshot
+    const warmSymbolic = {
+      persona: "ARCHITECT",
+      boundaryMode: "safe",
+      permissions: { allow: true }
+    };
+
+    // Warm fake dualband snapshot
+    const warmDualBand = {
+      binary: { vitals: { snapshot: () => warmBinary } },
+      symbolic: {
+        personaEngine: { getActivePersona: () => "ARCHITECT" },
+        boundariesEngine: { getMode: () => "safe" },
+        permissionsEngine: { snapshot: () => ({ allow: true }) }
+      }
+    };
+
+    // Warm fake context
+    const warmContext = {
+      trace: ["prewarm"],
+      diagnostics: warmDiagnostics,
+      persona: "ARCHITECT",
+      boundaryMode: "safe",
+      permissions: { allow: true },
+      routing: {
+        personaId: "ARCHITECT",
+        dualBand: { primary: "binary" },
+        reasoning: ["prewarm"]
+      },
+      cortexPacket: {
+        pattern: "prewarm",
+        decision: "expand",
+        binary: warmBinary,
+        symbolic: warmSymbolic,
+        band: { primary: "binary" },
+        bitLength: 128
+      },
+      pulse: {
+        pulseType: "prewarm",
+        pattern: "prewarm",
+        lineage: ["root", "prewarm"]
+      }
+    };
+
+    // Warm full debug report
+    formatDebugReport(warmContext, warmDualBand);
+
+    // Warm pretty string formatter
+    formatDebugString(warmContext, warmDualBand);
+
+    return true;
+  } catch (err) {
+    console.error("[Scribe Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ============================================================================
 // PUBLIC API — Build Debug Report (Object)
@@ -246,6 +320,7 @@ export function formatDebugString(context, dualBand = null) {
 // ============================================================================
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ============================================================================
+prewarmScribe();
 
 // ESM
 export {

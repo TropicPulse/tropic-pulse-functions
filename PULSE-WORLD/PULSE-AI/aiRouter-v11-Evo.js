@@ -1,14 +1,15 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — AI ROUTER ORGAN
+//  PULSE OS v12.3‑EVO+ — AI ROUTER ORGAN
 //  CNS Router • Intent Decoder • Persona Selector • Archetype Map
 //  PURE ROUTING • ZERO MUTATION • ZERO RANDOMNESS • DUALBAND‑AWARE
+//  ROUTING ARTERY v3 (throughput, pressure, cost, budget)
 // ============================================================================
 
 export const AIRouterMeta = Object.freeze({
   layer: "PulseAIRouter",
   role: "CNS_ROUTER_ORGAN",
-  version: "11.2-EVO+",
-  identity: "aiRouter-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiRouter-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -21,16 +22,17 @@ export const AIRouterMeta = Object.freeze({
     permissionAware: true,
     archetypeAware: true,
     routingAware: true,
+    routingArteryAware: true,
     overmindAware: true,
     safetyAware: true,
     personalAware: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO+"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Decode intent, select persona, map archetypes, and integrate dual-band routing hints for CNS execution.",
+      "Decode intent, select persona, map archetypes, integrate dual-band routing hints, and compute routing artery metrics v3 for CNS execution.",
 
     never: Object.freeze([
       "mutate request",
@@ -52,6 +54,7 @@ export const AIRouterMeta = Object.freeze({
       "select persona safely",
       "map archetypes deterministically",
       "integrate organism snapshot metrics",
+      "compute routing artery metrics v3",
       "produce dual-band routing hints",
       "surface safety + overmind hints",
       "return frozen routing packets",
@@ -87,6 +90,71 @@ const ArchetypePages = Object.freeze({
   TOURIST: "aiTourist.js",
   VETERINARIAN: "aiVeterinarian.js"
 });
+
+// ============================================================================
+//  ROUTING ARTERY HELPERS (PURE, STATELESS)
+// ============================================================================
+function _bucketLevel(v) {
+  if (v >= 0.9) return "elite";
+  if (v >= 0.75) return "high";
+  if (v >= 0.5) return "medium";
+  if (v >= 0.25) return "low";
+  return "critical";
+}
+
+function _bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+function _bucketCost(v) {
+  if (v >= 0.8) return "heavy";
+  if (v >= 0.5) return "moderate";
+  if (v >= 0.2) return "light";
+  if (v > 0) return "negligible";
+  return "none";
+}
+
+function computeRoutingArtery(flags, binaryLoad, personaId) {
+  const flagValues = Object.values(flags || {});
+  const activeFlags = flagValues.filter(Boolean).length;
+
+  const flagDensity = Math.min(1, activeFlags / 16);
+  const loadFactor = Math.min(1, binaryLoad);
+
+  const pressure = Math.max(0, Math.min(1, (flagDensity + loadFactor) / 2));
+
+  let personaBias = 0;
+  if (personaId === Personas.ARCHITECT) personaBias = 0.1;
+  else if (personaId === Personas.OBSERVER) personaBias = 0.05;
+  else if (personaId === Personas.TOURGUIDE) personaBias = -0.05;
+
+  const throughputBase = Math.max(0, 1 - pressure);
+  const throughput = Math.max(
+    0,
+    Math.min(1, throughputBase + personaBias)
+  );
+
+  const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
+  const budget = Math.max(0, Math.min(1, throughput - cost));
+
+  return Object.freeze({
+    activeFlags,
+    flagDensity,
+    binaryLoad,
+    throughput,
+    pressure,
+    cost,
+    budget,
+    throughputBucket: _bucketLevel(throughput),
+    pressureBucket: _bucketPressure(pressure),
+    costBucket: _bucketCost(cost),
+    budgetBucket: _bucketLevel(budget)
+  });
+}
 
 // ============================================================================
 //  ARCHETYPE SELECTOR (DETERMINISTIC)
@@ -154,7 +222,6 @@ export function routeAIRequest(request = {}, dualBand = null) {
   const intent = (request.intent || "analyze").toLowerCase();
   reasoning.push(`Intent detected: "${intent}"`);
 
-  // Extract flags (deterministic)
   const {
     touchesBackend = false,
     touchesFrontend = false,
@@ -263,7 +330,7 @@ export function routeAIRequest(request = {}, dualBand = null) {
 
   // --------------------------------------------------------------------------
   // 4) Dual‑Band Integration (Organism Snapshot Metrics)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   let organismSnapshotBits = 0;
   let binaryPressure = 0;
   let binaryLoad = 0;
@@ -273,7 +340,6 @@ export function routeAIRequest(request = {}, dualBand = null) {
     if (typeof snapshot === "string") {
       organismSnapshotBits = snapshot.length;
 
-      // deterministic heuristics
       binaryLoad = Math.min(1, organismSnapshotBits / 4096);
       binaryPressure = binaryLoad;
 
@@ -308,7 +374,22 @@ export function routeAIRequest(request = {}, dualBand = null) {
   );
 
   // --------------------------------------------------------------------------
-  // 6) Overmind + Safety + Personal Hints
+  // 6) Routing Artery v3 (pure, stateless)
+// --------------------------------------------------------------------------
+  const artery = computeRoutingArtery(flags, binaryLoad, personaId);
+
+  reasoning.push(
+    `Routing artery: throughput=${artery.throughput.toFixed(
+      2
+    )} (${artery.throughputBucket}), pressure=${artery.pressure.toFixed(
+      2
+    )} (${artery.pressureBucket}), budget=${artery.budget.toFixed(
+      2
+    )} (${artery.budgetBucket})`
+  );
+
+  // --------------------------------------------------------------------------
+  // 7) Overmind + Safety + Personal Hints
   // --------------------------------------------------------------------------
   const safetyMode =
     requestedSafetyMode || persona?.safetyMode || "standard";
@@ -330,7 +411,7 @@ export function routeAIRequest(request = {}, dualBand = null) {
   reasoning.push(`Safety mode: ${safetyMode}`);
 
   // --------------------------------------------------------------------------
-  // 7) Return Routing Packet
+  // 8) Return Routing Packet
   // --------------------------------------------------------------------------
   return Object.freeze({
     meta: AIRouterMeta,
@@ -342,6 +423,7 @@ export function routeAIRequest(request = {}, dualBand = null) {
     dualBand: dualBandHints,
     overmind: overmindHints,
     personaSafety,
+    artery,
     reasoning
   });
 }
@@ -357,6 +439,7 @@ export function explainRoutingDecision(request = {}, dualBand = null) {
     archetypePrimaryPage: result.archetypes?.primaryPage || null,
     dualBand: result.dualBand,
     safetyMode: result.personaSafety?.safetyMode || "standard",
+    artery: result.artery,
     reasoning: result.reasoning
   });
 }

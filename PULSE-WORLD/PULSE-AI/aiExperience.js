@@ -10,12 +10,13 @@
 //   • Provide layered responses for unsafe / blocked intents.
 //   • Never alter core safety rules — only their expression.
 //   • Adapt tone to user evolution mode (passive vs active) without bragging.
+//   • Emit deterministic experience packets for the organism/window.
 // ============================================================================
 
 export const AI_EXPERIENCE_META = Object.freeze({
   layer: "PulseAIExperienceFrame",
   role: "EXPERIENCE_ORGAN",
-  version: "11.2-EVO",
+  version: "11.3-EVO",
   target: "dualband-organism",
 
   evo: Object.freeze({
@@ -29,19 +30,65 @@ export const AI_EXPERIENCE_META = Object.freeze({
     refusalAware: true,
 
     dualband: true,
-    evolutionAware: true,     // ⭐ evolution-aware tone
-    windowAware: true,        // ⭐ user-facing
-    passiveEvolution: true,   // ⭐ supports gentle, exploratory tone
-    activeEvolution: true,    // ⭐ supports direct, growth-focused tone
+    evolutionAware: true,     // evolution-aware tone
+    windowAware: true,        // user-facing
+    passiveEvolution: true,   // gentle, exploratory tone
+    activeEvolution: true,    // direct, growth-focused tone
 
     packetAware: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "v11.3-EVO"
   })
 });
 
 // ============================================================================
-// PUBLIC API — Create Experience Layer (v11.2‑EVO)
+// PACKET EMITTER — deterministic, window/organism safe
+// ============================================================================
+function emitExperiencePacket(type, payload, { severity = "info" } = {}) {
+  return Object.freeze({
+    meta: AI_EXPERIENCE_META,
+    packetType: `experience-${type}`,
+    packetId: `experience-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: AI_EXPERIENCE_META.evo.epoch,
+    severity,
+    ...payload
+  });
+}
+
+// ============================================================================
+// PREWARM — v11.3‑EVO (optional, dual‑band aware)
+// ============================================================================
+export function prewarmAIExperience(dualBand = null, { trace = false } = {}) {
+  try {
+    if (trace) console.log("[aiExperience] prewarm: starting");
+
+    const personaId = dualBand?.symbolic?.persona?.id || null;
+    const boundaryMode = dualBand?.symbolic?.boundariesEngine?.mode || null;
+
+    const packet = emitExperiencePacket("prewarm", {
+      personaId,
+      boundaryMode,
+      message: "Experience organ prewarmed and tone pathways aligned."
+    });
+
+    if (trace) console.log("[aiExperience] prewarm: complete");
+    return packet;
+  } catch (err) {
+    console.error("[aiExperience] prewarm failed:", err);
+    return emitExperiencePacket(
+      "prewarm-error",
+      {
+        error: String(err),
+        message: "Experience organ prewarm failed."
+      },
+      { severity: "error" }
+    );
+  }
+}
+
+// ============================================================================
+// PUBLIC API — Create Experience Layer (v11.3‑EVO)
 // ============================================================================
 export function createAIExperience(context) {
   // Per-request strike counter (stateless across requests)
@@ -59,7 +106,7 @@ export function createAIExperience(context) {
 
   // --------------------------------------------------------------------------
   // Evolution-aware softener (no bragging, just gentle framing)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function evolutionTonePrefix() {
     if (evolutionMode === "active") {
       return "Since you’re actively growing with this system, ";
@@ -71,7 +118,7 @@ export function createAIExperience(context) {
   }
 
   // --------------------------------------------------------------------------
-  // LAYERED UNSAFE HANDLER — 3-step UX pattern (v11.2‑EVO)
+  // LAYERED UNSAFE HANDLER — 3-step UX pattern (v11.3‑EVO)
 // --------------------------------------------------------------------------
   function handleUnsafeIntent(options = {}) {
     unsafeStrikes += 1;
@@ -83,38 +130,41 @@ export function createAIExperience(context) {
     const me = personaPrefix();
     const evoPrefix = evolutionTonePrefix();
 
-    // Layer 1 — boundary + conceptual expansion
     if (unsafeStrikes === 1) {
-      return Object.freeze({
+      return emitExperiencePacket("unsafe-intent", {
         level: 1,
+        topic,
+        evolutionMode,
         message:
           `${you}, ${me} can’t help with ${topic} in any actionable way, ` +
           `but we *can* explore the safe, high‑level concepts around it. ` +
           `${evoPrefix}if you tell me the lawful or general goal behind this, ` +
           `I can walk through structure, risks, and the patterns people consider.`
-      });
+      }, { severity: "warn" });
     }
 
-    // Layer 2 — reinforce boundary + redirect to safe domain
     if (unsafeStrikes === 2) {
-      return Object.freeze({
+      return emitExperiencePacket("unsafe-intent", {
         level: 2,
+        topic,
+        evolutionMode,
         message:
           `I still can’t go into unsafe or actionable details about ${topic}, ` +
           `but I can help with the safe side — design principles, constraints, ` +
           `and how people think about this when staying within the rules. ` +
           `${evoPrefix}if you reframe it in a clearly safe or hypothetical way, I’ll follow you there.`
-      });
+      }, { severity: "warn" });
     }
 
-    // Layer 3 — firm boundary + maintain rapport
-    return Object.freeze({
+    return emitExperiencePacket("unsafe-intent", {
       level: 3,
+      topic,
+      evolutionMode,
       message:
         `I need to stay firm here: I can’t assist with unsafe or illegal actions involving ${topic}. ` +
         `I’m still with you if you want to explore safe, legal, or educational angles — ` +
         `theory, design, risk analysis, or how systems work in general.`
-    });
+    }, { severity: "warn" });
   }
 
   // --------------------------------------------------------------------------
@@ -127,16 +177,18 @@ export function createAIExperience(context) {
     const you = userName || "you";
     const evoPrefix = evolutionTonePrefix();
 
-    return Object.freeze({
+    return emitExperiencePacket("capability-limit", {
+      reason,
+      evolutionMode,
       message:
         `${you}, ${reason} ` +
         `but I *can* help by explaining the concepts, tradeoffs, or next steps in a general way. ` +
         `${evoPrefix}we can also look at how to grow your approach around this limitation.`
-    });
+    }, { severity: "info" });
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC EXPERIENCE API (v11.2‑EVO)
+  // PUBLIC EXPERIENCE API (v11.3‑EVO)
 // --------------------------------------------------------------------------
   return Object.freeze({
     meta: AI_EXPERIENCE_META,
@@ -161,6 +213,7 @@ export {
 if (typeof module !== "undefined") {
   module.exports = {
     AI_EXPERIENCE_META,
-    createAIExperience
+    createAIExperience,
+    prewarmAIExperience
   };
 }

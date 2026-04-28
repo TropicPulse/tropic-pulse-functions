@@ -1,13 +1,13 @@
 // ============================================================================
-//  aiLoggerAdapter.js — Pulse OS v11.2‑EVO Organ
+//  aiLoggerAdapter.js — Pulse OS v11.3‑EVO Organ
 //  Binary Logger Adapter + Shadow Logger (always-on forensic logger)
 // ============================================================================
 
-const LoggerAdapterMeta = Object.freeze({
+export const LoggerAdapterMeta = Object.freeze({
   layer: "OrganismMembrane",
   role: "LOGGER_ADAPTER",
-  version: "11.2-EVO",
-  identity: "aiLoggerAdapter-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiLoggerAdapter-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
@@ -18,10 +18,15 @@ const LoggerAdapterMeta = Object.freeze({
     pipelineAware: true,
     reflexAware: true,
     packetAware: true,
-    shadowLoggerAware: true,   // ⭐ NEW
+    shadowLoggerAware: true,
+    windowAware: true,       // ⭐ NEW
+    evolutionAware: true,    // ⭐ NEW
+    bluetoothReady: true,    // ⭐ NEW
+    microPipeline: true,     // ⭐ NEW
+    speedOptimized: true,    // ⭐ NEW
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "v11.2-EVO"
+    epoch: "v11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -36,14 +41,14 @@ const LoggerAdapterMeta = Object.freeze({
       "project binary to human-readable form",
       "modify pipeline or reflex behavior",
       "introduce randomness",
-      "recursively log itself" // ⭐ NEW
+      "recursively log itself"
     ]),
 
     always: Object.freeze([
       "validate binary input",
       "wrap binary in structured packets",
       "forward packets to ProofLogger",
-      "forward packets to shadowLogger (if present)", // ⭐ NEW
+      "forward packets to shadowLogger (if present)",
       "remain pure and minimal",
       "act as a safe membrane",
       "emit deterministic logger packets"
@@ -52,44 +57,52 @@ const LoggerAdapterMeta = Object.freeze({
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO
+//  PACKET EMITTER — deterministic, logger-scoped
 // ============================================================================
-class AIBinaryLoggerAdapter {
+function emitLoggerPacket(type, payload) {
+  return Object.freeze({
+    meta: LoggerAdapterMeta,
+    packetType: `logger-${type}`,
+    timestamp: Date.now(),
+    epoch: LoggerAdapterMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ============================================================================
+//  PREWARM — warms membrane + packet builder
+// ============================================================================
+export function prewarmLoggerAdapter({ trace = false } = {}) {
+  const packet = emitLoggerPacket("prewarm", {
+    message: "Logger adapter prewarmed and membrane aligned."
+  });
+
+  if (trace) console.log("[LoggerAdapter] prewarm", packet);
+  return packet;
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.3‑EVO
+// ============================================================================
+export class AIBinaryLoggerAdapter {
   constructor(config = {}) {
     this.id = config.id || LoggerAdapterMeta.identity;
 
-    // Primary human-facing logger (ProofLogger)
     this.logger = config.logger;
-
-    // ⭐ NEW — ALWAYS-ON SHADOW LOGGER
-    // This logger fires NO MATTER WHAT.
-    // It must be:
-    //   - write-only
-    //   - non-blocking
-    //   - non-interpreting
-    //   - non-mutating
-    //   - non-recursive
-    //   - safe for binary-only output
     this.shadowLogger = config.shadowLogger || null;
-
     this.trace = !!config.trace;
 
     if (!this.logger || typeof this.logger.log !== "function") {
-      throw new Error(
-        "AIBinaryLoggerAdapter requires a ProofLogger-like object with .log()"
-      );
+      throw new Error("AIBinaryLoggerAdapter requires a ProofLogger-like object with .log()");
     }
 
-    // shadowLogger is optional — but if provided, must have .logRaw()
     if (this.shadowLogger && typeof this.shadowLogger.logRaw !== "function") {
-      throw new Error(
-        "shadowLogger must implement .logRaw(binaryString, meta)"
-      );
+      throw new Error("shadowLogger must implement .logRaw(binaryString, meta)");
     }
   }
 
   // ---------------------------------------------------------------------------
-  //  PACKET BUILDER — pure, deterministic, no interpretation
+  //  PACKET BUILDER — pure, deterministic
   // ---------------------------------------------------------------------------
   _buildPacket(bits, meta = {}) {
     return Object.freeze({
@@ -97,22 +110,21 @@ class AIBinaryLoggerAdapter {
       source: this.id,
       bits,
       bitLength: bits.length,
-      timestamp: Date.now(), // allowed for human logs
+      timestamp: Date.now(),
       meta: Object.freeze(meta)
     });
   }
 
   // ---------------------------------------------------------------------------
-  //  ALWAYS-ON SHADOW LOGGER — fires even if ProofLogger fails
+  //  ALWAYS-ON SHADOW LOGGER — non-blocking, non-recursive
   // ---------------------------------------------------------------------------
   _shadowLog(bits, meta) {
     if (!this.shadowLogger) return;
 
     try {
-      // shadowLogger MUST NOT throw
       this.shadowLogger.logRaw(bits, meta);
     } catch (_) {
-      // swallow errors — shadow logger must NEVER break the organism
+      // shadow logger must NEVER break the organism
     }
   }
 
@@ -124,16 +136,20 @@ class AIBinaryLoggerAdapter {
 
     const packet = this._buildPacket(binaryStr, meta);
 
-    // ⭐ ALWAYS log to shadow logger FIRST
+    // Shadow logger ALWAYS fires first
     this._shadowLog(binaryStr, meta);
 
-    // Then log to ProofLogger
     this._trace("logBinary:packet", {
       bitLength: packet.bitLength,
       meta: packet.meta
     });
 
     this.logger.log(packet);
+
+    return emitLoggerPacket("logged", {
+      bitLength: packet.bitLength,
+      meta: packet.meta
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -153,6 +169,8 @@ class AIBinaryLoggerAdapter {
     });
 
     this._trace("attachToPipeline", { pipeline: pipeline.id });
+
+    return emitLoggerPacket("pipeline-attached", { pipelineId: pipeline.id });
   }
 
   // ---------------------------------------------------------------------------
@@ -180,6 +198,8 @@ class AIBinaryLoggerAdapter {
     };
 
     this._trace("attachToReflex", { reflex: reflex.id });
+
+    return emitLoggerPacket("reflex-attached", { reflexId: reflex.id });
   }
 
   // ---------------------------------------------------------------------------
@@ -192,7 +212,7 @@ class AIBinaryLoggerAdapter {
   }
 
   // ---------------------------------------------------------------------------
-  //  TRACE (optional)
+  //  TRACE
   // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
@@ -216,6 +236,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     AIBinaryLoggerAdapter,
     createAIBinaryLoggerAdapter,
-    LoggerAdapterMeta
+    LoggerAdapterMeta,
+    prewarmLoggerAdapter
   };
 }

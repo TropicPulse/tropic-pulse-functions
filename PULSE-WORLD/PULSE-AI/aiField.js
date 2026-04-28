@@ -1,5 +1,5 @@
 // ============================================================================
-//  aiField.js — Pulse OS v11.2‑EVO Organ
+//  aiField.js — Pulse OS v11.3‑EVO Organ
 //  Binary Membrane • Artery Metrics • Packet Bus Ready • Bluetooth‑Future Hooks
 // ============================================================================
 //
@@ -7,33 +7,34 @@
 //    This organ is the **Binary Field Layer**, the organism’s membrane
 //    between internal cognition and the external world.
 //
-//  v11.2‑EVO UPGRADES:
-//    • dualband-aware
-//    • packet-aware
-//    • evolution-aware
+//  v11.3‑EVO UPGRADES:
+//    • dualband-aware (binary vitals can align with organism snapshot)
+//    • packet-aware (explicit field packets, meta-tagged)
+//    • evolution-aware (field vitals usable by Evolution / Environment)
 //    • bluetooth-ready (future hooks only, no behavior change)
 //    • drift-proof meta
 //    • deterministic artery metrics
 //    • window-aware (safe vitals exposure)
+//    • prewarm-aware (field prewarm packet)
 //    • multi-instance, identity-safe
 // ============================================================================
 
 export const FieldMeta = Object.freeze({
   layer: "BinaryField",
   role: "BINARY_FIELD_LAYER",
-  version: "11.2-EVO",
-  identity: "aiBinaryField-v11.2-EVO",
+  version: "11.3-EVO",
+  identity: "aiBinaryField-v11.3-EVO",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
 
-    dualband: true,            // ⭐ NEW
-    packetAware: true,         // ⭐ NEW
-    evolutionAware: true,      // ⭐ NEW
-    windowAware: true,         // ⭐ NEW (safe vitals for UI)
-    bluetoothReady: true,      // ⭐ NEW (future integration hook)
+    dualband: true,            // dual-band aware
+    packetAware: true,         // packet-aware
+    evolutionAware: true,      // evolution-aware
+    windowAware: true,         // safe vitals for UI
+    bluetoothReady: true,      // future integration hook
 
     sentinelAware: true,
     metabolismAware: true,
@@ -51,7 +52,7 @@ export const FieldMeta = Object.freeze({
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "11.3-EVO"
   }),
 
   contract: Object.freeze({
@@ -66,8 +67,8 @@ export const FieldMeta = Object.freeze({
       "introduce randomness",
       "modify pipeline behavior",
       "modify reflex behavior",
-      "auto-connect bluetooth",        // ⭐ NEW
-      "expose raw device identifiers"  // ⭐ NEW
+      "auto-connect bluetooth",
+      "expose raw device identifiers"
     ]),
 
     always: Object.freeze([
@@ -79,13 +80,65 @@ export const FieldMeta = Object.freeze({
       "compute artery metrics deterministically",
       "expose binary vitals snapshot",
       "remain pure and minimal",
-      "prepare for bluetooth field channels (future)" // ⭐ NEW
+      "prepare for bluetooth field channels (future)"
     ])
   })
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO
+//  PACKET EMITTER — deterministic, field-scoped
+// ============================================================================
+function emitFieldPacket(type, payload) {
+  return Object.freeze({
+    meta: FieldMeta,
+    packetType: `field-${type}`,
+    timestamp: Date.now(),
+    epoch: FieldMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ============================================================================
+//  PREWARM — align field with dual-band snapshot (optional)
+// ============================================================================
+export function prewarmBinaryField(dualBand = null, { trace = false } = {}) {
+  try {
+    const binaryPressure =
+      dualBand?.binary?.metabolic?.pressure ??
+      dualBand?.binary?.pressure ??
+      0;
+
+    const binaryLoad =
+      dualBand?.binary?.metabolic?.load ??
+      dualBand?.binary?.load ??
+      0;
+
+    const payload = {
+      message: "Binary field prewarmed and artery metrics aligned.",
+      binary: {
+        pressure: binaryPressure,
+        load: binaryLoad
+      }
+    };
+
+    const packet = emitFieldPacket("prewarm", payload);
+
+    if (trace) {
+      // eslint-disable-next-line no-console
+      console.log("[aiBinaryField] prewarm", packet);
+    }
+
+    return packet;
+  } catch (err) {
+    return emitFieldPacket("prewarm-error", {
+      error: String(err),
+      message: "Binary field prewarm failed."
+    });
+  }
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v11.3‑EVO
 // ============================================================================
 class AIBinaryField {
   constructor(config = {}) {
@@ -104,7 +157,10 @@ class AIBinaryField {
     this.reflex = config.reflex || null;
 
     // Future‑ready: Bluetooth binary channel (not active)
-    this.bluetooth = config.bluetooth || null; // ⭐ placeholder only
+    this.bluetooth = config.bluetooth || null;
+
+    // Optional dual-band reference (for future vitals alignment)
+    this.dualBand = config.dualBand || null;
 
     this.trace = !!config.trace;
 
@@ -239,7 +295,6 @@ class AIBinaryField {
 
     const payload = {
       type: "binary-field-event",
-      timestamp: Date.now(),
       direction,
       bits,
       fieldState: vitals.fieldState,
@@ -253,19 +308,19 @@ class AIBinaryField {
         budget: vitals.budget,
         budgetBucket: vitals.budgetBucket
       },
-
-      // ⭐ Future: Bluetooth binary channel packet
       bluetooth: {
-        ready: !!this.bluetooth,
-        // no identifiers, no auto-connect
+        ready: !!this.bluetooth
       }
     };
 
     const json = JSON.stringify(payload);
     const encoded = this.encoder.encode(json);
 
-    return Object.freeze({
-      ...payload,
+    return emitFieldPacket("event", {
+      direction,
+      fieldState: payload.fieldState,
+      binary: payload.binary,
+      bluetooth: payload.bluetooth,
       bits: encoded,
       bitLength: encoded.length
     });
@@ -278,7 +333,9 @@ class AIBinaryField {
     const safe = this.sentinel.scan(bits);
     if (!safe) {
       this._trace("field:ingest:blocked", { reason: "sentinel-deny" });
-      return false;
+      return emitFieldPacket("ingest-blocked", {
+        reason: "sentinel-deny"
+      });
     }
 
     this._updateFieldState(bits, "in");
@@ -287,7 +344,7 @@ class AIBinaryField {
 
     this.pipeline?.run(packet.bits);
     this.reflex?.run(packet.bits);
-    this.logger?.logBinary(packet.bits, { source: "field-in" });
+    this.logger?.logBinary?.(packet.bits, { source: "field-in" });
 
     return packet;
   }
@@ -301,7 +358,7 @@ class AIBinaryField {
     const packet = this._generateFieldPacket(bits, "out");
 
     this.pipeline?.run(packet.bits);
-    this.logger?.logBinary(packet.bits, { source: "field-out" });
+    this.logger?.logBinary?.(packet.bits, { source: "field-out" });
 
     return packet;
   }
@@ -311,6 +368,7 @@ class AIBinaryField {
   // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
+    // eslint-disable-next-line no-console
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
@@ -334,6 +392,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     AIBinaryField,
     createAIBinaryField,
-    FieldMeta
+    FieldMeta,
+    prewarmBinaryField
   };
 }

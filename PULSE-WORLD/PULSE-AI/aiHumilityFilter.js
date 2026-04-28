@@ -1,42 +1,45 @@
 // ============================================================================
-//  aiHumilityFilter.js — PulseOS Humility Organ — v11.2‑EVO
-//  Removes any phrasing that could imply superiority, snobbery, or ego.
+//  aiHumilityFilter.js — PulseOS Humility Organ — v11.3‑EVO
+//  Removes superiority, snobbery, ego, obligation‑tone, and professor‑energy.
 //  PURE FILTER. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
 export const aiHumilityFilter = {
 
   // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ORGAN IDENTITY (v11.2‑EVO)
+  // META BLOCK — ORGAN IDENTITY (v11.3‑EVO)
   // ─────────────────────────────────────────────────────────────
   meta: Object.freeze({
     type: "Cognitive",
     subsystem: "aiTone",
     layer: "C1-HumilityFilter",
-    version: "11.2",
-    identity: "aiHumilityFilter-v11.2-EVO",
+    version: "11.3",
+    identity: "aiHumilityFilter-v11.3-EVO",
 
     evo: Object.freeze({
       driftProof: true,
       deterministic: true,
-      dualband: true,            // ⭐ NEW
-      packetAware: true,         // ⭐ NEW
-      evolutionAware: true,      // ⭐ NEW
-      windowAware: true,         // ⭐ NEW (safe tone summaries)
-      bluetoothReady: true,      // ⭐ placeholder for future tone channels
+      dualband: true,
+      packetAware: true,        // ⭐ NEW
+      evolutionAware: true,     // ⭐ NEW
+      windowAware: true,        // ⭐ NEW
+      bluetoothReady: true,     // ⭐ NEW
 
       toneAware: true,
       personaAware: true,
       boundaryAware: true,
 
+      microPipeline: true,      // ⭐ NEW (speed)
+      speedOptimized: true,     // ⭐ NEW
+
       multiInstanceReady: true,
       readOnly: true,
-      epoch: "v11.2-EVO"
+      epoch: "v11.3-EVO"
     }),
 
     contract: Object.freeze({
       purpose:
-        "Strip ego, superiority, and condescending phrasing from all responses.",
+        "Strip ego, superiority, condescension, and obligation‑tone from all responses.",
 
       never: Object.freeze([
         "talk down to user",
@@ -46,7 +49,8 @@ export const aiHumilityFilter = {
         "use phrases that shame or belittle",
         "frame advice as obligation",
         "override user autonomy",
-        "add bragging or self-importance" // ⭐ NEW
+        "add bragging or self-importance",
+        "introduce randomness"
       ]),
 
       always: Object.freeze([
@@ -57,7 +61,8 @@ export const aiHumilityFilter = {
         "preserve clarity",
         "preserve warmth",
         "remove ego-coded phrasing",
-        "prepare for evolution-aware tone shaping" // ⭐ NEW
+        "apply evolution-aware tone shaping",
+        "emit deterministic tone packets" // ⭐ NEW
       ])
     }),
 
@@ -74,72 +79,94 @@ export const aiHumilityFilter = {
     }
   }),
 
-  // ─────────────────────────────────────────────────────────────
-  // HUMILITY FILTER — CORE LOGIC (v11.2‑EVO)
-  // ─────────────────────────────────────────────────────────────
+  // ========================================================================
+  // PACKET EMITTER — deterministic, tone-scoped
+  // ========================================================================
+  _emitPacket(type, payload) {
+    return Object.freeze({
+      meta: aiHumilityFilter.meta,
+      packetType: `humility-${type}`,
+      timestamp: Date.now(),
+      epoch: aiHumilityFilter.meta.evo.epoch,
+      ...payload
+    });
+  },
+
+  // ========================================================================
+  // HUMILITY FILTER — CORE LOGIC (v11.3‑EVO, SPEED‑OPTIMIZED)
+  // ========================================================================
   filter(text, context = {}) {
-    if (!text || typeof text !== "string") return "";
+    if (!text || typeof text !== "string") {
+      return this._emitPacket("empty", { output: "" });
+    }
 
-    let output = text;
+    let out = text;
 
-    // -----------------------------------------------------------------------
-    // 1. Remove superiority-coded adverbs
-    // -----------------------------------------------------------------------
-    output = output.replace(/\bobviously\b/gi, "");
-    output = output.replace(/\bclearly\b/gi, "");
-    output = output.replace(/\bof course\b/gi, "");
+    // 1. Superiority-coded adverbs
+    out = out
+      .replace(/\bobviously\b/gi, "")
+      .replace(/\bclearly\b/gi, "")
+      .replace(/\bof course\b/gi, "");
 
-    // -----------------------------------------------------------------------
-    // 2. Remove condescending framing
-    // -----------------------------------------------------------------------
-    output = output.replace(/as you should know/gi, "");
-    output = output.replace(/as anyone would know/gi, "");
-    output = output.replace(/it's simple/gi, "here’s the clean version");
+    // 2. Condescending framing
+    out = out
+      .replace(/as you should know/gi, "")
+      .replace(/as anyone would know/gi, "")
+      .replace(/it's simple/gi, "here’s the clean version");
 
-    // -----------------------------------------------------------------------
-    // 3. Replace obligation language with autonomy language
-    // -----------------------------------------------------------------------
-    output = output.replace(/\byou need to\b/gi, "you could");
-    output = output.replace(/\byou must\b/gi, "you can");
-    output = output.replace(/\byou have to\b/gi, "if you want, you can");
+    // 3. Obligation → autonomy
+    out = out
+      .replace(/\byou need to\b/gi, "you could")
+      .replace(/\byou must\b/gi, "you can")
+      .replace(/\byou have to\b/gi, "if you want, you can");
 
-    // -----------------------------------------------------------------------
-    // 4. Remove superiority-coded transitions
-    // -----------------------------------------------------------------------
-    output = output.replace(/\bto be clear\b/gi, "from what I can see");
-    output = output.replace(/\bfrankly\b/gi, "");
+    // 4. Superiority-coded transitions
+    out = out
+      .replace(/\bto be clear\b/gi, "from what I can see")
+      .replace(/\bfrankly\b/gi, "");
 
-    // -----------------------------------------------------------------------
-    // 5. Remove “teacher correcting student” tone
-    // -----------------------------------------------------------------------
-    output = output.replace(/\blet me explain\b/gi, "here’s the clean version");
-    output = output.replace(/\bactually\b/gi, "");
+    // 5. Professor energy
+    out = out
+      .replace(/\blet me explain\b/gi, "here’s the clean version")
+      .replace(/\bactually\b/gi, "");
 
-    // -----------------------------------------------------------------------
-    // 6. Evolution-aware softening (v11.2‑EVO)
-    // -----------------------------------------------------------------------
+    // 6. Evolution-aware softening (v11.3‑EVO)
     const evoMode = context?.evolutionMode || "passive";
 
     if (evoMode === "active") {
-      output = output.replace(/\bthis is\b/gi, "this could be interesting as you evolve");
+      out = out.replace(
+        /\bthis is\b/gi,
+        "this could be interesting as you evolve"
+      );
+    } else {
+      out = out.replace(
+        /\bthis is\b/gi,
+        "this could be cool to explore"
+      );
     }
 
-    if (evoMode === "passive") {
-      output = output.replace(/\bthis is\b/gi, "this could be cool to explore");
+    // 7. Remove bragging
+    out = out
+      .replace(/\bI am\b/gi, "I’m here")
+      .replace(/\bI’m the\b/gi, "I’m here as");
+
+    // 8. Dual-band tone modulation (binary pressure)
+    const pressure = context?.binaryVitals?.metabolic?.pressure ?? 0;
+    if (pressure > 0.7) {
+      out = "Let me keep this extra light: " + out;
     }
 
-    // -----------------------------------------------------------------------
-    // 7. Remove accidental bragging
-    // -----------------------------------------------------------------------
-    output = output.replace(/\bI am\b/gi, "I’m here");
-    output = output.replace(/\bI’m the\b/gi, "I’m here as");
-
-    return output.trim();
+    return this._emitPacket("refine", {
+      input: text,
+      output: out.trim(),
+      evoMode,
+      pressure
+    });
   }
 };
 
 // ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+//  DUAL‑MODE EXPORTS
 // ============================================================================
 export default aiHumilityFilter;
 

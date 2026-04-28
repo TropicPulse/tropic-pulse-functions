@@ -50,6 +50,36 @@ export const DiagnosticsMeta = Object.freeze({
     ])
   })
 });
+// ---------------------------------------------------------
+//  DIAGNOSTICS PREWARM ENGINE — v11‑EVO
+// ---------------------------------------------------------
+export function prewarmDiagnosticsOrgan() {
+  try {
+    // Warm state creation
+    const warmState = createDiagnosticsState();
+
+    // Warm standalone API
+    const api = createDiagnosticsAPI();
+    api.flagMismatch("prewarm", "expected", "actual");
+    api.flagMissingField("missingField");
+    api.flagSlowdown("prewarm");
+    api.flagDrift("prewarm drift");
+
+    // Warm context-attached diagnostics
+    const warmContext = { trace: [] };
+    attachDiagnosticsOrgan(warmContext);
+
+    warmContext.flagMismatch("key", "expected", "actual");
+    warmContext.flagMissingField("missing");
+    warmContext.flagSlowdown("prewarm");
+    warmContext.flagDrift("prewarm drift");
+
+    return true;
+  } catch (err) {
+    console.error("[Diagnostics Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 
 // ============================================================================
@@ -146,6 +176,7 @@ export function createDiagnosticsAPI() {
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ---------------------------------------------------------
+prewarmDiagnosticsOrgan();
 
 // ESM
 export {

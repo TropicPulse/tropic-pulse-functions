@@ -1,14 +1,16 @@
 /**
- * aiReproduction.js — Pulse OS v11.2‑EVO Organ
+ * aiReproduction.js — Pulse OS v12.3‑EVO+ Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
- *   This organ is the **Binary Reproduction System** of the organism.
+ *   Binary Reproduction System of the organism.
  *
- *   It provides:
+ *   Provides:
  *     - organism cloning
  *     - genome duplication
  *     - multi-organism spawning
  *     - lineage-safe replication
+ *     - reproduction artery metrics v3 (throughput, pressure, cost, budget)
+ *     - multi-instance harmony + soft spiral warnings
  *
  *   It is the organism’s:
  *     • reproductive system
@@ -16,56 +18,23 @@
  *     • spawn factory
  *     • lineage multiplier
  *
- * WHY THIS ORGAN EXISTS:
- *   Without reproduction:
- *     - the organism is a singleton
- *     - no parallel organisms exist
- *     - no A/B evolution paths exist
- *     - no safe experimentation exists
- *
- *   Pulse OS v11‑EVO breaks this pattern.
- *
- *   This organ enforces:
- *       “THE ORGANISM MUST BE ABLE TO REPLICATE.”
- *
- * ARCHITECTURAL INTENT:
- *   This organ is NOT:
- *     - a genome generator (that’s Genome)
- *     - an evolution engine (that’s Evolution)
- *     - a scheduler
- *     - a governor
- *
- *   This organ IS:
- *     - a cloning layer
- *     - a genome duplicator
- *     - a spawn orchestrator
- *     - a reproduction engine
- *
- * REPRODUCTION MODEL:
- *   A reproduction event packet is:
- *
- *     {
- *       type: "binary-reproduction",
- *       timestamp: <ms>,
- *       parentId: <string>,
- *       childId: <string>,
- *       genomeFingerprint: <binary>,
- *       bits: <binary>,
- *       bitLength: <number>
- *     }
- *
- *   Entire reproduction event is encoded into binary.
+ *   v12.3‑EVO+ UPGRADE:
+ *     • Reproduction Artery v3 (rate, pressure, budget)
+ *     • Exported artery snapshot (getReproductionArtery)
+ *     • Multi-instance identity + harmony metrics
+ *     • Soft spiral warnings (no blocking, no limiting)
+ *     • Updated meta + epoch
  */
 
 // ============================================================================
-//  META BLOCK — v11.2‑EVO (DUALBAND + DUAL‑MODE EXPORTS)
+//  META BLOCK — v12.3‑EVO+
 // ============================================================================
 
 export const ReproductionMeta = Object.freeze({
   layer: "BinaryOrganism",
   role: "BINARY_REPRODUCTION_ORGAN",
-  version: "11.2-EVO",
-  identity: "aiBinaryReproduction-v11.2-EVO",
+  version: "12.3-EVO+",
+  identity: "aiBinaryReproduction-v12.3-EVO+",
 
   evo: Object.freeze({
     driftProof: true,
@@ -79,12 +48,12 @@ export const ReproductionMeta = Object.freeze({
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "11.2-EVO"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic organism cloning, genome duplication, and lineage-safe replication for the v11.2‑EVO organism.",
+      "Provide deterministic organism cloning, genome duplication, lineage-safe replication, and reproduction artery metrics v3 for the v12.3‑EVO+ organism.",
 
     never: Object.freeze([
       "use randomness",
@@ -102,6 +71,7 @@ export const ReproductionMeta = Object.freeze({
       "duplicate genome deterministically",
       "emit binary-only reproduction packets",
       "record lineage deterministically",
+      "compute reproduction artery metrics v3",
       "remain drift-proof",
       "remain deterministic",
       "remain non-blocking"
@@ -110,7 +80,7 @@ export const ReproductionMeta = Object.freeze({
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v11.2‑EVO (LOGIC UNCHANGED)
+//  ORGAN IMPLEMENTATION — v12.3‑EVO+
 // ============================================================================
 
 export class AIBinaryReproduction {
@@ -126,7 +96,13 @@ export class AIBinaryReproduction {
      *   logger      → aiBinaryLoggerAdapter instance (optional)
      *   pipeline    → aiBinaryPipeline instance (optional)
      *   reflex      → aiBinaryReflex instance (optional)
+     *   monitor     → optional monitor hook (artery snapshot observer)
+     *                  (artery) => void
      *   trace       → deterministic visibility hook
+     *
+     *   control:
+     *     windowMs        → time window for rate metrics (default: 60000 ms)
+     *     recommendedRate → recommended max clones per second (soft, non-blocking)
      */
     this.id = config.id || "ai-binary-reproduction";
     this.encoder = config.encoder;
@@ -136,7 +112,27 @@ export class AIBinaryReproduction {
     this.logger = config.logger || null;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
+    this.monitor = config.monitor || null;
     this.trace = !!config.trace;
+
+    this.slice = config.slice || "default";
+
+    this.windowMs =
+      typeof config.windowMs === "number" && config.windowMs > 0
+        ? config.windowMs
+        : 60000;
+
+    this.recommendedRate =
+      typeof config.recommendedRate === "number" && config.recommendedRate > 0
+        ? config.recommendedRate
+        : 32;
+
+    // multi-instance identity
+    this.instanceIndex = AIBinaryReproduction._registerInstance();
+    // counters for artery metrics
+    this._totalClones = 0;
+    this._windowStart = Date.now();
+    this._windowCount = 0;
 
     if (!this.encoder) {
       throw new Error("AIBinaryReproduction requires aiBinaryAgent encoder");
@@ -150,6 +146,124 @@ export class AIBinaryReproduction {
   }
 
   // ---------------------------------------------------------
+  //  STATIC INSTANCE REGISTRY (MULTI-INSTANCE HARMONY)
+  // ---------------------------------------------------------
+
+  static _registerInstance() {
+    if (typeof AIBinaryReproduction._instanceCount !== "number") {
+      AIBinaryReproduction._instanceCount = 0;
+    }
+    const index = AIBinaryReproduction._instanceCount;
+    AIBinaryReproduction._instanceCount += 1;
+    return index;
+  }
+
+  static getInstanceCount() {
+    return typeof AIBinaryReproduction._instanceCount === "number"
+      ? AIBinaryReproduction._instanceCount
+      : 0;
+  }
+
+  // ---------------------------------------------------------
+  //  REPRODUCTION ARTERY METRICS v3
+  // ---------------------------------------------------------
+
+  _rollWindow(now) {
+    if (now - this._windowStart >= this.windowMs) {
+      this._windowStart = now;
+      this._windowCount = 0;
+    }
+  }
+
+  _computeReproductionArtery() {
+    const now = Date.now();
+    this._rollWindow(now);
+
+    const elapsedMs = Math.max(1, now - this._windowStart);
+    const ratePerMs = this._windowCount / elapsedMs;
+    const ratePerSec = ratePerMs * 1000;
+
+    const instanceCount = AIBinaryReproduction.getInstanceCount();
+    const harmonicLoad =
+      instanceCount > 0 ? ratePerSec / instanceCount : ratePerSec;
+
+    const rateFactor =
+      this.recommendedRate > 0
+        ? Math.min(1, harmonicLoad / this.recommendedRate)
+        : 0;
+
+    const throughput = Math.max(0, Math.min(1, 1 - rateFactor));
+    const pressure = Math.max(0, Math.min(1, rateFactor));
+    const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
+    const budget = Math.max(0, Math.min(1, throughput - cost));
+
+    const artery = {
+      slice: this.slice,
+
+      instanceIndex: this.instanceIndex,
+      instanceCount,
+
+      totalClones: this._totalClones,
+      windowMs: this.windowMs,
+      windowCount: this._windowCount,
+      ratePerSec,
+      harmonicLoad,
+
+      throughput,
+      pressure,
+      cost,
+      budget,
+
+      throughputBucket: this._bucketLevel(throughput),
+      pressureBucket: this._bucketPressure(pressure),
+      costBucket: this._bucketCost(cost),
+      budgetBucket: this._bucketLevel(budget),
+
+      recommendedRate: this.recommendedRate,
+      timestamp: now
+    };
+
+    // soft spiral detection (no blocking)
+    if (
+      artery.pressureBucket === "overload" ||
+      artery.budgetBucket === "critical"
+    ) {
+      this._warn("reproduction:spiral:detected", artery);
+    }
+
+    return artery;
+  }
+
+  _bucketLevel(v) {
+    if (v >= 0.9) return "elite";
+    if (v >= 0.75) return "high";
+    if (v >= 0.5) return "medium";
+    if (v >= 0.25) return "low";
+    return "critical";
+  }
+
+  _bucketPressure(v) {
+    if (v >= 0.9) return "overload";
+    if (v >= 0.7) return "high";
+    if (v >= 0.4) return "medium";
+    if (v > 0) return "low";
+    return "none";
+  }
+
+  _bucketCost(v) {
+    if (v >= 0.8) return "heavy";
+    if (v >= 0.5) return "moderate";
+    if (v >= 0.2) return "light";
+    if (v > 0) return "negligible";
+    return "none";
+  }
+
+  // PUBLIC EXPORT
+  getReproductionArtery() {
+    return this._computeReproductionArtery();
+  }
+
+  // ---------------------------------------------------------
   //  CHILD ID GENERATION
   // ---------------------------------------------------------
 
@@ -157,11 +271,14 @@ export class AIBinaryReproduction {
     const genome = this.genome.loadGenome();
     const fp = genome?.fingerprint || "00000000";
 
-    // deterministic, drift-proof, lineage-safe
     const suffix = fp.slice(0, 8);
     const childId = `${parentId}-child-${suffix}`;
 
-    this._trace("child:id:generated", { parentId, childId });
+    this._trace("child:id:generated", {
+      parentId,
+      childId,
+      instanceIndex: this.instanceIndex
+    });
 
     return childId;
   }
@@ -191,7 +308,8 @@ export class AIBinaryReproduction {
     this._trace("reproduction:packet", {
       parentId,
       childId,
-      bits: packet.bitLength
+      bits: packet.bitLength,
+      instanceIndex: this.instanceIndex
     });
 
     return packet;
@@ -205,39 +323,36 @@ export class AIBinaryReproduction {
    * cloneOrganism(parentId, parentConfig)
    * -------------------------------------
    * Creates a new organism instance with the same genome.
+   * All abilities preserved; now monitored via artery metrics.
    */
   cloneOrganism(parentId, parentConfig = {}) {
-    // 1. Get current genome
     const genome = this.genome.loadGenome();
     if (!genome) {
       throw new Error("AIBinaryReproduction: no genome available for cloning");
     }
 
-    // 2. Generate child ID
     const childId = this._generateChildId(parentId);
 
-    // 3. Build child config (inherits but can override)
     const childConfig = {
       ...parentConfig,
       organismId: childId,
       genome
     };
 
-    // 4. Create new organism instance
     const childOrganism = this.factory(childConfig);
 
-    // 5. Generate reproduction packet
     const packet = this._generateReproductionPacket(parentId, childId, genome);
 
-    // 6. Emit packet
     if (this.pipeline) this.pipeline.run(packet.bits);
     if (this.reflex) this.reflex.run(packet.bits);
-    if (this.logger) {
+    if (this.logger && typeof this.logger.logBinary === "function") {
       this.logger.logBinary(packet.bits, { source: "reproduction" });
     }
 
-    // 7. Register in ancestry (if available)
-    if (this.ancestry && typeof this.ancestry.recordReproduction === "function") {
+    if (
+      this.ancestry &&
+      typeof this.ancestry.recordReproduction === "function"
+    ) {
       this.ancestry.recordReproduction({
         parentId,
         childId,
@@ -246,12 +361,33 @@ export class AIBinaryReproduction {
       });
     }
 
-    this._trace("reproduction:clone", { parentId, childId });
+    const now = Date.now();
+    this._rollWindow(now);
+    this._totalClones += 1;
+    this._windowCount += 1;
+
+    const artery = this._computeReproductionArtery();
+
+    if (typeof this.monitor === "function") {
+      try {
+        this.monitor(artery);
+      } catch (err) {
+        this._trace("monitor:error", { error: String(err) });
+      }
+    }
+
+    this._trace("reproduction:clone", {
+      parentId,
+      childId,
+      artery,
+      instanceIndex: this.instanceIndex
+    });
 
     return {
       childId,
       childOrganism,
-      packet
+      packet,
+      artery
     };
   }
 
@@ -263,6 +399,7 @@ export class AIBinaryReproduction {
    * spawnMany(parentId, parentConfig, count)
    * ---------------------------------------
    * Spawns multiple child organisms from the same parent.
+   * Behavior preserved; artery metrics reflect burst.
    */
   spawnMany(parentId, parentConfig = {}, count = 1) {
     const results = [];
@@ -274,7 +411,8 @@ export class AIBinaryReproduction {
 
     this._trace("reproduction:spawnMany", {
       parentId,
-      count: results.length
+      count: results.length,
+      instanceIndex: this.instanceIndex
     });
 
     return results;
@@ -284,14 +422,35 @@ export class AIBinaryReproduction {
   //  INTERNAL HELPERS
   // ---------------------------------------------------------
 
+  _warn(event, artery) {
+    if (this.logger && typeof this.logger.warn === "function") {
+      this.logger.warn(event, {
+        artery,
+        instanceIndex: this.instanceIndex,
+        slice: this.slice
+      });
+    }
+    if (typeof this.monitor === "function") {
+      try {
+        this.monitor(artery);
+      } catch (err) {
+        this._trace("monitor:error", { error: String(err) });
+      }
+    }
+    this._trace(event, { artery, instanceIndex: this.instanceIndex });
+  }
+
   _trace(event, payload) {
     if (!this.trace) return;
-    console.log(`[${this.id}] ${event}`, payload);
+    console.log(
+      `[${this.id}:${this.slice}#${this.instanceIndex}] ${event}`,
+      payload
+    );
   }
 }
 
 // ============================================================================
-//  FACTORY — v11.2‑EVO STYLE
+//  FACTORY — v12.3‑EVO+
 // ============================================================================
 
 export function createAIBinaryReproduction(config) {

@@ -62,7 +62,7 @@ export const BrainstemMeta = Object.freeze({
 import { createArchitectAPI } from "./aiArchitect.js";
 import { createTouristAPI } from "./aiTourist.js";
 import { createEnvironmentAPI } from "./aiEnvironment.js";
-import { createPowerAPI } from "./aiPower.js";
+import { createPowerAPI } from "./aiPowerPrime.js";
 import { createEvolutionAPI } from "./aiEvolution.js";
 import { createEarnAPI } from "./aiEarn.js";
 import { createDiagnosticsWriteAPI } from "./aiDiagnosticsWrite.js";

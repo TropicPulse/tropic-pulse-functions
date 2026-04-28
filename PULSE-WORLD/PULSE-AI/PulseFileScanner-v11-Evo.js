@@ -1,6 +1,6 @@
 // ============================================================================
-// FILE: /apps/PULSE-AI/PulseFileScanner-v11.2-EVO+.js
-// PULSE AI — v11.2‑EVO+
+// FILE: /apps/PULSE-AI/PulseFileScanner-v12.3-EVO+.js
+// PULSE AI — v12.3‑EVO+
 // “THE FILE SCANNER ORGAN — SYMBOLIC COGNITION + STRUCTURAL ANALYSIS”
 // ============================================================================
 //
@@ -13,10 +13,7 @@
 //   • Cortex-safe (symbolic-only)
 //   • Evolution-aware (lineage + drift tagging)
 //   • Deterministic
-//
-// MODES:
-//   • backendMode: true  → filesystem allowed (Node backend)
-//   • backendMode: false → no filesystem (frontend / UI / browser)
+//   • Emits FileScanner-Artery v3 (symbolic-only)
 // ============================================================================
 
 export const PulseFileScannerMeta = Object.freeze({
@@ -24,8 +21,8 @@ export const PulseFileScannerMeta = Object.freeze({
   subsystem: "aiFileScanner",
   layer: "PulseAICognition",
   role: "FILE_SCANNER_ORGAN",
-  version: "11.2-EVO+",
-  identity: "PulseFileScanner-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "PulseFileScanner-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -38,8 +35,9 @@ export const PulseFileScannerMeta = Object.freeze({
     mutationSafe: true,
     nonBlocking: true,
     multiInstanceReady: true,
+    scannerArteryAware: true,
     futureEvolutionReady: true,
-    epoch: "11.2-EVO+"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -47,6 +45,7 @@ export const PulseFileScannerMeta = Object.freeze({
       "Provide symbolic-only file cognition",
       "Analyze file structure without execution",
       "Detect drift, ESM/CJS conflicts, and import surfaces",
+      "Emit symbolic-only FileScanner-Artery v3",
       "Remain Cortex-safe and Evolution-aware"
     ],
     never: [
@@ -70,9 +69,32 @@ export const PulseFileScannerMeta = Object.freeze({
 });
 
 // ============================================================================
-// FACTORY — Cortex/Brain/Evolution inject environment
+// HELPERS — BUCKETS + PRESSURE
 // ============================================================================
-export function createPulseFileScanner({ backendMode = false, Evolution = null } = {}) {
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
+
+// ============================================================================
+// FILE SCANNER FACTORY — v12.3‑EVO+
+// ============================================================================
+export function createPulseFileScanner({
+  backendMode = false,
+  Evolution = null,
+  binaryVitals = {}
+} = {}) {
   let fs = null;
   let path = null;
 
@@ -81,13 +103,22 @@ export function createPulseFileScanner({ backendMode = false, Evolution = null }
     path = require("path");
   }
 
+  // Prewarm (symbolic-only)
+  function prewarm() {
+    return true;
+  }
+
+  // -------------------------------------------------------------------------
+  // FILE SCAN (symbolic-only)
+  // -------------------------------------------------------------------------
   function scanFile(filePath) {
     if (!backendMode) {
       return {
         ok: false,
         error: "BACKEND_DISABLED",
         message: "File scanning requires backendMode=true",
-        filePath
+        filePath,
+        artery: getScannerArterySnapshot({ ok: false, filePath, binaryVitals })
       };
     }
 
@@ -99,7 +130,8 @@ export function createPulseFileScanner({ backendMode = false, Evolution = null }
         ok: false,
         error: "FILE_NOT_FOUND",
         filePath,
-        fullPath
+        fullPath,
+        artery: getScannerArterySnapshot({ ok: false, filePath, binaryVitals })
       };
     }
 
@@ -109,13 +141,70 @@ export function createPulseFileScanner({ backendMode = false, Evolution = null }
     Evolution?.recordLineage?.("scanner-file-analyzed", { filePath });
     Evolution?.scanDrift?.({ scannerReport: report });
 
-    return report;
+    return {
+      ...report,
+      artery: getScannerArterySnapshot({
+        ok: true,
+        filePath,
+        report,
+        binaryVitals
+      })
+    };
   }
 
   return Object.freeze({
     meta: PulseFileScannerMeta,
-    scanFile
+    prewarm,
+    scanFile,
+    getScannerArterySnapshot
   });
+}
+
+// ============================================================================
+// FILE SCANNER ARTERY v3 — Symbolic-only, deterministic
+// ============================================================================
+export function getScannerArterySnapshot({
+  ok = false,
+  filePath = "",
+  report = null,
+  binaryVitals = {}
+} = {}) {
+  const pressure = extractBinaryPressure(binaryVitals);
+
+  const driftCount = report?.drift?.length || 0;
+  const importCount = report?.imports?.length || 0;
+  const esmCount = report?.esmExports?.length || 0;
+  const cjsCount = report?.cjsExports?.length || 0;
+
+  const localPressure =
+    driftCount > 0 ? 0.6 :
+    esmCount > 0 && cjsCount > 0 ? 0.5 :
+    importCount > 10 ? 0.3 :
+    0.1;
+
+  const fusedPressure = Math.max(
+    0,
+    Math.min(1, 0.7 * localPressure + 0.3 * pressure)
+  );
+
+  return {
+    organism: {
+      pressure: fusedPressure,
+      pressureBucket: bucketPressure(fusedPressure)
+    },
+    file: {
+      ok,
+      filePath,
+      driftCount,
+      esmCount,
+      cjsCount,
+      importCount
+    },
+    binary: {
+      pressure,
+      pressureBucket: bucketPressure(pressure)
+    }
+  };
 }
 
 // ============================================================================
@@ -200,12 +289,13 @@ ${r.imports.map(i => " - " + i).join("\n") || " none"}
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v11.2‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     PulseFileScannerMeta,
-    createPulseFileScanner
+    createPulseFileScanner,
+    getScannerArterySnapshot
   };
 }

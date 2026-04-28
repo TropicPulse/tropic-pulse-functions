@@ -95,13 +95,64 @@ import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
 import { bootCortex } from "./PulseOSBrainCortex.js";
 
+// ============================================================================
+//  BRAIN PREWARM ENGINE — v11-EVO-BINARY-MAX
+//  - Prewarm CNS identity + contracts + cortex boot signatures.
+//  - Touches ONLY PulseIQMap, PulseOrganismMap, bootCortex (law-compliant).
+//  - No binary execution, no external mutation, no randomness.
+// ============================================================================
+function prewarmPulseOSBrain() {
+  try {
+    // Touch IQ map entries (design + logging + long-term memory)
+    const iqKeys = Object.keys(PulseIQMap || {});
+    for (const k of iqKeys) {
+      const _ = PulseIQMap[k];
+    }
+
+    // Touch organism map entries (organ layout + lineage)
+    const orgKeys = Object.keys(PulseOrganismMap || {});
+    for (const k of orgKeys) {
+      const _ = PulseOrganismMap[k];
+    }
+
+    // Prewarm Cortex boot wiring with a minimal synthetic config
+    // (no real routes, no external mutation)
+    const syntheticBootConfig = {
+      mode: "prewarm",
+      identityKind: "none",
+      sceneType: "cns-prewarm",
+      workloadClass: "brain-prewarm",
+      dispatchSignature: "PulseOSBrain.prewarm",
+      shapeSignature: "CNS-A1"
+    };
+
+    try {
+      // bootCortex is allowed by law; we call it with a harmless config
+      bootCortex(syntheticBootConfig, {
+        PulseIQMap,
+        PulseOrganismMap
+      });
+    } catch (err) {
+      // Cortex boot prewarm is best-effort only
+      console.error("[PulseOSBrain Prewarm] bootCortex prewarm failed:", err);
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[PulseOSBrain Prewarm] Failed:", err);
+    return false;
+  }
+}
 
 // ============================================================================
 // 0) THE REAL CNS BRAIN — EXPORTED AS PulseOSBrain
 // ============================================================================
-export const PulseOSBrain = {
 
-  // -------------------------------------------------------------------------
+// One-time CNS brain prewarm at module load
+prewarmPulseOSBrain();
+
+export const PulseOSBrain = {
+   // -------------------------------------------------------------------------
   // Identity — Organism-wide CNS contract
   // -------------------------------------------------------------------------
   PulseRole: {

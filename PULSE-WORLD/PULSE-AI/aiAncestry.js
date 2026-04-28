@@ -1,32 +1,14 @@
-/**
- * aiAncestry.js — Pulse OS v11.2‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Ancestry System** of the organism.
- *
- *   It provides:
- *     - lineage tracking
- *     - reproduction history
- *     - parent/child graph
- *     - evolutionary timeline
- *     - ancestry queries
- *
- *   It is the organism’s:
- *     • genealogical archive
- *     • lineage ledger
- *     • reproduction historian
- *     • ancestry graph engine
- */
-
-// ---------------------------------------------------------
-//  META BLOCK — v11.2‑EVO
-// ---------------------------------------------------------
+// ============================================================================
+//  PULSE OS v12.3‑EVO+ — ANCESTRY ORGAN
+//  Genealogical Archive • Lineage Ledger • Reproduction Historian
+//  PURE BINARY. ZERO MUTATION. ZERO RANDOMNESS.
+// ============================================================================
 
 export const AncestryMeta = Object.freeze({
   layer: "Ancestry",
   role: "ANCESTRY_SYSTEM",
-  version: "11.2-EVO",
-  identity: "aiAncestry-v11.2-EVO",
+  version: "12.3-EVO+",
+  identity: "aiAncestry-v12.3-EVO+",
 
   evo: Object.freeze({
     deterministic: true,
@@ -35,12 +17,13 @@ export const AncestryMeta = Object.freeze({
     memoryAware: true,
     lineageAware: true,
     reproductionAware: true,
-    binaryEventAware: true,   // emits ancestry-event packets
+    binaryEventAware: true,
     pipelineAware: true,
     reflexAware: true,
     loggerAware: true,
+    ancestryArteryAware: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO"
+    epoch: "12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -66,10 +49,28 @@ export const AncestryMeta = Object.freeze({
   })
 });
 
-// ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION
-// ---------------------------------------------------------
+// ============================================================================
+// HELPERS — PRESSURE + BUCKETS
+// ============================================================================
+function extractBinaryPressure(binaryVitals = {}) {
+  if (binaryVitals?.layered?.organism?.pressure != null)
+    return binaryVitals.layered.organism.pressure;
+  if (binaryVitals?.binary?.pressure != null)
+    return binaryVitals.binary.pressure;
+  return 0;
+}
 
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v12.3‑EVO+
+// ============================================================================
 export class AIAncestry {
   constructor(config = {}) {
     this.id = config.id || AncestryMeta.identity;
@@ -80,31 +81,30 @@ export class AIAncestry {
     this.reflex = config.reflex || null;
     this.trace = !!config.trace;
 
-    if (!this.encoder || typeof this.encoder.encode !== "function") {
+    if (!this.encoder?.encode) {
       throw new Error("AIAncestry requires aiBinaryAgent encoder");
     }
-    if (
-      !this.memory ||
-      typeof this.memory.write !== "function" ||
-      typeof this.memory.read !== "function"
-    ) {
+    if (!this.memory?.write || !this.memory?.read) {
       throw new Error("AIAncestry requires a binary memory organ with write/read");
     }
 
     this.lineage = [];
   }
 
-  // ---------------------------------------------------------
-  //  RECORDING
-  // ---------------------------------------------------------
+  prewarm() {
+    return true;
+  }
 
-  recordReproduction(record) {
+  // ========================================================================
+  //  RECORDING — deterministic, binary‑safe
+  // ========================================================================
+  recordReproduction(record, binaryVitals = {}) {
     const frozenRecord = Object.freeze({ ...record });
 
     this.lineage.push(frozenRecord);
     this._trace("ancestry:recorded", frozenRecord);
 
-    const packet = this._generateAncestryPacket(frozenRecord);
+    const packet = this._generateAncestryPacket(frozenRecord, binaryVitals);
 
     if (this.pipeline) this.pipeline.run(packet.bits);
     if (this.reflex) this.reflex.run(packet.bits);
@@ -113,15 +113,17 @@ export class AIAncestry {
     return packet;
   }
 
-  // ---------------------------------------------------------
-  //  ANCESTRY PACKET
-  // ---------------------------------------------------------
+  // ========================================================================
+  //  ANCESTRY PACKET v3 — binary‑aware, deterministic
+  // ========================================================================
+  _generateAncestryPacket(record, binaryVitals = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
 
-  _generateAncestryPacket(record) {
     const payload = {
       type: "ancestry-event",
       timestamp: Date.now(),
-      record
+      record,
+      pressure: binaryPressure
     };
 
     const json = JSON.stringify(payload);
@@ -130,7 +132,8 @@ export class AIAncestry {
     const packet = Object.freeze({
       ...payload,
       bits: binary,
-      bitLength: binary.length
+      bitLength: binary.length,
+      pressureBucket: bucketPressure(binaryPressure)
     });
 
     this._trace("ancestry:packet", { bits: packet.bitLength });
@@ -138,23 +141,25 @@ export class AIAncestry {
     return packet;
   }
 
-  // ---------------------------------------------------------
-  //  STORAGE
-  // ---------------------------------------------------------
-
-  store() {
+  // ========================================================================
+  //  STORAGE v3 — binary‑safe, deterministic
+  // ========================================================================
+  store(binaryVitals = {}) {
     const json = JSON.stringify(this.lineage);
     const binary = this.encoder.encode(json);
 
     const key = this.encoder.encode("ancestry:records");
     this.memory.write(key, binary);
 
-    this._trace("ancestry:stored", { count: this.lineage.length });
+    this._trace("ancestry:stored", {
+      count: this.lineage.length,
+      pressure: extractBinaryPressure(binaryVitals)
+    });
 
     return binary;
   }
 
-  load() {
+  load(binaryVitals = {}) {
     const key = this.encoder.encode("ancestry:records");
     const binary = this.memory.read(key);
 
@@ -169,15 +174,17 @@ export class AIAncestry {
 
     this.lineage = parsed.map((r) => Object.freeze({ ...r }));
 
-    this._trace("ancestry:loaded", { count: this.lineage.length });
+    this._trace("ancestry:loaded", {
+      count: this.lineage.length,
+      pressure: extractBinaryPressure(binaryVitals)
+    });
 
     return Object.freeze([...this.lineage]);
   }
 
-  // ---------------------------------------------------------
-  //  QUERIES
-  // ---------------------------------------------------------
-
+  // ========================================================================
+  //  QUERIES — deterministic lineage graph
+  // ========================================================================
   getChildren(parentId) {
     return this.lineage.filter((r) => r.parentId === parentId);
   }
@@ -189,7 +196,6 @@ export class AIAncestry {
   getSiblings(childId) {
     const parent = this.getParent(childId);
     if (!parent) return [];
-
     return this.lineage
       .filter((r) => r.parentId === parent.parentId && r.childId !== childId)
       .map((r) => r.childId);
@@ -211,20 +217,51 @@ export class AIAncestry {
     return tree;
   }
 
-  // ---------------------------------------------------------
-  //  INTERNAL HELPERS
-  // ---------------------------------------------------------
+  // ========================================================================
+  //  ANCESTRY ARTERY v3 — symbolic-only, deterministic
+  // ========================================================================
+  ancestryArtery({ binaryVitals = {} } = {}) {
+    const binaryPressure = extractBinaryPressure(binaryVitals);
 
+    const eventCount = this.lineage.length;
+    const parentCount = new Set(this.lineage.map((r) => r.parentId)).size;
+    const childCount = new Set(this.lineage.map((r) => r.childId)).size;
+
+    const localPressure =
+      (eventCount > 50 ? 0.3 : 0) +
+      (parentCount > 20 ? 0.3 : 0) +
+      (childCount > 20 ? 0.3 : 0);
+
+    const pressure = Math.max(
+      0,
+      Math.min(1, 0.6 * localPressure + 0.4 * binaryPressure)
+    );
+
+    return {
+      organism: {
+        pressure,
+        pressureBucket: bucketPressure(pressure)
+      },
+      lineage: {
+        events: eventCount,
+        parents: parentCount,
+        children: childCount
+      }
+    };
+  }
+
+  // ========================================================================
+  //  INTERNAL TRACE
+  // ========================================================================
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 // FACTORY EXPORT (ESM + CommonJS)
-// ---------------------------------------------------------
-
+// ============================================================================
 export function createAIAncestry(config) {
   return new AIAncestry(config);
 }

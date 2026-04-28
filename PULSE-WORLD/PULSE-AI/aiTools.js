@@ -1,10 +1,10 @@
 // ============================================================================
-//  PULSE OS v11.2‑EVO+ — THE INSTRUMENTS
+//  PULSE OS v12.3‑EVO+ — THE INSTRUMENTS
 //  Cognitive Analysis Organ • Diagnostic Tools • Evolutionary Sensors
 //  PURE ANALYSIS. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
 // ============================================================================
 //
-// ROLE (v11.2‑EVO+):
+// ROLE (v12.3‑EVO+):
 //   The INSTRUMENTS organ provides:
 //     • Schema analysis
 //     • Drift detection
@@ -17,7 +17,7 @@
 //   They NEVER mutate data, NEVER modify external systems,
 //   NEVER introduce randomness, and NEVER override Router/Cortex decisions.
 //
-// ARCHITECTURE (v11.2‑EVO+):
+// ARCHITECTURE (v12.3‑EVO+):
 //   INSTRUMENTS = Cognitive Analysis Organ
 //     → Reads data
 //     → Translates to PulseFields
@@ -35,7 +35,7 @@
 //   • ALL cognition lives in aiTools.js.
 //   • INSTRUMENTS is imported BY aiTools.js.
 //
-// SECURITY POLICY (v11.2‑EVO+):
+// SECURITY POLICY (v12.3‑EVO+):
 //   • This file contains NO secure logic.
 //   • Secure CNS logic belongs ONLY in Brainstem.
 //   • This file must remain pure, deterministic, and read‑only.
@@ -53,8 +53,8 @@ export const AI_INSTRUMENTS_META = Object.freeze({
   subsystem: "aiInstruments",
   layer: "PulseAIInstruments",
   role: "INSTRUMENTS_ORGAN",
-  version: "11.2-EVO+",
-  identity: "aiInstruments-v11.2-EVO+",
+  version: "12.3-EVO+",
+  identity: "aiInstruments-v12.3-EVO+",
   target: "full-mesh",
 
   evo: Object.freeze({
@@ -74,7 +74,8 @@ export const AI_INSTRUMENTS_META = Object.freeze({
     mutationSafe: true,
     architectAware: true,
     multiInstanceReady: true,
-    epoch: "v11.2-EVO+"
+    arteryAware: true,
+    epoch: "v12.3-EVO+"
   }),
 
   contract: Object.freeze({
@@ -118,9 +119,129 @@ import { translateSQLSchema } from "../PULSE-translator/sqlToPulse.js";
 import { validatePulseField } from "../PULSE-SPECS/pulseFields.js";
 
 // ============================================================================
+// SECTION 2 — ANALYSIS ARTERY v3 (PURE, STATELESS, PER‑PROCESS)
+// ============================================================================
+
+const _INSTRUMENTS_ARTERY = {
+  windowMs: 60000,
+  windowStart: Date.now(),
+  windowAnalyses: 0,
+  windowHeavyAnalyses: 0,
+  totalAnalyses: 0,
+  totalHeavyAnalyses: 0,
+  instanceCount: 0
+};
+
+function _registerInstrumentsInstance() {
+  const index = _INSTRUMENTS_ARTERY.instanceCount;
+  _INSTRUMENTS_ARTERY.instanceCount += 1;
+  return index;
+}
+
+export const AI_INSTRUMENTS_INSTANCE_INDEX = _registerInstrumentsInstance();
+
+function _rollInstrumentsWindow(now) {
+  if (now - _INSTRUMENTS_ARTERY.windowStart >= _INSTRUMENTS_ARTERY.windowMs) {
+    _INSTRUMENTS_ARTERY.windowStart = now;
+    _INSTRUMENTS_ARTERY.windowAnalyses = 0;
+    _INSTRUMENTS_ARTERY.windowHeavyAnalyses = 0;
+  }
+}
+
+function _bucketLevel(v) {
+  if (v >= 0.9) return "elite";
+  if (v >= 0.75) return "high";
+  if (v >= 0.5) return "medium";
+  if (v >= 0.25) return "low";
+  return "critical";
+}
+
+function _bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
+
+function _bucketCost(v) {
+  if (v >= 0.8) return "heavy";
+  if (v >= 0.5) return "moderate";
+  if (v >= 0.2) return "light";
+  if (v > 0) return "negligible";
+  return "none";
+}
+
+function _computeInstrumentsArtery() {
+  const now = Date.now();
+  _rollInstrumentsWindow(now);
+
+  const elapsedMs = Math.max(1, now - _INSTRUMENTS_ARTERY.windowStart);
+  const analysesPerSec =
+    (_INSTRUMENTS_ARTERY.windowAnalyses / elapsedMs) * 1000;
+
+  const instanceCount = _INSTRUMENTS_ARTERY.instanceCount || 1;
+  const harmonicLoad = analysesPerSec / instanceCount;
+
+  const heavyRate =
+    _INSTRUMENTS_ARTERY.windowAnalyses > 0
+      ? _INSTRUMENTS_ARTERY.windowHeavyAnalyses /
+        _INSTRUMENTS_ARTERY.windowAnalyses
+      : 0;
+
+  const pressure = Math.min(1, (harmonicLoad / 128 + heavyRate) / 2);
+  const throughput = Math.max(0, 1 - pressure);
+  const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
+  const budget = Math.max(0, Math.min(1, throughput - cost));
+
+  return Object.freeze({
+    instanceIndex: AI_INSTRUMENTS_INSTANCE_INDEX,
+    instanceCount,
+    analysesPerSec,
+    harmonicLoad,
+    heavyRate,
+    pressure,
+    throughput,
+    cost,
+    budget,
+    pressureBucket: _bucketPressure(pressure),
+    throughputBucket: _bucketLevel(throughput),
+    costBucket: _bucketCost(cost),
+    budgetBucket: _bucketLevel(budget)
+  });
+}
+
+export function getInstrumentsArterySnapshot() {
+  return _computeInstrumentsArtery();
+}
+
+function _markAnalysis({ heavy = false } = {}) {
+  const now = Date.now();
+  _rollInstrumentsWindow(now);
+  _INSTRUMENTS_ARTERY.windowAnalyses += 1;
+  _INSTRUMENTS_ARTERY.totalAnalyses += 1;
+  if (heavy) {
+    _INSTRUMENTS_ARTERY.windowHeavyAnalyses += 1;
+    _INSTRUMENTS_ARTERY.totalHeavyAnalyses += 1;
+  }
+
+  const artery = _computeInstrumentsArtery();
+  if (
+    artery.pressureBucket === "overload" ||
+    artery.budgetBucket === "critical"
+  ) {
+    // Soft spiral warning — non‑blocking, logging only
+    // (keeps harmony, never blocks organism)
+    // eslint-disable-next-line no-console
+    console.log("[aiInstruments] spiral-warning", artery);
+  }
+}
+
+// ============================================================================
 // SECTION 3 — FIRESTORE ANALYSIS
 // ============================================================================
 export function analyzeFirestoreDoc(context, docData = {}) {
+  _markAnalysis({ heavy: true });
   context.logStep?.("Analyzing Firestore document...");
 
   const pulseSchema = translateFirestoreDocument(docData);
@@ -146,6 +267,7 @@ export function analyzeFirestoreDoc(context, docData = {}) {
 // SECTION 4 — SQL ANALYSIS
 // ============================================================================
 export function analyzeSQLSchema(context, sqlSchema = {}) {
+  _markAnalysis({ heavy: true });
   context.logStep?.("Analyzing SQL schema...");
 
   const pulseSchema = translateSQLSchema(sqlSchema);
@@ -167,6 +289,7 @@ export function analyzeSQLSchema(context, sqlSchema = {}) {
 // SECTION 5 — DRIFT DETECTION
 // ============================================================================
 export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
+  _markAnalysis();
   context.logStep?.("Checking for schema drift...");
 
   for (const key of Object.keys(pulseSchema)) {
@@ -192,6 +315,7 @@ export function detectDrift(context, pulseSchema = {}, firestoreSchema = {}) {
 // SECTION 6 — SLOWDOWN DETECTION
 // ============================================================================
 export function detectSlowdownPatterns(context, data) {
+  _markAnalysis();
   context.logStep?.("Checking for slowdown patterns...");
 
   if (!data) {
@@ -216,6 +340,7 @@ export function detectSlowdownPatterns(context, data) {
 // SECTION 7 — PULSE SCHEMA VALIDATION
 // ============================================================================
 export function validatePulseSchema(context, schema = {}) {
+  _markAnalysis();
   context.logStep?.("Validating Pulse schema...");
 
   for (const [key, field] of Object.entries(schema)) {
@@ -231,6 +356,7 @@ export function validatePulseSchema(context, schema = {}) {
 // SECTION 8 — ROUTE ANALYSIS
 // ============================================================================
 export function analyzeRoute(context, pathway = {}) {
+  _markAnalysis();
   context.logStep?.("Analyzing pathway descriptor...");
 
   if (!pathway || typeof pathway !== "object") {
@@ -253,6 +379,7 @@ export function analyzeRoute(context, pathway = {}) {
 // SECTION 9 — LOG ANALYSIS
 // ============================================================================
 export function analyzeLogs(context, logs = []) {
+  _markAnalysis();
   context.logStep?.("Analyzing logs...");
 
   if (!Array.isArray(logs)) {
@@ -271,6 +398,7 @@ export function analyzeLogs(context, logs = []) {
 // SECTION 10 — ERROR ANALYSIS
 // ============================================================================
 export function analyzeErrors(context, errors = []) {
+  _markAnalysis();
   context.logStep?.("Analyzing errors...");
 
   if (!Array.isArray(errors)) {
@@ -290,6 +418,7 @@ export function analyzeErrors(context, errors = []) {
 // SECTION 11 — EVOLUTIONARY PATTERN DETECTION
 // ============================================================================
 export function detectEvolutionaryPatterns(context, pulse = {}) {
+  _markAnalysis();
   context.logStep?.("Detecting evolutionary patterns...");
 
   if (pulse?.lineage && pulse.lineage.length > 20) {
