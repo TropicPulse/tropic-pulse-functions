@@ -292,5 +292,3 @@ export class AIBinaryHormones {
 export function createAIBinaryHormones(config) {
   return new AIBinaryHormones(config);
 }
-
-export { HormonesMeta };
