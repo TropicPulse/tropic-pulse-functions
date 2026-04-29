@@ -393,7 +393,7 @@ export default {
   getUIFlowSnapshot,
   bindUIFlowControls
 };
-
+if (typeof module !== "undefined") {
 // CommonJS
 module.exports = {
   PulseUIFlowRole,
@@ -402,3 +402,4 @@ module.exports = {
   getUIFlowSnapshot,
   bindUIFlowControls
 };
+}
