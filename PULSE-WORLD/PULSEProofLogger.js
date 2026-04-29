@@ -17,7 +17,7 @@
 //  - NEW: Backend‑safe Firebase logging for every log/warn/error/critical.
 // ============================================================================
 
-
+import { route } from "./PULSE-OS/PulseOSCNSNervousSystem.js";
 // ============================================================================
 //  CAPTURE ORIGINAL CONSOLE (prevents recursion)
 // ============================================================================
@@ -133,18 +133,16 @@ function normalizeArgs(args) {
 // ============================================================================
 async function sendToFirebase(level, message, rest) {
   try {
-    // Avoid blowing up in non‑browser environments
-    if (typeof fetch === "undefined") return;
-
-    await fetch("/NETLIFY/FUNCTIONS/log.js", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ level, message, rest })
+    await route("firebaseLog", {
+      level,
+      message,
+      rest
     });
   } catch (e) {
     _c.warn("PulseProofLogger: Firebase logging failed:", e);
   }
 }
+
 
 
 // ============================================================================
