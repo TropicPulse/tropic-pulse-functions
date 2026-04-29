@@ -995,12 +995,12 @@ if (hasWindow && typeof window.addEventListener === "function") {
         });
       }
       // ========================================================================
-      // CLASSIFICATION (v12‑EVO)
+      // CLASSIFICATION (v12.5‑EVO‑PRESENCE)
       // ========================================================================
       let classified = false;
 
       // ========================================================================
-      // UNIVERSAL EXTERNAL RESOURCE INTERCEPTOR (v12.4‑EVO‑PRESENCE)
+      // UNIVERSAL EXTERNAL RESOURCE INTERCEPTOR (v12.5‑EVO‑PRESENCE)
       // Detects ANY internet-bound request using origin resolution,
       // not text or protocol matching. Routes ALL external URLs through CNS.
       // ========================================================================
@@ -1034,7 +1034,7 @@ if (hasWindow && typeof window.addEventListener === "function") {
 
       if (isExternal(msg)) {
         logProtector("EXTERNAL_RESOURCE_REQUEST", {
-          note: "External resource detected — routing through CNS (v12.4‑EVO)",
+          note: "External resource detected — routing through CNS (v12.5‑EVO‑PRESENCE)",
           url: msg
         });
 
@@ -1051,10 +1051,12 @@ if (hasWindow && typeof window.addEventListener === "function") {
           seq: skinSeq,
           binaryAware: true,
           dualBand: true,
-          presenceAware: true
+          presenceAware: true,
+          external: true
         });
 
-        // ⭐ v12.4‑EVO: Route ALL external URLs through CNS → endpoint → InnerAgent → Proxy
+        // v12.5‑EVO‑PRESENCE:
+        // Route ALL external URLs through CNS → endpoint → InnerAgent → Proxy
         await route("fetchExternalResource", {
           url: msg,
           page: pagePath,
@@ -1064,8 +1066,8 @@ if (hasWindow && typeof window.addEventListener === "function") {
           binaryAware: true,
           dualBand: true,
           presenceAware: true,
-          external: true,              // NEW: explicit external classification
-          trackingPixel: true          // NEW: allows Google Ads / GTM / DoubleClick
+          external: true,
+          // trackingPixel: true // keep or toggle per route classification upstream
         });
 
         event.preventDefault();
@@ -1113,7 +1115,7 @@ if (hasWindow && typeof window.addEventListener === "function") {
       const dnaTag = memoryEntry?.dnaTag || "A1_SURFACE";
 
       // ========================================================================
-      // LOCAL SENSE REPORT (binary-aware)
+      // LOCAL SENSE REPORT (binary + dual + presence aware)
       // ========================================================================
       emitReflexSenseReport({
         message: msg,
@@ -1126,7 +1128,9 @@ if (hasWindow && typeof window.addEventListener === "function") {
         dnaTag,
         page: pagePath,
         seq: skinSeq,
-        binaryAware: true
+        binaryAware: true,
+        dualBand: true,
+        presenceAware: true
       });
 
       // ========================================================================
@@ -1145,9 +1149,9 @@ if (hasWindow && typeof window.addEventListener === "function") {
         tier,
         dnaTag,
         binaryAware: true,
-        dualBand: true
+        dualBand: true,
+        presenceAware: true
       });
-
 
       // ========================================================================
       // v12‑EVO — DRIFT INTELLIGENCE ENGINE (A1/A2 Hybrid) — UPGRADE 4/4

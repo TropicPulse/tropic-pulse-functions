@@ -579,10 +579,19 @@ if (typeof window !== "undefined") {
                   body: JSON.stringify(bodyOrQuery)
                 };
 
-            const res = await fetch(url + query, opts);
-            const data = await res.json();
+            const data = await PulseOSSkinReflex.route("fetchProxy", {
+              url: url + query,
+              method,
+              body: bodyOrQuery,
+              layer: "A1",
+              reflexOrigin: "PulseBand",
+              binaryAware: true,
+              dualBand: true,
+              presenceAware: true
+            });
 
-            window.PulseBand.emit("response:" + packet.sessionId, data);
+        window.PulseBand.emit("response:" + packet.sessionId, data);
+
           });
 
           window.PulseBandStart = (opts) => window.PulseBand.start(opts);

@@ -229,47 +229,64 @@ export function createPulseProxyInnerAgent({
     if (!type || typeof type !== "string")
       return { target: null, route: "unknown" };
 
+    // Brain impulses
     if (type.startsWith("brain:") || type === "PING_BRAIN")
       return { target: "Brain", route: "brain" };
 
+    // Long-term memory impulses
     if (type.startsWith("ltm:") || type === "LONG_TERM_MEMORY")
       return { target: "LongTermMemory", route: "ltm" };
 
+    // Page / UI impulses
     if (type.startsWith("page:") || type === "PAGE_REQUEST")
       return { target: "Pages", route: "pages" };
 
+    // External resource fetches (v12.5‑EVO)
     if (
       type === "FETCH_EXTERNAL_RESOURCE" ||
       type === "fetchExternalResource" ||
       type === "EXTERNAL_RESOURCE" ||
       type === "externalResource"
     ) {
-      return { target: "Pages", route: "external-resource" };
+      return { target: "PulseProxy", route: "external-resource" };
     }
 
+    // Default → Brain
     return { target: "Brain", route: "brain-default" };
   }
+
 
   async function dispatchToTarget(target, type, payload, binaryPayload, context) {
     const args = [type, payload || {}, binaryPayload || null, context || {}];
 
+    // Brain organ
     if (target === "Brain") {
       if (!Brain?.handle) return { error: "BrainUnavailable", type, target };
       return await Brain.handle(...args);
     }
 
+    // Long-term memory organ
     if (target === "LongTermMemory") {
       if (!LongTermMemory?.handle) return { error: "LongTermMemoryUnavailable", type, target };
       return await LongTermMemory.handle(...args);
     }
 
+    // Pages organ
     if (target === "Pages") {
       if (!Pages?.handle) return { error: "PagesUnavailable", type, target };
       return await Pages.handle(...args);
     }
 
+    // ⭐ NEW — PulseProxy organ (v12.5‑EVO‑PRESENCE)
+    if (target === "PulseProxy") {
+      if (!PulseProxy?.handle) return { error: "PulseProxyUnavailable", type, target };
+      return await PulseProxy.handle(...args);
+    }
+
+    // Unknown target
     return { error: "UnknownTarget", type, target };
   }
+
 
   // ========================================================================
   //  PUBLIC ENTRY — ORGANISM-CORRECT BACKEND ENDPOINT BRIDGE

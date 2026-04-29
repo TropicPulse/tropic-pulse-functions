@@ -115,10 +115,8 @@ function shouldSkipChunk(filePath, fileSize = 0) {
 
   return false;
 }
-
 // ============================================================================
 //  CHUNKS STATE — SECTIONAL FALLBACK
-//  Try every advantage; if degraded, fall back to regular mode.
 // ============================================================================
 const chunkCache = new Map();
 const chunkFailures = new Map();
@@ -155,66 +153,144 @@ function isChunksDegraded() {
 }
 
 // ============================================================================
-//  UNIVERSAL CHUNK FETCHER — WITH FALLBACK
-//  1) Try chunked path
-//  2) On error → mark failure, fall back to regular URL
+//  PRESENCE / BAND ENVELOPE HELPERS — v12.5‑EVO‑PRESENCE
+// ============================================================================
+function buildChunkPresenceEnvelope({ url, fromCache, degraded, kind }) {
+  const presence =
+    degraded ? "degraded-fallback" :
+    fromCache ? "cache-hit" :
+    "fresh";
+
+  const wave =
+    degraded ? "distorted" :
+    fromCache ? "stable" :
+    "coherent";
+
+  const band = "symbolic";    // chunker lives in symbolic band
+  const dualBand = false;     // can be flipped when binary overlays join
+
+  return {
+    url,
+    presence,
+    wave,
+    band,
+    dualBand,
+    kind
+  };
+}
+
+// ============================================================================
+//  UNIVERSAL CHUNK FETCHER — v12.5‑EVO‑PRESENCE + ROUTED
+//  1) Route via CNS → endpoint → InnerAgent → PulseProxy
+//  2) On error → mark failure, fall back to original URL
+//  Returns: { ok, value, envelope, error? }
 // ============================================================================
 async function fetchChunk(url) {
-  if (!url) return url;
+  if (!url) {
+    return {
+      ok: false,
+      value: url,
+      envelope: buildChunkPresenceEnvelope({
+        url,
+        fromCache: false,
+        degraded: chunksDegraded,
+        kind: "none"
+      })
+    };
+  }
 
   // If CHUNKS is degraded, fall back immediately to regular behavior.
   if (chunksDegraded) {
-    return url;
+    return {
+      ok: false,
+      value: url,
+      envelope: buildChunkPresenceEnvelope({
+        url,
+        fromCache: false,
+        degraded: true,
+        kind: "fallback"
+      })
+    };
   }
 
-  if (chunkCache.has(url)) return chunkCache.get(url);
+  // Cache hit
+  if (chunkCache.has(url)) {
+    const cached = chunkCache.get(url);
+    return {
+      ok: true,
+      value: cached,
+      envelope: buildChunkPresenceEnvelope({
+        url,
+        fromCache: true,
+        degraded: false,
+        kind: typeof cached === "string" ? "text-or-url" : "object"
+      })
+    };
+  }
 
   try {
-    const res = await fetch(url);
-    const contentType = res.headers.get("content-type") || "";
+    // ⭐ ROUTED, NOT FETCHED: ALL CHUNK LOADS GO THROUGH CNS → BACKEND
+    const routed = await window.route("fetchExternalResource", {
+      url,
+      layer: "A1",
+      reflexOrigin: "PulseChunks",
+      binaryAware: true,
+      dualBand: true,
+      presenceAware: true,
+      kind: "chunk"
+    });
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} for ${url}`);
+    // Contract: backend returns { ok, data, kind? }
+    const ok = routed && routed.ok !== false;
+    if (!ok) {
+      throw new Error(routed?.error || `Chunk route failed for ${url}`);
     }
 
-    // IMAGE → blob URL
-    if (contentType.startsWith("image/")) {
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      chunkCache.set(url, blobUrl);
-      return blobUrl;
-    }
+    const value = routed.data ?? routed.result ?? url;
+    const kind = routed.kind || (
+      typeof value === "string" ? "text-or-url" : "object"
+    );
 
-    // JSON → parsed object
-    if (contentType.includes("application/json")) {
-      const json = await res.json();
-      chunkCache.set(url, json);
-      return json;
-    }
+    chunkCache.set(url, value);
 
-    // CSS / JS / TEXT → text
-    const text = await res.text();
-    chunkCache.set(url, text);
-    return text;
+    return {
+      ok: true,
+      value,
+      envelope: buildChunkPresenceEnvelope({
+        url,
+        fromCache: false,
+        degraded: false,
+        kind
+      })
+    };
 
   } catch (err) {
     markChunkFailure(url, err);
-    // Fallback: return original URL so the browser / caller can load it normally.
-    return url;
+
+    return {
+      ok: false,
+      value: url,
+      error: String(err),
+      envelope: buildChunkPresenceEnvelope({
+        url,
+        fromCache: false,
+        degraded: true,
+        kind: "fallback"
+      })
+    };
   }
 }
 
 // ============================================================================
-//  IMAGE-SPECIFIC CHUNKER — WITH FALLBACK
+//  IMAGE-SPECIFIC CHUNKER — WITH PRESENCE-AWARE ROUTED FETCH
 // ============================================================================
 export async function getImage(url) {
-  const result = await fetchChunk(url);
-  // If degraded or failure, result will just be the original URL.
-  return result;
+  const { value } = await fetchChunk(url);
+  return value;
 }
 
 // ============================================================================
-//  GENERIC CHUNKER ENTRY — NOW WITH LORE + FALLBACK
+//  GENERIC CHUNKER ENTRY — NOW WITH LORE + PRESENCE
 // ============================================================================
 export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
   if (shouldSkipChunk(filePath, fileSize)) {
@@ -223,32 +299,37 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
 
   console.log("[PulseChunks] Chunking allowed:", filePath);
 
-  const chunk = await fetchChunk(filePath);
+  const { value: chunk, envelope } = await fetchChunk(filePath);
 
-  // If CHUNKS is degraded or fetchChunk fell back, chunk may just be the URL.
-  if (typeof chunk === "string" && metaPack && !chunksDegraded) {
+  if (
+    typeof chunk === "string" &&
+    metaPack &&
+    !chunksDegraded
+  ) {
     const lore = generateLoreHeader(metaPack);
     return {
       chunk: lore + "\n" + chunk,
       chunked: true,
-      safe: true
+      safe: true,
+      presence: envelope
     };
   }
 
   return {
     chunk,
     chunked: !chunksDegraded,
-    safe: true
+    safe: true,
+    presence: envelope
   };
 }
 
 // ============================================================================
-//  PREWARM ENGINE — NON-BLOCKING, WITH FALLBACK
+//  PREWARM ENGINE — NON-BLOCKING, ROUTED
 // ============================================================================
 export function prewarm(urls = []) {
   urls.forEach((url) => {
     if (!chunkCache.has(url) && !chunksDegraded) {
-      fetchChunk(url);
+      fetchChunk(url); // fire-and-forget, still routed + presence-aware
     }
   });
 }

@@ -79,31 +79,41 @@
 /* ----------------------------------------------------
    SAFE FETCH JSON (with timeout + UA header)
 ---------------------------------------------------- */
-
 import { db, admin } from "./firebase.js";
 
+/* ----------------------------------------------------
+   ROUTED JSON FETCH — v12.6‑EVO (NO RAW FETCH)
+---------------------------------------------------- */
 export async function safeFetchJson(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const res = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "TropicPulse/1.0",
-        "Accept": "application/json,text/plain,*/*",
-        ...(options.headers || {})
-      }
+    // Route through CNS → InnerAgent → Proxy
+    const routed = await window.route("fetchExternalResource", {
+      url,
+      method: options.method || "GET",
+      headers: options.headers || {},
+      body: options.body || null,
+      binaryAware: true,
+      dualBand: true,
+      presenceAware: true,
+      reflexOrigin: "BackendHelpers",
+      layer: "B2",
+      timeout: 15000
     });
 
     clearTimeout(timeout);
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+    if (!routed || routed.ok === false) {
+      throw new Error(
+        routed?.error || `Routed fetch failed for ${url}`
+      );
     }
 
-    return await res.json();
+    // Expect backend to return JSON body
+    return routed.data || routed.body || routed.result || null;
+
   } catch (err) {
     clearTimeout(timeout);
     throw err;
@@ -111,7 +121,7 @@ export async function safeFetchJson(url, options = {}) {
 }
 
 /* ----------------------------------------------------
-   GOOGLE PLACES TEXT SEARCH
+   GOOGLE PLACES TEXT SEARCH — ROUTED
 ---------------------------------------------------- */
 export async function searchPlacesText(query, apiKey) {
   const url = `https://places.googleapis.com/v1/places:searchText`;
@@ -130,11 +140,11 @@ export async function searchPlacesText(query, apiKey) {
     body: JSON.stringify(body)
   });
 
-  return res.places || [];
+  return res?.places || [];
 }
 
 /* ----------------------------------------------------
-   GOOGLE GEOCODING API
+   GOOGLE GEOCODING API — ROUTED
 ---------------------------------------------------- */
 export async function geocodeAddress(address, apiKey) {
   const url =
@@ -142,7 +152,7 @@ export async function geocodeAddress(address, apiKey) {
 
   const data = await safeFetchJson(url);
 
-  if (!data.results || data.results.length === 0) return null;
+  if (!data?.results || data.results.length === 0) return null;
 
   return data.results[0];
 }
@@ -769,6 +779,7 @@ export async function computeSha256Hex(buffer) {
     return null;
   }
 }
+export default db;
 // ============================================================================
 // 📘 PAGE INDEX — END OF FILE
 //

@@ -1,25 +1,30 @@
 // ============================================================================
-// FILE: /apps/PulseOS/PulseIQMap.js
-// PULSE OS — v12.3‑PRESENCE‑EVO‑MAX‑PRIME
-// “THE IQ WAREHOUSE / IMPORT CORTEX / KNOWLEDGE APPENDAGE STORE”
-//
-// TEXT‑ONLY • BLUEPRINT‑ONLY • NON‑EVOLVABLE • DETERMINISTIC
-// NO organ imports • NO page imports • NO dynamic loading
-// IQ = DESIGN BRAIN (NOT execution brain)
-// ============================================================================
-
-// ============================================================================
 //  SAFE LOGGING (ACCESS IMPORT)
 // ============================================================================
 import { log, warn, error as logError } from "../PULSEProofLogger.js";
-
+import { db as firebaseDb } from "../NETLIFY/FUNCTIONS/helpers.js";
 // ============================================================================
 //  CORTEX BOOT (ACCESS IMPORT)
 // ============================================================================
 import { bootCortex } from "./PulseOSBrainCortex.js";
 
-const firebase = "EXTERNAL-FIREBASE-APPENDAGE";
+// … VERSION_MAP and TOP_LEVEL_ROUTES unchanged …
 
+// ============================================================================
+//  IQ MAP — TEXT BLUEPRINT + ACCESS APPENDAGES
+// ============================================================================
+const firebaseAccess = {
+  provider: "Firebase",
+  role: "REMOTE_STATE_STORE",
+  routed: true,          // goes through backend helpers (which are now routed)
+  handle: "db",          // symbolic handle, not for direct client use
+  meta: {
+    helperModule: "../NETLIFY/FUNCTIONS/helpers.js",
+    contract: "PulseFirebase-v12.6-Routed"
+  },
+  // design-only reference (execution happens in backend helpers)
+  db: firebaseDb
+};
 // ============================================================================
 //  VERSION MAP — v12.3‑PRESENCE‑EVO‑MAX‑PRIME (TEXT‑ONLY)
 // ============================================================================
@@ -104,13 +109,12 @@ function inferTopLevelFromPath(path = "") {
 //  IQ MAP — TEXT BLUEPRINT + ACCESS APPENDAGES
 // ============================================================================
 export const PulseIQMap = {
-
-  // ACCESS UTILITIES
+// ACCESS UTILITIES
   log,
   warn,
   logError,
   bootCortex,
-  firebase,
+  firebase: firebaseAccess,
 
   // VERSION MAP
   version: VERSION_MAP,

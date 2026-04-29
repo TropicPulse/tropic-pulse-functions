@@ -17,4 +17,4 @@ if (!admin.apps.length) {
 // ---------------------------------------------------------------------------
 export const db = admin.firestore();
 export const storage = admin.storage().bucket();
-export { admin };
+export { admin, db as firebase };
