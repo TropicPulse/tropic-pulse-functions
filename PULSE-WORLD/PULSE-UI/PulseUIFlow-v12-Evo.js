@@ -248,7 +248,7 @@ async function evolveToIntent(flowDef, extraPayload = {}) {
  *  • Derives identity trust
  *  • Chooses initial intent (login or dashboard)
  */
-export async function initUIFlowV13() {
+export async function initUIFlow() {
   logFlow("INIT_V13_START", {});
 
   if (!hasWindow) {
@@ -372,7 +372,7 @@ export async function goToFlowIntent(flowId, options = {}) {
 /**
  * Get current UI flow snapshot (for diagnostics / overlays).
  */
-export function getUIFlowSnapshotV13() {
+export function getUIFlowSnapshot() {
   return {
     ...UIFlowState.snapshot(),
     map: UIIntentFlowMap
@@ -409,10 +409,8 @@ export function bindUIFlowIntentControls(root = null) {
 // ESM default
 export default {
   PulseUIFlowRole,
-  initUIFlowV13,
-  initUIFlow:initUIFlowV13,
+  initUIFlow,
   goToFlowIntent,
-  getUIFlowSnapshotV13,
-  getUIFlowSnapshot:getUIFlowSnapshotV13,
+  getUIFlowSnapshot,
   bindUIFlowIntentControls
 };
