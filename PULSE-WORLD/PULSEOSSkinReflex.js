@@ -927,9 +927,13 @@ if (hasWindow && typeof window.addEventListener === "function") {
       } catch (spineErr) {
         console.warn("[PulseUIErrors] failed to broadcast A1 error:", spineErr);
       }
+
       const top = rawFrames[0] || "unknown";
       const file = top.split("/").pop().split(":")[0] || "unknown";
       const line = top.split(":")[1] || "unknown";
+
+      const pagePath =
+        hasWindow && window.location ? window.location.pathname : null;
 
       // ========================================================================
       // LOCAL A1 DIAGNOSTICS (never throws)
@@ -947,15 +951,9 @@ if (hasWindow && typeof window.addEventListener === "function") {
             console.log("• line:", line);
             console.log("• top frame:", top);
             console.log("• raw frames:", rawFrames);
-            console.log(
-              "• page:",
-              hasWindow && window.location ? window.location.pathname : "unknown"
-            );
+            console.log("• page:", pagePath);
             console.log("• layer:", "A1 (SkinReflex)");
-            console.log(
-              "• note:",
-              "LOCAL ONLY — does NOT depend on routing or backend."
-            );
+            console.log("• note:", "LOCAL ONLY — does NOT depend on routing or backend.");
 
             console.groupEnd();
           }
@@ -1001,19 +999,20 @@ if (hasWindow && typeof window.addEventListener === "function") {
       // CLASSIFICATION (v12‑EVO)
       // ========================================================================
       let classified = false;
-      // ========================================================================
-      // EXTERNAL RESOURCE INTERCEPTOR (v12‑EVO)
-      // Detects ANY external URL request and routes it through backend proxy
-      // ========================================================================
-      const externalUrlPattern = /^https?:\/\/[^\/]+/i;
 
-      if (externalUrlPattern.test(msg)) {
+      // ========================================================================
+      // UNIVERSAL EXTERNAL RESOURCE INTERCEPTOR (v12‑EVO)
+      // Routes ANY internet-bound request through CNS Router
+      // ========================================================================
+      const externalUrlPattern = /^(https?:\/\/|ftp:\/\/|ftps:\/\/|wss?:\/\/|\/\/|www\.)/i;
+      const localUrlPattern    = /^(file:\/\/|data:|blob:|chrome:\/\/|about:|pulse:\/\/|localhost|127\.0\.0\.1)/i;
+
+      if (externalUrlPattern.test(msg) && !localUrlPattern.test(msg)) {
         logProtector("EXTERNAL_RESOURCE_REQUEST", {
-          note: "External URL detected — routing through backend proxy",
+          note: "External resource detected — routing through CNS",
           url: msg
         });
 
-        // Emit reflex intel
         emitReflexSenseReport({
           message: msg,
           file,
@@ -1025,10 +1024,10 @@ if (hasWindow && typeof window.addEventListener === "function") {
           dnaTag: "A1_SURFACE",
           page: pagePath,
           seq: skinSeq,
-          binaryAware: true
+          binaryAware: true,
+          dualBand: true
         });
 
-        // Ask CNS Router to fetch + localize the resource
         await route("fetchExternalResource", {
           url: msg,
           page: pagePath,
@@ -1039,12 +1038,13 @@ if (hasWindow && typeof window.addEventListener === "function") {
           dualBand: true
         });
 
-        // Prevent default browser behavior
         event.preventDefault();
         return;
       }
 
-
+      // ========================================================================
+      // REMAINING CLASSIFIERS
+      // ========================================================================
       if (msg.includes("Cannot find module")) {
         logProtector("IMPORT_DEGRADED", {
           note: "Import errors are degradation signals in v12‑EVO‑BINARY",
@@ -1081,9 +1081,6 @@ if (hasWindow && typeof window.addEventListener === "function") {
       const tier = memoryEntry?.tier || "microDegrade";
       const dnaTag = memoryEntry?.dnaTag || "A1_SURFACE";
 
-      const pagePath =
-        hasWindow && window.location ? window.location.pathname : null;
-
       // ========================================================================
       // LOCAL SENSE REPORT (binary-aware)
       // ========================================================================
@@ -1119,6 +1116,7 @@ if (hasWindow && typeof window.addEventListener === "function") {
         binaryAware: true,
         dualBand: true
       });
+
 
       // ========================================================================
       // v12‑EVO — DRIFT INTELLIGENCE ENGINE (A1/A2 Hybrid) — UPGRADE 4/4

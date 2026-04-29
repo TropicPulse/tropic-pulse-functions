@@ -229,21 +229,31 @@ export function createPulseProxyInnerAgent({
     catch {}
   }
 
-  function resolveTarget(type) {
-    if (!type || typeof type !== "string")
-      return { target: null, route: "unknown" };
+    function resolveTarget(type) {
+      if (!type || typeof type !== "string")
+        return { target: null, route: "unknown" };
 
-    if (type.startsWith("brain:") || type === "PING_BRAIN")
-      return { target: "Brain", route: "brain" };
+      if (type.startsWith("brain:") || type === "PING_BRAIN")
+        return { target: "Brain", route: "brain" };
 
-    if (type.startsWith("ltm:") || type === "LONG_TERM_MEMORY")
-      return { target: "LongTermMemory", route: "ltm" };
+      if (type.startsWith("ltm:") || type === "LONG_TERM_MEMORY")
+        return { target: "LongTermMemory", route: "ltm" };
 
-    if (type.startsWith("page:") || type === "PAGE_REQUEST")
-      return { target: "Pages", route: "pages" };
+      if (type.startsWith("page:") || type === "PAGE_REQUEST")
+        return { target: "Pages", route: "pages" };
 
-    return { target: "Brain", route: "brain-default" };
-  }
+      if (
+        type === "FETCH_EXTERNAL_RESOURCE" ||
+        type === "fetchExternalResource" ||
+        type === "EXTERNAL_RESOURCE" ||
+        type === "externalResource"
+      ) {
+        return { target: "Pages", route: "external-resource" };
+      }
+
+      return { target: "Brain", route: "brain-default" };
+    }
+
 
   async function dispatchToTarget(target, type, payload, binaryPayload, context) {
     const args = [type, payload || {}, binaryPayload || null, context || {}];
