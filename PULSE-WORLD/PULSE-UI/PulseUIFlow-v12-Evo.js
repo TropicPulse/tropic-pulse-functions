@@ -410,7 +410,9 @@ export function bindUIFlowIntentControls(root = null) {
 export default {
   PulseUIFlowRole,
   initUIFlowV13,
+  initUIFlow:initUIFlowV13,
   goToFlowIntent,
   getUIFlowSnapshotV13,
+  getUIFlowSnapshot:getUIFlowSnapshotV13,
   bindUIFlowIntentControls
 };
