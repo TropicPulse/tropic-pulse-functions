@@ -126,10 +126,13 @@ async function sendToFirebase(level, message, rest) {
     _c.warn("PulseProofLogger: Firebase logging failed:", e);
   }
 }
+// Add this Pulse command handler and integrate into log()
 function handlePulseCommand(cmd) {
-  const raw = cmd.slice(6).trim().toLowerCase(); // remove "Pulse:"
+  const raw = cmd.slice(6).trim(); // remove "Pulse:"
+  const parts = raw.split(/\s+/);
+  const verb = parts[0] ? parts[0].toLowerCase() : "";
 
-  switch (raw) {
+  switch (verb) {
     case "help":
       aiHelpBanner();
       break;
@@ -142,8 +145,29 @@ function handlePulseCommand(cmd) {
       _c.log("AI Prompts:", listAIPrompts());
       break;
 
+    case "open": {
+      const id = parts[1];
+      if (!id) return _c.warn("Pulse: Open requires an id. Usage: Pulse: Open <id>");
+      openAIPrompt(id);
+      break;
+    }
+
+    case "close": {
+      const id = parts[1];
+      if (!id) return _c.warn("Pulse: Close requires an id. Usage: Pulse: Close <id>");
+      closeAIPrompt(id);
+      break;
+    }
+
+    case "recent": {
+      const recent = getRecentAIPrompt();
+      if (!recent) return _c.log("No recent AI prompt.");
+      openAIPrompt(recent.id);
+      break;
+    }
+
     default:
-      _c.warn(`Unknown Pulse command: ${raw}`);
+      _c.warn(`Unknown Pulse command: ${verb}. Type "Pulse: Help" for options.`);
       break;
   }
 }
@@ -154,11 +178,10 @@ export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
-  // Pulse command handler
   if (subsystem === "logger" && typeof message === "string" && message.startsWith("Pulse:")) {
-    handlePulseCommand(message);
-    return;
-  }
+  handlePulseCommand(message);
+  return;
+}
 
 
   if (raw) {
@@ -327,16 +350,18 @@ export function listAIPrompts({ includeArchived = false } = {}) {
   return Object.values(AIPromptStore).filter(p => includeArchived || !p.archived);
 }
 
+// Replace the old aiHelpBanner with this guarded version
 export function aiHelpBanner() {
   _c.groupCollapsed(
-    "%c🤖 AI Console Help",
+    "%c🤖 AI Console Help (Pulse: commands)",
     "color:#9b59b6; font-weight:bold; font-size:13px;"
   );
 
-  _c.log("• createAIPrompt({ id, text })  → register a new AI prompt");
-  _c.log("• openAIPrompt(id)              → open prompt as a console group");
-  _c.log("• closeAIPrompt(id)             → archive and collapse prompt");
-
+  _c.log("• Pulse: Help                 → show this help banner");
+  _c.log("• Pulse: List                 → list active AI prompts");
+  _c.log("• Pulse: Open <id>            → open prompt <id> in console");
+  _c.log("• Pulse: Close <id>           → close/archive prompt <id>");
+  _c.log("• createAIPrompt({ id, text })→ register a new AI prompt (API)");
   _c.groupEnd();
 }
 
