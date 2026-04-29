@@ -14,7 +14,6 @@
 //   • ZERO interference with A1 timing/state rules
 // ============================================================================
 import PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
-import { PulseOrganismMap } from "./PULSE-OS/PulseOrganismMap.js";
 
 const PageScannerV12 = Object.freeze({
 
@@ -343,12 +342,36 @@ export const PulseRole = {
 // ============================================================================
 // OWNER MODULE RESOLUTION — v12‑EVO (Brain-map aware, no mutation)
 // ============================================================================
+// ============================================================================
+// OWNER MODULE RESOLUTION — v12.4‑EVO (Brain-map aware, no mutation)
+// ============================================================================
+
 const hasWindow = typeof window !== "undefined";
 
+// Single source of truth for organism map on the front:
+// 1) Prefer Brain injection (if exposed on window)
+// 2) Fallback to window.__PULSE_ORGANISM_MAP__ (static JSON push)
+// 3) Else null (safe, no crash)
 function getOrganismMapSafe() {
-  return PulseOrganismMap ?? null;
-}
+  try {
+    if (!hasWindow) return null;
 
+    // If Brain was exposed globally (optional)
+    const brain = window.PulseOSBrain || null;
+    if (brain && brain.PulseOrganismMap) {
+      return brain.PulseOrganismMap;
+    }
+
+    // Static JSON push from Brain at render time
+    if (window.__PULSE_ORGANISM_MAP__) {
+      return window.__PULSE_ORGANISM_MAP__;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 function resolveOwnerModule(symbol) {
   try {
@@ -363,6 +386,7 @@ function resolveOwnerModule(symbol) {
     return null;
   }
 }
+
 
 if (typeof console !== "undefined" && typeof console.log === "function") {
   console.log(

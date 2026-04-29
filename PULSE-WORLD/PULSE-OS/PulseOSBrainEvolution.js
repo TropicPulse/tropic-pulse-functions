@@ -1,13 +1,13 @@
 // ============================================================================
-// FILE: /apps/PULSE-OS/PulseOSEvolution-v12.3-Spine.js
-// PULSE OS — v12.3-SPINE-DUALBAND-PRESENCE
+// FILE: /apps/PULSE-OS/PulseOSEvolution-v12.4-Spine.js
+// PULSE OS — v12.4-SPINE-DUALBAND-PRESENCE
 // “THE EVOLUTION ENGINE — ORGANISM-WIDE CNS GROWTH + DRIFT INTELLIGENCE”
 // ============================================================================
 //
-// ROLE IN THE ORGANISM (v12.3-SPINE-DUALBAND-PRESENCE):
+// ROLE IN THE ORGANISM (v12.4-SPINE-DUALBAND-PRESENCE):
 // -----------------------------------------------------
 // • FIRST organ after Understanding
-// • Attaches Intent, OrganismMap, IQMap to Brain
+// • Attaches intent, OrganismMap, IQMap to Brain
 // • Attaches Evolution to Brain
 // • Boots the Brain (which boots Cortex)
 // • Provides drift detection (symbolic + binary + dualband)
@@ -23,8 +23,8 @@ export const PulseRole = {
   type: "Evolution",
   subsystem: "OS",
   layer: "CNS",
-  version: "12.3-Spine",
-  identity: "PulseOSEvolution-v12.3-SPINE-DUALBAND-PRESENCE",
+  version: "12.4-Spine",
+  identity: "PulseOSEvolution-v12.4-SPINE-DUALBAND-PRESENCE",
 
   evo: {
     deterministic: true,
@@ -37,12 +37,12 @@ export const PulseRole = {
     loopTheoryAware: true,
     continuanceAware: true,
 
-    // v12.3 organism-wide contracts
-    routingContract: "PulseRouter-v12.3",
-    osOrganContract: "PulseOS-v12.3-SPINE",
+    // v12.4 organism-wide contracts
+    routingContract: "PulseRouter-v12.4",
+    osOrganContract: "PulseOS-v12.4-SPINE",
     earnCompatibility: "PulseEarn-v12.0",
-    gpuCompatibility: "PulseGPU-v12.3",
-    sendCompatibility: "PulseSendSystem-v12.3",
+    gpuCompatibility: "PulseGPU-v12.4",
+    sendCompatibility: "PulseSendSystem-v12.4",
 
     // Dual-band evolution surface (tag-only)
     dualMode: true,
@@ -66,8 +66,8 @@ export const PulseRole = {
 export const PulseOSEvolutionMeta = Object.freeze({
   layer: "PulseOSEvolution",
   role: "CNS_EVOLUTION_ORGAN",
-  version: "v12.3-SPINE-DUALBAND-PRESENCE",
-  identity: "PulseOSEvolution-v12.3-SPINE-DUALBAND-PRESENCE",
+  version: "v12.4-SPINE-DUALBAND-PRESENCE",
+  identity: "PulseOSEvolution-v12.4-SPINE-DUALBAND-PRESENCE",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -134,15 +134,16 @@ export const PulseOSEvolutionMeta = Object.freeze({
   }),
 
   lineage: Object.freeze({
-    root: "PulseOS-v12.3-SPINE",
-    parent: "PulseOS-v12.0-SPINE",
+    root: "PulseOS-v12.4-SPINE",
+    parent: "PulseOS-v12.3-SPINE",
     ancestry: [
       "PulseOSEvolution-v9",
       "PulseOSEvolution-v10",
       "PulseOSEvolution-v11",
       "PulseOSEvolution-v11-Evo",
       "PulseOSEvolution-v11-EVO-BINARY",
-      "PulseOSEvolution-v12.3-SPINE-DUALBAND-PRESENCE"
+      "PulseOSEvolution-v12.3-SPINE-DUALBAND-PRESENCE",
+      "PulseOSEvolution-v12.4-SPINE-DUALBAND-PRESENCE"
     ]
   }),
 
@@ -162,7 +163,7 @@ export const PulseOSEvolutionMeta = Object.freeze({
 });
 
 // ============================================================================
-//  EVOLUTION ENGINE — The CNS growth organ (v12.3-SPINE-DUALBAND-PRESENCE)
+//  EVOLUTION ENGINE — The CNS growth organ (v12.4-SPINE-DUALBAND-PRESENCE)
 // ============================================================================
 export function PulseOSEvolution({ intent, organism, iq, understanding }) {
 
@@ -231,7 +232,7 @@ export function PulseOSEvolution({ intent, organism, iq, understanding }) {
     const normBand = normalizeBand(band);
     const drift = [];
 
-    if (!Brain.PulseIntentMap)   drift.push("missing-intent-map");
+    if (!Brain.intent)          drift.push("missing-intent-map");
     if (!Brain.PulseOrganismMap) drift.push("missing-organism-map");
     if (!Brain.PulseIQMap)       drift.push("missing-iq-map");
 
@@ -317,13 +318,13 @@ export function PulseOSEvolution({ intent, organism, iq, understanding }) {
   }
 
   // --------------------------------------------------------------------------
-  // EVOLUTION → BRAIN BOOTSTRAP (v12.3-SPINE-DUALBAND-PRESENCE)
-// --------------------------------------------------------------------------
+  // EVOLUTION → BRAIN BOOTSTRAP (v12.4-SPINE-DUALBAND-PRESENCE)
+  // --------------------------------------------------------------------------
   function bootBrain(Brain, { band = "dual", dnaTag = null } = {}) {
     const normBand = normalizeBand(band);
 
     // Attach maps to Brain
-    Brain.PulseIntentMap   = intent;
+    Brain.intent          = intent;
     Brain.PulseOrganismMap = organism;
     Brain.PulseIQMap       = iq;
 

@@ -1,6 +1,6 @@
 // ============================================================================
-// FILE: /apps/PulseOS/Brain/PulseOSBrain-v12.3-Spine.js
-// PULSE OS BRAIN — v12.3-SPINE-DUALBAND-PRESENCE
+// FILE: /apps/PulseOS/Brain/PulseOSBrain-v12.4-Spine.js
+// PULSE OS BRAIN — v12.4-SPINE-DUALBAND-PRESENCE
 // “THE REAL CNS / ORGANISM-WIDE IDENTITY + INTELLIGENCE KERNEL”
 // ============================================================================
 //
@@ -19,8 +19,8 @@
 export const PulseOSBrainMeta = Object.freeze({
   layer: "PulseOSBrain",
   role: "CNS_BRAIN_ORGAN",
-  version: "v12.3-SPINE-DUALBAND-PRESENCE",
-  identity: "PulseOSBrain-v12.3-SPINE-DUALBAND-PRESENCE",
+  version: "v12.4-SPINE-DUALBAND-PRESENCE",
+  identity: "PulseOSBrain-v12.4-SPINE-DUALBAND-PRESENCE",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -76,15 +76,16 @@ export const PulseOSBrainMeta = Object.freeze({
   }),
 
   lineage: Object.freeze({
-    root: "PulseOS-v12.3-SPINE",
-    parent: "PulseOS-v12.0-SPINE",
+    root: "PulseOS-v12.4-SPINE",
+    parent: "PulseOS-v12.3-SPINE",
     ancestry: [
       "PulseOSBrain-v9",
       "PulseOSBrain-v10",
       "PulseOSBrain-v11",
       "PulseOSBrain-v11-Evo",
       "PulseOSBrain-v11-EVO-BINARY-MAX",
-      "PulseOSBrain-v12.3-SPINE-DUALBAND-PRESENCE"
+      "PulseOSBrain-v12.3-SPINE-DUALBAND-PRESENCE",
+      "PulseOSBrain-v12.4-SPINE-DUALBAND-PRESENCE"
     ]
   }),
 
@@ -106,13 +107,16 @@ export const PulseOSBrainMeta = Object.freeze({
 
 
 // ============================================================================
-//  IMPORTS — LAW: BRAIN MAY IMPORT ONLY PULSEIQ (+ Cortex wiring)
+//  IMPORTS — LAW: BRAIN MAY IMPORT ONLY PULSEIQ + ORGANISM + CORTEX
 // ============================================================================
 import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
 import { createPulseOSCortex as cortexAPI } from "./PulseOSBrainCortex.js";
 
 
+// ============================================================================
+//  CNS BRAIN — v12.4-SPINE
+// ============================================================================
 export const PulseOSBrain = {
   // -------------------------------------------------------------------------
   // Identity — Organism-wide CNS contract
@@ -121,7 +125,7 @@ export const PulseOSBrain = {
     type: "Brain",
     subsystem: "OS",
     layer: "CNS",
-    version: "12.3-SPINE",
+    version: "12.4-SPINE",
     identity: "PulseOSBrain",
     evo: {
       deterministicNeuron: true,
@@ -130,11 +134,11 @@ export const PulseOSBrain = {
       advantageCascadeAware: true,
       unifiedAdvantageField: true,
 
-      routingContract: "PulseRouter-v12.3",
-      osOrganContract: "PulseOS-v12.3-SPINE",
+      routingContract: "PulseRouter-v12.4",
+      osOrganContract: "PulseOS-v12.4-SPINE",
       earnCompatibility: "PulseEarn-v12.0",
-      proxyCompatibility: "PulseProxySpine-v12.3",
-      gpuCompatibility: "PulseGPU-v12.3",
+      proxyCompatibility: "PulseProxySpine-v12.4",
+      gpuCompatibility: "PulseGPU-v12.4",
 
       loopTheoryAware: true,
       continuanceAware: true,
@@ -174,7 +178,7 @@ export const PulseOSBrain = {
     },
 
     fallbackToMemory() {
-      const iq = PulseOSBrain.PulseIQMap || PulseIQMap;
+      const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const route = iq.getRecoveryRoute ? iq.getRecoveryRoute() : "/";
       const organs = iq.pages && iq.pages[route] ? iq.pages[route] : [];
       return { route, organs };
@@ -186,7 +190,7 @@ export const PulseOSBrain = {
     getSymbolicOrganismIdentity() {
       return {
         role: PulseOSBrain.PulseRole,
-        intent: PulseOSBrain.PulseIntentMap,
+        intent: PulseOSBrain.intent,
         organismMap: PulseOSBrain.PulseOrganismMap,
         iqMap: PulseOSBrain.PulseIQMap
       };
@@ -209,7 +213,7 @@ export const PulseOSBrain = {
 
         encoding: {
           format: "application/pulse-organism+json",
-          suggestedTransport: "PulseGPU-v12.3",
+          suggestedTransport: "PulseGPU-v12.4",
           suggestedCompression: "post-render",
           executable: false
         }
@@ -223,10 +227,10 @@ export const PulseOSBrain = {
 
     // -----------------------------------------------------------------------
     // Presence / Mesh descriptors (metadata-only, IQ/Organism-driven)
-// -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
     getPresenceDescriptors() {
-      const iq = PulseOSBrain.PulseIQMap || PulseIQMap;
-      const organism = PulseOSBrain.PulseOrganismMap || PulseOrganismMap;
+      const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
+      const organism = PulseOSBrain.PulseOrganismMap || PulseOrganismMap || {};
 
       const presenceConfig = iq.presenceConfig || {};
       const meshConfig = iq.meshPresenceConfig || {};
@@ -250,9 +254,9 @@ export const PulseOSBrain = {
 
     // -----------------------------------------------------------------------
     // Chunking / prewarm profiles (metadata-only, IQ-driven)
-// -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
     getChunkingProfiles() {
-      const iq = PulseOSBrain.PulseIQMap || PulseIQMap;
+      const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const profiles = iq.chunkingProfiles || {};
 
       return {
@@ -264,25 +268,70 @@ export const PulseOSBrain = {
   },
 
   // -------------------------------------------------------------------------
-  // CNS Infrastructure (wired from IQ)
-// -------------------------------------------------------------------------
-  log: () => PulseOSBrain.PulseIQMap?.log,
-  warn: () => PulseOSBrain.PulseIQMap?.warn,
-  logError: () => PulseOSBrain.PulseIQMap?.logError,
-  firebase: () => PulseOSBrain.PulseIQMap?.firebase,
+  // CNS Infrastructure — IQ-aware but NOT IQ-dependent for survival
+  // -------------------------------------------------------------------------
+  PulseIQMap: PulseIQMap || {},       // never null
+  PulseOrganismMap: PulseOrganismMap, // required genome
 
-  PulseIQMap: null,
-  PulseOrganismMap: null,
+  log: (...args) => {
+    if (PulseOSBrain.PulseIQMap?.log) return PulseOSBrain.PulseIQMap.log(...args);
+    return console.log("[BRAIN]", ...args);
+  },
 
+  warn: (...args) => {
+    if (PulseOSBrain.PulseIQMap?.warn) return PulseOSBrain.PulseIQMap.warn(...args);
+    return console.warn("[BRAIN-WARN]", ...args);
+  },
 
-  intent: null,
-  understanding: null,
-  evolution: null,
-  cortex: null,
+  logError: (...args) => {
+    if (PulseOSBrain.PulseIQMap?.logError) return PulseOSBrain.PulseIQMap.logError(...args);
+    return console.error("[BRAIN-ERROR]", ...args);
+  },
+
+  firebase: (...args) => {
+    if (PulseOSBrain.PulseIQMap?.firebase) return PulseOSBrain.PulseIQMap.firebase(...args);
+    // Fallback: no firebase yet, safe no-op
+    return null;
+  },
+
+  // -------------------------------------------------------------------------
+  // INTENT / UNDERSTANDING / EVOLUTION / CORTEX — NEVER NULL
+  // -------------------------------------------------------------------------
+  intent: {
+    classify: () => null,
+    get: () => null
+  },
+
+  understanding: {
+    classify: () => null,
+    fallback: () => null
+  },
+
+  evolution: {
+    version: "v12.4-SPINE",
+    lineage: [],
+    recordLineage: (tag) => {
+      PulseOSBrain.evolution.lineage.push(tag);
+    },
+    scanDrift: (_brain) => {
+      // drift scan hook — no-op by default
+    },
+    evolveRaw: async () => [],
+    evolveOrganRaw: async () => []
+  },
+
+  cortex: {
+    routes: {},
+    pages: {},
+    bind: () => {},
+    initializeNervousSystem: () => {},
+    initializeOrgans: () => {},
+    scanFile: null
+  },
 
   // -------------------------------------------------------------------------
   // ⭐ CNS → Scanner Delegation Surface (symbolic-only)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   scanFile(filePath) {
     const cortex = PulseOSBrain.cortex;
 
@@ -290,8 +339,7 @@ export const PulseOSBrain = {
       return cortex.scanFile(filePath);
     }
 
-    const warnFn = PulseOSBrain.warn || PulseIQMap.warn;
-    warnFn("🧠 [PulseOSBrain v12.3] scanFile called but Cortex has no scanFile surface.", {
+    PulseOSBrain.warn("🧠 [PulseOSBrain v12.4] scanFile called but Cortex has no scanFile surface.", {
       filePath
     });
 
@@ -303,12 +351,9 @@ export const PulseOSBrain = {
   }
 };
 
+
 // ============================================================================
-//  BRAIN PREWARM ENGINE — v12.3-SPINE
-//  - Prewarm CNS identity + contracts + cortex boot signatures.
-//  - Touches ONLY PulseIQMap, PulseOrganismMap, bootCortex (law-compliant).
-//  - No binary execution, no external mutation, no randomness.
-//  - Presence/mesh/chunking awareness is metadata-only (no imports).
+//  BRAIN PREWARM ENGINE — v12.4-SPINE
 // ============================================================================
 function prewarmPulseOSBrain() {
   try {
@@ -333,7 +378,7 @@ function prewarmPulseOSBrain() {
       identityKind: "none",
       sceneType: "cns-prewarm",
       workloadClass: "brain-prewarm",
-      dispatchSignature: "PulseOSBrain.prewarm.v12.3",
+      dispatchSignature: "PulseOSBrain.prewarm.v12.4",
       shapeSignature: "CNS-SPINE-A1"
     };
 
@@ -346,24 +391,20 @@ function prewarmPulseOSBrain() {
       });
 
     } catch (err) {
-      console.error("[PulseOSBrain Prewarm v12.3] bootCortex prewarm failed:", err);
+      console.error("[PulseOSBrain Prewarm v12.4] bootCortex prewarm failed:", err);
     }
 
     return true;
   } catch (err) {
-    console.error("[PulseOSBrain Prewarm v12.3] Failed:", err);
+    console.error("[PulseOSBrain Prewarm v12.4] Failed:", err);
     return false;
   }
 }
 
 
-
-// ============================================================================
-// 0) THE REAL CNS BRAIN — EXPORTED AS PulseOSBrain
-// ============================================================================
-
 // One-time CNS brain prewarm at module load
 prewarmPulseOSBrain();
+
 
 // ============================================================================
 // 1) ROLE VALIDATION — CNS Gatekeeper
@@ -401,8 +442,7 @@ export function structuralError(expected, found, extraContext = {}) {
     ...extraContext
   };
 
-  const warnFn = PulseOSBrain.warn || PulseIQMap.warn;
-  warnFn("[STRUCTURAL_ERROR v12.3]", payload);
+  PulseOSBrain.warn("[STRUCTURAL_ERROR v12.4]", payload);
   return payload;
 }
 
@@ -427,8 +467,7 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 
   if (candidates.length > 0) {
     const chosen = candidates[0];
-    const logFn = PulseOSBrain.log || PulseIQMap.log;
-    logFn(`🧠 [PulseOSBrain v12.3] Attached organ from ${chosen.path}`);
+    PulseOSBrain.log(`🧠 [PulseOSBrain v12.4] Attached organ from ${chosen.path}`);
     return chosen.module;
   }
 
@@ -449,7 +488,6 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
 
   if (intent) {
     PulseOSBrain.intent = intent;
-    PulseOSBrain.PulseIntentMap = intent;
   }
 
   if (organism) {
@@ -459,28 +497,28 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
   if (iqMap) {
     PulseOSBrain.PulseIQMap = iqMap;
 
-    if (iqMap.log) PulseOSBrain.log = iqMap.log;
-    if (iqMap.warn) PulseOSBrain.warn = iqMap.warn;
-    if (iqMap.logError) PulseOSBrain.logError = iqMap.logError;
-    if (iqMap.firebase) PulseOSBrain.firebase = iqMap.firebase;
+    if (iqMap.log) PulseOSBrain.log = (...args) => iqMap.log(...args);
+    if (iqMap.warn) PulseOSBrain.warn = (...args) => iqMap.warn(...args);
+    if (iqMap.logError) PulseOSBrain.logError = (...args) => iqMap.logError(...args);
+    if (iqMap.firebase) PulseOSBrain.firebase = (...args) => iqMap.firebase(...args);
   }
 
-  PulseOSBrain.understanding = understanding;
+  if (understanding) {
+    PulseOSBrain.understanding = understanding;
+  }
 
   // Boot Cortex with PulseOSBrain as CNS parent
-  PulseOSBrain.cortex = cortexAPI.boot({ Brain: PulseOSBrain });
+  PulseOSBrain.cortex = cortexAPI.boot({ Brain: PulseOSBrain }) || PulseOSBrain.cortex;
 
   // Let Cortex initialize Nervous System + organs if it exposes hooks
   PulseOSBrain.cortex?.initializeNervousSystem?.();
   PulseOSBrain.cortex?.initializeOrgans?.();
 
   // Evolution may observe boot, but is not required
-  PulseOSBrain.evolution?.recordLineage?.("brain-cognitive-bootstrap-v12.3");
+  PulseOSBrain.evolution?.recordLineage?.("brain-cognitive-bootstrap-v12.4");
   PulseOSBrain.evolution?.scanDrift?.(PulseOSBrain);
 
-  const logFn = PulseOSBrain.log || PulseIQMap.log;
-  logFn("🧠 [PulseOSBrain v12.3] cognitiveBootstrap complete.");
+  PulseOSBrain.log("🧠 [PulseOSBrain v12.4] cognitiveBootstrap complete.");
 
   return PulseOSBrain;
 }
-
