@@ -126,6 +126,27 @@ async function sendToFirebase(level, message, rest) {
     _c.warn("PulseProofLogger: Firebase logging failed:", e);
   }
 }
+function handlePulseCommand(cmd) {
+  const raw = cmd.slice(6).trim().toLowerCase(); // remove "Pulse:"
+
+  switch (raw) {
+    case "help":
+      aiHelpBanner();
+      break;
+
+    case "ai":
+      aiHelpBanner();
+      break;
+
+    case "list":
+      _c.log("AI Prompts:", listAIPrompts());
+      break;
+
+    default:
+      _c.warn(`Unknown Pulse command: ${raw}`);
+      break;
+  }
+}
 
 // -----------------------------------------------------------------------------
 // Core logging functions unchanged behavior
@@ -133,6 +154,12 @@ export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
+  // Pulse command handler
+  if (subsystem === "logger" && typeof message === "string" && message.startsWith("Pulse:")) {
+    handlePulseCommand(message);
+    return;
+  }
+
 
   if (raw) {
     _c.log(message, ...rest);
@@ -300,6 +327,20 @@ export function listAIPrompts({ includeArchived = false } = {}) {
   return Object.values(AIPromptStore).filter(p => includeArchived || !p.archived);
 }
 
+export function aiHelpBanner() {
+  _c.groupCollapsed(
+    "%c🤖 AI Console Help",
+    "color:#9b59b6; font-weight:bold; font-size:13px;"
+  );
+
+  _c.log("• createAIPrompt({ id, text })  → register a new AI prompt");
+  _c.log("• openAIPrompt(id)              → open prompt as a console group");
+  _c.log("• closeAIPrompt(id)             → archive and collapse prompt");
+
+  _c.groupEnd();
+}
+
+
 // Optional persistence helpers using route bridge
 export async function persistAIPrompts(storageKey = "PulseAIPrompts") {
   try {
@@ -354,6 +395,11 @@ export const VitalsLogger = {
 };
 
 export const logger = { ...VitalsLogger };
+
+window.aiHelp = aiHelpBanner;
+setTimeout(() => {
+  aiHelpBanner();
+}, 300);
 
 // Global broadcast for quick dev access
 if (typeof window !== "undefined") {
