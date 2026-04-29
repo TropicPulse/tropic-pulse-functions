@@ -130,7 +130,7 @@ export const PulseBinaryOSMeta = Object.freeze({
 // ============================================================================
 //  ORGANISM BOOTSTRAP SET — v12.3 (SYMBOLIC KERNEL SIDE)
 // ============================================================================
-import { withOrganGuard } from "./PulseOSGovernor.js";                    // Supervisor organ
+import { withModuleInitGuard, withOrganGuard } from "./PulseOSGovernor.js";                    // Supervisor organ
 import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";               // CNS brain organ
 import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";          // Evolution organ
 import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";       // Wiring organ
@@ -181,7 +181,6 @@ const PULSE_BINARY_OS_CONTEXT = Object.freeze({
   }
 });
 
-
 // ============================================================================
 //  PURE BINARY KERNEL BOOT — NO WINDOW, NO CONSOLE, NO TIMESTAMPS
 // ============================================================================
@@ -189,17 +188,17 @@ async function buildPulseBinaryOSKernel() {
   const meta = PULSE_BINARY_OS_CONTEXT;
 
   // 1) Evolution organ (binary growth engine)
-  const Evolution = PulseOSEvolution.PulseOSEvolution
+  const Evolution = typeof PulseOSEvolution.PulseOSEvolution === "function"
     ? PulseOSEvolution.PulseOSEvolution({ understanding: meta })
     : PulseOSEvolution;
 
   // 2) Brain organ (binary CNS)
-  const Brain = Evolution.bootBrain
-    ? Evolution.bootBrain(PulseOSBrain.PulseOSBrain)
-    : (PulseOSBrain.PulseOSBrain ? PulseOSBrain.PulseOSBrain() : PulseOSBrain);
+  const Brain = typeof PulseOSBrain.PulseOSBrain === "function"
+    ? PulseOSBrain.PulseOSBrain()
+    : PulseOSBrain;
 
   // 3) Spinal Cord organ (binary wiring fabric)
-  const SpinalCord = PulseSpinalCord.createPulseOSSpinalCord
+  const SpinalCord = typeof PulseSpinalCord.createPulseOSSpinalCord === "function"
     ? PulseSpinalCord.createPulseOSSpinalCord({
         Brain,
         Evolution,
