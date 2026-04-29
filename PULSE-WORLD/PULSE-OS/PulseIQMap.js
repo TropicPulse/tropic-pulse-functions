@@ -193,31 +193,46 @@ async function buildPulseIQMapPrime() {
   const pageExpectations = buildPageExpectations();
 
   return {
-    log,
-    warn,
-    logError,
-    bootCortex,
-    firebase: firebaseAccess,
+  log,
+  warn,
+  logError,
+  bootCortex,
+  firebase: firebaseAccess,
 
-    version: VERSION_MAP,
-    genome,
+  version: VERSION_MAP,
+  genome,
 
-    topology: {
-      backendRoot: "tropic-pulse-functions",
-      publishRoot: FRONTEND_ROOT,
-      frontendFiles: FRONTEND_FILES,
-      frontendSystems: FRONTEND_SYSTEMS,
-      worldFolders: WORLD_FOLDERS
-    },
+  topology: {
+    backendRoot: "tropic-pulse-functions",
+    publishRoot: FRONTEND_ROOT,
+    frontendFiles: FRONTEND_FILES,
+    frontendSystems: FRONTEND_SYSTEMS,
+    worldFolders: WORLD_FOLDERS
+  },
+presenceConfig: {
+  enabled: false,
+  bluetoothPreferred: false,
+  routes: []
+},
+meshPresenceConfig: {
+  enabled: false,
+  topology: "none",
+  routes: []
+},
 
-    organs: organExpectations,
-    pages: pageExpectations,
-    drift: DRIFT_METADATA,
+  organs: organExpectations,
+  pages: pageExpectations,
+  drift: DRIFT_METADATA,
 
-    // NEW — dynamic route interpreter
-    routeInterpreter: (path) =>
-      interpretRoute(path, genome, pageExpectations)
-  };
+  // ⭐ FIX — add this
+  getRecoveryRoute() {
+    return "/";
+  },
+
+  routeInterpreter: (path) =>
+    interpretRoute(path, genome, pageExpectations)
+};
+
 }
 
 // -----------------------------------------------------------------------------
