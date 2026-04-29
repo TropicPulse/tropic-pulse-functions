@@ -1001,6 +1001,49 @@ if (hasWindow && typeof window.addEventListener === "function") {
       // CLASSIFICATION (v12‑EVO)
       // ========================================================================
       let classified = false;
+      // ========================================================================
+      // EXTERNAL RESOURCE INTERCEPTOR (v12‑EVO)
+      // Detects ANY external URL request and routes it through backend proxy
+      // ========================================================================
+      const externalUrlPattern = /^https?:\/\/[^\/]+/i;
+
+      if (externalUrlPattern.test(msg)) {
+        logProtector("EXTERNAL_RESOURCE_REQUEST", {
+          note: "External URL detected — routing through backend proxy",
+          url: msg
+        });
+
+        // Emit reflex intel
+        emitReflexSenseReport({
+          message: msg,
+          file,
+          line,
+          frames: rawFrames.length,
+          degraded: false,
+          healthScore: 1.0,
+          tier: "externalResource",
+          dnaTag: "A1_SURFACE",
+          page: pagePath,
+          seq: skinSeq,
+          binaryAware: true
+        });
+
+        // Ask CNS Router to fetch + localize the resource
+        await route("fetchExternalResource", {
+          url: msg,
+          page: pagePath,
+          routeTrace,
+          reflexOrigin: "SkinReflex",
+          layer: "A1",
+          binaryAware: true,
+          dualBand: true
+        });
+
+        // Prevent default browser behavior
+        event.preventDefault();
+        return;
+      }
+
 
       if (msg.includes("Cannot find module")) {
         logProtector("IMPORT_DEGRADED", {
