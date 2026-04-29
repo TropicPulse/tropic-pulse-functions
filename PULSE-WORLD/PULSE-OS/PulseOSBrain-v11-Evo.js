@@ -266,14 +266,14 @@ export const PulseOSBrain = {
   // -------------------------------------------------------------------------
   // CNS Infrastructure (wired from IQ)
 // -------------------------------------------------------------------------
-  log: PulseIQMap.log,
-  warn: PulseIQMap.warn,
-  logError: PulseIQMap.logError,
-  firebase: PulseIQMap.firebase,
+  log: () => PulseOSBrain.PulseIQMap?.log,
+  warn: () => PulseOSBrain.PulseIQMap?.warn,
+  logError: () => PulseOSBrain.PulseIQMap?.logError,
+  firebase: () => PulseOSBrain.PulseIQMap?.firebase,
 
-  PulseIntentMap: null,
-  PulseIQMap: PulseIQMap,
-  PulseOrganismMap: PulseOrganismMap,
+  PulseIQMap: null,
+  PulseOrganismMap: null,
+
 
   intent: null,
   understanding: null,
