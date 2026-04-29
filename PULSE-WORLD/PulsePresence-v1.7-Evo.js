@@ -294,9 +294,20 @@ export async function getImage(url) {
   const { value } = await fetchChunk(url);
   return value;
 }
+function attachLore(chunk, metaPack) {
+  const lore = generateLoreHeader(metaPack);
 
+  if (typeof chunk === "string") {
+    return lore + "\n" + chunk;
+  }
+
+  return {
+    __lore: lore,
+    __chunk: chunk
+  };
+}
 // ============================================================================
-//  GENERIC CHUNKER ENTRY — NOW WITH LORE + PRESENCE
+//  GENERIC CHUNKER ENTRY — NOW WITH UNIVERSAL LORE INJECTION
 // ============================================================================
 export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
   if (shouldSkipChunk(filePath, fileSize)) {
@@ -307,12 +318,21 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
 
   const { value: chunk, envelope } = await fetchChunk(filePath);
 
-  if (
-    typeof chunk === "string" &&
-    metaPack &&
-    !chunksDegraded
-  ) {
-    const lore = generateLoreHeader(metaPack);
+  // If no lore or degraded, return raw
+  if (!metaPack || chunksDegraded) {
+    return {
+      chunk,
+      chunked: !chunksDegraded,
+      safe: true,
+      presence: envelope
+    };
+  }
+
+  // ⭐ ALWAYS generate lore
+  const lore = generateLoreHeader(metaPack);
+
+  // ⭐ If chunk is text → prepend lore
+  if (typeof chunk === "string") {
     return {
       chunk: lore + "\n" + chunk,
       chunked: true,
@@ -321,13 +341,18 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
     };
   }
 
+  // ⭐ If chunk is NOT text → wrap it with lore metadata
   return {
-    chunk,
-    chunked: !chunksDegraded,
+    chunk: {
+      __lore: lore,
+      __chunk: chunk
+    },
+    chunked: true,
     safe: true,
     presence: envelope
   };
 }
+
 
 // ============================================================================
 //  PREWARM ENGINE — NON-BLOCKING, ROUTED
