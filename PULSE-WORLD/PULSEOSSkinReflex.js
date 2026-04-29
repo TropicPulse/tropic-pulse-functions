@@ -994,15 +994,15 @@ if (hasWindow && typeof window.addEventListener === "function") {
           binaryAware: true
         });
       }
-
       // ========================================================================
       // CLASSIFICATION (v12‑EVO)
       // ========================================================================
       let classified = false;
+
       // ========================================================================
-      // UNIVERSAL EXTERNAL RESOURCE INTERCEPTOR (v12‑EVO)
+      // UNIVERSAL EXTERNAL RESOURCE INTERCEPTOR (v12.4‑EVO‑PRESENCE)
       // Detects ANY internet-bound request using origin resolution,
-      // not text or protocol matching.
+      // not text or protocol matching. Routes ALL external URLs through CNS.
       // ========================================================================
       function isExternal(url) {
         try {
@@ -1034,7 +1034,7 @@ if (hasWindow && typeof window.addEventListener === "function") {
 
       if (isExternal(msg)) {
         logProtector("EXTERNAL_RESOURCE_REQUEST", {
-          note: "External resource detected — routing through CNS",
+          note: "External resource detected — routing through CNS (v12.4‑EVO)",
           url: msg
         });
 
@@ -1050,9 +1050,11 @@ if (hasWindow && typeof window.addEventListener === "function") {
           page: pagePath,
           seq: skinSeq,
           binaryAware: true,
-          dualBand: true
+          dualBand: true,
+          presenceAware: true
         });
 
+        // ⭐ v12.4‑EVO: Route ALL external URLs through CNS → endpoint → InnerAgent → Proxy
         await route("fetchExternalResource", {
           url: msg,
           page: pagePath,
@@ -1060,12 +1062,16 @@ if (hasWindow && typeof window.addEventListener === "function") {
           reflexOrigin: "SkinReflex",
           layer: "A1",
           binaryAware: true,
-          dualBand: true
+          dualBand: true,
+          presenceAware: true,
+          external: true,              // NEW: explicit external classification
+          trackingPixel: true          // NEW: allows Google Ads / GTM / DoubleClick
         });
 
         event.preventDefault();
         return;
       }
+
 
       // ========================================================================
       // REMAINING CLASSIFIERS
