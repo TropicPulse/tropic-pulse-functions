@@ -98,23 +98,29 @@ function generateLoreHeader({ meta, context, pulseRole, route }) {
 // ============================================================================
 //  SAFETY FENCE — OUTLIER RULES
 // ============================================================================
-function shouldSkipChunk(filePath, fileSize = 0) {
+function shouldSkipChunk(filePath = "", fileSize = 0) {
   if (!filePath) return true;
 
-  if (filePath.includes("PulseOSLongTermMemory.js")) return true;
-  if (filePath.includes("index.js")) return true;
+  // 1. Never chunk firebase-admin (backend-only)
   if (filePath.includes("firebase-admin")) return true;
 
-  if (
-    !filePath.startsWith("/public") &&
-    !filePath.startsWith("/frontend") &&
-    !filePath.startsWith("/assets")
-  ) return true;
+  if (filePath.includes("PulseOSLongTermMemory")) return true;
+  if (filePath.includes("index.html")) return true;
 
-  if (fileSize > 1024 * 1024) return true;
+  // 2. Never chunk the chunker itself (prevents recursion)
+  if (filePath.includes("PulseChunker") ||
+      filePath.includes("Brainstem") ||
+      filePath.includes("PulsePresence")) {
+    return true;
+  }
 
+  // 3. Never chunk extremely large files
+  if (fileSize > 1024 * 1024 * 5) return true; // 5MB safety cap
+
+  // 4. Everything else is allowed
   return false;
 }
+
 // ============================================================================
 //  CHUNKS STATE — SECTIONAL FALLBACK
 // ============================================================================

@@ -6,8 +6,8 @@
 //  - Route-level folding carpet (full route chunking)
 // ============================================================================
 
-import * as admin from "firebase-admin";
-import * as crypto from "crypto";
+import admin from "firebase-admin";
+import crypto from "crypto";
 import { onRequest } from "firebase-functions/v2/https";
 
 const db = admin.firestore();
