@@ -1,16 +1,21 @@
 // ============================================================================
-// FILE: /PulseOS/Core/PulseChunker-v12.4-PRESENCE-EVO-MAX.js
-// PULSE CHUNK ENGINE — v12.4‑PRESENCE‑EVO‑MAX‑PRIME
+// FILE: /PulseOS/Core/PulseChunker-v13-SPINE.js
+// PULSE CHUNK ENGINE — v13‑SPINE‑PRESENCE‑EVO‑MAX
 //  - Payload chunking
 //  - Cache/delta engine
 //  - Route-level folding carpet (full route chunking)
+//  - PulseBandSession-aware
 // ============================================================================
 
-import admin from "firebase-admin";
 import crypto from "crypto";
 import { onRequest } from "firebase-functions/v2/https";
+// ============================================================================
+// UNIVERSAL CNS GLOBAL SURFACE — v13 SPINE
+// ============================================================================
+const admin = global.db;
+const db    = global.db;
 
-const db = admin.firestore();
+
 
 // ============================================================================
 // META BLOCK — ORGAN IDENTITY
@@ -18,8 +23,8 @@ const db = admin.firestore();
 export const PulseChunkerMeta = Object.freeze({
   layer: "Backend",
   role: "PAYLOAD_CHUNK_ENGINE",
-  version: "v12.4-PRESENCE-EVO-MAX",
-  identity: "PulseChunker-v12.4-PRESENCE-EVO-MAX",
+  version: "v13-SPINE-PRESENCE-EVO-MAX",
+  identity: "PulseChunker-v13-SPINE-PRESENCE-EVO-MAX",
   guarantees: Object.freeze({
     deterministicSessionId: true,
     cacheAware: true,
@@ -54,6 +59,7 @@ export const PulseChunkerMeta = Object.freeze({
     ]
   })
 });
+
 
 // ============================================================================
 // ROUTE DESCRIPTOR CONTRACT — v12.4-EVO-ROUTE-FABRIC
@@ -677,3 +683,182 @@ export const logPulseBandRedownload = onRequest(
     }
   }
 );
+
+// ============================================================================
+// FACTORY — CNS‑SAFE CHUNKER (Brain + Logger)
+// ============================================================================
+export function createPulseChunker({ Brain, Logger } = {}) {
+  if (!Brain && !Logger) {
+    throw new Error("PulseChunker v13: Missing Brain/Logger injection.");
+  }
+
+  const log   = Logger?.log   || Brain?.log   || console.log;
+  const warn  = Logger?.warn  || Brain?.warn  || console.warn;
+  const error = Logger?.error || Brain?.logError || console.error;
+
+  // Optional DB — routed via Brain if available (no firebase-admin import)
+  const db = Brain?.firebase ? Brain.firebase("db") : null;
+
+  // Optional helpers from Brain / Logger / global
+  const fsAPI     = Brain?.fsAPI     || global.fsAPI     || null;
+  const routeAPI  = Brain?.routeAPI  || global.routeAPI  || null;
+  const schemaAPI = Brain?.schemaAPI || global.schemaAPI || null;
+  const fetchAPI  = Logger?.fetchAPI || Brain?.fetchAPI  || global.fetch || null;
+
+  // Internal registries
+  const backendOrgans = new Map();
+  const sessions = new Map();
+
+  // --------------------------------------------------------------------------
+  // PulseBandSession — deterministic session bootstrap
+  // --------------------------------------------------------------------------
+  function startPulseBandSession({
+    trace,
+    db: dbOverride,
+    fsAPI: fsOverride,
+    routeAPI: routeOverride,
+    schemaAPI: schemaOverride
+  } = {}) {
+    const now = Date.now().toString();
+    const seed = `${trace || "no-trace"}::${now}`;
+
+    const sessionId = crypto
+      .createHash("sha256")
+      .update(seed)
+      .digest("hex");
+
+    const session = {
+      id: sessionId,
+      startedAt: now,
+      db: dbOverride || db,
+      fsAPI: fsOverride || fsAPI,
+      routeAPI: routeOverride || routeAPI,
+      schemaAPI: schemaOverride || schemaAPI
+    };
+
+    sessions.set(sessionId, session);
+
+    log("[PulseChunker v13] PulseBandSession started", {
+      sessionId,
+      hasDb: !!session.db
+    });
+
+    return session;
+  }
+
+  // --------------------------------------------------------------------------
+  // Registration — backend organs that support chunking
+  // --------------------------------------------------------------------------
+  function registerBackendOrgan(name, { chunk, prewarm } = {}) {
+    if (!name || typeof chunk !== "function") {
+      warn("[PulseChunker v13] registerBackendOrgan called with invalid args", {
+        name,
+        hasChunk: typeof chunk === "function"
+      });
+      return;
+    }
+
+    backendOrgans.set(name, { chunk, prewarm });
+    log("[PulseChunker v13] Registered backend organ for chunking", { name });
+  }
+
+  // --------------------------------------------------------------------------
+  // Prewarm — universal warmup for chunker + registered organs
+  // --------------------------------------------------------------------------
+  function prewarm() {
+    log("[PulseChunker v13] Prewarm start", {
+      organs: backendOrgans.size
+    });
+
+    for (const [name, organ] of backendOrgans.entries()) {
+      if (typeof organ.prewarm === "function") {
+        try {
+          organ.prewarm();
+          log("[PulseChunker v13] Prewarmed organ", { name });
+        } catch (e) {
+          warn("[PulseChunker v13] Prewarm failed for organ", {
+            name,
+            error: e?.message
+          });
+        }
+      }
+    }
+
+    log("[PulseChunker v13] Prewarm complete");
+  }
+
+  // --------------------------------------------------------------------------
+  // Core chunking primitive
+  // --------------------------------------------------------------------------
+  function chunkPayload({
+    userId,
+    payload,
+    chunkSize = 1024 * 64,
+    baseVersion = "v1",
+    sizeOnly = false,
+    presenceTag = "default",
+    band = "dual"
+  }) {
+    const buffer =
+      typeof payload === "string" ? Buffer.from(payload, "utf8") : Buffer.from(payload || []);
+
+    const payloadBytes = buffer.length;
+    const payloadHash = crypto
+      .createHash("sha256")
+      .update(buffer)
+      .digest("hex");
+
+    const totalChunks = sizeOnly
+      ? Math.ceil(payloadBytes / chunkSize)
+      : Math.max(1, Math.ceil(payloadBytes / chunkSize));
+
+    const sessionSeed = `${userId || "anon"}::${payloadHash}::${baseVersion}`;
+    const sessionId = crypto
+      .createHash("sha256")
+      .update(sessionSeed)
+      .digest("hex");
+
+    const result = {
+      sessionId,
+      totalChunks,
+      payloadBytes,
+      payloadHash,
+      presenceTag,
+      band
+    };
+
+    log("[PulseChunker v13] Chunk payload computed", {
+      userId,
+      payloadBytes,
+      totalChunks,
+      presenceTag,
+      band
+    });
+
+    return result;
+  }
+
+  // --------------------------------------------------------------------------
+  // Public API
+  // --------------------------------------------------------------------------
+  return {
+    meta: PulseChunkerMeta,
+
+    // CNS wiring
+    startPulseBandSession,
+    registerBackendOrgan,
+    prewarm,
+
+    // Core primitive
+    chunkPayload,
+
+    // Optional helpers exposed for router / dualBand if needed
+    getSession(sessionId) {
+      return sessions.get(sessionId) || null;
+    },
+
+    hasBackendOrgan(name) {
+      return backendOrgans.has(name);
+    }
+  };
+}

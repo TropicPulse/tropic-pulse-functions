@@ -110,6 +110,7 @@ function shouldSkipChunk(filePath = "", fileSize = 0) {
   // 2. Never chunk the chunker itself (prevents recursion)
   if (filePath.includes("PulseChunker") ||
       filePath.includes("Brainstem") ||
+      filePath.includes("Organs") ||
       filePath.includes("PulsePresence")) {
     return true;
   }
