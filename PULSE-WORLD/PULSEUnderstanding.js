@@ -22,7 +22,7 @@
 //  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
 //  - Understanding integrates error packets from Window + Flow + Reflex.
 // ============================================================================
-import * as PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
+import PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
 
 
 // ============================================================================
@@ -38,12 +38,12 @@ import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
 // ============================================================================
 import { PulseOSv11Evo } from "./PULSE-OS/PulseOS-v11-Evo.js";
 
-import * as PulseProxySym from "./PULSE-PROXY/PulseProxy-v11-EVO.js";
-import * as PulseRouterSym from "./PULSE-ROUTER/PulseRouter-v11-EVO.js";
-import * as PulseGPUSym from "./PULSE-GPU/PulseGPU-v11-EVO.js";
-import * as PulseMeshSym from "./PULSE-MESH/PulseMesh-v11-EVO.js";
-import * as PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
-import * as PulseEarnSym from "./PULSE-EARN/PulseEarn-v12.3-Presence.js";
+import PulseProxySym from "./PULSE-PROXY/PulseProxy-v11-EVO.js";
+import PulseRouterSym from "./PULSE-ROUTER/PulseRouter-v11-EVO.js";
+import PulseGPUSym from "./PULSE-GPU/PulseGPU-v11-EVO.js";
+import PulseMeshSym from "./PULSE-MESH/PulseMesh-v11-EVO.js";
+import PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
+import PulseEarnSym from "./PULSE-EARN/PulseEarn-v12.3-Presence.js";
 
 
 // ============================================================================
@@ -51,13 +51,13 @@ import * as PulseEarnSym from "./PULSE-EARN/PulseEarn-v12.3-Presence.js";
 //  Window already booted ai-v11-Evo and exposed window.PulseBinary.
 // ============================================================================
 import { PulseBinaryOSv11Evo } from "./PULSE-OS/PulseBinaryOS-v11-EVO-MAX.js";
-import * as PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
+import PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
 
 import { createBinaryProxy } from "./PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
-import * as PulseRouterBin from "./PULSE-ROUTER/PulseBinaryRouter-v11-EVO.js";
-import * as PulseGPUBin from "./PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
-import * as PulseMeshBin from "./PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
-import * as PulseSendBin from "./PULSE-SEND/PulseBinarySend-v11-EVO.js";
+import { createBinaryRouter as PulseRouterBin} from "./PULSE-ROUTER/PulseBinaryRouter-v11-EVO.js";
+import { PulseBinaryGPU as PulseGPUBin} from "./PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
+import { createBinaryMesh as PulseMeshBin} from "./PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
+import { createBinarySend as PulseSendBin} from "./PULSE-SEND/PulseBinarySend-v11-EVO.js";
 
 
 // ============================================================================

@@ -47,13 +47,13 @@ import PulseBinaryOrganismBoot from "./PULSE-AI/ai-v11-Evo.js";
 //  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
 //  - Safe, membrane-level, never throws, never breaks.
 // ============================================================================
-import * as PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
+import PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
 
 // ============================================================================
 //  UI FLOW ENGINE (PulseUIFlow-v12-EVO)
 //  - UI flow coordinator, UI-only, safe to expose at membrane.
 // ============================================================================
-import * as PulseUIFlow from "./PULSE-UI/PulseUIFlow-v12-EVO.js";
+import {initUIFlow as PulseUIFlow} from "./PULSE-UI/PulseUIFlow-v12-EVO.js";
 
 
 // ============================================================================
