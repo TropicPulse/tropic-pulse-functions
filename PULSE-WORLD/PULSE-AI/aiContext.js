@@ -272,12 +272,6 @@ export function createCognitiveFrame(options = {}) {
   return Object.freeze(context);
 }
 
-// ============================================================================
-//  ESM EXPORTS
-// ============================================================================
-export {
-  createCognitiveFrame
-};
 
 export default createCognitiveFrame;
 

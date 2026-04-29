@@ -339,7 +339,7 @@ export function createPulseOSCortex({ Brain }) {
   // ========================================================================
   //  PUBLIC API
   // ========================================================================
-  export const cortexAPI = {
+  const cortexAPI = {
     boot: bootCortexFn,
     update: updateCortex,
     state: CortexState,

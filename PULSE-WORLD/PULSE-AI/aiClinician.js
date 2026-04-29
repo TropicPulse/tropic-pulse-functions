@@ -225,12 +225,6 @@ export function createClinicianOrgan(context = {}) {
   });
 }
 
-// ============================================================================
-//  EXPORTS
-// ============================================================================
-export {
-  createClinicianOrgan
-};
 
 export default createClinicianOrgan;
 

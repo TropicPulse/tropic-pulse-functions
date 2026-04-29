@@ -22,7 +22,7 @@ export function createPulseEarnMemoryAdapter({
   // ---------------------------------------------------------
   //  v12 IDENTITY BLOCK (MetaBlock)
   // ---------------------------------------------------------
-  export const metaBlock = {
+  const metaBlock = {
     identity: "PulseEarnMemoryAdapter",
     subsystem: "Earn",
     layer: "MemoryAdapter",

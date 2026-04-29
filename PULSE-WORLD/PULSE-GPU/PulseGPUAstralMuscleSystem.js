@@ -1,3 +1,4 @@
+/* global log,warn */
 // ============================================================================
 //  PULSE GPU ENGINE v12-Evo-Presence-Max — THE ASTRAL MUSCLE SYSTEM
 //  WebGPU Execution Layer • Frame Conductor • GPU Motor Cortex Surface
@@ -55,7 +56,7 @@
 //  • binaryGpuOrganContract: "PulseBinaryGPU-v12-Evo-Presence-Max"
 //  • earnCompatibility: "Earn-v4-Presence"
 // ============================================================================
-
+import { PulseGPURuntime } from "./PulseGPUDrive.js";
 
 // ============================================================================
 //  ENGINE META — Astral Muscle Identity (v12-Evo-Presence)

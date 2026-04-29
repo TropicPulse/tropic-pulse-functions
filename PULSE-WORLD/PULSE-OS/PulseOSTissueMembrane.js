@@ -1,3 +1,4 @@
+/* global log,error */
 // ============================================================================
 // FILE: /apps/PulseOS/PULSE-OS/PulseOSTissueMembrane.js
 // PULSE OS — v10.1 → v12.3-Presence

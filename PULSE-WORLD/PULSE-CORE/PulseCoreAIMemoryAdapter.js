@@ -22,7 +22,7 @@ export function createPulseAIMemoryAdapter({
   // ---------------------------------------------------------
   //  v12 IDENTITY BLOCK (MetaBlock)
   // ---------------------------------------------------------
-  export const metaBlock = {
+  const metaBlock = {
     identity: "PulseAIMemoryAdapter",
     subsystem: "AI",
     layer: "MemoryAdapter",

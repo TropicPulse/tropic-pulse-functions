@@ -190,7 +190,7 @@ function buildCastleId({ regionId, hostName }) {
   return stableHash(`CASTLE::${regionId}::${hostName}`);
 }
 
-function computeCastlePresence(castle) {
+export function computeCastlePresence(castle) {
   const serverCount = Object.keys(castle.serversById || {}).length;
   const soldierCount = Object.keys(castle.soldiersById || {}).length;
   const capacityHint = castle.presenceField?.capacityHint ?? 1;
@@ -222,6 +222,47 @@ function computeCastlePresence(castle) {
     tier
   };
 }
+
+export function summarizeCastlePresence(castles = {}) {
+  const byRegion = {};
+  const meshLinksByCastleId = {};
+
+  for (const castleId in castles) {
+    const castle = castles[castleId];
+    const region = castle.region || "unknown";
+
+    const presence = computeCastlePresence(castle);
+
+    if (!byRegion[region]) {
+      byRegion[region] = {
+        castles: [],
+        totalLoad: 0,
+        avgLoad: 0,
+        count: 0
+      };
+    }
+
+    byRegion[region].castles.push({
+      castleId,
+      ...presence
+    });
+
+    byRegion[region].totalLoad += presence.loadIndex;
+    byRegion[region].count++;
+  }
+
+  // compute averages
+  for (const region in byRegion) {
+    const r = byRegion[region];
+    r.avgLoad = r.count > 0 ? r.totalLoad / r.count : 0;
+  }
+
+  return {
+    byRegion,
+    meshLinksByCastleId
+  };
+}
+
 
 function ensureCastle(castleId, regionId, hostName, presenceField) {
   if (!castlesById[castleId]) {

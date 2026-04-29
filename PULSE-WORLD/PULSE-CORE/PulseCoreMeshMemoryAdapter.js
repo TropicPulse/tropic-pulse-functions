@@ -22,7 +22,7 @@ export function createPulseMeshMemoryAdapter({
   // ---------------------------------------------------------
   //  v12 IDENTITY BLOCK (MetaBlock)
   // ---------------------------------------------------------
-  export const metaBlock = {
+  const metaBlock = {
     identity: "PulseMeshMemoryAdapter",
     subsystem: "Mesh",
     layer: "MemoryAdapter",

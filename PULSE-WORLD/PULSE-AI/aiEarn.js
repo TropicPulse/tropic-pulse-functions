@@ -384,12 +384,6 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ============================================================================
 
-// ESM
-export {
-  EarnMeta,
-  createEarnAPI
-};
-
 // Default (ESM)
 export default createEarnAPI;
 

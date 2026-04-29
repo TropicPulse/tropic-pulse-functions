@@ -1,3 +1,4 @@
+/* global log,warn */
 // ============================================================================
 //  PULSE GPU BRAIN v12-Evo-Presence-Max — THE ANALYST CORTEX / BRAINSTEM
 //  CPU-SIDE INTELLIGENCE DIVISION (FULL-GPU, API-AGNOSTIC)

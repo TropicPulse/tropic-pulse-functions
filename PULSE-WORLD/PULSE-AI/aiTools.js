@@ -232,7 +232,7 @@ function _markAnalysis({ heavy = false } = {}) {
   ) {
     // Soft spiral warning — non‑blocking, logging only
     // (keeps harmony, never blocks organism)
-    // eslint-disable-next-line no-console
+     
     console.log("[aiInstruments] spiral-warning", artery);
   }
 }

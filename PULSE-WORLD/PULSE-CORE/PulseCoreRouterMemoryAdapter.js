@@ -23,7 +23,7 @@ export function createPulseRouterMemoryAdapter({
   // ---------------------------------------------------------
   //  v12 IDENTITY BLOCK (MetaBlock)
   // ---------------------------------------------------------
-  export const metaBlock = {
+  const metaBlock = {
     identity: "PulseRouterMemoryAdapter",
     subsystem: "Router",
     layer: "MemoryAdapter",

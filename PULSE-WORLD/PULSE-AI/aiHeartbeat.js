@@ -363,7 +363,7 @@ export async function handler(event, context) {
 // ============================================================================
 //  EXPORT META
 // ============================================================================
-export { AI_HEARTBEAT_META };
+
 
 if (typeof module !== "undefined") {
   module.exports = {

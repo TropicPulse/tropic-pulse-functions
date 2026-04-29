@@ -247,13 +247,6 @@ export default depsSurface;
 
 // ESM
 export {
-  DepsMeta,
-  getDb,
-  getFsAPI,
-  getRouteAPI,
-  getSchemaAPI,
-  getOrganismSnapshot,
-  emitDepsPacket,
   depsSurface
 };
 

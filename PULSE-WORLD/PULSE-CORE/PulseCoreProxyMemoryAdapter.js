@@ -23,7 +23,7 @@ export function createPulseProxyMemoryAdapter({
   // ---------------------------------------------------------
   //  v12 IDENTITY BLOCK (MetaBlock)
   // ---------------------------------------------------------
-  export const metaBlock = {
+  const metaBlock = {
     identity: "PulseProxyMemoryAdapter",
     subsystem: "Proxy",
     layer: "MemoryAdapter",

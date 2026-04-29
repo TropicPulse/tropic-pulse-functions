@@ -350,7 +350,7 @@ export function PulseOSEvolution({ intent, organism, iq, understanding }) {
   // --------------------------------------------------------------------------
   // PUBLIC EVOLUTION ORGAN SURFACE
   // --------------------------------------------------------------------------
-  export const Evolution = {
+  const Evolution = {
     PulseRole,
     DriftState,
     scanDrift,

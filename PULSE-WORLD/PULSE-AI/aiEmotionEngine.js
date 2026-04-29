@@ -143,14 +143,6 @@ export const aiEmotionEngine = {
 export default aiEmotionEngine;
 
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  EmotionEngineMeta,
-  aiEmotionEngine
-};
-
 if (typeof module !== "undefined") {
   module.exports = {
     EmotionEngineMeta,

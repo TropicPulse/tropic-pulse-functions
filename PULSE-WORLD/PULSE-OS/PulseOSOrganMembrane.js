@@ -1,3 +1,4 @@
+/* global log, error */
 // ============================================================================
 // FILE: /apps/PulseOS/Organs/Barriers/PulseOSOrganMembrane.js
 // PULSE OS — v12.3-Evo-Prime

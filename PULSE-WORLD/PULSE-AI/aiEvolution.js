@@ -143,7 +143,218 @@ export async function prewarmEvolutionOrgan(fsAPI, routeAPI, schemaAPI, dualBand
     const sampleFiles = Array.isArray(files) ? files.slice(0, 5) : [];
     const sampleRoutes = Array.isArray(routes) ? routes.slice(0, 5) : [];
     const sampleSchemas = Array.isArray(schemas) ? schemas.slice(0, 5) : [];
+    function summarizeSnapshot(snapshot) {
+    if (!snapshot) {
+      return Object.freeze({
+        present: false,
+        binaryBits: 0,
+        symbolicKeys: 0
+      });
+    }
 
+    const binaryStr =
+      typeof snapshot === "string"
+        ? snapshot
+        : typeof snapshot.binary === "string"
+        ? snapshot.binary
+        : "";
+
+    const symbolic =
+      snapshot && typeof snapshot.symbolic === "object"
+        ? snapshot.symbolic
+        : null;
+
+    const symbolicKeys = symbolic ? Object.keys(symbolic).length : 0;
+
+    return Object.freeze({
+      present: true,
+      binaryBits: binaryStr.length,
+      symbolicKeys
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // CHUNKING — keep packets bounded + deterministic
+  // --------------------------------------------------------------------------
+  function chunkArray(arr, size = 200) {
+    if (!Array.isArray(arr) || size <= 0) return [];
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += size) {
+      chunks.push(Object.freeze(arr.slice(i, i + size)));
+    }
+    return Object.freeze(chunks);
+  }
+
+  // --------------------------------------------------------------------------
+  // PACKET EMITTER — Evolution Packets v2
+  // --------------------------------------------------------------------------
+  function emitEvolutionPacket(type, payload, { severity = "info", driftLevel = "none" } = {}) {
+    return Object.freeze({
+      meta: AI_EVOLUTION_META,
+      packetType: `evo-${type}`,
+      packetId: `evo-${type}-${Date.now()}`,
+      timestamp: Date.now(),
+      organismEpoch: AI_EVOLUTION_META.evo.epoch,
+      severity,
+      driftLevel,
+      ...payload
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // DETECTORS — Pure, Deterministic Analysis
+  // --------------------------------------------------------------------------
+  function detectUnusedImports(file) {
+    if (!file?.imports || !file?.references) return [];
+    return file.imports.filter(imp => !file.references.includes(imp.name));
+  }
+
+  function detectOrphanedRoutes(routeMap) {
+    if (!Array.isArray(routeMap)) return [];
+    return routeMap.filter(r => !r.inbound && !r.outbound);
+  }
+
+  function detectDeadComponents(files) {
+    if (!Array.isArray(files)) return [];
+    return files.filter(
+      f =>
+        f.type === "component" &&
+        Array.isArray(f.references) &&
+        f.references.length === 0
+    );
+  }
+
+  function detectSchemaDrift(schemas) {
+    const drift = [];
+
+    if (!Array.isArray(schemas)) return drift;
+
+    for (const s of schemas) {
+      if (!s?.expectedFields || !s?.actualFields) continue;
+
+      for (const key of Object.keys(s.expectedFields)) {
+        if (!s.actualFields[key]) {
+          drift.push({
+            schema: s.name,
+            field: key,
+            issue: "missing"
+          });
+        }
+      }
+
+      for (const key of Object.keys(s.actualFields)) {
+        if (!s.expectedFields[key]) {
+          drift.push({
+            schema: s.name,
+            field: key,
+            issue: "unexpected"
+          });
+        }
+      }
+    }
+
+    return drift;
+  }
+
+  function detectOrganDrift(files) {
+    if (!Array.isArray(files)) return [];
+
+    return files
+      .filter(f => f.type === "organ")
+      .map(f => {
+        const missingExports =
+          f.expectedExports?.filter(e => !f.exports?.includes(e)) || [];
+        const unusedExports =
+          f.exports?.filter(e => !f.references?.includes(e)) || [];
+
+        return {
+          organ: f.name,
+          missingExports,
+          unusedExports
+        };
+      })
+      .filter(o => o.missingExports.length > 0 || o.unusedExports.length > 0);
+  }
+
+  function detectPageDrift(files) {
+    if (!Array.isArray(files)) return [];
+
+    return files
+      .filter(f => f.type === "page")
+      .map(f => {
+        const missingRoutes =
+          f.expectedRoutes?.filter(r => !f.routes?.includes(r)) || [];
+        const unusedRoutes =
+          f.routes?.filter(r => !f.references?.includes(r)) || [];
+
+        return {
+          page: f.name,
+          missingRoutes,
+          unusedRoutes
+        };
+      })
+      .filter(p => p.missingRoutes.length > 0 || p.unusedRoutes.length > 0);
+  }
+
+  function detectPulseEarnDrift(files) {
+    if (!Array.isArray(files)) return null;
+
+    const earn = files.find(f => f.name === "PulseEarn-v11-Evo.js");
+    if (!earn) return null;
+
+    return {
+      missingExports:
+        earn.expectedExports?.filter(e => !earn.exports?.includes(e)) || [],
+      unusedImports: detectUnusedImports(earn),
+      unusedExports:
+        earn.exports?.filter(e => !earn.references?.includes(e)) || [],
+      deadPaths: earn.deadPaths || []
+    };
+  }
+
+  function detectEvolutionaryPatterns({
+    files = [],
+    routes = [],
+    schemaDrift = [],
+    organDrift = [],
+    pageDrift = []
+  }) {
+    const fileCount = Array.isArray(files) ? files.length : 0;
+    const routeCount = Array.isArray(routes) ? routes.length : 0;
+
+    const deadComponents = detectDeadComponents(files);
+    const orphanedRoutes = detectOrphanedRoutes(routes);
+
+    const newLimb =
+      fileCount > 0 &&
+      (schemaDrift.length > 0 || organDrift.length > 0 || pageDrift.length > 0);
+
+    const overgrowth =
+      deadComponents.length > 10 || orphanedRoutes.length > 10;
+
+    const starvation =
+      fileCount > 0 &&
+      schemaDrift.length === 0 &&
+      organDrift.length === 0 &&
+      pageDrift.length === 0 &&
+      deadComponents.length === 0 &&
+      orphanedRoutes.length === 0;
+
+    return Object.freeze({
+      newLimb,
+      overgrowth,
+      starvation,
+      counts: {
+        files: fileCount,
+        routes: routeCount,
+        schemaDrift: schemaDrift.length,
+        organDrift: organDrift.length,
+        pageDrift: pageDrift.length,
+        deadComponents: deadComponents.length,
+        orphanedRoutes: orphanedRoutes.length
+      }
+    });
+  }
     detectUnusedImports(sampleFiles[0] || null);
     detectDeadComponents(sampleFiles);
     detectOrphanedRoutes(sampleRoutes);
@@ -713,13 +924,6 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
   });
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  AI_EVOLUTION_META,
-  createEvolutionAPI
-};
 
 if (typeof module !== "undefined") {
   module.exports = {

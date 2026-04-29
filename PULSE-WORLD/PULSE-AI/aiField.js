@@ -124,7 +124,7 @@ export function prewarmBinaryField(dualBand = null, { trace = false } = {}) {
     const packet = emitFieldPacket("prewarm", payload);
 
     if (trace) {
-      // eslint-disable-next-line no-console
+       
       console.log("[aiBinaryField] prewarm", packet);
     }
 
@@ -368,7 +368,7 @@ class AIBinaryField {
   // ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
-    // eslint-disable-next-line no-console
+     
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
@@ -385,7 +385,6 @@ export function createAIBinaryField(config) {
 // ============================================================================
 export {
   AIBinaryField,
-  FieldMeta
 };
 
 if (typeof module !== "undefined") {

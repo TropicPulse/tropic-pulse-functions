@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // ============================================================================
 // FILE: tropic-pulse-functions/apps/PULSE-GPU/PulseGPUDrive.js
 // LAYER: MOMENTUM NETWORK — GPU RUNTIME (BRAIN → ENGINE FLOW)
@@ -13,7 +14,8 @@
 //  • Exposes meshes/shaders/textures/dispatch hints to Astral Muscle Engine.
 //  • Binary-aware, symbolic-aware, dispatch-aware, memory-aware, presence-aware.
 //  • Fail-open: if anything is missing, surfaces stay empty but never throw.
-// ============================================================================
+
+import { PulseGPUBrainExport } from "./PulseGPUBrain";
 
 const PULSE_GPU_RUNTIME_VERSION = "12.0-Evo-Presence-Max";
 

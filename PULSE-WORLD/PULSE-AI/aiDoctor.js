@@ -278,13 +278,6 @@ export function createDoctorOrgan(context = {}) {
   });
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  DoctorMeta,
-  createDoctorOrgan
-};
 
 if (typeof module !== "undefined") {
   module.exports = {

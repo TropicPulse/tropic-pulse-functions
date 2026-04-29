@@ -221,7 +221,7 @@ export function createPulseCoreEvolutions({
   // -------------------------------------------------------------------------
   //  PUBLIC API
 // -------------------------------------------------------------------------
-  export const PulseCoreEvolutions = {
+  const PulseCoreEvolutions = {
     CoreEvolutionsRole,
     CoreEvolutionsMetaBlock,
     Evolutions,

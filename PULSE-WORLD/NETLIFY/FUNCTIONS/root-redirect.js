@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // ============================================================================
 // FILE: tropic-pulse-functions/netlify/functions/root-redirect.js
 // PULSE REDIRECT — VERSION 6.3

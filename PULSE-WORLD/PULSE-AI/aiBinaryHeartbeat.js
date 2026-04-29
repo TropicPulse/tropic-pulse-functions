@@ -230,12 +230,6 @@ export function createAIBinaryHeartbeat(config) {
   return new AIBinaryHeartbeat(config);
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  HeartbeatMeta
-};
 
 if (typeof module !== "undefined") {
   module.exports = {

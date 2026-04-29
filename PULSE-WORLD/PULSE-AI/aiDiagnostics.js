@@ -178,13 +178,6 @@ export function createDiagnosticsAPI() {
 // ---------------------------------------------------------
 prewarmDiagnosticsOrgan();
 
-// ESM
-export {
-  DiagnosticsMeta,
-  createDiagnosticsState,
-  attachDiagnosticsOrgan,
-  createDiagnosticsAPI
-};
 
 // CommonJS
 if (typeof module !== "undefined") {

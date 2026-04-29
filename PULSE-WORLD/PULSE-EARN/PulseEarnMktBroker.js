@@ -51,6 +51,15 @@ export const PulseEarnMktBrokerMeta = Object.freeze({
     ]
   })
 });
+export const RUNPOD_RECEPTOR_DNA = {
+  version: "1.0",
+  receptorType: "runpod",
+  jobs: [
+    { id: "ping", payload: { type: "ping" } },
+    { id: "fetch", payload: { type: "fetch" } },
+    { id: "submit", payload: { type: "submit" } }
+  ]
+};
 
 // ============================================================================
 // Deterministic Hash Helper

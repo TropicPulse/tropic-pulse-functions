@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // FILE: tropic-pulse-functions/netlify/functions/helpers.js
 //
 // INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
@@ -78,6 +79,9 @@
 /* ----------------------------------------------------
    SAFE FETCH JSON (with timeout + UA header)
 ---------------------------------------------------- */
+
+import { db, admin } from "../firebase.js";
+
 export async function safeFetchJson(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);

@@ -227,10 +227,6 @@ export function createAIBinaryLoggerAdapter(config) {
   return new AIBinaryLoggerAdapter(config);
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS
-// ============================================================================
-export { LoggerAdapterMeta };
 
 if (typeof module !== "undefined") {
   module.exports = {

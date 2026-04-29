@@ -214,7 +214,7 @@ export function createPulseBinaryOverlay({
   // -------------------------------------------------------------------------
   //  PUBLIC API
   // -------------------------------------------------------------------------
-  export const PulseBinaryOverlay = {
+  const PulseBinaryOverlay = {
     BinaryOverlayRole,
     BinaryOverlayMetaBlock,
     Governor,

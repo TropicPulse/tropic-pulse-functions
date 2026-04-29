@@ -234,5 +234,3 @@ export class AIBinaryDelta {
 export function createAIBinaryDelta(config) {
   return new AIBinaryDelta(config);
 }
-
-export { AIBinaryDelta };

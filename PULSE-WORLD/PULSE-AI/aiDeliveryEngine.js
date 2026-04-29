@@ -129,11 +129,6 @@ export default aiDeliveryEngine;
 // ---------------------------------------------------------
 prewarmDeliveryEngine();
 
-// ESM
-export {
-  aiDeliveryEngine
-};
-
 // CommonJS
 if (typeof module !== "undefined") {
   module.exports = {

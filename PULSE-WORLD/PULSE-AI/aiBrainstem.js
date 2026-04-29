@@ -173,7 +173,7 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
 // ============================================================================
 // EXPORTS
 // ============================================================================
-export { createBrainstem };
+
 export default createBrainstem;
 
 if (typeof module !== "undefined") {

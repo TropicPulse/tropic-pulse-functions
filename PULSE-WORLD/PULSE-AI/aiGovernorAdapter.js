@@ -286,12 +286,6 @@ export function createAIBinaryGovernorAdapter(config) {
   return new AIBinaryGovernorAdapter(config);
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  GovernorAdapterMeta
-};
 
 if (typeof module !== "undefined") {
   module.exports = {

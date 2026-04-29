@@ -181,7 +181,7 @@ export function createPulseCoreGovernor({
   // -------------------------------------------------------------------------
   //  PUBLIC API
   // -------------------------------------------------------------------------
- export const PulseCoreGovernor = {
+ const PulseCoreGovernor = {
     CoreGovernorRole,
     CoreGovernorMetaBlock,
 

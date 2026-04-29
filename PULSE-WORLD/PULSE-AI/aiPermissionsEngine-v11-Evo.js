@@ -4,6 +4,9 @@
 //  PURE CONTRACT ORACLE. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
+import { getPermissionsForPersona,ForbiddenActions } from "./permissions.js";
+
+
 export const PermissionsMeta = Object.freeze({
   layer: "PulseAIPermissionsLayer",
   role: "PERMISSIONS_ENGINE",

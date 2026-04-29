@@ -4,9 +4,10 @@
 //  Binary-aware • Symbolic-aware • Dispatch-aware • Memory-aware
 // ============================================================================
 
-import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUConfig.js";
+import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUCommandments.js";
+import { PulseGPUGeneticMemory } from "./PulseGPUGeneticMemory.js";
 import { PulseGPUSurvivalInstincts } from "./PulseGPUSurvivalInstincts.js";
-
+import { PulseGPUEngine } from "./PulseGPUAstralMuscleSystem.js";
 // ============================================================================
 // DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC (v11-Evo)
 // ============================================================================
@@ -172,7 +173,7 @@ function detectRegression(currentMetrics = {}, baselineMetrics = {}) {
 // ============================================================================
 class PulseGPUPerformanceAdvisor {
   constructor(settingsMemory) {
-    this.memory = settingsMemory || new PulseGPUSettingsMemory();
+    this.memory = settingsMemory || new PulseGPUGeneticMemory();
   }
 
   static meta = {

@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // scan-apps.js
 // Scans /apps and prints:
 //  - all top-level folders

@@ -202,14 +202,6 @@ export function createAIExperience(context) {
   });
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  AI_EXPERIENCE_META,
-  createAIExperience
-};
-
 if (typeof module !== "undefined") {
   module.exports = {
     AI_EXPERIENCE_META,

@@ -1,23 +1,6 @@
-// Aldwyn — **Chunker 1/3 + 2/3 + 3/3 fully received.**  
-// You get **exactly what you asked for**:
-
-// ### **✔ FULL UPGRADE BACK**  
-// ### **PulseChunker v12.3‑Presence‑EVO‑MAX‑PRIME**  
-// **Deterministic • Backend‑only • Presence‑aware • Binary‑aware • Dual‑band compliant • Zero‑timing • Zero‑randomness • Zero‑mutation • Fully aligned with OrganismMap + IntentMap + IQMap + SDN‑Prewarm**
-
-// No commentary.  
-// No filler.  
-// Just the upgraded organ as a **single unified file**.
-
-// ---
-
-// # ✅ **PULSE CHUNKER — v12.3‑PRESENCE‑EVO‑MAX‑PRIME (FULL UPGRADE)**
-
-// ```js
 // ============================================================================
 // FILE: /apps/PulseOS/Core/PulseChunker-v12.3-PRESENCE-EVO-MAX.js
 // PULSE CHUNK ENGINE — v12.3‑PRESENCE‑EVO‑MAX‑PRIME
-// Backend‑only • Deterministic • Presence‑aware • Binary‑aware
 // ============================================================================
 
 import * as admin from "firebase-admin";
@@ -70,119 +53,107 @@ export const PulseChunkerMeta = Object.freeze({
 });
 
 // ============================================================================
-// LORE TRANSLATOR — ORGAN-AWARE LORE HEADER
+// LORE TRANSLATOR
 // ============================================================================
 function generateLoreHeader({ meta, payloadType, baseVersion, presenceTag, band }) {
   if (!meta) return "";
-
   const guarantees = Object.keys(meta.guarantees || {}).filter(k => meta.guarantees[k]);
   const inputs = meta.contract?.input || [];
   const outputs = meta.contract?.output || [];
-
   return `
 /*
-  ────────────────────────────────────────────────────────────────
   PULSE LORE — ORGAN: ${meta.identity}
-  LAYER: ${meta.layer}
-  ROLE: ${meta.role}
   VERSION: ${meta.version}
   PAYLOAD TYPE: ${payloadType || "unknown"}
   BASE VERSION: ${baseVersion || "none"}
   PRESENCE TAG: ${presenceTag || "none"}
   BAND: ${band || "symbolic"}
-  ────────────────────────────────────────────────────────────────
-
-  The chunk engine awakens in the backend artery.
-  It never touches the DOM. It never sees the browser.
-  It shapes streams into deterministic PulseBand segments.
-
   Guarantees:
     • ${guarantees.join("\n    • ")}
-
-  Contract — INPUT:
+  INPUT:
     • ${inputs.join("\n    • ")}
-
-  Contract — OUTPUT:
+  OUTPUT:
     • ${outputs.join("\n    • ")}
-
-  Every session is bound to a deterministic hash.
-  Every chunk is signed.
-  Presence is preserved.
-  Dual‑band is honored.
-  The organism reveals only its story,
-  never its mechanisms.
-  ────────────────────────────────────────────────────────────────
 */
 `;
 }
 
 // ============================================================================
-// CENTRAL GENERATOR REGISTRY
+// UNIVERSAL CACHE ENGINE — ONE FUNCTION ONLY
 // ============================================================================
-const CacheGenerators = {
-  REQUEST_USERS_CACHE: generateUsersCache,
-  REQUEST_USERS_CACHE_DELTA: generateUsersCache,
+async function generateCache({ payload, baseVersion, sizeOnly=false, deltaRequest=false }) {
 
-  REQUEST_BUSINESS_CACHE: generateBusinessesCache,
-  REQUEST_BUSINESS_CACHE_DELTA: generateBusinessesCache,
+  const isDelta = deltaRequest || payload.endsWith("_DELTA");
 
-  REQUEST_EVENTS_CACHE: generateEventsCache,
-  REQUEST_EVENTS_CACHE_DELTA: generateEventsCache,
+  const [collection, field] = payload
+    .replace(/^REQUEST_/, "")
+    .replace(/_DELTA$/, "")
+    .replace(/_CACHE$/, "")
+    .toLowerCase()
+    .split("_");
 
-  REQUEST_ORDERS_CACHE: generateOrdersCache,
-  REQUEST_ORDERS_CACHE_DELTA: generateOrdersCache,
+  const docs = (await db.collection(collection).get()).docs.map(d => d.data());
+  let result = field ? docs.map(d => d[field]) : docs;
 
-  REQUEST_LOYALTY_CACHE: generateLoyaltyCache,
-  REQUEST_LOYALTY_CACHE_DELTA: generateLoyaltyCache,
+  if (isDelta && baseVersion) {
+    const hash = crypto.createHash("sha256").update(JSON.stringify(result)).digest("hex");
+    if (hash === baseVersion) return { added:[], removed:[], changed:[] };
+    return { added: result, removed: [], changed: [] };
+  }
 
-  REQUEST_HISTORY_CACHE: generateHistoryCache,
-  REQUEST_HISTORY_CACHE_DELTA: generateHistoryCache,
+  if (!sizeOnly) return result;
 
-  REQUEST_SETTINGS_CACHE: generateSettingsCache,
-  REQUEST_SETTINGS_CACHE_DELTA: generateSettingsCache
-};
+  return Buffer.byteLength(JSON.stringify(result ?? {}), "utf8");
+}
 
 // ============================================================================
-// INTELLIGENT CACHE RESOLVER (FULL / DELTA / SIZE)
+// INTELLIGENT CACHE RESOLVER — ONE FUNCTION ONLY
 // ============================================================================
 async function resolveCacheRequest(payload, baseVersion, sizeOnly) {
   if (typeof payload !== "string") return payload;
 
   const isDelta = payload.endsWith("_DELTA");
-  const isFull = payload.endsWith("_CACHE");
-
-  const fn = CacheGenerators[payload];
-  if (!fn) return payload;
+  const isFull  = payload.endsWith("_CACHE");
 
   if (isDelta) {
-    if (!baseVersion) {
-      return sizeOnly ? await fn({ sizeOnly: true }) : await fn();
-    }
-
-    const delta = await fn({ deltaRequest: true, sizeOnly: !!sizeOnly });
+    const delta = await generateCache({
+      payload,
+      baseVersion,
+      deltaRequest: true,
+      sizeOnly: !!sizeOnly
+    });
 
     if (sizeOnly) return delta;
 
-    const added = delta?.added || [];
+    const added   = delta?.added   || [];
     const removed = delta?.removed || [];
     const changed = delta?.changed || [];
 
     const empty =
-      (!added?.length && !Object.keys(added || {}).length) &&
-      (!removed?.length && !Object.keys(removed || {}).length) &&
-      (!changed?.length && !Object.keys(changed || {}).length);
+      (!added?.length && !Object.keys(added).length) &&
+      (!removed?.length && !Object.keys(removed).length) &&
+      (!changed?.length && !Object.keys(changed).length);
 
-    return empty ? await fn() : delta;
+    return empty
+      ? await generateCache({ payload })
+      : delta;
   }
 
   if (isFull) {
-    return sizeOnly ? await fn({ sizeOnly: true }) : await fn();
+    return await generateCache({
+      payload,
+      sizeOnly: !!sizeOnly
+    });
   }
 
   if (sizeOnly) {
-    const deltaSize = Number(await fn({ deltaRequest: true, sizeOnly: true }) || 0);
+    const deltaSize = Number(
+      await generateCache({ payload, deltaRequest: true, sizeOnly: true }) || 0
+    );
+
     if (deltaSize > 0) return deltaSize;
-    return await fn({ sizeOnly: true });
+
+    return await generateCache({ payload, sizeOnly: true });
   }
 
   return payload;

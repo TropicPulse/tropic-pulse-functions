@@ -230,13 +230,6 @@ export function createEntrepreneurOrgan(context = {}) {
   });
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  EntrepreneurMeta,
-  createEntrepreneurOrgan
-};
 
 if (typeof module !== "undefined") {
   module.exports = {

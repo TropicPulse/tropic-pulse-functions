@@ -322,12 +322,6 @@ export function formatDebugString(context, dualBand = null) {
 // ============================================================================
 prewarmScribe();
 
-// ESM
-export {
-  SCRIBE_META,
-  formatDebugReport,
-  formatDebugString
-};
 
 // CommonJS
 if (typeof module !== "undefined") {

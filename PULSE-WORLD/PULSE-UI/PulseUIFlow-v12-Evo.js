@@ -1,3 +1,4 @@
+/* global log */
 // ============================================================================
 // FILE: /apps/PulseOS/PULSE-UI/PulseUIFlow-v12-EVO.js
 // PULSE OS — v12‑EVO

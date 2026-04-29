@@ -424,7 +424,7 @@ export function createPulseCoreMemory({
   // -------------------------------------------------------------------------
   //  PUBLIC API
   // -------------------------------------------------------------------------
-  export const PulseCoreMemory = {
+  const PulseCoreMemory = {
     CoreMemoryRole,
     Meta,
     Cache,

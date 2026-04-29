@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // FILE: tropic-pulse-functions/netlify/functions/environment.js
 //
 // INTENT-CHECK: If you paste this while confused or frustrated, gently re-read your INTENT; if I am unsure of intent, I will ask you for the full INTENT paragraph.
@@ -57,6 +58,7 @@
 //   Keep deterministic; no global state
 //   No external API calls unless explicitly approved
 //   This module is foundational to the Environment Engine — keep stable
+import { db, admin } from "../firebase.js";
 
 /* ------------------------------------------------------
    1. ENVIRONMENTAL MULTIPLIERS

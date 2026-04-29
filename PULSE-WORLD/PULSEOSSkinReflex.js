@@ -1,3 +1,4 @@
+/* global log */
 // PULSE OS v12‑EVO — PAGE SCANNER INTELLIGENCE LAYER (A1/A2 HYBRID)
 // “DRIFT ENGINE • LINEAGE ENGINE • STRUCTURAL ENGINE • MODULE ENGINE”
 // This layer adds:
@@ -13,6 +14,7 @@
 //   • ZERO interference with A1 timing/state rules
 // ============================================================================
 import * as PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
+import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
 
 const PageScannerV12 = Object.freeze({
 
@@ -344,16 +346,9 @@ export const PulseRole = {
 const hasWindow = typeof window !== "undefined";
 
 function getOrganismMapSafe() {
-  try {
-    if (typeof PulseOSBrain === "object" && PulseOSBrain.PulseOrganismMap) {
-      return PulseOSBrain.PulseOrganismMap;
-    }
-    if (typeof PulseOrganismMap === "object") {
-      return PulseOrganismMap;
-    }
-  } catch {}
-  return null;
+  return PulseOrganismMap ?? null;
 }
+
 
 function resolveOwnerModule(symbol) {
   try {
@@ -765,7 +760,6 @@ export async function callHelper(helperName, payload = {}) {
 // v12 — PAGE SCANNER ENTRYPOINT (sessionCheck → routeCheck → reflex ready)
 // ============================================================================
 let hasBootedOnce = false;
-
 export async function attachScanner() {
   try {
     logProtector("SCANNER_ATTACH_START", {});
@@ -776,7 +770,6 @@ export async function attachScanner() {
       return null;
     }
 
-    // FIRST LOAD → ATTACH ONLY (NO ROUTE, NO HEAL)
     if (!hasBootedOnce) {
       hasBootedOnce = true;
 
@@ -787,36 +780,25 @@ export async function attachScanner() {
       return {
         identity,
         route: null,
-        healed: false
+        needsHealing: false
       };
     }
 
-    // AFTER FIRST LOAD → CHECK IF HEALING IS NEEDED
-    const routeInfo = routeCheck();   // <-- this will be updated next
+    const routeInfo = routeCheck();
     const needsHealing = routeInfo?.needsHealing === true;
 
-    if (!needsHealing) {
-      // continuity OK → DO NOT HEAL
-      logProtector("SCANNER_CONTINUITY_OK", routeInfo);
-      return {
-        identity,
-        route: routeInfo,
-        healed: false
-      };
-    }
+    logProtector(
+      needsHealing
+        ? "SCANNER_CONTINUITY_BROKEN"
+        : "SCANNER_CONTINUITY_OK",
+      routeInfo
+    );
 
-    // continuity broken → HEAL ONLY NOW
-    const healResult = routeHeal(routeInfo);
-
-    logProtector("SCANNER_ROUTE_HEAL_APPLIED", {
-      routeInfo,
-      healResult
-    });
-
+    // SkinReflex NEVER heals — it only reports
     return {
       identity,
       route: routeInfo,
-      healed: true
+      needsHealing
     };
 
   } catch (err) {
@@ -826,6 +808,7 @@ export async function attachScanner() {
     return null;
   }
 }
+
 
 
 // ============================================================================
@@ -1097,6 +1080,11 @@ if (hasWindow && typeof window.addEventListener === "function") {
       // ========================================================================
       // v12‑EVO — DRIFT INTELLIGENCE ENGINE (A1/A2 Hybrid) — UPGRADE 4/4
       // ========================================================================
+      // Predeclare drift intel so they exist outside the try
+      let structural = null;
+      let severity = 0;
+      let tooFar = false;
+
       try {
         const sourceA = event?.error?.sourceA || "";
         const sourceB = event?.error?.sourceB || "";
@@ -1108,12 +1096,14 @@ if (hasWindow && typeof window.addEventListener === "function") {
         const moduleModeA = PageScannerV12.detectModuleMode(sourceA);
         const moduleModeB = PageScannerV12.detectModuleMode(sourceB);
         const exportDrift = PageScannerV12.detectExportDrift(sourceB, varsB);
-        const structural = PageScannerV12.detectStructural(sourceA, sourceB);
+
+        // assign to the predeclared variable
+        structural = PageScannerV12.detectStructural(sourceA, sourceB);
         const contract = PageScannerV12.detectContract(sourceA, sourceB);
 
-        const severity =
-          typeof structural.severity === "number" ? structural.severity : 0;
-        const tooFar = severity >= 3;
+        severity =
+          typeof structural?.severity === "number" ? structural.severity : 0;
+        tooFar = severity >= 3;
 
         emitPageScannerIntel({
           event: "page-error-drift-detected",
@@ -1161,6 +1151,7 @@ if (hasWindow && typeof window.addEventListener === "function") {
         );
       }
 
+
       // ========================================================================
       // HEALING TRIGGER (v12‑EVO) — now respects "too far" structural drift
       // ========================================================================
@@ -1178,9 +1169,9 @@ if (hasWindow && typeof window.addEventListener === "function") {
 
       // If structural drift is too far, skip healing attempt
       if (typeof structural !== "undefined") {
-        const severity =
+        severity =
           typeof structural.severity === "number" ? structural.severity : 0;
-        const tooFar = severity >= 3;
+        tooFar = severity >= 3;
 
         if (tooFar) {
           logProtector("HEALING_SKIPPED_TOO_FAR_STRUCTURAL_DRIFT", {

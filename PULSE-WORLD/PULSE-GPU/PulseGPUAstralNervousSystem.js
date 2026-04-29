@@ -35,7 +35,7 @@
 // --- GPU BRAIN --------------------------------------------------------------
 //  ANALYST CORTEX — Precomputation, package building, deterministic logic
 //  Version: PulseGPUBrain v12-Evo-Presence — PulseSend‑v12‑ready, Earn-v4-Presence-compatible
-export * from "./PulseGPUBrain.js";
+
 
 // --- GPU RUNTIME ------------------------------------------------------------
 //  MOMENTUM NETWORK — Frame conduction, buffer setup, runtime surface

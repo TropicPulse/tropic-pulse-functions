@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // FILE: apps/netlify/functions/redeemPulsePoints.js
 //
 // INTENT-CHECK:
@@ -69,6 +70,54 @@
 // ------------------------------------------------------
 // redeemPulsePoints — Backend Pulse Points Redemption Engine (A Layer)
 // ------------------------------------------------------
+import { db, admin } from "../firebase.js";
+import { onRequest } from "firebase-functions/v2/https";
+import { defineSecret } from "firebase-functions/params";
+import Stripe from "stripe";
+import nodemailer from "nodemailer";
+import twilio from "twilio";
+
+
+const EMAIL_PASSWORD = defineSecret("EMAIL_PASSWORD");
+const STRIPE_PASSWORD = defineSecret("STRIPE_SECRET_KEY");
+const JWT_SECRET = defineSecret("JWT_SECRET");
+
+
+function getSeasonFromSettings(settings) {
+  const today = new Date();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const mmdd = `${mm}-${dd}`;
+
+  const periods = settings?.seasonalPeriods || {};
+
+  const isInRange = (date, start, end) => {
+    // Normal range
+    if (start <= end) return date >= start && date <= end;
+    // Wrap-around (e.g., Dec 15 → Jan 10)
+    return date >= start || date <= end;
+  };
+
+  for (const key in periods) {
+    const s = periods[key];
+    if (!s?.start || !s?.end) continue;
+
+    if (isInRange(mmdd, s.start, s.end)) {
+      return {
+        seasonalActive: true,
+        seasonalName: s.name || "",
+        seasonalMultiplier: Number(s.multiplier) || 1
+      };
+    }
+  }
+
+  return {
+    seasonalActive: false,
+    seasonalName: "",
+    seasonalMultiplier: 1
+  };
+}
+
 
 export const redeemPulsePoints = onRequest(
   {

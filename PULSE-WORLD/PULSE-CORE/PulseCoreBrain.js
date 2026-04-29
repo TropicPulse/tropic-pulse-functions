@@ -229,7 +229,7 @@ export function createPulseCoreBrain({
   // -------------------------------------------------------------------------
   //  PUBLIC API
 // -------------------------------------------------------------------------
-  export const PulseCoreBrain = {
+  const PulseCoreBrain = {
     CoreBrainRole,
     CoreBrainMetaBlock,
     Patterns,

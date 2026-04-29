@@ -1,3 +1,4 @@
+/* global log, error */
 // ============================================================================
 // FILE: /PULSE-PROXY/RouteDownAlert.js
 // PULSE OS — v12.3-Presence-EVO-MAX

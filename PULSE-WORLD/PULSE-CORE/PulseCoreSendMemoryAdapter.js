@@ -23,7 +23,7 @@ export function createPulseSendMemoryAdapter({
   // ---------------------------------------------------------
   //  v12 IDENTITY BLOCK (MetaBlock)
   // ---------------------------------------------------------
-  export const metaBlock = {
+  const metaBlock = {
     identity: "PulseSendMemoryAdapter",
     subsystem: "Send",
     layer: "MemoryAdapter",

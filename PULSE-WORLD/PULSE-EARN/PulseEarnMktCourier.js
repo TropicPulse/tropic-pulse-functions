@@ -53,39 +53,46 @@ export const PulseEarnMktCourierMeta = Object.freeze({
 });
 
 // ============================================================================
-// Deterministic Hash Helper
+// Deterministic Hash Helper — v12.3‑EVO
 // ============================================================================
 function computeHash(str) {
   let h = 0;
   const s = String(str || "");
-  for (let i = 0; i < s.length; i++)
+  for (let i = 0; i < s.length; i++) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
+  }
   return `h${h}`;
 }
 
-function normalizeBand(b) {
-  const x = String(b || "symbolic").toLowerCase();
-  return x === "binary" ? "binary" : "symbolic";
+function normalizeBand(band) {
+  const b = String(band || "symbolic").toLowerCase();
+  return b === "binary" ? "binary" : "symbolic";
 }
 
 function buildBandSignature(band) {
-  return computeHash(`COURIER_BAND::${normalizeBand(band)}`);
+  return computeHash(`AMBASSADOR_BAND::${normalizeBand(band)}`);
 }
+
 
 // ============================================================================
 // A‑B‑A Binary + Wave Surfaces
 // ============================================================================
-function buildBinaryField(cycle, gpuFlag) {
-  const patternLen = gpuFlag ? 14 : 10;
-  const density = patternLen + (gpuFlag ? 20 : 5) + cycle;
+function buildBinaryField(cycle, hasGpu, presenceField) {
+  const patternLen = hasGpu ? 16 : 10;
+  const baseDensity = patternLen + cycle + (hasGpu ? 25 : 8);
+  const mesh = Number(presenceField?.meshPressureIndex || 0);
+  const castle = Number(presenceField?.castleLoadLevel || 0);
+  const density = baseDensity + mesh + castle;
   const surface = density + patternLen;
 
   return {
-    binaryPhenotypeSignature: computeHash(`BCOURIER::${surface}`),
-    binarySurfaceSignature: computeHash(`BCOURIER_SURF::${surface}`),
+    binaryPhenotypeSignature: computeHash(`BAKASH::${surface}`),
+    binarySurfaceSignature: computeHash(`BAKASH_SURF::${surface}`),
     binarySurface: {
       patternLen,
       density,
+      meshPressureIndex: mesh,
+      castleLoadLevel: castle,
       surface
     },
     parity: surface % 2 === 0 ? 0 : 1,
@@ -93,10 +100,11 @@ function buildBinaryField(cycle, gpuFlag) {
   };
 }
 
-function buildWaveField(cycle, band) {
-  const amplitude = (cycle + 1) * (band === "binary" ? 12 : 6);
-  const wavelength = amplitude + 4;
-  const phase = amplitude % 16;
+function buildWaveField(cycle, band, presenceField) {
+  const mesh = Number(presenceField?.meshStrength || 0);
+  const amplitude = (cycle + 1) * (band === "binary" ? 14 : 7) + mesh;
+  const wavelength = amplitude + 5;
+  const phase = (amplitude + (presenceField?.meshPressureIndex || 0)) % 16;
 
   return {
     amplitude,
@@ -106,6 +114,53 @@ function buildWaveField(cycle, band) {
     mode: band === "binary" ? "compression-wave" : "symbolic-wave"
   };
 }
+
+
+// ============================================================================
+// Signature Builders — v12.3‑EVO
+// ============================================================================
+function buildPingSignature(latency) {
+  return computeHash(`PING::${latency}`);
+}
+
+function buildFetchSignature(count) {
+  return computeHash(`FETCH::${count}`);
+}
+
+function buildNormalizationSignature(jobId) {
+  return computeHash(`NORM::${jobId || "NONE"}`);
+}
+
+function buildSubmitSignature(jobId) {
+  return computeHash(`SUBMIT::${jobId || "NONE"}`);
+}
+
+function buildAmbassadorCycleSignature(cycle, presenceTier) {
+  return computeHash(`AMBASSADOR_CYCLE::${cycle}::PTIER:${presenceTier}`);
+}
+
+
+// ============================================================================
+// INTERNAL — Safe Getter
+// ============================================================================
+function safeGet(obj, path, fallback = null) {
+  try {
+    return path
+      .split(".")
+      .reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+const VALID_LEASE_STATES = new Set([
+  "active",
+  "open",
+  "insufficient_funds",
+  "closed",
+  "unknown"
+]);
+
 
 // ============================================================================
 // Presence Field (v12.3)
@@ -241,18 +296,6 @@ const healingState = {
 
 let courierCycle = 0;
 
-// ============================================================================
-// Safe Getter
-// ============================================================================
-function safeGet(obj, path, fallback = null) {
-  try {
-    return path
-      .split(".")
-      .reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 // ============================================================================
 // Deterministic Spheron Receptor DNA
@@ -283,6 +326,23 @@ const SPHERON_RECEPTOR_DNA = {
   lineage: "Courier-Spheron-v12.3-PRESENCE",
   phenotype: "MarketplaceReceptor"
 };
+export function buildCourierCycleSignature(courierCycle = 0) {
+  const cycle = Number(courierCycle) || 0;
+
+  return {
+    cycle,
+    cycleMod2: cycle % 2,
+    cycleMod4: cycle % 4,
+    cycleMod8: cycle % 8,
+    parity: cycle % 2 === 0 ? "even" : "odd",
+    tierHint:
+      cycle % 8 === 0 ? "alpha" :
+      cycle % 4 === 0 ? "beta" :
+      cycle % 2 === 0 ? "gamma" :
+      "delta",
+    stamp: `courier-cycle-${cycle}`
+  };
+}
 
 // ============================================================================
 // COURIER CLIENT — v12.3 Presence + Advantage‑C

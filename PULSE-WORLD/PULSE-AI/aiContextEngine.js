@@ -241,13 +241,6 @@ export function createContextEngine(config = {}) {
 }
 
 
-// ============================================================================
-//  ESM EXPORTS
-// ============================================================================
-export {
-  AiContextEngine,
-  createContextEngine
-};
 
 export default createContextEngine;
 

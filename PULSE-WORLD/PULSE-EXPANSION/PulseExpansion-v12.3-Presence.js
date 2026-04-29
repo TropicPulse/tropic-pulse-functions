@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { logger } from "../PULSEProofLogger.js";
-import { pulseCastle, PulseCastleMeta } from "./PulseCastle-v12.3-Presence.js";
+import { pulseCastle, PulseCastleMeta, summarizeCastlePresence } from "./PulseCastle-v12.3-Presence.js";
 import { pulseServer, PulseServerMeta } from "./PulseServer-v12.3-Presence.js";
 
 // ============================================================================

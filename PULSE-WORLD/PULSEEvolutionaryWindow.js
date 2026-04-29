@@ -45,7 +45,7 @@
 // ============================================================================
 import * as PulseVitals from "./PULSEProofMonitor.js";
 import * as PulseLogger from "./PULSEProofLogger.js";
-
+import * as PulseOSSkinReflex from "./PulseOSSkinReflex.js";
 // FRONTEND CHUNK MEMBRANE — 2026 transport layer
 import * as PulseChunks from "./PulseChunks-v1.js";
 

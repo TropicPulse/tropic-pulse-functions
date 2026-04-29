@@ -300,13 +300,6 @@ export function createDoctorArchitectOrgan(context = {}) {
   });
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
-export {
-  DoctorArchitectMeta,
-  createDoctorArchitectOrgan
-};
 
 if (typeof module !== "undefined") {
   module.exports = {
