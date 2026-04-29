@@ -6,7 +6,7 @@
 // PASSIVE/ACTIVE PAGESCANNER-AWARE (NO TIMERS, NO POLLING)
 // ============================================================================
 import { prewarmSDN } from "./PulseSDN-Prewarm-v12-EVO.js";
-import { PageScannerV12 } from "./PulseOSSkinReflex-v12-EVO-BINARY-MAX.js";
+import { PageScannerV12 } from "../PulseOSSkinReflex.js";
 
 
 // ============================================================================
