@@ -2,7 +2,6 @@
 //  SAFE LOGGING (ACCESS IMPORT)
 // ============================================================================
 import { log, warn, error as logError } from "../PULSEProofLogger.js";
-import { db as firebaseDb } from "../NETLIFY/FUNCTIONS/helpers.js";
 // ============================================================================
 //  CORTEX BOOT (ACCESS IMPORT)
 // ============================================================================
