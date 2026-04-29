@@ -72,11 +72,14 @@
 //   • Stripe onboarding links must use approved refresh_url + return_url
 //   • This endpoint is critical — changes affect all vendor onboarding flows
 
+import admin from "firebase-admin";
 import crypto from "crypto";
 import { getStripe } from "./stripe.js";
 import { normalizePhone } from "./utils.js";
 import { getTwilioClient, MESSAGING_SERVICE_SID } from "./twilio.js";
 
+if (!admin.apps.length) admin.initializeApp();
+const db = admin.firestore();
 
 export async function handler(event, context) {
   try {

@@ -55,6 +55,11 @@
 //   Firestore Admin SDK usage is allowed (confirmed by Aldwyn)
 //   No external API calls unless explicitly approved
 
+import admin from "firebase-admin";
+
+if (!admin.apps.length) admin.initializeApp();
+const db = admin.firestore();
+
 /* ----------------------------------------------------
    SAVE LAST VAULT VISIT
 ---------------------------------------------------- */

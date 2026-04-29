@@ -65,10 +65,12 @@
 
 // Shared Vault utilities for TPSecurity patching + logging
 
+import admin from "firebase-admin";
 import Stripe from "stripe";
 import emailTemplates from "./emailTemplates.js";
 import { VAULT_PATCH_TWILIGHT } from "./vault-patches.js";
 
+const db = admin.firestore();
 
 /* ------------------------------------------------------
    EMAIL + STRIPE UTILITIES (ADDED)

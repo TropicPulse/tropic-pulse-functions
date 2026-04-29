@@ -96,10 +96,15 @@
 //   • This endpoint is critical — changes affect payouts, reserves, and credits
 
 import Stripe from "stripe";
-
+import admin from "firebase-admin";
 import { calculateReleaseDate } from "./utils.js";
 import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from "./env.js";
 
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+const db = admin.firestore();
 
 export async function handler(event, context) {
   try {
