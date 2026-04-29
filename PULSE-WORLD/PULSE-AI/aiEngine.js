@@ -77,15 +77,15 @@ export const ExecutionEngineMeta = Object.freeze({
   })
 });
 
-import { createAIContext } from "./aiContext.js";
+import { createCognitiveFrame as createAIContext } from "./aiContext.js";
 import { createBrainstem } from "./aiBrainstem.js";
-import { resolvePersonaV11 } from "./persona.js";
+import { resolvePersonaV12 as resolvePersonaV11 } from "./persona.js";
 import { routeAIRequest } from "./aiRouter-v11-Evo.js";
 import { canPerformDynamic } from "./boundaries.js";
 
-import { runArchitectMode } from "./modes/architect.js";
-import { runObserverMode } from "./modes/observer.js";
-import { runTourGuideMode } from "./modes/tourguide.js";
+import { createArchitectOrgan as runArchitectMode } from "./aiArchitect.js";
+import { createClinicianOrgan as runObserverMode } from "./aiClinician.js";
+import { createTouristAPI as runTourGuideMode } from "./aiTourist.js";
 
 // ============================================================================
 //  PACKET EMITTER — deterministic, execution-scoped
