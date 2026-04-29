@@ -136,7 +136,7 @@ async function sendToFirebase(level, message, rest) {
     // Avoid blowing up in non‑browser environments
     if (typeof fetch === "undefined") return;
 
-    await fetch("/PULSE-WORLD/log", {
+    await fetch("/log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ level, message, rest })
