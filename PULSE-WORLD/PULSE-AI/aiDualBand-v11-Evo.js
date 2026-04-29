@@ -63,45 +63,19 @@ export const DualBandMeta = Object.freeze({
     ])
   })
 });
-
 // ============================================================================
-//  IMPORTS (ESM syntax preserved)
+// IMPORTS (dependency-ordered, ESM)
 // ============================================================================
-import { createAIOrganism } from "./aiOrganism.js";
-
-import { createPersonaEngine } from "./persona.js";
-import { createBoundariesEngine } from "./boundaries.js";
-import { createPermissionsEngine } from "./permissions.js";
-
-import { createRouterEngine } from "./aiRouter-v11-Evo.js";
-
-import {
-  createCortex,
-  prewarmAICortex
-} from "./aiCortex-v11-Evo.js";
-
-import { createTouristAPI } from "./aiTourist.js";
-import { createArchitectAPI } from "./aiArchitect.js";
-
-import {
-  createContextEngine,
-  prewarmContextEngine
-} from "./aiContextEngine.js";
-
-import createCognitiveFrame, {
-  COGNITIVE_FRAME_META,
-  prewarmCognitiveFrame
-} from "./aiContext.js";
-
-import { createDoctorOrgan } from "./aiDoctor.js";
-import { createDoctorArchitectOrgan } from "./aiDoctorArchitect.js";
-
-import {
-  SCRIBE_META,
-  formatDebugReport,
-  formatDebugString,
-  prewarmScribe
-} from "./aiDebug.js";
+import depsSurface, {
+  DepsMeta,
+  getDb,
+  getFsAPI,
+  getRouteAPI,
+  getSchemaAPI,
+  getOrganismSnapshot,
+  emitDepsPacket,
+  prewarmDepsLayer
+} from "./aiDeps.js";
 
 import {
   DiagnosticsMeta,
@@ -117,30 +91,42 @@ import {
   prewarmDiagnosticsWriteOrgan
 } from "./aiDiagnosticsWrite.js";
 
-import aiDeliveryEngine, {
-  prewarmDeliveryEngine
-} from "./aiDeliveryEngine.js";
+import {
+  SCRIBE_META,
+  formatDebugReport,
+  formatDebugString,
+  prewarmScribe
+} from "./aiDebug.js";
 
-import depsSurface, {
-  DepsMeta,
-  getDb,
-  getFsAPI,
-  getRouteAPI,
-  getSchemaAPI,
-  getOrganismSnapshot,
-  emitDepsPacket,
-  prewarmDepsLayer
-} from "./aiDeps.js";
+import { createPermissionsEngine } from "./permissions.js";
+import { createBoundariesEngine } from "./boundaries.js";
+import { createPersonaEngine } from "./persona.js";
+
+import {
+  createContextEngine,
+  prewarmContextEngine
+} from "./aiContextEngine.js";
+
+import createCognitiveFrame, {
+  COGNITIVE_FRAME_META,
+  prewarmCognitiveFrame
+} from "./aiContext.js"; // canonical name
+
+import { createCortex, prewarmAICortex } from "./aiCortex-v11-Evo.js";
+import { createRouterEngine } from "./aiRouter-v11-Evo.js";
 import { runAI, ExecutionEngineMeta } from "./aiEngine.js";
 
-import aiEmotionEngine, {
-  prewarmEmotionEngine
-} from "./aiEmotionEngine.js";
+import aiDeliveryEngine, { prewarmDeliveryEngine } from "./aiDeliveryEngine.js";
+import aiEmotionEngine, { prewarmEmotionEngine } from "./aiEmotionEngine.js";
+import createEarnAPI, { EarnMeta, prewarmEarnOrgan } from "./aiEarn.js";
 
-import createEarnAPI, {
-  EarnMeta,
-  prewarmEarnOrgan
-} from "./aiEarn.js";
+import { createTouristAPI } from "./aiTourist.js";
+import { createArchitectAPI } from "./aiArchitect.js";
+import { createDoctorOrgan } from "./aiDoctor.js";
+import { createDoctorArchitectOrgan } from "./aiDoctorArchitect.js";
+
+import { createAIOrganism } from "./aiOrganism.js";
+
 
 // ============================================================================
 //  DUAL-BAND CONTEXT
@@ -256,7 +242,7 @@ export function prewarmDualBandBridge({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  createDualBandOrganism() — v12.3‑EVO+
+//  createDualBandOrganism() — v13.0‑EVO-AI-DUAL
 // ============================================================================
 export function createDualBandOrganism({
   trace = false,
@@ -267,21 +253,22 @@ export function createDualBandOrganism({
   binaryVitals = {},
   diagnostics = {}
 } = {}) {
-
-  // ⭐ PREWARM THE DUALBAND BRIDGE ITSELF
+  // ⭐ PREWARM LAYERS (order matters)
   prewarmDualBandBridge({ trace });
-
-  // ⭐ PREWARM ALL SUBSYSTEMS
-  prewarmEmotionEngine();
-  prewarmDeliveryEngine();
+  prewarmDepsLayer();
   prewarmDiagnosticsOrgan();
   prewarmDiagnosticsWriteOrgan();
-  prewarmDepsLayer();
   prewarmScribe();
+  prewarmEmotionEngine();
+  prewarmDeliveryEngine();
   prewarmContextEngine();
   prewarmCognitiveFrame();
-  prewarmEarnOrgan(db, null, null); // dualBand not ready yet
+  prewarmEarnOrgan(db, null, null);
+  prewarmAICortex();
 
+  // --------------------------------------------------------------------------
+  // ORGANISM CORE
+  // --------------------------------------------------------------------------
   const organism = createAIOrganism({ trace });
 
   const context = {
@@ -316,7 +303,7 @@ export function createDualBandOrganism({
   // --------------------------------------------------------------------------
   // EMOTION ENGINE
   // --------------------------------------------------------------------------
-  const emotionEngine = aiEmotionEngine;
+  const emotionEngine = aiEmotionEngine({ context, personaEngine });
 
   // --------------------------------------------------------------------------
   // ROUTER + CORTEX
@@ -328,9 +315,6 @@ export function createDualBandOrganism({
     permissionsEngine,
     emotionEngine
   });
-
-  // ⭐ PREWARM CORTEX WITH CORRECT ENCODER
-  prewarmAICortex({ encoder: organism.agent, trace });
 
   const cortex = createCortex({
     context,
@@ -378,8 +362,13 @@ export function createDualBandOrganism({
   // --------------------------------------------------------------------------
   // CLINICAL + STRUCTURAL ORGANS
   // --------------------------------------------------------------------------
-  const doctor = createDoctorOrgan({ logStep: msg => trace && console.log("[Doctor]", msg) });
-  const doctorArchitect = createDoctorArchitectOrgan({ logStep: msg => trace && console.log("[DoctorArchitect]", msg) });
+  const doctor = createDoctorOrgan({
+    logStep: msg => trace && console.log("[Doctor]", msg)
+  });
+
+  const doctorArchitect = createDoctorArchitectOrgan({
+    logStep: msg => trace && console.log("[DoctorArchitect]", msg)
+  });
 
   // --------------------------------------------------------------------------
   // DIAGNOSTICS + SCRIBE + DIAGNOSTICS WRITE
@@ -398,13 +387,31 @@ export function createDualBandOrganism({
   // --------------------------------------------------------------------------
   // DELIVERY ENGINE
   // --------------------------------------------------------------------------
-  const delivery = aiDeliveryEngine;
+  const delivery = aiDeliveryEngine({
+    context,
+    router,
+    deps,
+    emotionEngine
+  });
 
   // --------------------------------------------------------------------------
   // ARCHITECT + TOURIST
   // --------------------------------------------------------------------------
-  const architect = createArchitectAPI({ context, db: deps.db });
-  const tourist = createTouristAPI({ context, db: deps.db });
+  const architect = createArchitectAPI({
+    context,
+    db: deps.db,
+    router,
+    cortex,
+    delivery
+  });
+
+  const tourist = createTouristAPI({
+    context,
+    db: deps.db,
+    router,
+    cortex,
+    delivery
+  });
 
   // --------------------------------------------------------------------------
   // EARN ORGAN
@@ -473,7 +480,6 @@ export function createDualBandOrganism({
       emotionEngine,
       earn,
 
-      // ⭐ Execution Engine as an organ
       execution: {
         meta: ExecutionEngineMeta,
         run: (request, operation) =>
