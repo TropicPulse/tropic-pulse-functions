@@ -1,6 +1,7 @@
 // ============================================================================
 //  v11.3‑EVO — BOUNDARIES ENGINE (Dual‑Band Superego Contract)
 // ============================================================================
+import { getBoundariesForPersona,canPerformDynamic } from "./permissions.js";
 
 export const BoundariesMeta = Object.freeze({
   layer: "PulseAIBoundariesLayer",
