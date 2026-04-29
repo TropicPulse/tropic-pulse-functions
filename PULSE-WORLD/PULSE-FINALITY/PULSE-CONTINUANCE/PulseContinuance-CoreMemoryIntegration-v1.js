@@ -5,8 +5,8 @@
 //  PURE SYMBOLIC CACHING • ZERO MUTATION OF PHYSICS • ZERO RANDOMNESS
 // ============================================================================
 
-import PulseContinuanceAPI from "./PulseContinuance-v12.3-EVO+.js";
-import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
+import PulseContinuanceAPI from "./PulseContinuance-v11-Evo.js";
+import { createPulseCoreMemory } from "../../PULSE-CORE/PulseCoreMemory.js";
 
 // ============================================================================
 //  META — v12.3-PRESENCE-EVO+

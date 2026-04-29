@@ -17,7 +17,7 @@
  */
 
 import PulseOmniHostingAPI from "./PulseOmniHosting-v11-Evo.js";
-import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
+import { createPulseCoreMemory } from "../../PULSE-CORE/PulseCoreMemory.js";
 
 // -------------------------
 // META — v12.3-PRESENCE-EVO+

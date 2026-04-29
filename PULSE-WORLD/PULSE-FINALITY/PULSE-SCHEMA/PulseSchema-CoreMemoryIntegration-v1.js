@@ -23,7 +23,7 @@
  */
 
 import PulseSchemaAPI from "./PulseSchema-v11-Evo.js";
-import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
+import { createPulseCoreMemory } from "../../PULSE-CORE/PulseCoreMemory.js";
 
 const {
   PulseField,
