@@ -1,3 +1,4 @@
+
 // ============================================================================
 // FILE: /apps/PULSE-OS/PulseOSCNSNervousSystem-v11-EVO-BINARY-MAX.js
 // PULSE OS — v11‑EVO‑BINARY‑MAX
@@ -203,8 +204,6 @@ const CNS_CONTEXT = {
     online: "proxy-spine"
   }
 };
-
-
 // ============================================================================
 // TRANSPORT LAYER — OFFLINE + ONLINE (GUARDED GLOBALS, DUAL‑BAND)
 // ============================================================================
@@ -242,23 +241,32 @@ const Transport = {
       return { error: "Offline mode: no local endpoint handler registered" };
     }
 
-    // ONLINE BAND — proxy spine only
+    // ONLINE BAND — local push to remote endpoint (brain/endpoint owns fetch)
     logCNS("TRANSPORT_ONLINE_CALL", { type, band: "online" });
 
-    if (typeof fetch !== "function") {
-      logCNS("TRANSPORT_ONLINE_NO_FETCH", { type, band: "online" });
-      return { error: "Fetch API not available in this environment" };
+    const remoteEndpoint =
+      hasWindow && window.PulseRemoteEndpoint &&
+      typeof window.PulseRemoteEndpoint.handle === "function"
+        ? window.PulseRemoteEndpoint
+        : null;
+
+    if (!remoteEndpoint) {
+      logCNS("TRANSPORT_ONLINE_NO_REMOTE_ENDPOINT", { type, band: "online" });
+      return { error: "No remote endpoint handler registered for online band" };
     }
 
-    const res = await fetch("/PULSE-PROXY/PulseProxyInnerAgent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, payload, context: CNS_CONTEXT })
-    });
-
-    const json = await res.json();
-    logCNS("TRANSPORT_ONLINE_RESPONSE", { type, band: "online" });
-    return json;
+    try {
+      const json = await remoteEndpoint.handle({ type, payload, context: CNS_CONTEXT });
+      logCNS("TRANSPORT_ONLINE_RESPONSE", { type, band: "online" });
+      return json;
+    } catch (err) {
+      logCNS("TRANSPORT_ONLINE_ERROR", {
+        type,
+        band: "online",
+        message: String(err)
+      });
+      return { error: "Online remote endpoint failed", details: String(err) };
+    }
   },
 
   async callCheckRouterMemory(logs) {
@@ -270,18 +278,32 @@ const Transport = {
       return null;
     }
 
-    if (typeof fetch !== "function") {
-      logCNS("HEAL_NO_FETCH", { count: logs.length, band: "online" });
+    const remoteEndpoint =
+      hasWindow && window.PulseRemoteEndpoint &&
+      typeof window.PulseRemoteEndpoint.handle === "function"
+        ? window.PulseRemoteEndpoint
+        : null;
+
+    if (!remoteEndpoint) {
+      logCNS("HEAL_NO_REMOTE_ENDPOINT", { count: logs.length, band: "online" });
       return null;
     }
 
-    const res = await fetch("/PULSE-PROXY/CheckRouterMemory", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ logs, context: CNS_CONTEXT })
-    });
-
-    return await res.json();
+    try {
+      const data = await remoteEndpoint.handle({
+        type: "CheckRouterMemory",
+        payload: { logs },
+        context: CNS_CONTEXT
+      });
+      return data;
+    } catch (err) {
+      logCNS("HEAL_REMOTE_ERROR", {
+        count: logs.length,
+        band: "online",
+        message: String(err)
+      });
+      return null;
+    }
   },
 
   async callRouteDownAlert(error, type) {
@@ -293,18 +315,67 @@ const Transport = {
       return;
     }
 
-    if (typeof fetch !== "function") {
-      logCNS("ALERT_NO_FETCH", { error, type, band: "online" });
+    const remoteEndpoint =
+      hasWindow && window.PulseRemoteEndpoint &&
+      typeof window.PulseRemoteEndpoint.handle === "function"
+        ? window.PulseRemoteEndpoint
+        : null;
+
+    if (!remoteEndpoint) {
+      logCNS("ALERT_NO_REMOTE_ENDPOINT", { error, type, band: "online" });
       return;
     }
 
-    await fetch("/pulse-router/RouteDownAlert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error, type, context: CNS_CONTEXT })
-    });
+    try {
+      await remoteEndpoint.handle({
+        type: "RouteDownAlert",
+        payload: { error, type },
+        context: CNS_CONTEXT
+      });
+      logCNS("ALERT_SENT", { type, band: "online" });
+    } catch (err) {
+      logCNS("ALERT_REMOTE_ERROR", {
+        message: String(err),
+        band: "online"
+      });
+    }
   }
 };
+
+
+// ============================================================================
+// LOGGING ENTRY POINT — v11‑EVO‑BINARY‑MAX Dual‑Band
+// ============================================================================
+export async function logEvent(eventType, data) {
+  const band = resolveBandFromPayload(data || {});
+  const dnaTag = resolveDnaTagFromPayload(data || {});
+  logCNS("LOG_EVENT", { eventType, band, dnaTag });
+
+  const page =
+    hasWindow && window.location
+      ? window.location.pathname
+      : null;
+
+  if (RouterMemory && typeof RouterMemory.push === "function") {
+    RouterMemory.push({
+      eventType,
+      data,
+      page,
+      band,
+      dnaTag,
+      timestamp: ++routerEventSeq
+    });
+  }
+
+  logCNS("LOG_PUSHED", { eventType, band, dnaTag });
+
+  await healRouterMemoryIfNeeded();
+
+  if (typeof GateHeartbeat === "function") {
+    GateHeartbeat();
+    logCNS("GATE_HEARTBEAT_SIGNAL_SENT", { band, dnaTag });
+  }
+}
 
 
 // ============================================================================
@@ -524,40 +595,6 @@ export async function route(type, payload = {}) {
 }
 
 
-// ============================================================================
-// LOGGING ENTRY POINT — v11‑EVO‑BINARY‑MAX Dual‑Band
-// ============================================================================
-export async function logEvent(eventType, data) {
-  const band = resolveBandFromPayload(data || {});
-  const dnaTag = resolveDnaTagFromPayload(data || {});
-  logCNS("LOG_EVENT", { eventType, band, dnaTag });
-
-  const page =
-    hasWindow && window.location
-      ? window.location.pathname
-      : null;
-
-  if (RouterMemory && typeof RouterMemory.push === "function") {
-    RouterMemory.push({
-      eventType,
-      data,
-      page,
-      band,
-      dnaTag,
-      timestamp: ++routerEventSeq
-    });
-  }
-
-  logCNS("LOG_PUSHED", { eventType, band, dnaTag });
-
-  await healRouterMemoryIfNeeded();
-
-  if (typeof GateHeartbeat === "function") {
-    GateHeartbeat();
-    logCNS("GATE_HEARTBEAT_SIGNAL_SENT", { band, dnaTag });
-  }
-}
-
 
 // ============================================================================
 // HEALING ENTRY POINT — v11‑EVO‑BINARY‑MAX Dual‑Band
@@ -584,6 +621,3 @@ export const PulseOSCNSNervousSystem = {
   heal
 };
 
-// ============================================================================
-// END OF FILE — THE CENTRAL NERVOUS SYSTEM / COMMUNICATION INTELLIGENCE ORGAN
-// ============================================================================

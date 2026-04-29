@@ -337,16 +337,20 @@ if (typeof window !== "undefined") {
         }
       });
     }
-
-    // Optional: intercept fetch() for direct image requests (CSS, etc.)
+    // ============================================================================
+    // UNIVERSAL FETCH INTERCEPTOR — ALL FETCHES GO THROUGH ROUTE()
+    // ============================================================================
     const originalFetch = window.fetch?.bind(window);
+
     if (originalFetch && !window.__PulseFetchPatched) {
       window.__PulseFetchPatched = true;
-      window.fetch = async function (resource, options) {
+
+      window.fetch = async function(resource, options) {
         try {
           const url =
             typeof resource === "string" ? resource : resource?.url || null;
 
+          // 1. If it's an image → use your chunker
           const isImage =
             typeof url === "string" &&
             url.match(/\.(png|jpe?g|webp|gif|avif|svg)$/i);
@@ -355,12 +359,34 @@ if (typeof window !== "undefined") {
             const blobUrl = await window.fetchImage(url);
             return originalFetch(blobUrl, options);
           }
+
+          // 2. If it's ANY other URL → route it
+          if (typeof window.route === "function") {
+            const result = await window.route("fetchProxy", {
+              url,
+              options
+            });
+
+            // Endpoint returns { ok, status, headers, body }
+            if (result && result.__fetched) {
+              const blob = new Blob([result.body], { type: result.contentType });
+              const response = new Response(blob, {
+                status: result.status,
+                headers: result.headers
+              });
+              return response;
+            }
+          }
+
         } catch (err) {
-          console.error("[PulseEvolutionaryWindow] fetch image patch error:", err);
+          console.error("[PulseFetchPatch] error:", err);
         }
+
+        // 3. Fallback to original fetch
         return originalFetch(resource, options);
       };
     }
+
 
     // Prewarm visible assets on first paint (zero-latency repeat)
     window.addEventListener("load", () => {

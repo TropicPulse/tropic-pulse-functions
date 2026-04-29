@@ -999,15 +999,40 @@ if (hasWindow && typeof window.addEventListener === "function") {
       // CLASSIFICATION (v12‑EVO)
       // ========================================================================
       let classified = false;
-
       // ========================================================================
       // UNIVERSAL EXTERNAL RESOURCE INTERCEPTOR (v12‑EVO)
-      // Routes ANY internet-bound request through CNS Router
+      // Detects ANY internet-bound request using origin resolution,
+      // not text or protocol matching.
       // ========================================================================
-      const externalUrlPattern = /^(https?:\/\/|ftp:\/\/|ftps:\/\/|wss?:\/\/|\/\/|www\.)/i;
-      const localUrlPattern    = /^(file:\/\/|data:|blob:|chrome:\/\/|about:|pulse:\/\/|localhost|127\.0\.0\.1)/i;
+      function isExternal(url) {
+        try {
+          const u = new URL(url, window.location.href);
 
-      if (externalUrlPattern.test(msg) && !localUrlPattern.test(msg)) {
+          // Local origins (allowed)
+          const localOrigins = new Set([
+            window.location.origin,
+            "null",                     // sandboxed iframes
+            "file://",
+            "data:",
+            "blob:",
+            "pulse://",
+            "chrome://",
+            "about:",
+            "http://localhost",
+            "http://127.0.0.1",
+            "https://localhost",
+            "https://127.0.0.1"
+          ]);
+
+          // If origin is NOT in local set → it's external
+          return !localOrigins.has(u.origin);
+        } catch {
+          // If URL cannot be parsed → treat as external for safety
+          return true;
+        }
+      }
+
+      if (isExternal(msg)) {
         logProtector("EXTERNAL_RESOURCE_REQUEST", {
           note: "External resource detected — routing through CNS",
           url: msg
