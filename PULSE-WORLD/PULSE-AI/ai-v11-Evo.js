@@ -392,12 +392,41 @@ export function createBinaryOrganism({ trace = false } = {}) {
   // Persist anatomy + genome
   anatomy.store();
   genome.storeGenome();
+  // ---------------------------------------------------------------------------
+// 8) Binary Organism Readiness Surface (v12.3-EVO+)
+// ---------------------------------------------------------------------------
+const readiness = Object.freeze({
+  meta: {
+    layer: "BinaryOrganismReadiness",
+    role: "READINESS_SURFACE",
+    version: "12.3-EVO+",
+    evo: {
+      deterministic: true,
+      driftProof: true,
+      zeroMutation: true,
+      zeroSecrets: true
+    }
+  },
+
+  registryCount: registry?.count?.() ?? null,
+  anatomyCount: anatomy?.count?.() ?? null,
+  genomeHash: genome?.hash?.() ?? null,
+  consciousnessHash: consciousness?.hash?.() ?? null,
+  memoryFootprint: memory?.size?.() ?? null,
+  schedulerState: scheduler?.state?.() ?? null,
+
+  prewarmed: true
+});
 
   return {
-    context: ORGANISM_CONTEXT,
-    ...organs
-  };
+  context: ORGANISM_CONTEXT,
+  ...organs,
+  readiness
+};
+
 }
+
+
 
 // ============================================================================
 //  bootBinaryOrganism() — v12.3‑EVO+

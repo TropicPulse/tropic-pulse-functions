@@ -59,6 +59,9 @@ export const BrainstemMeta = Object.freeze({
 // ============================================================================
 //  IMPORTS
 // ============================================================================
+import PulseOSPresence from "../PULSE-OS/PulseOSPresence-v12.4-EVO.js";
+import PulseMeshPresenceRelay from "../PULSE-OS/PulseMeshPresenceRelay-v12.4-EVO.js";
+
 import { createArchitectAPI } from "./aiArchitect.js";
 import { createTouristAPI, prewarmTourist } from "./aiTourist.js";
 
@@ -143,6 +146,23 @@ export function createOrgans(context, db, fsAPI, routeAPI, schemaAPI) {
   // ------------------------------------------------------------------------
   // 4) REAL ORGANS (symbolic service organs)
   // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // 4.1) PRESENCE ORGANS (v12.4-EVO)
+  // ------------------------------------------------------------------------
+  const osPresence = PulseOSPresence.create({
+    SystemClock: context.SystemClock,
+    IdentityDirectory: context.IdentityDirectory,
+    DeviceFingerprint: context.DeviceFingerprint,
+    log: context.log
+  });
+
+  const meshPresenceRelay = PulseMeshPresenceRelay.create({
+    MeshBus: context.MeshBus,
+    SystemClock: context.SystemClock,
+    IdentityDirectory: context.IdentityDirectory,
+    log: context.log
+  });
+
   const doctor = createDoctorAPI({ context, db });
   const surgeon = createSurgeonAPI({ context, db });
   const lawyer = createLawyerAPI({ context, db });
@@ -166,20 +186,13 @@ export function createOrgans(context, db, fsAPI, routeAPI, schemaAPI) {
   // 5.0) UNIVERSAL SYSTEM MAP (EVERYTHING IS A SYSTEM)
 // ------------------------------------------------------------------------
   const ALL_SYSTEMS = Object.freeze({
-    // CNS
     personaEngine,
     boundariesEngine,
     permissionsEngine,
     router,
     cortex,
-
-    // Dual‑Band
     dualBand,
-
-    // Backend infra
     chunker,
-
-    // Service organs
     doctor,
     surgeon,
     lawyer,
@@ -187,16 +200,19 @@ export function createOrgans(context, db, fsAPI, routeAPI, schemaAPI) {
     veterinarian,
     clinician,
     evolutionary,
-
-    // Core organs
     architect,
     tourist,
     environment,
     power,
     evolution,
     earn,
-    diagnosticsWrite
+    diagnosticsWrite,
+
+    // NEW
+    osPresence,
+    meshPresenceRelay
   });
+
 
   // wire chunker into dual-band / router if supported
   if (dualBand && typeof dualBand.registerBackendOrgan === "function") {
@@ -258,8 +274,13 @@ export function createOrgans(context, db, fsAPI, routeAPI, schemaAPI) {
     power,
     evolution,
     earn,
-    diagnosticsWrite
+    diagnosticsWrite,
+
+    // NEW
+    osPresence,
+    meshPresenceRelay
   });
+
 }
 
 

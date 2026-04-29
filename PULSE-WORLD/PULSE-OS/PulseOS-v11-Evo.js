@@ -28,7 +28,7 @@ import { withOrganGuard } from "./PulseOSGovernor.js";
 import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";
 import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";
 import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";
-import * as PulseOSPresence from "./PulseOSPresence.js";
+import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";
 import * as PulseMeshPresence from "./PulseMeshPresenceRelay.js";
 
 export const PulseOSKernelMeta = Object.freeze({
