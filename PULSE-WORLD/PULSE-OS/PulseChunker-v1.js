@@ -440,7 +440,7 @@ export const createPulseBandSession = onRequest(
 );
 
 // ============================================================================
-// GET NEXT PULSE BAND CHUNK
+// GET NEXT PULSE BAND DNA STRAND
 // ============================================================================
 export const getNextPulseBandChunk = onRequest(
   { region: "us-central1" },
@@ -475,19 +475,19 @@ export const getNextPulseBandChunk = onRequest(
         await db.collection("pulseband_errors").add({
           sessionId,
           userId,
-          type: "session_aborted",
+          type: "genome_aborted",
           reason: "Too many failures",
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        return res.json({ success: false, error: "Session aborted" });
+        return res.json({ success: false, error: "Genome aborted" });
       }
 
-      const chunksRef = sessionRef.collection("chunks");
+      const dnaRef = sessionRef.collection("dna");
 
-      const snap = await chunksRef
-        .where("status", "==", "pending")
-        .orderBy("index", "asc")
+      const snap = await dnaRef
+        .where("strandStatus", "==", "pending")
+        .orderBy("organismStrand", "asc")
         .limit(1)
         .get();
 
@@ -500,27 +500,27 @@ export const getNextPulseBandChunk = onRequest(
         await db.collection("pulseband_logs").add({
           sessionId,
           userId,
-          type: "session_complete",
+          type: "genome_complete",
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        return res.json({ success: true, done: true });
+        return res.json({ success: true, genomeComplete: true });
       }
 
       const doc = snap.docs[0];
       const data = doc.data();
 
       await doc.ref.set(
-        { status: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp() },
+        { strandStatus: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp() },
         { merge: true }
       );
 
       return res.json({
         success: true,
-        chunk: {
-          index: data.index,
-          data: data.data,
-          signature: data.signature,
+        dna: {
+          organismStrand: data.organismStrand,
+          strand: data.strand,
+          geneSignature: data.geneSignature,
           presenceTag: data.presenceTag,
           band: data.band
         }
@@ -528,7 +528,7 @@ export const getNextPulseBandChunk = onRequest(
 
     } catch (err) {
       await db.collection("pulseband_errors").add({
-        type: "getNextChunk_error",
+        type: "getNextDNA_error",
         error: err?.message || String(err),
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
@@ -538,8 +538,9 @@ export const getNextPulseBandChunk = onRequest(
   }
 );
 
+
 // ============================================================================
-// ACK PULSE BAND CHUNK
+// ACK PULSE BAND DNA STRAND
 // ============================================================================
 export const ackPulseBandChunk = onRequest(
   { region: "us-central1" },
@@ -553,38 +554,38 @@ export const ackPulseBandChunk = onRequest(
       const {
         sessionId,
         userId,
-        index,
-        signature,
+        organismStrand,
+        geneSignature,
         latencyMs,
         kbps
       } = req.body || {};
 
-      if (!sessionId || !userId || index == null || !signature) {
+      if (!sessionId || !userId || organismStrand == null || !geneSignature) {
         return res.json({ success: false, error: "Missing params" });
       }
 
       const sessionRef = db.collection("pulseband_sessions").doc(String(sessionId));
-      const chunkRef = sessionRef
-        .collection("chunks")
-        .doc(index.toString().padStart(5, "0"));
+      const dnaRef = sessionRef
+        .collection("dna")
+        .doc(organismStrand.toString().padStart(5, "0"));
 
-      const snap = await chunkRef.get();
+      const snap = await dnaRef.get();
       if (!snap.exists) {
-        return res.json({ success: false, error: "Chunk not found" });
+        return res.json({ success: false, error: "DNA strand not found" });
       }
 
       const data = snap.data();
 
-      if (data.signature !== signature) {
+      if (data.geneSignature !== geneSignature) {
         await db.collection("pulseband_errors").add({
           sessionId,
           userId,
-          index,
+          organismStrand,
           latencyMs,
           kbps,
-          type: "signature_mismatch",
-          expected: data.signature,
-          got: signature,
+          type: "dna_signature_mismatch",
+          expected: data.geneSignature,
+          got: geneSignature,
           presenceTag: data.presenceTag,
           band: data.band,
           createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -595,12 +596,12 @@ export const ackPulseBandChunk = onRequest(
           { merge: true }
         );
 
-        return res.json({ success: false, error: "Signature mismatch" });
+        return res.json({ success: false, error: "DNA signature mismatch" });
       }
 
-      await chunkRef.set(
+      await dnaRef.set(
         {
-          status: "acked",
+          strandStatus: "acked",
           latencyMs: latencyMs ?? null,
           kbps: kbps ?? null,
           ackedAt: admin.firestore.FieldValue.serverTimestamp()
@@ -608,11 +609,11 @@ export const ackPulseBandChunk = onRequest(
         { merge: true }
       );
 
-      return res.json({ success: true });
+      return res.json({ success: true, dnaAck: true });
 
     } catch (err) {
       await db.collection("pulseband_errors").add({
-        type: "ackChunk_error",
+        type: "ackDNA_error",
         error: err?.message || String(err),
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
@@ -621,6 +622,7 @@ export const ackPulseBandChunk = onRequest(
     }
   }
 );
+
 
 // ============================================================================
 // LOG PULSE BAND REDOWNLOAD — v12.4‑PRESENCE‑EVO‑MAX‑PRIME
