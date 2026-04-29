@@ -22,20 +22,6 @@
        ============================================================================ -->
   <link rel="stylesheet" href="./PulseEvolutionaryAnimations.css" />
 
-  <!-- ============================================================================
-       UNIFIED MODULE SCRIPT (OS ignition + analytics)
-       ============================================================================ -->
-  <script type="module">
-    /* 0. BOOT MEMBRANE — MUST BE FIRST */
-import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
-
-/* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
-import * as PULSEOSSkinReflex from "./PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
-
-function mark(label) {
-  console.log("[INDEX]", label);
-}
-  </script>
 
   <!-- ============================================================================
        DYNAMIC CSS LAYER (EMPTY — JS will inject evolution rules)
@@ -47,7 +33,7 @@ function mark(label) {
   <!-- ============================================================================
        HTML LAYER (SKELETON)
        ----------------------------------------------------------------------------
-       EvolutionaryTrustedPage Skeleton
+       PulseEvolutionaryPage Skeleton
        --------------------------------
        This single wrapper can reconstruct into:
          • Any internal page (trusted intent)
@@ -62,6 +48,15 @@ function mark(label) {
        Full Pulse‑UI organism wiring + trust-gated portal/page loader
        ============================================================================ -->
   <script type="module">
+    /* 0. BOOT MEMBRANE — MUST BE FIRST */
+    import * as PulseWindow from "../PULSEEvolutionaryWindow.js";
+
+    /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
+    import * as PULSEOSSkinReflex from "../PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
+
+    function mark(label) {
+      console.log("[INDEX]", label);
+    }
     // Import icons
     import { PulseIcons } from "./PulseEvolutionaryIcons.js";
 
@@ -103,7 +98,7 @@ function mark(label) {
 
     // 1) Long‑term memory (route‑aware)
     const MemoryOrgan = createPulseEvolutionaryMemory({
-      routeId: window.location.pathname || "PulseEvolutionaryTrustedPage"
+      routeId: window.location.pathname || "PulseEvolutionaryPage"
     });
 
     // 2) Code organ (needs Evolution + Memory + CNS)
@@ -147,7 +142,7 @@ function mark(label) {
     // BOOT SEQUENCE — EvolutionaryTrustedPage (TRUSTED / UNTRUSTED INTENTS)
     // ------------------------------------------------------------------------
     (async () => {
-      console.log("[BOOT] EvolutionaryTrustedPage starting…");
+      console.log("[BOOT] PulseEvolutionaryPage starting…");
 
       /* ============================================================
          TRUST GATE — ZERO‑TRAVERSAL SECURITY
