@@ -91,7 +91,7 @@ import {
 import createCognitiveFrame, {
   COGNITIVE_FRAME_META,
   prewarmCognitiveFrame
-} from "./aiCognitiveFrame.js";
+} from "./aiContext.js";
 
 import { createDoctorOrgan } from "./aiDoctor.js";
 import { createDoctorArchitectOrgan } from "./aiDoctorArchitect.js";
@@ -101,7 +101,7 @@ import {
   formatDebugReport,
   formatDebugString,
   prewarmScribe
-} from "./aiScribe.js";
+} from "./aiDebug.js";
 
 import {
   DiagnosticsMeta,
@@ -131,7 +131,7 @@ import depsSurface, {
   emitDepsPacket,
   prewarmDepsLayer
 } from "./aiDeps.js";
-import runAI, { ExecutionEngineMeta } from "./aiExecutionEngine.js";
+import { runAI, ExecutionEngineMeta } from "./aiEngine.js";
 
 import aiEmotionEngine, {
   prewarmEmotionEngine
