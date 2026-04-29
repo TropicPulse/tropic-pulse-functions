@@ -36,7 +36,7 @@
 // to talk through connectors. A→B→C is now required so the system stays deterministic,
 // secure, and drift‑proof.
 // ============================================================================
-import { db, admin } from "../firebase.js";
+import { db, admin } from "./firebase.js";
 
 export default async function handler(req, res) {
   try {

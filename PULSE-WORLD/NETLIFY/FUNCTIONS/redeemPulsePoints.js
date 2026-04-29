@@ -70,7 +70,7 @@
 // ------------------------------------------------------
 // redeemPulsePoints — Backend Pulse Points Redemption Engine (A Layer)
 // ------------------------------------------------------
-import { db, admin } from "../firebase.js";
+import { db, admin } from "./firebase.js";
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import Stripe from "stripe";

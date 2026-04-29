@@ -80,7 +80,7 @@
    SAFE FETCH JSON (with timeout + UA header)
 ---------------------------------------------------- */
 
-import { db, admin } from "../firebase.js";
+import { db, admin } from "./firebase.js";
 
 export async function safeFetchJson(url, options = {}) {
   const controller = new AbortController();

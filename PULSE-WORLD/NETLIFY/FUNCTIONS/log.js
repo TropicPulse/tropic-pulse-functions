@@ -1,4 +1,4 @@
-import { logToFirebase } from "../logToFirebase.js";
+import { logToFirebase } from "./logToFirebase.js";
 
 export async function handler(req, res) {
   try {

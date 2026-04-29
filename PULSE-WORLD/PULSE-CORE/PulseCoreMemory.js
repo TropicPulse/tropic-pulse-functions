@@ -454,3 +454,15 @@ export function createPulseCoreMemory({
 
   return PulseCoreMemory;
 }
+// ---------------------------------------------------------------------------
+//  DEFAULT + NAMED EXPORT SURFACE
+//  (So other organs can import `PulseCoreMemory` directly.)
+// ---------------------------------------------------------------------------
+export { createPulseCoreMemory as PulseCoreMemory };
+
+const PulseCoreMemoryAPI = {
+  CoreMemoryRole,
+  create: createPulseCoreMemory
+};
+
+export default PulseCoreMemoryAPI;

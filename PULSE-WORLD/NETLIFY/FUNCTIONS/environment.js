@@ -58,7 +58,7 @@
 //   Keep deterministic; no global state
 //   No external API calls unless explicitly approved
 //   This module is foundational to the Environment Engine — keep stable
-import { db, admin } from "../firebase.js";
+import { db, admin } from "./firebase.js";
 
 /* ------------------------------------------------------
    1. ENVIRONMENTAL MULTIPLIERS
