@@ -38,12 +38,12 @@ import { PulseIQMap } from "./PULSE-OS/PulseIQMap.js";
 // ============================================================================
 import { PulseOSv11Evo } from "./PULSE-OS/PulseOS-v11-Evo.js";
 
-import PulseProxySym from "./PULSE-PROXY/PulseProxy-v11-EVO.js";
-import PulseRouterSym from "./PULSE-ROUTER/PulseRouter-v11-EVO.js";
-import PulseGPUSym from "./PULSE-GPU/PulseGPU-v11-EVO.js";
-import PulseMeshSym from "./PULSE-MESH/PulseMesh-v11-EVO.js";
-import PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
-import PulseEarnSym from "./PULSE-EARN/PulseEarn-v12.3-Presence.js";
+import * as PulseProxySym from "./PULSE-PROXY/PulseProxy-v11-EVO.js";
+import * as PulseRouterSym from "./PULSE-ROUTER/PulseRouter-v11-EVO.js";
+import * as PulseGPUSym from "./PULSE-GPU/PulseGPU-v11-EVO.js";
+import * as PulseMeshSym from "./PULSE-MESH/PulseMesh-v11-EVO.js";
+import * as PulseSendSym from "./PULSE-SEND/PulseSend-v11-EVO.js";
+import {createEarn as PulseEarnSym} from "./PULSE-EARN/PulseEarn-v12.3-Presence.js";
 
 
 // ============================================================================
