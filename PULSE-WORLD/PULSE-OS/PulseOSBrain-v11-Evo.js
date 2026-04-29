@@ -110,7 +110,7 @@ export const PulseOSBrainMeta = Object.freeze({
 // ============================================================================
 import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
-import { cortexAPI } from "./PulseOSBrainCortex.js";
+import { createPulseOSCortex as cortexAPI } from "./PulseOSBrainCortex.js";
 
 
 export const PulseOSBrain = {
