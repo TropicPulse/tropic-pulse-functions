@@ -145,10 +145,13 @@ function prewarmPulseOSBrain() {
     };
 
     try {
-      bootCortex(syntheticBootConfig, {
+      bootCortex({
+        PulseOSBrain,
         PulseIQMap,
-        PulseOrganismMap
+        PulseOrganismMap,
+        ...syntheticBootConfig
       });
+
     } catch (err) {
       console.error("[PulseOSBrain Prewarm v12.3] bootCortex prewarm failed:", err);
     }
