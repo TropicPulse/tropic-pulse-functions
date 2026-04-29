@@ -29,7 +29,7 @@ import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";
 import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";
 import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";
 import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";
-import * as PulseMeshPresence from "./PulseMeshPresenceRelay.js";
+import * as PulseMeshPresence from "../PULSE-MESH/PulseMeshPresenceRelay-v12.4-EVO.js";
 
 export const PulseOSKernelMeta = Object.freeze({
   layer: "PulseOSKernel",

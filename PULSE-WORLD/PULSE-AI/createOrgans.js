@@ -60,7 +60,7 @@ export const BrainstemMeta = Object.freeze({
 //  IMPORTS
 // ============================================================================
 import PulseOSPresence from "../PULSE-OS/PulseOSPresence-v12.4-EVO.js";
-import PulseMeshPresenceRelay from "../PULSE-OS/PulseMeshPresenceRelay-v12.4-EVO.js";
+import PulseMeshPresenceRelay from "../PULSE-MESH/PulseMeshPresenceRelay-v12.4-EVO.js";
 
 import { createArchitectAPI } from "./aiArchitect.js";
 import { createTouristAPI, prewarmTourist } from "./aiTourist.js";
