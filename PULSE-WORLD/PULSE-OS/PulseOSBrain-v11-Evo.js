@@ -435,7 +435,14 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 // ============================================================================
 // 4) COGNITIVE BOOTSTRAP — Evolution → PulseOSBrain → Cortex
 // ============================================================================
-export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
+export async function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
+
+  // Dynamically import IQ Map if not provided
+  if (!iqMap) {
+    const module = await import("./PulseIQMap.js");
+    iqMap = module.PulseIQMap;
+  }
+
   if (intent) {
     PulseOSBrain.intent = intent;
     PulseOSBrain.PulseIntentMap = intent;
@@ -469,5 +476,7 @@ export function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
   const logFn = PulseOSBrain.log || PulseIQMap.log;
   logFn("🧠 [PulseOSBrain v12.3] cognitiveBootstrap complete.");
+
   return PulseOSBrain;
 }
+
