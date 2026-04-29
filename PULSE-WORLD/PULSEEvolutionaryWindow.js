@@ -25,7 +25,7 @@
 // ============================================================================
 import {VitalsMonitor as PulseVitals} from "./PULSEProofMonitor.js";
 import {VitalsLogger as PulseLogger} from "./PULSEProofLogger.js";
-import {PageScannerV12 as PulseOSSkinReflex} from "./PulseOSSkinReflex.js";
+import * as PulseOSSkinReflex from "./PulseOSSkinReflex.js";
 // FRONTEND CHUNK MEMBRANE — 2026 transport layer (portal carpet)
 import PulseChunks from "./PulsePresence-v1.7-Evo.js";
 
@@ -579,7 +579,7 @@ if (typeof window !== "undefined") {
                   body: JSON.stringify(bodyOrQuery)
                 };
 
-            const data = await PulseOSSkinReflex.route("fetchProxy", {
+            const data = await PulseLogger.route("fetchProxy", {
               url: url + query,
               method,
               body: bodyOrQuery,
