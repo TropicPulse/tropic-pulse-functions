@@ -4,11 +4,11 @@
 // “THE REAL CNS / ORGANISM-WIDE IDENTITY + INTELLIGENCE KERNEL”
 // ============================================================================
 //
-// LAWS (UNCHANGED):
+// LAWS (UPDATED FOR v13):
 //   • Brain may import ONLY:
 //       - PulseIQMap        (design + logging + long-term memory)
 //       - PulseOrganismMap  (organ layout + organs + lineage)
-//       - PulseOSBrainCortex (Cortex boot wiring)
+//       - PulseOSEvolution  (CNS evolution organ, which boots Cortex)
 //   • Brain NEVER executes binary payloads.
 //   • Brain is binary-aware, dualband, but symbolic-primary.
 //   • Binary is always post-render, handled by GPU / Send / Binary organs.
@@ -39,7 +39,7 @@ export const PulseOSBrainMeta = Object.freeze({
     // Import laws
     importsPulseIQMapOnly: true,
     importsOrganismMapOnly: true,
-    importsCortexBootOnly: true,
+    importsEvolutionOnly: true,
 
     // Presence / mesh / performance awareness (metadata-only)
     presenceFieldAware: true,
@@ -70,8 +70,8 @@ export const PulseOSBrainMeta = Object.freeze({
       "CNSContracts",
       "CNSDiagnostics",
       "CNSBootSignatures",
-      "CNSPresenceDescriptors",   // presence + mesh descriptors (metadata-only)
-      "CNSChunkingProfiles"       // chunk/prewarm profiles (metadata-only)
+      "CNSPresenceDescriptors",
+      "CNSChunkingProfiles"
     ]
   }),
 
@@ -100,20 +100,18 @@ export const PulseOSBrainMeta = Object.freeze({
     pattern: "A-B-A",
     baseline: "CNS identity + contract kernel (symbolic-primary, dualband-aware)",
     adaptive:
-      "binary-aware overlays via GPU/Send/Binary organs + presence/mesh + chunk/prewarm metadata surfaces",
+      "binary-aware overlays via GPU/Send/Binary organs + presence/mesh/chunk/prewarm metadata surfaces",
     return:
       "online CNS identity + contracts + boot signatures + presence/chunking descriptors"
   })
 });
 
-
 // ============================================================================
-//  IMPORTS — LAW: BRAIN MAY IMPORT ONLY PULSEIQ + ORGANISM + CORTEX
+//  IMPORTS — LAW: BRAIN MAY IMPORT ONLY PULSEIQ + ORGANISM + EVOLUTION
 // ============================================================================
 import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
-import { createPulseOSCortex } from "./PulseOSBrainCortex.js";
-
+import { PulseOSEvolution } from "./PulseOSEvolution-v13-Spine.js";
 
 // ============================================================================
 //  CNS BRAIN — v13-SPINE
@@ -151,7 +149,6 @@ export const PulseOSBrain = {
       binaryNonExecutable: true,
       organismWideIdentityField: true,
 
-      // Presence / mesh / performance awareness (metadata-only)
       presenceFieldAware: true,
       bluetoothPresenceAware: true,
       meshPresenceRelayAware: true,
@@ -185,9 +182,6 @@ export const PulseOSBrain = {
       return { route, organs };
     },
 
-    // -----------------------------------------------------------------------
-    // Symbolic + Binary organism identity surfaces
-    // -----------------------------------------------------------------------
     getSymbolicOrganismIdentity() {
       return {
         role: PulseOSBrain.PulseRole,
@@ -226,9 +220,6 @@ export const PulseOSBrain = {
       };
     },
 
-    // -----------------------------------------------------------------------
-    // Presence / Mesh descriptors (metadata-only, IQ/Organism-driven)
-    // -----------------------------------------------------------------------
     getPresenceDescriptors() {
       const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const organism = PulseOSBrain.PulseOrganismMap || PulseOrganismMap || {};
@@ -253,9 +244,6 @@ export const PulseOSBrain = {
       };
     },
 
-    // -----------------------------------------------------------------------
-    // Chunking / prewarm profiles (metadata-only, IQ-driven)
-    // -----------------------------------------------------------------------
     getChunkingProfiles() {
       const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const profiles = iq.chunkingProfiles || {};
@@ -271,8 +259,8 @@ export const PulseOSBrain = {
   // -------------------------------------------------------------------------
   // CNS Infrastructure — IQ-aware but NOT IQ-dependent for survival
   // -------------------------------------------------------------------------
-  PulseIQMap: PulseIQMap || {},       // never null
-  PulseOrganismMap: PulseOrganismMap, // required genome
+  PulseIQMap: PulseIQMap || {},
+  PulseOrganismMap: PulseOrganismMap,
 
   log: (...args) => {
     if (PulseOSBrain.PulseIQMap?.log) return PulseOSBrain.PulseIQMap.log(...args);
@@ -291,7 +279,6 @@ export const PulseOSBrain = {
 
   firebase: (...args) => {
     if (PulseOSBrain.PulseIQMap?.firebase) return PulseOSBrain.PulseIQMap.firebase(...args);
-    // Fallback: no firebase yet, safe no-op
     return null;
   },
 
@@ -308,18 +295,7 @@ export const PulseOSBrain = {
     fallback: () => null
   },
 
-  evolution: {
-    version: "v13-SPINE",
-    lineage: [],
-    recordLineage: (tag, extra = {}) => {
-      PulseOSBrain.evolution.lineage.push({ tag, extra });
-    },
-    scanDrift: (_brain, _ctx = {}) => {
-      // drift scan hook — no-op by default
-    },
-    evolveRaw: async (_designIdentity) => [],
-    evolveOrganRaw: async (_designIdentity) => []
-  },
+  evolution: null, // will be attached by cognitiveBootstrap
 
   cortex: {
     routes: {},
@@ -330,9 +306,6 @@ export const PulseOSBrain = {
     scanFile: null
   },
 
-  // -------------------------------------------------------------------------
-  // ⭐ CNS → Scanner Delegation Surface (symbolic-only)
-  // -------------------------------------------------------------------------
   scanFile(filePath) {
     const cortex = PulseOSBrain.cortex;
 
@@ -352,7 +325,6 @@ export const PulseOSBrain = {
   }
 };
 
-
 // ============================================================================
 //  BRAIN PREWARM ENGINE — v13-SPINE
 // ============================================================================
@@ -371,29 +343,7 @@ function prewarmPulseOSBrain() {
       const _ = organism[k];
     }
 
-    const syntheticBootConfig = {
-      mode: "prewarm",
-      identityKind: "none",
-      sceneType: "cns-prewarm",
-      workloadClass: "brain-prewarm",
-      dispatchSignature: "PulseOSBrain.prewarm.v13",
-      shapeSignature: "CNS-SPINE-A1"
-    };
-
-    try {
-      const cortex = createPulseOSCortex({ Brain: PulseOSBrain });
-
-      cortex.boot({
-        band: "dual",
-        PulseIQMap: iq,
-        PulseOrganismMap: organism,
-        ...syntheticBootConfig
-      });
-
-    } catch (err) {
-      console.error("[PulseOSBrain Prewarm v13] bootCortex prewarm failed:", err);
-    }
-
+    // Prewarm is symbolic-only; no Evolution boot here
     return true;
   } catch (err) {
     console.error("[PulseOSBrain Prewarm v13] Failed:", err);
@@ -401,10 +351,7 @@ function prewarmPulseOSBrain() {
   }
 }
 
-
-// One-time CNS brain prewarm at module load
 prewarmPulseOSBrain();
-
 
 // ============================================================================
 // 1) ROLE VALIDATION — CNS Gatekeeper
@@ -425,7 +372,6 @@ export function validatePulseRole(module, expectedType, expectedSubsystem) {
   return typeOk && subsystemOk;
 }
 
-
 // ============================================================================
 // 2) STRUCTURAL ERROR INTELLIGENCE — Drift Surface
 // ============================================================================
@@ -445,7 +391,6 @@ export function structuralError(expected, found, extraContext = {}) {
   PulseOSBrain.warn("[STRUCTURAL_ERROR v13]", payload);
   return payload;
 }
-
 
 // ============================================================================
 // 3) EVOLUTION + ORGAN LOADING — Design-Driven CNS Logic
@@ -471,7 +416,6 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
     return chosen.module;
   }
 
-  // v13: neutral when no candidates — no hard structural error until evolution is real
   PulseOSBrain.warn("[PulseOSBrain v13] No matching organ found for designIdentity.", {
     designIdentity,
     expected
@@ -480,9 +424,8 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
   return null;
 }
 
-
 // ============================================================================
-// 4) COGNITIVE BOOTSTRAP — Evolution → PulseOSBrain → Cortex
+// 4) COGNITIVE BOOTSTRAP — Brain → Evolution → Cortex
 // ============================================================================
 export async function cognitiveBootstrap({ intent, organism, iqMap, understanding }) {
 
@@ -491,13 +434,8 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
     iqMap = module.PulseIQMap;
   }
 
-  if (intent) {
-    PulseOSBrain.intent = intent;
-  }
-
-  if (organism) {
-    PulseOSBrain.PulseOrganismMap = organism;
-  }
+  if (intent) PulseOSBrain.intent = intent;
+  if (organism) PulseOSBrain.PulseOrganismMap = organism;
 
   if (iqMap) {
     PulseOSBrain.PulseIQMap = iqMap;
@@ -512,17 +450,21 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
     PulseOSBrain.understanding = understanding;
   }
 
-  const cortex = createPulseOSCortex({ Brain: PulseOSBrain });
-  cortex.boot({ band: "dual" });
+  // ⭐ Brain boots Evolution (which will boot Cortex)
+  const evolutionOrgan = PulseOSEvolution({
+    intent,
+    organism,
+    iq: iqMap,
+    understanding
+  });
+
+  PulseOSBrain.evolution = evolutionOrgan;
+
+  const cortex = evolutionOrgan.bootCortex(PulseOSBrain, { band: "dual" });
   PulseOSBrain.cortex = cortex;
 
-  PulseOSBrain.cortex?.initializeNervousSystem?.();
-  PulseOSBrain.cortex?.initializeOrgans?.();
-
-  PulseOSBrain.evolution?.recordLineage?.("brain-cognitive-bootstrap-v13", {
-    band: "dual"
-  });
-  PulseOSBrain.evolution?.scanDrift?.(PulseOSBrain, { band: "dual" });
+  evolutionOrgan.recordLineage("brain-cognitive-bootstrap-v13", { band: "dual" });
+  evolutionOrgan.scanDrift(PulseOSBrain, { band: "dual" });
 
   PulseOSBrain.log("🧠 [PulseOSBrain v13] cognitiveBootstrap complete.");
 

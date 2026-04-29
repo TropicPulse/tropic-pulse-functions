@@ -154,11 +154,6 @@ export const PulseOSCortexMeta = Object.freeze({
 });
 
 
-// ============================================================================
-//  EVOLUTION IMPORT (optional, non-blocking)
-// ============================================================================
-import { PulseOSEvolution as Evolution } from "./PulseOSBrainEvolution.js";
-
 
 // ============================================================================
 //  BOOT SURFACE — v13
@@ -180,6 +175,9 @@ export function createPulseOSCortex({ Brain }) {
   if (!Brain) {
     throw new Error("PulseOSCortex v13: Missing CNS Brain injection.");
   }
+
+  // ⭐ The ONLY correct way Cortex sees Evolution
+  const Evolution = Brain.evolution || null;
 
   function normalizeBand(band) {
     return (band === "binary" || band === "symbolic" || band === "dual")
@@ -266,6 +264,7 @@ export function createPulseOSCortex({ Brain }) {
     CortexState.presenceDescriptors = computePresenceDescriptors();
     CortexState.chunkingProfiles = computeChunkingProfiles();
 
+    // ⭐ Evolution is now correctly referenced
     Evolution?.recordLineage?.("cortex-boot-v13", { band: normBand });
     Evolution?.scanDrift?.(Brain, { band: normBand });
 
