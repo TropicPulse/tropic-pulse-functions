@@ -1924,7 +1924,7 @@ async function computeSha256Hex(buffer) {
 
   // Fallback to Node's crypto via dynamic require (avoids top-level imports)
   try {
-    const crypto = require("crypto");
+    
     // If buffer is an ArrayBuffer view, convert to Buffer
     const nodeBuf = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
     return crypto.createHash("sha256").update(nodeBuf).digest("hex");

@@ -136,7 +136,7 @@ import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";          // Evol
 import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";       // Wiring organ
 // Presence / Mesh presence (symbolic/OS side, optional)
 import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";                 // OS Presence Organ (optional)
-import * as PulseMeshPresence from "../PULSE-MESH/PulseMeshPresenceRelay-v12.4-EVO.js";        // Mesh Presence Relay (optional)
+import {createBinaryMeshEnvironment as PulseMeshPresence} from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js";        // Mesh Presence Relay (optional)
 // ============================================================================
 // PULSE OS v13-PRESENCE-EVO+ — WORLD BARREL
 // ============================================================================

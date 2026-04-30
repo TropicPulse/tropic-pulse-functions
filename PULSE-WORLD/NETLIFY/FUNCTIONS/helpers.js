@@ -80,7 +80,7 @@
    SAFE FETCH JSON (with timeout + UA header)
 ---------------------------------------------------- */
 import { db, admin } from "./firebase.js";
-
+import crypto from "crypto";
 /* ----------------------------------------------------
    ROUTED JSON FETCH — v12.6‑EVO (NO RAW FETCH)
 ---------------------------------------------------- */
@@ -767,7 +767,6 @@ export async function computeSha256Hex(buffer) {
 
   // Node fallback (dynamic require)
   try {
-    const crypto = require("crypto");
 
     const nodeBuf = Buffer.isBuffer(buffer)
       ? buffer

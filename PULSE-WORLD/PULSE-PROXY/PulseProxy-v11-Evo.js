@@ -182,24 +182,68 @@ export const PulseProxyOrganismMeta = Object.freeze({
 //  Forward‑only, no barrels, no mesh imports, no loops
 // ============================================================================
 
-// Forward imports from existing proxy organs.
-// Adjust paths if your filenames differ slightly.
+// ---------------------------------------------------------------------------
+// CORE VITALS
+// ---------------------------------------------------------------------------
 import PulseProxyHeart from "./PulseProxyHeart.js";
 import PulseProxyBloodPressure from "./PulseProxyBloodPressure.js";
 import PulseProxyCirculatorySystem from "./PulseProxyCirculatorySystem.js";
+
+// ---------------------------------------------------------------------------
+// HORMONAL / AUTONOMIC CONTROL
+// ---------------------------------------------------------------------------
 import PulseProxyHypothalamus from "./PulseProxyHypothalamus.js";
 import PulseProxySpine from "./PulseProxySpine-v11-Evo.js";
-// Nervous systems (PNS + CNS)
-import pulseband from "./PulseProxyPNSNervousSystem-v11-Evo.js";
 
-// Limbic system (emotion, instinct, survival)
-import PulseProxyLimbicSystem from "./PulseProxyLimbicSystem.js";
+// ---------------------------------------------------------------------------
+// NERVOUS SYSTEMS (PNS FIRST, THEN CNS)
+// ---------------------------------------------------------------------------
+import pulseband from "./PulseProxyPNSNervousSystem-v11-Evo.js";   // PNS
+import PulseProxySynapse from "./PulseProxySynapse.js";            // Synapse junctions
 
-// Outer agent purifier (immune‑like external threat filter)
-import PulseProxyOuterAgentPurifier from "./PulseProxyOuterAgentPurifier.js";
+// ---------------------------------------------------------------------------
+// LIMBIC SYSTEM (INSTINCT / EMOTION / SURVIVAL)
+// ---------------------------------------------------------------------------
+import { PulseClient, PulseNet, PULSE_LIMBIC_SHADOW_META } from "./PulseProxyLimbic.js";
 
-// Repair organ (cellular repair, tissue regeneration, drift correction)
-import PulseProxyRepairSystem from "./PulseProxyRepairSystem.js";
+// ---------------------------------------------------------------------------
+// IMMUNE SYSTEM (DEFENSE / PURIFICATION)
+// ---------------------------------------------------------------------------
+import {scanUserScoresForInstanceHints, checkProxyHealthAndMetrics } from "./PulseProxyWBCells.js";
+import { cleanupSessionsBefore, cleanupErrorsBefore, cleanupRedownloadsBefore } 
+  from "./PulseProxyPNSPurifier.js";
+
+// ---------------------------------------------------------------------------
+// AGENTS (EXTERNAL + INTERNAL AMBASSADORS)
+// ---------------------------------------------------------------------------
+import PulseProxyOuterAgent from "./PulseProxyOuterAgent.js";
+import createPulseProxyInnerAgent from "./PulseProxyInnerAgent.js";
+
+// ---------------------------------------------------------------------------
+// SIGNALING + IMPULSE LAYER
+// ---------------------------------------------------------------------------
+import PulseProxyImpulse from "./PulseProxyImpulse.js";
+
+// ---------------------------------------------------------------------------
+// TRANSPORT LAYER (BLOODSTREAM)
+// ---------------------------------------------------------------------------
+import PulseProxyBloodstream from "./PulseProxyBloodstream.js";
+
+// ---------------------------------------------------------------------------
+// STRESS / REFLEX ACCELERATION
+// ---------------------------------------------------------------------------
+import PulseProxyAdrenalSystem from "./PulseProxyAdrenalSystem.js";
+
+// ---------------------------------------------------------------------------
+// BOUNDARY LAYER (BLOOD–BRAIN BARRIER)
+// ---------------------------------------------------------------------------
+import PulseProxyBBB from "./PulseProxyBBB.js";
+
+// ---------------------------------------------------------------------------
+// REPAIR / REGENERATION
+// ---------------------------------------------------------------------------
+import pulseHistoryRepair from "./PulseProxyPNSRepair.js";
+
 
 // If ProxyRole actually lives in one of these, you can re‑export or import it from there.
 // For now, keep symbolic proxy independent of a specific enum and just expose the proxy role symbolically:

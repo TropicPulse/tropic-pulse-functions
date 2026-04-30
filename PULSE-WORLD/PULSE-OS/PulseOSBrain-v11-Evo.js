@@ -124,6 +124,10 @@ import { PulseIQMap } from "./PulseIQMap.js";
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
 import { PulseOSEvolution } from "./PulseOSBrainEvolution.js";
 
+import checkBand from "../PULSE-PROXY/CheckBand-v11-Evo.js";
+import checkIdentity from "../PULSE-PROXY/CheckIdentity-v11-Evo.js";
+import checkRouterMemory from "../PULSE-PROXY/CheckRouterMemory-v11-Evo.js";
+
 // ============================================================================
 //  CNS BRAIN — v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE
 // ============================================================================

@@ -397,6 +397,359 @@ app.use((req, res, next) => {
   next();
 });
 
+
+// ============================================================================
+//  CONTEXT SHAPE — v12.3-EVO
+// ============================================================================
+export function createSpineContext({
+  layer = "BackendSpine",
+  role = "PulseProxySpine-v12.3-EVO",
+  purpose = "Unified TPProxy gateway + vitals pump + OS healer feed",
+  context = "Backend spine for PulseProxy: routes traffic, exposes vitals, feeds healers",
+  version = "12.3-EVO",
+  target = "proxy-core",
+  selfRepairable = true
+} = {}) {
+  return {
+    layer,
+    role,
+    purpose,
+    context,
+    version,
+    target,
+    selfRepairable,
+    evo: { ...PulseRoleBinary.evo }
+  };
+}
+
+
+// ============================================================================
+//  VITALS FIELD — Deterministic Shape + Defaults (with band metadata)
+// ============================================================================
+export function createEmptyVitals(context = createSpineContext()) {
+  return {
+    ...context,
+    lastRequestTs: null,
+    lastError: null,
+    lastProxyError: null,
+    lastRedisError: null,
+    lastEmailError: null,
+    lastWarmConnection: null,
+    lastRateLimitDecision: null,
+    lastTPProxyCall: null,
+    lastHealthCheck: null,
+    lastMetricsCheck: null,
+    lastNodeCheck: null,
+    lastPingCheck: null,
+    cycleCount: 0,
+    status: "healthy",
+    mode: "online",
+
+    // 12.3-EVO passive band metadata
+    pulsePrewarm: null,
+    pulseCacheMode: null,
+    pulseChunkMode: null,
+    pulseRemember: null,
+
+    presenceBandState: null,
+    harmonicDrift: null,
+    coherenceScore: null,
+
+    dualBandMode: "symbolic"
+  };
+}
+
+
+// ============================================================================
+//  RATE LIMIT FIELD — Deterministic Rate Limit Math
+// ============================================================================
+export function computeRateLimitState({
+  totalRequestsToday,
+  maxRequestsPerDay,
+  nowMs,
+  startTimeMs
+} = {}) {
+  const safeTotal = Number.isFinite(totalRequestsToday)
+    ? Math.max(0, totalRequestsToday)
+    : 0;
+
+  const safeMax = Number.isFinite(maxRequestsPerDay) && maxRequestsPerDay > 0
+    ? maxRequestsPerDay
+    : 1;
+
+  const usageRatio = safeTotal / safeMax;
+  const clampedRatio = usageRatio > 1 ? 1 : usageRatio;
+
+  let band = "low";
+  if (clampedRatio >= 0.9) band = "critical";
+  else if (clampedRatio >= 0.7) band = "high";
+  else if (clampedRatio >= 0.4) band = "medium";
+
+  const uptimeMs =
+    Number.isFinite(nowMs) && Number.isFinite(startTimeMs) && nowMs >= startTimeMs
+      ? nowMs - startTimeMs
+      : null;
+
+  return {
+    totalRequestsToday: safeTotal,
+    maxRequestsPerDay: safeMax,
+    usageRatio: clampedRatio,
+    band,
+    uptimeMs
+  };
+}
+
+
+// ============================================================================
+//  NODE + REGION DESCRIPTORS — Deterministic Identity View
+// ============================================================================
+export function buildNodeDescriptor({
+  region,
+  nodeId,
+  version,
+  mode,
+  maxRequestsPerDay
+} = {}) {
+  return {
+    region: region || "unknown-region",
+    nodeId: nodeId || "unknown-node",
+    version: version || "v12.3-EVO",
+    mode: mode === "offline" ? "offline" : "online",
+    maxRequestsPerDay: Number.isFinite(maxRequestsPerDay)
+      ? maxRequestsPerDay
+      : null
+  };
+}
+
+
+// ============================================================================
+//  HEALABILITY MAP — How the Spine Looks to Healers (Binary View)
+// ============================================================================
+export function buildHealabilitySnapshot({
+  vitals,
+  rateLimit,
+  nodeDescriptor,
+  redisReady,
+  offlineMode
+} = {}) {
+  const v = vitals || {};
+  const r = rateLimit || {};
+  const n = nodeDescriptor || {};
+
+  const redisStatus = redisReady ? "ready" : "degraded";
+  const mode = offlineMode ? "offline" : "online";
+
+  let health = "healthy";
+
+  if (v.lastProxyError || v.lastRedisError || v.lastEmailError) {
+    health = "degraded";
+  }
+
+  if (r.band === "critical") {
+    health = "rate-limited";
+  }
+
+  if (mode === "offline") {
+    health = health === "healthy" ? "offline" : health;
+  }
+
+  return {
+    health,
+    mode,
+    redisStatus,
+    node: {
+      region: n.region,
+      nodeId: n.nodeId,
+      version: n.version
+    },
+    rateLimit: {
+      band: r.band,
+      usageRatio: r.usageRatio,
+      totalRequestsToday: r.totalRequestsToday,
+      maxRequestsPerDay: r.maxRequestsPerDay
+    },
+    vitals: {
+      lastRequestTs: v.lastRequestTs,
+      lastError: v.lastError,
+      lastProxyError: v.lastProxyError,
+      lastRedisError: v.lastRedisError,
+      lastEmailError: v.lastEmailError,
+      lastWarmConnection: v.lastWarmConnection,
+      lastRateLimitDecision: v.lastRateLimitDecision,
+      lastTPProxyCall: v.lastTPProxyCall,
+      lastHealthCheck: v.lastHealthCheck,
+      lastMetricsCheck: v.lastMetricsCheck,
+      lastNodeCheck: v.lastNodeCheck,
+      lastPingCheck: v.lastPingCheck,
+      cycleCount: v.cycleCount,
+
+      // 12.3-EVO band metadata surfaced to healers
+      presenceBandState: v.presenceBandState,
+      harmonicDrift: v.harmonicDrift,
+      coherenceScore: v.coherenceScore,
+      pulsePrewarm: v.pulsePrewarm,
+      pulseCacheMode: v.pulseCacheMode,
+      pulseChunkMode: v.pulseChunkMode,
+      pulseRemember: v.pulseRemember,
+      dualBandMode: v.dualBandMode
+    }
+  };
+}
+
+
+// ============================================================================
+//  VITALS UPDATE HELPERS — Pure, Caller-Driven
+// ============================================================================
+export function bumpCycle(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastRequestTs: Number.isFinite(nowMs) ? nowMs : base.lastRequestTs || null,
+    cycleCount: (base.cycleCount || 0) + 1
+  };
+}
+
+export function recordError(vitals, { type, message, nowMs } = {}) {
+  const base = vitals || {};
+  const msg = typeof message === "string" ? message : String(message || "");
+
+  const next = {
+    ...base,
+    lastError: msg
+  };
+
+  if (type === "proxy") {
+    next.lastProxyError = msg;
+  } else if (type === "redis") {
+    next.lastRedisError = msg;
+  } else if (type === "email") {
+    next.lastEmailError = msg;
+  }
+
+  if (Number.isFinite(nowMs)) {
+    next.lastRequestTs = nowMs;
+  }
+
+  return next;
+}
+
+export function recordWarmConnection(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastWarmConnection: Number.isFinite(nowMs) ? nowMs : base.lastWarmConnection || null
+  };
+}
+
+export function recordRateLimitDecision(vitals, { decision, nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastRateLimitDecision: decision || base.lastRateLimitDecision || null,
+    lastRequestTs: Number.isFinite(nowMs) ? nowMs : base.lastRequestTs || null
+  };
+}
+
+export function recordTPProxyCall(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastTPProxyCall: Number.isFinite(nowMs) ? nowMs : base.lastTPProxyCall || null
+  };
+}
+
+export function recordHealthCheck(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastHealthCheck: Number.isFinite(nowMs) ? nowMs : base.lastHealthCheck || null
+  };
+}
+
+export function recordMetricsCheck(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastMetricsCheck: Number.isFinite(nowMs) ? nowMs : base.lastMetricsCheck || null
+  };
+}
+
+export function recordNodeCheck(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastNodeCheck: Number.isFinite(nowMs) ? nowMs : base.lastNodeCheck || null
+  };
+}
+
+export function recordPingCheck(vitals, { nowMs } = {}) {
+  const base = vitals || {};
+  return {
+    ...base,
+    lastPingCheck: Number.isFinite(nowMs) ? nowMs : base.lastPingCheck || null
+  };
+}
+
+
+// ============================================================================
+//  PACKET / EARN DESCRIPTORS — Binary View Only
+// ============================================================================
+export function describePacket({
+  packetId,
+  userId,
+  deviceId,
+  kind,
+  createdAtMs,
+  sizeBytes
+} = {}) {
+  return {
+    packetId: packetId || null,
+    userId: userId || null,
+    deviceId: deviceId || null,
+    kind: kind || "unknown",
+    createdAtMs: Number.isFinite(createdAtMs) ? createdAtMs : null,
+    sizeBytes: Number.isFinite(sizeBytes) ? sizeBytes : null
+  };
+}
+
+
+// ============================================================================
+//  REDIS DESCRIPTORS — Binary View Only
+// ============================================================================
+export function describeRedisState({ ready, lastError } = {}) {
+  return {
+    ready: !!ready,
+    lastError: lastError ? String(lastError) : null,
+    status: ready ? "ready" : "degraded"
+  };
+}
+
+
+// ============================================================================
+//  MAILER DESCRIPTORS — Binary View Only
+// ============================================================================
+export function describeMailerState({ enabled, lastError } = {}) {
+  return {
+    enabled: !!enabled,
+    lastError: lastError ? String(lastError) : null,
+    status: enabled ? "ready" : "disabled"
+  };
+}
+
+
+// ============================================================================
+//  TPProxy DESCRIPTORS — Binary View Only
+// ============================================================================
+export function describeTPProxyState({
+  lastTPProxyCall,
+  lastProxyError
+} = {}) {
+  return {
+    lastTPProxyCall: Number.isFinite(lastTPProxyCall) ? lastTPProxyCall : null,
+    lastProxyError: lastProxyError ? String(lastProxyError) : null
+  };
+}
+
 // ============================================================================
 //  REDIS — v12.3-EVO (unchanged behavior)
 // ============================================================================

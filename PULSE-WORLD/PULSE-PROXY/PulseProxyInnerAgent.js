@@ -6,7 +6,7 @@
 //  PURE BACKEND ORGAN — NO MARKETPLACE, NO BUSINESS LOGIC, NO RANDOMNESS.
 // ============================================================================
 
-import { corsHandler, pulseCors } from "../NETLIFY/FUNCTIONS/http.js";
+import { corsHandler, pulseCors } from "./PulseCORS.js";
 
 // ============================================================================
 //  ORGAN IDENTITY — v12.3‑EVO‑PRESENCE

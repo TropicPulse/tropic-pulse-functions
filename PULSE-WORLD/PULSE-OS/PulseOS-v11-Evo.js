@@ -24,17 +24,20 @@
 //    - All drift eliminated; unified organism identity.
 // ============================================================================
 
-import { withOrganGuard } from "./PulseOSGovernor.js";
-import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";
-import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";
-import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";
-import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";
-import * as PulseMeshPresence from "../PULSE-MESH/PulseMeshPresenceRelay-v12.4-EVO.js";
+// ============================================================================
+//  ORGANISM BOOTSTRAP SET — v12.3 (SYMBOLIC KERNEL SIDE)
+// ============================================================================
+import { withModuleInitGuard, withOrganGuard } from "./PulseOSGovernor.js";                    // Supervisor organ
+import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";               // CNS brain organ
+import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";          // Evolution organ
+import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";       // Wiring organ
+// Presence / Mesh presence (symbolic/OS side, optional)
+import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";                 // OS Presence Organ (optional)
+import {createPulseMeshEnvironment as PulseMeshPresence} from "../PULSE-MESH/PulseMesh-v11-Evo.js";        // Mesh Presence Relay (optional)
 // ============================================================================
 // PULSE OS v13-PRESENCE-EVO+ — WORLD BARREL
 // ============================================================================
 import { createPulseExpansion, pulseExpansion, PulseExpansionMeta } from "../PULSE-EXPANSION/PulseExpansion-v12.3-PRESENCE.js";
-
 // (optional) direct access if you want to surface them:
 const Expansion = pulseExpansion; // singleton
 const ExpansionMeta = PulseExpansionMeta;
