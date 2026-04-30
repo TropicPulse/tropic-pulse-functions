@@ -93,9 +93,9 @@ export const PulseEarnHeartMeta = Object.freeze({
   })
 });
 
-import { getNextMarketplaceJob } from "./PulseEarnNervousSystem-v11-Evo.js";
-import { executePulseEarnJob } from "./PulseEarnMetabolism-v11-Evo.js";
-import { submitPulseEarnResult } from "./PulseEarnLymphNodes-v11-Evo.js";
+import { getNextMarketplaceJob } from "./PulseEarnNervousSystem.js";
+import { executePulseEarnJob } from "./PulseEarnMetabolism.js";
+import { submitPulseEarnResult } from "./PulseEarnLymphNodes.js";
 
 
 // ============================================================================

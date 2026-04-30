@@ -141,7 +141,7 @@ export const PulseRole = {
   }
 };
 
-import { PulseEarnReceptor } from "./PulseEarnReceptor.js";
+import { PulseEarnReceptor } from "./PulseEarnReceptorMkt.js";
 import { PulseEarnCustomReceptor } from "./PulseEarnCustomReceptorMkt.js";
 
 

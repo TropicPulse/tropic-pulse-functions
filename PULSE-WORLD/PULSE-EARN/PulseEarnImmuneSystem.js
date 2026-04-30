@@ -140,20 +140,20 @@ export const PULSE_EARN_IMMUNE_CONTEXT = Object.freeze({
 // Imports — subsystem vitals (healing state providers)
 // (still v11-Evo filenames; presence fields are optional, metadata-only)
 // ============================================================================
-import { getEarnEngineHealingState } from "./EarnEngine-v11-Evo.js";
-import { getPulseEarnHeartHealingState } from "./PulseEarnHeart-v11-Evo.js";
+import { getEarnEngineHealingState } from "./PulseEarnMuscleSystem.js";
+import { getPulseEarnHeartHealingState } from "./PulseEarnHeart.js";
 
-import { getPulseEarnMetabolismHealingState } from "./PulseEarnMetabolism-v11-Evo.js";
-import { getPulseEarnLymphHealingState } from "./PulseEarnLymphNodes-v11-Evo.js";
+import { getPulseEarnMetabolismHealingState } from "./PulseEarnMetabolism.js";
+import { getPulseEarnLymphHealingState } from "./PulseEarnLymphNodes.js";
 
 import {
   getPulseEarnGeneticMemoryHealingState,
   synthesizePulseEarnGene,
   writePulseEarnGene
-} from "./PulseEarnGeneticMemory-v11-Evo.js";
+} from "./PulseEarnGeneticMemory.js";
 
-import { getPulseEarnCellHealingState } from "./PulseEarnCell-v11-Evo.js";
-import { getPulseEarnNervousSystemHealingState } from "./PulseEarnNervousSystem-v11-Evo.js";
+import { getPulseEarnCellHealingState } from "./PulseEarnCell.js";
+import { getPulseEarnNervousSystemHealingState } from "./PulseEarnNervousSystem.js";
 
 
 // ============================================================================

@@ -15,6 +15,19 @@
 //  • All “memory” is structural (derived from inputs), not temporal.
 //  • Presence/mesh/castle/expansion/globalHints are metadata surfaces only.
 // ============================================================================
+// --- CORE EARN ORGAN --------------------------------------------------------
+// --- BIOLOGICAL EARN ORGANS -----------------------------------------------
+import * as PulseEarnCirculatorySystem from "./PulseEarnCirculatorySystem.js";
+import * as PulseEarnEndocrineSystem   from "./PulseEarnEndocrineSystem.js";
+import * as PulseEarnImmuneSystem      from "./PulseEarnImmuneSystem.js";
+import * as PulseEarnMetabolism        from "./PulseEarnMetabolism.js";
+import * as PulseEarnNervousSystem     from "./PulseEarnNervousSystem.js";
+import * as PulseEarnSkeletalSystem    from "./PulseEarnSkeletalSystem.js";
+
+// --- MARKET EARN ORGANS ----------------------------------------------------
+import * as PulseEarnMktAuctioneer     from "./PulseEarnMktAuctioneer.js";
+import * as PulseEarnMktBroker         from "./PulseEarnMktBroker.js";
+import * as PulseEarnMktCourier        from "./PulseEarnMktCourier.js";
 
 export const EarnMeta = Object.freeze({
   layer: "PulseEarn",

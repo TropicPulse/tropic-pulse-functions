@@ -57,9 +57,9 @@ export const PulseEarnMuscleSystemMeta = Object.freeze({
   })
 });
 
-import { fetchJobFromMarketplace } from "./PulseEarnNervousSystem-v12.3-PRESENCE-EVO+.js";
-import { submitMarketplaceResult } from "./PulseEarnLymphNodes-v12.3-PRESENCE-EVO+.js";
-import { getPulseEarnDeviceProfile } from "./PulseEarnSkeletalSystem-v12.3-PRESENCE-EVO+.js";
+import { fetchJobFromMarketplace } from "./PulseEarnNervousSystem.js";
+import { submitMarketplaceResult } from "./PulseEarnLymphNodes.js";
+import { getPulseEarnDeviceProfile } from "./PulseEarnSkeletalSystem.js";
 
 // ============================================================================
 // Deterministic Hash Helper

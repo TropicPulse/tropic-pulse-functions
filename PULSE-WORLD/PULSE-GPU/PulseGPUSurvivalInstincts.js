@@ -18,7 +18,7 @@
 //  • Legacy-safe: v10.4/v11 callers still behave identically
 // ============================================================================
 
-import { SCORE_CONSTANTS } from "./PulseGPUConfig.js";
+import { SCORE_CONSTANTS } from "./PulseGPUCommandments.js";
 
 // ------------------------------------------------------------
 // ⭐ OS‑v12.3-Evo-binary-Prime CONTEXT METADATA — Survival Instincts Identity

@@ -29,7 +29,7 @@
 //  • Self‑repair‑ready: insights include metadata
 // ============================================================================
 
-import { INSIGHT_THRESHOLDS } from "./PulseGPUConfig.js";
+import { INSIGHT_THRESHOLDS } from "./PulseGPUCommandments.js";
 
 // ============================================================================
 // UTILITY: clamp — Wisdom requires boundaries

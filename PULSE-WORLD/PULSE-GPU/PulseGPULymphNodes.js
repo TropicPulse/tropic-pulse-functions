@@ -29,8 +29,8 @@
 
 import { PulseGPUSettingsRestorer } from "./PulseGPUCognitiveLayer.js";
 import { PulseGPUUXBridge } from "./PulseGPUCognitiveIntelligence.js";
-import { PulseGPUPerformanceAdvisor } from "./PulseGPUPerformanceAdvisor.js";
-import { PulseGPUAutoOptimize } from "./PulseGPUAutoOptimize.js";
+import { PulseGPUPerformanceAdvisor } from "./PulseGPUDriveCenter.js";
+import { PulseGPUGuardianCortex as PulseGPUAutoOptimize } from "./PulseGPUGuardianCortex.js";
 
 const GPU_HEALER_CONTEXT = {
   layer: "PulseGPUHealer",
