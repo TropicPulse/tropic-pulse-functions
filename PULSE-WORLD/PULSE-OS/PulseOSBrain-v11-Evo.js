@@ -362,7 +362,47 @@ export const PulseOSBrain = {
       error: "SCANNER_UNAVAILABLE",
       filePath
     };
+  },
+  // -------------------------------------------------------------------------
+// BRAIN-ONLY INTERNET CONNECTOR (SAFE, ISOLATED, VIEW-ONLY)
+// -------------------------------------------------------------------------
+async connectToInternet() {
+  try {
+    const url = PulseOSBrain.PulseIQMap?.worldLensURL;
+    if (!url) {
+      PulseOSBrain.warn("No worldLensURL configured in IQMap.");
+      return null;
+    }
+
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    // Store symbolic-only snapshot (never live dependency)
+    PulseOSBrain.CNSWorldLensSnapshot = {
+      lastUpdated: Date.now(),
+      summary: data.summary || {},
+      sources: data.sources || [],
+      offlineSafe: true
+    };
+
+    return PulseOSBrain.CNSWorldLensSnapshot;
+
+  } catch (err) {
+    PulseOSBrain.warn("Brain internet connection failed:", err);
+    return {
+      lastUpdated: null,
+      summary: {},
+      sources: [],
+      offlineSafe: true
+    };
   }
+},
+
+  
 };
 
 // ============================================================================
@@ -375,12 +415,12 @@ function prewarmPulseOSBrain() {
 
     const iqKeys = Object.keys(iq);
     for (const k of iqKeys) {
-      const _ = iq[k];
+      const o = iq[k];
     }
 
     const orgKeys = Object.keys(organism);
     for (const k of orgKeys) {
-      const _ = organism[k];
+      const o = organism[k];
     }
 
     // Prewarm is symbolic-only; no Evolution boot here
@@ -411,6 +451,8 @@ export function validatePulseRole(module, expectedType, expectedSubsystem) {
 
   return typeOk && subsystemOk;
 }
+
+
 
 // ============================================================================
 // 2) STRUCTURAL ERROR INTELLIGENCE — Drift Surface
@@ -510,3 +552,30 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
 
   return PulseOSBrain;
 }
+// -------------------------------------------------------------------------
+// AUTO-CONNECT: Brain upstream world-lens fetch on load
+// -------------------------------------------------------------------------
+(async () => {
+  try {
+    const url = PulseOSBrain.PulseIQMap?.worldLensURL;
+    if (!url) {
+      PulseOSBrain.warn("No worldLensURL configured in IQMap.");
+      return;
+    }
+
+    const response = await fetch(url, { method: "GET", cache: "no-store" });
+    const data = await response.json();
+
+    PulseOSBrain.CNSWorldLensSnapshot = {
+      lastUpdated: Date.now(),
+      summary: data.summary || {},
+      sources: data.sources || [],
+      offlineSafe: true
+    };
+
+    PulseOSBrain.log("🧠 Brain world-lens auto-connected.");
+
+  } catch (err) {
+    PulseOSBrain.warn("Brain auto-connect failed:", err);
+  }
+})();
