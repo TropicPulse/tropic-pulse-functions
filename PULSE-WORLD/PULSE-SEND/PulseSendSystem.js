@@ -32,15 +32,13 @@
 // ============================================================================
 import { createPulseV3 } from "./PulseV3UnifiedOrganism-v11-Evo.js";
 import { createPulseV2 } from "./PulseV2EvolutionEngine-v11-Evo.js";
-import { createLegacyPulse } from "./PulseSendLegacyPulse-v11-EvoStable.js";
+import { createLegacyPulse } from "./PulseSendLegacyPulse-v11-Evo.js";
 
 // Router + Mesh + Send
-import { PulseRouter } from "../pulse-router/PulseRouter-v11.js";
-import { PulseMesh } from "../pulse-mesh/PulseMesh-v11.js";
-import { createPulseSend } from "./PULSE-SEND/PulseSend-v11-Evo.js";
-import { createPulseSendMover } from "./PULSE-SEND/PulseSendMover-v11-Evo.js";
-import { createPulseSendImpulse } from "./PULSE-SEND/PulseSendImpulse-v11-Evo.js";
-import { createPulseSendReturn } from "./PULSE-SEND/PulseSendReturn-v12.4-EvoBinary.js";
+import { PulseRouter } from "../pulse-router/PulseRouter-v11-evo.js";
+import { PulseMesh } from "../pulse-mesh/PulseMesh-v11-evo.js";
+import { createPulseSendImpulse as createPulseSend } from "./PulseSendImpulse-v11-Evo.js";
+import { createPulseSendReturn } from "./PulseSendReturn.js";
 
 
 // ============================================================================
@@ -340,17 +338,16 @@ export function createPulseSendSystem({
   }
 
   const PulseSend = createPulseSend({
-    createPulseV3,
-    createPulseV2,
-    createPulseV1: createLegacyPulse,
-    pulseRouter: PulseRouter,
-    pulseMesh: PulseMesh,
-    createPulseSendMover,
-    createPulseSendImpulse,
-    createPulseSendReturn,
-    log,
-    sdn
-  });
+  createPulseV3,
+  createPulseV2,
+  createPulseV1: createLegacyPulse,
+  pulseRouter: PulseRouter,
+  pulseMesh: PulseMesh,
+  createPulseSendReturn,
+  log,
+  sdn
+});
+
 
   // ------------------------------------------------------------------------
   //  INTERNAL: Try Pulse v3 (Unified Organism)

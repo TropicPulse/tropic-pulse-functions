@@ -16,7 +16,8 @@
 //   • NO network, NO fetch, NO async, NO randomness.
 //   • NEVER mutate external objects.
 //   • Presence/advantage/hints are metadata-only.
-// ============================================================================
+// ============================================================================\
+
 export const PulseEarnMktAuctioneerMeta = Object.freeze({
   layer: "PulseEarnMktAuctioneer",
   role: "EARN_MARKETPLACE_RECEPTOR",

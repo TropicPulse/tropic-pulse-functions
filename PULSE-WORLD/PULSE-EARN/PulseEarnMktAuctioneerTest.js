@@ -6,7 +6,7 @@
 import {
   PulseEarnMktAuctioneer,
   getPulseEarnMktAuctioneerHealingState
-} from "./PulseEarnMktAuctioneer-v12.3-PRESENCE-EVO+.js";
+} from "./PulseEarnMktAuctioneer.js";
 
 // Optional deterministic global presence hints
 const globalHints = {

@@ -25,9 +25,11 @@ import * as PulseEarnNervousSystem     from "./PulseEarnNervousSystem.js";
 import * as PulseEarnSkeletalSystem    from "./PulseEarnSkeletalSystem.js";
 
 // --- MARKET EARN ORGANS ----------------------------------------------------
-import * as PulseEarnMktAuctioneer     from "./PulseEarnMktAuctioneer.js";
-import * as PulseEarnMktBroker         from "./PulseEarnMktBroker.js";
-import * as PulseEarnMktCourier        from "./PulseEarnMktCourier.js";
+import PulseEarnMktAuctioneer     from "./PulseEarnMktAuctioneer.js";
+import PulseEarnMktAmbassador        from "./PulseEarnMktAmbassador.js";
+import PulseEarnMktBroker         from "./PulseEarnMktBroker.js";
+import PulseEarnMktCourier        from "./PulseEarnMktCourier.js";
+import PulseEarnMktForager        from "./PulseEarnMktForager.js";
 
 export const EarnMeta = Object.freeze({
   layer: "PulseEarn",

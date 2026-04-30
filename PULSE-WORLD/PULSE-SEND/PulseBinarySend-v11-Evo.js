@@ -12,6 +12,27 @@
 //    - 12.3+: cacheChunk-aware, prewarm-aware, presence-aware.
 //    - Fallback-safe: deterministic fallback to proxy.
 // ============================================================================
+// --- Evolution Engines ------------------------------------------------------
+import * as PulseV2EvolutionEngine   from "./PulseV2EvolutionEngine-v11-Evo.js";
+import * as PulseV3UnifiedOrganism   from "./PulseV3UnifiedOrganism-v11-Evo.js";
+
+// --- Impulse Layer ----------------------------------------------------------
+import * as PulseSendImpulse         from "./PulseSendImpulse-v11-Evo.js";
+
+// --- Legacy Pulse Layer -----------------------------------------------------
+import * as PulseSendLegacyPulse     from "./PulseSendLegacyPulse-v11-Evo.js";
+
+// --- Adapter Layer ----------------------------------------------------------
+import * as PulseSendAdapter         from "./PulseSendAdapter.js";
+
+// --- Engine Layer -----------------------------------------------------------
+import * as PulseSendEngine          from "./PulseSendEngine.js";
+
+// --- Return Layer -----------------------------------------------------------
+import * as PulseSendReturn          from "./PulseSendReturn.js";
+
+// --- System Layer (Final Conductor) ----------------------------------------
+import * as PulseSendSystem          from "./PulseSendSystem.js";
 
 export function createBinarySend({
   fallbackProxy,
