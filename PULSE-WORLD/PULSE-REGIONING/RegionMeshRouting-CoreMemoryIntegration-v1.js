@@ -47,6 +47,8 @@
  * }
  */
 
+import RegionMeshRoutingAPI from "./RegionMeshRouting-v11-Evo.js";
+import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 // -------------------------
 // Cosmos Context
 // -------------------------
@@ -200,11 +202,17 @@ export function rankRegionsForPlacement(
 // Exported API
 // -------------------------
 
-const RegionMeshRoutingAPI = {
+// -------------------------
+// Exported API (v13 COSMOS-MULTIVERSE)
+// -------------------------
+
+export const RegionMeshRoutingCosmosV13 = {
+  computeRegionRoute,
+  rankRegionsForPlacement,
   RegionRoute,
   RankedRegionCandidate,
-  computeRegionRoute,
-  rankRegionsForPlacement
+  normalizeCosmosContext
 };
 
-export default RegionMeshRoutingAPI;
+export default RegionMeshRoutingCosmosV13;
+

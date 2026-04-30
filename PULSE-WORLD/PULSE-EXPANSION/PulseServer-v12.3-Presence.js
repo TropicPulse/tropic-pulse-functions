@@ -1,6 +1,6 @@
 // ============================================================================
 //  PULSE OS v12.3‑PRESENCE‑EVO+ — PULSE SERVER (EXEC ENGINE / ADVANTAGE HUB)
-//  PulseServer-v12.3-Presence.js
+//  PulseServer-v12.3-Presence
 //
 //  ROLE:
 //    - Deterministic compute / exec engine for the organism.
@@ -30,10 +30,10 @@ import {
 import {
   createPulseScheduler,
   PulseSchedulerMeta
-} from "../PULSE-RUNTIME/PulseScheduler-v2-Evo.js";
+} from "../PULSE-X/PulseScheduler-v2.js";
 
 // Runtime v2 (multi-organism execution + binary frames)
-import PulseRuntimeV2 from "../PULSE-RUNTIME/PulseRuntime-v2-Evo.js";
+import PulseRuntimeV2 from "../PULSE-X/PulseRuntime-v2-Evo.js";
 
 const {
   runPulseTickV2,

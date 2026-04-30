@@ -81,7 +81,7 @@ import { routeAIRequest } from "../AI/aiRouter-v11-EVO.js";
 import { createOvermindOrgan } from "../AI/aiOvermind-v11.2-EVO.js";
 
 // UPGRADED RUNTIME
-import PulseRuntimeAPI from "./PulseRuntime-v2.3-PRESENCE-EVO+.js";
+import PulseRuntimeAPI from "../PULSE-x/pulseruntime-V2-EVO.js";
 
 const {
   runPulseTickV2: runPulseTick,

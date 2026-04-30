@@ -36,16 +36,16 @@ export const PulseRuntimeV2Meta = Object.freeze({
     syntheticOnly: true
   }),
   evo: Object.freeze({
-    presenceAware: true,        // region/host heatmaps, tick visibility
-    advantageAware: true,       // can surface advantage via meta/policy
-    dualbandSafe: true,         // symbolic-first, binary-backed
-    chunkAware: true,           // binary frames are chunk-friendly
-    cacheAware: true,           // runtime state is cacheable/introspectable
-    prewarmAware: true,         // CoreMemory.prewarm() at entry
-    meshAware: true,            // region/host heatmaps tie into mesh
-    expansionAware: true,       // multi-organism plans for Expansion/NodeAdmin
+    presenceAware: true,
+    advantageAware: true,
+    dualbandSafe: true,
+    chunkAware: true,
+    cacheAware: true,
+    prewarmAware: true,
+    meshAware: true,
+    expansionAware: true,
     multiInstanceReady: true,
-    runtimeAware: true          // explicit runtime tick + introspection
+    runtimeAware: true
   })
 });
 
@@ -53,29 +53,51 @@ export const PulseRuntimeV2Meta = Object.freeze({
 // Imports
 // -------------------------
 
-import * as PulseWorldRegioning from "../PULSE-REGIONING/index.js";
+// World / Regioning (this *is* PulseExpansion)
+import * as PulseWorldRegioning from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
+
+// Finality hooks (aggregator over finality organs)
 import * as PulseWorldFinality from "../PULSE-FINALITY/index.js";
 
-import MultiOrganismSupportAPI from "../PULSE-ORGANS/MultiOrganismSupport-v11-Evo.js";
-import ExecutionPhysicsAPI from "../PULSE-ORGANS/ExecutionPhysics-v11-Evo.js";
+// Delta Engine (CoreMemory integrations)
+import * as PulseContinuance from "../PULSE-FINALITY/PULSE-CONTINUANCE/PulseContinuance-CoreMemoryIntegration-v1.js";
+import * as PulseOmniHosting from "../PULSE-FINALITY/PULSE-OMNIHOSTING/PulseOmniHosting-CoreMemoryIntegration-v1.js";
+import * as PulseSchema from "../PULSE-FINALITY/PULSE-SCHEMA/PulseSchema-CoreMemoryIntegration-v1.js";
 
+// Core Memory
 import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 
+// Binary substrate
 import BinarySubstrateV2 from "./BinarySubstrate-v2.js";
+const { packMultiOrganismPlan, packExecutionResult } = BinarySubstrateV2;
 
-const {
-  buildMultiOrganismPlan,
-  summarizeMultiOrganismPlan
-} = MultiOrganismSupportAPI;
+// -------------------------
+// Runtime Functions Wiring
+// -------------------------
 
-const {
-  executeMultiOrganismPlan
-} = ExecutionPhysicsAPI;
+// Build multi-organism plan (Expansion / Regioning layer)
+const buildMultiOrganismPlan =
+  PulseWorldRegioning.buildMultiOrganismPlan ||
+  (() => {
+    throw new Error("buildMultiOrganismPlan missing in PulseWorldRegioning");
+  });
 
-const {
-  packMultiOrganismPlan,
-  packExecutionResult
-} = BinarySubstrateV2;
+// Summaries (Schema layer)
+const summarizeMultiOrganismPlan =
+  PulseSchema.summarizeMultiOrganismPlan ||
+  (() => {
+    throw new Error("summarizeMultiOrganismPlan missing in PulseSchema");
+  });
+
+// Execution (Continuance / OmniHosting layer)
+const executeMultiOrganismPlan =
+  PulseContinuance.executeMultiOrganismPlan ||
+  PulseOmniHosting.executeMultiOrganismPlan ||
+  (() => {
+    throw new Error(
+      "executeMultiOrganismPlan missing in PulseContinuance/PulseOmniHosting"
+    );
+  });
 
 // -------------------------
 // Runtime Memory
@@ -121,10 +143,12 @@ function trackRegionHost(state) {
   const hosts = CoreMemory.get(ROUTE, KEY_HOT_HOSTS) || {};
 
   if (state.currentRegionId) {
-    regions[state.currentRegionId] = (regions[state.currentRegionId] || 0) + 1;
+    regions[state.currentRegionId] =
+      (regions[state.currentRegionId] || 0) + 1;
   }
   if (state.currentHostName) {
-    hosts[state.currentHostName] = (hosts[state.currentHostName] || 0) + 1;
+    hosts[state.currentHostName] =
+      (hosts[state.currentHostName] || 0) + 1;
   }
 
   CoreMemory.set(ROUTE, KEY_HOT_REGIONS, regions);
@@ -177,7 +201,6 @@ export function runPulseTickV2({
   CoreMemory.prewarm();
 
   const tick = bumpTick();
-
   CoreMemory.set(ROUTE, KEY_LAST_POLICY, globalContinuancePolicy);
 
   const adjustedContexts =

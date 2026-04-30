@@ -5,7 +5,8 @@
 
 import { logger } from "../PULSEProofLogger.js";
 import { pulseCastle, PulseCastleMeta, summarizeCastlePresence } from "./PulseCastle-v12.3-Presence.js";
-import { pulseServer, PulseServerMeta } from "./PulseServer-v12.3-Presence.js";
+import { pulseServer, PulseServerMeta } from "./PulseServer-v12.3-Presence";
+import { pulseUser, PulseUserMeta, createPulseWorldCore } from "./PulseUser-v12.3-Presence";
 // ============================================================================
 //  PulseRegioning-Barrel.js — v13‑EVO‑PRESENCE‑MAX
 //  Unified Regioning Organ Import Surface

@@ -26,8 +26,9 @@ import { logger } from "../PULSEProofLogger.js";
 import {
   createPulseServer,
   PulseServerMeta
-} from "../PULSE-SERVER/PulseServer-v12.3-Presence.js";
+} from ".//PulseServer-v12.3-Presence";
 
+import { pulseUser, PulseUserMeta, createPulseWorldCore } from "./PulseUser-v12.3-Presence";
 
 // ============================================================================
 //  META — Castle Identity
