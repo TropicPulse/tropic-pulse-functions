@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: BinaryMesh-v13-EVO-PRIME.js
+// FILE: BinaryMesh-v13-Evo.js
 // BINARY MESH — v13-EVO-PRIME
 // “PURE BINARY CONNECTIVE TISSUE / BINARY-FIRST / SYMBOLIC FALLBACK”
 // ============================================================================
@@ -15,7 +15,7 @@
 //   • INPUT (data path):
 //       - bits: number[] (0 or 1 only)
 //   • INPUT (control path):
-//       - from: string
+//       - from: string.
 //       - options: { band?, presenceTag?, trace? }
 //   • OUTPUT:
 //       - bits (unchanged) OR symbolic fallback result
@@ -51,6 +51,24 @@ export const BinaryMeshMeta = Object.freeze({
 });
 
 // ============================================================================
+// IMPORTS — MESH SUBSYSTEMS
+// ============================================================================
+import { createOrganismMesh } from "./OrganismMesh-v1-EVO.js";
+
+// symbolic-side mesh systems
+import PulseMeshFlow from "./PulseMeshFlow.js";
+import PulseMeshPresenceRelay from "./PulseMeshPresenceRelay-v12.4-EVO.js";
+
+import PulseMeshCognition from "./PulseMeshCognition.js";
+import PulseMeshEndocrineSystem from "./PulseMeshEndocrineSystem.js";
+import PulseMeshImmuneSystem from "./PulseMeshImmuneSystem.js";
+import PulseMeshOrgans from "./PulseMeshOrgans.js";
+import PulseMeshThalamus from "./PulseMeshThalamus.js";
+
+import PresenceAIView from "./PresenceAIView.js";
+import MentorUpgradeRequest from "./MentorUpgradeRequest.js";
+
+// ============================================================================
 // INTERNAL HELPERS
 // ============================================================================
 function isPureBinary(bits, maxBitsLength) {
@@ -62,6 +80,12 @@ function isPureBinary(bits, maxBitsLength) {
     if (b !== 0 && b !== 1) return false;
   }
   return true;
+}
+
+function safeLog(fn, fallback) {
+  if (typeof fn === "function") return fn;
+  if (typeof console !== "undefined" && typeof fallback === "function") return fallback;
+  return () => {};
 }
 
 // ============================================================================
@@ -77,8 +101,11 @@ export function createBinaryMesh({
 
   const links = Object.create(null);
 
+  const logWarn = safeLog(globalThis?.warn, console?.warn);
+  const logInfo = safeLog(globalThis?.log, console?.log);
+
   // -------------------------------------------------------------------------
-  // LINK REGISTRATION (symbolic-only)
+  // LINK REGISTRATION
   // -------------------------------------------------------------------------
   function link(from, to) {
     links[from] = to;
@@ -86,7 +113,7 @@ export function createBinaryMesh({
 
   // -------------------------------------------------------------------------
   // SYMBOLIC FALLBACK (binary → symbolic)
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
   function fallback(reason, from, bits, {
     band = defaultBand,
     presenceTag = defaultPresenceTag
@@ -98,14 +125,13 @@ export function createBinaryMesh({
       );
     }
 
-    if (trace && typeof console !== "undefined") {
-      console.warn(
+    if (trace) {
+      logWarn(
         `[BinaryMesh v13] FALLBACK (${reason}) from:${from} band:${band} presence:${presenceTag}`,
         bits
       );
     }
 
-    // Convert bits → symbolic packet
     const packet = {
       type: "binaryFallback",
       reason,
@@ -115,7 +141,6 @@ export function createBinaryMesh({
       presenceTag
     };
 
-    // Symbolic mesh handles the fallback
     return symbolicMesh.transmit(from, packet, {
       band: "symbolic",
       presenceTag: "PulseMesh-v13"
@@ -140,8 +165,8 @@ export function createBinaryMesh({
       return fallback("non-binary-input", from, bits, { band, presenceTag });
     }
 
-    if (trace && typeof console !== "undefined") {
-      console.log(
+    if (trace) {
+      logInfo(
         `[BinaryMesh v13] ${from} → ${to} band:${band} presence:${presenceTag}`,
         bits
       );
@@ -162,7 +187,207 @@ export function createBinaryMesh({
   });
 }
 
+// ============================================================================
+// LOCAL BINARY SUBSYSTEMS — LIVE ON THIS PAGE
+// ============================================================================
+const PulseBinaryMeshPresence = {
+  create({ context, binaryMesh, log, warn }) {
+    function prewarm() {
+      log?.("[BinaryPresence] prewarm");
+    }
+
+    function pulse(from, bits, options) {
+      return binaryMesh.transmit(from, bits, options);
+    }
+
+    return Object.freeze({
+      prewarm,
+      pulse
+    });
+  }
+};
+
+const PulseBinaryMeshPrime = {
+  create({ context, binaryMesh, log, warn }) {
+    function prewarm() {
+      log?.("[BinaryPrime] prewarm");
+    }
+
+    function process(from, bits, options) {
+      // extend with your prime binary logic as needed
+      return binaryMesh.transmit(from, bits, options);
+    }
+
+    return Object.freeze({
+      prewarm,
+      process
+    });
+  }
+};
+
+// ============================================================================
+// BINARY MESH ENVIRONMENT — v13-EVO-PRIME
+//   BINARY BARREL: BOOT ORGANISM, LOAD SUBSYSTEMS, WIRE, PREWARM
+// ============================================================================
+export function createBinaryMeshEnvironment({
+  context = {},
+  trace = false,
+  maxBitsLength = 64,
+  defaultBand = "binary",
+  defaultPresenceTag = "BinaryMesh-v13"
+} = {}) {
+
+  const log   = context.log   || safeLog(globalThis?.log, console?.log);
+  const warn  = context.warn  || safeLog(globalThis?.warn, console?.warn);
+  const error = context.error || safeLog(globalThis?.error, console?.error);
+
+  // -------------------------------------------------------
+  // 0) BOOT THE ORGANISM (ROUTE THROUGH ORGANISMMESH)
+// -------------------------------------------------------
+  const organism = createOrganismMesh({
+    context,
+    fallbackProxy: null,          // binary → symbolic handled by binaryMesh itself
+    trace,
+    defaultBand,
+    defaultPresenceTag
+  });
+
+  // organism exposes both meshes
+  const symbolicMesh = organism.symbolicMeshEnv.symbolicMesh;
+  const binaryMesh   = organism.binaryMeshEnv.binaryMesh;
+
+  // -------------------------------------------------------
+  // 1) BINARY SUBSYSTEMS (LOCAL)
+// -------------------------------------------------------
+  const binaryPresence = PulseBinaryMeshPresence?.create
+    ? PulseBinaryMeshPresence.create({ context, binaryMesh, log, warn })
+    : null;
+
+  const binaryPrime = PulseBinaryMeshPrime?.create
+    ? PulseBinaryMeshPrime.create({ context, binaryMesh, log, warn })
+    : null;
+
+  // -------------------------------------------------------
+  // 2) SYMBOLIC-ADJACENT SUBSYSTEMS
+  // -------------------------------------------------------
+  const meshFlow = PulseMeshFlow?.create
+    ? PulseMeshFlow.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const meshPresenceRelay = PulseMeshPresenceRelay?.create
+    ? PulseMeshPresenceRelay.create({
+        MeshBus: context.MeshBus,
+        SystemClock: context.SystemClock,
+        IdentityDirectory: context.IdentityDirectory,
+        log
+      })
+    : null;
+
+  const meshCognition = PulseMeshCognition?.create
+    ? PulseMeshCognition.create({ context, mesh: symbolicMesh, flow: meshFlow, log, warn })
+    : null;
+
+  const meshEndocrine = PulseMeshEndocrineSystem?.create
+    ? PulseMeshEndocrineSystem.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const meshImmune = PulseMeshImmuneSystem?.create
+    ? PulseMeshImmuneSystem.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const meshOrgans = PulseMeshOrgans?.create
+    ? PulseMeshOrgans.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const meshThalamus = PulseMeshThalamus?.create
+    ? PulseMeshThalamus.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const presenceAIView = PresenceAIView?.create
+    ? PresenceAIView.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const mentorUpgradeRequest = MentorUpgradeRequest?.create
+    ? MentorUpgradeRequest.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  // -------------------------------------------------------
+  // 3) REGISTRY
+  // -------------------------------------------------------
+  const ALL_SYSTEMS = Object.freeze({
+    // core
+    binaryMesh,
+
+    // binary subsystems
+    binaryPresence,
+    binaryPrime,
+
+    // symbolic-adjacent subsystems
+    meshFlow,
+    meshPresenceRelay,
+    meshCognition,
+    meshEndocrine,
+    meshImmune,
+    meshOrgans,
+    meshThalamus,
+    presenceAIView,
+    mentorUpgradeRequest
+  });
+
+  // -------------------------------------------------------
+  // 4) PREWARM
+  // -------------------------------------------------------
+  function prewarm() {
+    log("[BinaryMesh v13] Prewarm start");
+
+    for (const [name, system] of Object.entries(ALL_SYSTEMS)) {
+      if (system && typeof system.prewarm === "function") {
+        try {
+          system.prewarm();
+          log("[BinaryMesh v13] Prewarmed system", { name });
+        } catch (e) {
+          warn("[BinaryMesh v13] Prewarm failed", { name, error: e?.message });
+        }
+      }
+    }
+
+    log("[BinaryMesh v13] Prewarm complete");
+  }
+
+  // -------------------------------------------------------
+  // 5) PUBLIC ENVIRONMENT API
+  // -------------------------------------------------------
+  return Object.freeze({
+    meta: BinaryMeshMeta,
+
+    // core
+    binaryMesh,
+
+    // binary subsystems
+    binaryPresence,
+    binaryPrime,
+
+    // symbolic-adjacent subsystems
+    meshFlow,
+    meshPresenceRelay,
+    meshCognition,
+    meshEndocrine,
+    meshImmune,
+    meshOrgans,
+    meshThalamus,
+    presenceAIView,
+    mentorUpgradeRequest,
+
+    prewarm,
+    systems: ALL_SYSTEMS,
+
+    // organism hook
+    organism
+  });
+}
+
 export default {
   BinaryMeshMeta,
-  createBinaryMesh
+  createBinaryMesh,
+  createBinaryMeshEnvironment
 };
