@@ -1,7 +1,9 @@
 // ============================================================================
-// PULSE-WORLD : PulseBeaconMesh.js
-// ROLE: Local membrane simulator + density/mode debugger
-// VERSION: v12.3-PRESENCE-EVO+
+//  PULSE-WORLD : PulseBeaconMesh.js
+//  ROLE: Local membrane simulator + density/mode debugger
+//  VERSION: v13-PRESENCE-EVO+
+//  LAYER: BeaconMesh
+//  IDENTITY: PulseBeaconMesh-v13-PRESENCE-EVO+
 // ============================================================================
 //
 // PURPOSE:
@@ -23,12 +25,64 @@
 //   - Never override global hints.
 //   - Only call Beacon Engine APIs.
 //   - Always deterministic.
+//   - Pure membrane surface.
 // ============================================================================
 
+// ============================================================================
+//  META (v13-PRESENCE-EVO+)
+// ============================================================================
+export const PulseBeaconMeshMeta = Object.freeze({
+  layer: "BeaconMesh",
+  role: "LOCAL_MEMBRANE_SIMULATOR",
+  version: "v13-PRESENCE-EVO+",
+  identity: "PulseBeaconMesh-v13-PRESENCE-EVO+",
+
+  guarantees: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    zeroRandomness: true,
+    zeroTimers: true,
+    zeroAsync: true,
+    zeroNetwork: true,
+    zeroEval: true,
+    zeroDynamicImports: true,
+    zeroMutation: true,
+    zeroExternalMutation: true,
+
+    // Awareness flags
+    meshAware: true,
+    presenceFieldAware: true,
+    bandAware: true,
+    advantageAware: true,
+    chunkPrewarmAware: true,
+    multiInstanceReady: true
+  })
+});
+
+// ============================================================================
+//  ORGAN: PulseBeaconMesh (v13)
+// ============================================================================
 export function PulseBeaconMesh({ beacon }) {
-  if (!beacon) throw new Error("PulseBeaconMesh requires a Beacon Engine instance");
+  if (!beacon)
+    throw new Error("PulseBeaconMesh requires a Beacon Engine instance");
+
+  // --------------------------------------------------------------------------
+  // INTERNAL META SNAPSHOT (non-invasive)
+  // --------------------------------------------------------------------------
+  const snapshotMeta = Object.freeze({
+    engineIdentity: beacon?.meta?.identity ?? null,
+    engineVersion: beacon?.meta?.version ?? null,
+    engineLayer: beacon?.meta?.layer ?? null,
+    engineRole: beacon?.meta?.role ?? null
+  });
 
   return Object.freeze({
+
+    // ------------------------------------------------------------------------
+    // META
+    // ------------------------------------------------------------------------
+    meta: PulseBeaconMeshMeta,
+    engineMeta: snapshotMeta,
 
     // ------------------------------------------------------------------------
     // SIMULATION: Broadcast under simulated world conditions
@@ -66,6 +120,27 @@ export function PulseBeaconMesh({ beacon }) {
     // ------------------------------------------------------------------------
     getPresenceField() {
       return beacon.buildPresenceField();
+    },
+
+    // ------------------------------------------------------------------------
+    // BAND FIELD (symbolic/binary)
+    // ------------------------------------------------------------------------
+    getBandField() {
+      return beacon.buildBandField?.() ?? null;
+    },
+
+    // ------------------------------------------------------------------------
+    // ADVANTAGE FIELD (EVO+)
+    // ------------------------------------------------------------------------
+    getAdvantageField() {
+      return beacon.buildAdvantageField?.() ?? null;
+    },
+
+    // ------------------------------------------------------------------------
+    // CHUNK PREWARM FIELD (EVO+)
+    // ------------------------------------------------------------------------
+    getChunkPrewarmField() {
+      return beacon.buildChunkPrewarmField?.() ?? null;
     }
   });
 }
