@@ -27,13 +27,13 @@ import { logger } from "../PULSEProofLogger.js";
 import {
   createPulseServer,
   PulseServerMeta
-} from ".//PulseServer-v12.3-Presence";
+} from "./PulseServer-v12.3-Presence.js";
 
 import {
   pulseUser,
   PulseUserMeta,
   createPulseWorldCore
-} from "./PulseUser-v12.3-Presence";
+} from "./PulseUser-v12.3-Presence.js";
 
 
 // ============================================================================

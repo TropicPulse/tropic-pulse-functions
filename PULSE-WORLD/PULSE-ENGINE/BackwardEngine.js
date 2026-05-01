@@ -1,19 +1,26 @@
 // ============================================================================
-// BackwardEngine.js — v13-EVO-PRIME Backward Lane Engine
+// BackwardEngine.js — v13.1-EVO-PRIME Backward Lane Engine
+//  • Dual-band aware (symbolic/binary)
+//  • Drift-proof via normalized job/intents (multi-instance safe)
+//  • Binary-first, chunk/memory aware
+//  • Deterministic tick sequencing
 // ============================================================================
 
 export const BackwardEngineMeta = Object.freeze({
   lane: "backward",
-  version: "13.0-EVO-PRIME",
-  identity: "BackwardEngine-v13",
-  evo: {
+  version: "13.1-EVO-PRIME",
+  identity: "BackwardEngine-v13.1-EVO-PRIME",
+  evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryFirst: true,
     chunkAware: true,
     memoryAware: true,
-    multiInstanceReady: true
-  }
+    multiInstanceReady: true,
+    dualBandAware: true,
+    symbolicPrimary: true,
+    binaryNonExecutable: true
+  })
 });
 
 const BACKWARD_JOB_QUEUE_KEY = "evo:backward:jobs";
@@ -29,8 +36,59 @@ function safe(fn, ...args) {
   return undefined;
 }
 
+// Monotonic tick sequence (engine-local)
 let globalTickId = 0;
 
+// ---------------------------------------------------------------------------
+// Normalization / multi-instance drift-proofing
+// ---------------------------------------------------------------------------
+function normalizeJob(job, { instanceId }) {
+  if (!job || typeof job !== "object") {
+    return {
+      id: `job-${instanceId}-${globalTickId}`,
+      type: "evo:backward:unknown",
+      payload: {},
+      lane: "backward",
+      __band: "symbolic",
+      __dnaTag: null
+    };
+  }
+
+  const payload = job.payload && typeof job.payload === "object"
+    ? job.payload
+    : {};
+
+  const band =
+    typeof payload.__band === "string"
+      ? payload.__band.toLowerCase()
+      : "symbolic";
+
+  return {
+    id: job.id || `job-${instanceId}-${globalTickId}`,
+    type: job.type || "evo:backward:generic",
+    payload,
+    lane: "backward",
+    __band: band === "binary" ? "binary" : "symbolic",
+    __dnaTag: typeof payload.__dnaTag === "string" ? payload.__dnaTag : null
+  };
+}
+
+function normalizeMetrics(base, extra = {}) {
+  return {
+    lane: "backward",
+    instanceId: base.instanceId,
+    tickId: base.tickId,
+    jobId: base.jobId,
+    durationMs: extra.durationMs ?? 0,
+    patternsCount: extra.patternsCount ?? 0,
+    band: base.band || "symbolic",
+    dnaTag: base.dnaTag || null
+  };
+}
+
+// ============================================================================
+// Factory — Backward Engine v13.1-EVO-PRIME
+// ============================================================================
 export function createBackwardEngine({
   BinaryOrgan,
   MemoryOrgan,
@@ -43,8 +101,8 @@ export function createBackwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // Job intake
-  // --------------------------------------------------------------------------
+  // Job intake (drift-proof, normalized)
+// --------------------------------------------------------------------------
   function readJobQueue() {
     const raw = safe(MemoryOrgan.read, BACKWARD_JOB_QUEUE_KEY);
     if (!raw || !Array.isArray(raw)) return [];
@@ -60,62 +118,75 @@ export function createBackwardEngine({
     if (!queue.length) return null;
     const job = queue.shift();
     writeJobQueue(queue);
-    return job;
+    return normalizeJob(job, { instanceId });
   }
 
   function submitJob(job) {
     const queue = readJobQueue();
+    const normalized = normalizeJob(job, { instanceId });
+
     queue.push({
-      ...job,
-      lane: "backward",
-      ts: Date.now()
+      ...normalized,
+      // metadata only; not used for randomness
+      submittedTick: globalTickId
     });
+
     writeJobQueue(queue);
-    if (trace) console.log("[BackwardEngine] job submitted:", job);
+
+    if (trace) console.log("[BackwardEngine] job submitted:", normalized);
   }
 
   // --------------------------------------------------------------------------
-  // Self-generated job when idle
-  // --------------------------------------------------------------------------
+  // Self-generated job when idle (deterministic shape)
+// --------------------------------------------------------------------------
   function createSelfJob() {
-    return {
-      id: `self-${instanceId}-${Date.now()}`,
-      type: "self:evo-backward",
-      payload: {
-        hint: "self-generated-backward",
-        ts: Date.now()
-      }
-    };
+    return normalizeJob(
+      {
+        id: `self-${instanceId}-${globalTickId}`,
+        type: "self:evo-backward",
+        payload: {
+          hint: "self-generated-backward",
+          // metadata only
+          origin: "BackwardEngine"
+        }
+      },
+      { instanceId }
+    );
   }
 
   // --------------------------------------------------------------------------
-  // Core backward compute (stabilize, normalize, compress, pattern‑reduce)
-  // --------------------------------------------------------------------------
+  // Core backward compute (stabilize, normalize, compress, pattern-reduce)
+// --------------------------------------------------------------------------
   function computeBackward(job) {
-    const start = performance.now();
+    const tickId = globalTickId;
 
-    const base = {
+    const baseMeta = {
       lane: "backward",
       instanceId,
-      tickId: globalTickId,
+      tickId,
       jobId: job.id,
-      type: job.type,
-      ts: Date.now()
+      band: job.__band || "symbolic",
+      dnaTag: job.__dnaTag || null
     };
 
     const payload = job.payload || {};
 
-    // Example: stabilization / clamping / dedupe / compression
-    const score = typeof payload.boostedScore === "number"
-      ? payload.boostedScore
-      : (typeof payload.score === "number" ? payload.score : Math.random());
+    // Deterministic score: prefer explicit values, fall back to 0.5
+    const score =
+      typeof payload.boostedScore === "number"
+        ? payload.boostedScore
+        : typeof payload.score === "number"
+          ? payload.score
+          : 0.5;
 
-    const stabilizedScore = Math.max(0, Math.min(1, score - 0.05));
+    const clampedScore = Math.max(0, Math.min(1, score));
+    const stabilizedScore = Math.max(0, Math.min(1, clampedScore - 0.05));
 
     let patterns = Array.isArray(payload.patterns) ? payload.patterns.slice() : [];
     const seen = new Set();
     patterns = patterns.filter((p) => {
-      const key = `${p.id}:${p.weight}`;
+      if (!p || typeof p !== "object") return false;
+      const key = `${p.id ?? "?"}:${p.weight ?? 0}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -123,7 +194,7 @@ export function createBackwardEngine({
 
     const compressedHints = patterns.slice(0, 4).map((p) => ({
       id: p.id,
-      bucket: p.weight > 0.5 ? "high" : "low"
+      bucket: (typeof p.weight === "number" && p.weight > 0.5) ? "high" : "low"
     }));
 
     const resultPayload = {
@@ -131,23 +202,20 @@ export function createBackwardEngine({
       lane: "backward",
       stabilizedScore,
       patterns,
-      compressedHints
+      compressedHints,
+      __band: baseMeta.band,
+      __dnaTag: baseMeta.dnaTag
     };
 
-    const end = performance.now();
+    const metrics = normalizeMetrics(baseMeta, {
+      durationMs: 0, // no wall-clock dependency
+      patternsCount: patterns.length
+    });
 
     return {
-      meta: base,
+      meta: baseMeta,
       payload: resultPayload,
-      metrics: {
-        lane: "backward",
-        instanceId,
-        tickId: globalTickId,
-        jobId: job.id,
-        durationMs: end - start,
-        patternsCount: patterns.length,
-        ts: Date.now()
-      }
+      metrics
     };
   }
 
@@ -165,7 +233,8 @@ export function createBackwardEngine({
         instanceId,
         tickId: result.metrics.tickId,
         jobId: result.metrics.jobId,
-        ts: result.metrics.ts
+        band: result.metrics.band,
+        dnaTag: result.metrics.dnaTag
       }
     };
 
@@ -194,14 +263,16 @@ export function createBackwardEngine({
         tickId: result.metrics.tickId,
         jobId: result.metrics.jobId,
         stabilizedScore: result.payload.stabilizedScore,
-        patternsCount: result.metrics.patternsCount
+        patternsCount: result.metrics.patternsCount,
+        band: result.metrics.band,
+        dnaTag: result.metrics.dnaTag
       }
     });
   }
 
   // --------------------------------------------------------------------------
-  // tick() — one backward evolution step
-  // --------------------------------------------------------------------------
+  // tick() — one backward evolution step (deterministic lane step)
+// --------------------------------------------------------------------------
   function tick() {
     globalTickId += 1;
 
@@ -218,7 +289,7 @@ export function createBackwardEngine({
     if (trace) {
       console.log("[BackwardEngine] tick complete:", {
         tickId: result.metrics.tickId,
-        durationMs: result.metrics.durationMs
+        patternsCount: result.metrics.patternsCount
       });
     }
 
@@ -226,14 +297,14 @@ export function createBackwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // prewarm() — touch binary paths
-  // --------------------------------------------------------------------------
+  // prewarm() — touch binary paths (binary-first, deterministic sample)
+// --------------------------------------------------------------------------
   function prewarm() {
     const sample = {
       lane: "backward",
       instanceId,
       intent: "prewarm",
-      ts: Date.now()
+      band: "symbolic"
     };
     const bits   = safe(BinaryOrgan.encode, sample) || "";
     const chunks = safe(BinaryOrgan.chunk, bits) || [];

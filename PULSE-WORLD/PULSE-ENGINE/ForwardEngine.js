@@ -1,19 +1,27 @@
 // ============================================================================
-// ForwardEngine.js — v13-EVO-PRIME Forward Lane Engine
+// ForwardEngine.js — v13.1-EVO-PRIME Forward Lane Engine
+//  • Dual-band aware (symbolic/binary)
+//  • Drift-proof via normalized job/intents (multi-instance safe)
+//  • Binary-first, chunk/memory aware
+//  • Deterministic tick sequencing
+//  • Forward lane: expand, predict, factor, pattern-find
 // ============================================================================
 
 export const ForwardEngineMeta = Object.freeze({
   lane: "forward",
-  version: "13.0-EVO-PRIME",
-  identity: "ForwardEngine-v13",
-  evo: {
+  version: "13.1-EVO-PRIME",
+  identity: "ForwardEngine-v13.1-EVO-PRIME",
+  evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     binaryFirst: true,
     chunkAware: true,
     memoryAware: true,
-    multiInstanceReady: true
-  }
+    multiInstanceReady: true,
+    dualBandAware: true,
+    symbolicPrimary: true,
+    binaryNonExecutable: true
+  })
 });
 
 const FORWARD_JOB_QUEUE_KEY = "evo:forward:jobs";
@@ -29,8 +37,59 @@ function safe(fn, ...args) {
   return undefined;
 }
 
+// Monotonic tick sequence (engine-local)
 let globalTickId = 0;
 
+// ---------------------------------------------------------------------------
+// Normalization / multi-instance drift-proofing
+// ---------------------------------------------------------------------------
+function normalizeJob(job, { instanceId }) {
+  if (!job || typeof job !== "object") {
+    return {
+      id: `job-${instanceId}-${globalTickId}`,
+      type: "evo:forward:unknown",
+      payload: {},
+      lane: "forward",
+      __band: "symbolic",
+      __dnaTag: null
+    };
+  }
+
+  const payload = job.payload && typeof job.payload === "object"
+    ? job.payload
+    : {};
+
+  const band =
+    typeof payload.__band === "string"
+      ? payload.__band.toLowerCase()
+      : "symbolic";
+
+  return {
+    id: job.id || `job-${instanceId}-${globalTickId}`,
+    type: job.type || "evo:forward:generic",
+    payload,
+    lane: "forward",
+    __band: band === "binary" ? "binary" : "symbolic",
+    __dnaTag: typeof payload.__dnaTag === "string" ? payload.__dnaTag : null
+  };
+}
+
+function normalizeMetrics(base, extra = {}) {
+  return {
+    lane: "forward",
+    instanceId: base.instanceId,
+    tickId: base.tickId,
+    jobId: base.jobId,
+    durationMs: extra.durationMs ?? 0,
+    patternsCount: extra.patternsCount ?? 0,
+    band: base.band || "symbolic",
+    dnaTag: base.dnaTag || null
+  };
+}
+
+// ============================================================================
+// Factory — Forward Engine v13.1-EVO-PRIME
+// ============================================================================
 export function createForwardEngine({
   BinaryOrgan,
   MemoryOrgan,
@@ -43,7 +102,7 @@ export function createForwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // Job intake
+  // Job intake (drift-proof, normalized)
   // --------------------------------------------------------------------------
   function readJobQueue() {
     const raw = safe(MemoryOrgan.read, FORWARD_JOB_QUEUE_KEY);
@@ -60,68 +119,86 @@ export function createForwardEngine({
     if (!queue.length) return null;
     const job = queue.shift();
     writeJobQueue(queue);
-    return job;
+    return normalizeJob(job, { instanceId });
   }
 
   function submitJob(job) {
     const queue = readJobQueue();
+    const normalized = normalizeJob(job, { instanceId });
+
     queue.push({
-      ...job,
-      lane: "forward",
-      ts: Date.now()
+      ...normalized,
+      submittedTick: globalTickId
     });
+
     writeJobQueue(queue);
-    if (trace) console.log("[ForwardEngine] job submitted:", job);
+
+    if (trace) console.log("[ForwardEngine] job submitted:", normalized);
   }
 
   // --------------------------------------------------------------------------
-  // Self-generated job when idle
+  // Self-generated job when idle (deterministic shape)
   // --------------------------------------------------------------------------
   function createSelfJob() {
-    return {
-      id: `self-${instanceId}-${Date.now()}`,
-      type: "self:evo-forward",
-      payload: {
-        hint: "self-generated-forward",
-        ts: Date.now()
-      }
-    };
+    return normalizeJob(
+      {
+        id: `self-${instanceId}-${globalTickId}`,
+        type: "self:evo-forward",
+        payload: {
+          hint: "self-generated-forward",
+          origin: "ForwardEngine"
+        }
+      },
+      { instanceId }
+    );
   }
 
   // --------------------------------------------------------------------------
   // Core forward compute (expand, predict, factor, pattern-find)
   // --------------------------------------------------------------------------
   function computeForward(job) {
-    const start = performance.now();
+    const tickId = globalTickId;
 
-    const base = {
+    const baseMeta = {
       lane: "forward",
       instanceId,
-      tickId: globalTickId,
+      tickId,
       jobId: job.id,
-      type: job.type,
-      ts: Date.now()
+      band: job.__band || "symbolic",
+      dnaTag: job.__dnaTag || null
     };
 
     const payload = job.payload || {};
 
-    // Example: pattern expansion / scoring / prefill hints
-    const score = typeof payload.score === "number" ? payload.score : Math.random();
-    const boostedScore = Math.min(1, score + 0.1);
+    // Deterministic score: prefer explicit values, fall back to 0.5
+    const score =
+      typeof payload.score === "number"
+        ? payload.score
+        : typeof payload.baseScore === "number"
+          ? payload.baseScore
+          : 0.5;
 
-    const patterns = Array.isArray(payload.patterns) ? payload.patterns.slice() : [];
+    const clampedScore = Math.max(0, Math.min(1, score));
+    const boostedScore = Math.max(0, Math.min(1, clampedScore + 0.1));
+
+    let patterns = Array.isArray(payload.patterns) ? payload.patterns.slice() : [];
+
+    // Forward lane: expand patterns deterministically if under a threshold
     if (patterns.length < 8) {
+      const nextId = `p-${patterns.length + 1}`;
       patterns.push({
-        id: `p-${patterns.length + 1}`,
+        id: nextId,
         weight: boostedScore,
-        ts: Date.now()
+        source: payload.source || "forward-engine",
+        lane: "forward"
       });
     }
 
     const prefillChunks = patterns.map((p) => ({
       id: p.id,
-      weight: p.weight,
-      hint: "forward-prefill"
+      weight: typeof p.weight === "number" ? p.weight : boostedScore,
+      hint: "forward-prefill",
+      lane: "forward"
     }));
 
     const resultPayload = {
@@ -129,23 +206,20 @@ export function createForwardEngine({
       lane: "forward",
       boostedScore,
       patterns,
-      prefillChunks
+      prefillChunks,
+      __band: baseMeta.band,
+      __dnaTag: baseMeta.dnaTag
     };
 
-    const end = performance.now();
+    const metrics = normalizeMetrics(baseMeta, {
+      durationMs: 0, // no wall-clock dependency
+      patternsCount: patterns.length
+    });
 
     return {
-      meta: base,
+      meta: baseMeta,
       payload: resultPayload,
-      metrics: {
-        lane: "forward",
-        instanceId,
-        tickId: globalTickId,
-        jobId: job.id,
-        durationMs: end - start,
-        patternsCount: patterns.length,
-        ts: Date.now()
-      }
+      metrics
     };
   }
 
@@ -163,7 +237,8 @@ export function createForwardEngine({
         instanceId,
         tickId: result.metrics.tickId,
         jobId: result.metrics.jobId,
-        ts: result.metrics.ts
+        band: result.metrics.band,
+        dnaTag: result.metrics.dnaTag
       }
     };
 
@@ -192,13 +267,15 @@ export function createForwardEngine({
         tickId: result.metrics.tickId,
         jobId: result.metrics.jobId,
         boostedScore: result.payload.boostedScore,
-        patternsCount: result.metrics.patternsCount
+        patternsCount: result.metrics.patternsCount,
+        band: result.metrics.band,
+        dnaTag: result.metrics.dnaTag
       }
     });
   }
 
   // --------------------------------------------------------------------------
-  // tick() — one forward evolution step
+  // tick() — one forward evolution step (deterministic lane step)
   // --------------------------------------------------------------------------
   function tick() {
     globalTickId += 1;
@@ -216,7 +293,7 @@ export function createForwardEngine({
     if (trace) {
       console.log("[ForwardEngine] tick complete:", {
         tickId: result.metrics.tickId,
-        durationMs: result.metrics.durationMs
+        patternsCount: result.metrics.patternsCount
       });
     }
 
@@ -224,14 +301,14 @@ export function createForwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // prewarm() — touch binary paths
+  // prewarm() — touch binary paths (binary-first, deterministic sample)
   // --------------------------------------------------------------------------
   function prewarm() {
     const sample = {
       lane: "forward",
       instanceId,
       intent: "prewarm",
-      ts: Date.now()
+      band: "symbolic"
     };
     const bits   = safe(BinaryOrgan.encode, sample) || "";
     const chunks = safe(BinaryOrgan.chunk, bits) || [];

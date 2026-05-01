@@ -44,244 +44,282 @@
        JS LAYER (CORTEX)
        ============================================================================ -->
   <script type="module">
-    /* 0. BOOT MEMBRANE — MUST BE FIRST */
-    import * as PulseWindow from "../PULSEEvolutionaryWindow.js";
+  /* 0. BOOT MEMBRANE — MUST BE FIRST */
+  import * as PulseWindow from "../PULSEEvolutionaryWindow.js";
 
-    /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
-    import * as PULSEOSSkinReflex from "../PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
+  /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
+  import * as PULSEOSSkinReflex from "../PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
 
-    function mark(label) {
-      console.log("[INDEX]", label);
+  function mark(label) {
+    console.log("[INDEX]", label);
+  }
+
+  // Icons
+  import { PulseIcons } from "./PulseEvolutionaryIcons.js";
+
+  // UI organism organs
+  import { createPulseEvolutionaryCode } from "./PulseEvolutionaryCode.js";
+  import { createPulseEvolutionaryMemory } from "./PulseEvolutionaryMemory.js";
+  import { createPulseEvolutionaryBrain } from "./PulseEvolutionaryBrain.js";
+  import { createPulseEvolutionaryImpulse } from "./PulseEvolutionaryImpulse.js";
+  import { createPulseEvolutionaryRouter } from "./PulseEvolutionaryRouter.js";
+  import { createPulseEvolutionaryBinary } from "./PulseEvolutionaryBinary.js";
+
+  // AI organs (example: aiEarn)
+  import * as aiEarn from "../PULSE-AI/aiEarn.js";
+
+  // Mock CNS (replace with real CNS when wired)
+  const CNS = {
+    emitImpulse(source, impulse) {
+      console.log("[CNS] Impulse:", source, impulse);
     }
+  };
 
-    // Icons
-    import { PulseIcons } from "./PulseEvolutionaryIcons.js";
+  const Evolution = {
+    getPageLineage() {
+      return {
+        lineage: "v13-evo-prime",
+        stable: true,
+        page: window.location.pathname
+      };
+    },
+    recordPageLineage(model) {
+      console.log("[Evolution] Lineage recorded:", model);
+    }
+  };
 
-    // UI organism organs
-    import { createPulseEvolutionaryCode } from "./PulseEvolutionaryCode.js";
-    import { createPulseEvolutionaryMemory } from "./PulseEvolutionaryMemory.js";
-    import { createPulseEvolutionaryBrain } from "./PulseEvolutionaryBrain.js";
-    import { createPulseEvolutionaryImpulse } from "./PulseEvolutionaryImpulse.js";
-    import { createPulseEvolutionaryRouter } from "./PulseEvolutionaryRouter.js";
-    import { createPulseEvolutionaryBinary } from "./PulseEvolutionaryBinary.js";
+  // ------------------------------------------------------------------------
+  // ACTNOW + MULTI‑INSTANCE FORMULA — INLINE, NO NEW STRUCTURES
+  //  • ACTNOW: keep user on same spot after evolution/route
+  //  • Multi‑Formula: align intents to prevent drift (forward/backward/engines)
+  // ------------------------------------------------------------------------
+  function capturePageState() {
+    return {
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      anchor:
+        document.activeElement &&
+        (document.activeElement.id ||
+          document.activeElement.name ||
+          null)
+    };
+  }
 
-    // AI organs (example: aiEarn)
-    import * as aiEarn from "../PULSE-AI/aiEarn.js";
+  function actNowRestore(state) {
+    if (!state) return;
 
-    // Optional: evolution/earn helpers later can be wired here
-    // import { createEvolutionEngine } from "../PULSE-AI/aiEvolutionEngine.js";
-    // import { createEarnEngine } from "../PULSE-AI/aiEarnEngine.js";
-
-    // Mock CNS (replace with real CNS when wired)
-    const CNS = {
-      emitImpulse(source, impulse) {
-        console.log("[CNS] Impulse:", source, impulse);
+    // Pure reflex: no cognition, no async, no timers
+    try {
+      if (typeof window.scrollTo === "function") {
+        window.scrollTo(state.scrollX || 0, state.scrollY || 0);
       }
+
+      if (state.anchor) {
+        const el =
+          document.getElementById(state.anchor) ||
+          document.getElementsByName(state.anchor)[0];
+        if (el && typeof el.focus === "function") {
+          el.focus();
+        }
+      }
+    } catch {
+      // ACTNOW must never break page
+    }
+  }
+
+  // Multi‑instance formula: drift‑proof alignment of intents
+  // v13+ — inline governor, no new organ
+  function alignEvolutionIntent(intent) {
+    if (!intent || typeof intent !== "object") return intent;
+
+    // Ensure deterministic shape + band tagging
+    const base = {
+      type: intent.type || "page:update",
+      payload: intent.payload || {},
+      __band: intent.payload?.__band || "symbolic",
+      __dnaTag: intent.payload?.__dnaTag || null
     };
 
-    const Evolution = {
-      getPageLineage() {
-        return {
-          lineage: "v13-evo-prime",
-          stable: true,
-          page: window.location.pathname
-        };
-      },
-      recordPageLineage(model) {
-        console.log("[Evolution] Lineage recorded:", model);
-      }
+    // Here is where forward/backward/engine alignment rules would live.
+    // For now, we keep it deterministic and pass through with normalized shape.
+    return base;
+  }
+
+  function alignRouteIntent(route, opts) {
+    const normalized = {
+      route: route || "/",
+      opts: opts || {}
     };
 
-    // ------------------------------------------------------------------------
-    // INSTANTIATE UI ORGANS — v13‑EVO‑PRIME wiring order
-    // ------------------------------------------------------------------------
+    // Same idea: normalize + tag for dual‑band / drift‑proof routing.
+    normalized.opts.__band =
+      typeof normalized.opts.__band === "string"
+        ? normalized.opts.__band
+        : "symbolic";
 
-    // 1) Long‑term memory (route‑aware)
-    const MemoryOrgan = createPulseEvolutionaryMemory({
-      routeId: window.location.pathname || "PulseEvolutionaryPage"
-    });
+    return normalized;
+  }
 
-    // 2) Code organ (needs Evolution + Memory + CNS)
-    const CodeOrgan = createPulseEvolutionaryCode({
-      Evolution,
-      LongTermMemory: MemoryOrgan,
-      CNS
-    });
+  // ------------------------------------------------------------------------
+  // INSTANTIATE UI ORGANS — v13‑EVO‑PRIME wiring order
+  // ------------------------------------------------------------------------
 
-    // 3) Brain organ (coordinates Code + Memory + CNS)
-    const BrainOrgan = createPulseEvolutionaryBrain({
-      Evolution,
-      LongTermMemory: MemoryOrgan,
-      CNS,
-      createCode: () => CodeOrgan,
-      createMemory: () => MemoryOrgan
-    });
+  // 1) Long‑term memory (route‑aware)
+  const MemoryOrgan = createPulseEvolutionaryMemory({
+    routeId: window.location.pathname || "PulseEvolutionaryPage"
+  });
 
-    // 4) Router organ (needs CNS + Evolution + Code + Brain)
-    const RouterOrgan = createPulseEvolutionaryRouter({
-      CNS,
-      Evolution,
-      CodeOrgan,
-      BrainOrgan
-    });
+  // 2) Code organ (needs Evolution + Memory + CNS)
+  const CodeOrgan = createPulseEvolutionaryCode({
+    Evolution,
+    LongTermMemory: MemoryOrgan,
+    CNS
+  });
 
-    // 5) Impulse organ (route‑aware, lineage‑aware)
-    const ImpulseOrgan = createPulseEvolutionaryImpulse({
-      CNS,
-      Evolution,
-      RouteOrgan: RouterOrgan
-    });
+  // 3) Brain organ (coordinates Code + Memory + CNS)
+  const BrainOrgan = createPulseEvolutionaryBrain({
+    Evolution,
+    LongTermMemory: MemoryOrgan,
+    CNS,
+    createCode: () => CodeOrgan,
+    createMemory: () => MemoryOrgan
+  });
 
-    // 6) Binary organ (route‑aware, lineage‑aware, chunk/dechunk)
-    const BinaryOrgan = createPulseEvolutionaryBinary({
-      Evolution,
-      RouteOrgan: RouterOrgan,
-      MemoryOrgan
-    });
+  // 4) Router organ (needs CNS + Evolution + Code + Brain)
+  const RouterOrgan = createPulseEvolutionaryRouter({
+    CNS,
+    Evolution,
+    CodeOrgan,
+    BrainOrgan
+  });
 
-    // ------------------------------------------------------------------------
-    // PREWARM / PRE‑CHUNK — v13‑EVO‑PRIME
-    // ------------------------------------------------------------------------
-    async function prewarmEvolutionaryMembrane() {
-      try {
-        // Memory prewarm (route‑aware)
-        if (typeof MemoryOrgan.prewarm === "function") {
-          await MemoryOrgan.prewarm();
-        }
+  // 5) Impulse organ (route‑aware, lineage‑aware)
+  const ImpulseOrgan = createPulseEvolutionaryImpulse({
+    CNS,
+    Evolution,
+    RouteOrgan: RouterOrgan
+  });
 
-        // Binary prewarm (chunk/dechunk paths)
-        if (typeof BinaryOrgan.prewarm === "function") {
-          await BinaryOrgan.prewarm();
-        }
+  // 6) Binary organ (route‑aware, lineage‑aware, chunk/dechunk)
+  const BinaryOrgan = createPulseEvolutionaryBinary({
+    Evolution,
+    RouteOrgan: RouterOrgan,
+    MemoryOrgan
+  });
 
-        // Brain prewarm (restore + minimal evolve)
-        if (typeof BrainOrgan.prewarm === "function") {
-          await BrainOrgan.prewarm();
-        }
+  // ------------------------------------------------------------------------
+  // PREWARM / PRE‑CHUNK — v13‑EVO‑PRIME
+  // ------------------------------------------------------------------------
+  async function prewarmEvolutionaryMembrane() {
+    try {
+      // Memory prewarm (route‑aware)
+      if (typeof MemoryOrgan.prewarm === "function") {
+        await MemoryOrgan.prewarm();
+      }
 
-        console.log("[PREWARM] Evolutionary membrane prewarmed.");
-      } catch (err) {
-        console.warn("[PREWARM] Evolutionary membrane prewarm failed:", err);
+      // Binary prewarm (chunk/dechunk paths)
+      if (typeof BinaryOrgan.prewarm === "function") {
+        await BinaryOrgan.prewarm();
+      }
+
+      // Brain prewarm (restore + minimal evolve)
+      if (typeof BrainOrgan.prewarm === "function") {
+        await BrainOrgan.prewarm();
+      }
+
+      console.log("[PREWARM] Evolutionary membrane prewarmed.");
+    } catch (err) {
+      console.warn("[PREWARM] Evolutionary membrane prewarm failed:", err);
+    }
+  }
+
+  // ------------------------------------------------------------------------
+  // BACKGROUND EVOLUTIONARY WORKER HOOK (for second page / loop)
+  // ------------------------------------------------------------------------
+  async function runBackgroundEvolutionaryTick() {
+    if (
+      typeof BinaryOrgan.chunk === "function" &&
+      typeof BinaryOrgan.dechunk === "function"
+    ) {
+      const sampleBits = BinaryOrgan.encode
+        ? BinaryOrgan.encode({ intent: "evo-tick", ts: Date.now() })
+        : "0";
+
+      const chunks = BinaryOrgan.chunk(sampleBits);
+      const recombined = BinaryOrgan.dechunk(chunks);
+
+      if (BinaryOrgan.decode) {
+        const decoded = BinaryOrgan.decode(recombined);
+        console.log("[EVOTICK] decoded payload:", decoded);
       }
     }
 
-    // ------------------------------------------------------------------------
-    // BACKGROUND EVOLUTIONARY WORKER HOOK (for second page / loop)
-    // ------------------------------------------------------------------------
-    async function runBackgroundEvolutionaryTick() {
-      // This is where, on the “worker” variant page,
-      // you’d call big factoring functions, chunk/dechunk, etc.
-      // Example (assuming BinaryOrgan exposes chunk/dechunk helpers):
+    // Worker page can expand this into full 250‑line compute loop.
+  }
 
-      if (typeof BinaryOrgan.chunk === "function" &&
-          typeof BinaryOrgan.dechunk === "function") {
-        const sampleBits = BinaryOrgan.encode
-          ? BinaryOrgan.encode({ intent: "evo-tick", ts: Date.now() })
-          : "0";
+  // ------------------------------------------------------------------------
+  // BOOT SEQUENCE — EvolutionaryTrustedPage (TRUSTED / UNTRUSTED INTENTS)
+  // ------------------------------------------------------------------------
+  (async () => {
+    console.log("[BOOT] PulseEvolutionaryPage starting…");
 
-        const chunks = BinaryOrgan.chunk(sampleBits);
-        const recombined = BinaryOrgan.dechunk(chunks);
+    await prewarmEvolutionaryMembrane();
 
-        // Optionally feed back into Code/Brain/Memory
-        if (BinaryOrgan.decode) {
-          const decoded = BinaryOrgan.decode(recombined);
-          console.log("[EVOTICK] decoded payload:", decoded);
+    const trust =
+      typeof PULSEOSSkinReflex.checkTrust === "function"
+        ? await PULSEOSSkinReflex.checkTrust()
+        : true; // default to trusted if not wired yet
+
+    if (!trust) {
+      console.log("[BOOT] Untrusted session → loading OUTSIDE intent…");
+
+      await BrainOrgan.freshEvolve({
+        type: "portal:outside",
+        payload: {
+          mode: "outside",
+          title: "Portal Boundary",
+          message: "Please authenticate to continue."
         }
-      }
+      });
 
-      // This function is intentionally minimal here;
-      // the “worker” page can expand it into a 250‑line compute loop.
-    }
-
-    // ------------------------------------------------------------------------
-    // BOOT SEQUENCE — EvolutionaryTrustedPage (TRUSTED / UNTRUSTED INTENTS)
-    // ------------------------------------------------------------------------
-    (async () => {
-      console.log("[BOOT] PulseEvolutionaryPage starting…");
-
-      await prewarmEvolutionaryMembrane();
-
-      const trust =
-        typeof PULSEOSSkinReflex.checkTrust === "function"
-          ? await PULSEOSSkinReflex.checkTrust()
-          : true; // default to trusted if not wired yet
-
-      if (!trust) {
-        console.log("[BOOT] Untrusted session → loading OUTSIDE intent…");
-
-        await BrainOrgan.freshEvolve({
-          type: "portal:outside",
-          payload: {
-            mode: "outside",
-            title: "Portal Boundary",
-            message: "Please authenticate to continue."
-          }
-        });
-
-        // OUTSIDE mode: minimal interface, no internal routing
-        window.PulseEvolutionaryPage = {
-          evolve: (payload) =>
-            CodeOrgan.evolve({ type: "portal:update", payload }),
-
-          ai: async (intent) => {
-            if (intent === "earn") {
-              const data = await aiEarn.readAll?.();
-              return CodeOrgan.evolve({
-                type: "page:update",
-                payload: {
-                  mode: "inside",
-                  title: "AI Earn Diagnostics",
-                  content: JSON.stringify(data ?? {}, null, 2)
-                }
-              });
-            }
-
-            console.warn("[AI] Unknown AI intent:", intent);
-          },
-
-          memory: MemoryOrgan,
-          brain: BrainOrgan,
-          router: RouterOrgan,
-          binary: BinaryOrgan,
-          impulse: ImpulseOrgan,
-          icons: PulseIcons
-        };
-
-        console.log("[BOOT] EvolutionaryTrustedPage ready in OUTSIDE mode.");
-        return;
-      }
-
-      console.log("[BOOT] Trusted session → loading INSIDE intent…");
-
-      const restored = await BrainOrgan.restore?.();
-
-      if (!restored?.ok) {
-        await BrainOrgan.freshEvolve({
-          type: "page:inside",
-          payload: {
-            mode: "inside",
-            title: "PulseOS",
-            content: "Trusted session restored."
-          }
-        });
-      }
-
-      // INSIDE mode: full internal interface
+      // OUTSIDE mode: minimal interface, no internal routing
       window.PulseEvolutionaryPage = {
-        evolve: (payload) =>
-          CodeOrgan.evolve({ type: "page:update", payload }),
+        evolve: async (payload) => {
+          const pre = capturePageState();
 
-        route: (route, opts) => RouterOrgan.go(route, opts),
+          const aligned = alignEvolutionIntent({
+            type: "portal:update",
+            payload
+          });
 
-        encode: (payload) => BinaryOrgan.encode?.(payload),
-        decode: (compressed) => BinaryOrgan.decode?.(compressed),
+          const result = await CodeOrgan.evolve(aligned);
 
-        // Binary chunk/dechunk exposure for evo loops
-        chunk: (bits) => BinaryOrgan.chunk?.(bits),
-        dechunk: (chunks) => BinaryOrgan.dechunk?.(chunks),
+          actNowRestore(pre);
+          return result;
+        },
 
-        // Background evolutionary tick hook (for worker variant)
-        evoTick: () => runBackgroundEvolutionaryTick(),
+        ai: async (intent) => {
+          if (intent === "earn") {
+            const data = await aiEarn.readAll?.();
+            const pre = capturePageState();
+
+            const aligned = alignEvolutionIntent({
+              type: "page:update",
+              payload: {
+                mode: "inside",
+                title: "AI Earn Diagnostics",
+                content: JSON.stringify(data ?? {}, null, 2)
+              }
+            });
+
+            const result = await CodeOrgan.evolve(aligned);
+
+            actNowRestore(pre);
+            return result;
+          }
+
+          console.warn("[AI] Unknown AI intent:", intent);
+        },
 
         memory: MemoryOrgan,
         brain: BrainOrgan,
@@ -291,8 +329,72 @@
         icons: PulseIcons
       };
 
-      console.log("[BOOT] EvolutionaryTrustedPage ready in INSIDE mode.");
-    })();
-  </script>
+      console.log("[BOOT] EvolutionaryTrustedPage ready in OUTSIDE mode.");
+      return;
+    }
+
+    console.log("[BOOT] Trusted session → loading INSIDE intent…");
+
+    const restored = await BrainOrgan.restore?.();
+
+    if (!restored?.ok) {
+      await BrainOrgan.freshEvolve({
+        type: "page:inside",
+        payload: {
+          mode: "inside",
+          title: "PulseOS",
+          content: "Trusted session restored."
+        }
+      });
+    }
+
+    // INSIDE mode: full internal interface
+    window.PulseEvolutionaryPage = {
+      evolve: async (payload) => {
+        const pre = capturePageState();
+
+        const aligned = alignEvolutionIntent({
+          type: "page:update",
+          payload
+        });
+
+        const result = await CodeOrgan.evolve(aligned);
+
+        actNowRestore(pre);
+        return result;
+      },
+
+      route: async (route, opts) => {
+        const pre = capturePageState();
+
+        const aligned = alignRouteIntent(route, opts);
+        const result = await RouterOrgan.go(aligned.route, aligned.opts);
+
+        actNowRestore(pre);
+        return result;
+      },
+
+      encode: (payload) => BinaryOrgan.encode?.(payload),
+      decode: (compressed) => BinaryOrgan.decode?.(compressed),
+
+      // Binary chunk/dechunk exposure for evo loops
+      chunk: (bits) => BinaryOrgan.chunk?.(bits),
+      dechunk: (chunks) => BinaryOrgan.dechunk?.(chunks),
+
+      // Background evolutionary tick hook (for worker variant)
+      evoTick: () => runBackgroundEvolutionaryTick(),
+
+      memory: MemoryOrgan,
+      brain: BrainOrgan,
+      router: RouterOrgan,
+      binary: BinaryOrgan,
+      impulse: ImpulseOrgan,
+      icons: PulseIcons
+    };
+
+    console.log("[BOOT] EvolutionaryTrustedPage ready in INSIDE mode.");
+  })();
+</script>
+
 </body>
 </html>
