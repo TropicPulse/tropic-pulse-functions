@@ -109,7 +109,6 @@ export const PulseProxyHeartMeta = Object.freeze({
     ]
   })
 });
-
 // ============================================================================
 // AI FALLBACK SURFACES (metadata)
 // ============================================================================
@@ -215,7 +214,7 @@ const heartHealing = {
   lastAdvantageField: null,
 
   lastAiFallbackSurface: null,
-  lastBeatSource: "mom" // "mom" | "dad"
+  lastBeatSource: "mom" // "mom" | "dad" | "random" | "none"
 };
 
 async function logHeart(stage, details = {}) {
@@ -230,9 +229,41 @@ async function logHeart(stage, details = {}) {
 }
 
 // ============================================================================
-// MAIN HANDLER — MOM PULSE PRIMARY, DAD PULSE FALLBACK
+// RANDOMIZER FALLBACK (chaotic beat source)
 // ============================================================================
-export const handler = async () => {
+function randomBeatNudge() {
+  // ~3% chance per cycle
+  if (Math.random() > 0.97) {
+    const now = Date.now();
+
+    heartHealing.lastBeatSource = "random";
+    heartHealing.lastExitReason = "random_nudge";
+    heartHealing.lastError = null;
+    heartHealing.lastBeatResult = { randomNudgeAt: now };
+
+    globalThis.PulseAIHeartbeatLastBeatAt = now;
+
+    console.log("heart", "RANDOM_NUDGE", {
+      cycle: HEART_CYCLE,
+      at: now,
+      ...HEART_CONTEXT
+    });
+
+    return {
+      ok: true,
+      beat: { randomNudgeAt: now },
+      beatSource: "random"
+    };
+  }
+
+  return null;
+}
+
+// ============================================================================
+// LOCAL HEART BEAT — MOM PRIMARY, DAD FALLBACK, RANDOM LAST-RESORT
+// ============================================================================
+// Call this from your local loop (PULSE-NET, 3-heart mesh, etc.)
+export async function pulseHeartOnce() {
   HEART_CYCLE++;
   heartHealing.cycles = HEART_CYCLE;
   heartHealing.lastCycleIndex = HEART_CYCLE;
@@ -254,14 +285,13 @@ export const handler = async () => {
   let beatSource = "mom";
 
   try {
-    // MOM PULSE (primary) — same code, every time
+    // MOM PULSE (primary)
     beatResult = await heartbeat.beat();
     heartHealing.lastBeatResult = beatResult;
     heartHealing.lastError = null;
     heartHealing.lastExitReason = "ok";
     heartHealing.lastBeatSource = "mom";
 
-    // Bounce Mom's pulse into Dad as a signal (no timer, just a ping)
     try {
       aiHeartbeat.pulseAiHeartbeat?.("mom-pulse");
     } catch (_) {}
@@ -269,27 +299,22 @@ export const handler = async () => {
     await logHeart("BEAT_COMPLETE", { beatSource: "mom" });
 
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        ok: true,
-        beat: beatResult,
-        beatSource,
-
-        heartCycle: HEART_CYCLE,
-        heartCycleSignature: heartHealing.lastHeartCycleSignature,
-        binaryField,
-        waveField,
-        advantageField,
-        aiFallbackSurface,
-
-        ...HEART_CONTEXT
-      })
+      ok: true,
+      beat: beatResult,
+      beatSource,
+      heartCycle: HEART_CYCLE,
+      heartCycleSignature: heartHealing.lastHeartCycleSignature,
+      binaryField,
+      waveField,
+      advantageField,
+      aiFallbackSurface,
+      ...HEART_CONTEXT
     };
 
   } catch (err) {
     const msg = String(err);
 
-    // MOM PULSE DOWN → CONTINUE UNDER DAD'S MOMENTUM IF AVAILABLE
+    // MOM DOWN → DAD SNAPSHOT IF AVAILABLE
     if (aiFallbackSurface.aiHeartbeatAlive && aiHeartbeat.snapshotAiHeartbeat) {
       try {
         const dadSnapshot = aiHeartbeat.snapshotAiHeartbeat();
@@ -307,25 +332,23 @@ export const handler = async () => {
         });
 
         return {
-          statusCode: 200,
-          body: JSON.stringify({
-            ok: true,
-            beat: beatResult,
-            beatSource,
-
-            heartCycle: HEART_CYCLE,
-            heartCycleSignature: heartHealing.lastHeartCycleSignature,
-            binaryField,
-            waveField,
-            advantageField,
-            aiFallbackSurface,
-
-            ...HEART_CONTEXT
-          })
+          ok: true,
+          beat: beatResult,
+          beatSource,
+          heartCycle: HEART_CYCLE,
+          heartCycleSignature: heartHealing.lastHeartCycleSignature,
+          binaryField,
+          waveField,
+          advantageField,
+          aiFallbackSurface,
+          ...HEART_CONTEXT
         };
       } catch (fallbackErr) {
         const fmsg = String(fallbackErr);
-        heartHealing.lastError = { message: fmsg, stage: "dad_pulse_fallback_failed" };
+        heartHealing.lastError = {
+          message: fmsg,
+          stage: "dad_pulse_fallback_failed"
+        };
         heartHealing.lastExitReason = "fatal_error";
         heartHealing.lastBeatSource = "none";
 
@@ -334,29 +357,42 @@ export const handler = async () => {
           fallbackError: fmsg
         });
 
-        return {
-          statusCode: 500,
-          body: JSON.stringify({
-            ok: false,
-            error: msg,
-            fallbackError: fmsg,
-
+        // Try random nudge as last-resort beat
+        const randomResult = randomBeatNudge();
+        if (randomResult) {
+          return {
+            ...randomResult,
             heartCycle: HEART_CYCLE,
             heartCycleSignature: heartHealing.lastHeartCycleSignature,
             binaryField,
             waveField,
             advantageField,
             aiFallbackSurface,
-            beatSource: "none",
-
             ...HEART_CONTEXT
-          })
+          };
+        }
+
+        return {
+          ok: false,
+          error: msg,
+          fallbackError: fmsg,
+          heartCycle: HEART_CYCLE,
+          heartCycleSignature: heartHealing.lastHeartCycleSignature,
+          binaryField,
+          waveField,
+          advantageField,
+          aiFallbackSurface,
+          beatSource: "none",
+          ...HEART_CONTEXT
         };
       }
     }
 
-    // MOM PULSE DOWN, DAD NOT AVAILABLE
-    heartHealing.lastError = { message: msg, stage: "mom_pulse_failed_no_dad" };
+    // MOM DOWN, DAD NOT AVAILABLE → RANDOM LAST-RESORT
+    heartHealing.lastError = {
+      message: msg,
+      stage: "mom_pulse_failed_no_dad"
+    };
     heartHealing.lastExitReason = "fatal_error";
     heartHealing.lastBeatSource = "none";
 
@@ -365,25 +401,34 @@ export const handler = async () => {
       aiHeartbeatAlive: aiFallbackSurface.aiHeartbeatAlive
     });
 
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        ok: false,
-        error: msg,
-
+    const randomResult = randomBeatNudge();
+    if (randomResult) {
+      return {
+        ...randomResult,
         heartCycle: HEART_CYCLE,
         heartCycleSignature: heartHealing.lastHeartCycleSignature,
         binaryField,
         waveField,
         advantageField,
         aiFallbackSurface,
-        beatSource: "none",
-
         ...HEART_CONTEXT
-      })
+      };
+    }
+
+    return {
+      ok: false,
+      error: msg,
+      heartCycle: HEART_CYCLE,
+      heartCycleSignature: heartHealing.lastHeartCycleSignature,
+      binaryField,
+      waveField,
+      advantageField,
+      aiFallbackSurface,
+      beatSource: "none",
+      ...HEART_CONTEXT
     };
   }
-};
+}
 
 // ============================================================================
 // DIAGNOSTICS

@@ -1,12 +1,14 @@
 // ============================================================================
-// PULSE-NET — Immortal Backend Heartbeat + Forward/Backward Engine ignition
-// v14-EVO-IMMORTAL
+// PULSE-NET — Immortal Local Heartbeat + Forward/Backward Engine ignition
+// v15-FAMILY-IMMORTAL
 //  • Multi-instance safe
 //  • Drift-proof
 //  • Dual-lane (forward/backward)
 //  • Shared organism memory
 //  • Exportable engines for Earn
 //  • Deterministic tick sequencing
+//  • 3-heart mesh (Mom/Dad/Earn) + random nudge
+//  • LOCAL ONLY — lives under PULSE-X, NOT a Netlify function
 // ============================================================================
 
 import { createForwardEngine } from "../ForwardEngine.js";
@@ -20,11 +22,19 @@ globalThis.__PULSE_ORGANISM__ = globalThis.__PULSE_ORGANISM__ || {
   forwardTicks: 0,
   backwardTicks: 0,
   lastHeartbeat: 0,
-  lastAIHeartbeat: 0
+  lastAIHeartbeat: 0,
+  lastBeatSource: "none"
+};
+
+// Local PULSE-NET runtime state
+globalThis.__PULSE_NET__ = globalThis.__PULSE_NET__ || {
+  started: false,
+  intervalId: null,
+  lastTick: 0
 };
 
 // ============================================================================
-// ENGINE SINGLETONS (per cold start OR per import in Earn)
+// ENGINE SINGLETONS (per import in Earn / PULSE-X)
 // ============================================================================
 let forwardEngine = null;
 let backwardEngine = null;
@@ -58,7 +68,7 @@ function getForwardEngine() {
     BinaryOrgan,
     MemoryOrgan,
     BrainOrgan,
-    instanceId: "forward-netlify",
+    instanceId: "forward-local",
     trace: true
   });
 
@@ -73,7 +83,7 @@ function getBackwardEngine() {
     BinaryOrgan,
     MemoryOrgan,
     BrainOrgan,
-    instanceId: "backward-netlify",
+    instanceId: "backward-local",
     trace: true
   });
 
@@ -84,91 +94,165 @@ function getBackwardEngine() {
 // ============================================================================
 // HEARTBEAT HELPERS
 // ============================================================================
-async function getHeartbeatState() {
+function getHeartbeatState() {
   return { last: globalThis.__PULSE_ORGANISM__.lastHeartbeat };
 }
 
-async function updateHeartbeatState(ts) {
+function updateHeartbeatState(ts) {
   globalThis.__PULSE_ORGANISM__.lastHeartbeat = ts;
-  console.log("Heartbeat updated:", ts);
+  console.log("[PULSE-NET] Heartbeat updated:", ts);
 }
 
-async function runOrganismHeartbeat() {
-  globalThis.__PULSE_ORGANISM__.lastHeartbeat = Date.now();
-  console.log("Organism heartbeat triggered");
+function runOrganismHeartbeat(source) {
+  const now = Date.now();
+  globalThis.__PULSE_ORGANISM__.lastHeartbeat = now;
+  globalThis.__PULSE_ORGANISM__.lastBeatSource = source;
+  console.log("[PULSE-NET] Organism heartbeat:", source, now);
 }
 
-async function runAIHeartbeat() {
-  globalThis.__PULSE_ORGANISM__.lastAIHeartbeat = Date.now();
-  console.log("AI heartbeat triggered");
+function runAIHeartbeat(source) {
+  const now = Date.now();
+  globalThis.__PULSE_ORGANISM__.lastAIHeartbeat = now;
+  console.log("[PULSE-NET] AI heartbeat:", source, now);
 }
 
 // ============================================================================
 // ENGINE TICK HELPERS
 // ============================================================================
-async function warmForwardEngine() {
+function warmForwardEngine() {
   const engine = getForwardEngine();
   const result = engine.tick();
 
   globalThis.__PULSE_ORGANISM__.forwardTicks++;
-
   console.log("[PULSE-NET] ForwardEngine tick:", result.metrics);
   return result.metrics;
 }
 
-async function warmBackwardEngine() {
+function warmBackwardEngine() {
   const engine = getBackwardEngine();
   const result = engine.tick();
 
   globalThis.__PULSE_ORGANISM__.backwardTicks++;
-
   console.log("[PULSE-NET] BackwardEngine tick:", result.metrics);
   return result.metrics;
 }
 
 // ============================================================================
-// NETLIFY HANDLER (IMMORTAL ORGANISM LOOP)
+// 3-HEART MESH (Mom / Dad / Earn) + random nudge
 // ============================================================================
-export const handler = async () => {
-  try {
-    const state = await getHeartbeatState();
 
-    const now = Date.now();
-    const last = state?.last || 0;
-    const stale = now - last > 90 * 1000;
+// Mom Heart — primary beat: forward engine + organism heartbeat
+function momHeart(now) {
+  runOrganismHeartbeat("mom");
+  const forwardMetrics = warmForwardEngine();
+  return { source: "mom", forward: forwardMetrics };
+}
 
-    if (stale) {
-      await runOrganismHeartbeat();
-      await runAIHeartbeat();
-      await updateHeartbeatState(now);
-    }
+// Dad Heart — fallback beat: backward engine + AI heartbeat
+function dadHeart(now) {
+  runAIHeartbeat("dad");
+  const backwardMetrics = warmBackwardEngine();
+  return { source: "dad", backward: backwardMetrics };
+}
 
-    const forwardMetrics = await warmForwardEngine();
-    const backwardMetrics = await warmBackwardEngine();
-
+// Earn Heart — tertiary beat: both engines if stale, light touch if not
+function earnHeart(now, stale) {
+  if (stale) {
+    runOrganismHeartbeat("earn-stale");
+    runAIHeartbeat("earn-stale");
+    const forwardMetrics = warmForwardEngine();
+    const backwardMetrics = warmBackwardEngine();
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        ok: true,
-        stale,
-        last,
-        now,
-        forward: forwardMetrics,
-        backward: backwardMetrics,
-        organism: globalThis.__PULSE_ORGANISM__
-      })
+      source: "earn-stale",
+      forward: forwardMetrics,
+      backward: backwardMetrics
     };
-
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
-    };
+  } else {
+    // light nudge: just ensure organism time moves
+    runOrganismHeartbeat("earn-soft");
+    return { source: "earn-soft" };
   }
-};
+}
+
+// Random nudge — probabilistic extra push
+function randomNudge(now) {
+  if (Math.random() > 0.97) {
+    runOrganismHeartbeat("random");
+    console.log("[PULSE-NET] Random nudge beat");
+    return { source: "random" };
+  }
+  return null;
+}
 
 // ============================================================================
-// EXPORT ENGINES FOR EARN PAGE (SHARED ORGANISM)
+// LOCAL IMMORTAL LOOP (NO NETLIFY, NO HANDLER)
+// ============================================================================
+
+function tickFamily() {
+  const now = Date.now();
+  const { last } = getHeartbeatState();
+  const delta = now - (last || 0);
+
+  const stale = delta > 90 * 1000;      // organism stale
+  const softStale = delta > 15 * 1000;  // soft fallback threshold
+
+  let result = null;
+
+  // 1) Mom tries first (primary beat)
+  if (!stale) {
+    result = momHeart(now);
+  } else {
+    console.log("[PULSE-NET] Mom stale, escalating to Dad/Earn");
+  }
+
+  // 2) If Mom is stale or soft-stale, let Dad step in
+  if (!result || softStale) {
+    const dadResult = dadHeart(now);
+    result = { ...(result || {}), ...dadResult };
+  }
+
+  // 3) If fully stale, Earn does a heavy rescue beat
+  if (stale) {
+    const earnResult = earnHeart(now, true);
+    result = { ...(result || {}), ...earnResult };
+  } else {
+    // non-stale: Earn does a soft continuity beat
+    const earnResult = earnHeart(now, false);
+    result = { ...(result || {}), ...earnResult };
+  }
+
+  // 4) Random nudge as extra beat source
+  const rnd = randomNudge(now);
+  if (rnd) {
+    result = { ...(result || {}), ...rnd };
+  }
+
+  globalThis.__PULSE_NET__.lastTick = now;
+  return result;
+}
+
+// Start the local immortal loop (idempotent)
+export function startPulseNet(intervalMs = 1000) {
+  const state = globalThis.__PULSE_NET__;
+  if (state.started) {
+    console.log("[PULSE-NET] Already started");
+    return;
+  }
+
+  state.started = true;
+  state.intervalId = setInterval(() => {
+    try {
+      tickFamily();
+    } catch (err) {
+      console.error("[PULSE-NET] Tick error:", err);
+    }
+  }, intervalMs);
+
+  console.log("[PULSE-NET] Local immortal family loop started @", intervalMs, "ms");
+}
+
+// ============================================================================
+// EXPORT ENGINES + ORGANISM FOR EARN / OTHER ORGANS
 // ============================================================================
 export function PulseNetForward() {
   return getForwardEngine();

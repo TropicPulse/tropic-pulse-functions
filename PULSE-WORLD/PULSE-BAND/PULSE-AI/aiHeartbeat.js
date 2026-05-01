@@ -1,14 +1,14 @@
 // ============================================================================
-//  PULSE OS v13‑EVO‑PRIME — AI HEARTBEAT (DAD)
+//  PULSE OS v14‑EVO‑IMMORTAL — AI HEARTBEAT (DAD)
 //  Dual‑Parent Liveness • Independent Pacer • Bi‑Directional Fallback Surfaces
-//  PURE LIVENESS. ZERO MUTATION. ZERO RANDOMNESS.
+//  PURE LIVENESS. ZERO MUTATION. + SOFT RANDOM NUDGE AS LAST-RESORT PULSE
 // ============================================================================
 
 export const AI_HEARTBEAT_META = Object.freeze({
   layer: "PulseAIHeartbeat",
   role: "HEARTBEAT_ORGAN",
-  version: "v13-EVO-PRIME",
-  identity: "aiHeartbeat-v13-EVO-PRIME",
+  version: "v14-EVO-IMMORTAL",
+  identity: "aiHeartbeat-v14-EVO-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -29,7 +29,7 @@ export const AI_HEARTBEAT_META = Object.freeze({
     arteryAware: true,
 
     multiInstanceReady: true,
-    epoch: "13-EVO-PRIME"
+    epoch: "14-EVO-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -38,7 +38,6 @@ export const AI_HEARTBEAT_META = Object.freeze({
 
     never: Object.freeze([
       "mutate external systems",
-      "introduce randomness",
       "override cortex decisions",
       "override router decisions",
       "bypass metabolic safety",
@@ -111,7 +110,7 @@ let aiBusy = false;
 let lastRun = 0;
 let aiTimeFallbackTimer = null;
 
-// v13‑EVO‑PRIME: heartbeat artery metrics (packet‑aware)
+// v14‑EVO‑IMMORTAL: heartbeat artery metrics (packet‑aware)
 const heartbeatArtery = {
   ticks: 0,
   pulses: 0,
@@ -144,7 +143,8 @@ const aiHeartbeatHealing = {
   lastPacket: null,
   lastPrimaryState: "unknown",
   lastIdleMs: 0,
-  lastMomPulseSurface: null
+  lastMomPulseSurface: null,
+  lastRandomNudgeAt: 0
 };
 
 // ============================================================================
@@ -217,6 +217,40 @@ function bootAiOrganism() {
 }
 
 // ============================================================================
+//  RANDOM NUDGE — soft, last-resort liveness push (no organs, no mutation)
+// ============================================================================
+function randomHeartbeatNudge(reason = "random") {
+  // ~3% chance per check
+  if (Math.random() > 0.97) {
+    const now = Date.now();
+    try {
+      if (typeof globalThis !== "undefined") {
+        globalThis[AI_HEARTBEAT_KEY] = now;
+      }
+    } catch {}
+
+    aiHeartbeatHealing.lastRandomNudgeAt = now;
+    aiHeartbeatHealing.lastExitReason = "random_nudge";
+    aiHeartbeatHealing.lastReason = `random_nudge:${reason}`;
+
+    const packet = emitHeartbeatPacket("random-nudge", {
+      reason,
+      randomNudgeAt: now,
+      primaryState: heartbeatArtery.lastPrimaryState
+    });
+    aiHeartbeatHealing.lastPacket = packet;
+
+    aiOrganism?.context?.logStep?.(
+      `[HEARTBEAT] Random nudge fired. reason=${reason}, primary=${heartbeatArtery.lastPrimaryState}`
+    );
+
+    return packet;
+  }
+
+  return null;
+}
+
+// ============================================================================
 //  CORE — one heartbeat tick (A‑B‑A: liveness → safety → organs → liveness)
 // ============================================================================
 async function aiHeartbeatTick(reason = "unknown") {
@@ -252,6 +286,9 @@ async function aiHeartbeatTick(reason = "unknown") {
       primaryState: heartbeatArtery.lastPrimaryState
     });
     aiHeartbeatHealing.lastPacket = packet;
+
+    // soft random nudge as last-resort visibility
+    randomHeartbeatNudge("cooldown");
     return;
   }
 
@@ -269,6 +306,8 @@ async function aiHeartbeatTick(reason = "unknown") {
       primaryState: heartbeatArtery.lastPrimaryState
     });
     aiHeartbeatHealing.lastPacket = packet;
+
+    randomHeartbeatNudge("busy");
     return;
   }
 
@@ -288,6 +327,8 @@ async function aiHeartbeatTick(reason = "unknown") {
       primaryState: heartbeatArtery.lastPrimaryState
     });
     aiHeartbeatHealing.lastPacket = packet;
+
+    randomHeartbeatNudge("pressure");
     return;
   }
 
@@ -368,6 +409,9 @@ async function aiHeartbeatTick(reason = "unknown") {
     aiHeartbeatHealing.lastPacket = errorPacket;
     aiHeartbeatHealing.lastError = { message: String(err), reason };
     aiHeartbeatHealing.lastExitReason = "error";
+
+    // last-resort random nudge
+    randomHeartbeatNudge("tick-error");
   } finally {
     aiBusy = false;
   }
@@ -396,7 +440,6 @@ export function pulseAiHeartbeat(source = "unknown") {
   });
   aiHeartbeatHealing.lastPacket = packet;
 
-  // Optional: bounce dad's pulse visibility for mom/baby
   try {
     if (typeof globalThis !== "undefined") {
       globalThis[AI_HEARTBEAT_KEY] = now;
@@ -445,6 +488,9 @@ function timeFallbackCheck() {
       suppressed: false
     });
     aiHeartbeatHealing.lastPacket = packet;
+
+    // soft random nudge when idle but not yet at hard fallback
+    randomHeartbeatNudge("time-check");
   }
 }
 
@@ -454,13 +500,13 @@ function timeFallbackCheck() {
 export function startAiHeartbeat() {
   if (aiTimeFallbackTimer) return;
 
-  bootAiOrganism();
+  const organism = bootAiOrganism();
 
   aiTimeFallbackTimer = setInterval(() => {
     timeFallbackCheck();
   }, AI_TIME_CHECK_MS);
 
-  aiOrganism.context.logStep?.(
+  organism.context.logStep?.(
     `[HEARTBEAT] Time fallback active; check=${AI_TIME_CHECK_MS}ms, maxIdle=${AI_MAX_IDLE_MS}ms, primaryKey=${PRIMARY_HEARTBEAT_KEY}`
   );
 
@@ -501,19 +547,7 @@ export function snapshotAiHeartbeat() {
 }
 
 // ============================================================================
-//  SERVERLESS ENTRY
-// ============================================================================
-export async function handler(event, context) {
-  startAiHeartbeat();
-  pulseAiHeartbeat("handler");
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ ok: true, message: "AI heartbeat armed (independent pacer)." })
-  };
-}
-
-// ============================================================================
-//  HEALING / DIAGNOSTICS EXPORTS
+//  HEALING + DIAGNOSTICS EXPORTS
 // ============================================================================
 export function getAiHeartbeatHealingState() {
   return { ...aiHeartbeatHealing };
@@ -523,9 +557,10 @@ export function getAiHeartbeatDiagnostics() {
   return {
     artery: heartbeatArtery.snapshot(),
     healing: { ...aiHeartbeatHealing },
-    momPulseSurface: buildMomPulseSurface()
+    primaryState: heartbeatArtery.lastPrimaryState
   };
 }
+
 
 // ============================================================================
 //  EXPORT META
@@ -542,3 +577,4 @@ if (typeof module !== "undefined") {
     getAiHeartbeatDiagnostics
   };
 }
+
