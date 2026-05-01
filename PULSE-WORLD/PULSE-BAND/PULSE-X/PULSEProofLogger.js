@@ -3,7 +3,7 @@
 //  PROOF LOGGER • AI CONSOLE EXTENSION • OFFLINE-FIRST TELEMETRY
 // ============================================================================
 console.log("Logger");
-import { route } from "./PULSE-OS/PulseOSCNSNervousSystem.js";
+import { route } from "../PULSE-OS/PulseOSCNSNervousSystem.js";
 
 // Capture original console to avoid recursion
 const _c = { ...console };
