@@ -23,8 +23,18 @@ const g =
     : {};
 
 function isBrowser() {
-  return typeof window !== "undefined" && typeof document !== "undefined";
+  return (
+    typeof window !== "undefined" &&
+    typeof document !== "undefined" &&
+    typeof navigator !== "undefined" &&
+    window === window.window &&            // must be a real Window
+    document.nodeType === 9 &&             // must be a real DOM Document
+    typeof window.requestAnimationFrame === "function" && // browser-only API
+    !window.process &&                     // blocks Node-injected globals
+    !navigator.userAgent.includes("Node")  // blocks Node UA spoofing
+  );
 }
+
 
 // ============================================================================
 // SURFACE ENVIRONMENT SNAPSHOT
