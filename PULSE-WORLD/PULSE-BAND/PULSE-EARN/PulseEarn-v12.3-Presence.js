@@ -33,14 +33,27 @@ import PulseEarnMktAmbassador     from "./PulseEarnMktAmbassador.js";
 import PulseEarnMktBroker         from "./PulseEarnMktBroker.js";
 import PulseEarnMktCourier        from "./PulseEarnMktCourier.js";
 import PulseEarnMktForager        from "./PulseEarnMktForager.js";
-import { PulseNetForward, PulseNetBackward } from "../PULSE-NET.js";
 
-const forward = PulseNetForward();
-const backward = PulseNetBackward();
+// --- PULSE-NET ORGANISM BRIDGE (v15-FAMILY-IMMORTAL) -----------------------
+import {
+  startPulseNet,
+  PulseNetForward,
+  PulseNetBackward,
+  PulseNetOrganism
+} from "../PULSE-ENGINE/PULSE-NET.js";
 
-forward.tick();
-backward.tick();
+// IMMORTAL: no top-level ticking, no time-based math here.
+// We only expose structural accessors to the running PULSE-NET organism.
+// Host code (not this file) may call startPulseNet(intervalMs) if desired.
+const PulseNet = Object.freeze({
+  forwardEngine: () => PulseNetForward(),
+  backwardEngine: () => PulseNetBackward(),
+  organism: () => PulseNetOrganism()
+});
 
+// ============================================================================
+//  EarnMeta — static contract + guarantees
+// ============================================================================
 export const EarnMeta = Object.freeze({
   layer: "PulseEarn",
   role: "EARN_ORGAN",
@@ -120,7 +133,6 @@ export const EarnMeta = Object.freeze({
   })
 });
 
-
 // ============================================================================
 //  DUAL-BAND CONSTANTS (symbolic + binary)
 // ============================================================================
@@ -133,7 +145,6 @@ function normalizeBand(band) {
   const b = (band || ROUTE_BANDS.SYMBOLIC).toLowerCase();
   return b === ROUTE_BANDS.BINARY ? ROUTE_BANDS.BINARY : ROUTE_BANDS.SYMBOLIC;
 }
-
 
 // ============================================================================
 //  EarnRole — identifies this as the Earn v13 IMMORTAL Organism
@@ -207,7 +218,6 @@ export const EarnRole = {
   minerContract: "PulseMiner-v13.0-PRESENCE-IMMORTAL",
   pulseCompatibility: "Pulse-v1/v2/v3"
 };
-
 
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
@@ -354,7 +364,6 @@ function deriveFactoringSignalFromContext({
   return 0;
 }
 
-
 // ============================================================================
 //  LOOP THEORY / WAVE THEORY / MEMORY SURFACES (pure, structural)
 // ============================================================================
@@ -421,7 +430,6 @@ function buildBinaryField(pattern, lineage) {
   };
 }
 
-
 // ============================================================================
 //  PRESENCE / ADVANTAGE FIELDS (v13 IMMORTAL)
 // ============================================================================
@@ -435,7 +443,10 @@ function buildPresenceField({
   routerPresence = "unknown",
   castleLoadLevel = "unknown"
 } = {}) {
-  const pressure = (Number(meshPressureIndex) || 0) + (castleLoadLevel === "unknown" ? 0 : Number(castleLoadLevel) || 0);
+  const pressure =
+    (Number(meshPressureIndex) || 0) +
+    (castleLoadLevel === "unknown" ? 0 : Number(castleLoadLevel) || 0);
+
   let presenceTier = "idle";
   if (pressure >= 150) presenceTier = "critical";
   else if (pressure >= 100) presenceTier = "high";
@@ -487,7 +498,6 @@ function buildAdvantageField({
     serverBinaryReuse
   });
 }
-
 
 // ============================================================================
 //  FACTORY — Create an Earn v13 Presence-IMMORTAL Organism (dual-band)
@@ -562,6 +572,24 @@ export function createEarn({
           shiftDepth: null
         };
 
+  // PULSE-NET organism snapshot — structural, descriptive-only
+  const netOrganism = PulseNet.organism?.() ?? null;
+  const netField = netOrganism
+    ? {
+        lastHeartbeat: netOrganism.lastHeartbeat ?? 0,
+        lastAIHeartbeat: netOrganism.lastAIHeartbeat ?? 0,
+        forwardTicks: netOrganism.forwardTicks ?? 0,
+        backwardTicks: netOrganism.backwardTicks ?? 0,
+        lastBeatSource: netOrganism.lastBeatSource ?? "none"
+      }
+    : {
+        lastHeartbeat: 0,
+        lastAIHeartbeat: 0,
+        forwardTicks: 0,
+        backwardTicks: 0,
+        lastBeatSource: "none"
+      };
+
   const earnPresenceField = buildPresenceField({
     regionId: pf.regionId,
     castleId: pf.castleId,
@@ -605,6 +633,8 @@ export function createEarn({
       ...earnAdvantageField
     },
 
+    netField, // PULSE-NET organism snapshot
+
     meta: {
       shapeSignature,
       evolutionStage,
@@ -623,8 +653,12 @@ export function createEarn({
       memorySurface,
       binaryField,
 
+      netField, // mirrored for diagnostics
+
       // v11/v12/v13 signatures
-      earnSignature: computeHash(pattern + "::" + lineageSignature + "::" + normalizedBand),
+      earnSignature: computeHash(
+        pattern + "::" + lineageSignature + "::" + normalizedBand
+      ),
       patternSignature: computeHash(pattern),
       lineageSurface: computeHash(String(lineage.length)),
       advantageSignature: computeHash(JSON.stringify(advantageFieldCore)),
@@ -649,7 +683,6 @@ export function createEarn({
     }
   };
 }
-
 
 // ============================================================================
 //  EVOLUTION ENGINE — evolve an existing Earn deterministically (dual-band)
@@ -706,7 +739,9 @@ export function evolveEarn(earn, context = {}) {
   const gh = context.globalHints || null;
   const serverHints = context.serverAdvantageHints || null;
 
-  const cachePriority = normalizeCachePriority(gh?.cacheHints?.priority ?? adv.cachePriority);
+  const cachePriority = normalizeCachePriority(
+    gh?.cacheHints?.priority ?? adv.cachePriority
+  );
   const prewarmNeeded = gh?.prewarmHints?.shouldPrewarm ?? adv.prewarmNeeded;
   const meshPressureIndex = mesh?.meshPressureIndex ?? pf.meshPressureIndex ?? 0;
 
@@ -741,6 +776,24 @@ export function evolveEarn(earn, context = {}) {
     serverBinaryReuse: serverHints?.binaryReuse ?? adv.serverBinaryReuse ?? true
   });
 
+  // PULSE-NET organism snapshot — structural, descriptive-only
+  const netOrganism = PulseNet.organism?.() ?? null;
+  const netField = netOrganism
+    ? {
+        lastHeartbeat: netOrganism.lastHeartbeat ?? 0,
+        lastAIHeartbeat: netOrganism.lastAIHeartbeat ?? 0,
+        forwardTicks: netOrganism.forwardTicks ?? 0,
+        backwardTicks: netOrganism.backwardTicks ?? 0,
+        lastBeatSource: netOrganism.lastBeatSource ?? "none"
+      }
+    : {
+        lastHeartbeat: 0,
+        lastAIHeartbeat: 0,
+        forwardTicks: 0,
+        backwardTicks: 0,
+        lastBeatSource: "none"
+      };
+
   return {
     EarnRole,
     jobId: earn.jobId,
@@ -760,6 +813,8 @@ export function evolveEarn(earn, context = {}) {
       ...nextAdvantageField
     },
 
+    netField,
+
     meta: {
       shapeSignature,
       evolutionStage,
@@ -778,7 +833,11 @@ export function evolveEarn(earn, context = {}) {
       memorySurface,
       binaryField,
 
-      earnSignature: computeHash(nextPattern + "::" + lineageSignature + "::" + normalizedBand),
+      netField,
+
+      earnSignature: computeHash(
+        nextPattern + "::" + lineageSignature + "::" + normalizedBand
+      ),
       patternSignature: computeHash(nextPattern),
       lineageSurface: computeHash(String(nextLineage.length)),
       advantageSignature: computeHash(JSON.stringify(advantageFieldCore)),
@@ -803,7 +862,6 @@ export function evolveEarn(earn, context = {}) {
     }
   };
 }
-
 
 // ============================================================================
 //  COHORT / WAVE EVOLUTION — multi-instance evolution surfaces (presence-aware)

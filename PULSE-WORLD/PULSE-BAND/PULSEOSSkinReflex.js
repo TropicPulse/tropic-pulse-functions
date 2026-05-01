@@ -15,7 +15,7 @@
 //   • ZERO interference with A1 timing/state rules
 // ============================================================================
 console.log("Skin Reflex");
-import PulseUIErrors from "../PULSE-UI/PulseUIErrors-v12-EVO.js";
+import PulseUIErrors from "./PULSE-UI/PulseUIErrors-v12-EVO.js";
 
 export const PageScannerV12 = Object.freeze({
 

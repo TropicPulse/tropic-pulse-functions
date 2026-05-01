@@ -11,8 +11,8 @@
 //  • LOCAL ONLY — lives under PULSE-X, NOT a Netlify function
 // ============================================================================
 
-import { createForwardEngine } from "./PULSE-ENGINE/ForwardEngine.js";
-import { createBackwardEngine } from "./PULSE-ENGINE/BackwardEngine.js";
+import { createForwardEngine } from "./ForwardEngine.js";
+import { createBackwardEngine } from "./BackwardEngine.js";
 
 // ============================================================================
 // GLOBAL ORGANISM MEMORY (shared across all imports)
