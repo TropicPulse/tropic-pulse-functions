@@ -10,7 +10,7 @@
 //  • No randomness.
 //  • No timestamps in math (only telemetry if desired).
 //  • Pure deterministic string/shape operations.
-//  • Zero mutation outside instance.
+//  • Zero mutation outside instance (CoreMemory writes are structural, keyed, deterministic).
 //  • Band-aware, but band is metadata-only (no behavioral non-determinism).
 //  • All “memory” is structural (derived from inputs), not temporal.
 //  • Presence/mesh/castle/expansion/globalHints are metadata surfaces only.
@@ -42,6 +42,12 @@ import {
   PulseNetOrganism
 } from "../PULSE-ENGINE/PULSE-NET.js";
 
+// --- PULSE-CORE MEMORY SPINE (FULL SPINE) ----------------------------------
+import PulseCoreMemory                from "../PULSE-CORE/PulseCoreMemory.js";
+import PulseCoreAIMemoryAdapter      from "../PULSE-CORE/PulseCoreAIMemoryAdapter.js";
+import PulseCoreEarnMemoryAdapter     from "../PULSE-CORE/PulseCoreEarnMemoryAdapter.js";
+import PulseBinaryCoreOverlay         from "../PULSE-CORE/PulseBinaryCoreOverlay.js";
+
 // IMMORTAL: no top-level ticking, no time-based math here.
 // We only expose structural accessors to the running PULSE-NET organism.
 // Host code (not this file) may call startPulseNet(intervalMs) if desired.
@@ -49,6 +55,14 @@ const PulseNet = Object.freeze({
   forwardEngine: () => PulseNetForward(),
   backwardEngine: () => PulseNetBackward(),
   organism: () => PulseNetOrganism()
+});
+
+// CoreMemory bridge: structural, deterministic, keyed by memory surfaces.
+const CoreMemory = Object.freeze({
+  raw: () => PulseCoreMemory,
+  all: () => PulseCoreAIMemoryAdapter,
+  earn: () => PulseCoreEarnMemoryAdapter,
+  binaryOverlay: () => PulseBinaryCoreOverlay
 });
 
 // ============================================================================
@@ -431,6 +445,64 @@ function buildBinaryField(pattern, lineage) {
 }
 
 // ============================================================================
+//  CORE MEMORY FIELD (FULL SPINE) — structural, keyed, deterministic
+// ============================================================================
+function buildCoreMemoryField({
+  pattern,
+  lineage,
+  pageId,
+  band,
+  memorySurface,
+  binaryField
+}) {
+  const normalizedBand = normalizeBand(band);
+
+  return {
+    coreMemoryVersion: "v13.0-PRESENCE-IMMORTAL",
+    band: normalizedBand,
+    pattern,
+    lineage,
+    pageId,
+    memoryKey: memorySurface.memoryKey,
+    ancestry: memorySurface.ancestry,
+    lineageSignature: memorySurface.lineageSignature,
+    pageSignature: memorySurface.pageSignature,
+    binaryShapeSignature: binaryField.binaryShapeSignature,
+    binarySurfaceSignature: binaryField.binarySurfaceSignature,
+    binarySurface: binaryField.binarySurface,
+    parity: binaryField.parity,
+    bitDensity: binaryField.bitDensity,
+    shiftDepth: binaryField.shiftDepth
+  };
+}
+
+// Structural read from CoreMemory via Earn adapter (if present).
+function readCoreMemoryEarn(memoryKey) {
+  try {
+    const earnAdapter = CoreMemory.earn?.();
+    if (!earnAdapter || typeof earnAdapter.readEarnMemory !== "function") {
+      return null;
+    }
+    return earnAdapter.readEarnMemory(memoryKey);
+  } catch {
+    return null;
+  }
+}
+
+// Structural write to CoreMemory via Earn adapter (if present).
+function writeCoreMemoryEarn(memoryKey, coreMemoryField) {
+  try {
+    const earnAdapter = CoreMemory.earn?.();
+    if (!earnAdapter || typeof earnAdapter.writeEarnMemory !== "function") {
+      return;
+    }
+    earnAdapter.writeEarnMemory(memoryKey, coreMemoryField);
+  } catch {
+    // IMMORTAL: swallow, no side-effects on failure path.
+  }
+}
+
+// ============================================================================
 //  PRESENCE / ADVANTAGE FIELDS (v13 IMMORTAL)
 // ============================================================================
 function buildPresenceField({
@@ -572,6 +644,19 @@ export function createEarn({
           shiftDepth: null
         };
 
+  // CoreMemory full spine field
+  const coreMemoryField = buildCoreMemoryField({
+    pattern,
+    lineage,
+    pageId,
+    band: normalizedBand,
+    memorySurface,
+    binaryField
+  });
+
+  // Structural read from CoreMemory (if any prior Earn state exists)
+  const priorCoreMemory = readCoreMemoryEarn(coreMemoryField.memoryKey);
+
   // PULSE-NET organism snapshot — structural, descriptive-only
   const netOrganism = PulseNet.organism?.() ?? null;
   const netField = netOrganism
@@ -614,7 +699,7 @@ export function createEarn({
     serverBinaryReuse: serverHints.binaryReuse ?? true
   });
 
-  return {
+  const earnObject = {
     EarnRole,
     jobId,
     pattern,
@@ -633,7 +718,9 @@ export function createEarn({
       ...earnAdvantageField
     },
 
-    netField, // PULSE-NET organism snapshot
+    netField,          // PULSE-NET organism snapshot
+    coreMemoryField,   // CoreMemory full spine field
+    priorCoreMemory,   // Any prior stored Earn memory for this key
 
     meta: {
       shapeSignature,
@@ -653,7 +740,9 @@ export function createEarn({
       memorySurface,
       binaryField,
 
-      netField, // mirrored for diagnostics
+      netField,
+      coreMemoryField,
+      priorCoreMemory,
 
       // v11/v12/v13 signatures
       earnSignature: computeHash(
@@ -682,6 +771,11 @@ export function createEarn({
       }
     }
   };
+
+  // Structural write of Earn state into CoreMemory via Earn adapter.
+  writeCoreMemoryEarn(coreMemoryField.memoryKey, earnObject.coreMemoryField);
+
+  return earnObject;
 }
 
 // ============================================================================
@@ -776,6 +870,19 @@ export function evolveEarn(earn, context = {}) {
     serverBinaryReuse: serverHints?.binaryReuse ?? adv.serverBinaryReuse ?? true
   });
 
+  // CoreMemory full spine field for evolved Earn
+  const coreMemoryField = buildCoreMemoryField({
+    pattern: nextPattern,
+    lineage: nextLineage,
+    pageId,
+    band: normalizedBand,
+    memorySurface,
+    binaryField
+  });
+
+  // Structural read from CoreMemory for evolved key
+  const priorCoreMemory = readCoreMemoryEarn(coreMemoryField.memoryKey);
+
   // PULSE-NET organism snapshot — structural, descriptive-only
   const netOrganism = PulseNet.organism?.() ?? null;
   const netField = netOrganism
@@ -794,7 +901,7 @@ export function evolveEarn(earn, context = {}) {
         lastBeatSource: "none"
       };
 
-  return {
+  const evolved = {
     EarnRole,
     jobId: earn.jobId,
     pattern: nextPattern,
@@ -814,6 +921,8 @@ export function evolveEarn(earn, context = {}) {
     },
 
     netField,
+    coreMemoryField,
+    priorCoreMemory,
 
     meta: {
       shapeSignature,
@@ -834,6 +943,8 @@ export function evolveEarn(earn, context = {}) {
       binaryField,
 
       netField,
+      coreMemoryField,
+      priorCoreMemory,
 
       earnSignature: computeHash(
         nextPattern + "::" + lineageSignature + "::" + normalizedBand
@@ -861,6 +972,11 @@ export function evolveEarn(earn, context = {}) {
       }
     }
   };
+
+  // Structural write of evolved Earn state into CoreMemory via Earn adapter.
+  writeCoreMemoryEarn(coreMemoryField.memoryKey, evolved.coreMemoryField);
+
+  return evolved;
 }
 
 // ============================================================================
