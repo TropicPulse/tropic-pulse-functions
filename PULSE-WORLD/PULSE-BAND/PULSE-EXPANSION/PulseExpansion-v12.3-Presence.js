@@ -4,7 +4,7 @@
 //  Every‑Advantage / Regioning‑Physics‑Aware / Beacon‑Aware / OS‑Aware
 // ============================================================================
 
-import { logger } from "../PULSE-X/PULSEProofLogger.js";
+import { logger } from "../PULSEProofLogger.js";
 import {
   pulseCastle,
   PulseCastleMeta,

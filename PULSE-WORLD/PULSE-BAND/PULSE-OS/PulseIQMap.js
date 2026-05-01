@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
-import { log, warn, error as logError } from "../PULSE-X/PULSEProofLogger.js";
+import { log, warn, error as logError } from "../PULSEProofLogger.js";
 import { bootCortex } from "./PulseOSBrainCortex.js";
 
 // -----------------------------------------------------------------------------
