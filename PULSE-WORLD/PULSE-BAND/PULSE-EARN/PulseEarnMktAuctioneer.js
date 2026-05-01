@@ -378,8 +378,8 @@ function updateVolatility(jobs) {
 export const PulseEarnMktAuctioneer = {
   id: "vast",
   name: "Vast.ai",
-  version: "12.3-PRESENCE-EVO+",
-  lineage: "Auctioneer-Vast-v12.3-PRESENCE-EVO+",
+  version: "14-IMMORTAL",
+  lineage: "Auctioneer-Vast-v14-IMMORTAL",
 
   // -------------------------------------------------------------------------
   // PING — deterministic latency + A‑B‑A + presence surfaces
@@ -391,7 +391,8 @@ export const PulseEarnMktAuctioneer = {
     const latency = VAST_RECEPTOR_DNA.pingLatency;
     const band = normalizeBand(VAST_RECEPTOR_DNA.band);
 
-    const presenceField = buildPresenceField(globalHints);
+    const presenceField = buildPresenceField({ globalHints });
+
     const advantageField = buildAdvantageField(globalHints);
     const hintsField = buildHintsField(globalHints);
     const presenceTier = classifyAuctioneerPresenceTier(presenceField);
@@ -551,7 +552,8 @@ export const PulseEarnMktAuctioneer = {
     healingState.cycleCount++;
 
     const band = normalizeBand(VAST_RECEPTOR_DNA.band);
-    const presenceField = buildPresenceField(globalHints);
+    const presenceField = buildPresenceField({ globalHints });
+
     const advantageField = buildAdvantageField(globalHints);
     const hintsField = buildHintsField(globalHints);
     const presenceTier = classifyAuctioneerPresenceTier(presenceField);
