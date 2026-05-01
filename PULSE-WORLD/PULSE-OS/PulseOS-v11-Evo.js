@@ -37,7 +37,7 @@ import {createPulseMeshEnvironment as PulseMeshPresence} from "../PULSE-MESH/Pul
 // ============================================================================
 // PULSE OS v13-PRESENCE-EVO+ — WORLD BARREL
 // ============================================================================
-import { createPulseExpansion, pulseExpansion, PulseExpansionMeta } from "../PULSE-EXPANSION/PulseExpansion-v12.3-PRESENCE.js";
+import { createPulseExpansion, pulseExpansion, PulseExpansionMeta } from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
 // (optional) direct access if you want to surface them:
 const Expansion = pulseExpansion; // singleton
 const ExpansionMeta = PulseExpansionMeta;
