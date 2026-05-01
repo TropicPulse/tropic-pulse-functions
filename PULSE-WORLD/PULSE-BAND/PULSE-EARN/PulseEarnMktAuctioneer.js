@@ -1,10 +1,10 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-EARN/PulseEarnMktAuctioneer-v12.3-PRESENCE-EVO+.js
-// LAYER: MARKETPLACE AUCTIONEER (v12.3‑PRESENCE‑EVO+ A‑B‑A)
+// FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-EARN/PulseEarnMktAuctioneer-v13.0-PRESENCE-IMMORTAL.js
+// LAYER: MARKETPLACE AUCTIONEER (v13.0‑PRESENCE‑IMMORTAL A‑B‑A)
 // Vast.ai Deterministic Adapter + Presence/Advantage/Hints Surfaces
 // ============================================================================
 //
-// ROLE (v12.3‑PRESENCE‑EVO+ A‑B‑A):
+// ROLE (v13.0‑PRESENCE‑IMMORTAL A‑B‑A):
 //   • Deterministic Vast.ai → Pulse‑Earn adapter.
 //   • Pure receptor phenotype: ping(), fetchJobs(), normalizeJob(), submitResult().
 //   • Emits A‑B‑A bandSignature + binaryField + waveField + presence/advantage/hints.
@@ -16,13 +16,13 @@
 //   • NO network, NO fetch, NO async, NO randomness.
 //   • NEVER mutate external objects.
 //   • Presence/advantage/hints are metadata-only.
-// ============================================================================\
+// ============================================================================
 
 export const PulseEarnMktAuctioneerMeta = Object.freeze({
   layer: "PulseEarnMktAuctioneer",
   role: "EARN_MARKETPLACE_RECEPTOR",
-  version: "v12.3-PRESENCE-EVO+",
-  identity: "PulseEarnMktAuctioneer-v12.3-PRESENCE-EVO+",
+  version: "v13.0-PRESENCE-IMMORTAL",
+  identity: "PulseEarnMktAuctioneer-v13.0-PRESENCE-IMMORTAL",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -67,12 +67,13 @@ export const PulseEarnMktAuctioneerMeta = Object.freeze({
 
   lineage: Object.freeze({
     root: "PulseOS-v11-EVO",
-    parent: "PulseEarn-v12.3-PRESENCE-EVO+",
+    parent: "PulseEarn-v13.0-PRESENCE-IMMORTAL",
     ancestry: [
       "PulseEarnMktAuctioneer-v9",
       "PulseEarnMktAuctioneer-v10",
       "PulseEarnMktAuctioneer-v11",
-      "PulseEarnMktAuctioneer-v11-Evo"
+      "PulseEarnMktAuctioneer-v11-Evo",
+      "PulseEarnMktAuctioneer-v12.3-PRESENCE-EVO+"
     ]
   }),
 
@@ -92,7 +93,7 @@ export const PulseEarnMktAuctioneerMeta = Object.freeze({
 
 
 // ============================================================================
-// Healing Metadata — deterministic receptor log (v12.3‑PRESENCE‑EVO+ A‑B‑A)
+// Healing Metadata — deterministic receptor log (v13.0‑PRESENCE‑IMMORTAL A‑B‑A)
 // ============================================================================
 const healingState = {
   lastPingMs: null,
@@ -107,7 +108,7 @@ const healingState = {
   lastNormalizedJobId: null,
   lastNormalizationError: null,
 
-  lastPayloadVersion: "11-Evo",
+  lastPayloadVersion: "13-IMMORTAL",
   lastJobType: null,
   lastGpuScore: null,
   lastResourceShape: null,
@@ -130,7 +131,7 @@ const healingState = {
   lastBinaryField: null,
   lastWaveField: null,
 
-  // Presence‑EVO+ additions
+  // Presence‑IMMORTAL additions
   lastPresenceField: null,
   lastAdvantageField: null,
   lastHintsField: null,
@@ -141,7 +142,7 @@ const healingState = {
 
 
 // ============================================================================
-// Deterministic Hash Helper — v12.3‑EVO
+// Deterministic Hash Helper — v13‑IMMORTAL
 // ============================================================================
 function computeHash(str) {
   let h = 0;
@@ -159,7 +160,7 @@ function normalizeBand(band) {
 
 
 // ============================================================================
-// Signature Builders — v12.3‑EVO
+// Signature Builders — v13‑IMMORTAL
 // ============================================================================
 function buildPingSignature(latency) {
   return computeHash(`PING::${latency}`);
@@ -256,7 +257,7 @@ function buildWaveField(band, presenceField) {
 
 
 // ============================================================================
-// DETERMINISTIC VAST.AI DNA — v11-Evo baseline
+// DETERMINISTIC VAST.AI DNA — v13‑IMMORTAL baseline
 // ============================================================================
 const VAST_RECEPTOR_DNA = {
   pingLatency: 42,
@@ -282,8 +283,8 @@ const VAST_RECEPTOR_DNA = {
     }
   ],
 
-  version: "11-Evo",
-  lineage: "Auctioneer-Vast-v11-Evo",
+  version: "13-IMMORTAL",
+  lineage: "Auctioneer-Vast-v13-IMMORTAL",
   phenotype: "MarketplaceAuctioneer"
 };
 
@@ -372,14 +373,14 @@ function updateVolatility(jobs) {
 
 
 // ============================================================================
-// AUCTIONEER — Vast.ai Marketplace Adapter (v12.3‑PRESENCE‑EVO+ A‑B‑A)
+// AUCTIONEER — Vast.ai Marketplace Adapter (v13.0‑PRESENCE‑IMMORTAL A‑B‑A)
 // globalHints is optional; if omitted, defaults to {}
 // ============================================================================
 export const PulseEarnMktAuctioneer = {
   id: "vast",
   name: "Vast.ai",
-  version: "14-IMMORTAL",
-  lineage: "Auctioneer-Vast-v14-IMMORTAL",
+  version: "v13-IMMORTAL",
+  lineage: "Auctioneer-Vast-v13-IMMORTAL",
 
   // -------------------------------------------------------------------------
   // PING — deterministic latency + A‑B‑A + presence surfaces
@@ -391,8 +392,7 @@ export const PulseEarnMktAuctioneer = {
     const latency = VAST_RECEPTOR_DNA.pingLatency;
     const band = normalizeBand(VAST_RECEPTOR_DNA.band);
 
-    const presenceField = buildPresenceField({ globalHints });
-
+    const presenceField = buildPresenceField(globalHints);
     const advantageField = buildAdvantageField(globalHints);
     const hintsField = buildHintsField(globalHints);
     const presenceTier = classifyAuctioneerPresenceTier(presenceField);
@@ -546,14 +546,13 @@ export const PulseEarnMktAuctioneer = {
 
   // -------------------------------------------------------------------------
   // SUBMIT RESULT — Vast.ai does NOT accept compute results (presence‑aware)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   submitResult(job, result, globalHints = {}) {
     auctioneerCycle++;
     healingState.cycleCount++;
 
     const band = normalizeBand(VAST_RECEPTOR_DNA.band);
-    const presenceField = buildPresenceField({ globalHints });
-
+    const presenceField = buildPresenceField(globalHints);
     const advantageField = buildAdvantageField(globalHints);
     const hintsField = buildHintsField(globalHints);
     const presenceTier = classifyAuctioneerPresenceTier(presenceField);
@@ -606,23 +605,23 @@ export const PulseEarnMktAuctioneer = {
       auctioneerPresenceProfile,
       binaryProfile,
       waveProfile,
-      note: "Vast.ai does not accept compute results (v12.3-PRESENCE-EVO+ deterministic)."
+      note: "Vast.ai does not accept compute results (v13.0-PRESENCE-IMMORTAL deterministic)."
     };
   },
 
   // -------------------------------------------------------------------------
-  // NORMALIZE JOB — Vast → Pulse‑Earn schema (v14‑IMMORTAL)
+  // NORMALIZE JOB — Vast → Pulse‑Earn schema (v13‑IMMORTAL)
   // Never returns null unless job is truly invalid.
   // Auto-fills missing fields, presence-aware, deterministic.
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
   normalizeJob(raw, globalHints = {}) {
     try {
       // -------------------------------------------------------------
-      // 0. Build presence/advantage/hints surfaces (v14)
+      // 0. Build presence/advantage/hints surfaces (v13)
       // -------------------------------------------------------------
-      const presenceField = buildPresenceField({ globalHints });
-      const advantageField = buildAdvantageField({ globalHints });
-      const hintsField = buildHintsField({ globalHints });
+      const presenceField = buildPresenceField(globalHints);
+      const advantageField = buildAdvantageField(globalHints);
+      const hintsField = buildHintsField(globalHints);
       const presenceTier = classifyAuctioneerPresenceTier(presenceField);
 
       // -------------------------------------------------------------
@@ -659,7 +658,7 @@ export const PulseEarnMktAuctioneer = {
         0;
 
       if (!Number.isFinite(payout) || payout <= 0) {
-        // v14: DO NOT return null — fallback to tiny payout
+        // v13: DO NOT return null — fallback to tiny payout
         healingState.lastNormalizationError = "non_positive_payout_fallback";
       }
 
@@ -667,7 +666,7 @@ export const PulseEarnMktAuctioneer = {
 
       // -------------------------------------------------------------
       // 3. Extract CPU / RAM / GPU / Bandwidth
-      // Vast job shapes vary wildly — v14 normalizer handles all.
+      // Vast job shapes vary wildly — v13 normalizer handles all.
       // -------------------------------------------------------------
       const cpuRequired =
         Number(raw.cpu_cores) ||
@@ -700,7 +699,7 @@ export const PulseEarnMktAuctioneer = {
         5;
 
       // -------------------------------------------------------------
-      // 4. Build normalized job (v14)
+      // 4. Build normalized job (v13)
       // -------------------------------------------------------------
       const normalized = {
         id: String(id),
@@ -714,17 +713,17 @@ export const PulseEarnMktAuctioneer = {
         minGpuScore: gpuScore,
         bandwidthNeededMbps: bandwidth,
 
-        // v14 presence-aware metadata
+        // v13 presence-aware metadata
         presenceField,
         advantageField,
         hintsField,
         presenceTier,
 
-        // v14 meta
+        // v13 meta
         meta: {
           rawSource: "vast",
           rawJob: raw,
-          version: "v14-IMMORTAL",
+          version: "v13-IMMORTAL",
           band: raw.band || raw.meta?.band || "symbolic"
         }
       };
@@ -751,7 +750,7 @@ export const PulseEarnMktAuctioneer = {
 
 
 // ============================================================================
-// HEALING STATE EXPORT — v12.3‑PRESENCE‑EVO+ A‑B‑A
+// HEALING STATE EXPORT — v13.0‑PRESENCE‑IMMORTAL A‑B‑A
 // ============================================================================
 export function getPulseEarnMktAuctioneerHealingState() {
   return { ...healingState };
