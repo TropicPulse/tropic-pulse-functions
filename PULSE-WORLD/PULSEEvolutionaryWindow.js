@@ -3,7 +3,7 @@
 // PULSE EVOLUTIONARY WINDOW — v13-EVO-ALWAYS-ON-OFFLINE-FIRST
 // PORTAL-MEMBRANE • ONE-WAY GLASS • ZERO-TRUST SURFACE • NO ORGANS BEYOND GLASS
 // ============================================================================
-
+console.log("Window");
 import { VitalsMonitor as PulseVitalsMonitor } from "./PulseProofMonitor.js";
 import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
 import { PageScannerV12 as PulseOSSkinReflex } from "./PulseOSSkinReflex.js";

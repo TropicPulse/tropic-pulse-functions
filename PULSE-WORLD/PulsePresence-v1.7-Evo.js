@@ -4,7 +4,7 @@
 //  Chunking • Caching • Prewarm • Zero-Latency Surface
 //  Lore injection • PulseBand integration • Sectional fallback
 // ============================================================================
-
+console.log("Presence");
 console.log("[PulseChunks-v1.7-EVO-FALLBACK] Membrane chunker loading...");
 
 // ============================================================================
