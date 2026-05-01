@@ -103,8 +103,9 @@ function shouldSkipChunk(filePath = "", fileSize = 0) {
 
   // 1. Never chunk firebase-admin (backend-only)
   if (filePath.includes("firebase-admin")) return true;
-  if (filePath.includes("env.js")) return true;
-  if (filePath.includes("cors")) return true;
+  if (filePath.includes("env")) return true;
+  if (filePath.includes("package")) return true;
+  if (filePath.includes("PulseCORS")) return true;
   if (filePath.includes("PulseOSLongTermMemory")) return true;
   if (filePath.includes("index.html")) return true;
 
