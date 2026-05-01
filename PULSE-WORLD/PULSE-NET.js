@@ -364,20 +364,33 @@
  * File: netlify/functions/organismHeartbeat.js
  * Schedule: every 1 minute
  */
+/**
+ * PULSE-NET
+ * Netlify Scheduled Heartbeat Organ
+ * Runs every minute
+ */
 
 export const handler = async () => {
   try {
-    // 1. Check if a heartbeat is already running
-    const heartbeatStatus = await checkHeartbeatStatus();
+    const state = await getHeartbeatState();
 
-    if (!heartbeatStatus?.alive) {
-      // 2. No heartbeat → trigger organism heartbeat
+    const stale =
+      !state?.last ||
+      Date.now() - state.last > 90 * 1000; // stale after 90s
+
+    if (stale) {
       await runOrganismHeartbeat();
+      await runAIHeartbeat();
+      await updateHeartbeatState(Date.now());
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true })
+      body: JSON.stringify({
+        ok: true,
+        stale,
+        last: state?.last || null
+      })
     };
 
   } catch (err) {
@@ -388,16 +401,24 @@ export const handler = async () => {
   }
 };
 
-// ------------------------------
+// --------------------------------------------------
 // INTERNAL HELPERS
-// ------------------------------
+// --------------------------------------------------
 
-async function checkHeartbeatStatus() {
-  // Replace with your DB / Firestore / Redis / KV lookup
-  return { alive: false };
+async function getHeartbeatState() {
+  // Replace with your DB / KV / Firestore / Redis
+  return { last: 0 };
+}
+
+async function updateHeartbeatState(ts) {
+  // Replace with your DB write
+  console.log("Heartbeat updated:", ts);
 }
 
 async function runOrganismHeartbeat() {
-  // Replace with your actual organism heartbeat logic
   console.log("Organism heartbeat triggered");
+}
+
+async function runAIHeartbeat() {
+  console.log("AI heartbeat triggered");
 }
