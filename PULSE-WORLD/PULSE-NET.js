@@ -364,32 +364,121 @@
  * File: netlify/functions/organismHeartbeat.js
  * Schedule: every 1 minute
  */
-/**
- * PULSE-NET
- * Netlify Scheduled Heartbeat Organ
- * Runs every minute
- */
+// ============================================================================
+// PULSE-NET — Immortal Backend Heartbeat + Forward/Backward Engine ignition
+// Fires every minute via Netlify schedule
+// ============================================================================
+
+import { createForwardEngine } from "../ForwardEngine.js";
+import { createBackwardEngine } from "../BackwardEngine.js";
+
+// Singleton per cold start
+let forwardEngine = null;
+let backwardEngine = null;
+
+function getForwardEngine() {
+  if (forwardEngine) return forwardEngine;
+
+  // TODO: replace with real organs
+  const BinaryOrgan = {
+    encode: (v) => JSON.stringify(v),
+    chunk: (s) => [s],
+    dechunk: (chunks) => chunks.join(""),
+    decode: (s) => JSON.parse(s)
+  };
+
+  const MemoryOrgan = {
+    read: (key) => {
+      globalThis.__PULSE_MEM__ = globalThis.__PULSE_MEM__ || {};
+      return globalThis.__PULSE_MEM__[key] ?? null;
+    },
+    write: (key, value) => {
+      globalThis.__PULSE_MEM__ = globalThis.__PULSE_MEM__ || {};
+      globalThis.__PULSE_MEM__[key] = value;
+    }
+  };
+
+  const BrainOrgan = {
+    evolve: (_event) => {}
+  };
+
+  forwardEngine = createForwardEngine({
+    BinaryOrgan,
+    MemoryOrgan,
+    BrainOrgan,
+    instanceId: "forward-netlify",
+    trace: true
+  });
+
+  forwardEngine.prewarm();
+  return forwardEngine;
+}
+
+function getBackwardEngine() {
+  if (backwardEngine) return backwardEngine;
+
+  // TODO: replace with real organs
+  const BinaryOrgan = {
+    encode: (v) => JSON.stringify(v),
+    chunk: (s) => [s],
+    dechunk: (chunks) => chunks.join(""),
+    decode: (s) => JSON.parse(s)
+  };
+
+  const MemoryOrgan = {
+    read: (key) => {
+      globalThis.__PULSE_MEM__ = globalThis.__PULSE_MEM__ || {};
+      return globalThis.__PULSE_MEM__[key] ?? null;
+    },
+    write: (key, value) => {
+      globalThis.__PULSE_MEM__ = globalThis.__PULSE_MEM__ || {};
+      globalThis.__PULSE_MEM__[key] = value;
+    }
+  };
+
+  const BrainOrgan = {
+    evolve: (_event) => {}
+  };
+
+  backwardEngine = createBackwardEngine({
+    BinaryOrgan,
+    MemoryOrgan,
+    BrainOrgan,
+    instanceId: "backward-netlify",
+    trace: true
+  });
+
+  backwardEngine.prewarm();
+  return backwardEngine;
+}
 
 export const handler = async () => {
   try {
     const state = await getHeartbeatState();
 
-    const stale =
-      !state?.last ||
-      Date.now() - state.last > 90 * 1000; // stale after 90s
+    const now = Date.now();
+    const last = state?.last || 0;
+    const stale = now - last > 90 * 1000;
 
     if (stale) {
       await runOrganismHeartbeat();
       await runAIHeartbeat();
-      await updateHeartbeatState(Date.now());
+      await updateHeartbeatState(now);
     }
+
+    // Engines: warm + tick every fire
+    const forwardMetrics = await warmForwardEngine();
+    const backwardMetrics = await warmBackwardEngine();
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         ok: true,
         stale,
-        last: state?.last || null
+        last,
+        now,
+        forward: forwardMetrics,
+        backward: backwardMetrics
       })
     };
 
@@ -406,12 +495,10 @@ export const handler = async () => {
 // --------------------------------------------------
 
 async function getHeartbeatState() {
-  // Replace with your DB / KV / Firestore / Redis
-  return { last: 0 };
+  return { last: 0 }; // TODO: real DB/KV
 }
 
 async function updateHeartbeatState(ts) {
-  // Replace with your DB write
   console.log("Heartbeat updated:", ts);
 }
 
@@ -421,4 +508,28 @@ async function runOrganismHeartbeat() {
 
 async function runAIHeartbeat() {
   console.log("AI heartbeat triggered");
+}
+
+async function warmForwardEngine() {
+  const engine = getForwardEngine();
+  const result = engine.tick();
+  console.log("[PULSE-NET] ForwardEngine tick:", result.metrics);
+  return result.metrics;
+}
+
+async function warmBackwardEngine() {
+  const engine = getBackwardEngine();
+  const result = engine.tick();
+  console.log("[PULSE-NET] BackwardEngine tick:", result.metrics);
+  return result.metrics;
+}
+// --------------------------------------------------
+// EXPORT ENGINES FOR EARN PAGE
+// --------------------------------------------------
+export function PulseNetForward() {
+  return getForwardEngine();
+}
+
+export function PulseNetBackward() {
+  return getBackwardEngine();
 }
