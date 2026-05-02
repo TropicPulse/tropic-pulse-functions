@@ -11,7 +11,7 @@ import { PageScannerV12 as PULSEOSSkinReflex } from "./PULSEOSSkinReflex.js";
 import PulseChunks from "./PulsePresence-v1.7-Evo.js";
 import PulseUnderstanding from "./PulseUnderstanding.js";
 
-import { PulseBinaryOrganismBoot } from "./PulseProofBridge.js";
+import { route, PulseBinaryOrganismBoot } from "./PulseProofBridge.js";
 
 
 import { initUIFlow as PulseUIFlow } from "./PulseUIFlow-v12-EVO.js";
