@@ -2,7 +2,7 @@
 //  PulseProofLogger.js — v13.1-EVO-ALWAYS-ON-OFFLINE-FIRST
 //  PROOF LOGGER • AI CONSOLE EXTENSION • OFFLINE-FIRST TELEMETRY
 // ============================================================================
-console.log("Logger");
+
 
 import { safeRoute as route } from "./PulseProofBridge.js";
 // Capture original console to avoid recursion
