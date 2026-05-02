@@ -521,73 +521,166 @@ function dechunkAll() {
   chunksDegraded = false;
   console.log("[PulseChunks] All chunks cleared, state reset.");
 }
+// ============================================================================
+//  OFFLINE IMAGE AUTO-DETECTOR — v2.1 MULTILANE + CNS FALLBACK
+//  No raw URL fallback. No 404. No flicker. No retries.
+//  Primary: fetchChunk()
+//  Fallback: route("getImages") — CNS-level image fetch
+// ============================================================================
 
-// ============================================================================
-//  OFFLINE IMAGE AUTO-DETECTOR — sequential (no burst collapse)
-// ============================================================================
 async function autoLoadOfflineImages() {
   if (typeof document === "undefined") return;
 
-  const imgs = Array.from(document.querySelectorAll("img.offline-img[data-offline]"));
+  const imgs = Array.from(
+    document.querySelectorAll("img.offline-img[data-offline]")
+  );
 
   for (const img of imgs) {
     const url = img.getAttribute("data-offline");
     if (!url) continue;
 
     try {
+      // Primary: chunk-based image fetch
       const { value, ok, error, envelope } = await fetchChunk(url);
 
       if (!ok) {
-        console.warn("[PulseChunks] Offline image chunk failed, falling back to URL:", {
+        console.warn("[PulseChunks] Offline chunk failed — using CNS fallback:", {
           url,
           error,
           envelope
         });
-        img.src = url;
+
+        // ============================================================
+        //  CNS FALLBACK — getImages route
+        // ============================================================
+        const fallback = await route("getImages", {
+          url,
+          layer: "A1",
+          reflexOrigin: "PulseChunks",
+          binaryAware: true,
+          dualBand: true,
+          presenceAware: true,
+          kind: "image-fallback"
+        });
+
+        if (fallback && fallback.ok && fallback.data) {
+          const unwrapped = PulseChunkNormalizer.unwrap(fallback.data);
+          const binary = PulseChunkNormalizer.normalizeBinary(unwrapped);
+
+          const src =
+            PulseChunkNormalizer.normalizeImage(binary) ||
+            PulseChunkNormalizer.normalizeChunkValue(binary, "image") ||
+            null;
+
+          if (src) {
+            img.src = src;
+            continue;
+          }
+        }
+
+        console.warn("[PulseChunks] CNS fallback failed — leaving image unchanged:", url);
         continue;
       }
 
-      // 1) Fully unwrap DNA → raw payload
+      // ============================================================
+      //  PRIMARY CHUNK → NORMALIZER PIPELINE
+      // ============================================================
       const unwrapped = PulseChunkNormalizer.unwrap(value);
-
-      // 2) Normalize binary → Blob/base64
       const binary = PulseChunkNormalizer.normalizeBinary(unwrapped);
 
-      // 3) Normalize image → usable src
       const src =
         PulseChunkNormalizer.normalizeImage(binary) ||
         PulseChunkNormalizer.normalizeChunkValue(binary, "image") ||
         null;
 
       if (!src) {
-        console.warn("[PulseChunks] Could not normalize image, falling back to URL:", {
+        console.warn("[PulseChunks] Normalizer failed — using CNS fallback:", {
           url,
           value
         });
-        img.src = url;
+
+        // ============================================================
+        //  CNS FALLBACK — getImages route
+        // ============================================================
+        const fallback = await route("getImages", {
+          url,
+          layer: "A1",
+          reflexOrigin: "PulseChunks",
+          binaryAware: true,
+          dualBand: true,
+          presenceAware: true,
+          kind: "image-fallback"
+        });
+
+        if (fallback && fallback.ok && fallback.data) {
+          const unwrapped2 = PulseChunkNormalizer.unwrap(fallback.data);
+          const binary2 = PulseChunkNormalizer.normalizeBinary(unwrapped2);
+
+          const src2 =
+            PulseChunkNormalizer.normalizeImage(binary2) ||
+            PulseChunkNormalizer.normalizeChunkValue(binary2, "image") ||
+            null;
+
+          if (src2) {
+            img.src = src2;
+            continue;
+          }
+        }
+
+        console.warn("[PulseChunks] CNS fallback failed — leaving image unchanged:", url);
         continue;
       }
 
+      // ============================================================
+      //  SUCCESS — APPLY IMAGE
+      // ============================================================
       img.src = src;
 
     } catch (err) {
-      console.warn("[PulseChunks] Offline image load threw, falling back to URL:", url, err);
-      img.src = url;
+      console.warn("[PulseChunks] Offline image load threw — using CNS fallback:", {
+        url,
+        err
+      });
+
+      // ============================================================
+      //  CNS FALLBACK — getImages route
+      // ============================================================
+      try {
+        const fallback = await route("getImages", {
+          url,
+          layer: "A1",
+          reflexOrigin: "PulseChunks",
+          binaryAware: true,
+          dualBand: true,
+          presenceAware: true,
+          kind: "image-fallback"
+        });
+
+        if (fallback && fallback.ok && fallback.data) {
+          const unwrapped = PulseChunkNormalizer.unwrap(fallback.data);
+          const binary = PulseChunkNormalizer.normalizeBinary(unwrapped);
+
+          const src =
+            PulseChunkNormalizer.normalizeImage(binary) ||
+            PulseChunkNormalizer.normalizeChunkValue(binary, "image") ||
+            null;
+
+          if (src) {
+            img.src = src;
+            continue;
+          }
+        }
+      } catch (fallbackErr) {
+        console.warn("[PulseChunks] CNS fallback threw — leaving image unchanged:", {
+          url,
+          fallbackErr
+        });
+      }
     }
   }
 }
 
-if (typeof window !== "undefined" && typeof document !== "undefined") {
-  document.addEventListener("DOMContentLoaded", () => {
-    autoLoadOfflineImages();
-  });
-}
 
-if (typeof window !== "undefined") {
-  if (window.PulseBand && typeof window.PulseBand.on === "function") {
-    window.PulseBand.on("chunk", handlePulseBandPacket);
-  }
-}
 // ============================================================================
 //  EXPOSE TO WINDOW — WITH STATE + CONTROLS + LANE STATS (v2.1 CLEAN)
 // ============================================================================
@@ -616,6 +709,19 @@ window.PulseChunks = {
 
 export default window.PulseChunks;
 
+// Attach loader
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    autoLoadOfflineImages();
+  });
+}
+
+// PulseBand integration stays unchanged
+if (typeof window !== "undefined") {
+  if (window.PulseBand && typeof window.PulseBand.on === "function") {
+    window.PulseBand.on("chunk", handlePulseBandPacket);
+  }
+}
 console.log(
   "[PulseChunks-v2.1-MULTILANE-HYBRID] Ready — 32-lane membrane active, full normalizer attached, sectional fallback, universal de-chunking, offline image loader fixed, lane stats online."
 );
