@@ -7,7 +7,7 @@
 //  • Forward lane: expand, predict, factor, pattern-find
 // ============================================================================
 
-import { createShifterPulse } from "./PulseSBinaryhifterEvolutionaryPulse-v11-Evo.js";
+import { createShifterPulse } from "../PULSE-SHIFTER/PulseBinaryShifterEvolutionaryPulse-v11-Evo.js";
 
 export const ForwardEngineMeta = Object.freeze({
   lane: "forward",
