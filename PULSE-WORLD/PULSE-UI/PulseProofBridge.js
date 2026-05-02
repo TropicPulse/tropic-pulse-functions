@@ -85,6 +85,32 @@ export function startDualBandAI(options = {}) {
   });
 }
 
+export function fetchImageThroughBridge(url) {
+  trace("IMAGE_FETCH (SIGNAL)", { url });
+
+  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  return new Promise((resolve) => {
+    const handler = (event) => {
+      const msg = event.data;
+      if (!msg || msg.type !== "IMAGE_RESPONSE") return;
+      if (msg.requestId !== requestId) return;
+
+      channel.removeEventListener("message", handler);
+      resolve(msg.data);
+    };
+
+    channel.addEventListener("message", handler);
+
+    channel.postMessage({
+      type: "IMAGE_REQUEST",
+      requestId,
+      url
+    });
+  });
+}
+
+
 // -----------------------------------------------------------------------------
 // START UNDERSTANDING — fire-and-forget signal
 // -----------------------------------------------------------------------------
@@ -110,6 +136,13 @@ channel.onmessage = (event) => {
     if (aiEventHandler) aiEventHandler(msg.data);
     return;
   }
+  
+  if (msg.type === "IMAGE_RESPONSE") {
+  traceInbound("IMAGE_RESPONSE", msg.data);
+  // UI will handle the data (Blob/Base64)
+  return;
+}
+
 
   if (msg.type === "DUALBAND_BOOT") {
     traceInbound("DUALBAND_BOOT", msg.bootOptions);

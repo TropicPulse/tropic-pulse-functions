@@ -8,6 +8,51 @@ import { startDualBandAIEngine } from "../PULSE-BAND/PULSE-AI/DualBandAIEngine.j
 const channel = new BroadcastChannel("PulseCNS");
 
 // -----------------------------------------------------------------------------
+// OFFLINE IMAGE LOADER — uses CNS FS + PATH
+// -----------------------------------------------------------------------------
+async function fetchImageOffline(url) {
+  try {
+    // Extract filename
+    const filename = url.split("/").pop();
+
+    // Build path using CNS virtual path resolver
+    const picturePath = await CNSRoute("path.join", {
+      parts: ["_PICTURES", filename]
+    });
+
+    // Check existence
+    const exists = await CNSRoute("fs.exists", {
+      path: picturePath
+    });
+
+    if (!exists) {
+      return {
+        ok: false,
+        error: `File not found in _PICTURES: ${filename}`
+      };
+    }
+
+    // Read binary file
+    const binary = await CNSRoute("fs.readBinary", {
+      path: picturePath
+    });
+
+    return {
+      ok: true,
+      base64: binary.base64,
+      filename,
+      from: "_PICTURES"
+    };
+
+  } catch (err) {
+    return {
+      ok: false,
+      error: String(err)
+    };
+  }
+}
+
+// -----------------------------------------------------------------------------
 // MAIN SIGNAL HANDLER
 // -----------------------------------------------------------------------------
 channel.onmessage = async (event) => {
@@ -42,6 +87,25 @@ channel.onmessage = async (event) => {
       type: "CNS_RESPONSE",
       requestId,
       result
+    });
+
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // IMAGE REQUEST (OFFLINE IMAGE LOADING)
+  // ---------------------------------------------------------------------------
+  if (msg.type === "IMAGE_REQUEST") {
+    const { requestId, url } = msg;
+
+    console.log("[PulseSignalInterceptor] ← IMAGE_REQUEST", url);
+
+    const data = await fetchImageOffline(url);
+
+    channel.postMessage({
+      type: "IMAGE_RESPONSE",
+      requestId,
+      data
     });
 
     return;
