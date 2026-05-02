@@ -6,7 +6,9 @@
 // ============================================================================
 console.log("Presence");
 console.log("[PulseChunks-v1.7-EVO-FALLBACK] Membrane chunker loading...");
+
 import { safeRoute as route } from "./PulseProofBridge.js";
+
 // ============================================================================
 //  LORE TRANSLATOR — Evolvable, deterministic, metadata-driven
 // ============================================================================
@@ -196,18 +198,17 @@ function buildChunkPresenceEnvelope({ url, fromCache, degraded, kind }) {
 // ============================================================================
 async function fetchChunk(url) {
   // ⭐ MAKE DNA VISIBLE IN NETWORK — FRONTEND LOGGING ENDPOINT
-try {
-  await route("proxy.dnaVisibility", {
-  url,
-  timestamp: Date.now(),
-  degraded: chunksDegraded,
-  presence: "frontend-dna-request",
-  membrane: "PulseChunks-v1.7"
-});
-
-} catch (err) {
-  console.warn("[PulseDNA] Network visibility logging failed:", err);
-}
+  try {
+    await route("proxy.dnaVisibility", {
+      url,
+      timestamp: Date.now(),
+      degraded: chunksDegraded,
+      presence: "frontend-dna-request",
+      membrane: "PulseChunks-v1.7"
+    });
+  } catch (err) {
+    console.warn("[PulseDNA] Network visibility logging failed:", err);
+  }
 
   if (!url) {
     return {
@@ -311,6 +312,7 @@ export async function getImage(url) {
   const { value } = await fetchChunk(url);
   return value;
 }
+
 function attachLore(chunk, metaPack) {
   const lore = generateLoreHeader(metaPack);
 
@@ -322,7 +324,9 @@ function attachLore(chunk, metaPack) {
     __lore: lore,
     __chunk: chunk
   };
-}// ============================================================================
+}
+
+// ============================================================================
 //  GENERIC CHUNKER ENTRY — NOW WITH UNIVERSAL LORE INJECTION (DNA MODE)
 // ============================================================================
 export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
@@ -368,8 +372,6 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
     presence: envelope
   };
 }
-
-
 
 // ============================================================================
 //  PREWARM ENGINE — NON-BLOCKING, ROUTED
@@ -442,6 +444,53 @@ function dechunkAll() {
   console.log("[PulseChunks] All chunks cleared, state reset.");
 }
 
+// ============================================================================
+//  OFFLINE IMAGE AUTO-DETECTOR — <img class="offline-img" data-offline="...">
+//  Loads images THROUGH the chunker, not raw browser fetch.
+// ============================================================================
+function autoLoadOfflineImages() {
+  if (typeof document === "undefined") return;
+
+  const imgs = document.querySelectorAll("img.offline-img[data-offline]");
+
+  imgs.forEach(async (img) => {
+    const url = img.getAttribute("data-offline");
+    if (!url) return;
+
+    try {
+      const value = await getImage(url);
+
+      // If backend returns a URL/string → use directly
+      if (typeof value === "string") {
+        img.src = value;
+        return;
+      }
+
+      // If backend returns an object with url
+      if (value && typeof value === "object" && typeof value.url === "string") {
+        img.src = value.url;
+        return;
+      }
+
+      // If backend returns base64 payload
+      if (value && typeof value === "object" && typeof value.base64 === "string") {
+        // Default to PNG; caller can adjust later if needed
+        img.src = `data:image/png;base64,${value.base64}`;
+        return;
+      }
+
+      console.warn("[PulseChunks] Unknown image chunk format for", url, value);
+    } catch (err) {
+      console.warn("[PulseChunks] Offline image load failed:", url, err);
+    }
+  });
+}
+
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    autoLoadOfflineImages();
+  });
+}
 
 // Attach listener if PulseBand exists
 if (typeof window !== "undefined") {
@@ -463,6 +512,7 @@ window.PulseChunks = {
   dechunk,
   dechunkAll
 };
+
 export default window.PulseChunks;
 
-console.log("[PulseChunks-v1.7-EVO-FALLBACK] Ready — membrane chunker active with sectional fallback.");
+console.log("[PulseChunks-v1.7-EVO-FALLBACK] Ready — membrane chunker active with sectional fallback + offline image auto-loader.");
