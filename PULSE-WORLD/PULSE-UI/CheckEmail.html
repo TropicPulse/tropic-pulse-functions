@@ -13,26 +13,12 @@
 <script type="module">
  import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
 import PulseChunks from "./PulsePresence-v1.7-Evo.js";
-import { safeRoute as route, fetchImageThroughBridge } from "./PulseProofBridge.js";
 /* 0. BOOT MEMBRANE — MUST BE FIRST */
 import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
 
 /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
 import * as PULSEOSSkinReflex from "./PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".offline-img").forEach(img => {
-    const url = img.getAttribute("data-offline");
-
-    fetchImageThroughBridge(url).then(data => {
-      if (data && data.ok) {
-        img.src = `data:image/png;base64,${data.base64}`;
-      } else {
-        console.warn("Offline image failed:", url, data);
-      }
-    });
-  });
-});
 
 </script>
 
