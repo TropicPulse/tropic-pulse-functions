@@ -45,25 +45,25 @@
      ============================================================================ -->
 <script type="module">
   /* 0. BOOT MEMBRANE — MUST BE FIRST */
-  import * as PulseWindow from "../PULSEEvolutionaryWindow.js";
+  import * as PulseWindow from "../../PULSE-UI/PULSEEvolutionaryWindow.js";
 
   /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
-  import * as PULSEOSSkinReflex from "../PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
+  import * as PULSEOSSkinReflex from "../../PULSE-UI/PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
 
   function mark(label) {
     console.log("[INDEX]", label);
   }
 
   // Icons
-  import { PulseIcons } from "../PULSE-UI/PulseEvolutionaryIcons.js";
+  import { PulseIcons } from "../../PULSE-UI/PulseEvolutionaryIcons.js";
 
   // UI organism organs
-  import { createPulseEvolutionaryCode } from "../PULSE-UI/PulseEvolutionaryCode.js";
-  import { createPulseEvolutionaryMemory } from "../PULSE-UI/PulseEvolutionaryMemory.js";
-  import { createPulseEvolutionaryBrain } from "../PULSE-UI/PulseEvolutionaryBrain.js";
-  import { createPulseEvolutionaryImpulse } from "../PULSE-UI/PulseEvolutionaryImpulse.js";
-  import { createPulseEvolutionaryRouter } from "../PULSE-UI/PulseEvolutionaryRouter.js";
-  import { createPulseEvolutionaryBinary } from "../PULSE-UI/PulseEvolutionaryBinary.js";
+  import { createPulseEvolutionaryCode } from "../../PULSE-UI/PulseEvolutionaryCode.js";
+  import { createPulseEvolutionaryMemory } from "../../PULSE-UI/PulseEvolutionaryMemory.js";
+  import { createPulseEvolutionaryBrain } from "../../PULSE-UI/PulseEvolutionaryBrain.js";
+  import { createPulseEvolutionaryImpulse } from "../../PULSE-UI/PulseEvolutionaryImpulse.js";
+  import { createPulseEvolutionaryRouter } from "../../PULSE-UI/PulseEvolutionaryRouter.js";
+  import { createPulseEvolutionaryBinary } from "../../PULSE-UI/PulseEvolutionaryBinary.js";
 
   // AI organs (example: aiEarn)
   import * as aiEarn from "../PULSE-AI/aiEarn.js";

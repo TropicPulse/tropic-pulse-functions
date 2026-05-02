@@ -28,9 +28,9 @@ import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
 // ============================================================================
 //  IMPORTS — MAPS (Intent, Organism, IQ)
 // ============================================================================
-import { PulseIntentMap } from "../PULSE-OS/PulseIntentMap.js";
-import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
-import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
+import { PulseIntentMap } from "../PULSE-BAND/PULSE-OS/PulseIntentMap.js";
+import { PulseOrganismMap } from "../PULSE-BAND/PULSE-OS/PulseOrganismMap.js";
+import { PulseIQMap } from "../PULSE-BAND/PULSE-OS/PulseIQMap.js";
 
 
 // ============================================================================
@@ -57,7 +57,7 @@ import { createEarn as PulseEarnSym } from "../PULSE-BAND/PULSE-EARN/PulseEarn-v
 //  IMPORTS — BINARY SHADOW (NO BOOT HERE)
 //  Window already booted ai-v11-Evo and exposed window.PulseBinary.
 // ============================================================================
-import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-AI/aiDualBand-v11-Evo.js";
+import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-BAND/PULSE-AI/aiDualBand-v11-Evo.js";
 
 import { createBinaryProxy } from "../PULSE-BAND/PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
 import { createBinaryRouter as PulseRouterBin } from "../PULSE-BAND/PULSE-ROUTER/PulseBinaryRouter-v11-EVO.js";

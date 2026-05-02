@@ -39,7 +39,6 @@
 
 
 import express from "express";
-import crypto from "crypto";
 import nodemailer from "nodemailer";
 import { createClient } from "redis";
 
@@ -60,6 +59,7 @@ const error = global.error || console.error;
 // ============================================================================
 //  SPINE IDENTITY — v14.0-PRESENCE-IMMORTAL-BACKEND (symbolic backend only)
 // ============================================================================
+
 
 export const PulseRole = {
   type: "Organ",
