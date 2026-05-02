@@ -1,14 +1,14 @@
 // ============================================================================
-//  FILE: PulseShifterEvolutionaryPulse-v12-3-Evo.js
+//  FILE: PulseShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL.js
 //  Pulse v2 Organism • Evolution Engine • Pattern + Lineage + Shape
-//  v12.3-Evo: Diagnostics + Signatures + Ancestry + Evolution Surface
+//  v14.0-PRESENCE-IMMORTAL: Dual-band aware (symbolic/binary) + Presence/Band Surface
 // ============================================================================
 //
 //  ROLE:
 //  -----
 //  This organ is the *pure evolution core* for Pulse v2.
 //
-//  It does NOT know about bits, binary pulses, or UI.
+//  It does NOT know about bits, GPUs, or network.
 //  It only knows about:
 //    - pattern: a symbolic identifier for the work / route / job
 //    - lineage: the historical chain of patterns
@@ -16,34 +16,37 @@
 //    - advantageField: a deterministic "fitness" / advantage surface
 //    - healthScore: a normalized health metric for this pulse
 //    - tier: a coarse degradation tier based on healthScore
+//    - bandMode: "symbolic" or "binary" (SHIFTER dual-band surface)
+//    - presenceBandState / harmonicDrift / coherenceScore: passive metadata
 //
 //  This engine is designed to sit BEHIND a binary front-end such as
-//  PulseBinaryShifterEvolutionaryPulse-v12-3-Evo, which will:
+//  PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL, which will:
 //    - accept bits
-//    - derive pattern/mode/payload hints
+//    - derive pattern/mode/payload/band hints
 //    - call createPulseV2 / evolvePulseV2
 //    - emit compact, binary-friendly summaries
 //
-//  SAFETY CONTRACT (v12.3-Evo):
-//  ----------------------------
+//  SAFETY CONTRACT (v14.0-PRESENCE-IMMORTAL):
+//  ------------------------------------------
 //  • No imports.
 //  • No network.
 //  • No randomness.
 //  • No timestamps.
 //  • No external mutation.
 //  • Deterministic compute loop only.
+//  • Band/presence fields are metadata-only (no non-deterministic routing).
 // ============================================================================
 
 
 // ============================================================================
-// ⭐ PulseRole — identifies this as the Pulse v2 evolution engine (v12.3-Evo)
+// ⭐ PulseRole — Pulse v2 evolution engine (v14.0-PRESENCE-IMMORTAL)
 // ============================================================================
 export const PulseRole = {
   type: "Pulse",
   subsystem: "Pulse",
   layer: "Organ",
-  version: "12.3",
-  identity: "PulseShifterEvolutionaryPulse-v12.3-Evo",
+  version: "14.0-PRESENCE-IMMORTAL",
+  identity: "PulseShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL",
 
   evo: {
     // Core evolution capabilities
@@ -52,6 +55,14 @@ export const PulseRole = {
     lineageAware: true,
     shapeAware: true,
     modeAware: true,
+
+    // Band / presence surface (dual-band SHIFTER)
+    dualBandAware: true,
+    symbolicPrimary: true,
+    binaryFieldAware: true,
+    presenceAware: true,
+    harmonicsAware: true,
+    epochStable: true,
 
     // Ready to cooperate with routing/mesh organs
     routerAwareReady: true,
@@ -72,26 +83,22 @@ export const PulseRole = {
 
     // Binary integration flags:
     //   - This file is the *back-end* evolution engine.
-    //   - A separate binary organ (PulseBinaryShifterEvolutionaryPulse-v12.3-Evo)
-    //     will act as the front-end that speaks in bits.
+    //   - A separate binary organ (PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL)
+    //     acts as the front-end that speaks in bits.
     binaryBackEndReady: true,
-    binaryFrontEndContract: "PulseBinaryShifterEvolutionaryPulse-v12.3-Evo"
+    binaryFrontEndContract: "PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL"
   },
 
-  routingContract: "PulseRouter-v12.3",
-  meshContract: "PulseMesh-v12.3",
-  sendContract: "PulseSend-v12.3",
-  gpuOrganContract: "PulseGPU-v12.3",
-  earnCompatibility: "PulseEarn-v12.3"
+  routingContract: "PulseRouter-v14.0-PRESENCE-IMMORTAL",
+  meshContract: "PulseMesh-v14.0-PRESENCE-IMMORTAL",
+  sendContract: "PulseSend-v14.0-PRESENCE-IMMORTAL",
+  gpuOrganContract: "PulseGPU-v14.0-PRESENCE-IMMORTAL",
+  earnCompatibility: "PulseEarn-v14.0-PRESENCE-IMMORTAL"
 };
 
 
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
-// ============================================================================
-//  These helpers are intentionally small and self-contained. They define how
-//  patterns, lineages, and shapes are turned into signatures and diagnostics.
-//  They are the "symbolic math" behind the evolution engine.
 // ============================================================================
 
 function computeHash(str) {
@@ -104,20 +111,17 @@ function computeHash(str) {
 }
 
 function buildLineage(parentLineage, pattern) {
-  // Append the new pattern to the existing lineage, forming a simple ancestry chain.
   const base = Array.isArray(parentLineage) ? parentLineage : [];
   return [...base, pattern];
 }
 
 function computeShapeSignature(pattern, lineage) {
-  // Shape = pattern + lineage combined into a single signature.
   const lineageKey = lineage.join("::");
   const raw = `${pattern}::${lineageKey}`;
   return `shape-${computeHash(raw)}`;
 }
 
 function computeEvolutionStage(pattern, lineage) {
-  // Simple, human-readable stage based on lineage depth.
   const depth = lineage.length;
 
   if (depth === 1) return "seed";
@@ -128,7 +132,7 @@ function computeEvolutionStage(pattern, lineage) {
 }
 
 // v2-style deterministic pattern evolution
-// This is where a front-end (router/mesh/binary) can inject hints.
+// Front-ends (router/mesh/binary) inject hints here.
 function evolvePattern(pattern, context = {}) {
   const { routerHint, meshHint, organHint } = context;
 
@@ -152,7 +156,6 @@ function buildLineageSignature(lineage) {
 }
 
 function buildPageAncestrySignature({ pattern, lineage, pageId }) {
-  // Page ancestry is a compact way to tie pattern+lineage to a page context.
   const shape = {
     pattern,
     patternAncestry: buildPatternAncestry(pattern),
@@ -164,7 +167,6 @@ function buildPageAncestrySignature({ pattern, lineage, pageId }) {
 }
 
 function buildDiagnostics(pattern, lineage, healthScore, tier) {
-  // Diagnostics are a human/AI-readable summary of the evolution state.
   return {
     patternLength: pattern.length,
     lineageDepth: lineage.length,
@@ -179,20 +181,24 @@ function buildDiagnostics(pattern, lineage, healthScore, tier) {
 
 
 // ============================================================================
-//  INTERNAL: Deterministic evolution compute loop (v2 — experimental tier)
+//  INTERNAL: Deterministic evolution compute loop (v2 — IMMORTAL tier)
 // ============================================================================
-//  This is the core "advantage field" computation. It takes symbolic inputs
-//  (pattern, lineage, payload, mode) and produces:
-//    - advantageField: a structured description of "strength" and context
-//    - healthScore: a normalized [0..1] health metric
-//
-//  A binary front-end can:
-//    - feed patterns/modes derived from bits
-//    - read advantageField + healthScore
-//    - route or prioritize work accordingly
+//  Inputs:
+//    - pattern, lineage, payload, mode
+//    - bandMode: "symbolic" | "binary" (SHIFTER dual-band)
+//    - presenceBandState / harmonicDrift / coherenceScore: passive metadata
 // ============================================================================
 
-function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
+function runEvolutionComputeLoopV2({
+  pattern,
+  lineage,
+  payload,
+  mode,
+  bandMode = "symbolic",
+  presenceBandState = null,
+  harmonicDrift = null,
+  coherenceScore = null
+}) {
   const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
   const payloadSize = payload && typeof payload === "object"
     ? Object.keys(payload).length
@@ -209,7 +215,14 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
       mode === "drain"    ? 3 :
       mode === "recovery" ? 2 :
       1,
-    experimentalTier: "v2-evolution-engine-v12.3"
+
+    // IMMORTAL / band surface (metadata-only, deterministic)
+    bandMode: bandMode === "binary" ? "binary" : "symbolic",
+    presenceBandState: presenceBandState ?? null,
+    harmonicDrift: harmonicDrift ?? null,
+    coherenceScore: coherenceScore ?? null,
+
+    experimentalTier: "v2-evolution-engine-v14.0-PRESENCE-IMMORTAL"
   };
 
   const maxPattern = 64;
@@ -234,13 +247,14 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v12.3-Evo)
+//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v14.0-PRESENCE-IMMORTAL)
 // ============================================================================
-//  This is the "birth" function for a Pulse v2 evolution instance.
-//  A binary front-end will typically call this after deriving:
-//    - pattern (from bits / route / job)
-//    - payload (metadata)
+//  Front-ends (symbolic or binary SHIFTER) typically provide:
+//    - pattern
+//    - payload
 //    - mode (stress/drain/recovery/normal)
+//    - bandMode: "symbolic" | "binary"
+//    - presenceBandState / harmonicDrift / coherenceScore (optional)
 // ============================================================================
 
 export function createPulseV2({
@@ -251,7 +265,13 @@ export function createPulseV2({
   returnTo = null,
   parentLineage = null,
   mode = "normal",
-  pageId = "NO_PAGE"
+  pageId = "NO_PAGE",
+
+  // SHIFTER dual-band + presence surface
+  bandMode = "symbolic",
+  presenceBandState = null,
+  harmonicDrift = null,
+  coherenceScore = null
 }) {
   const lineage        = buildLineage(parentLineage, pattern);
   const shapeSignature = computeShapeSignature(pattern, lineage);
@@ -269,7 +289,11 @@ export function createPulseV2({
     pattern,
     lineage,
     payload,
-    mode
+    mode,
+    bandMode,
+    presenceBandState,
+    harmonicDrift,
+    coherenceScore
   });
 
   const tier =
@@ -295,8 +319,14 @@ export function createPulseV2({
     mode,
     pageId,
 
+    // Band / presence surface
+    bandMode: bandMode === "binary" ? "binary" : "symbolic",
+    presenceBandState: presenceBandState ?? null,
+    harmonicDrift: harmonicDrift ?? null,
+    coherenceScore: coherenceScore ?? null,
+
     // Evolution engine type
-    pulseType: "Pulse-v2-EvolutionEngine-v12.3",
+    pulseType: "Pulse-v2-EvolutionEngine-v14.0-PRESENCE-IMMORTAL",
 
     // Advantage + health
     advantageField,
@@ -328,14 +358,35 @@ export function createPulseV2({
 // ============================================================================
 //  EVOLUTION ENGINE — evolve an existing Pulse deterministically (v2 style)
 // ============================================================================
-//  This is the "next step" function. A binary front-end or router/mesh can:
+//  Front-ends (router/mesh/binary SHIFTER) can:
 //    - take an existing pulse
 //    - provide context hints (routerHint, meshHint, organHint)
+//    - optionally override band/presence metadata
 //    - get back a new pulse with updated pattern/lineage/advantage/health
 // ============================================================================
 
-export function evolvePulseV2(pulse, context = {}) {
-  const nextPattern    = evolvePattern(pulse.pattern, context);
+export function evolvePulseV2(
+  pulse,
+  context = {}
+) {
+  const {
+    routerHint,
+    meshHint,
+    organHint,
+
+    // Optional band/presence overrides (if front-end wants to shift band)
+    bandMode = pulse.bandMode || "symbolic",
+    presenceBandState = pulse.presenceBandState ?? null,
+    harmonicDrift = pulse.harmonicDrift ?? null,
+    coherenceScore = pulse.coherenceScore ?? null
+  } = context;
+
+  const nextPattern = evolvePattern(pulse.pattern, {
+    routerHint,
+    meshHint,
+    organHint
+  });
+
   const nextLineage    = buildLineage(pulse.lineage, nextPattern);
   const shapeSignature = computeShapeSignature(nextPattern, nextLineage);
   const evolutionStage = computeEvolutionStage(nextPattern, nextLineage);
@@ -353,7 +404,11 @@ export function evolvePulseV2(pulse, context = {}) {
     pattern: nextPattern,
     lineage: nextLineage,
     payload: pulse.payload,
-    mode: pulse.mode || "normal"
+    mode: pulse.mode || "normal",
+    bandMode,
+    presenceBandState,
+    harmonicDrift,
+    coherenceScore
   });
 
   const tier =
@@ -379,8 +434,14 @@ export function evolvePulseV2(pulse, context = {}) {
     mode: pulse.mode || "normal",
     pageId,
 
+    // Band / presence surface
+    bandMode: bandMode === "binary" ? "binary" : "symbolic",
+    presenceBandState: presenceBandState ?? null,
+    harmonicDrift: harmonicDrift ?? null,
+    coherenceScore: coherenceScore ?? null,
+
     // Evolution engine type
-    pulseType: "Pulse-v2-EvolutionEngine-v12.3",
+    pulseType: "Pulse-v2-EvolutionEngine-v14.0-PRESENCE-IMMORTAL",
 
     // Advantage + health
     advantageField,

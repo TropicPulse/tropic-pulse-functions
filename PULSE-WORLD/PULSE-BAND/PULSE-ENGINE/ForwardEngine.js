@@ -1,16 +1,18 @@
 // ============================================================================
-// ForwardEngine.js — v13.1-EVO-PRIME Forward Lane Engine
+// ForwardEngine.js — v13.1-EVO-PRIME + SHIFTER-PULSE
 //  • Dual-band aware (symbolic/binary)
 //  • Drift-proof via normalized job/intents (multi-instance safe)
-//  • Binary-first, chunk/memory aware
+//  • ShifterPulse-first (binary/regular), chunk/memory aware
 //  • Deterministic tick sequencing
 //  • Forward lane: expand, predict, factor, pattern-find
 // ============================================================================
 
+import { createShifterPulse } from "./PulseSBinaryhifterEvolutionaryPulse-v11-Evo.js";
+
 export const ForwardEngineMeta = Object.freeze({
   lane: "forward",
-  version: "13.1-EVO-PRIME",
-  identity: "ForwardEngine-v13.1-EVO-PRIME",
+  version: "13.1-EVO-PRIME-SHIFTER",
+  identity: "ForwardEngine-v13.1-EVO-PRIME-SHIFTER",
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
@@ -20,7 +22,8 @@ export const ForwardEngineMeta = Object.freeze({
     multiInstanceReady: true,
     dualBandAware: true,
     symbolicPrimary: true,
-    binaryNonExecutable: true
+    binaryNonExecutable: true,
+    shifterPulseAware: true
   })
 });
 
@@ -88,18 +91,24 @@ function normalizeMetrics(base, extra = {}) {
 }
 
 // ============================================================================
-// Factory — Forward Engine v13.1-EVO-PRIME
+// Factory — Forward Engine v13.1-EVO-PRIME-SHIFTER
 // ============================================================================
 export function createForwardEngine({
-  BinaryOrgan,
+  ShifterPulse,      // new: band-aware binary/regular shifter
   MemoryOrgan,
   BrainOrgan,
   instanceId = "forward-0",
   trace = false
 } = {}) {
-  if (!BinaryOrgan || !MemoryOrgan) {
-    throw new Error("[ForwardEngine] BinaryOrgan and MemoryOrgan are required.");
+  if (!ShifterPulse || !MemoryOrgan) {
+    throw new Error("[ForwardEngine] ShifterPulse and MemoryOrgan are required.");
   }
+
+  // If caller passes a factory, instantiate it
+  const shifter =
+    typeof ShifterPulse.create === "function"
+      ? ShifterPulse.create({ lane: "forward", instanceId })
+      : (ShifterPulse || createShifterPulse({ lane: "forward", instanceId }));
 
   // --------------------------------------------------------------------------
   // Job intake (drift-proof, normalized)
@@ -155,7 +164,7 @@ export function createForwardEngine({
 
   // --------------------------------------------------------------------------
   // Core forward compute (expand, predict, factor, pattern-find)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   function computeForward(job) {
     const tickId = globalTickId;
 
@@ -224,11 +233,19 @@ export function createForwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // Binary encode + chunk + write results
+  // Binary/regular encode + chunk + write results via ShifterPulse
   // --------------------------------------------------------------------------
   function writeResult(result) {
-    const encoded = safe(BinaryOrgan.encode, result) || "";
-    const chunks  = safe(BinaryOrgan.chunk, encoded) || [];
+    const band = result.metrics.band || "symbolic";
+
+    const encoded =
+      safe(shifter.encode, result, { band }) ||
+      safe(shifter.encode, result); // fallback
+
+    const chunks =
+      safe(shifter.chunk, encoded, { band }) ||
+      safe(shifter.chunk, encoded) ||
+      [];
 
     const packet = {
       bits: chunks,
@@ -276,7 +293,7 @@ export function createForwardEngine({
 
   // --------------------------------------------------------------------------
   // tick() — one forward evolution step (deterministic lane step)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   function tick() {
     globalTickId += 1;
 
@@ -301,8 +318,8 @@ export function createForwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // prewarm() — touch binary paths (binary-first, deterministic sample)
-  // --------------------------------------------------------------------------
+  // prewarm() — touch shifter paths (binary + symbolic, deterministic sample)
+// --------------------------------------------------------------------------
   function prewarm() {
     const sample = {
       lane: "forward",
@@ -310,11 +327,25 @@ export function createForwardEngine({
       intent: "prewarm",
       band: "symbolic"
     };
-    const bits   = safe(BinaryOrgan.encode, sample) || "";
-    const chunks = safe(BinaryOrgan.chunk, bits) || [];
-    const flat   = safe(BinaryOrgan.dechunk, chunks) || "";
-    safe(BinaryOrgan.decode, flat);
-    if (trace) console.log("[ForwardEngine] prewarm complete.");
+
+    const encodedSym = safe(shifter.encode, sample, { band: "symbolic" }) ||
+                       safe(shifter.encode, sample);
+    const chunksSym  = safe(shifter.chunk, encodedSym, { band: "symbolic" }) ||
+                       safe(shifter.chunk, encodedSym) ||
+                       [];
+    const flatSym    = safe(shifter.dechunk, chunksSym, { band: "symbolic" }) ||
+                       safe(shifter.dechunk, chunksSym) ||
+                       "";
+    safe(shifter.decode, flatSym, { band: "symbolic" });
+
+    const encodedBin = safe(shifter.encode, sample, { band: "binary" });
+    if (encodedBin) {
+      const chunksBin = safe(shifter.chunk, encodedBin, { band: "binary" }) || [];
+      const flatBin   = safe(shifter.dechunk, chunksBin, { band: "binary" }) || "";
+      safe(shifter.decode, flatBin, { band: "binary" });
+    }
+
+    if (trace) console.log("[ForwardEngine] prewarm complete (symbolic + binary).");
     return true;
   }
 

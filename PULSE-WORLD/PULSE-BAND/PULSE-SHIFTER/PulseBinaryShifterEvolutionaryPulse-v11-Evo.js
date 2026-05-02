@@ -1,31 +1,10 @@
 // ============================================================================
-//  FILE: PulseBinaryShifterEvolutionaryPulse-v12-Evo.js
-//  Pulse v2 • Binary Shifter Evolutionary Pulse Front-End (v12-Evo)
-//  v12.4: BinaryStrength + BitsSummary + Hints Surface + Drift-Proof Contract
-// ============================================================================
-//  ROLE:
-//  -----
-//  This organ is the BINARY FRONT-END for the PulseShifterEvolutionaryPulse
-//  evolution engine.
-//
-//  • It speaks in bits.
-//  • It derives pattern/mode/payload/hints from binary input.
-//  • It calls the symbolic evolution core:
-//        - createPulseV2
-//        - evolvePulseV2
-//  • It emits compact, binary-friendly summaries that routers/meshes/GPUs
-//    can use without understanding the full symbolic structure.
-//
-//  DESIGN:
-//  -------
-//  - Back-end: PulseShifterEvolutionaryPulse-v11-Evo (symbolic evolution).
-//  - Front-end: this file (binary shifter, v12-Evo surface).
-//  - Safety: deterministic, no randomness, no network, no external mutation.
-//  - Purpose: give the binary layer a way to "evolve" work using the v2 engine,
-//    with an explicit binarySummary + hints surface.
-//
-//  This is a *bootloader-class* organ: it is the bridge between
-//  BinaryPulse world and EvolutionEngine world.
+//  FILE: PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL.js
+//  Pulse v2 • Binary Shifter Evolutionary Pulse Front-End (v14.0-PRESENCE-IMMORTAL)
+//  IMMORTAL: BinaryStrength + BitsSummary + Hints Surface + Band/DNA + Presence
+//  • Dual-band aware (symbolic/binary, non-executable binary)
+//  • Drift-proof contract, no randomness, no external mutation
+//  • Presence/harmonics/immortal-band surfaced as metadata only
 // ============================================================================
 
 import {
@@ -34,22 +13,22 @@ import {
   evolvePulseV2
 } from "./PulseShifterEvolutionaryPulse-v11-Evo.js";
 
+// ============================================================================
+//  PulseBinaryRole — IMMORTAL binary front-end for evolution
+// ============================================================================
 
-// ============================================================================
-//  PulseBinaryRole — identifies this as the binary front-end for evolution
-// ============================================================================
 export const PulseBinaryRole = {
   type: "Pulse",
   subsystem: "Pulse",
   layer: "BinaryFrontEnd",
-  version: "12.4",
-  identity: "PulseBinaryShifterEvolutionaryPulse-v12-Evo",
+  version: "14.0-PRESENCE-IMMORTAL",
+  identity: "PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL",
 
   evo: {
     binaryFrontEnd: true,
     evolutionBackEnd: "PulseShifterEvolutionaryPulse-v11-Evo",
 
-    // Mirror back-end guarantees, but expose v12 surface.
+    // Mirror back-end guarantees, IMMORTAL surface.
     driftProof: EvolutionPulseRole.evo.driftProof,
     unifiedAdvantageField: EvolutionPulseRole.evo.unifiedAdvantageField,
     pulseV2Ready: EvolutionPulseRole.evo.pulseV2Ready,
@@ -58,7 +37,19 @@ export const PulseBinaryRole = {
     // Explicit binary surface flags
     binaryStrengthAware: true,
     binaryHintsSurfaceReady: true,
-    bitsSummaryReady: true
+    bitsSummaryReady: true,
+
+    // IMMORTAL band / presence surfaces (descriptive-only)
+    dualBandAware: true,
+    symbolicPrimary: true,
+    binaryNonExecutable: true,
+    presenceAware: true,
+    harmonicsAware: true,
+    epochStable: true,
+    passivePrewarm: true,
+    passiveCache: true,
+    passiveChunk: true,
+    passiveRemember: true
   },
 
   routingContract: EvolutionPulseRole.routingContract,
@@ -68,9 +59,9 @@ export const PulseBinaryRole = {
   earnCompatibility: EvolutionPulseRole.earnCompatibility
 };
 
-
 // ============================================================================
 //  INTERNAL HELPERS — BITS → NUMBERS / STRINGS / MODES / HINTS
+//  (deterministic, no randomness, no external mutation)
 // ============================================================================
 
 function bitsToNumber(bits) {
@@ -89,7 +80,6 @@ function bitsToHex(bits, maxNibbles = 8) {
 }
 
 function bitsToPattern(bits, prefix = "bp") {
-  // Binary-derived pattern: stable, deterministic, compact.
   const hex = bitsToHex(bits, 8);
   return `${prefix}/${hex}`;
 }
@@ -105,7 +95,6 @@ function bitsToMode(bits) {
 }
 
 function bitsToPayload(bits, maxKeys = 4) {
-  // Very small, deterministic payload derived from bit windows.
   const safe = Array.isArray(bits) ? bits : [];
   const payload = {};
   const chunkSize = 8;
@@ -122,7 +111,6 @@ function bitsToPayload(bits, maxKeys = 4) {
 }
 
 function bitsToHints(bits) {
-  // Derive simple router/mesh/organ hints from bit windows.
   const safe = Array.isArray(bits) ? bits : [];
   const n = bitsToNumber(safe);
 
@@ -143,7 +131,24 @@ function computeBinaryStrength(bits) {
   return ones / safe.length; // 0..1
 }
 
-function buildBitsSummary(bits) {
+// IMMORTAL band metadata: band + dnaTag are descriptive-only
+function deriveBandMetadata({ bits, defaultBand = "symbolic", dnaSeed = null } = {}) {
+  const safe = Array.isArray(bits) ? bits : [];
+  const hasBits = safe.length > 0;
+
+  const band = hasBits && safe.length % 2 === 0 ? "binary" : defaultBand;
+
+  let dnaTag = null;
+  if (typeof dnaSeed === "string" && dnaSeed.length > 0) {
+    dnaTag = dnaSeed;
+  } else if (hasBits) {
+    dnaTag = `dna-${bitsToHex(safe, 6)}`;
+  }
+
+  return { band, dnaTag };
+}
+
+function buildBitsSummary(bits, { band, dnaTag } = {}) {
   const safe = Array.isArray(bits) ? bits : [];
   const hasBits = safe.length > 0;
   if (!hasBits) {
@@ -155,7 +160,9 @@ function buildBitsSummary(bits) {
       binaryStrength: 0,
       routerHint: null,
       meshHint: null,
-      organHint: null
+      organHint: null,
+      band: band || "symbolic",
+      dnaTag: dnaTag || null
     };
   }
 
@@ -172,22 +179,14 @@ function buildBitsSummary(bits) {
     binaryStrength,
     routerHint,
     meshHint,
-    organHint
+    organHint,
+    band: band || "symbolic",
+    dnaTag: dnaTag || null
   };
 }
 
-
 // ============================================================================
-//  BINARY → EVOLUTION CREATION
-// ============================================================================
-//  createBinaryEvolutionPulse (v12 surface):
-//    - Accepts bits + optional hints.
-//    - Derives pattern/mode/payload from bits.
-//    - Calls createPulseV2 (symbolic engine).
-//    - Returns a compact object with:
-//        • symbolic evolutionPulse
-//        • binarySummary (bitsSummary + hints)
-//        • binary-facing summary surface
+//  BINARY → EVOLUTION CREATION (IMMORTAL SURFACE)
 // ============================================================================
 
 export function createBinaryEvolutionPulse({
@@ -198,25 +197,42 @@ export function createBinaryEvolutionPulse({
   parentLineage = null,
   pageId = "NO_PAGE",
   patternPrefix = "bp",
+  // IMMORTAL band metadata (optional, descriptive-only)
+  defaultBand = "symbolic",
+  dnaSeed = null,
+  presenceBandState = null,
+  harmonicDrift = null,
+  coherenceScore = null,
   trace = false
 } = {}) {
   const safeBits = Array.isArray(bits) ? bits : [];
+  const { band, dnaTag } = deriveBandMetadata({
+    bits: safeBits,
+    defaultBand,
+    dnaSeed
+  });
+
   const pattern  = bitsToPattern(safeBits, patternPrefix);
   const mode     = bitsToMode(safeBits);
   const payload  = bitsToPayload(safeBits);
   const hints    = bitsToHints(safeBits);
-  const bitsSummary = buildBitsSummary(safeBits);
+  const bitsSummary = buildBitsSummary(safeBits, { band, dnaTag });
 
   const enrichedPayload = {
     ...payload,
     routerHint: hints.routerHint,
     meshHint: hints.meshHint,
     organHint: hints.organHint,
-    binaryStrength: bitsSummary.binaryStrength
+    binaryStrength: bitsSummary.binaryStrength,
+    __band: band,
+    __dnaTag: dnaTag,
+    presenceBandState,
+    harmonicDrift,
+    coherenceScore
   };
 
   if (trace) {
-    console.log("[BinaryEvolution] create", {
+    console.log("[BinaryEvolution IMMORTAL] create", {
       bitsLength: safeBits.length,
       pattern,
       mode,
@@ -240,7 +256,6 @@ export function createBinaryEvolutionPulse({
     PulseBinaryRole,
     evolutionPulse: pulse,
 
-    // Binary-facing summary (v12 surface)
     summary: {
       pattern: pulse.pattern,
       mode: pulse.mode,
@@ -254,20 +269,19 @@ export function createBinaryEvolutionPulse({
   };
 }
 
-
 // ============================================================================
-//  BINARY → EVOLUTION STEP
-// ============================================================================
-//  evolveBinaryEvolutionPulse (v12 surface):
-//    - Accepts an existing evolution pulse + bits + optional hints.
-//    - Uses bits to derive router/mesh/organ hints.
-//    - Calls evolvePulseV2 (symbolic engine).
-//    - Returns updated pulse + binary-friendly summary + bitsSummary.
+//  BINARY → EVOLUTION STEP (IMMORTAL SURFACE)
 // ============================================================================
 
 export function evolveBinaryEvolutionPulse({
   evolutionPulse,
   bits,
+  // IMMORTAL band metadata (optional, descriptive-only)
+  defaultBand = "symbolic",
+  dnaSeed = null,
+  presenceBandState = null,
+  harmonicDrift = null,
+  coherenceScore = null,
   trace = false
 } = {}) {
   if (!evolutionPulse) {
@@ -275,18 +289,31 @@ export function evolveBinaryEvolutionPulse({
   }
 
   const safeBits = Array.isArray(bits) ? bits : [];
+  const { band, dnaTag } = deriveBandMetadata({
+    bits: safeBits,
+    defaultBand,
+    dnaSeed
+  });
+
   const hints    = bitsToHints(safeBits);
-  const bitsSummary = buildBitsSummary(safeBits);
+  const bitsSummary = buildBitsSummary(safeBits, { band, dnaTag });
 
   if (trace) {
-    console.log("[BinaryEvolution] evolve", {
+    console.log("[BinaryEvolution IMMORTAL] evolve", {
       bitsLength: safeBits.length,
       hints,
       bitsSummary
     });
   }
 
-  const nextPulse = evolvePulseV2(evolutionPulse, hints);
+  const nextPulse = evolvePulseV2(evolutionPulse, {
+    ...hints,
+    __band: band,
+    __dnaTag: dnaTag,
+    presenceBandState,
+    harmonicDrift,
+    coherenceScore
+  });
 
   return {
     PulseBinaryRole,
@@ -305,24 +332,18 @@ export function evolveBinaryEvolutionPulse({
   };
 }
 
-
 // ============================================================================
-//  PUBLIC API — BINARY EVOLUTION FRONT-END (v12-Evo)
-// ============================================================================
-//  This is what the rest of PulseOS should use when dealing with bits.
-//  The symbolic engine stays behind this boundary.
+//  PUBLIC API — BINARY EVOLUTION FRONT-END (v14.0-PRESENCE-IMMORTAL)
 // ============================================================================
 
 export function createPulseBinaryShifterEvolutionaryPulse({ trace = false } = {}) {
   return {
     role: PulseBinaryRole,
 
-    // Create a new evolution pulse from bits.
     createFromBits(args) {
       return createBinaryEvolutionPulse({ ...args, trace });
     },
 
-    // Evolve an existing evolution pulse using bits.
     evolveWithBits(args) {
       return evolveBinaryEvolutionPulse({ ...args, trace });
     }

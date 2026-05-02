@@ -11,7 +11,7 @@
 //   - Balanced adaptive mode: stable unless meaningful change detected.
 // ============================================================================
 
-import { createBinaryPulse } from "../PULSE-TECH/PulseBinaryTech-v11-EVO.js";
+import { createBinaryPulse } from "../PULSE-TECH/PulseBinaryTech-v14-Presence-Immortal.js";
 import { createBinaryWaveScanner } from "../PULSE-TOOLS/PulseBinaryWaveScanner.js";
 import { createBinaryLoopScanner } from "../PULSE-TOOLS/PulseBinaryLoopScanner.js";
 import { createPulseAdminInspector } from "../PULSE-TOOLS/PulseAdminInspector.js";

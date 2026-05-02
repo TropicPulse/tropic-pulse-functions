@@ -1,15 +1,19 @@
 // ============================================================================
-// BackwardEngine.js — v13.1-EVO-PRIME Backward Lane Engine
+// BackwardEngine.js — v14.0-PRESENCE-IMMORTAL Backward Lane Engine
 //  • Dual-band aware (symbolic/binary)
 //  • Drift-proof via normalized job/intents (multi-instance safe)
 //  • Binary-first, chunk/memory aware
 //  • Deterministic tick sequencing
+//  • ShifterPulse-aware (binary/regular band shifter, non-executable)
 // ============================================================================
+
+// Optional SHIFTER PULSE bridge (binary/regular band shifter, descriptive-only)
+import { ShifterPulse } from "./PulseShifterEvolutionaryPulse-v11-Evo.js";
 
 export const BackwardEngineMeta = Object.freeze({
   lane: "backward",
-  version: "13.1-EVO-PRIME",
-  identity: "BackwardEngine-v13.1-EVO-PRIME",
+  version: "14.0-PRESENCE-IMMORTAL",
+  identity: "BackwardEngine-v14.0-PRESENCE-IMMORTAL",
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
@@ -19,7 +23,9 @@ export const BackwardEngineMeta = Object.freeze({
     multiInstanceReady: true,
     dualBandAware: true,
     symbolicPrimary: true,
-    binaryNonExecutable: true
+    binaryNonExecutable: true,
+    shifterPulseAware: true,     // new: can use ShifterPulse for band-aware encode/chunk
+    shifterBinaryRegular: true   // new: binary/regular shifting is descriptive-only
   })
 });
 
@@ -38,6 +44,68 @@ function safe(fn, ...args) {
 
 // Monotonic tick sequence (engine-local)
 let globalTickId = 0;
+
+// ---------------------------------------------------------------------------
+// ShifterPulse adapter — band-aware wrapper around BinaryOrgan
+// ---------------------------------------------------------------------------
+function createShifterAdapter(BinaryOrgan) {
+  const hasShifter =
+    ShifterPulse &&
+    (typeof ShifterPulse.encode === "function" ||
+      typeof ShifterPulse.shiftEncode === "function");
+
+  // We never *require* ShifterPulse; we just prefer it when present.
+  function encode(value, { band }) {
+    if (hasShifter && typeof ShifterPulse.encode === "function") {
+      // band is descriptive-only; no routing, no randomness
+      return ShifterPulse.encode(value, { band: band || "symbolic" });
+    }
+    if (hasShifter && typeof ShifterPulse.shiftEncode === "function") {
+      return ShifterPulse.shiftEncode("regular", "binary", value, {
+        band: band || "symbolic"
+      });
+    }
+    return safe(BinaryOrgan.encode, value) || "";
+  }
+
+  function decode(bits, { band }) {
+    if (hasShifter && typeof ShifterPulse.decode === "function") {
+      return ShifterPulse.decode(bits, { band: band || "symbolic" });
+    }
+    if (hasShifter && typeof ShifterPulse.shiftDecode === "function") {
+      return ShifterPulse.shiftDecode("binary", "regular", bits, {
+        band: band || "symbolic"
+      });
+    }
+    return safe(BinaryOrgan.decode, bits);
+  }
+
+  function chunk(bits, { band }) {
+    if (hasShifter && typeof ShifterPulse.chunk === "function") {
+      return ShifterPulse.chunk(bits, { band: band || "symbolic" }) || [];
+    }
+    if (hasShifter && typeof ShifterPulse.shiftChunk === "function") {
+      return ShifterPulse.shiftChunk("binary", bits, {
+        band: band || "symbolic"
+      }) || [];
+    }
+    return safe(BinaryOrgan.chunk, bits) || [];
+  }
+
+  function dechunk(chunks, { band }) {
+    if (hasShifter && typeof ShifterPulse.dechunk === "function") {
+      return ShifterPulse.dechunk(chunks, { band: band || "symbolic" }) || "";
+    }
+    if (hasShifter && typeof ShifterPulse.shiftDechunk === "function") {
+      return ShifterPulse.shiftDechunk("binary", chunks, {
+        band: band || "symbolic"
+      }) || "";
+    }
+    return safe(BinaryOrgan.dechunk, chunks) || "";
+  }
+
+  return { encode, decode, chunk, dechunk, hasShifter };
+}
 
 // ---------------------------------------------------------------------------
 // Normalization / multi-instance drift-proofing
@@ -87,7 +155,7 @@ function normalizeMetrics(base, extra = {}) {
 }
 
 // ============================================================================
-// Factory — Backward Engine v13.1-EVO-PRIME
+// Factory — Backward Engine v14.0-PRESENCE-IMMORTAL
 // ============================================================================
 export function createBackwardEngine({
   BinaryOrgan,
@@ -100,9 +168,11 @@ export function createBackwardEngine({
     throw new Error("[BackwardEngine] BinaryOrgan and MemoryOrgan are required.");
   }
 
+  const Shifter = createShifterAdapter(BinaryOrgan);
+
   // --------------------------------------------------------------------------
   // Job intake (drift-proof, normalized)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function readJobQueue() {
     const raw = safe(MemoryOrgan.read, BACKWARD_JOB_QUEUE_KEY);
     if (!raw || !Array.isArray(raw)) return [];
@@ -138,7 +208,7 @@ export function createBackwardEngine({
 
   // --------------------------------------------------------------------------
   // Self-generated job when idle (deterministic shape)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function createSelfJob() {
     return normalizeJob(
       {
@@ -220,11 +290,13 @@ export function createBackwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // Binary encode + chunk + write results
-  // --------------------------------------------------------------------------
+  // Binary encode + chunk + write results (ShifterPulse-aware)
+// --------------------------------------------------------------------------
   function writeResult(result) {
-    const encoded = safe(BinaryOrgan.encode, result) || "";
-    const chunks  = safe(BinaryOrgan.chunk, encoded) || [];
+    const band = result.metrics.band || "symbolic";
+
+    const encoded = Shifter.encode(result, { band }) || "";
+    const chunks  = Shifter.chunk(encoded, { band }) || [];
 
     const packet = {
       bits: chunks,
@@ -234,7 +306,8 @@ export function createBackwardEngine({
         tickId: result.metrics.tickId,
         jobId: result.metrics.jobId,
         band: result.metrics.band,
-        dnaTag: result.metrics.dnaTag
+        dnaTag: result.metrics.dnaTag,
+        shifterPulse: Shifter.hasShifter === true ? "enabled" : "fallback-binary"
       }
     };
 
@@ -244,7 +317,8 @@ export function createBackwardEngine({
     if (trace) {
       console.log("[BackwardEngine] result written:", {
         key: BACKWARD_RESULT_KEY,
-        metrics: result.metrics
+        metrics: result.metrics,
+        shifterPulse: packet.meta.shifterPulse
       });
     }
   }
@@ -297,20 +371,28 @@ export function createBackwardEngine({
   }
 
   // --------------------------------------------------------------------------
-  // prewarm() — touch binary paths (binary-first, deterministic sample)
+  // prewarm() — touch binary paths via ShifterPulse (binary/regular, deterministic)
 // --------------------------------------------------------------------------
   function prewarm() {
+    const band = "symbolic";
     const sample = {
       lane: "backward",
       instanceId,
       intent: "prewarm",
-      band: "symbolic"
+      band
     };
-    const bits   = safe(BinaryOrgan.encode, sample) || "";
-    const chunks = safe(BinaryOrgan.chunk, bits) || [];
-    const flat   = safe(BinaryOrgan.dechunk, chunks) || "";
-    safe(BinaryOrgan.decode, flat);
-    if (trace) console.log("[BackwardEngine] prewarm complete.");
+
+    const bits   = Shifter.encode(sample, { band }) || "";
+    const chunks = Shifter.chunk(bits, { band }) || [];
+    const flat   = Shifter.dechunk(chunks, { band }) || "";
+    Shifter.decode(flat, { band });
+
+    if (trace) {
+      console.log("[BackwardEngine] prewarm complete.", {
+        band,
+        shifterPulse: Shifter.hasShifter === true ? "enabled" : "fallback-binary"
+      });
+    }
     return true;
   }
 
