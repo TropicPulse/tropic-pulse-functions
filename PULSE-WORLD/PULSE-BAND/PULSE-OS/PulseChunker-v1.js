@@ -322,42 +322,53 @@ export function createPulseChunker({ Brain, Logger } = {}) {
     return payload;
   }
 
-  // --------------------------------------------------------------------------
-  // PulseBandSession — deterministic session bootstrap
-  // --------------------------------------------------------------------------
-  function startPulseBandSession({
-    trace,
-    db: dbOverride,
-    fsAPI: fsOverride,
-    routeAPI: routeOverride,
-    schemaAPI: schemaOverride
-  } = {}) {
-    const now = Date.now().toString();
-    const seed = `${trace || "no-trace"}::${now}`;
-
-    const sessionId = crypto
-      .createHash("sha256")
-      .update(seed)
-      .digest("hex");
-
-    const session = {
-      id: sessionId,
-      startedAt: now,
-      db: dbOverride || db,
-      fsAPI: fsOverride || fsAPI,
-      routeAPI: routeOverride || routeAPI,
-      schemaAPI: schemaOverride || schemaAPI
-    };
-
-    sessions.set(sessionId, session);
-
-    log("[PulseChunker v14] PulseBandSession started", {
-      sessionId,
-      hasDb: !!session.db
-    });
-
-    return session;
+  // ============================================================================
+// DETERMINISTIC HASH — Pulse-native, no crypto
+// ============================================================================
+function computeHash(str) {
+  let h = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
+  return `h${h}`;
+}
+
+// --------------------------------------------------------------------------
+// PulseBandSession — deterministic session bootstrap
+// --------------------------------------------------------------------------
+function startPulseBandSession({
+  trace,
+  db: dbOverride,
+  fsAPI: fsOverride,
+  routeAPI: routeOverride,
+  schemaAPI: schemaOverride
+} = {}) {
+  const now = Date.now().toString();
+  const seed = `${trace || "no-trace"}::${now}`;
+
+  const sessionId = computeHash(seed);
+
+  const session = {
+    id: sessionId,
+    startedAt: now,
+    db: dbOverride || db,
+    fsAPI: fsOverride || fsAPI,
+    routeAPI: routeOverride || routeAPI,
+    schemaAPI: schemaOverride || schemaAPI
+  };
+
+  sessions.set(sessionId, session);
+
+  log("[PulseChunker v14] PulseBandSession started", {
+    sessionId,
+    hasDb: !!session.db
+  });
+
+  return session;
+}
+
+
 
   // --------------------------------------------------------------------------
   // Registration — backend organs that support chunking
@@ -403,53 +414,51 @@ export function createPulseChunker({ Brain, Logger } = {}) {
   // --------------------------------------------------------------------------
   // Core chunking primitive (metadata only; no splitting yet)
   // --------------------------------------------------------------------------
-  function chunkPayload({
+  // --------------------------------------------------------------------------
+// Core chunking primitive (metadata only; no splitting yet)
+// --------------------------------------------------------------------------
+function chunkPayload({
+  userId,
+  payload,
+  chunkSize = 1024 * 64,
+  baseVersion = "v1",
+  sizeOnly = false,
+  presenceTag = "default",
+  band = "dual"
+}) {
+  const buffer =
+    typeof payload === "string" ? Buffer.from(payload, "utf8") : Buffer.from(payload || []);
+
+  const payloadBytes = buffer.length;
+  const payloadHash = computeHash(buffer.toString("utf8"));
+
+  const totalChunks = sizeOnly
+    ? Math.ceil(payloadBytes / chunkSize)
+    : Math.max(1, Math.ceil(payloadBytes / chunkSize));
+
+  const sessionSeed = `${userId || "anon"}::${payloadHash}::${baseVersion}`;
+  const sessionId = computeHash(sessionSeed);
+
+  const result = {
+    sessionId,
+    totalChunks,
+    payloadBytes,
+    payloadHash,
+    presenceTag,
+    band
+  };
+
+  log("[PulseChunker v14] Chunk payload computed", {
     userId,
-    payload,
-    chunkSize = 1024 * 64,
-    baseVersion = "v1",
-    sizeOnly = false,
-    presenceTag = "default",
-    band = "dual"
-  }) {
-    const buffer =
-      typeof payload === "string" ? Buffer.from(payload, "utf8") : Buffer.from(payload || []);
+    payloadBytes,
+    totalChunks,
+    presenceTag,
+    band
+  });
 
-    const payloadBytes = buffer.length;
-    const payloadHash = crypto
-      .createHash("sha256")
-      .update(buffer)
-      .digest("hex");
+  return result;
+}
 
-    const totalChunks = sizeOnly
-      ? Math.ceil(payloadBytes / chunkSize)
-      : Math.max(1, Math.ceil(payloadBytes / chunkSize));
-
-    const sessionSeed = `${userId || "anon"}::${payloadHash}::${baseVersion}`;
-    const sessionId = crypto
-      .createHash("sha256")
-      .update(sessionSeed)
-      .digest("hex");
-
-    const result = {
-      sessionId,
-      totalChunks,
-      payloadBytes,
-      payloadHash,
-      presenceTag,
-      band
-    };
-
-    log("[PulseChunker v14] Chunk payload computed", {
-      userId,
-      payloadBytes,
-      totalChunks,
-      presenceTag,
-      band
-    });
-
-    return result;
-  }
 
   // --------------------------------------------------------------------------
   // Route Descriptor Folding — imports/assets/payloads

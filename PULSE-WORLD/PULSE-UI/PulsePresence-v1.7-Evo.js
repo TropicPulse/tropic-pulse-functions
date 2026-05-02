@@ -10,7 +10,8 @@ console.log("Presence");
 console.log("[PulseChunks-v2.0-MULTILANE-HYBRID] Membrane chunker loading...");
 
 import { safeRoute as route, fireAndForgetRoute } from "./PulseProofBridge.js";
-import { normalizeChunkValue, normalizeImage } from "./PulsePresenceNormalizer.js";
+import PulseChunkNormalizer from "./PulsePresenceNormalizer.js";
+
 
 // ============================================================================
 //  LORE TRANSLATOR — Evolvable, deterministic, metadata-driven
@@ -373,7 +374,7 @@ async function fetchChunk(url) {
 }
 
 // ============================================================================
-//  IMAGE-SPECIFIC CHUNKER — NORMALIZER-ALIGNED
+//  IMAGE-SPECIFIC CHUNKER — NORMALIZER-ALIGNED (v2.0 MULTILANE)
 // ============================================================================
 export async function getImage(url) {
   const { value, ok, error, envelope } = await fetchChunk(url);
@@ -387,9 +388,16 @@ export async function getImage(url) {
     return url;
   }
 
+  // 1) Fully unwrap DNA → raw payload
+  const unwrapped = PulseChunkNormalizer.unwrap(value);
+
+  // 2) Normalize binary → Blob / base64
+  const binary = PulseChunkNormalizer.normalizeBinary(unwrapped);
+
+  // 3) Normalize image → usable img.src
   const src =
-    normalizeImage(value) ||
-    normalizeChunkValue(value, "image") ||
+    PulseChunkNormalizer.normalizeImage(binary) ||
+    PulseChunkNormalizer.normalizeChunkValue(binary, "image") ||
     null;
 
   if (!src) {
@@ -539,9 +547,16 @@ async function autoLoadOfflineImages() {
         continue;
       }
 
+      // 1) Fully unwrap DNA → raw payload
+      const unwrapped = PulseChunkNormalizer.unwrap(value);
+
+      // 2) Normalize binary → Blob/base64
+      const binary = PulseChunkNormalizer.normalizeBinary(unwrapped);
+
+      // 3) Normalize image → usable src
       const src =
-        normalizeImage(value) ||
-        normalizeChunkValue(value, "image") ||
+        PulseChunkNormalizer.normalizeImage(binary) ||
+        PulseChunkNormalizer.normalizeChunkValue(binary, "image") ||
         null;
 
       if (!src) {
@@ -573,24 +588,34 @@ if (typeof window !== "undefined") {
     window.PulseBand.on("chunk", handlePulseBandPacket);
   }
 }
-
 // ============================================================================
-//  EXPOSE TO WINDOW — WITH STATE + CONTROLS + LANE STATS
+//  EXPOSE TO WINDOW — WITH STATE + CONTROLS + LANE STATS (v2.1 CLEAN)
 // ============================================================================
 window.PulseChunks = {
+  // Core API
   getImage,
   fetchChunk,
   prewarm,
   PulseChunker,
+
+  // State + degradation
   isDegraded: isChunksDegraded,
   resetState: resetChunksState,
+
+  // Dechunking utilities
   dechunk,
   dechunkAll,
-  normalizeChunkValue,
+
+  // Full normalizer organ (v2.0 MULTILANE)
+  normalizer: PulseChunkNormalizer,
+
+  // Lane system
   lanes,
   getLaneStats: getLaneStatsSnapshot,
 };
 
 export default window.PulseChunks;
 
-console.log("[PulseChunks-v2.0-MULTILANE-HYBRID] Ready — 32-lane membrane active with sectional fallback + universal de-chunking + offline image auto-loader + lane stats.");
+console.log(
+  "[PulseChunks-v2.1-MULTILANE-HYBRID] Ready — 32-lane membrane active, full normalizer attached, sectional fallback, universal de-chunking, offline image loader fixed, lane stats online."
+);
