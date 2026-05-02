@@ -26,6 +26,42 @@
 // • Deterministic: same system → same reflection
 // • Zero imports — all dependencies injected by CNS
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshEcho",
+  version: "v14.9-MESH-ECHO",
+  layer: "mesh",
+  role: "mesh_reflex_and_echo_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    reflex: true,                   // Reflex arc organ
+    echo: true,                     // Echo/bounce propagation
+    binaryAware: true,              // Binary reflex signals
+    symbolicAware: true,            // Symbolic reflex signals
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshAwareness",
+      "PulseMeshCognition"
+    ],
+    never: [
+      "legacyMeshEcho",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

@@ -4,6 +4,44 @@
 //  Deterministic Job Intake + Result Forwarding + Reputation Updating
 //  Dual-Band + Binary + Wave + Presence + Chunk/Prewarm (descriptive-only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnNervousSystem",
+  version: "v14-IMMORTAL",
+  layer: "earn_nervous",
+  role: "earn_signal_router",
+  lineage: "PulseEarnNervousSystem-v10.4 → v11-Evo → v14-IMMORTAL",
+
+  evo: {
+    nervousSystem: true,
+    signalRouting: true,
+    sensoryIntake: true,
+    motorOutput: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMuscleSystem",
+      "PulseEarnReflexRouter",
+      "PulseEarnSkeletalSystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnNervousSystemMeta = Object.freeze({
   layer: "PulseEarnNervousSystem",

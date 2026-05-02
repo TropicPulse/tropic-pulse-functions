@@ -3,6 +3,41 @@
 //  ROUTER DESIGN CORTEX (Symbolic + Binary + Advantage + Prewarm/Cache/Chunk/Multi‑Presence)
 //  Deterministic Architectural Memory • Drift‑Proof • Pure Memory Organ
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouterEvolutionaryDesign",
+  version: "v14.4-EVO-DESIGN",
+  layer: "frontend",
+  role: "router_design_cortex",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    designCore: true,
+    deterministic: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    longTermMemory: true,
+    lineageAware: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterEvolutionaryInstincts",
+      "PulseRouterEvolutionaryThought"
+    ],
+    never: [
+      "legacyRouterDesign",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ------------------------------------------------------------

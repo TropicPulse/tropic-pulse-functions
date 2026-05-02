@@ -3,6 +3,44 @@
 //  THE FORAGER — Salad Marketplace Receptor (v13.0 Presence + Advantage‑C‑13.0)
 //  Deterministic receptor DNA + A‑B‑A + Unified Presence + Chunk/Prewarm v13
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktForager",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "market_forager",
+  lineage: "PulseEarnMktForager-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    marketForager: true,
+    jobDiscovery: true,
+    jobHarvesting: true,
+    jobNormalization: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktCourier",
+      "PulseEarnMktEmbassyLedger",
+      "PulseEarnMktBroker"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktForagerMeta = Object.freeze({
   layer: "PulseEarnMktForager",

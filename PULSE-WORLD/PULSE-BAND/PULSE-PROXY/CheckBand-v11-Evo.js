@@ -30,6 +30,46 @@
 //   • Deterministic, loggable, replayable, binary‑aware, presence‑aware
 //   • Snapshots are metadata‑only, safe for OS‑Healer + GlobalHealer
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "CheckBand",
+  version: "v14.4-IMMORTAL-DUALBAND",
+  layer: "backend_healer",
+  role: "band_integrity_healer",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    healerCore: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    driftAware: true,
+    lineageAware: true,
+    deterministic: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseBand",
+      "PulsePresence",
+      "CheckIdentity",
+      "CheckRouterMemory"
+    ],
+    never: [
+      "legacyCheckBand",
+      "legacyBandHealer",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
+const admin = global.db;
+const db    = global.db;
+import { VitalsLogger as logger }        from "./PulseProofLogger.js";
+import { PulseLineage } from "./PulseProxyBBB.js";
 
 export const PulseOSCheckBandMeta = Object.freeze({
   layer: "PulseProxyAdrenalSystem",

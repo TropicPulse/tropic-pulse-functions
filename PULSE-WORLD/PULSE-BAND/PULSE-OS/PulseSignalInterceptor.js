@@ -1,41 +1,95 @@
-// -----------------------------------------------------------------------------
-// PulseSignalInterceptor.js — OFFLINE CNS + DUALBAND AI EXECUTION LISTENER
-// -----------------------------------------------------------------------------
+// ============================================================================
+// PulseSignalInterceptor.js — v14 IMMORTAL
+// OFFLINE CNS + DUALBAND AI EXECUTION LISTENER + IMAGE LOADER ORGAN
+// ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSignalInterceptor",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_signal_interceptor",
+  lineage: "PulseOS-v14",
 
+  evo: {
+    interceptor: true,
+    reflexFilter: true,
+    anomalyDetection: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSNervousSystem",
+      "PulseOSSpinalCord",
+      "PulseOSFightFlightResponse"
+    ],
+    never: [
+      "legacySignalInterceptor",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
+
+// ============================================================================
+// IMPORTS — CNS ROUTER + DUALBAND AI ENGINE
+// ============================================================================
 import { route as CNSRoute } from "../PULSE-BAND/PULSE-OS/PulseOSCNSNervousSystem.js";
 import { startDualBandAIEngine } from "../PULSE-BAND/PULSE-AI/DualBandAIEngine.js";
 
+// ============================================================================
+// BROADCAST CHANNEL — PulseCNS
+// This is the nervous system "axon" that carries CNS messages between:
+//   • UI → CNS
+//   • CNS → UI
+//   • AI Engine → UI
+// ============================================================================
 const channel = new BroadcastChannel("PulseCNS");
 
-// -----------------------------------------------------------------------------
-// OFFLINE IMAGE LOADER — uses CNS FS + PATH
-// -----------------------------------------------------------------------------
+// ============================================================================
+// OFFLINE IMAGE LOADER — v14 IMMORTAL
+// Uses CNS virtual filesystem + path resolver
+// NEVER uses network fetch
+// NEVER leaks filesystem paths
+// ALWAYS returns deterministic envelopes
+// ============================================================================
 async function fetchImageOffline(url) {
   try {
-    // Extract filename
+    // Extract filename from URL
     const filename = url.split("/").pop();
 
-    // Build path using CNS virtual path resolver
+    // Resolve virtual path: _PICTURES/<filename>
     const picturePath = await CNSRoute("path.join", {
       parts: ["_PICTURES", filename]
     });
 
-    // Check existence
-    const exists = await CNSRoute("fs.exists", {
-      path: picturePath
-    });
+    // Check if file exists in CNS FS
+    const exists = await CNSRoute("fs.exists", { path: picturePath });
 
     if (!exists) {
       return {
         ok: false,
-        error: `File not found in _PICTURES: ${filename}`
+        error: `File not found in _PICTURES: ${filename}`,
+        filename,
+        from: "_PICTURES"
       };
     }
 
-    // Read binary file
-    const binary = await CNSRoute("fs.readBinary", {
-      path: picturePath
-    });
+    // Read binary file (base64)
+    const binary = await CNSRoute("fs.readBinary", { path: picturePath });
 
     return {
       ok: true,
@@ -52,15 +106,22 @@ async function fetchImageOffline(url) {
   }
 }
 
-// -----------------------------------------------------------------------------
-// MAIN SIGNAL HANDLER
-// -----------------------------------------------------------------------------
+// ============================================================================
+// MAIN SIGNAL HANDLER — v14 IMMORTAL
+// Handles:
+//   • CNS_REQUEST
+//   • IMAGE_REQUEST
+//   • DUALBAND_AI_START
+//
+// This organ is the "interceptor" between UI and CNS/AI subsystems.
+// It MUST be deterministic, safe, and never mutate incoming messages.
+// ============================================================================
 channel.onmessage = async (event) => {
   const msg = event.data;
   if (!msg) return;
 
   // ---------------------------------------------------------------------------
-  // CNS REQUEST
+  // CNS REQUEST — symbolic or binary CNS execution
   // ---------------------------------------------------------------------------
   if (msg.type === "CNS_REQUEST") {
     const { requestId, path, payload } = msg;
@@ -74,8 +135,10 @@ channel.onmessage = async (event) => {
     let result;
 
     try {
+      // Execute CNS route (symbolic or binary)
       result = await CNSRoute(path, payload);
     } catch (err) {
+      // Deterministic error envelope
       result = {
         error: true,
         message: err?.message || "CNS execution error",
@@ -83,6 +146,7 @@ channel.onmessage = async (event) => {
       };
     }
 
+    // Respond back to UI
     channel.postMessage({
       type: "CNS_RESPONSE",
       requestId,
@@ -93,12 +157,16 @@ channel.onmessage = async (event) => {
   }
 
   // ---------------------------------------------------------------------------
-  // IMAGE REQUEST (OFFLINE IMAGE LOADING)
+  // IMAGE REQUEST — offline CNS FS loader
   // ---------------------------------------------------------------------------
   if (msg.type === "IMAGE_REQUEST") {
     const { requestId, url } = msg;
 
-    console.log("[PulseSignalInterceptor] ← IMAGE_REQUEST", url);
+    console.log(
+      "%c[PulseSignalInterceptor] ← IMAGE_REQUEST",
+      "color:#3498DB; font-weight:bold;",
+      url
+    );
 
     const data = await fetchImageOffline(url);
 
@@ -112,7 +180,10 @@ channel.onmessage = async (event) => {
   }
 
   // ---------------------------------------------------------------------------
-  // DUALBAND AI START
+  // DUALBAND AI START — boots the AI engine
+  // AI engine can emit:
+  //   • DUALBAND_AI_EVENT
+  //   • DUALBAND_BOOT
   // ---------------------------------------------------------------------------
   if (msg.type === "DUALBAND_AI_START") {
     console.log(
@@ -122,9 +193,10 @@ channel.onmessage = async (event) => {
     );
 
     try {
+      // Boot AI engine with provided options
       const ai = await startDualBandAIEngine(msg.options || {});
 
-      // AI ENGINE CAN EMIT EVENTS BACK TO UI
+      // AI → UI event channel
       ai.on("event", (data) => {
         channel.postMessage({
           type: "DUALBAND_AI_EVENT",
@@ -132,7 +204,7 @@ channel.onmessage = async (event) => {
         });
       });
 
-      // AI ENGINE CAN REQUEST ORGANISM BOOT
+      // AI → UI organism boot request
       ai.on("boot-organism", (bootOptions) => {
         channel.postMessage({
           type: "DUALBAND_BOOT",

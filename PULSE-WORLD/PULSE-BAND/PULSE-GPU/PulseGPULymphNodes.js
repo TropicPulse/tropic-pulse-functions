@@ -26,6 +26,41 @@
 //  • Self-repair-ready: all outputs include metadata
 //  • Deterministic: same inputs → same healing result
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPULymphNodes",
+  version: "v14-IMMORTAL",
+  layer: "gpu_guardian",
+  role: "gpu_lymph_nodes",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuHealer: true,
+    gpuCleanup: true,
+    gpuAnomalyBuffer: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUGuardianCortex",
+      "PulseGPUDriveCenter"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyLymphNodes"
+    ]
+  }
+}
+*/
 
 import { PulseGPUSettingsRestorer } from "./PulseGPUCognitiveLayer.js";
 import { PulseGPUUXBridge } from "./PulseGPUCognitiveIntelligence.js";

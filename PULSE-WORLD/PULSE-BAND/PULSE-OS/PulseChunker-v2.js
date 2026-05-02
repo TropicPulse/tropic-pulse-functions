@@ -6,6 +6,46 @@
 //  - Route-level folding carpet (full route chunking)
 //  - PulseBandSession-aware
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseChunker",
+  version: "v14-IMMORTAL",
+  layer: "os_chunker",
+  role: "chunking_and_prewarm_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    chunking: true,
+    prewarm: true,
+    cacheAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSBBB",
+      "PulseBinaryOS"
+    ],
+    never: [
+      "legacyChunker",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 // UNIVERSAL CNS GLOBAL SURFACE — v13 SPINE

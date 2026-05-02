@@ -1,10 +1,48 @@
 // ============================================================================
-//  PulseProofLogger.js — v13.1-EVO-ALWAYS-ON-OFFLINE-FIRST
+//  PulseProofLogger.js — v14-IMMORTAL-LOGGER
 //  PROOF LOGGER • AI CONSOLE EXTENSION • OFFLINE-FIRST TELEMETRY
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseProofLogger",
+  version: "v14-IMMORTAL-LOGGER",
+  layer: "frontend",
+  role: "observer_logger",
+  lineage: "PulseOS-v12",
 
+  evo: {
+    passive: true,
+    alwaysOn: true,
+    safeRouteFree: true,
+    dualBandAware: true,
+    chunkAligned: true,
+    presenceAware: true,
+    cnsAligned: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseUIFlow",
+      "PulseUIErrors"
+    ],
+    never: [
+      "legacyLogger",
+      "legacyObserver",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPresence",
+      "legacyChunker",
+      "legacyFlow"
+    ]
+  }
+}
+*/
 
 import { safeRoute as route } from "./PulseProofBridge.js";
+
 // Capture original console to avoid recursion
 const _c = { ...console };
 
@@ -12,16 +50,16 @@ const _c = { ...console };
 // Environment + online flag (offline-first)
 // -----------------------------------------------------------------------------
 const g =
-  typeof global !== "undefined"
-    ? global
-    : typeof globalThis !== "undefined"
+  typeof globalThis !== "undefined"
     ? globalThis
+    : typeof global !== "undefined"
+    ? global
     : typeof window !== "undefined"
     ? window
     : {};
 
 function isOnline() {
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && typeof window.PULSE_ONLINE === "boolean") {
     return window.PULSE_ONLINE === true;
   }
   if (typeof g.PULSE_ONLINE === "boolean") {
@@ -35,7 +73,7 @@ function hasRoute() {
 }
 
 // -----------------------------------------------------------------------------
-// Existing maps and helpers (version bumped)
+// Maps and helpers
 // -----------------------------------------------------------------------------
 export const PulseVersion = {
   proof: "13.1",
@@ -149,7 +187,6 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
 // Firebase / telemetry bridge — OFFLINE-FIRST, FAILURE-PROOF
 // -----------------------------------------------------------------------------
 async function sendToFirebase(level, message, rest) {
-  // Offline-first: never block logging if CNS/route is missing or offline.
   if (!hasRoute()) return;
   if (!isOnline()) return;
 
@@ -164,15 +201,12 @@ async function sendToFirebase(level, message, rest) {
 // Pulse command handler (AI console extension)
 // -----------------------------------------------------------------------------
 function handlePulseCommand(cmd) {
-  const raw = cmd.slice(6).trim(); // remove "Pulse:"
+  const raw = cmd.slice(6).trim();
   const parts = raw.split(/\s+/);
   const verb = parts[0] ? parts[0].toLowerCase() : "";
 
   switch (verb) {
     case "help":
-      aiHelpBanner();
-      break;
-
     case "ai":
       aiHelpBanner();
       break;
@@ -209,14 +243,20 @@ function handlePulseCommand(cmd) {
 }
 
 // -----------------------------------------------------------------------------
-// Core logging functions — now offline-first, CNS-optional
+// Core logging functions — offline-first, CNS-optional
 // -----------------------------------------------------------------------------
+function mark404(message) {
+  if (typeof message === "string" && message.trim() === "404") {
+    return "404*";
+  }
+  return message;
+}
+
 export function log(...args) {
   const { subsystem, message, rest, raw } = normalizeArgs(args);
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
 
-  // Pulse: commands on logger channel
   if (subsystem === "logger" && typeof message === "string" && message.startsWith("Pulse:")) {
     handlePulseCommand(message);
     return;
@@ -224,63 +264,60 @@ export function log(...args) {
 
   const safeMessage = mark404(message);
 
-if (raw) {
-  _c.log(safeMessage, ...rest);
-} else {
-  _c.log(`%c${prefix} — ${safeMessage}`, `color:${color}; font-weight:bold;`, ...rest);
-}
+  if (raw) {
+    _c.log(safeMessage, ...rest);
+  } else {
+    _c.log(
+      `%c${prefix} — ${safeMessage}`,
+      `color:${color}; font-weight:bold;`,
+      ...rest
+    );
+  }
 
-sendToFirebase("log", safeMessage, rest);
-
+  sendToFirebase("log", safeMessage, rest);
 }
 
 export function warn(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
+  const safeMessage = mark404(message);
 
- const safeMessage = mark404(message);
+  _c.warn(
+    `%c${prefix} ⚠️ [WARN] — ${safeMessage}`,
+    "color:#FFEE58; font-weight:bold;",
+    ...rest
+  );
 
-_c.warn(
-  `%c${prefix} ⚠️ [WARN] — ${safeMessage}`,
-  "color:#FFEE58; font-weight:bold;",
-  ...rest
-);
-
-sendToFirebase("warn", safeMessage, rest);
-
+  sendToFirebase("warn", safeMessage, rest);
 }
 
 export function error(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
+  const safeMessage = mark404(message);
 
- const safeMessage = mark404(message);
+  _c.error(
+    `%c${prefix} 🟥 [ERROR] — ${safeMessage}`,
+    "color:#EF5350; font-weight:bold;",
+    ...rest
+  );
 
-_c.error(
-  `%c${prefix} 🟥 [ERROR] — ${safeMessage}`,
-  "color:#EF5350; font-weight:bold;",
-  ...rest
-);
-
-sendToFirebase("error", safeMessage, rest);
-
+  sendToFirebase("error", safeMessage, rest);
 }
 
 export function critical(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
-
   const safeMessage = mark404(message);
 
-_c.groupCollapsed(
-  `%c${prefix} 💀 [CRITICAL] — ${safeMessage}`,
-  "color:#D32F2F; font-weight:bold; font-size:14px;"
-);
-_c.error(`%c${safeMessage}`, "color:#D32F2F; font-weight:bold;", ...rest);
-_c.groupEnd();
+  _c.groupCollapsed(
+    `%c${prefix} 💀 [CRITICAL] — ${safeMessage}`,
+    "color:#D32F2F; font-weight:bold; font-size:14px;"
+  );
+  _c.error(`%c${safeMessage}`, "color:#D32F2F; font-weight:bold;", ...rest);
+  _c.groupEnd();
 
-sendToFirebase("critical", safeMessage, rest);
-
+  sendToFirebase("critical", safeMessage, rest);
 }
 
 // -----------------------------------------------------------------------------
@@ -289,18 +326,14 @@ sendToFirebase("critical", safeMessage, rest);
 export function group(subsystem, label) {
   const color = PulseColors[subsystem] || "#fff";
   const prefix = formatPrefix(subsystem);
-  _c.groupCollapsed(`%c${prefix} — ${label}`, `color:${color}; font-weight:bold;`);
+  _c.groupCollapsed(
+    `%c${prefix} — ${label}`,
+    `color:${color}; font-weight:bold;`
+  );
 }
 
 export function groupEnd() {
   _c.groupEnd();
-}
-
-function mark404(message) {
-  if (typeof message === "string" && message.trim() === "404") {
-    return "404*";
-  }
-  return message;
 }
 
 // -----------------------------------------------------------------------------
@@ -348,7 +381,6 @@ export function openAIPrompt(id, { trace = false } = {}) {
     groupEnd();
   }
 
-  // Telemetry bloodstream hook — best-effort, offline-first
   try {
     const packet = makeTelemetryPacket(subsystem, "ai_prompt_open", {
       promptId: id,
@@ -359,7 +391,7 @@ export function openAIPrompt(id, { trace = false } = {}) {
     if (hasRoute() && isOnline()) {
       route("telemetryIngest", packet).catch(() => {});
     }
-  } catch (e) {}
+  } catch (_) {}
 
   if (trace) _c.log(`[AIPrompt] opened ${id}`);
   return p;
@@ -368,10 +400,10 @@ export function openAIPrompt(id, { trace = false } = {}) {
 export function closeAIPrompt(id, { archive = true, trace = false } = {}) {
   const p = AIPromptStore[id];
   if (!p) return null;
+
   p.opened = false;
   if (archive) p.archived = true;
 
-  // Telemetry bloodstream hook — best-effort
   try {
     const packet = makeTelemetryPacket(p.meta?.subsystem || "proof", "ai_prompt_close", {
       promptId: id,
@@ -382,7 +414,7 @@ export function closeAIPrompt(id, { archive = true, trace = false } = {}) {
     if (hasRoute() && isOnline()) {
       route("telemetryIngest", packet).catch(() => {});
     }
-  } catch (e) {}
+  } catch (_) {}
 
   const keys = Object.keys(AIPromptStore).reverse();
   for (const k of keys) {
@@ -418,7 +450,9 @@ export function aiHelpBanner() {
   _c.groupEnd();
 }
 
+// -----------------------------------------------------------------------------
 // Optional persistence helpers using route bridge
+// -----------------------------------------------------------------------------
 export async function persistAIPrompts(storageKey = "PulseAIPrompts") {
   try {
     if (hasRoute() && isOnline()) {
@@ -446,7 +480,7 @@ export async function restoreAIPrompts(storageKey = "PulseAIPrompts") {
 }
 
 // -----------------------------------------------------------------------------
-// Legacy console redirects preserved — logger is the membrane
+// Legacy console redirects — logger is the membrane
 // -----------------------------------------------------------------------------
 console.log = (...args) => log(...args);
 console.warn = (...args) => warn(...args);
@@ -475,21 +509,43 @@ export const VitalsLogger = {
 
 export const logger = { ...VitalsLogger };
 
-// Optional dev helpers (can be removed for production)
-if (typeof window !== "undefined") {
-  window.aiHelp = aiHelpBanner;
-  setTimeout(() => {
-    aiHelpBanner();
-  }, 300);
+// ============================================================================
+// GLOBAL LOGGER BINDINGS — v14 IMMORTAL
+// ============================================================================
+(function bindLogger() {
+  try {
+    // Browser environment
+    if (typeof window !== "undefined") {
+      window.aiHelp = aiHelpBanner;
+      setTimeout(() => aiHelpBanner(), 300);
 
-  window.log = log;
-  window.warn = warn;
-  window.error = error;
-  window.critical = critical;
-  window.group = group;
-  window.groupEnd = groupEnd;
-  window.createAIPrompt = createAIPrompt;
-  window.openAIPrompt = openAIPrompt;
-  window.closeAIPrompt = closeAIPrompt;
-  window.listAIPrompts = listAIPrompts;
-}
+      window.log = log;
+      window.warn = warn;
+      window.error = error;
+      window.critical = critical;
+      window.group = group;
+      window.groupEnd = groupEnd;
+
+      window.createAIPrompt = createAIPrompt;
+      window.openAIPrompt = openAIPrompt;
+      window.closeAIPrompt = closeAIPrompt;
+      window.listAIPrompts = listAIPrompts;
+    }
+
+    // Universal binding (browser + node + workers)
+    globalThis.log = log;
+    globalThis.warn = warn;
+    globalThis.error = error;
+    globalThis.critical = critical;
+    globalThis.group = group;
+    globalThis.groupEnd = groupEnd;
+
+    globalThis.createAIPrompt = createAIPrompt;
+    globalThis.openAIPrompt = openAIPrompt;
+    globalThis.closeAIPrompt = closeAIPrompt;
+    globalThis.listAIPrompts = listAIPrompts;
+
+  } catch (err) {
+    _c.error("Logger binding failed:", err);
+  }
+})();

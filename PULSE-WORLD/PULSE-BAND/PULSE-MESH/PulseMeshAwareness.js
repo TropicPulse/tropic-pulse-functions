@@ -31,6 +31,41 @@
 //  • Binary-aware: reflects binary vs symbolic vs dual activity (metadata-only)
 //  • Presence-aware: reflects band + presence tags (metadata-only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshAwareness",
+  version: "v14.9-MESH-AWARENESS",
+  layer: "mesh",
+  role: "mesh_sensory_awareness",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    meshAware: true,                // Reads mesh topology + hops
+    presenceAware: true,            // Reads presence field
+    binaryAware: true,              // Binary mesh signals
+    dualBand: true,                 // Symbolic + binary sensing
+    deterministic: true,            // No randomness in awareness
+    driftProof: true,               // Awareness must be stable
+    zeroMutationOfInput: true,      // Never mutate mesh/presence objects
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshPresenceRelay",
+      "PulsePresence",
+      "PulseMeshAura"
+    ],
+    never: [
+      "legacyMeshAwareness",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

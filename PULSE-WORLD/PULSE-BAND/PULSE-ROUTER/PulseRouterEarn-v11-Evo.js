@@ -3,6 +3,41 @@
 //  Deterministic Earn Routing • Pattern/Lineage/Page/Binary-Aware
 //  + CoreMemory Integration: hot patterns/pages/binary surfaces
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouterEarn",
+  version: "v14.4-EVO",
+  layer: "frontend",
+  role: "earn_router",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    earnCore: true,
+    advantageV2: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterCommandments",
+      "PulsePresence",
+      "PulseChunks"
+    ],
+    never: [
+      "legacyEarnRouter",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 

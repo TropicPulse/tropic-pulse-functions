@@ -16,6 +16,46 @@
 // • Binary-aware, dual-mode-ready, presence-band-aware, dual-band-ready.
 // • No pressure gating, no route-mode logic, no factoring logic.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshThalamus",
+  version: "v14.9-MESH-THALAMUS",
+  layer: "mesh",
+  role: "mesh_deterministic_relay",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    thalamus: true,                 // This IS the thalamus organ
+    relayOnly: true,                // Pure relay, no logic
+    metadataOnly: true,             // No routing, no pressure, no factoring
+    deterministic: true,
+    driftProof: true,
+    binaryAware: true,
+    symbolicAware: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshAwareness",
+      "PulseMeshCognition"
+    ],
+    never: [
+      "legacyMeshThalamus",
+      "safeRoute",
+      "fetchViaCNS",
+      "pressureLogic",
+      "routeMode",
+      "factoringLogic"
+    ]
+  }
+}
+*/
 
 const ThalamusMeta = {
   layer: "PulseMeshThalamus",

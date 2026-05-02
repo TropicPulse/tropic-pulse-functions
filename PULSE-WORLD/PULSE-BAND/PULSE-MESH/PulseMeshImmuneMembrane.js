@@ -24,6 +24,46 @@
 // • Unified-advantage-field, multi-instance-ready.
 // • Zero randomness, zero timestamps, zero async.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshImmuneMembrane",
+  version: "v14.9-MESH-IMMUNE-MEMBRANE",
+  layer: "mesh",
+  role: "mesh_integrity_and_immune_barrier",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    immune: true,                   // This IS the immune membrane
+    driftDetection: true,           // Detects drift in mesh signals
+    anomalyDetection: true,         // Detects abnormal impulses
+    binaryAware: true,              // Binary immune flags
+    symbolicAware: true,            // Symbolic immune flags
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,             // No routing, no compute
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshEndocrineSystem",
+      "PulseMeshAwareness",
+      "PulseMeshCognition"
+    ],
+    never: [
+      "legacyMeshImmune",
+      "legacyMeshMembrane",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseImmune() {
 

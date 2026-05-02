@@ -31,6 +31,46 @@
 //  • Presence-aware but presence stays in metadata only
 // ============================================================================
 
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshAura",
+  version: "v14.9-MESH-AURA-IMMORTAL",
+  layer: "mesh",
+  role: "mesh_aura_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    meshAura: true,                 // This IS the mesh aura organ
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Reads mesh topology
+    binaryAware: true,              // Binary artery + binary mesh
+    advantageAware: true,           // Advantage cascade fields
+    chunkPrewarmReady: true,        // Chunk/prewarm integration
+    deterministic: true,            // No randomness
+    driftProof: true,               // No drift in aura fields
+    zeroRandomness: true,           // Aura must be stable
+    zeroAsync: true,                // Aura must be synchronous
+    zeroMutationOfInput: true,      // Never mutate presence/mesh objects
+    zeroNetworkFetch: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshPresenceRelay",
+      "PulsePresence",
+      "PresenceAwareness",
+      "PresenceAIView"
+    ],
+    never: [
+      "legacyMeshAura",
+      "legacyPresenceAura",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // -----------------------------------------------------------
 // Aura State (global, metadata-only)

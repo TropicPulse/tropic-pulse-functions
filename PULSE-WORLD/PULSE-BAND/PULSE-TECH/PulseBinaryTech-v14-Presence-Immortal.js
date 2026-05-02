@@ -24,6 +24,49 @@
 //   • Binary math stays pure; all pulse engines are consumers only.
 //   • No randomness, no time, no IO, no network.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinaryTech",
+  version: "v14.4-PRESENCE-IMMORTAL",
+  layer: "frontend",
+  role: "binary_tech_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryCore: true,
+    immortalBand: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    cnsAligned: true,
+    advantageV2: true,
+    multiPulseFamily: true,
+    noInlineBuilders: true
+  },
+
+  contract: {
+    always: [
+      "PulseBinaryPulse",
+      "PulseBinaryShifter",
+      "PulseBinaryEarn",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseSend",
+      "PulseWindow"
+    ],
+    never: [
+      "legacyBinaryTech",
+      "legacyBinaryPulse",
+      "legacyPresence",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyChunker",
+      "legacyFallback"
+    ]
+  }
+}
+*/
 
 // ---------------------------------------------------------------------------
 // IMPORTS — adjust paths to match your repo layout

@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // ============================================================================
 //  PULSE OS v12.3-EVO-PRESENCE — PULSEBAND PURIFIER (BACKEND CLEANUP ORGAN)
 //  “THE PURIFIER / SANITY LAYER / ORDER‑KEEPER”
@@ -36,6 +37,8 @@
 // ============================================================================
 
 
+const admin = global.db;
+const db    = global.db;
 // ============================================================================
 // ORGAN IDENTITY — v12.3-EVO-PRESENCE
 // ============================================================================

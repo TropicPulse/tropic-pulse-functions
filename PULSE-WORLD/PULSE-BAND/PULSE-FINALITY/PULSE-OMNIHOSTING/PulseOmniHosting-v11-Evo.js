@@ -1,69 +1,3 @@
-/**
- * META {
- *   organ: "PulseOmniHosting",
- *   root: "PULSE-FINALITY",
- *   mode: "substrate",
- *   target: "omnidirectional-hosting",
- *   version: "v12.3-PRESENCE-EVO+",
- *
- *   role: "Universal hosting mesh. Determines where an organism can run, move, replicate, or failover.",
- *
- *   guarantees: {
- *     deterministic: true,
- *     hostAgnostic: true,
- *     multiInstanceReady: true,
- *     zeroBackend: true,
- *     zeroNetwork: true,
- *     reversiblePlacement: true,
- *     noRandomness: true,
- *
- *     // 12.3+ presence / advantage surface
- *     presenceAware: true,
- *     advantageAware: true,
- *     fallbackBandAware: true,
- *     chunkAware: true,
- *     cacheAware: true,
- *     prewarmAware: true
- *   },
- *
- *   contracts: {
- *     input: [
- *       "PulseSchema",
- *       "HostDescriptor",
- *       "RegionDescriptor"
- *     ],
- *     output: [
- *       "PlacementPlan",
- *       "FailoverPlan",
- *       "HostCapabilityMatrix"
- *     ]
- *   },
- *
- *   upstream: [
- *     "PulseSchema",
- *     "RegioningPhysics",
- *     "EnvironmentPhysics"
- *   ],
- *
- *   downstream: [
- *     "PulseContinuance",
- *     "DeploymentPhysics",
- *     "DeltaEngine",
- *     "SnapshotPhysics",
- *     "LineageEngine",
- *     "PulseOmniHosting-CoreMemory-v12.3-PRESENCE-EVO+"
- *   ],
- *
- *   notes: [
- *     "OmniHosting is the universal hosting mesh.",
- *     "Hosts are interchangeable. No host defines truth.",
- *     "Placement is deterministic and reversible.",
- *     "Failover is schema-aware and region-aware.",
- *     "This organ enables multi-instance minimal survival.",
- *     "12.3+ adds presence/fallback/chunk/cache/prewarm hints as pure symbolic metadata."
- *   ]
- * }
- */
 
 /**
  * PulseOmniHosting-v12.3-PRESENCE-EVO+.js
@@ -85,6 +19,44 @@
  *   - Always produce reversible placement plans.
  *   - 12.3+: expose presence/fallback/chunk/cache/prewarm hints as symbolic fields only.
  */
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOmniHosting",
+  version: "v14-IMMORTAL",
+  layer: "hosting",
+  role: "omni_hosting_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    hostingEngine: true,
+    capabilityMatrix: true,
+    placementPlanner: true,
+    failoverPlanner: true,
+    hostEligibility: true,
+    hostTrendModeling: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseContinuance",
+      "PulseSchema"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyOmniHosting"
+    ]
+  }
+}
+*/
 
 // -------------------------
 // META EXPORT

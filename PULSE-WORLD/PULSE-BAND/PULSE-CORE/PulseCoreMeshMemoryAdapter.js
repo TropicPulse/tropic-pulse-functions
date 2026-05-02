@@ -9,6 +9,42 @@
 //  • Presence‑touch propagation
 //  • TTL + healing compatible
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreMeshMemoryAdapter",
+  version: "v14-IMMORTAL",
+  layer: "corememory_adapter",
+  role: "mesh_memory_adapter",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    adapter: true,
+    meshMemoryBridge: true,        // symbolic ↔ binary memory bridge for Mesh
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreMemory",
+      "PulseCoreBrain",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createPulseBinaryOverlay } from "./PulseBinaryCoreOverlay.js";
 

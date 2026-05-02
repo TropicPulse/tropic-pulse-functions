@@ -16,6 +16,49 @@
 // • ⭐ Binary‑aware, pulse‑aware, dual‑band, shifter‑aware (symbolic + binary).
 // • ⭐ Presence/harmonics/IMMORTAL band metadata surfaced as pure schema only.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSpecsDNAGenome",
+  version: "v14-IMMORTAL",
+  layer: "genome",
+  role: "os_data_genome",
+  lineage: "PulseSpecsDNAGenome-v1 → v9.1 → v10.4 → v11-Evo → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    genomeCore: true,               // canonical PulseField language
+    immutable: true,                // structure MUST NEVER change
+    schemaOnly: true,               // no logic, no runtime, no execution
+    deterministic: true,            // pure static spec
+    driftProof: true,               // cannot drift across versions
+    translationSpec: true,          // SQL ↔ Firestore ↔ PulseField
+    validationRules: true,          // PulseField rule definitions
+    mappingRules: true,             // type mapping law
+    nonExecutable: true,            // MUST NOT contain executable logic
+    metadataOnlyEvolution: true,    // only version + identity may evolve
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+    pureSpec: true
+  },
+
+  contract: {
+    always: [
+      "PulseSchema",                // schema unification engine
+      "PulseContinuance",           // continuity + survival modeling
+      "PulseOmniHosting",           // hosting + placement logic
+      "PulseCoreMemory"             // core memory integration
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "runtimeExecution",
+      "ioOperations",
+      "legacyGenome"
+    ]
+  }
+}
+*/
 
 export const PULSE_FIELDS_CONTEXT = {
   layer: "PulseSpecs",

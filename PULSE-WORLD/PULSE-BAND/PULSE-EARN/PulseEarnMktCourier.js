@@ -2,6 +2,43 @@
 // FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-EARN/PulseEarnMktCourier-v13.0-PRESENCE-IMMORTAL.js
 // LAYER: THE COURIER (v13.0 Presence + Advantage‑C + Prewarm)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktCourier",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "market_courier",
+  lineage: "PulseEarnMktCourier-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    marketCourier: true,
+    jobTransport: true,
+    jobDelivery: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktBroker",
+      "PulseEarnMktForager",
+      "PulseEarnMktEmbassyLedger"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktCourierMeta = Object.freeze({
   layer: "PulseEarnMktCourier",

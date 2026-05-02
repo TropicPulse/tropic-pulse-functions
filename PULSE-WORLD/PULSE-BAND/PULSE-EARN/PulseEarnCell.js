@@ -20,6 +20,43 @@
 //   • Deterministic output only.
 //   • Dual-band + binary + wave + presence metadata are structural-only.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnCell",
+  version: "v14-IMMORTAL",
+  layer: "earn_cell",
+  role: "earn_metabolic_cell",
+  lineage: "PulseEarnCell-v9 → v11-Evo → v14-IMMORTAL",
+
+  evo: {
+    earnCell: true,
+    metabolicUnit: true,
+    jobExecutor: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarn",
+      "PulseEarnCirculatorySystem",
+      "PulseEarnEndocrineSystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnCellMeta = Object.freeze({
   layer: "PulseEarnCell",

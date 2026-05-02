@@ -11,6 +11,46 @@
 //  • CoreMemory persistence
 //  • deterministic canonicalization
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreBrain",
+  version: "v14-IMMORTAL",
+  layer: "corememory_brain",
+  role: "corememory_symbolic_brain",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    memoryShaping: true,
+    memoryPhysics: true,
+    overlayManagement: true,
+    hydrationPlanning: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseBinaryCoreOverlay",
+      "PulseCoreEvolution",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const CoreBrainRole = {
   type: "Organ",

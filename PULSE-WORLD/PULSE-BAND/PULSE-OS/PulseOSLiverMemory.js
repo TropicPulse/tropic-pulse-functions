@@ -28,6 +28,49 @@
 //   • Zero loops (no for/while/forEach/map/filter/reduce)
 //   • Pure metadata only
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSLiverMemory",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_liver_memory",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    liverMemory: true,
+    detoxMemory: true,
+    cleanupMemory: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSShortTermMemory",
+      "PulseOSLongTermMemory",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyLiverMemory",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

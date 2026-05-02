@@ -25,6 +25,41 @@
 //  • Deterministic: same inputs → same decision.
 // ============================================================================
 
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUGuardianCortex",
+  version: "v14-IMMORTAL",
+  layer: "gpu_guardian",
+  role: "gpu_guardian_cortex",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuGuardian: true,
+    gpuSafety: true,
+    gpuPolicyEnforcer: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUDriveCenter",
+      "PulseGPUCommandments"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGuardianCortex"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 //  Utility: build decision — Guardian lineage + nervous-system metadata

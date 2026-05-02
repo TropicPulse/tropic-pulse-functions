@@ -17,6 +17,48 @@
 //   • Brain may hold world-lens / advantage / presence / pulse-topology
 //     summaries, but only emits view-only, non-network-dependent descriptors.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSBrain",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_brain",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    cortexAware: true,
+    evolutionAware: true,
+    chunkAware: true,
+    prewarmAware: true,
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrainCortex",
+      "PulseOSBrainEvolution",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyOSBrain",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseOSBrainMeta = Object.freeze({
   layer: "PulseOSBrain",

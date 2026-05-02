@@ -36,6 +36,41 @@
 //  • Deterministic compute loop only.
 //  • Band/presence fields are metadata-only (no non-deterministic routing).
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseShifterEvolutionaryPulse",
+  version: "v14.0-EVO",
+  layer: "frontend",
+  role: "symbolic_evolution_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    symbolicCore: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulsePresence",
+      "PulseChunks",
+      "PulsePresenceNormalizer",
+      "PulseUIFlow"
+    ],
+    never: [
+      "legacyShifter",
+      "legacyEvolutionEngine",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPresence",
+      "legacyChunker"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

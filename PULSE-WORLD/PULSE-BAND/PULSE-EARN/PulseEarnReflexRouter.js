@@ -4,6 +4,43 @@
 //  Deterministic, Zero-Async, Zero-Routing, Zero-Sending
 //  Pure Reflex → Earn Handoff with Presence Surfaces (metadata-only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnReflexRouter",
+  version: "v14-IMMORTAL",
+  layer: "earn_reflex",
+  role: "earn_reflex_router",
+  lineage: "PulseEarnReflexRouter-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    reflexRouter: true,
+    fastRouting: true,
+    bypassLogic: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnReflex",
+      "PulseEarnNervousSystem",
+      "PulseEarnReceptorMkt"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseRole = {
   type: "Synapse",

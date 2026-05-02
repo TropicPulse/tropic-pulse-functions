@@ -5,6 +5,43 @@
 //  Only: build LegacyEarn v1 + Pulse-compatible envelope and return it.
 //  Presence/Advantage/Chunk/Band/Binary/Wave aware as METADATA ONLY.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnContinuancePulse",
+  version: "v14-IMMORTAL",
+  layer: "earn_continuance",
+  role: "earn_continuance_pulse",
+  lineage: "PulseEarnContinuancePulse-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    continuancePulse: true,
+    fallbackAware: true,
+    survivalHeuristics: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarn",
+      "PulseEarnGeneticMemory",
+      "PulseEarnEndocrineSystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnContinuancePulseMeta = Object.freeze({
   layer: "PulseEarnContinuancePulse",

@@ -7,6 +7,12 @@
 // ============================================================================
 
 
+const admin = global.db;
+const db    = global.db;
+
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { VitalsLogger as logger }        from "./PulseProofLogger.js";
+import { PulseLineage } from "./PulseProxyBBB.js";
 // ============================================================================
 // HEARTBEAT IDENTITY — v12.3‑EVO‑BINARY‑MAX‑ABA
 // ============================================================================
@@ -245,7 +251,40 @@ export const HEARTBEAT_CONTEXT = {
   evo: PulseRole.evo
 };
 
+function getSeasonFromSettings(settings) {
+  const today = new Date();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const mmdd = `${mm}-${dd}`;
 
+  const periods = settings?.seasonalPeriods || {};
+
+  const isInRange = (date, start, end) => {
+    // Normal range
+    if (start <= end) return date >= start && date <= end;
+    // Wrap-around (e.g., Dec 15 → Jan 10)
+    return date >= start || date <= end;
+  };
+
+  for (const key in periods) {
+    const s = periods[key];
+    if (!s?.start || !s?.end) continue;
+
+    if (isInRange(mmdd, s.start, s.end)) {
+      return {
+        seasonalActive: true,
+        seasonalName: s.name || "",
+        seasonalMultiplier: Number(s.multiplier) || 1
+      };
+    }
+  }
+
+  return {
+    seasonalActive: false,
+    seasonalName: "",
+    seasonalMultiplier: 1
+  };
+}
 // ============================================================================
 //  TIMER: LOGOUT + HISTORY REPAIR (v12.3‑EVO envelope)
 //  ⭐ INTERNAL LOGIC REMAINS EXACTLY AS YOU PROVIDED ⭐
@@ -524,8 +563,9 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
       ...SECURITY_SWEEP_CONTEXT
     });
   } catch (_) {}
+
   // --------------------------------------------------------------------------
-  // ⭐ ORIGINAL SECURITY SWEEP LOGIC (UNCHANGED) ⭐
+  // ⭐ SECURITY SWEEP — v14 (NO JWT, SAME LOGIC) ⭐
   // --------------------------------------------------------------------------
   const runId = crypto.randomUUID();
   const logId = `SECURE_${runId}`;
@@ -537,6 +577,7 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
   try {
     const nowMs = Date.now();
     const now = new Date(nowMs);
+
     const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
     const dayOfWeek = now.getUTCDay();
@@ -547,198 +588,177 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
 
     const usersSnap = await db.collection("Users").get();
 
-    try {
-      for (const doc of usersSnap.docs) {
-        const uid = doc.id;
+    for (const doc of usersSnap.docs) {
+      const uid = doc.id;
 
+      try {
+        const u = doc.data() || {};
+        const TPIdentity = u.TPIdentity || {};
+        const TPSecurity = u.TPSecurity || {};
+
+        // -----------------------------
+        // TIMESTAMP NORMALIZATION (NO JWT)
+        // -----------------------------
+        let lastIssued = null;
+
+        if (TPIdentity.lastJWTIssuedAt) {
+          if (typeof TPIdentity.lastJWTIssuedAt.toMillis === "function") {
+            lastIssued = TPIdentity.lastJWTIssuedAt.toMillis();
+          } else if (TPIdentity.lastJWTIssuedAt._seconds) {
+            lastIssued = TPIdentity.lastJWTIssuedAt._seconds * 1000;
+          } else if (typeof TPIdentity.lastJWTIssuedAt === "number") {
+            lastIssued = TPIdentity.lastJWTIssuedAt;
+          }
+        }
+
+        const age = lastIssued ? nowMs - lastIssued : Infinity;
+        const needs30DayRefresh = age > THIRTY_DAYS;
+
+        // -----------------------------
+        // SECURITY FLAGS
+        // -----------------------------
+        const danger =
+          TPSecurity.vaultLockdown ||
+          TPSecurity.appLocked ||
+          TPSecurity.hackerFlag ||
+          TPSecurity.forceIdentityRefresh ||
+          (TPSecurity.failedLoginAttempts > 5);
+
+        const ipJump =
+          TPSecurity.lastKnownIP &&
+          TPSecurity.previousIP &&
+          TPSecurity.lastKnownIP !== TPSecurity.previousIP;
+
+        const deviceJump =
+          TPSecurity.lastKnownDevice &&
+          TPSecurity.previousDevice &&
+          TPSecurity.lastKnownDevice !== TPSecurity.previousDevice;
+
+        const needsEarlyRefresh = danger || ipJump || deviceJump;
+
+        const totalFlags =
+          (TPSecurity.failedLoginAttempts || 0) +
+          (TPSecurity.hackerFlag ? 3 : 0) +
+          (TPSecurity.vaultLockdown ? 5 : 0) +
+          (TPSecurity.appLocked ? 5 : 0);
+
+        if (totalFlags >= 10) {
+          flaggedUsers.push({
+            uid,
+            email: TPIdentity.email || null,
+            failedLoginAttempts: TPSecurity.failedLoginAttempts || 0,
+            vaultLockdown: !!TPSecurity.vaultLockdown,
+            appLocked: !!TPSecurity.appLocked,
+            hackerFlag: !!TPSecurity.hackerFlag
+          });
+        }
+
+        // -----------------------------
+        // ⭐ RESEND TOKEN ROTATION (NO JWT) ⭐
+        // -----------------------------
+        if (!needs30DayRefresh && !needsEarlyRefresh) continue;
+
+        const rootResendToken = u.UserToken || null;
+        const oldSessionToken = TPIdentity.resendToken || null;
+
+        // NEW resendToken (secure random)
+        const newSessionToken = crypto.randomUUID();
+
+        const reason = needsEarlyRefresh
+          ? "early_security_refresh"
+          : "30_day_rotation";
+
+        // -----------------------------
+        // WRITE TO TPIdentityHistory
+        // -----------------------------
         try {
-          const u = doc.data() || {};
-          const TPIdentity = u.TPIdentity || {};
-          const TPSecurity = u.TPSecurity || {};
-
-          // -----------------------------
-          // TIMESTAMP NORMALIZATION
-          // -----------------------------
-          let lastJWT = null;
-
-          if (TPIdentity.lastJWTIssuedAt) {
-            if (typeof TPIdentity.lastJWTIssuedAt.toMillis === "function") {
-              lastJWT = TPIdentity.lastJWTIssuedAt.toMillis();
-            } else if (TPIdentity.lastJWTIssuedAt._seconds) {
-              lastJWT = TPIdentity.lastJWTIssuedAt._seconds * 1000;
-            } else if (typeof TPIdentity.lastJWTIssuedAt === "number") {
-              lastJWT = TPIdentity.lastJWTIssuedAt;
-            }
-          }
-
-          const age = lastJWT ? nowMs - lastJWT : Infinity;
-          const needs30DayRefresh = age > THIRTY_DAYS;
-
-          // -----------------------------
-          // SECURITY FLAGS
-          // -----------------------------
-          const danger =
-            TPSecurity.vaultLockdown ||
-            TPSecurity.appLocked ||
-            TPSecurity.hackerFlag ||
-            TPSecurity.forceIdentityRefresh ||
-            (TPSecurity.failedLoginAttempts > 5);
-
-          const ipJump =
-            TPSecurity.lastKnownIP &&
-            TPSecurity.previousIP &&
-            TPSecurity.lastKnownIP !== TPSecurity.previousIP;
-
-          const deviceJump =
-            TPSecurity.lastKnownDevice &&
-            TPSecurity.previousDevice &&
-            TPSecurity.lastKnownDevice !== TPSecurity.previousDevice;
-
-          const needsEarlyRefresh = danger || ipJump || deviceJump;
-
-          const totalFlags =
-            (TPSecurity.failedLoginAttempts || 0) +
-            (TPSecurity.hackerFlag ? 3 : 0) +
-            (TPSecurity.vaultLockdown ? 5 : 0) +
-            (TPSecurity.appLocked ? 5 : 0);
-
-          if (totalFlags >= 10) {
-            flaggedUsers.push({
-              uid,
-              email: TPIdentity.email || null,
+          await db.collection("IdentityHistory").add({
+            uid,
+            rootResendToken,
+            oldSessionToken,
+            newSessionToken,
+            reason,
+            dangerFlags: {
+              vaultLockdown: TPSecurity.vaultLockdown || false,
+              appLocked: TPSecurity.appLocked || false,
+              hackerFlag: TPSecurity.hackerFlag || false,
               failedLoginAttempts: TPSecurity.failedLoginAttempts || 0,
-              vaultLockdown: !!TPSecurity.vaultLockdown,
-              appLocked: !!TPSecurity.appLocked,
-              hackerFlag: !!TPSecurity.hackerFlag
-            });
-          }
-
-          if (!needs30DayRefresh && !needsEarlyRefresh) continue;
-
-          // -----------------------------
-          // TOKENS
-          // -----------------------------
-          const rootResendToken = u.UserToken || null; // permanent root token
-          const oldSessionToken = TPIdentity.resendToken || null;
-
-          let newSessionToken;
-          try {
-            newSessionToken = jwt.sign(
-              {
-                uid,
-                email: TPIdentity.email || null,
-                name: TPIdentity.name || TPIdentity.displayName || null
-              },
-              JWT_SECRET.value(),
-              { expiresIn: "30d" }
-            );
-          } catch (err) {
-            await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
-              fn: "securitySweep",
-              stage: "jwt_sign",
-              uid,
-              error: String(err),
-              runId,
-              createdAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            continue;
-          }
-
-          const reason = needsEarlyRefresh
-            ? "early_security_refresh"
-            : "30_day_rotation";
-
-          // -----------------------------
-          // WRITE TO TPIdentityHistory
-          // -----------------------------
-          try {
-            await db.collection("IdentityHistory").add({
-              uid,
-              rootResendToken,
-              oldSessionToken,
-              newSessionToken,
-              reason,
-              dangerFlags: {
-                vaultLockdown: TPSecurity.vaultLockdown || false,
-                appLocked: TPSecurity.appLocked || false,
-                hackerFlag: TPSecurity.hackerFlag || false,
-                failedLoginAttempts: TPSecurity.failedLoginAttempts || 0,
-                ipJump,
-                deviceJump
-              },
-              runId,
-              createdAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-          } catch (err) {
-            await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
-              fn: "securitySweep",
-              stage: "identity_log",
-              uid,
-              error: String(err),
-              runId,
-              createdAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            continue;
-          }
-
-          try {
-            await doc.ref.update({
-              "TPIdentity.resendToken": newSessionToken,
-              "TPIdentity.lastJWTIssuedAt": admin.firestore.FieldValue.serverTimestamp(),
-
-              "TPSecurity.previousIP": TPSecurity.lastKnownIP || null,
-              "TPSecurity.previousDevice": TPSecurity.lastKnownDevice || null,
-
-              "TPSecurity.lastKnownIP": TPSecurity.lastKnownIP || null,
-              "TPSecurity.lastKnownDevice": TPSecurity.lastKnownDevice || null,
-
-              "TPSecurity.forceIdentityRefresh": false
-            });
-          } catch (err) {
-            await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
-              fn: "securitySweep",
-              stage: "user_update",
-              uid,
-              error: String(err),
-              runId,
-              createdAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            continue;
-          }
-
-          rotatedUsers.push(uid);
-
+              ipJump,
+              deviceJump
+            },
+            runId,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+          });
         } catch (err) {
           await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
             fn: "securitySweep",
-            stage: "user_loop",
+            stage: "identity_log",
             uid,
             error: String(err),
             runId,
             createdAt: admin.firestore.FieldValue.serverTimestamp()
           });
+          continue;
         }
+
+        // -----------------------------
+        // UPDATE USER DOC
+        // -----------------------------
+        try {
+          await doc.ref.update({
+            "TPIdentity.resendToken": newSessionToken,
+            "TPIdentity.lastJWTIssuedAt": admin.firestore.FieldValue.serverTimestamp(),
+
+            "TPSecurity.previousIP": TPSecurity.lastKnownIP || null,
+            "TPSecurity.previousDevice": TPSecurity.lastKnownDevice || null,
+
+            "TPSecurity.lastKnownIP": TPSecurity.lastKnownIP || null,
+            "TPSecurity.lastKnownDevice": TPSecurity.lastKnownDevice || null,
+
+            "TPSecurity.forceIdentityRefresh": false
+          });
+        } catch (err) {
+          await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
+            fn: "securitySweep",
+            stage: "user_update",
+            uid,
+            error: String(err),
+            runId,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+          continue;
+        }
+
+        rotatedUsers.push(uid);
+
+      } catch (err) {
+        await db.collection("FUNCTION_ERRORS").doc(`${errorPrefix}${uid}`).set({
+          fn: "securitySweep",
+          stage: "user_loop",
+          uid,
+          error: String(err),
+          runId,
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
       }
-    } catch (err) {
-      await db.collection("FUNCTION_ERRORS").doc(`ERR_IDENTITY_SWEEP_${runId}`).set({
-        fn: "securitySweep",
-        stage: "identity_sweep_block",
-        error: String(err),
-        runId,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
     }
-    
+
+    // --------------------------------------------------------------------------
+    // ⭐ MERGED + OPTIMIZED CLEANUP BLOCK ⭐
+    // --------------------------------------------------------------------------
     try {
-      const cutoff24h = Date.now() - 24 * 60 * 60 * 1000;
-      const cutoff7d  = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const cutoff24h = now - 24 * 60 * 60 * 1000;
+      const cutoff7d  = now - 7 * 24 * 60 * 60 * 1000;
 
       const deletedSessions = [];
       const deletedChunks = [];
       const deletedErrors = [];
       const deletedRedownloads = [];
 
+      // Sessions + chunks
       const sessionsSnap = await db.collection("pulseband_sessions").get();
+      const batchSessions = db.batch();
 
       for (const s of sessionsSnap.docs) {
         const data = s.data() || {};
@@ -748,31 +768,49 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
           const chunksSnap = await s.ref.collection("chunks").get();
 
           for (const c of chunksSnap.docs) {
-            await c.ref.delete();
+            batchSessions.delete(c.ref);
             deletedChunks.push(c.id);
           }
 
-          await s.ref.delete();
+          batchSessions.delete(s.ref);
           deletedSessions.push(s.id);
         }
       }
 
+      if (deletedSessions.length || deletedChunks.length) {
+        await batchSessions.commit();
+      }
+
+      // Errors
       const errorsSnap = await db.collection("pulseband_errors").get();
+      const batchErrors = db.batch();
+
       for (const e of errorsSnap.docs) {
         const createdAt = e.data()?.createdAt?.toMillis?.() || 0;
         if (createdAt < cutoff7d) {
-          await e.ref.delete();
+          batchErrors.delete(e.ref);
           deletedErrors.push(e.id);
         }
       }
 
+      if (deletedErrors.length) {
+        await batchErrors.commit();
+      }
+
+      // Redownloads
       const redlSnap = await db.collection("pulseband_redownloads").get();
+      const batchRedl = db.batch();
+
       for (const r of redlSnap.docs) {
         const createdAt = r.data()?.createdAt?.toMillis?.() || 0;
         if (createdAt < cutoff7d) {
-          await r.ref.delete();
+          batchRedl.delete(r.ref);
           deletedRedownloads.push(r.id);
         }
+      }
+
+      if (deletedRedownloads.length) {
+        await batchRedl.commit();
       }
 
       await db.collection("TIMER_LOGS").doc(`PB_CLEANUP_${runId}`).set({
@@ -823,7 +861,6 @@ export const securitySweep = onSchedule("every 24 hours", async () => {
     });
   }
 });
-
 
 // ============================================================================
 // HEARTBEAT HEALING / DIAGNOSTICS EXPORTS

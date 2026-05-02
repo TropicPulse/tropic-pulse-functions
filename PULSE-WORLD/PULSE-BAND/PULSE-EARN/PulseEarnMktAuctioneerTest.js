@@ -2,6 +2,43 @@
 // TEST SCRIPT — Vast.ai Adapter Test (v13.0‑PRESENCE‑IMMORTAL A‑B‑A Deterministic)
 // Pulse‑Earn v13.0‑PRESENCE‑IMMORTAL
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktAuctioneerTest",
+  version: "v14-IMMORTAL",
+  layer: "earn_market_test",
+  role: "auctioneer_validation_harness",
+  lineage: "PulseEarnMktAuctioneerTest-v11 → v14-IMMORTAL",
+
+  evo: {
+    testHarness: true,
+    deterministicReplay: true,
+    auctioneerValidation: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktAuctioneer",
+      "PulseEarnMktBroker",
+      "PulseEarnMktConsulate"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import {
   PulseEarnMktAuctioneer,

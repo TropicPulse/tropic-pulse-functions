@@ -13,6 +13,42 @@
 // • Multi-instance-ready, unified-advantage-field,
 //   binary-aware, dual-mode-ready, presence-aware.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshOrgans",
+  version: "v14.9-MESH-ORGANS",
+  layer: "mesh",
+  role: "mesh_organ_registry",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    organRegistry: true,            // Registry of mesh organs
+    metadataOnly: true,             // No compute, no routing
+    binaryAware: true,              // Binary organ metadata
+    symbolicAware: true,            // Symbolic organ metadata
+    deterministic: true,
+    driftProof: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshCognition",
+      "PulseMeshAwareness"
+    ],
+    never: [
+      "legacyMeshOrgans",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseOrgans() {
 

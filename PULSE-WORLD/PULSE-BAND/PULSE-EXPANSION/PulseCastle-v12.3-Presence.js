@@ -17,6 +17,44 @@
 //    - No dynamic imports.
 //    - No reinterpretation of PulseServer compute.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCastle",
+  version: "v14-IMMORTAL",
+  layer: "presence_castle",
+  role: "region_identity_and_security",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    regionIdentity: true,
+    regionSecurity: true,
+    regionTier: true,
+    regionPhysics: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseExpansion",
+      "PulseRouter",
+      "PulseServer"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

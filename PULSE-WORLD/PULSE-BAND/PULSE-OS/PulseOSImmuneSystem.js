@@ -9,6 +9,49 @@
 //  ALL dependencies are external workers (DB, time, network).
 //  This organ ONLY builds immune artifacts from mesh + presence drift events.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSImmuneSystem",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_immune_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    immune: true,
+    anomalyDetection: true,
+    driftDetection: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSNervousSystem",
+      "PulseOSFightFlightResponse",
+      "PulseOSSurvivalInstincts"
+    ],
+    never: [
+      "legacyOSImmuneSystem",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const GLOBAL_HEALER_CONTEXT_V12 = Object.freeze({
   organ: "GlobalHealer",

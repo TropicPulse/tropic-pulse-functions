@@ -100,6 +100,50 @@
 //  This file preserves that history — the exponential era — as part of the
 //  system’s long‑term memory and architectural lineage.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSLongTermMemory",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_long_term_memory",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    longTermMemory: true,
+    memoryConsolidation: true,
+    recallEngine: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSBrainCortex",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyLongTermMemory",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
 import { onRequest, onCall } from "firebase-functions/v2/https";
 import { onDocumentWritten, onDocumentWrittenWithAuthContext } from "firebase-functions/v2/firestore";
 import nodemailer from "nodemailer";

@@ -5,6 +5,44 @@
 // Deterministic • Metadata-Only • Safe DisplayName Presence
 // Job-Readiness • Power-User Detection • Earn-Context Surfacing
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PresenceJobView",
+  version: "v14.9-PRESENCE-JOB-VIEW",
+  layer: "presence",
+  role: "job_ready_presence_surface",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Includes mesh hops + distance
+    aiView: true,                   // Builds AI-friendly presence surface
+    rankingAware: true,             // Includes power user ranking
+    identityAware: true,            // Includes identity directory
+    earnAware: true,                // Includes Earn context
+    deterministic: true,
+    driftProof: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PresenceAwareness",
+      "PresenceAIView",
+      "PowerUserRanking",
+      "PulseMeshPresenceRelay"
+    ],
+    never: [
+      "legacyPresenceJobView",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPresenceJobView({
   PresenceAwarenessPage,

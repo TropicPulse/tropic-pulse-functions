@@ -18,6 +18,44 @@
 // • Deterministic, drift-proof, connective tissue.
 // • Binary-aware, dual-mode-ready, presence-aware, dual-band-ready.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshTendons",
+  version: "v14.9-MESH-TENDONS",
+  layer: "mesh",
+  role: "mesh_connective_tissue",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    tendons: true,                  // This IS the connective tissue organ
+    tensionAware: true,             // Reads impulse tension
+    elasticityAware: true,          // Determines impulse elasticity
+    metadataOnly: true,             // No routing, no compute
+    deterministic: true,
+    driftProof: true,
+    presenceAware: true,
+    meshAware: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshEnvironmentalField",
+      "PulseMeshAwareness"
+    ],
+    never: [
+      "legacyMeshTendons",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseMeshTendons({ log, warn, error }) {
 

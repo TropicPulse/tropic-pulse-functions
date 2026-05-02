@@ -36,6 +36,45 @@
 //   - Always deterministic.
 //   - Pure symbolic Overmind surface.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBeaconConsole",
+  version: "v14-IMMORTAL",
+  layer: "presence_console",
+  role: "presence_debug_console",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    presenceConsole: true,
+    beaconAware: true,
+    meshAware: true,
+    bluetoothAware: true,
+    regionAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseBeaconEngine",
+      "PulseBeaconMesh",
+      "PulseExpansion"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseBeaconConsoleMeta = Object.freeze({
   layer: "OvermindConsole",

@@ -4,6 +4,42 @@
 //  No guessing. No heuristics. No fallback decoding.
 //  Fully aligned with PulseChunks-v2.0-MULTILANE-HYBRID
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulsePresenceNormalizer",
+  version: "v12.5-EVO-SMART-HYBRID",
+  layer: "frontend",
+  role: "chunk_normalizer",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryAware: true,
+    chunkAligned: true,
+    dualBand: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    smartNormalizer: true,
+    unwrapOneLayer: true
+  },
+
+  contract: {
+    always: [
+      "PulseChunks",
+      "PulsePresence",
+      "PulseWindow",
+      "PulseUIFlow",
+      "PulseUIErrors"
+    ],
+    never: [
+      "legacyNormalizer",
+      "legacyDecode",
+      "legacyPresence",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // SMART: unwrap ONLY ONE LAYER.
 // Backend must declare the shape. No recursive peeling.

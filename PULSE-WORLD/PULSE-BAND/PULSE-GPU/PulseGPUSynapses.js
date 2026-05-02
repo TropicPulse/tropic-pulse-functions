@@ -26,6 +26,42 @@
 //  • No mutation outside internal listener map
 //  • Deterministic: same impulses → same order → same results
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUSynapse",
+  version: "v14-IMMORTAL",
+  layer: "gpu_runtime",
+  role: "gpu_synapse",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuSynapse: true,
+    gpuSignalJunction: true,
+    gpuFanout: true,
+
+    gpuCompute: true,
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUNervousSystem",
+      "PulseGPUSpine"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGPUSynapse"
+    ]
+  }
+}
+*/
 
 const PULSE_GPU_EVENT_EMITTER_META_V12 = {
   layer: "PulseGPUEventEmitter",

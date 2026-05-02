@@ -7,6 +7,49 @@
 // PRIMARY OS / BINARY OS PULLER
 // This is the thing that actually knows how to boot brains / runtimes.
 // Swap this line to PulseOS-v11-Evo.js if that's your primary.
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseUser",
+  version: "v14-IMMORTAL",
+  layer: "presence_user",
+  role: "presence_user_core",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    userCore: true,
+    presenceAware: true,
+    bluetoothAware: true,
+    meshAware: true,
+    regionAware: true,
+    advantageBand: true,
+    fallbackBand: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseBeaconEngine",
+      "PulseBeaconMesh",
+      "PulseExpansion"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
+
 import * as PulseBinaryOS from "../PULSE-OS/PulseBinaryOS-v11-Evo-Max.js";
 
 // ============================================================================

@@ -4,6 +4,40 @@
 // Presence Awareness Page (Human-Facing)
 // Deterministic • Metadata-Only • Safe DisplayName Presence
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PresenceAwareness",
+  version: "v14.9-PRESENCE-AWARE",
+  layer: "presence",
+  role: "presence_awareness_engine",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    presenceField: true,            // Reads presence field
+    meshAware: true,                // Includes mesh hops + relay
+    aiSurface: true,                // Feeds PresenceAIView
+    deterministic: true,
+    driftProof: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulsePresence",
+      "PulseMeshPresenceRelay",
+      "PresenceAIView"
+    ],
+    never: [
+      "legacyPresenceAwareness",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPresenceAwarenessPage({
   PulseSenses,

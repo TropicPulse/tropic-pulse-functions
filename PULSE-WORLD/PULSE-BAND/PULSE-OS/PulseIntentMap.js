@@ -6,6 +6,63 @@
 //  It is the highest authority in the entire system.
 //  NOTHING overrides this map. NOTHING evolves above it.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseIntentMap",
+  version: "v14.9-IMMORTAL-FOUNDER-INTENT",
+  layer: "founder_intent",
+  role: "pre_brain_pre_organism_law_map",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    founderIntent: true,            // This IS the founder's law
+    preOrganism: true,              // Loaded BEFORE OrganismMap
+    preBrain: true,                 // Loaded BEFORE OSBrain
+    preConsciousness: true,         // Loaded BEFORE IQMap
+    preChunker: true,               // Loaded BEFORE chunker
+    prePresence: true,              // Loaded BEFORE presence field
+    preMesh: true,                  // Loaded BEFORE mesh relay
+    preBand: true,                  // Loaded BEFORE PulseBand
+    preRouter: true,                // Loaded BEFORE routers
+    immutable: true,                // Cannot be mutated at runtime
+    driftProof: true,               // Prevents organism drift
+    deterministic: true,            // No randomness allowed
+    antiMutation: true,             // Cannot be rewritten by organism
+    antiOverride: true,             // Cannot be overridden by organs
+    antiEvolution: true,            // Evolution cannot modify intent
+    safeRouteFree: true,            // Must not use safeRoute
+    zeroNetworkFetch: true,         // Must not fetch anything
+    zeroExternalMutation: true,     // Must not mutate global state
+    zeroMutationOfInput: true       // Must not mutate incoming identity/session
+  },
+
+  contract: {
+    always: [
+      "OrganismMap",                // IntentMap must load BEFORE genome
+      "IQMap",                      // IntentMap must load BEFORE consciousness
+      "PulseOSLoader",              // Loader must obey founder intent
+      "PulseOSBrain",               // Brain must obey founder intent
+      "PulseSpinalCord",            // Wiring must obey founder intent
+      "PulseChunker",               // Chunker must obey founder intent
+      "PulsePresence",              // Presence must obey founder intent
+      "PulseMesh",                  // Mesh must obey founder intent
+      "PulseBand",                  // Nervous system must obey founder intent
+      "PulseRouter",                // Symbolic router must obey founder intent
+      "PulseBinaryRouter"           // Binary router must obey founder intent
+    ],
+
+    never: [
+      "legacyIntentMap",            // No v1.7/v11.x intent maps
+      "runtimeIntentRewrite",       // Organism cannot rewrite intent
+      "organOverride",              // No organ can override founder intent
+      "safeRoute",                  // Forbidden at this layer
+      "fetchViaCNS",                // Forbidden at this layer
+      "dynamicIntent",              // Intent cannot be dynamic
+      "evolutionIntentRewrite"      // Evolution cannot rewrite intent
+    ]
+  }
+}
+*/
 
 export const PulseIntentMap = {
 

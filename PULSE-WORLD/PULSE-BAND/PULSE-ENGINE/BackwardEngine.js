@@ -6,6 +6,50 @@
 //  • Deterministic tick sequencing
 //  • ShifterPulse-aware (binary/regular band shifter, non-executable)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "BackwardEngine",
+  version: "v14-IMMORTAL",
+  layer: "pulsenet_engine",
+  role: "backward_compression_engine",
+  lineage: "PulseNet-v14",
+
+  evo: {
+    backwardLane: true,            // compression lane
+    patternCompression: true,      // compresses symbolic + binary patterns
+    jobAware: true,                // consumes Earn + self jobs
+    chunkAware: true,              // chunk/dechunk safe
+    prewarmAware: true,            // prewarm surfaces
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "ForwardEngine",
+      "PulseNet",
+      "PulseChunker"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "presenceEngine",
+      "meshKernel",
+      "routerCore"
+    ]
+  }
+}
+*/
 
 // Optional SHIFTER PULSE bridge (binary/regular band shifter, descriptive-only)
 import { ShifterPulse } from "../PULSE-SHIFTER/PulseShifterEvolutionaryPulse-v11-Evo.js";

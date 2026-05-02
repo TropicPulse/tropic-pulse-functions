@@ -3,6 +3,41 @@
 // PULSE ORGANISM MESH — TOP-LEVEL ORGANISM LOADER
 // “One page. One route. Whole organism.”
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "OrganismMesh",
+  version: "v14.9-MESH-EVO",
+  layer: "mesh",
+  role: "mesh_presence_graph",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    meshAware: true,                // Core mesh organ
+    presenceAware: true,            // Uses presence field
+    binaryAware: true,              // Mesh hops + binary hints
+    deterministic: true,            // Mesh graph must be stable
+    driftProof: true,               // No drift in mesh topology
+    dualBand: true,                 // Symbolic + binary mesh
+    zeroNetworkFetch: true,
+    zeroMutationOfInput: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshPresenceRelay",
+      "PulsePresence",
+      "PresenceAwareness"
+    ],
+    never: [
+      "legacyMesh",
+      "legacyPresenceRelay",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createPulseOrgans } from "./PulseMeshOrgans.js";
 

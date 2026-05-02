@@ -28,7 +28,8 @@
 // ============================================================================
 import { logger } from "../../PULSE-UI/PULSEProofLogger.js";
 import { PulseLineage } from "./PulseProxyBBB.js";
-
+const admin = global.db;
+const db    = global.db;
 
 // ============================================================================
 //  PULSE ROLE — v12.3‑Evo A‑B‑A Identity

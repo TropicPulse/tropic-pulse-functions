@@ -13,6 +13,41 @@
 //
 // ============================================================================
 
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouterEvolutionaryInstincts",
+  version: "v14.4-EVO-INSTINCTS",
+  layer: "frontend",
+  role: "router_evolutionary_memory",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    instinctCore: true,
+    deterministic: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    reflexMemory: true,
+    ancestryAware: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterEvolutionaryDesign",
+      "PulseRouterEvolutionaryThought"
+    ],
+    never: [
+      "legacyRouterInstincts",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // ------------------------------------------------------------
 // v12.3‑Evo CONTEXT METADATA — Router Evolution Identity

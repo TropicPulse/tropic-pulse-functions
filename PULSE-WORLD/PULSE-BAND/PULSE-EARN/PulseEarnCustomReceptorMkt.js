@@ -20,6 +20,43 @@
 //   • READ‑ONLY except deterministic DNA caching.
 //   • Unified Earn v13 presence/advantage/chunk schema.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnCustomReceptorMkt",
+  version: "v14-IMMORTAL",
+  layer: "earn_receptor",
+  role: "earn_market_receptor",
+  lineage: "PulseEarnCustomReceptorMkt-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    customReceptor: true,
+    marketAware: true,
+    jobTypeDetection: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarn",
+      "PulseEarnCell",
+      "PulseEarnCirculatorySystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnCustomReceptorMeta = Object.freeze({
   layer: "PulseEarnCustomReceptor",

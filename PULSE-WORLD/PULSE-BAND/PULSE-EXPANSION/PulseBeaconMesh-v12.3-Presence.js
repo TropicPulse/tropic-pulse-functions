@@ -28,6 +28,45 @@
 //   - Always deterministic.
 //   - Pure membrane surface (symbolic composition only).
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBeaconMesh",
+  version: "v14-IMMORTAL",
+  layer: "presence_mesh",
+  role: "presence_mesh_simulator",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    meshSimulation: true,
+    proximityAwareness: true,
+    densityField: true,
+    regionField: true,
+    bluetoothPresence: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseBeaconEngine",
+      "PulseExpansion",
+      "PulseUser"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 //  META (v13-PRESENCE-EVO++)

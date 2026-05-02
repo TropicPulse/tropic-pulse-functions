@@ -21,6 +21,37 @@
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSendImpulse",
+  version: "v14.4-IMMORTAL",
+  layer: "frontend",
+  role: "send_impulse",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    spark: true,
+    zeroCompute: true,
+    deterministic: true,
+    presenceAware: true,
+    dualBand: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendSystem",
+      "PulseSendReturn"
+    ],
+    never: [
+      "legacyImpulse",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacySend"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

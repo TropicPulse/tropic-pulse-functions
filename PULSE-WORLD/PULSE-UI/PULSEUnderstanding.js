@@ -16,6 +16,48 @@
 //   • DO NOT mutate Window or Page.
 //   • MAY read membrane intel from window.PulseSurface + PulseChunks portal.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseUnderstanding",
+  version: "v12.5-EVO",
+  layer: "frontend",
+  role: "intent_interpreter",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryAware: true,
+    dualBand: true,
+    chunkAligned: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    cnsFallback: true,
+    normalizerAligned: true,
+    interpreterCore: true,
+    mapDriven: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseBand",
+      "PulseUIFlow",
+      "PulsePresenceNormalizer"
+    ],
+    never: [
+      "legacyUnderstanding",
+      "legacyThink",
+      "legacyBrainstem",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyOfflineLoader",
+      "legacyChunker",
+      "v1.7Fallback"
+    ]
+  }
+}
+*/
 
 console.log("Understanding");
 // ============================================================================

@@ -5,6 +5,52 @@
 //  • UPGRADED: CNS-level passive/active PageScanner integration (always-on, no timers)
 //  • UPGRADED: v13+ CNS healers (checkBand / checkIdentity / checkRouterMemory)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSNervousSystem",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_nervous_system",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    nervousSystem: true,
+    conductor: true,
+    reflexAware: true,
+    sensoryAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSSensoryCortex",
+      "PulseOSFightFlightResponse"
+    ],
+    never: [
+      "legacyNervousSystem",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseRole = {
   type: "NervousSystem",

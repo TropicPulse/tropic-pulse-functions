@@ -18,6 +18,45 @@
  *    - Pure orchestration over symbolic + binary layers.
  * ============================================================
  */
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseScheduler",
+  version: "v14-IMMORTAL",
+  layer: "scheduler",
+  role: "macro_orchestrator",
+  lineage: "PulseScheduler-v1 → v11-Evo → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    macroScheduler: true,          // top-level orchestrator
+    runtimeAware: true,            // PulseRuntime integration
+    substrateAware: true,          // BinarySubstrate integration
+    dualBand: true,                // symbolic + binary
+    deterministicScheduling: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseRuntime",
+      "BinarySubstrate"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "presenceEngine",
+      "meshKernel",
+      "routerCore"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 //  META

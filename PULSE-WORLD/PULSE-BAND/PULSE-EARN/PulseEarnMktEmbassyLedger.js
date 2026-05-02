@@ -15,6 +15,45 @@
 //   • Unified Earn v13 presence model (mesh/castle/region).
 //   • Public API unchanged: marketplaces[], getHealingState().
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktEmbassyLedger",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "market_embassy_ledger",
+  lineage: "PulseEarnMktEmbassyLedger-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    embassyLedger: true,
+    adapterRegistry: true,
+    adapterValidation: true,
+    deterministicSignatures: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktConsulate",
+      "PulseEarnMktBroker",
+      "PulseEarnMktCourier",
+      "PulseEarnMktForager"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktEmbassyLedgerMeta = Object.freeze({
   layer: "PulseEarnMktEmbassyLedger",

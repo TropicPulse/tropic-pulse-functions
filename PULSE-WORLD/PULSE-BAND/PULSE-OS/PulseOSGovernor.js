@@ -11,6 +11,50 @@
 //  - Presence-aware (metadata only)
 //  - Chunk/prewarm-aware (metadata only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSGovernor",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_governor",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    governor: true,
+    rateLimiter: true,
+    loadBalancer: true,
+    reflexPriority: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSNervousSystem",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyGovernor",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const GOVERNOR_CONTEXT_V12 = {
   organ: "PulseOSGovernor",

@@ -3,6 +3,53 @@
 // INTERPRETATION LAYER OF THE GENOME (PulseOrganismMap)
 // Zero top‑level routes. Zero static routing. Fully dynamic.
 // -----------------------------------------------------------------------------
+/*
+AI_EXPERIENCE_META = {
+  identity: "IQMap",
+  version: "v14.9-IMMORTAL-CONSCIOUSNESS",
+  layer: "consciousness",
+  role: "ui_identity_and_routing_map",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    consciousness: true,          // This IS the consciousness map
+    uiIdentity: true,             // Page-level identity
+    routingIdentity: true,        // Page-level routing
+    chunkingAware: true,          // Chunker integration
+    prewarmAware: true,           // Prewarm surfaces
+    gpuProfileAware: true,        // GPU profile mapping
+    presenceAware: true,          // Presence surfaces
+    meshAware: true,              // Mesh surfaces
+    binaryAware: true,            // Binary UI surfaces
+    generatedFromGenome: true,    // MUST be generated from OrganismMap
+    deterministic: true,
+    driftProof: true,
+    safeRouteFree: true,
+    zeroNetworkFetch: true,
+    zeroMutationOfInput: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "OrganismMap",              // IQMap MUST be generated from genome
+      "PulseChunker",
+      "PulsePresence",
+      "PulseMesh",
+      "PulseUI",
+      "PulseRouter",
+      "PulseBinaryRouter"
+    ],
+    never: [
+      "legacyIQMap",
+      "manualRouting",
+      "manualPageMap",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
 import { log, warn, error as logError } from "../../PULSE-UI/PULSEProofLogger.js";

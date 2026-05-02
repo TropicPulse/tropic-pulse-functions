@@ -28,12 +28,42 @@
 //   • Binary drift detection + proxy bypass detection
 //   • Presence + chunk/cache/prewarm hints are derived, not time‑based
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "CheckRouterMemory",
+  version: "v14.4-EVO-BINARY-MAX",
+  layer: "backend_healer",
+  role: "router_memory_healer",
+  lineage: "PulseRouter-v12",
 
+  evo: {
+    healerCore: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    driftAware: true,
+    lineageAware: true,
+    deterministic: true,
+    safeRouteFree: true
+  },
 
-// ============================================================================
-// PART 1/2 — META, CONTEXT, SIGNATURES, HELPERS
-// ============================================================================
-
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterCommandments",
+      "CheckIdentity",
+      "CheckBand"
+    ],
+    never: [
+      "legacyRouterMemory",
+      "legacyCheckRouterMemory",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 // LAYER CONSTANTS + DIAGNOSTICS

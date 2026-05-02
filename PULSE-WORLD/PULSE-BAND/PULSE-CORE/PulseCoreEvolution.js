@@ -14,6 +14,47 @@
 //  • advantage scoring
 //  • deterministic delta application
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreEvolution",
+  version: "v14-IMMORTAL",
+  layer: "corememory_evolution",
+  role: "corememory_evolution_engine",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    evolutionEngine: true,
+    versionMigration: true,
+    dnaTagging: true,
+    hotLoopPromotion: true,
+    healingLogic: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreBrain",
+      "PulseBinaryCoreOverlay",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const CoreEvolutionsRole = {
   type: "Organ",

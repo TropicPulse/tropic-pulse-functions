@@ -17,6 +17,45 @@
 //  • Unified-advantage-field compliant (tags only, no side effects).
 // ============================================================================
 
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshSurvivalInstincts",
+  version: "v14.9-MESH-SURVIVAL",
+  layer: "mesh",
+  role: "mesh_survival_and_threat_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    survival: true,                 // This IS the survival organ
+    threatDetection: true,          // Detects mesh-level threats
+    reflexPriority: true,           // Prioritizes reflex impulses
+    binaryAware: true,              // Binary threat flags
+    symbolicAware: true,            // Symbolic threat signals
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,             // No routing, no compute
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshImmuneSystem",
+      "PulseMeshEcho",
+      "PulseMeshFlow",
+      "PulseMeshAwareness"
+    ],
+    never: [
+      "legacyMeshSurvival",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // -----------------------------------------------------------
 //  Presence-Band Helper (v12.3+)

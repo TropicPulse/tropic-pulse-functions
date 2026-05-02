@@ -18,6 +18,45 @@
 //   • Presence-aware, binary-aware, dual-band-ready.
 //   • Zero randomness, zero timestamps, zero mutation.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshImmuneSystem",
+  version: "v14.9-MESH-IMMUNE",
+  layer: "mesh",
+  role: "mesh_immune_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    immune: true,                   // Immune logic
+    anomalyDetection: true,         // Detects abnormal impulses
+    driftDetection: true,           // Detects mesh drift
+    binaryAware: true,              // Binary immune flags
+    symbolicAware: true,            // Symbolic immune flags
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,             // No routing, no compute
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshEndocrineSystem",
+      "PulseMeshAwareness",
+      "PulseMeshImmuneMembrane"
+    ],
+    never: [
+      "legacyMeshImmuneSystem",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseMeshImmuneSystem({
   PulseImmunity,

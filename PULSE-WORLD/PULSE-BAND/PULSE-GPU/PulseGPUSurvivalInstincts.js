@@ -17,6 +17,42 @@
 //  • Deterministic: same inputs → same evolutionary memory
 //  • Legacy-safe: v10.4/v11 callers still behave identically
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUSurvivalInstincts",
+  version: "v14-IMMORTAL",
+  layer: "gpu_guardian",
+  role: "gpu_survival_instincts",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuSurvival: true,
+    gpuThreatHeuristics: true,
+    gpuKillSwitchHeuristics: true,
+
+    gpuCompute: true,
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUGuardianCortex",
+      "PulseGPULymphNodes"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacySurvivalInstincts"
+    ]
+  }
+}
+*/
 
 import { SCORE_CONSTANTS } from "./PulseGPUCommandments.js";
 

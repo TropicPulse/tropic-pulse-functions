@@ -2,6 +2,44 @@
 // FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-EARN/PulseEarnMktConsulate-v13.0-PRESENCE-IMMORTAL.js
 // LAYER: THE CONSULATE (v13.0 Presence + Advantage‑C + Prewarm)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktConsulate",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "market_consulate",
+  lineage: "PulseEarnMktConsulate-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    marketConsulate: true,
+    jobNormalization: true,
+    jobDiplomacy: true,
+    jobMetadataFusion: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktBroker",
+      "PulseEarnMktAuctioneer",
+      "PulseEarnMktEmbassyLedger"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktConsulateMeta = Object.freeze({
   layer: "PulseEarnMktConsulate",

@@ -29,6 +29,44 @@
 //   • NO timestamps, NO randomness.
 //   • Internal healing state is allowed to mutate; external objects are not.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnSurvivalInstincts",
+  version: "v14-IMMORTAL",
+  layer: "earn_survival",
+  role: "earn_survival_brainstem",
+  lineage: "PulseEarnSurvivalInstincts-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    survivalBrainstem: true,
+    threatHeuristics: true,
+    overloadPrevention: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnImmuneSystem",
+      "PulseEarnLymphNodes",
+      "PulseEarnReflexRouter"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
 export const PulseEarnSurvivalInstinctsMeta = Object.freeze({
   layer: "PulseEarnSurvivalInstincts",
   role: "EARN_SURVIVAL_ORGAN",

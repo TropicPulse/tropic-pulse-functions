@@ -4,6 +4,43 @@
 // BABY HEART — NO HEARTBEAT, NO TIMERS, NO TIMESTAMPS
 // Baby runs off Mom/Dad pulse surfaces + soft random nudge until its own beat exists.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnHeart",
+  version: "v14-IMMORTAL",
+  layer: "earn_heart",
+  role: "earn_pulse_driver",
+  lineage: "PulseEarnHeart-v10.4 → v11-Evo → v14-IMMORTAL",
+
+  evo: {
+    earnPulse: true,
+    jobPump: true,
+    metabolicPulse: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnCirculatorySystem",
+      "PulseEarnMetabolism",
+      "PulseEarnGenome"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnHeartMeta = Object.freeze({
   layer: "PulseEarnHeart",

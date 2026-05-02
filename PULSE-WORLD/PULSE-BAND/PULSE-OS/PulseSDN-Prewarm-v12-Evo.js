@@ -20,6 +20,47 @@
 //   • MUST NOT depend on real time or clocks.
 //   • All operations are structural, deterministic, and presence/dual-band aware.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSDN-Prewarm",
+  version: "v14-IMMORTAL",
+  layer: "os_sdn",
+  role: "sdn_prewarm_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    sdn: true,
+    prewarm: true,
+    chunkAware: true,
+    cacheAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseChunker",
+      "PulseOSBrain",
+      "PulseBinaryOS"
+    ],
+    never: [
+      "legacySDNPrewarm",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const SDNPrewarmMeta = Object.freeze({
   layer: "PulseSDN",

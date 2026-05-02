@@ -23,6 +23,41 @@
 //   • Binary‑first nervous system compliance
 //   • Dualband compression + unified advantage field required
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "CheckIdentity",
+  version: "v12.3-PRESENCE-EVO-BINARY-MAX",
+  layer: "backend_identity_engine",
+  role: "binary_first_identity_healer",
+  lineage: "PulseProxy-v12",
+
+  evo: {
+    identityEngine: true,
+    binaryFirstIdentity: true,
+    dualBandIdentity: true,
+    presenceAware: true,
+    lineageAware: true,
+    driftMarkerAware: true,
+    deterministic: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulsePresence",
+      "PulseBand",
+      "CheckBand",
+      "CheckRouterMemory"
+    ],
+    never: [
+      "legacyIdentity",
+      "legacyCheckIdentity",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseOSCheckIdentityMeta = Object.freeze({
   layer: "PulseProxyIdentityEngine",
@@ -63,7 +98,7 @@ export const PulseOSCheckIdentityMeta = Object.freeze({
     prewarmAware: true,
 
     // Execution prohibitions (binary core)
-//  zeroDateNow: true,          // symbolic wrapper may still use Date.now
+    // zeroDateNow: true,          // symbolic wrapper may still use Date.now
     zeroMutationOfInput: true,
     zeroRandomness: true,
     zeroTimers: true,
@@ -298,8 +333,19 @@ function normalizeIdentity(raw, mode, presenceContext = {}, advantageContext = {
 
 // ============================================================================
 // DUALBAND IDENTITY REPAIR — A → B → A
-// (repairIdentity + validateAndLoadIdentity are organism-level wiring)
+// (in the 99% automated model, this is light-touch)
 // ============================================================================
+async function repairIdentity(identity) {
+  if (!identity) return null;
+
+  return {
+    ...identity,
+    uid: identity.uid || identity.userId || null,
+    resendToken: identity.resendToken || null
+  };
+}
+
+
 async function dualbandRepair(identity) {
   const symbolic = await repairIdentity(identity);
 
@@ -314,6 +360,38 @@ async function dualbandRepair(identity) {
     repairMode: "dualband"
   };
 }
+
+
+// ============================================================================
+// IDENTITY LOADER — 99% AUTOMATED, 1% resendToken
+// Token → minimal identity seed (no DB, no cache wiring here)
+// ============================================================================
+async function validateAndLoadIdentity(token) {
+  if (!token || typeof token !== "string") return null;
+
+  // Extract raw token
+  const raw = token.replace("identity=", "").trim();
+  if (!raw) return null;
+
+  // Decode token → symbolic seed
+  let decoded;
+  try {
+    decoded = JSON.parse(Buffer.from(raw, "base64").toString("utf8"));
+  } catch {
+    return null;
+  }
+
+  // Must have uid
+  if (!decoded?.uid) return null;
+
+  return {
+    uid: decoded.uid,
+    resendToken: decoded.resendToken || null,
+    tokenVersion: decoded.version || "unknown",
+    source: "token"
+  };
+}
+
 
 
 // ============================================================================

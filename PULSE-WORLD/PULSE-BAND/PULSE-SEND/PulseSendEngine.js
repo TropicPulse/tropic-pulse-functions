@@ -12,6 +12,39 @@
 //  • Pure deterministic movement.
 //  • Zero mutation outside instance.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSendEngine",
+  version: "v12.4-EVO-CORE",
+  layer: "frontend",
+  role: "send_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    deterministic: true,
+    fallbackLadder: true
+  },
+
+  contract: {
+    always: [
+      "PulseSend",
+      "PulseSendAdapter",
+      "PulseBinarySend",
+      "PulsePresence"
+    ],
+    never: [
+      "legacySendEngine",
+      "legacyEngine",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

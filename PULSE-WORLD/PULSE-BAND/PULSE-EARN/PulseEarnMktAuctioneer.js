@@ -17,6 +17,44 @@
 //   • NEVER mutate external objects.
 //   • Presence/advantage/hints are metadata-only.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktAuctioneer",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "earn_market_auctioneer",
+  lineage: "PulseEarnMktAuctioneer-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    marketAuctioneer: true,
+    jobScoring: true,
+    jobRanking: true,
+    jobValuation: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktAmbassador",
+      "PulseEarnCustomReceptorMkt",
+      "PulseEarnCirculatorySystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktAuctioneerMeta = Object.freeze({
   layer: "PulseEarnMktAuctioneer",

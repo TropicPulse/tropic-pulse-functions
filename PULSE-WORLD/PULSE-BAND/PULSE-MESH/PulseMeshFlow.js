@@ -28,6 +28,47 @@
 // • No mutation outside metadata.
 // • Deterministic-field, unified-advantage-field, drift-proof.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshFlow",
+  version: "v14.9-MESH-FLOW",
+  layer: "mesh",
+  role: "mesh_conduction_and_flow_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    flow: true,                     // This IS the flow organ
+    conductor: true,                // Impulse conduction
+    sequencing: true,               // Impulse sequencing
+    lifecycle: true,                // Impulse lifecycle
+    binaryAware: true,              // Binary conduction hints
+    symbolicAware: true,            // Symbolic conduction hints
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshAwareness",
+      "PulseMeshCognition",
+      "PulseMeshCortex",
+      "PulseMeshEcho",
+      "PulseMeshEndocrineSystem",
+      "PulseMeshEnvironmentalField"
+    ],
+    never: [
+      "legacyMeshFlow",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseMeshFlow({
   applyPulseSkin,

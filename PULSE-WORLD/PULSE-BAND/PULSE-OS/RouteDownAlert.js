@@ -44,6 +44,46 @@
 // VERSION TAG:
 //   version: 12.3-Presence-EVO-MAX
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "RouteDownAlter",
+  version: "v14-IMMORTAL",
+  layer: "router",
+  role: "router_downstream_alter",
+  lineage: "PulseRouter-v14",
+
+  evo: {
+    routerAlter: true,
+    downstreamAware: true,
+    reflexAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseOSSpinalCord"
+    ],
+    never: [
+      "legacyRouteDownAlter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseOSRouteDownAlertMeta = Object.freeze({
   layer: "PulseOSRouteDownAlert",

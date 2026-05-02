@@ -24,6 +24,49 @@
 //   • Deterministic: same snapshot → same signature
 //   • Prewarm + chunking are purely structural, offline-absolute
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSSurvivalInstincts",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_survival_instincts",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    survival: true,
+    instinctEngine: true,
+    threatAwareness: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSFightFlightResponse",
+      "PulseOSImmuneSystem",
+      "PulseOSNervousSystem"
+    ],
+    never: [
+      "legacySurvivalInstincts",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseOSSurvivalInstinctsMeta = Object.freeze({
   layer: "PulseOSSurvivalInstincts",

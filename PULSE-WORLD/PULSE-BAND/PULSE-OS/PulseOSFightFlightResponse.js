@@ -5,6 +5,49 @@
 //  PURE REFLEX. ZERO COGNITION. ZERO NETWORK. ZERO BACKEND.
 //  NO TIMERS. NO AUTONOMY. CNS‑TRIGGERED ONLY.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSFightFlightResponse",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_fight_flight_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    fightFlight: true,
+    reflexPriority: true,
+    threatDetection: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSNervousSystem",
+      "PulseOSSurvivalInstincts",
+      "PulseOSImmuneSystem"
+    ],
+    never: [
+      "legacyFightFlight",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const ACTNOW_CONTEXT_V12 = Object.freeze({
   organ: "ACTNow",

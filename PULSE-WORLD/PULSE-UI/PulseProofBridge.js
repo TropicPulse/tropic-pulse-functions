@@ -5,6 +5,44 @@
 //  - Dev tracing
 //  - SSR-safe (no BroadcastChannel → no-op bridge)
 // -----------------------------------------------------------------------------
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseProofBridge",
+  version: "v13-EVO-CNS-PRIME",
+  layer: "frontend",
+  role: "cns_bridge",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    cnsAligned: true,
+    dualBand: true,
+    binaryAware: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    chunkAligned: true,
+    bridgeCore: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseUIFlow",
+      "PulseUIErrors",
+      "PulsePresenceNormalizer"
+    ],
+    never: [
+      "legacyBridge",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPresence",
+      "legacyChunker",
+      "legacyFlow"
+    ]
+  }
+}
+*/
 
 const DEV = true;
 

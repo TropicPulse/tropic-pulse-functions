@@ -4,6 +4,43 @@
 // Mesh-Level Presence • Nearby Scan • Metadata-Only • Membrane-Safe
 // Bridges Mesh → Presence → Window (no organs exposed)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshPresenceRelay",
+  version: "v14.9-MESH-PRESENCE-RELAY",
+  layer: "mesh",
+  role: "presence_to_mesh_bridge",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Writes mesh presence signals
+    binaryAware: true,              // Binary presence hints
+    symbolicAware: true,            // Symbolic presence hints
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulsePresence",
+      "PulseMeshAwareness",
+      "PulseMeshAura"
+    ],
+    never: [
+      "legacyMeshPresenceRelay",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseMeshPresenceRelay({
   MeshBus,           // publish/subscribe bus (safe, metadata-only)

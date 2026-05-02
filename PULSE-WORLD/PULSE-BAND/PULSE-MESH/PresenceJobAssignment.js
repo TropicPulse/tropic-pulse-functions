@@ -4,6 +4,42 @@
 // Presence-Based Job Assignment Engine
 // Deterministic • Metadata-Only • Presence + Readiness + Power-User Aware
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PresenceJobAssignment",
+  version: "v14.9-PRESENCE-JOB-EVO",
+  layer: "presence_social",
+  role: "job_assignment_engine",
+  lineage: "PulseWorld-v14",
+
+  evo: {
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Uses mesh hops + proximity
+    aiViewAware: true,              // Uses PresenceAIView
+    rankingAware: true,             // Uses PowerUserRanking
+    deterministic: true,            // Job assignment must be stable
+    driftProof: true,               // No drift in job scoring
+    dualBand: true,                 // Symbolic + binary scoring
+    zeroMutationOfInput: true,      // Never mutate presence objects
+    zeroNetworkFetch: true,         // No external fetch
+    safeRouteFree: true             // No safeRoute allowed
+  },
+
+  contract: {
+    always: [
+      "PresenceAwareness",
+      "PresenceAIView",
+      "PowerUserRanking",
+      "PulseMeshPresenceRelay"
+    ],
+    never: [
+      "legacyJobAssignment",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPresenceJobAssignment({
   PresenceJobView,

@@ -5,6 +5,49 @@
 //  • Deterministic immune surface only (builders → artifacts)
 //  • Symbolic-primary, binary-aware, dual-band-tagged
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSInflammatoryResponse",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_inflammatory_response",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    inflammation: true,
+    immuneAware: true,
+    anomalyResponse: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSImmuneSystem",
+      "PulseOSFightFlightResponse",
+      "PulseOSSurvivalInstincts"
+    ],
+    never: [
+      "legacyInflammatoryResponse",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const HEALER_CONTEXT_V12_3 = {
   organ: "PulseOSHealer",

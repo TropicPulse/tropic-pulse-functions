@@ -13,6 +13,42 @@
 //  • Session metadata
 //  • Deterministic routing (no GPU calls)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreGPUMemoryAdapter",
+  version: "v14-IMMORTAL",
+  layer: "corememory_adapter",
+  role: "gpu_memory_adapter",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    adapter: true,
+    gpuMemoryBridge: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreBrain",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createPulseBinaryOverlay } from "./PulseBinaryCoreOverlay.js";
 

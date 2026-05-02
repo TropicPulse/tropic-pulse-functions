@@ -12,6 +12,45 @@
 //  - Pure witness: if the organism dies, we SEE it.
 //
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseProofMonitor",
+  version: "v13-EVO-BINARY-MAX",
+  layer: "frontend",
+  role: "observer_monitor",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryAware: true,
+    dualBandAware: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    vitalsMonitor: true,
+    passive: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseUIFlow",
+      "PulseUIErrors"
+    ],
+    never: [
+      "legacyMonitor",
+      "legacyVitals",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPresence",
+      "legacyChunker",
+      "legacyFlow"
+    ]
+  }
+}
+*/
+
 console.log("Monitor");
 import { log, warn, error } from "./PulseProofLogger.js";
 

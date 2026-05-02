@@ -4,6 +4,39 @@
 // Presence AI View (Machine-Facing)
 // Deterministic • Metadata-Only • Safe Presence Exposure
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PresenceAIView",
+  version: "v14.9-PRESENCE-VIEW",
+  layer: "presence",
+  role: "presence_ai_surface",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Includes mesh hops + distance
+    aiView: true,                   // Safe AI-facing presence surface
+    deterministic: true,
+    driftProof: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PresenceAwareness",
+      "PowerUserRanking"
+    ],
+    never: [
+      "legacyPresenceAIView",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPresenceAIView({
   PulseSenses,

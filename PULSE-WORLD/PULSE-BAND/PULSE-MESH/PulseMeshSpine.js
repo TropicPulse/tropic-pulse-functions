@@ -35,6 +35,44 @@
 // • All advantages are metadata-only: prewarm/chunk/cache/presence
 //   are tags + snapshots, never side-effectful I/O.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshSpine",
+  version: "v14.9-MESH-SPINE",
+  layer: "mesh",
+  role: "mesh_spinal_cord_and_conduction_spine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    spine: true,                    // This IS the mesh spinal cord
+    conductor: true,                // Conduction backbone
+    routingSpine: true,             // Routing spine
+    binaryAware: true,              // Binary conduction hints
+    symbolicAware: true,            // Symbolic conduction hints
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshAwareness",
+      "PulseMeshCognition",
+      "PulseMeshCortex"
+    ],
+    never: [
+      "legacyMeshSpine",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createCommunityReflex } from "./CommunityReflex.js";
 import { applyPulseCortex } from "./PulseMeshCortex.js";

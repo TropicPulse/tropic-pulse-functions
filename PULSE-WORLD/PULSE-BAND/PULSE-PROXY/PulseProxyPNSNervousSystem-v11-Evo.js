@@ -1,3 +1,4 @@
+/* global log,warn,error */
 // ============================================================================
 // GLOBAL WIRING — v12.3 (no imports, organism‑level wiring)
 // ============================================================================
@@ -170,6 +171,51 @@ export const PulseBandSymbolicMeta = Object.freeze({
   })
 });
 
+// ============================================================================
+// NERVOUS SYSTEM LOGGER — v14 IMMORTAL
+// ============================================================================
+export function nervousLog(stage, payload = {}) {
+  try {
+    // Diagnostics gate
+    const enabled =
+      typeof window !== "undefined"
+        ? window.PULSE_NERVOUS_DIAGNOSTICS || window.PULSE_DIAGNOSTICS
+        : process.env.PULSE_NERVOUS_DIAGNOSTICS === "true" ||
+          process.env.PULSE_DIAGNOSTICS === "true";
+
+    if (!enabled) return;
+
+    // Safe timestamp
+    const ts = Date.now();
+
+    // Safe payload
+    const safePayload =
+      payload && typeof payload === "object"
+        ? payload
+        : { value: String(payload) };
+
+    // Final nervous packet
+    const packet = {
+      layer: "PulseNervousSystem",
+      stage,
+      ts,
+      ...safePayload
+    };
+
+    // Browser console
+    if (typeof console !== "undefined" && console.log) {
+      console.log("[NERV]", JSON.stringify(packet));
+    }
+
+    // PulseBand logger (if available)
+    if (typeof window !== "undefined" && window.PulseLogger?.nervous) {
+      window.PulseLogger.nervous(packet);
+    }
+
+  } catch (_) {
+    // NEVER throw — nervous system must never break flow
+  }
+}
 
 // ============================================================================
 // Utility helpers — v12.3 deterministic field + presence surfaces

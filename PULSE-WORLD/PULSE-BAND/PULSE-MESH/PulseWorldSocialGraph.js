@@ -9,6 +9,48 @@
 // Edges: presence, jobs, mentorship, upgrades
 // No payload data, only relationship metadata.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseWorldSocialGraph",
+  version: "v14.9-WORLD-SOCIAL-GRAPH",
+  layer: "world_social",
+  role: "social_graph_engine",
+  lineage: "PulseWorld-v14",
+
+  evo: {
+    socialGraph: true,              // This IS the social graph organ
+    presenceAware: true,            // Uses presence field
+    meshAware: true,                // Uses mesh proximity
+    rankingAware: true,             // Uses power user ranking
+    mentorshipAware: true,          // Mentor/mentee edges
+    jobAware: true,                 // Job edges
+    deterministic: true,
+    driftProof: true,
+    dualBand: true,
+    metadataOnly: true,             // Graph is metadata-only
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PresenceAwareness",
+      "PresenceAIView",
+      "PowerUserRanking",
+      "MentorUpgradeRequest",
+      "PresenceJobAssignment",
+      "PulseMeshPresenceRelay"
+    ],
+    never: [
+      "legacySocialGraph",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseWorldSocialGraph({
   PowerUserRanking,

@@ -16,6 +16,43 @@
 //  Unified Router Organ Import Surface (Binary + Evolutionary + Mesh + Earn)
 //  PURE IMPORT LAYER — NO LOGIC, NO STATE, NO EXECUTION
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinaryRouter",
+  version: "v14.4-IMMORTAL",
+  layer: "frontend",
+  role: "binary_router",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryCore: true,
+    immortalBand: true,
+    dualBand: true,
+    chunkAligned: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    deterministic: true,
+    advantageV2: true
+  },
+
+  contract: {
+    always: [
+      "PulseBinaryPulse",
+      "PulseBinaryTech",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseRouterCommandments"
+    ],
+    never: [
+      "legacyBinaryRouter",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyChunker"
+    ]
+  }
+}
+*/
 
 
 // --- EVOLUTIONARY ROUTER ORGANS --------------------------------------------

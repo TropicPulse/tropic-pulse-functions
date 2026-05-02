@@ -12,6 +12,52 @@
 //   • The organism map IS the genome.
 //   • All subsystems read from THIS file.
 // -----------------------------------------------------------------------------
+/*
+AI_EXPERIENCE_META = {
+  identity: "OrganismMap",
+  version: "v14.9-IMMORTAL-GENOME",
+  layer: "genome",
+  role: "organism_genome_definition",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    genome: true,                 // This IS the organism genome
+    selfDescribing: true,         // Can describe itself
+    selfEvolving: true,           // Can evolve itself (v14+)
+    autoDiscovery: true,          // Scans filesystem for organs
+    organPlacement: true,         // Determines where organs live
+    organWiring: true,            // Determines how organs connect
+    organPresence: true,          // Determines presence field
+    organMesh: true,              // Determines mesh presence
+    deterministic: true,          // Must be deterministic
+    driftProof: true,             // Genome must never drift
+    safeRouteFree: true,          // Genome must not use safeRoute
+    zeroNetworkFetch: true,       // Genome must not fetch anything
+    zeroMutationOfInput: true,    // Genome must not mutate external state
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSLoader",
+      "PulseOSBrain",
+      "PulseSpinalCord",
+      "PulseChunker",
+      "PulsePresence",
+      "PulseMesh",
+      "PulseBand",
+      "PulseRouter",
+      "PulseBinaryRouter"
+    ],
+    never: [
+      "legacyOrganismMap",
+      "legacyGenome",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 let fs = null;
 let db = null;

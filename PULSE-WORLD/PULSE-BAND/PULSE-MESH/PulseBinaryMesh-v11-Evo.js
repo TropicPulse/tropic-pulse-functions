@@ -24,6 +24,48 @@
 //   • No randomness, no timing, no env access.
 //   • No dynamic imports, no eval.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinaryMesh",
+  version: "v14-IMMORTAL",
+  layer: "mesh_binary",
+  role: "binary_mesh_kernel",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    binaryPrimary: true,
+    symbolicAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    meshTopologyAware: true,
+    meshPresenceAware: true,
+    meshAuraAware: true,
+
+    nonExecutableBinary: true,
+    metadataOnly: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshAwareness",
+      "PulseMeshPresenceRelay"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyBinaryMesh"
+    ]
+  }
+}
+*/
 
 export const BinaryMeshMeta = Object.freeze({
   layer: "BinaryNervousSystem",

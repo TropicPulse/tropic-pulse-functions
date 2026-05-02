@@ -5,6 +5,49 @@
 // DUAL‑BAND NEURAL MEMORY • PREWARM + CHUNK • MULTI‑PRESENCE SNAPSHOTS
 // OFFLINE‑ABSOLUTE • ZERO MUTATION AFTER INSERTION
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSShortTermMemory",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_short_term_memory",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    shortTermMemory: true,
+    workingSet: true,
+    recallBuffer: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSLongTermMemory",
+      "PulseOSLiverMemory"
+    ],
+    never: [
+      "legacyShortTermMemory",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 const LAYER_ID   = "SHORT-TERM-MEMORY";
 const LAYER_NAME = "THE HIPPOCAMPAL BUFFER";

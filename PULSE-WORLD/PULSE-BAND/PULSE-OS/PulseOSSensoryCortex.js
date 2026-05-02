@@ -35,6 +35,49 @@
 //   • No timestamps generated here (may pass through existing hop timestamps)
 //   • No cache writes, no prewarm execution — hints only
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSSensoryCortex",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_sensory_cortex",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    sensoryCortex: true,
+    sensoryIntegration: true,
+    sensoryAwareness: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSNervousSystem",
+      "PulseOSBrain",
+      "PulseChunker"
+    ],
+    never: [
+      "legacySensoryCortex",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseOSSensoryCortexMeta = Object.freeze({
   layer: "PulseOSSensoryCortex",

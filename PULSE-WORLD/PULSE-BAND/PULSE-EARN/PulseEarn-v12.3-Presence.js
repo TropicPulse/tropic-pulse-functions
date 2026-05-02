@@ -17,6 +17,47 @@
 //  • Health is descriptive-only (no performance/baseline math).
 //  • Advantage fields are IMMORTAL, versioned, non-perf-weighted.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarn",
+  version: "v14-IMMORTAL",
+  layer: "earn_core",
+  role: "earn_root_engine",
+  lineage: "PulseEarn-v9 → v10.4 → v11-Evo → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    earnRoot: true,
+    jobPlanner: true,
+    jobFusion: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnCell",
+      "PulseEarnCirculatorySystem",
+      "PulseEarnEndocrineSystem",
+      "PulseEarnGeneticMemory",
+      "PulseEarnContinuancePulse"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "presenceEngine",
+      "meshKernel"
+    ]
+  }
+}
+*/
 
 // --- CORE EARN ORGAN --------------------------------------------------------
 // --- BIOLOGICAL EARN ORGANS -----------------------------------------------

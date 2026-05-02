@@ -11,6 +11,45 @@
 //  • GPU‑promotion rules
 //  • Governor‑aligned (v12)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreLayers",
+  version: "v14-IMMORTAL",
+  layer: "corememory_layers",
+  role: "corememory_physical_layer_map",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    layerMap: true,                // RAM, DiskPrimary, DiskSecondary, GPU, Proxy
+    memoryPhysics: true,
+    hydrationRules: true,
+    dehydrationRules: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreMemory",
+      "PulseBinaryCoreOverlay",
+      "PulseCoreBrain",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const CoreLayersRole = {
   type: "Organ",

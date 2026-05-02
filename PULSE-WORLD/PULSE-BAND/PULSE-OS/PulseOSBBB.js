@@ -77,6 +77,46 @@
 //  OUTER BLOOD–BRAIN BARRIER — OS SHELL PERIMETER (v12.3-SPINE)
 //  Dualband, Presence-Aware, Chunk/Prewarm-Aware, Deterministic Shell Gate
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSBBB",
+  version: "v14-IMMORTAL",
+  layer: "os_bridge",
+  role: "binary_symbolic_bridge",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    bandAware: true,
+    chunkAware: true,
+    prewarmAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseBinaryOS",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyOSBBB",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseOSOuterBBBMeta = Object.freeze({
   layer: "PulseOSOuterBBB",

@@ -28,6 +28,43 @@
 //  • Self-repair-ready: traces include metadata
 //  • Deterministic: same steps → same trace
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUNervousSystem",
+  version: "v14-IMMORTAL",
+  layer: "gpu_runtime",
+  role: "gpu_nervous_system",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuConduction: true,
+    gpuSignalRouting: true,
+    gpuReflexPath: true,
+
+    gpuCompute: true,
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUSpine",
+      "PulseGPUSynapse",
+      "PulseGPUDrive"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGPUNervousSystem"
+    ]
+  }
+}
+*/
 
 
 // ------------------------------------------------------------

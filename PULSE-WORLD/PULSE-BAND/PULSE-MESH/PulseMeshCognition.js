@@ -24,7 +24,42 @@
 //  • Deterministic, drift-proof cognition.
 //  • Zero randomness, zero timestamps, zero async.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshCognition",
+  version: "v14.9-MESH-COGNITION",
+  layer: "mesh",
+  role: "mesh_memory_and_pattern_engine",
+  lineage: "PulseMesh-v14",
 
+  evo: {
+    cognition: true,                // This IS the cognition organ
+    metadataOnly: true,             // Never mutates payloads
+    binaryAware: true,              // Binary tags + binary patterns
+    symbolicAware: true,            // Symbolic tags + patterns
+    dualBand: true,                 // Dual-mode cognition
+    deterministic: true,            // No randomness in cognition
+    driftProof: true,               // No drift in memory patterns
+    zeroMutationOfInput: true,      // Never mutate impulses
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshAwareness",
+      "PulseMeshCortex"
+    ],
+    never: [
+      "legacyMeshCognition",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // -----------------------------------------------------------
 // Cognition Store (metadata-only)

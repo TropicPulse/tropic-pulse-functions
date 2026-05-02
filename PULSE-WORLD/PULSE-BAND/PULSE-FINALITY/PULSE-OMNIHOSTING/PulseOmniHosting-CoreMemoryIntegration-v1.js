@@ -15,6 +15,41 @@
  *   ZERO randomness.
  *   PURE symbolic caching.
  */
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOmniHosting-CoreMemoryIntegration",
+  version: "v14-IMMORTAL",
+  layer: "integration",
+  role: "omnihosting_corememory_wrapper",
+  lineage: "PulseOmniHosting-v14",
+
+  evo: {
+    integrationWrapper: true,
+    coreMemoryAdapter: true,
+    symbolicPrimary: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    pureCompute: true
+  },
+
+  contract: {
+    always: [
+      "PulseOmniHosting",
+      "PulseCoreMemory"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyOmniHostingIntegration"
+    ]
+  }
+}
+*/
 
 import PulseOmniHostingAPI from "./PulseOmniHosting-v11-Evo.js";
 import { createPulseCoreMemory } from "../../PULSE-CORE/PulseCoreMemory.js";

@@ -23,6 +23,64 @@
 //    - Symbolic + Binary coexist as dual-mode cognition.
 //    - All drift eliminated; unified organism identity.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSSymbolicKernel",
+  version: "v12.3-SPINE-SYMBOLIC-IMMORTAL",
+  layer: "os_kernel_symbolic",
+  role: "symbolic_organism_kernel",
+  lineage: "PulseOS-v12.3-SPINE",
+
+  evo: {
+    symbolicPrimary: true,          // This is the symbolic OS kernel
+    binaryAware: true,              // Knows binary organs exist
+    binaryReady: true,              // Can host binary organs but does not execute them
+    dualBand: true,                 // Symbolic + binary coexistence
+    presenceAware: true,            // Must host OS Presence organ
+    meshPresenceAware: true,        // Must host Mesh Presence Relay
+    chunkPrewarmReady: true,        // Chunker + prewarm integration
+    evolutionAware: true,           // Works with Evolution organ
+    governorAligned: true,          // Must obey Governor organ rules
+    spinalCordAligned: true,        // Must wire organs via SpinalCord
+    deterministic: true,            // No randomness in boot sequence
+    driftProof: true,               // No drift allowed in symbolic kernel
+    safeRouteFree: true,            // Kernel must not use safeRoute
+    zeroNetworkFetch: true,         // Kernel must not fetch network resources
+    zeroMutationOfInput: true,      // Must not mutate incoming identity/session
+    zeroExternalMutation: true      // Must not mutate global state outside contract
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",               // CNS symbolic brain organ
+      "PulseOSEvolution",           // Evolution organ
+      "PulseSpinalCord",            // Wiring organ
+      "PulseOSPresence",            // OS Presence organ
+      "PulseMeshPresence",          // Mesh Presence Relay
+      "PulseExpansion",             // Expansion barrel
+      "PulseGovernor"               // Supervisor organ
+    ],
+
+    optional: [
+      "PulseBinaryKernel",          // Binary kernel (external file)
+      "PulseBinaryRouter",          // Binary router
+      "PulseChunker",               // Chunker organ
+      "PulsePrewarm"                // Prewarm organ
+    ],
+
+    never: [
+      "legacySymbolicKernel",       // No v1.7/v11.x symbolic kernel
+      "legacyPresence",             // No legacy presence organ
+      "legacyMeshPresence",         // No legacy mesh relay
+      "legacySpinalCord",           // No legacy wiring
+      "safeRoute",                  // Forbidden in OS kernel
+      "fetchViaCNS",                // Kernel cannot fetch CNS
+      "legacyChunker",              // No legacy chunker
+      "legacyEvolution"             // No legacy evolution organ
+    ]
+  }
+}
+*/
 
 // ============================================================================
 //  ORGANISM BOOTSTRAP SET — v12.3 (SYMBOLIC KERNEL SIDE)

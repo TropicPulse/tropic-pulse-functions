@@ -35,6 +35,44 @@
 //   - PulseBeaconEngine (for presence + mesh status)
 //   - Optional: world / neighbor mesh snapshots (symbolic only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMesh",
+  version: "v14-IMMORTAL",
+  layer: "presence_mesh_core",
+  role: "symbolic_mesh_kernel",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    meshKernel: true,
+    meshFlow: true,
+    meshAwareness: true,
+    meshPresence: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseExpansion",
+      "PulseBeaconEngine"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseMeshMeta = Object.freeze({
   organId: "PulseMesh-v13-PRESENCE-EVO+",

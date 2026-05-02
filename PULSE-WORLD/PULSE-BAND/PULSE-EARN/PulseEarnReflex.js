@@ -4,6 +4,43 @@
 //  Pure deterministic reflex builder (zero routing, zero sending)
 //  Binary-first A-B-A + Presence surfaces (metadata-only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnReflex",
+  version: "v14-IMMORTAL",
+  layer: "earn_reflex",
+  role: "earn_reflex_arc",
+  lineage: "PulseEarnReflex-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    reflexArc: true,
+    threatResponse: true,
+    fastPath: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnReflexRouter",
+      "PulseEarnMuscleSystem",
+      "PulseEarnNervousSystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 // ORGAN IDENTITY — v13.0-PRESENCE-IMMORTAL

@@ -26,6 +26,49 @@
 //    - When THIS file runs, the *binary creature* comes online.
 //    - This is the reflex ignition — the organism’s heartbeat.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinaryOS",
+  version: "v14-IMMORTAL",
+  layer: "os_binary",
+  role: "binary_os_kernel",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    binaryPrimary: true,
+    symbolicAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    nonExecutableBinary: true,
+    metadataOnly: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSBrainCortex",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyBinaryOS",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseBinaryOSMeta = Object.freeze({
   layer: "PulseBinaryOSKernel",

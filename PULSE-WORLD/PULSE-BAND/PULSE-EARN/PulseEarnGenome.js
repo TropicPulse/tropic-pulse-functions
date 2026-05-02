@@ -26,6 +26,44 @@
 //   • Immutable across versions unless explicitly ratified.
 //   • v13.0‑PRESENCE‑IMMORTAL adds ONLY metadata + signatures OUTSIDE the schema.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnGenome",
+  version: "v14-IMMORTAL",
+  layer: "earn_genome",
+  role: "earn_genetic_blueprint",
+  lineage: "PulseEarnGenome-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    earnGenome: true,
+    jobDNA: true,
+    lineageTracking: true,
+    mutationProof: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnHeart",
+      "PulseEarnMetabolism",
+      "PulseEarnGeneticMemory"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnGenomeCoreMeta = Object.freeze({
   layer: "PulseEarnGenomeCore",

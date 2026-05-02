@@ -28,6 +28,45 @@
 //   • Self-repair-ready: plans include OS metadata
 //   • Deterministic: same advice → same plan
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUCognitiveLayer",
+  version: "v14-IMMORTAL",
+  layer: "gpu_brain",
+  role: "gpu_cognitive_layer",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuCognition: true,
+    gpuAnalysis: true,
+    gpuPreflight: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUBrain",
+      "PulseGPUDrive"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGPUCognition"
+    ]
+  }
+}
+*/
 
 // ------------------------------------------------------------
 // ⭐ OS‑v12-Evo-Presence-Max CONTEXT METADATA

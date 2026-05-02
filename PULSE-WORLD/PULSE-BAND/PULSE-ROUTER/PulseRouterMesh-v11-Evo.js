@@ -3,6 +3,43 @@
 //  Deterministic Mesh Path Selection • Pattern/Lineage/Page/Binary-Aware
 //  12.3+: cacheChunkKey • prewarmHint • multiPresenceScope
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouterMesh",
+  version: "v14.4-EVO-MESH",
+  layer: "frontend",
+  role: "router_mesh_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    meshCore: true,
+    deterministic: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    multiRoute: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterEvolutionaryDesign",
+      "PulseRouterEvolutionaryInstincts",
+      "PulseRouterEvolutionaryThought"
+    ],
+    never: [
+      "legacyRouterMesh",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseMeshRole = {
   type: "MeshRouter",

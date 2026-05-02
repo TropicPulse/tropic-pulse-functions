@@ -24,6 +24,39 @@
 //   ✘ NOT a renderer
 //   ✘ NOT a binary executor
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseUIFlow",
+  version: "v13-EVO",
+  layer: "frontend",
+  role: "ui_flow_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    intentDriven: true,
+    organismMapAligned: true,
+    presenceAware: true,
+    chunkAligned: true,
+    dualBand: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseUIErrors"
+    ],
+    never: [
+      "legacyUIFlow",
+      "legacyPresence",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

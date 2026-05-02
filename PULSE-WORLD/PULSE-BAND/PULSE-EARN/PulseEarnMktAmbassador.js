@@ -17,6 +17,43 @@
 //   • Unified v13 job schema.
 //   • A‑B‑A surfaces preserved.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktAmbassador",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "earn_market_ambassador",
+  lineage: "PulseEarnMktAmbassador-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    marketAmbassador: true,
+    jobNegotiation: true,
+    jobNormalization: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktAuctioneer",
+      "PulseEarnCustomReceptorMkt",
+      "PulseEarnCirculatorySystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktAmbassadorMeta = Object.freeze({
   layer: "PulseEarnMktAmbassador",

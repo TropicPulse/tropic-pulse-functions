@@ -4,6 +4,51 @@
 // “THE EVOLUTION ENGINE — ORGANISM-WIDE CNS GROWTH + DRIFT INTELLIGENCE”
 // CoreMemory-integrated • Immortal Drift/Lineage • Cache/Prewarm-aware
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSBrainEvolution",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_evolution_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    evolutionEngine: true,
+    lineageAware: true,
+    driftScanner: true,
+    structuralDriftAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    intentAware: true,
+    organismMapAware: true,
+    iqMapAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSBrainCortex",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyBrainEvolution",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { PulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 

@@ -10,6 +10,42 @@
 //  • Dual‑band metadata
 //  • TTL + healing compatible
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreProxyMemoryAdapter",
+  version: "v14-IMMORTAL",
+  layer: "corememory_adapter",
+  role: "proxy_memory_adapter",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    adapter: true,
+    proxyBridge: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreBrain",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createPulseBinaryOverlay } from "./PulseBinaryCoreOverlay.js";
 

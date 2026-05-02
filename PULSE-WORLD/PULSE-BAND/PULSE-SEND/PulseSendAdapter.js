@@ -14,6 +14,39 @@
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSendAdapter",
+  version: "v12.4-EVO-BINARY",
+  layer: "frontend",
+  role: "send_adapter",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryAware: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulseSend",
+      "PulseSendEngine",
+      "PulseBinarySend",
+      "PulsePresence"
+    ],
+    never: [
+      "legacySendAdapter",
+      "legacyAdapter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

@@ -1,67 +1,3 @@
-/**
- * META {
- *   organ: "PulseContinuance",
- *   root: "PULSE-FINALITY",
- *   mode: "substrate",
- *   target: "predictive-continuance",
- *   version: "v12.3-PRESENCE-EVO+",
- *
- *   role: "Predictive survival engine. Uses environment + grid signals to move BEFORE failure.",
- *
- *   guarantees: {
- *     deterministic: true,
- *     hostAgnostic: true,
- *     regionAware: true,
- *     schemaAware: true,
- *     noRandomness: true,
- *     presenceAware: true,
- *     advantageAware: true,
- *     fallbackBandAware: true,
- *     chunkAware: true,
- *     cacheAware: true,
- *     prewarmAware: true
- *   },
- *
- *   contracts: {
- *     input: [
- *       "PulseSchema",
- *       "HostDescriptor[]",
- *       "RegionSignal[]",
- *       "GridSignal[]",
- *       "CurrentPlacementPlan"
- *     ],
- *     output: [
- *       "PreemptiveMovePlan",
- *       "ReplicationPlan",
- *       "ContinuanceRiskReport"
- *     ]
- *   },
- *
- *   upstream: [
- *     "PulseSchema",
- *     "PulseOmniHosting",
- *     "RegioningPhysics",
- *     "EnvironmentPhysics",
- *     "PulseGridSignals"
- *   ],
- *
- *   downstream: [
- *     "DeploymentPhysics",
- *     "DeltaEngine",
- *     "SnapshotPhysics",
- *     "LineageEngine",
- *     "PulseContinuanceCoreMemory-v12.3-PRESENCE-EVO+"
- *   ],
- *
- *   notes: [
- *     "Continuance is about moving BEFORE failure, not recovering AFTER.",
- *     "Uses symbolic risk scoring, no randomness.",
- *     "Does not talk to real hosts; only reasons over descriptors + signals.",
- *     "Output is a plan, not an action.",
- *     "12.3+ adds presence/fallback/chunk/cache/prewarm hints as pure symbolic fields."
- *   ]
- * }
- */
 
 /**
  * PulseContinuance-v12.3-PRESENCE-EVO+.js
@@ -83,6 +19,42 @@
  *   - Always output explicit, reversible plans.
  *   - 12.3+: attach presence/fallback/chunk/cache/prewarm hints as pure metadata.
  */
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseContinuance",
+  version: "v14-IMMORTAL",
+  layer: "continuance",
+  role: "continuance_engine",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    continuanceEngine: true,
+    outageDetection: true,
+    replicationPlanning: true,
+    survivalModeling: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseOmniHosting",
+      "PulseSchema"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyContinuance"
+    ]
+  }
+}
+*/
 
 // -------------------------
 // Types

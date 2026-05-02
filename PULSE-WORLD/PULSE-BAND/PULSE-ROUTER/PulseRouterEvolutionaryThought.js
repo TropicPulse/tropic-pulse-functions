@@ -16,6 +16,41 @@
 //    • Pure memory organ — NO external mutation.
 //
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouterEvolutionaryThought",
+  version: "v14.4-EVO-THOUGHT",
+  layer: "frontend",
+  role: "router_reasoning_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    thoughtCore: true,
+    deterministic: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    noMutation: true,
+    noDrift: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterEvolutionaryDesign",
+      "PulseRouterEvolutionaryInstincts"
+    ],
+    never: [
+      "legacyRouterThought",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

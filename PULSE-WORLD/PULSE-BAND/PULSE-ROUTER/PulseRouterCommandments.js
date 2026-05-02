@@ -10,6 +10,38 @@
 //    - Zero randomness, zero mutation, drift-proof.
 //    - Reversible serialization.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouterCommandments",
+  version: "v12.5-EVO-LAW",
+  layer: "frontend",
+  role: "router_law",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    lawCore: true,
+    deterministic: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseRouterEarn"
+    ],
+    never: [
+      "legacyRouterLaw",
+      "legacyRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ------------------------------------------------------------

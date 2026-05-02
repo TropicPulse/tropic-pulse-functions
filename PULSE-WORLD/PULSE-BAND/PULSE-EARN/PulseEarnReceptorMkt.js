@@ -21,6 +21,43 @@
 //   • NEVER mutate job objects.
 //   • Unified Earn v13 presence/advantage/chunk schema.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnReceptorMkt",
+  version: "v14-IMMORTAL",
+  layer: "earn_receptor",
+  role: "earn_market_receptor",
+  lineage: "PulseEarnReceptorMkt-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    receptor: true,
+    marketSignalIntake: true,
+    jobTypeDetection: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnNervousSystem",
+      "PulseEarnReflexRouter",
+      "PulseEarnMktAmbassador"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnReceptorMeta = Object.freeze({
   layer: "PulseEarnReceptor",

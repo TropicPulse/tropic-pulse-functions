@@ -28,6 +28,43 @@
 //  • Deterministic: same traces → same insights
 //  • Self‑repair‑ready: insights include metadata
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUWisdomCortex",
+  version: "v14-IMMORTAL",
+  layer: "gpu_brain",
+  role: "gpu_wisdom_cortex",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuCognition: true,
+    gpuHeuristics: true,
+    gpuMetaReasoning: true,
+
+    gpuCompute: true,
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUBrain",
+      "PulseGPUCognitiveLayer",
+      "PulseGPUGeneticMemory"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyWisdomCortex"
+    ]
+  }
+}
+*/
 
 import { INSIGHT_THRESHOLDS } from "./PulseGPUCommandments.js";
 

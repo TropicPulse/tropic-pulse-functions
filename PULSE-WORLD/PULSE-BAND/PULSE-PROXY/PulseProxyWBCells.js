@@ -16,13 +16,15 @@ const G = typeof globalThis !== "undefined"
   ? global
   : {};
 
-const db    = G.db    || null;
 const log   = G.log   || console.log;
 const error = G.error || console.error;
 
 const Timestamp = (G.firebaseAdmin && G.firebaseAdmin.firestore.Timestamp) ||
                   G.Timestamp ||
                   null;
+
+const admin = global.db;
+const db    = global.db;
 
 
 // ============================================================================
@@ -210,6 +212,59 @@ export const PulseProxyHealerMeta = Object.freeze({
   })
 });
 
+// ============================================================================
+// writeHealerLog — v14 IMMORTAL HEALER LOGGER
+// Writes deterministic, drift‑proof healer logs to FUNCTION_LOGS
+// ============================================================================
+export async function writeHealerLog({
+  subsystem = "unknown",
+  stage = "unknown",
+  severity = "info",
+  note = null,
+  details = null,
+  runId = null,
+  uid = null,
+  file = null,
+  fn = null
+} = {}) {
+  try {
+    const ts = Date.now();
+    const id = `HL_${ts}_${Math.random().toString(36).slice(2, 8)}`;
+
+    const payload = {
+      ts,
+      subsystem,
+      stage,
+      severity,
+      note,
+      details,
+      runId,
+      uid,
+      file,
+      fn,
+      healerVersion: "v14-IMMORTAL",
+      layer: "backend_healer",
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    await db.collection("FUNCTION_LOGS").doc(id).set(payload);
+    return id;
+
+  } catch (err) {
+    // NEVER throw — healer logs must not break the healer
+    try {
+      await db.collection("FUNCTION_ERRORS").add({
+        ts: Date.now(),
+        fn: "writeHealerLog",
+        error: String(err),
+        stage: "healer_log_failure",
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (_) {}
+
+    return null;
+  }
+}
 
 // ============================================================================
 //  BINARY CORE — v12.3 (unchanged logic, upgraded surfaces)
@@ -333,7 +388,7 @@ function buildPresenceField(status) {
 // ============================================================================
 async function checkProxyHealthAndMetrics() {
   ImmuneState.status = "scanning";
-  ImmuneState.lastHealthScanTs = nowMs();
+  ImmuneState.lastHealthScanTs = Date.now();
   log("wbc", "scan_start");
 
   let health = null;
@@ -364,7 +419,7 @@ async function checkProxyHealthAndMetrics() {
     return;
   }
 
-  ImmuneState.lastMetricsScanTs = nowMs();
+  ImmuneState.lastMetricsScanTs = Date.now();
 
   const healthResult = ProxyHealerBinary.classifyPressure(metrics);
 
@@ -392,7 +447,7 @@ async function checkProxyHealthAndMetrics() {
 async function scanUserScoresForInstanceHints() {
   if (!db) return;
 
-  ImmuneState.lastScoresScanTs = nowMs();
+  ImmuneState.lastScoresScanTs = Date.now();
 
   let snap;
   try {

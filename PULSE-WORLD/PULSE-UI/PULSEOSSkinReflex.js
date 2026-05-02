@@ -17,6 +17,9 @@
 console.log("Skin Reflex");
 import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
 
+const log   = global.log   || console.log;
+const warn  = global.warn  || console.warn;
+const error = global.error || console.error;
 export const PageScannerV12 = Object.freeze({
 
   // ---------------------------------------------------------

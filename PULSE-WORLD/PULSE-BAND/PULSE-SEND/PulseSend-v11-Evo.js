@@ -14,6 +14,40 @@
 //  • Pure deterministic transport chain.
 //  • Zero mutation outside instance.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSend",
+  version: "v12.4-EVO-UNIFIED",
+  layer: "frontend",
+  role: "send_router",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    unifiedPulseFamily: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendAdapter",
+      "PulseSendEngine",
+      "PulsePresence",
+      "PulseChunks"
+    ],
+    never: [
+      "legacyPulseSend",
+      "legacySendRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
 // --- Evolution Engines ------------------------------------------------------
 import {createPulseV2 as PulseV2EvolutionEngine }  from "./PulseV2EvolutionEngine-v11-Evo.js";
 import {createPulseV3 as PulseV3UnifiedOrganism }  from "./PulseV3UnifiedOrganism-v11-Evo.js";

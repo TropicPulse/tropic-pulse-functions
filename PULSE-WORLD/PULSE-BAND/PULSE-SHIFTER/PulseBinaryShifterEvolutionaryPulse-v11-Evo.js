@@ -6,6 +6,44 @@
 //  • Drift-proof contract, no randomness, no external mutation
 //  • Presence/harmonics/immortal-band surfaced as metadata only
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinaryShifterEvolutionaryPulse",
+  version: "v14.0-EVO-IMMORTAL",
+  layer: "frontend",
+  role: "binary_evolution_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryCore: true,
+    dualBand: true,
+    immortalBand: true,
+    chunkAligned: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    advantageV2: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulseBinaryPulse",
+      "PulseBinaryTech",
+      "PulsePresence",
+      "PulseChunks",
+      "PulsePresenceNormalizer"
+    ],
+    never: [
+      "legacyBinaryShifter",
+      "legacyEvolutionEngine",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPresence",
+      "legacyChunker"
+    ]
+  }
+}
+*/
 
 import {
   PulseRole as EvolutionPulseRole,

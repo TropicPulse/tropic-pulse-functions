@@ -6,6 +6,46 @@
 //  • Still: metadata-only, zero GPU calls, zero side effects
 // ============================================================================
 // --- CORE GPU ORGANS --------------------------------------------------------
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPU",
+  version: "v14-IMMORTAL",
+  layer: "gpu_symbolic",
+  role: "gpu_symbolic_surface",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+
+    gpuBoundary: true,
+    gpuSafe: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUBrain",
+      "PulseGPUDrive",
+      "PulseGPUDriveCenter"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPulseGPU"
+    ]
+  }
+}
+*/
+
 import * as PulseGPUBrain              from "./PulseGPUBrain.js";
 import * as PulseGPUDrive              from "./PulseGPUDrive.js";
 import * as PulseGPUDriveCenter        from "./PulseGPUDriveCenter.js";

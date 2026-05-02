@@ -3,6 +3,47 @@
 // Mesh Endocrine Interpreter • Metadata-Only • Zero-Compute • Zero-Mutation
 // Presence-Aware • Binary-Aware • Drift-Proof • Advantage-Field-Aware
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshEndocrineSystem",
+  version: "v14.9-MESH-ENDOCRINE",
+  layer: "mesh",
+  role: "mesh_hormonal_signal_interpreter",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    endocrine: true,                // This IS the endocrine organ
+    immuneAware: true,              // Reads immune flags
+    healingAware: true,             // Reads healing signals
+    meshAware: true,                // Mesh topology + pressure
+    presenceAware: true,            // Presence field
+    binaryAware: true,              // Binary hormone signals
+    symbolicAware: true,            // Symbolic hormone signals
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshAwareness",
+      "PulseMeshCognition",
+      "PulseMeshImmuneSystem"
+    ],
+    never: [
+      "legacyMeshEndocrine",
+      "legacyMeshClinician",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseMeshEndocrineSystem({
   PulseHalo,

@@ -6,6 +6,50 @@
 //  • Deterministic tick sequencing
 //  • Forward lane: expand, predict, factor, pattern-find
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "ForwardEngine",
+  version: "v14-IMMORTAL",
+  layer: "pulsenet_engine",
+  role: "forward_expansion_engine",
+  lineage: "PulseNet-v14",
+
+  evo: {
+    forwardLane: true,             // expansion lane
+    patternExpansion: true,        // expands symbolic + binary patterns
+    jobAware: true,                // consumes Earn + self jobs
+    chunkAware: true,              // chunk/dechunk safe
+    prewarmAware: true,            // prewarm surfaces
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "BackwardEngine",
+      "PulseNet",
+      "PulseChunker"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "presenceEngine",
+      "meshKernel",
+      "routerCore"
+    ]
+  }
+}
+*/
 
 import { createShifterPulse } from "../PULSE-SHIFTER/PulseBinaryShifterEvolutionaryPulse-v11-Evo.js";
 

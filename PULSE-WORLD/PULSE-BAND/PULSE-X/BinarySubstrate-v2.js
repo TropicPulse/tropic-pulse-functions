@@ -14,6 +14,46 @@
  *   All upstream organs remain symbolic.
  *   This is the binary representation layer.
  */
+/*
+AI_EXPERIENCE_META = {
+  identity: "BinarySubstrate",
+  version: "v14-IMMORTAL",
+  layer: "substrate",
+  role: "binary_representation_layer",
+  lineage: "BinarySubstrate-v1 → v11-Evo → v14-IMMORTAL",
+
+  evo: {
+    binaryPrimary: true,           // binary-first representation
+    symbolicAware: true,           // symbolic ↔ binary dualband
+    dualBand: true,
+
+    fixedWidthFrames: true,        // deterministic binary frames
+    deterministicPacking: true,
+    deterministicUnpacking: true,
+
+    driftProof: true,
+    deterministic: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseRuntime",
+      "PulseScheduler"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "presenceEngine",
+      "meshKernel"
+    ]
+  }
+}
+*/
 
 export const BinarySubstrateV2Meta = Object.freeze({
   organId: "BinarySubstrate-v2.3-PRESENCE-EVO+",

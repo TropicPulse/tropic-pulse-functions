@@ -10,6 +10,49 @@
 //  • 3-heart mesh (Mom/Dad/Earn) + random nudge
 //  • LOCAL ONLY — lives under PULSE-X, NOT a Netlify function
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseNet",
+  version: "v13-EVO-IMMORTAL",
+  layer: "frontend",
+  role: "network_intelligence",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    dualBand: true,
+    binaryAware: true,
+    cnsAligned: true,
+    chunkAligned: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    microPulseEngine: true,
+    pathfinder: true,
+    preLossDetector: true,
+    fallbackRouter: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseBand",
+      "PulseUIFlow",
+      "PulseProofBridge",
+      "PulsePresenceNormalizer"
+    ],
+    never: [
+      "legacyPulseNet",
+      "legacyPulseClient",
+      "legacyPulseMesh",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyFallbackRouter",
+      "legacyNetworkLayer"
+    ]
+  }
+}
+*/
 
 import { createForwardEngine } from "./ForwardEngine.js";
 import { createBackwardEngine } from "./BackwardEngine.js";

@@ -25,6 +25,43 @@
 // • Deterministic-field, drift-proof.
 // • Unified-advantage-field, multi-instance-ready.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshHormones",
+  version: "v14.9-MESH-HORMONES",
+  layer: "mesh",
+  role: "mesh_hormone_signal_generator",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    hormones: true,                 // This IS the hormone generator
+    endocrineAware: true,           // Works with endocrine system
+    binaryAware: true,              // Binary hormone packets
+    symbolicAware: true,            // Symbolic hormone packets
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,             // No routing, no compute
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshEndocrineSystem",
+      "PulseMeshFlow",
+      "PulseMeshAwareness"
+    ],
+    never: [
+      "legacyMeshHormones",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseMeshHormones({ PulseFieldRead, log, warn, error }) {
 

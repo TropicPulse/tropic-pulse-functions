@@ -14,6 +14,45 @@
 //  • Exposes meshes/shaders/textures/dispatch hints to Astral Muscle Engine.
 //  • Binary-aware, symbolic-aware, dispatch-aware, memory-aware, presence-aware.
 //  • Fail-open: if anything is missing, surfaces stay empty but never throw.
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUDrive",
+  version: "v14-IMMORTAL",
+  layer: "gpu_runtime",
+  role: "gpu_runtime_surface",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuRuntime: true,
+    gpuMomentumNetwork: true,
+    gpuFrameConductor: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+
+    parallelSafe: true,
+    gpuSafe: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUDriveCenter",
+      "PulseGPUBrain",
+      "PulseGPU"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGPURuntime"
+    ]
+  }
+}
+*/
 
 import { PulseGPUBrainExport } from "./PulseGPUBrain.js";
 

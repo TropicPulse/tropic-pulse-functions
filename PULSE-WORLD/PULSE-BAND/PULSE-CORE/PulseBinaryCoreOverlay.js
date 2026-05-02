@@ -12,6 +12,46 @@
 //  • governor + evolution aligned
 //  • RAM as scratchpad, CoreMemory as truth
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinaryCoreOverlay",
+  version: "v14-IMMORTAL",
+  layer: "corememory_binary",
+  role: "binary_overlay_engine",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    binaryPrimary: true,
+    symbolicAware: true,
+    dualBand: true,
+
+    overlayEngine: true,
+    hydrationEngine: true,
+    dehydrationEngine: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreBrain",
+      "PulseCoreEvolution",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
 import { createPulseCoreGovernor } from "./PulseCoreGovernor.js";
 
 export const BinaryOverlayRole = {

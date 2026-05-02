@@ -19,6 +19,43 @@
 //   • Deterministic hashing + safe in‑memory storage only.
 //   • Presence/advantage/chunk surfaces DO NOT affect behavior.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnGeneticMemory",
+  version: "v14-IMMORTAL",
+  layer: "earn_genetic",
+  role: "earn_genetic_memory",
+  lineage: "PulseEarnGeneticMemory-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    geneticMemory: true,
+    jobLineage: true,
+    jobEvolution: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarn",
+      "PulseEarnEndocrineSystem",
+      "PulseEarnContinuancePulse"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnGeneticMemoryMeta = Object.freeze({
   layer: "PulseEarnGeneticMemory",

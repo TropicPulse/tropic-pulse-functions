@@ -2,6 +2,43 @@
 // FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-EARN/PulseEarnMktBroker-v13.0-PRESENCE-IMMORTAL.js
 // LAYER: THE RUNPOD BROKER (v13.0 Presence + Advantage‑C + Prewarm)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnMktBroker",
+  version: "v14-IMMORTAL",
+  layer: "earn_market",
+  role: "market_broker",
+  lineage: "PulseEarnMktBroker-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    marketBroker: true,
+    jobBroker: true,
+    jobPackaging: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnMktAuctioneer",
+      "PulseEarnMktConsulate",
+      "PulseEarnMktCourier"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnMktBrokerMeta = Object.freeze({
   layer: "PulseEarnMktBroker",

@@ -13,6 +13,38 @@
 //    - Cosmos-aware routing metadata.
 //
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouter",
+  version: "v12.5-EVO",
+  layer: "frontend",
+  role: "symbolic_router",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    symbolicCore: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouterCommandments",
+      "PulsePresence",
+      "PulseChunks"
+    ],
+    never: [
+      "legacyRouter",
+      "legacySymbolicRouter",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // --- EVOLUTIONARY ROUTER ORGANS --------------------------------------------

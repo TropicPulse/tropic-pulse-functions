@@ -35,6 +35,43 @@
 //   • Dual-band is metadata-only (no non-deterministic branching).
 //   • Presence/advantage/globalHints/capabilityModel are metadata-only.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnCirculatorySystem",
+  version: "v14-IMMORTAL",
+  layer: "earn_circulatory",
+  role: "earn_circulation_and_flow",
+  lineage: "PulseEarnCirculatorySystem-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    earnCirculation: true,
+    jobFlow: true,
+    nutrientFlow: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarn",
+      "PulseEarnCell",
+      "PulseEarnEndocrineSystem"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnCirculatorySystemMeta = Object.freeze({
   layer: "PulseEarnCirculatorySystem",

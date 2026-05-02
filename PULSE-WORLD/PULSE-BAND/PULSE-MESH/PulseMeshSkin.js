@@ -24,6 +24,43 @@
 // • Zero imports — CNS injects dependencies.
 // • Drift-proof, deterministic, multi-instance-ready.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshSkin",
+  version: "v14.9-MESH-SKIN",
+  layer: "mesh",
+  role: "mesh_surface_and_boundary_layer",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    skin: true,                     // This IS the mesh skin organ
+    boundaryLayer: true,            // Boundary + surface metadata
+    metadataOnly: true,
+    deterministic: true,
+    driftProof: true,
+    presenceAware: true,
+    meshAware: true,
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshImmuneMembrane",
+      "PulseMeshAwareness",
+      "PulseMeshAura"
+    ],
+    never: [
+      "legacyMeshSkin",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseSkin({ log, warn, error }) {
 

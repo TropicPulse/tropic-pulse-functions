@@ -12,6 +12,46 @@
 //  • Drift detection hooks
 //  • Governor‑aligned with CoreMemory v12 + CoreLayers v12
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreGovernor",
+  version: "v14-IMMORTAL",
+  layer: "corememory_governor",
+  role: "corememory_governor",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    governor: true,
+    memoryPolicy: true,
+    memoryPhysicsRules: true,
+    adapterOrchestration: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreBrain",
+      "PulseCoreEvolution",
+      "PulseBinaryCoreOverlay"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { CoreMemoryRole, createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 import { CoreLayersRole, PulseCoreLayersOrgan } from "./PulseCoreLayers.js";

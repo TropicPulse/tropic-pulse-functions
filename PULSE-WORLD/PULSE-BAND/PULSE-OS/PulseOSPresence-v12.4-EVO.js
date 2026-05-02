@@ -4,6 +4,49 @@
 // OS-Level Presence • Deterministic • Metadata-Only • Membrane-Safe
 // No Organs Exposed • No Identity Leaks • No Routing
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSPresence",
+  version: "v14-IMMORTAL",
+  layer: "presence",
+  role: "os_presence_field",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    presenceField: true,
+    presenceAwareness: true,
+    presenceRelay: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    meshAware: true,
+    bluetoothPresenceAware: true,
+
+    safeRouteFree: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshPresenceRelay",
+      "PulsePresenceAwareness",
+      "PulsePresenceAIView"
+    ],
+    never: [
+      "legacyOSPresence",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPulseOSPresence({
   SystemClock,       // uptime + organism age (safe)

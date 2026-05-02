@@ -23,6 +23,43 @@
 //   • Dual-band + binary + wave + presence metadata are structural-only.
 //   • NO speed, NO baseline, NO governor, NO performance assumptions.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnLymphNodes",
+  version: "v14-IMMORTAL",
+  layer: "earn_immune",
+  role: "earn_lymph_nodes",
+  lineage: "PulseEarnLymphNodes-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    lymphNodes: true,
+    immuneBuffer: true,
+    anomalyQuarantine: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnImmuneSystem",
+      "PulseEarnHeart",
+      "PulseEarnMetabolism"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnLymphNodesMeta = Object.freeze({
   layer: "PulseEarnLymphNodes",

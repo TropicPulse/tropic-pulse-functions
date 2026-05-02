@@ -19,6 +19,47 @@
 // • Symbolic-primary: Cortex always thinks in symbolic mode
 // • Presence-aware + mesh-aware + chunk/prewarm-aware (metadata-only)
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseOSBrainCortex",
+  version: "v14-IMMORTAL",
+  layer: "cns",
+  role: "os_cortex",
+  lineage: "PulseOS-v14",
+
+  evo: {
+    cortex: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+
+    chunkAware: true,
+    prewarmAware: true,
+    presenceAware: true,
+    meshAware: true,
+
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseOSBrain",
+      "PulseOSBrainEvolution",
+      "PulseChunker"
+    ],
+    never: [
+      "legacyOSBrainCortex",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseRole = {
   type: "Cortex",            // FIXED (was incorrectly "Brain")

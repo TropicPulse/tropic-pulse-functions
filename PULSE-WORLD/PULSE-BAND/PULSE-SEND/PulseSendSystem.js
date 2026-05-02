@@ -25,6 +25,40 @@
 //    • Pure internal routing + transport
 //    • Deterministic bit → pattern/mode/payload mapping
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSendSystem",
+  version: "v14.4-EVO",
+  layer: "frontend",
+  role: "send_system_conductor",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true,
+    deterministic: true,
+    unifiedPulseFamily: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendImpulse",
+      "PulseSendReturn",
+      "PulseSendLegacyPulse",
+      "PulseV2EvolutionEngine",
+      "PulseV3UnifiedOrganism"
+    ],
+    never: [
+      "legacySendSystem",
+      "legacySend",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

@@ -22,6 +22,44 @@
 //   • Dual-band + binary + wave + presence metadata are structural-only.
 //   • Binary-first: binary field is the primary immune surface, wave is secondary.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnImmuneSystem",
+  version: "v14-IMMORTAL",
+  layer: "earn_immune",
+  role: "earn_immune_system",
+  lineage: "PulseEarnImmuneSystem-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    earnImmune: true,
+    anomalyDetection: true,
+    jobRejection: true,
+    toxinFilter: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarnLymphNodes",
+      "PulseEarnMetabolism",
+      "PulseEarnHeart"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnImmuneSystemMeta = Object.freeze({
   layer: "PulseEarnImmuneSystem",

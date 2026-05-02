@@ -25,6 +25,44 @@
 //   • Presence/advantage/hints are deterministic inputs.
 //   • Scoring weights are provided as inputs (no internal hardcoded weights).
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnEndocrineSystem",
+  version: "v14-IMMORTAL",
+  layer: "earn_endocrine",
+  role: "earn_hormone_and_signal_system",
+  lineage: "PulseEarnEndocrineSystem-v11 → v12.3 → v14-IMMORTAL",
+
+  evo: {
+    endocrineSystem: true,
+    hormoneSignals: true,
+    jobPrioritySignals: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseEarn",
+      "PulseEarnCell",
+      "PulseEarnCirculatorySystem",
+      "PulseEarnGeneticMemory"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnEndocrineSystemMeta = Object.freeze({
   layer: "PulseEarnEndocrineSystem",

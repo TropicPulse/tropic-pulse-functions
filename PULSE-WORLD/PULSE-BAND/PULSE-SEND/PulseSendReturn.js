@@ -4,6 +4,34 @@
 //  v14-IMMORTAL: Binary-Aware + Movement-Aware + DualStack-Aware Return Surface
 //                + Ancestry Surface + Advantage Echo
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSendReturn",
+  version: "v14.4-EVO",
+  layer: "frontend",
+  role: "send_return",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    deterministic: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendImpulse",
+      "PulseSendSystem"
+    ],
+    never: [
+      "legacyReturn",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseRole = {
   type: "Messenger",

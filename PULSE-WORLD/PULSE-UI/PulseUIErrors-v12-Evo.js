@@ -3,6 +3,40 @@
 // UNIVERSAL ERROR SPINE — v13-EVO-PRIME
 // Membrane-Safe • Drift-Safe • Organism-Wide Error Unifier
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseUIErrors",
+  version: "v13-EVO-PRIME",
+  layer: "frontend",
+  role: "ui_error_spine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    presenceAware: true,
+    chunkAligned: true,
+    dualBand: true,
+    safeRouteFree: true,
+    normalizerAligned: true,
+    errorSpine: true
+  },
+
+  contract: {
+    always: [
+      "PulseWindow",
+      "PulsePresence",
+      "PulseChunks",
+      "PulseUIFlow"
+    ],
+    never: [
+      "legacyUIErrors",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyPresence",
+      "legacyFlow"
+    ]
+  }
+}
+*/
 
 export const PulseUIErrors = (() => {
   const spineMeta = Object.freeze({

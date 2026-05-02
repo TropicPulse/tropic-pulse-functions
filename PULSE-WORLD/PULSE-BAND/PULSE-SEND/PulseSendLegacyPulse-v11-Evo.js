@@ -19,6 +19,34 @@
 //  • No external mutation.
 //  • Deterministic, stable, non-evolving organism.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseSendLegacyPulse",
+  version: "v14.4-IMMORTAL",
+  layer: "frontend",
+  role: "legacy_pulse_floor",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    immutable: true,
+    noEvolution: true,
+    deterministic: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendSystem"
+    ],
+    never: [
+      "legacyLegacyPulse",
+      "legacyEvolutionEngine",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

@@ -4,6 +4,40 @@
 // Power User Ranking Engine
 // Deterministic • Metadata-Only • Presence + Age + Role Aware
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PowerUserRanking",
+  version: "v14.9-PRESENCE-RANK",
+  layer: "presence_social",
+  role: "power_user_ranking_engine",
+  lineage: "PulseWorld-v14",
+
+  evo: {
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Reads mesh proximity
+    rankingEngine: true,            // Computes rankScore
+    deterministic: true,            // Ranking must be stable
+    driftProof: true,               // No rank drift
+    dualBand: true,                 // Binary + symbolic scoring
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PresenceAwareness",
+      "PresenceAIView",
+      "MentorUpgradeRequest"
+    ],
+    never: [
+      "legacyRanking",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createPowerUserRanking({
   log, warn, error

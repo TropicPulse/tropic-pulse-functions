@@ -25,6 +25,41 @@
 // • Fail-open: missing context → safe defaults
 // • Metadata-only shaping
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshCortex",
+  version: "v14.9-MESH-CORTEX",
+  layer: "mesh",
+  role: "mesh_symbolic_interpretation",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    cortex: true,                   // This IS the mesh cortex
+    symbolicAware: true,            // Symbolic interpretation
+    binaryAware: true,              // Binary hints + binary routing
+    dualBand: true,                 // Symbolic + binary cortex
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshCognition",
+      "PulseMeshAwareness",
+      "PulseMeshFlow"
+    ],
+    never: [
+      "legacyMeshCortex",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

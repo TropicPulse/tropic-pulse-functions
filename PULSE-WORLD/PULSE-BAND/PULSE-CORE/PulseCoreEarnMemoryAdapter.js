@@ -9,6 +9,42 @@
 //  • lineage + reward‑shape metadata
 //  • governor + evolution aligned
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreEarnMemoryAdapter",
+  version: "v14-IMMORTAL",
+  layer: "corememory_adapter",
+  role: "earn_memory_adapter",
+  lineage: "PulseCoreMemory-v14",
+
+  evo: {
+    adapter: true,
+    earnMemoryBridge: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreBrain",
+      "PulseCoreGovernor"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { createPulseBinaryOverlay } from "./PulseBinaryCoreOverlay.js";
 

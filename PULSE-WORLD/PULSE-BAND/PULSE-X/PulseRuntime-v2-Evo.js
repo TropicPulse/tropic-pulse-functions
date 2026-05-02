@@ -18,6 +18,45 @@
  *   Memory-spined.
  *   Deterministic.
  */
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRuntime",
+  version: "v14-IMMORTAL",
+  layer: "runtime",
+  role: "organism_execution_conductor",
+  lineage: "PulseRuntime-v1 → v11-Evo → v13-PRESENCE-EVO+ → v14-IMMORTAL",
+
+  evo: {
+    runtimeConductor: true,        // orchestrates organs
+    executionCycle: true,          // deterministic tick
+    dualBand: true,                // symbolic + binary
+    substrateAware: true,          // BinarySubstrate integration
+    schedulerAware: true,          // PulseScheduler integration
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "BinarySubstrate",
+      "PulseScheduler"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "presenceEngine",
+      "meshKernel",
+      "routerCore"
+    ]
+  }
+}
+*/
 
 // -------------------------
 // Meta

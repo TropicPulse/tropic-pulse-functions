@@ -25,6 +25,44 @@
 //   - Suggest improvements, never execute them.
 //   - Be user-aware and OS-brain-aware when attachments are present.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseRouter",
+  version: "v14-IMMORTAL",
+  layer: "presence_router",
+  role: "presence_route_planner",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    routePlanner: true,
+    meshAware: true,
+    regionAware: true,
+    densityAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseServer",
+      "PulseCastle",
+      "PulseMesh"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseRouterMeta = Object.freeze({
   organId: "PulseRouter-v13-PRESENCE-EVO+",

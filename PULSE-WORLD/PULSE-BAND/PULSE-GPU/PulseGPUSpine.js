@@ -34,6 +34,44 @@
 //  • Deterministic: same input → same output
 //  • Fail-open: invalid input → safe empty results
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUSpine",
+  version: "v14-IMMORTAL",
+  layer: "gpu_runtime",
+  role: "gpu_spine",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuSpine: true,
+    gpuOrchestrator: true,
+    gpuBackbone: true,
+
+    gpuCompute: true,
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUNervousSystem",
+      "PulseGPUDriveCenter",
+      "PulseGPUDrive"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGPUSpine"
+    ]
+  }
+}
+*/
+
 import { PulseGPUEventEmitter } from "./PulseGPUSynapses.js";
 import { PulseGPUInsightsEngine } from "./PulseGPUWisdomCortex.js";
 import { PulseGPUSessionTracer } from "./PulseGPUNervousSystem.js";

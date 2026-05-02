@@ -3,6 +3,61 @@
 //  ORGANISM‑WIDE BINARY MEMORY SPINE (DUAL‑BAND + DNA + HEALING + LOOP THEORY)
 //  “LOAD RARELY, SERVE CONSTANTLY, FLUSH INTENTIONALLY, HEAL WHILE SPINNING”
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseCoreMemory",
+  version: "v14-IMMORTAL",
+  layer: "corememory",
+  role: "corememory_spine",
+  lineage: "PulseCoreMemory-v1 → v11-Evo → v13-DualBand → v14-IMMORTAL",
+
+  evo: {
+    symbolicPrimary: true,         // symbolic API
+    binaryPrimary: true,           // binary storage
+    dualBand: true,                // symbolic ↔ binary
+
+    memorySpine: true,
+    overlayEngine: true,
+    hydrationEngine: true,
+    dehydrationEngine: true,
+    healingEngine: true,
+    dnaAware: true,
+    ttlAware: true,
+    versionAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseCoreLayers",
+      "PulseBinaryCoreOverlay",
+      "PulseCoreBrain",
+      "PulseCoreEvolution",
+      "PulseCoreGovernor",
+
+      // all adapters
+      "PulseCoreAIMemoryAdapter",
+      "PulseCoreEarnMemoryAdapter",
+      "PulseCoreGPUMemoryAdapter",
+      "PulseCoreProxyMemoryAdapter",
+      "PulseCoreRouterMemoryAdapter",
+      "PulseCoreSendMemoryAdapter",
+      "PulseCoreMeshMemoryAdapter"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // Adapters — forward‑only, no barrels
 import { createPulseGPUOrchestrator }         from "./PulseCoreGpuMemoryAdapter.js";

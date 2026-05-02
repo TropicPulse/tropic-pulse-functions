@@ -11,6 +11,44 @@
 //    - Now worldCore-aware, user-aware, mesh-aware, brain-aware.
 // ============================================================================
 
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseServer",
+  version: "v14-IMMORTAL",
+  layer: "presence_server",
+  role: "presence_region_server",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    regionServer: true,
+    regionState: true,
+    regionPhysics: true,
+    regionIdentity: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseRouter",
+      "PulseCastle",
+      "PulseExpansion"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 //  IMPORTS — Organs it feeds and orchestrates

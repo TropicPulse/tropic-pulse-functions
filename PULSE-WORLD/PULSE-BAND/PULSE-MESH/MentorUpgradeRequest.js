@@ -4,6 +4,41 @@
 // Mentor Upgrade Request Surface
 // Deterministic • Metadata-Only • Power-User + Learner Linking
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "MentorUpgradeRequest",
+  version: "v14.9-PRESENCE-WORLD",
+  layer: "presence_social",
+  role: "mentor_upgrade_pipeline",
+  lineage: "PulseWorld-v14",
+
+  evo: {
+    presenceAware: true,            // Reads presence fields
+    meshAware: true,                // Reads mesh proximity + hops
+    socialAware: true,              // Works with mentor/mentee graph
+    deterministic: true,            // No randomness in upgrade logic
+    driftProof: true,               // Mentor upgrades must be stable
+    dualBand: true,                 // Symbolic + binary scoring
+    zeroMutationOfInput: true,      // Never mutate presence objects
+    zeroNetworkFetch: true,         // No external fetch
+    safeRouteFree: true             // No safeRoute allowed
+  },
+
+  contract: {
+    always: [
+      "PresenceAwareness",
+      "PresenceAIView",
+      "PowerUserRanking",
+      "PulseMeshPresenceRelay"
+    ],
+    never: [
+      "legacyMentorUpgrade",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export function createMentorUpgradeRequest({
   PresenceJobView,

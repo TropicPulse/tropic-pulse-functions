@@ -29,6 +29,42 @@
 //  • Zero mutation outside instance.
 //  • Presence-aware, binary-aware, dual-band-aware.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshEvolutionaryWiring",
+  version: "v14.9-MESH-EVOLUTIONARY-WIRING",
+  layer: "mesh",
+  role: "mesh_lineage_and_wiring_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    evolutionaryWiring: true,       // This IS the wiring evolution organ
+    lineageAware: true,             // Organ lineage + signature
+    signatureAware: true,           // organSignature, meshSignature, patternHash
+    deterministic: true,            // No randomness in wiring
+    driftProof: true,               // Wiring must never drift
+    metadataOnly: true,             // No routing, no compute
+    dualBand: true,                 // Symbolic + binary lineage
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshFlow",
+      "PulseMeshCognition",
+      "PulseMeshAwareness"
+    ],
+    never: [
+      "legacyMeshWiring",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ⭐ PulseRole — identifies this as the PulseMesh Wiring Organ (v12.3)

@@ -27,6 +27,37 @@
 //  • No external mutation.
 //  • Deterministic compute loop only.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseV3UnifiedOrganism",
+  version: "v14.4-EVO",
+  layer: "frontend",
+  role: "unified_pulse_organism",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    unifiedOrganism: true,
+    deterministic: true,
+    dualBand: true,
+    presenceAware: true,
+    chunkAligned: true,
+    safeRouteFree: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendSystem",
+      "PulseV2EvolutionEngine"
+    ],
+    never: [
+      "legacyUnifiedOrganism",
+      "legacyPulse",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

@@ -16,6 +16,42 @@
 //  • PulseSend/Earn‑aligned: contracts are explicit, but conceptual only.
 //  • Binary-aware, symbolic-aware, dispatch-aware, memory-aware, presence-aware.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUCommandments",
+  version: "v14-IMMORTAL",
+  layer: "gpu_law",
+  role: "gpu_commandments",
+  lineage: "PulseGPU-v14",
+
+  evo: {
+    gpuLaw: true,
+    gpuRules: true,
+    gpuSafety: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUBrain",
+      "PulseGPUDrive",
+      "PulseGPUDriveCenter"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyGPUCommandments"
+    ]
+  }
+}
+*/
 
 // ============================================================================
 // METADATA — v12-Evo-Presence-Max COMMANDMENTS IDENTITY

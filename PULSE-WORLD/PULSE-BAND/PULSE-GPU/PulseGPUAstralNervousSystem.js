@@ -31,10 +31,47 @@
 //  • Color: Indigo-Silver (astral clarity + GPU intelligence boundary).
 //  • Subtheme: Boundary, export, subsystem identity, presence.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseGPUAstralNervousSystem",
+  version: "v14-IMMORTAL",
+  layer: "gpu_boundary",
+  role: "gpu_astral_nervous_system",
+  lineage: "PulseGPU-v14",
 
-// --- GPU BRAIN --------------------------------------------------------------
-//  ANALYST CORTEX — Precomputation, package building, deterministic logic
-//  Version: PulseGPUBrain v12-Evo-Presence — PulseSend‑v12‑ready, Earn-v4-Presence-compatible
+  evo: {
+    gpuBoundary: true,
+    gpuIdentitySurface: true,
+    subsystemBoundary: true,
+
+    symbolicAware: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseGPUBrain",
+      "PulseGPUDrive",
+      "PulseGPUDriveCenter"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyAstralNervousSystem"
+    ]
+  }
+}
+*/
+
 
 
 // --- GPU RUNTIME ------------------------------------------------------------

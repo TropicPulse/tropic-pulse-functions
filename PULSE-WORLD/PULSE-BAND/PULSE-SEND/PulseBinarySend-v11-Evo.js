@@ -12,6 +12,42 @@
 //    - 12.3+: cacheChunk-aware, prewarm-aware, presence-aware.
 //    - Fallback-safe: deterministic fallback to proxy.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseBinarySend",
+  version: "v14-EVO-IMMORTAL",
+  layer: "frontend",
+  role: "binary_send_engine",
+  lineage: "PulseOS-v12",
+
+  evo: {
+    binaryCore: true,
+    immortalBand: true,
+    dualBand: true,
+    chunkAligned: true,
+    presenceAware: true,
+    safeRouteFree: true,
+    deterministic: true
+  },
+
+  contract: {
+    always: [
+      "PulseBinaryPulse",
+      "PulseBinaryTech",
+      "PulseSendAdapter",
+      "PulsePresence",
+      "PulseChunks"
+    ],
+    never: [
+      "legacyBinarySend",
+      "legacySend",
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyChunker"
+    ]
+  }
+}
+*/
 
 // --- Evolution Engines ------------------------------------------------------
 import {createPulseV2 as PulseV2EvolutionEngine }  from "./PulseV2EvolutionEngine-v11-Evo.js";

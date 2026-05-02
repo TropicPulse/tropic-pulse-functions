@@ -16,6 +16,43 @@
 //  • Zero timestamps.
 //  • Zero mutation outside instance.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseEarnSendSystem",
+  version: "v14-IMMORTAL",
+  layer: "earn_send",
+  role: "earn_send_conductor",
+  lineage: "PulseEarnSendSystem-v10.4 → v11-Evo → v14-IMMORTAL",
+
+  evo: {
+    sendConductor: true,
+    jobPackaging: true,
+    jobForwarding: true,
+    dualBand: true,
+    symbolicPrimary: true,
+    binaryAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseSendSystem",
+      "PulseEarnNervousSystem",
+      "PulseEarnCell"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 export const PulseEarnSendSystemMeta = Object.freeze({
   layer: "PulseEarnSendSystem",

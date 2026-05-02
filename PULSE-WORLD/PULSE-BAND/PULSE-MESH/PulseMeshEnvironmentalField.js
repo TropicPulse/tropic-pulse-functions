@@ -26,6 +26,43 @@
 // • Drift-proof, multi-instance-ready, factoring-aware, mesh-pressure-aware,
 //   binary-aware, dual-band-ready, presence-aware.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshEnvironmentalField",
+  version: "v14.9-MESH-ENVIRONMENTAL",
+  layer: "mesh",
+  role: "mesh_internal_weather_system",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    environmentalField: true,       // This IS the internal weather organ
+    metadataOnly: true,             // No compute, no routing, no autonomy
+    deterministic: true,            // Must be stable
+    driftProof: true,               // No drift in pressure/tension fields
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Reads mesh topology
+    binaryAware: true,              // Binary pressure/tension hints
+    dualBand: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshAwareness",
+      "PulseMeshAura",
+      "PulseMeshFlow"
+    ],
+    never: [
+      "legacyEnvironmentalField",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 
 // ============================================================================

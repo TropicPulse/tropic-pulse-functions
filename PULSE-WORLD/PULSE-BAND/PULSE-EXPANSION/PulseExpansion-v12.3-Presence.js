@@ -3,6 +3,50 @@
 //  B‑Tier Presence Strategist (Region Governor)
 //  Every‑Advantage / Regioning‑Physics‑Aware / Beacon‑Aware / OS‑Aware
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseExpansion",
+  version: "v14-IMMORTAL",
+  layer: "presence_expansion",
+  role: "presence_region_governor",
+  lineage: "PulsePresence-v14",
+
+  evo: {
+    expansionGovernor: true,
+    regionPlanner: true,
+    meshAware: true,
+    beaconAware: true,
+    castleAware: true,
+    serverAware: true,
+    userAware: true,
+
+    symbolicPrimary: true,
+    binaryAware: true,
+    dualBand: true,
+
+    deterministic: true,
+    driftProof: true,
+    zeroMutationOfInput: true,
+    zeroNetwork: true,
+    zeroFilesystem: true
+  },
+
+  contract: {
+    always: [
+      "PulseBeaconEngine",
+      "PulseBeaconMesh",
+      "PulseCastle",
+      "PulseRouter",
+      "PulseServer",
+      "PulseUser"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
 
 import { logger } from "../../PULSE-UI/PULSEProofLogger.js";
 import {

@@ -28,6 +28,45 @@
 // • Zero imports — all dependencies injected by CNS Brain.
 // • Binary-aware, dual-mode-ready, drift-proof.
 // ============================================================================
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseMeshSenses",
+  version: "v14.9-MESH-SENSES",
+  layer: "mesh",
+  role: "mesh_sensory_engine",
+  lineage: "PulseMesh-v14",
+
+  evo: {
+    senses: true,                   // This IS the sensory organ
+    presenceAware: true,            // Reads presence field
+    meshAware: true,                // Reads mesh topology
+    binaryAware: true,              // Binary sensory packets
+    symbolicAware: true,            // Symbolic sensory packets
+    dualBand: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,
+    zeroMutationOfInput: true,
+    zeroNetworkFetch: true,
+    safeRouteFree: true,
+    zeroExternalMutation: true
+  },
+
+  contract: {
+    always: [
+      "PulseMeshAwareness",
+      "PulseMeshFlow",
+      "PulseMeshCognition"
+    ],
+    never: [
+      "legacyMeshSenses",
+      "safeRoute",
+      "fetchViaCNS"
+    ]
+  }
+}
+*/
+
 export function createPulseSenses({
   PulseHalo,
   PulseFieldRead,
