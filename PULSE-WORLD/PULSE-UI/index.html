@@ -1579,7 +1579,7 @@ if (!window.__PULSE_UI_INIT__) {
 
         if (testStatus) testStatus.textContent = "Test complete.";
       } catch (err) {
-        warn("Window GPU test failed", err);
+        console.warn("Window GPU test failed", err);
         if (testStatus)  testStatus.textContent  = "Test failed.";
         if (testMetrics) testMetrics.textContent = "";
       }
