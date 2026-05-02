@@ -12,7 +12,6 @@
 //  • governor + evolution aligned
 //  • RAM as scratchpad, CoreMemory as truth
 // ============================================================================
-
 import { createPulseCoreGovernor } from "./PulseCoreGovernor.js";
 
 export const BinaryOverlayRole = {
