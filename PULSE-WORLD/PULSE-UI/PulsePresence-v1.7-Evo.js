@@ -9,7 +9,7 @@ console.log("Presence");
 console.log("[PulseChunks-v1.8-EVO-FALLBACK] Membrane chunker loading...");
 
 import { safeRoute as route } from "./PulseProofBridge.js";
-import { normalizeChunkValue, normalizeImage } from "./PulseChunkNormalizer.js";
+import { normalizeChunkValue, normalizeImage } from "./PulsePresenceNormalizer.js";
 
 // ============================================================================
 //  LORE TRANSLATOR — Evolvable, deterministic, metadata-driven
