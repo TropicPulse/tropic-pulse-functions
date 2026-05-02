@@ -6,6 +6,9 @@
 // ============================================================================
 
 import { PulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
+import { createPulseV3 } from "./PulseV3UnifiedOrganism-v11-Evo.js";
+import { createPulseV2 } from "./PulseV2EvolutionEngine-v11-Evo.js";
+import { createLegacyPulse } from "./PulseSendLegacyPulse-v11-Evo.js";
 
 // ============================================================================
 // CORE MEMORY — IMMORTAL IMPULSE MEMORY
@@ -725,8 +728,6 @@ export const ImpulseStrategy = {
       case "v11":
         return Impulse_v11.create(intent, payload);
 
-      case "v10.4":
-        return Impulse_v10_4.create(intent, payload);
 
       case "legacy-pulse":
       case "v10":
@@ -744,3 +745,6 @@ export const ImpulseStrategy = {
     }
   }
 };
+export const Impulse_v11_Prime = { create: createPulseV3 };
+export const Impulse_v11_Evo   = { create: createPulseV2 };
+export const Impulse_v11       = { create: createLegacyPulse };

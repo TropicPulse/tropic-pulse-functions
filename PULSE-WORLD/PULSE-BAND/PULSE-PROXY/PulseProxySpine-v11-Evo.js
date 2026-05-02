@@ -38,14 +38,20 @@
 // ============================================================================
 
 
+import express from "express";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
+import { createClient } from "redis";
+
 // SDN prewarm engine (spinal reflex ignition for backend spine, passive only)
 import { prewarmSDN } from "../PULSE-OS/PulseSDN-Prewarm-v12-Evo.js";
 
 import { createPulseEarnSendSystem } from "../PULSE-EARN/PulseEarnSendSystem.js";
-import { updateUserMetrics as recordUserMetrics } from "../PulseProofMonitor.js";
+import { updateUserMetrics as recordUserMetrics } from "../../PULSE-UI/PULSEProofMonitor.js";
 import startPulseTimer from "./PulseProxyHeart.js";
 import { createPulseOSHealerV12_3 as startPulseOSHealer } from "../PULSE-OS/PulseOSInflammatoryResponse.js";
 import { createGlobalHealerV12 as startGlobalHealer } from "../PULSE-OS/PulseOSImmuneSystem.js";
+import { PulseBinaryOSv11Evo as startPulseOS } from "../PULSE-OS/PulseBinaryOS-v11-Evo-Max.js";
 
 const log   = global.log   || console.log;
 const warn  = global.warn  || console.warn;
@@ -917,7 +923,7 @@ app.get("/TPProxy", async (req, res) => {
 
     if (rememberMe) {
       const warmStart = Date.now();
-      await warmConnection(target);
+      await prewarmSDN(target);
       warmDuration = Date.now() - warmStart;
       healingState.lastWarmConnection = warmStart;
     }

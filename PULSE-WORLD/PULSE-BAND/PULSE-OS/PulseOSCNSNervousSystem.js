@@ -127,7 +127,7 @@ export const PulseOSCNSNervousSystemMeta = Object.freeze({
 // ============================================================================
 import { PulseOSShortTermMemory } from "./PulseOSShortTermMemory.js";
 // PageScannerV12: A1/A2 intelligence pack, used here as CNS-level passive/active scanner
-import { PageScannerV12 } from "../PULSEOSSkinReflex.js";
+import { PageScannerV12 } from "../PULSE-UI/PULSEOSSkinReflex.js";
 
 import checkBand from "../PULSE-PROXY/CheckBand-v11-Evo.js";
 import checkIdentity from "../PULSE-PROXY/CheckIdentity-v11-Evo.js";

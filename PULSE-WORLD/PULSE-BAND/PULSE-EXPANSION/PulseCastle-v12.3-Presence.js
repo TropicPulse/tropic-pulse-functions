@@ -22,7 +22,7 @@
 // ============================================================================
 //  IMPORTS (backend-safe)
 // ============================================================================
-import { logger } from "../PULSEProofLogger.js";
+import { logger } from "../../PULSE-UI/PULSEProofLogger.js";
 
 import {
   createPulseServer,

@@ -26,7 +26,7 @@
 // ============================================================================
 //  OSKernel imports (backend‑safe)
 // ============================================================================
-import { logger } from "../PULSEProofLogger.js";
+import { logger } from "../../PULSE-UI/PULSEProofLogger.js";
 import { PulseLineage } from "./PulseProxyBBB.js";
 
 

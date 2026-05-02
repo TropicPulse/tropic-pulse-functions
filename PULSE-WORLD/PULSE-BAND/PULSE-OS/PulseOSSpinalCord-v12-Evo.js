@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { prewarmSDN } from "./PulseSDN-Prewarm-v12-Evo.js";
-import { PageScannerV12 } from "../PULSEOSSkinReflex.js";
+import { PageScannerV12 } from "../../PULSE-UI/PULSEOSSkinReflex.js";
 
 // ============================================================================
 // SPINAL CORD IDENTITY — v13.0-PRESENCE-IMMORTAL
