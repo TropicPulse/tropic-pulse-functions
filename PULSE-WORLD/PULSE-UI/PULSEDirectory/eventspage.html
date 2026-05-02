@@ -45,7 +45,7 @@ body {
   justify-content: center;
 
   background: #000;
-  background-image: url('/_PICTURES/Mysterious.png');
+  background-image: url('./_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1569,7 +1569,7 @@ input::placeholder {
 
 <body>
   <div id="t-loading">
-    <img src="/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="./_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -1582,7 +1582,7 @@ input::placeholder {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="/_PICTURES/PulseBand.png"
+          src="./_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -1911,13 +1911,13 @@ input::placeholder {
   });
   
   const emptyStateImages = [
-    "/_PICTURES/Disheveled.png",
-    "/_PICTURES/Disheveled2.png",
-    "/_PICTURES/Disheveled3.png",
-    "/_PICTURES/Disheveled4.png",
-    "/_PICTURES/Disheveled5.png",
-    "/_PICTURES/Disheveled6.png",
-    "/_PICTURES/DisheveledExhausted1.png"
+    "./_PICTURES/Disheveled.png",
+    "./_PICTURES/Disheveled2.png",
+    "./_PICTURES/Disheveled3.png",
+    "./_PICTURES/Disheveled4.png",
+    "./_PICTURES/Disheveled5.png",
+    "./_PICTURES/Disheveled6.png",
+    "./_PICTURES/DisheveledExhausted1.png"
   ];
 
   
@@ -2952,7 +2952,7 @@ function renderEvents(list, isDateFilter = false) {
     const img =
       ev.mainPhotoURL ||
       (ev.images?.length > 0 ? ev.images[0] : null) ||
-      "/_PICTURES/Frustrated.png";
+      "./_PICTURES/Frustrated.png";
 
     let price;
 
@@ -3044,7 +3044,7 @@ function renderEvents(list, isDateFilter = false) {
     imgEl.loading = "lazy";
     // ⭐ ADD THIS — SAME BEHAVIOR AS DETAILS PAGE
     imgEl.onerror = () => {
-      imgEl.src = "/_PICTURES/Frustrated.png";
+      imgEl.src = "./_PICTURES/Frustrated.png";
     };
     EventLazyObserver.observe(imgEl);
     

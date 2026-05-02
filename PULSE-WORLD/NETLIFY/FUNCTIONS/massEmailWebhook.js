@@ -1057,7 +1057,7 @@ newUser: {
                         Enjoy these moments! Share your successes with Tropic Pulse on social media.
                       </div>
                       <a href="https://linktr.ee/tropicpulse" target="_blank">
-                        <img src="/_PICTURES/SocialMedia.png?v8"
+                        <img src="../PULSE-UI/_PICTURES/SocialMedia.png?v8"
                              alt="Social Media Icons"
                              width="180"
                              style="display:block; margin:auto;">
@@ -1089,7 +1089,7 @@ newUser: {
 
     const trackingPixel =
       logId && logId !== "Preview Mode"
-        ? `<img src="/_PICTURES/emailopen?logId=${encodeURIComponent(
+        ? `<img src="../PULSE-UI/_PICTURES/emailopen?logId=${encodeURIComponent(
             logId
           )}" width="1" height="1" alt="" style="opacity:0; width:1px; height:1px;">`
         : "";
@@ -1272,7 +1272,7 @@ newUser: {
             <div style="display:inline-block; text-align:center;">
               <div class="logo-circle" style="margin:0 auto 10px auto;">
                 <img 
-                  src="/_PICTURES/ToucanLogo-Mini.png?v8"
+                  src="../PULSE-UI/_PICTURES/ToucanLogo-Mini.png?v8"
                   alt="Tropic Pulse Toucan"
                   width="60"
                   style="display:block; border-radius:50%;">
@@ -1379,7 +1379,7 @@ return `Tropic Pulse: Payout for your Delivery: ${orderID}`;
     const formattedpending = formatDisplayAmount(displayCurrency,pendingBalance);
     const trackingPixel =
       logId && logId !== "Preview Mode"
-        ? `<img src="/_PICTURES/emailopen?logId=${encodeURIComponent(
+        ? `<img src="../PULSE-UI/_PICTURES/emailopen?logId=${encodeURIComponent(
             logId
           )}" width="1" height="1" alt="" style="opacity:0; width:1px; height:1px;">`
         : "";
@@ -1482,7 +1482,7 @@ return `<!DOCTYPE html>
 
         <!-- Logo -->
         <img 
-          src="/_PICTURES/ToucanLogo-Mini.png?v8"
+          src="../PULSE-UI/_PICTURES/ToucanLogo-Mini.png?v8"
           alt="Tropic Pulse Logo"
           width="70"
           height="70"

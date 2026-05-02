@@ -45,7 +45,7 @@ import * as PULSEOSSkinReflex from "../PULSEOSSkinReflex.js"; // PageScannerV12 
   justify-content: center;
 
   background: #000;
-  background-image: url('/_PICTURES/Mysterious.png');
+  background-image: url('./_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -860,7 +860,7 @@ body::before {
 
 <body>
 <div id="t-loading">
-    <img src="/_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="./_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -873,7 +873,7 @@ body::before {
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="/_PICTURES/PulseBand.png"
+          src="./_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -1806,7 +1806,7 @@ function updateCarousel() {
 
     if (!Array.isArray(carouselImages) || carouselImages.length === 0) {
       warn("Carousel: No images found, using fallback.");
-      carouselImages = ["/_PICTURES/Frustrated.png"];
+      carouselImages = ["./_PICTURES/Frustrated.png"];
       currentIndex = 0;
     }
 
@@ -1817,7 +1817,7 @@ function updateCarousel() {
     setTimeout(() => {
       mainImage.src = carouselImages[currentIndex];
       mainImage.onerror = () => {
-        mainImage.src = "/_PICTURES/Frustrated.png";
+        mainImage.src = "./_PICTURES/Frustrated.png";
       };
       mainImage.style.opacity = 1;
     }, 150);
@@ -1836,7 +1836,7 @@ function updateCarousel() {
     error("updatCarousel error:", err);
     const mainImage = el("mainImage");
     if (mainImage) {
-      mainImage.src = "/_PICTURES/Frustrated.png";
+      mainImage.src = "./_PICTURES/Frustrated.png";
       mainImage.style.opacity = 1;
     }
   }
@@ -1929,7 +1929,7 @@ async function renderEvent(evRaw) {
     /* ---------- Images / Carousel ---------- */
     const images = Array.isArray(ev.images) && ev.images.length > 0
       ? ev.images
-      : ['/_PICTURES/Frustrated.png'];
+      : ['./_PICTURES/Frustrated.png'];
 
     carouselImages = images;
     currentIndex = 0;
