@@ -222,9 +222,7 @@ const baseMetaPack = {
 // ============================================================================
 if (isBrowser()) {
   try {
-    // Expose PulseChunks
-    window.PulseChunks = window.PulseChunks || PulseChunks;
-
+    
     // fetchImage
     window.fetchImage =
       window.fetchImage ||

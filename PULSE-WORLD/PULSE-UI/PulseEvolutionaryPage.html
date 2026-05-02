@@ -44,8 +44,8 @@
        JS LAYER (CORTEX)
        ============================================================================ -->
   <script type="module">
-  import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
-  import { VitalsMonitor as PulseVitalsMonitor } from "./PulseProofMonitor.js";
+import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
+import { VitalsMonitor as PulseVitalsMonitor } from "./PulseProofMonitor.js";
 import PulseChunks from "./PulsePresence-v1.7-Evo.js";
 /* 0. BOOT MEMBRANE — MUST BE FIRST */
 import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
@@ -53,7 +53,8 @@ import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
 /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
 import * as PULSEOSSkinReflex from "./PULSEOSSkinReflex.js"; // PageScannerV12 auto hooks window here
 
-
+// Expose PulseChunks
+    window.PulseChunks = window.PulseChunks || PulseChunks;
   function mark(label) {
     console.log("[INDEX]", label);
   }
