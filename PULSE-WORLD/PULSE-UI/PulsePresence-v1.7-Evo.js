@@ -308,7 +308,7 @@ async function fetchChunk(url) {
 }
 
 // ============================================================================
-//  IMAGE-SPECIFIC CHUNKER — WITH PRESENCE-AWARE ROUTED FETCH + NORMALIZATION
+//  IMAGE-SPECIFIC CHUNKER — MINIMAL, SES-SAFE NORMALIZATION
 // ============================================================================
 export async function getImage(url) {
   const { value, ok, error, envelope } = await fetchChunk(url);
@@ -322,22 +322,31 @@ export async function getImage(url) {
     return url;
   }
 
-  // Prefer dedicated image normalizer, then generic
-  const src =
-    normalizeImage(value) ||
-    normalizeChunkValue(value, "image") ||
-    null;
+  const v = value;
 
-  if (!src) {
-    console.warn("[PulseChunks] getImage could not normalize image, falling back to URL:", {
-      url,
-      value
-    });
-    return url;
+  // 1) Already a string → treat as URL/src
+  if (typeof v === "string") {
+    return v;
   }
 
-  return src;
+  // 2) { url }
+  if (v && typeof v === "object" && typeof v.url === "string") {
+    return v.url;
+  }
+
+  // 3) { base64 }
+  if (v && typeof v === "object" && typeof v.base64 === "string") {
+    return `data:image/png;base64,${v.base64}`;
+  }
+
+  // 4) Anything else → give up and let browser fetch directly
+  console.warn("[PulseChunks] getImage unknown image format, falling back to URL:", {
+    url,
+    value: v
+  });
+  return url;
 }
+
 
 function attachLore(chunk, metaPack) {
   const lore = generateLoreHeader(metaPack);
