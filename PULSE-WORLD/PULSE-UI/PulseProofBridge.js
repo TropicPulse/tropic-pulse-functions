@@ -1,92 +1,125 @@
 // -----------------------------------------------------------------------------
-// PulseBridge.js — The legal FRONT → MIDDLE → CNS routing layer
+// PulseBridge.js — The LOCAL PORT BRIDGE for FRONT ↔ CNS (SIGNAL VERSION)
 // -----------------------------------------------------------------------------
 //
 // PURPOSE:
-//   - Prevents FRONT layer from calling CNS directly
-//   - Adds safety, tracing, and membrane-friendly behavior
-//   - Allows future upgrades without touching CNS
-//   - Marks synthetic 404s with "*" so YOU know it's internal
-//
-// CONTRACT:
-//   FRONT → PulseBridge.safeRoute() → CNS.route()
-//   NEVER: FRONT → CNS.route() directly
+//   - Lives INSIDE PULSE-UI.
+//   - NO IMPORTS.
+//   - Sends SIGNALS to offline CNS + DualBand AI.
+//   - Receives SIGNALS from offline CNS + DualBand AI.
+//   - UI registers callbacks for organism boot + AI events.
+//   - Bridge calls those callbacks when signals arrive.
 //
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// PulseBridge.js — The LOCAL PORT BRIDGE for FRONT ↔ CNS (SIGNAL VERSION)
+// -----------------------------------------------------------------------------
 
-import { route as CNSRoute } from "../PULSE-BAND/PULSE-OS/PulseOSCNSNervousSystem.js";
-
-// Optional: detect dev mode (you can replace this with your own flag)
 const DEV = true;
+const channel = new BroadcastChannel("PulseCNS");
 
 // -----------------------------------------------------------------------------
-// Internal helper — marks synthetic 404s so YOU know it's internal
+// CALLBACK REGISTRIES (UI registers handlers here)
+// -----------------------------------------------------------------------------
+let dualBandBootHandler = null;
+let aiEventHandler = null;
+
+export function onDualBandBoot(fn) {
+  dualBandBootHandler = fn;
+}
+
+export function onAIEvent(fn) {
+  aiEventHandler = fn;
+}
+
+// -----------------------------------------------------------------------------
+// Marks synthetic 404s so YOU know it's internal
 // -----------------------------------------------------------------------------
 function mark404(result) {
   if (!result) return result;
-
-  // CNS may return: { status: 404 } or throw "404"
-  if (result === 404) return 404 + "*";
+  if (result === 404) return "404*";
   if (result?.status === 404) return { ...result, status: "404*" };
   if (typeof result === "string" && result.trim() === "404") return "404*";
-
   return result;
 }
 
 // -----------------------------------------------------------------------------
-// Internal helper — optional dev-mode tracing
+// Optional dev-mode tracing
 // -----------------------------------------------------------------------------
-function trace(path, payload) {
+function trace(label, data) {
   if (!DEV) return;
+  console.log(`%c[LOCAL PORT BRIDGE] → ${label}`, "color:#7FDBFF; font-weight:bold;", data);
+}
 
-  console.log(
-    "%c[PulseBridge] → CNS",
-    "color:#7FDBFF; font-weight:bold;",
-    { path, payload }
-  );
+function traceInbound(label, data) {
+  if (!DEV) return;
+  console.log(`%c[LOCAL PORT BRIDGE] ← ${label}`, "color:#39CCCC; font-weight:bold;", data);
 }
 
 // -----------------------------------------------------------------------------
-// SAFE ROUTE — the only legal way for FRONT to talk to CNS
+// SAFE ROUTE — sends a CNS_REQUEST signal and waits for CNS_RESPONSE
 // -----------------------------------------------------------------------------
 export function safeRoute(path, payload = {}) {
-  try {
-    trace(path, payload);
+  trace("CNS (SIGNAL)", { path, payload });
 
-    // Forward to CNS
-    const result = CNSRoute(path, payload);
+  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-    // Mark internal 404s so YOU know it's not a filesystem error
-    return mark404(result);
+  return new Promise((resolve) => {
+    const handler = (event) => {
+      const msg = event.data;
+      if (!msg || msg.type !== "CNS_RESPONSE") return;
+      if (msg.requestId !== requestId) return;
 
-  } catch (err) {
-    // If CNS throws "404", convert to "404*"
-    if (err?.message === "404" || err === "404") {
-      return "404*";
-    }
+      channel.removeEventListener("message", handler);
+      resolve(mark404(msg.result));
+    };
 
-    // Forward other errors untouched
-    throw err;
-  }
+    channel.addEventListener("message", handler);
+
+    channel.postMessage({
+      type: "CNS_REQUEST",
+      requestId,
+      path,
+      payload
+    });
+  });
 }
 
 // -----------------------------------------------------------------------------
-// FUTURE EXTENSION POINTS
+// START DUALBAND AI — fire-and-forget signal
 // -----------------------------------------------------------------------------
-//
-// 1. Permission checks
-//    if (!userHasAccess(path)) return "404*";
-//
-// 2. Layer validation
-//    if (path.startsWith("nervousSystem/") && FRONT_CALLING) return "404*";
-//
-// 3. Payload sanitation
-//    sanitize(payload);
-//
-// 4. Offline routing
-//    if (!navigator.onLine) return offlineRoute(path, payload);
-//
-// 5. Logging hooks
-//    PulseLogger.log("bridge", `Routing ${path}`);
-//
+export function startDualBandAI(options = {}) {
+  trace("DUALBAND_AI_START (SIGNAL)", options);
+
+  channel.postMessage({
+    type: "DUALBAND_AI_START",
+    timestamp: Date.now(),
+    options
+  });
+}
+
 // -----------------------------------------------------------------------------
+// INBOUND SIGNAL HANDLER — AI → UI events
+// -----------------------------------------------------------------------------
+channel.onmessage = (event) => {
+  const msg = event.data;
+  if (!msg) return;
+
+  if (msg.type === "DUALBAND_AI_EVENT") {
+    traceInbound("DUALBAND_AI_EVENT", msg.data);
+    if (aiEventHandler) aiEventHandler(msg.data);
+    return;
+  }
+
+  if (msg.type === "DUALBAND_BOOT") {
+    traceInbound("DUALBAND_BOOT", msg.bootOptions);
+    if (dualBandBootHandler) dualBandBootHandler(msg.bootOptions);
+    return;
+  }
+};
+
+// -----------------------------------------------------------------------------
+// ALIASES FOR WINDOW / OTHER MODULES
+// -----------------------------------------------------------------------------
+export const route = safeRoute;
+export const PulseBinaryOrganismBoot = startDualBandAI;
