@@ -1,12 +1,13 @@
 // ============================================================================
-//  PulseChunks-v1.8-EVO-FALLBACK
+//  PulseChunks-v2.0-MULTILANE-HYBRID
 //  FRONTEND CHUNK MEMBRANE — 2026 Transport Layer
 //  Chunking • Caching • Prewarm • Zero-Latency Surface
 //  Lore injection • PulseBand integration • Sectional fallback
 //  + Universal de-chunking via PulseChunkNormalizer
+//  + 32-LANE HYBRID CNS ROUTER (binary-aligned, hash-routed)
 // ============================================================================
 console.log("Presence");
-console.log("[PulseChunks-v1.8-EVO-FALLBACK] Membrane chunker loading...");
+console.log("[PulseChunks-v2.0-MULTILANE-HYBRID] Membrane chunker loading...");
 
 import { safeRoute as route } from "./PulseProofBridge.js";
 import { normalizeChunkValue, normalizeImage } from "./PulsePresenceNormalizer.js";
@@ -14,8 +15,6 @@ import { normalizeChunkValue, normalizeImage } from "./PulsePresenceNormalizer.j
 // ============================================================================
 //  LORE TRANSLATOR — Evolvable, deterministic, metadata-driven
 // ============================================================================
-
-// Deterministic selector (no randomness, no timers)
 function stableIndexFromString(str, max) {
   let sum = 0;
   for (let i = 0; i < str.length; i++) sum += str.charCodeAt(i);
@@ -105,7 +104,6 @@ function generateLoreHeader({ meta, context, pulseRole, route }) {
 function shouldSkipChunk(filePath = "", fileSize = 0) {
   if (!filePath) return true;
 
-  // 1. Never chunk firebase-admin (backend-only)
   if (filePath.includes("firebase-admin")) return true;
   if (filePath.includes("env")) return true;
   if (filePath.includes("package")) return true;
@@ -113,7 +111,6 @@ function shouldSkipChunk(filePath = "", fileSize = 0) {
   if (filePath.includes("PulseOSLongTermMemory")) return true;
   if (filePath.includes("index.html")) return true;
 
-  // 2. Never chunk the chunker itself (prevents recursion)
   if (filePath.includes("PulseChunker") ||
       filePath.includes("Brainstem") ||
       filePath.includes("Organs") ||
@@ -121,15 +118,13 @@ function shouldSkipChunk(filePath = "", fileSize = 0) {
     return true;
   }
 
-  // 3. Never chunk extremely large files
   if (fileSize > 1024 * 1024 * 5) return true; // 5MB safety cap
 
-  // 4. Everything else is allowed
   return false;
 }
 
 // ============================================================================
-//  CHUNKS STATE — SECTIONAL FALLBACK
+//  CHUNKS STATE — SECTIONAL FALLBACK (GLOBAL)
 // ============================================================================
 const chunkCache = new Map();
 const chunkFailures = new Map();
@@ -179,8 +174,8 @@ function buildChunkPresenceEnvelope({ url, fromCache, degraded, kind }) {
     fromCache ? "stable" :
     "coherent";
 
-  const band = "symbolic";    // chunker lives in symbolic band
-  const dualBand = false;     // can be flipped when binary overlays join
+  const band = "symbolic";
+  const dualBand = false;
 
   return {
     url,
@@ -193,20 +188,97 @@ function buildChunkPresenceEnvelope({ url, fromCache, degraded, kind }) {
 }
 
 // ============================================================================
-//  UNIVERSAL CHUNK FETCHER — v12.5‑EVO‑PRESENCE + ROUTED
-//  1) Route via CNS → endpoint → InnerAgent → PulseProxy
-//  2) On error → mark failure, fall back to original URL
-//  Returns: { ok, value, envelope, error? }
+//  32-LANE CNS ROUTER — HYBRID: GLOBAL CACHE + PER-LANE CNS/STATS
+// ============================================================================
+const LANE_COUNT = 32;          // 2^5 — sweet spot
+const LANE_MASK  = LANE_COUNT - 1;
+
+function hashKey(key = "") {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) {
+    h = ((h << 5) - h + key.charCodeAt(i)) | 0;
+  }
+  return h >>> 0;
+}
+
+function pickLaneIndex(key) {
+  return hashKey(key) & LANE_MASK;
+}
+
+function nowMs() {
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function createLane(id) {
+  return {
+    id,
+    envelopeCounter: 0,
+    stats: {
+      requests: 0,
+      successes: 0,
+      failures: 0,
+      totalLatencyMs: 0,
+      lastError: null,
+    },
+    async fetchViaCNS(url) {
+      const start = nowMs();
+      this.stats.requests++;
+
+      const envelopeId = `lane-${id}-${++this.envelopeCounter}`;
+
+      const routed = await window.route("fetchExternalResource", {
+        url,
+        layer: "A1",
+        reflexOrigin: "PulseChunks",
+        binaryAware: true,
+        dualBand: true,
+        presenceAware: true,
+        kind: "chunk",
+        laneId: id,
+        envelopeId,
+      });
+
+      const latency = nowMs() - start;
+      this.stats.totalLatencyMs += latency;
+
+      const ok = routed && routed.ok !== false;
+      if (ok) {
+        this.stats.successes++;
+      } else {
+        this.stats.failures++;
+        this.stats.lastError = routed?.error || `Chunk route failed for ${url}`;
+      }
+
+      return routed;
+    }
+  };
+}
+
+const lanes = Array.from({ length: LANE_COUNT }, (_, i) => createLane(i));
+
+function getLaneStatsSnapshot() {
+  return lanes.map(lane => ({
+    id: lane.id,
+    envelopeCounter: lane.envelopeCounter,
+    stats: { ...lane.stats },
+  }));
+}
+
+// ============================================================================
+//  UNIVERSAL CHUNK FETCHER — v2.0 MULTILANE HYBRID
 // ============================================================================
 async function fetchChunk(url) {
-  // ⭐ MAKE DNA VISIBLE IN NETWORK — FRONTEND LOGGING ENDPOINT
+  // Frontend DNA visibility logging (non-blocking)
   try {
     await route("proxy.dnaVisibility", {
       url,
       timestamp: Date.now(),
       degraded: chunksDegraded,
       presence: "frontend-dna-request",
-      membrane: "PulseChunks-v1.8"
+      membrane: "PulseChunks-v2.0-MULTILANE-HYBRID",
     });
   } catch (err) {
     console.warn("[PulseDNA] Network visibility logging failed:", err);
@@ -225,7 +297,6 @@ async function fetchChunk(url) {
     };
   }
 
-  // If CHUNKS is degraded, fall back immediately to regular behavior.
   if (chunksDegraded) {
     return {
       ok: false,
@@ -239,7 +310,7 @@ async function fetchChunk(url) {
     };
   }
 
-  // Cache hit
+  // Global cache — shared across lanes
   if (chunkCache.has(url)) {
     const cached = chunkCache.get(url);
     return {
@@ -254,19 +325,13 @@ async function fetchChunk(url) {
     };
   }
 
-  try {
-    // ⭐ ROUTED, NOT FETCHED: ALL CHUNK LOADS GO THROUGH CNS → BACKEND
-    const routed = await window.route("fetchExternalResource", {
-      url,
-      layer: "A1",
-      reflexOrigin: "PulseChunks",
-      binaryAware: true,
-      dualBand: true,
-      presenceAware: true,
-      kind: "chunk"
-    });
+  // Deterministic lane selection
+  const laneIndex = pickLaneIndex(url);
+  const lane = lanes[laneIndex];
 
-    // Contract: backend returns { ok, data, kind? }
+  try {
+    const routed = await lane.fetchViaCNS(url);
+
     const ok = routed && routed.ok !== false;
     if (!ok) {
       throw new Error(routed?.error || `Chunk route failed for ${url}`);
@@ -324,22 +389,18 @@ export async function getImage(url) {
 
   const v = value;
 
-  // 1) Already a string → treat as URL/src
   if (typeof v === "string") {
     return v;
   }
 
-  // 2) { url }
   if (v && typeof v === "object" && typeof v.url === "string") {
     return v.url;
   }
 
-  // 3) { base64 }
   if (v && typeof v === "object" && typeof v.base64 === "string") {
     return `data:image/png;base64,${v.base64}`;
   }
 
-  // 4) Anything else → give up and let browser fetch directly
   console.warn("[PulseChunks] getImage unknown image format, falling back to URL:", {
     url,
     value: v
@@ -347,7 +408,9 @@ export async function getImage(url) {
   return url;
 }
 
-
+// ============================================================================
+//  LORE ATTACHMENT — NOW ACTUALLY USED
+// ============================================================================
 function attachLore(chunk, metaPack) {
   const lore = generateLoreHeader(metaPack);
 
@@ -362,7 +425,7 @@ function attachLore(chunk, metaPack) {
 }
 
 // ============================================================================
-//  GENERIC CHUNKER ENTRY — NOW WITH UNIVERSAL LORE INJECTION (DNA MODE)
+//  GENERIC CHUNKER ENTRY — WITH UNIVERSAL LORE INJECTION (DNA MODE)
 // ============================================================================
 export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
   if (shouldSkipChunk(filePath, fileSize)) {
@@ -373,7 +436,6 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
 
   const { value: chunk, envelope } = await fetchChunk(filePath);
 
-  // If no lore or degraded, return raw DNA
   if (!metaPack || chunksDegraded) {
     return {
       dna: chunk,
@@ -383,25 +445,10 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
     };
   }
 
-  // ⭐ ALWAYS generate lore
-  const lore = generateLoreHeader(metaPack);
+  const dnaWithLore = attachLore(chunk, metaPack);
 
-  // ⭐ If DNA is text → prepend lore
-  if (typeof chunk === "string") {
-    return {
-      dna: lore + "\n" + chunk,
-      dnaEncoded: true,
-      safe: true,
-      presence: envelope
-    };
-  }
-
-  // ⭐ If DNA is NOT text → wrap it with lore metadata
   return {
-    dna: {
-      __lore: lore,
-      __dna: chunk
-    },
+    dna: dnaWithLore,
     dnaEncoded: true,
     safe: true,
     presence: envelope
@@ -414,25 +461,19 @@ export async function PulseChunker(filePath, fileSize = 0, metaPack = null) {
 export function prewarm(urls = []) {
   urls.forEach((url) => {
     if (!chunkCache.has(url) && !chunksDegraded) {
-      fetchChunk(url); // fire-and-forget, still routed + presence-aware
+      fetchChunk(url); // fire-and-forget, lane-routed
     }
   });
 }
 
 // ============================================================================
 //  PULSEBAND INTEGRATION — v12-EVO
-//  Allows backend chunker to push chunk packets to the membrane.
 // ============================================================================
 function handlePulseBandPacket(packet) {
   if (!packet || !packet.type) return;
 
   switch (packet.type) {
     case "chunk-manifest":
-      if (Array.isArray(packet.urls) && !chunksDegraded) {
-        prewarm(packet.urls);
-      }
-      break;
-
     case "chunk-prewarm":
       if (Array.isArray(packet.urls) && !chunksDegraded) {
         prewarm(packet.urls);
@@ -479,8 +520,7 @@ function dechunkAll() {
 }
 
 // ============================================================================
-//  OFFLINE IMAGE AUTO-DETECTOR — <img class="offline-img" data-offline="...">
-//  Loads images THROUGH the chunker, then normalizes via PulseChunkNormalizer.
+//  OFFLINE IMAGE AUTO-DETECTOR — sequential (no burst collapse)
 // ============================================================================
 async function autoLoadOfflineImages() {
   if (typeof document === "undefined") return;
@@ -533,7 +573,6 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
   });
 }
 
-// Attach listener if PulseBand exists
 if (typeof window !== "undefined") {
   if (window.PulseBand && typeof window.PulseBand.on === "function") {
     window.PulseBand.on("chunk", handlePulseBandPacket);
@@ -541,7 +580,7 @@ if (typeof window !== "undefined") {
 }
 
 // ============================================================================
-//  EXPOSE TO WINDOW — WITH STATE + CONTROLS
+//  EXPOSE TO WINDOW — WITH STATE + CONTROLS + LANE STATS
 // ============================================================================
 window.PulseChunks = {
   getImage,
@@ -553,8 +592,10 @@ window.PulseChunks = {
   dechunk,
   dechunkAll,
   normalizeChunkValue,
+  lanes,                 // raw lane objects (for deep debugging)
+  getLaneStats: getLaneStatsSnapshot, // snapshot view for tools
 };
 
 export default window.PulseChunks;
 
-console.log("[PulseChunks-v1.8-EVO-FALLBACK] Ready — membrane chunker active with sectional fallback + universal de-chunking + offline image auto-loader.");
+console.log("[PulseChunks-v2.0-MULTILANE-HYBRID] Ready — 32-lane membrane active with sectional fallback + universal de-chunking + offline image auto-loader + lane stats.");
