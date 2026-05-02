@@ -9,7 +9,7 @@
 console.log("Presence");
 console.log("[PulseChunks-v2.0-MULTILANE-HYBRID] Membrane chunker loading...");
 
-import { safeRoute as route, fireAndForgetRoute } from "./PulseBridge.js";
+import { safeRoute as route, fireAndForgetRoute } from "./PulseProofBridge.js";
 import { normalizeChunkValue, normalizeImage } from "./PulsePresenceNormalizer.js";
 
 // ============================================================================
