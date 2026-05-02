@@ -74,7 +74,8 @@ export function safeRoute(path, payload = {}, timeoutMs = 10000) {
     return Promise.resolve(null);
   }
 
-  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const requestId = `req-${Date.now()}-${Math.floor(performance.now() * 1000)}`;
+
 
   // 🔹 Auto fire-and-forget for telemetry-style paths
   if (FIRE_AND_FORGET_PATHS.has(path)) {
