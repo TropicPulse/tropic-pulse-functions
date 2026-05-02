@@ -1,17 +1,20 @@
 // ============================================================================
-//  PulsePresenceNormalizer-SMART
+//  PulsePresenceNormalizer-SMART v2.0
 //  Contract-driven bridge: A → Z
 //  No guessing. No heuristics. No fallback decoding.
+//  Fully aligned with PulseChunks-v2.0-MULTILANE-HYBRID
 // ============================================================================
 
-// SMART: We do NOT unwrap recursively.
-// We only unwrap ONE layer because the backend should declare the shape.
+// SMART: unwrap ONLY ONE LAYER.
+// Backend must declare the shape. No recursive peeling.
 function unwrap(value) {
   if (!value || typeof value !== "object") return value;
 
+  // Lore-wrapped DNA
   if (value.__dna !== undefined) return value.__dna;
   if (value.__chunk !== undefined) return value.__chunk;
 
+  // Backend-declared wrappers
   if (value.data !== undefined) return value.data;
   if (value.chunk !== undefined) return value.chunk;
   if (value.value !== undefined) return value.value;
@@ -20,8 +23,7 @@ function unwrap(value) {
 }
 
 // ============================================================================
-//  SMART IMAGE CONSTRUCTOR
-//  A → Z (image)
+//  SMART IMAGE CONSTRUCTOR — A → Z (image)
 // ============================================================================
 export function normalizeImage(value, mime = "image/png") {
   value = unwrap(value);

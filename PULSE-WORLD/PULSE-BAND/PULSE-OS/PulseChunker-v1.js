@@ -59,9 +59,19 @@ export const PulseChunkerMeta = Object.freeze({
 });
 
 // ============================================================================
+//  PulseChunker-v14-IMMORTAL
+//  Backend CNS Chunk Brain — 2026
+//  • Route descriptor folding (imports/assets/payloads)
+//  • Delta/full cache resolver (_DELTA / _CACHE / sizeOnly)
+//  • Lane-aware + envelopeId-aware presence
+//  • Lore injection (__lore / __chunk / __dna-compatible)
+//  • PulseBand session + optional streaming
+//  • Chunk signing + binary-safe payload handling
+// ============================================================================
+
+
+// ============================================================================
 // ROUTE DESCRIPTOR CONTRACT — v12.4-EVO-ROUTE-FABRIC
-//  - Lets frontend send "the whole route" as one object.
-//  - Chunker folds open: data payloads + imports + assets.
 // ============================================================================
 function isRouteDescriptor(input) {
   if (!input || typeof input !== "object") return false;
@@ -74,7 +84,7 @@ function isRouteDescriptor(input) {
 }
 
 // ============================================================================
-// LORE TRANSLATOR
+// LORE TRANSLATOR — backend flavor, Presence-aligned
 // ============================================================================
 function generateLoreHeader({ meta, payloadType, baseVersion, presenceTag, band }) {
   if (!meta) return "";
@@ -89,10 +99,13 @@ function generateLoreHeader({ meta, payloadType, baseVersion, presenceTag, band 
   BASE VERSION: ${baseVersion || "none"}
   PRESENCE TAG: ${presenceTag || "none"}
   BAND: ${band || "symbolic"}
+
   Guarantees:
     • ${guarantees.join("\n    • ")}
+
   INPUT:
     • ${inputs.join("\n    • ")}
+
   OUTPUT:
     • ${outputs.join("\n    • ")}
 */
@@ -112,11 +125,63 @@ function signChunk(userId, sessionId, index, dataBase64) {
 }
 
 // ============================================================================
+// PRESENCE ENVELOPE — lane-aware, envelope-aware
+// ============================================================================
+function buildPresenceEnvelope({
+  laneId,
+  envelopeId,
+  band = "dual",
+  wave = "coherent",
+  dualBand = true,
+  presenceTag = "default",
+  ok = true
+}) {
+  return {
+    ok,
+    laneId,
+    envelopeId,
+    band,
+    dualBand,
+    wave,
+    presenceTag,
+    timestamp: Date.now()
+  };
+}
+
+// ============================================================================
+// PAYLOAD NORMALIZATION — JSON / string / Buffer / binary
+// ============================================================================
+function normalizeBackendPayload(payload) {
+  if (payload == null) {
+    return { kind: "none", buffer: Buffer.alloc(0), raw: null };
+  }
+
+  if (Buffer.isBuffer(payload)) {
+    return { kind: "binary", buffer: payload, raw: payload };
+  }
+
+  if (payload instanceof Uint8Array) {
+    const buf = Buffer.from(payload);
+    return { kind: "binary", buffer: buf, raw: payload };
+  }
+
+  if (typeof payload === "string") {
+    const buf = Buffer.from(payload, "utf8");
+    return { kind: "text", buffer: buf, raw: payload };
+  }
+
+  // JSON
+  const jsonStr = JSON.stringify(payload);
+  const buf = Buffer.from(jsonStr, "utf8");
+  return { kind: "json", buffer: buf, raw: payload };
+}
+
+// ============================================================================
 // FACTORY — CNS‑SAFE CHUNKER (Brain + Logger)
 // ============================================================================
 export function createPulseChunker({ Brain, Logger } = {}) {
   if (!Brain && !Logger) {
-    throw new Error("PulseChunker v13: Missing Brain/Logger injection.");
+    throw new Error("PulseChunker v14-IMMORTAL: Missing Brain/Logger injection.");
   }
 
   const log   = Logger?.log   || Brain?.log   || console.log;
@@ -136,12 +201,46 @@ export function createPulseChunker({ Brain, Logger } = {}) {
   const backendOrgans = new Map();
   const sessions = new Map();
 
+  // Meta (for lore)
+  const PulseChunkerMeta = {
+    identity: "PulseChunker-v14-IMMORTAL",
+    version: "14.0.0",
+    guarantees: {
+      laneAware: true,
+      presenceAware: true,
+      binarySafe: true,
+      cacheAware: true,
+      routeDescriptorAware: true,
+      loreInjected: true
+    },
+    contract: {
+      input: [
+        "routeDescriptor | rawPayload",
+        "laneId",
+        "envelopeId",
+        "userId",
+        "baseVersion",
+        "sizeOnly"
+      ],
+      output: [
+        "ok",
+        "data",
+        "kind",
+        "presence",
+        "lore",
+        "sessionId",
+        "payloadBytes",
+        "payloadHash"
+      ]
+    }
+  };
+
   // ========================================================================
   // UNIVERSAL CACHE ENGINE — ONE FUNCTION ONLY (DB‑scoped)
   // ========================================================================
   async function generateCache({ payload, baseVersion, sizeOnly = false, deltaRequest = false }) {
     if (!db) {
-      warn("[PulseChunker v13] generateCache called without db; returning passthrough.");
+      warn("[PulseChunker v14] generateCache called without db; returning passthrough.");
       return sizeOnly ? 0 : payload;
     }
 
@@ -252,7 +351,7 @@ export function createPulseChunker({ Brain, Logger } = {}) {
 
     sessions.set(sessionId, session);
 
-    log("[PulseChunker v13] PulseBandSession started", {
+    log("[PulseChunker v14] PulseBandSession started", {
       sessionId,
       hasDb: !!session.db
     });
@@ -265,7 +364,7 @@ export function createPulseChunker({ Brain, Logger } = {}) {
   // --------------------------------------------------------------------------
   function registerBackendOrgan(name, { chunk, prewarm } = {}) {
     if (!name || typeof chunk !== "function") {
-      warn("[PulseChunker v13] registerBackendOrgan called with invalid args", {
+      warn("[PulseChunker v14] registerBackendOrgan called with invalid args", {
         name,
         hasChunk: typeof chunk === "function"
       });
@@ -273,14 +372,14 @@ export function createPulseChunker({ Brain, Logger } = {}) {
     }
 
     backendOrgans.set(name, { chunk, prewarm });
-    log("[PulseChunker v13] Registered backend organ for chunking", { name });
+    log("[PulseChunker v14] Registered backend organ for chunking", { name });
   }
 
   // --------------------------------------------------------------------------
   // Prewarm — universal warmup for chunker + registered organs
   // --------------------------------------------------------------------------
   function prewarm() {
-    log("[PulseChunker v13] Prewarm start", {
+    log("[PulseChunker v14] Prewarm start", {
       organs: backendOrgans.size
     });
 
@@ -288,9 +387,9 @@ export function createPulseChunker({ Brain, Logger } = {}) {
       if (typeof organ.prewarm === "function") {
         try {
           organ.prewarm();
-          log("[PulseChunker v13] Prewarmed organ", { name });
+          log("[PulseChunker v14] Prewarmed organ", { name });
         } catch (e) {
-          warn("[PulseChunker v13] Prewarm failed for organ", {
+          warn("[PulseChunker v14] Prewarm failed for organ", {
             name,
             error: e?.message
           });
@@ -298,11 +397,11 @@ export function createPulseChunker({ Brain, Logger } = {}) {
       }
     }
 
-    log("[PulseChunker v13] Prewarm complete");
+    log("[PulseChunker v14] Prewarm complete");
   }
 
   // --------------------------------------------------------------------------
-  // Core chunking primitive
+  // Core chunking primitive (metadata only; no splitting yet)
   // --------------------------------------------------------------------------
   function chunkPayload({
     userId,
@@ -341,7 +440,7 @@ export function createPulseChunker({ Brain, Logger } = {}) {
       band
     };
 
-    log("[PulseChunker v13] Chunk payload computed", {
+    log("[PulseChunker v14] Chunk payload computed", {
       userId,
       payloadBytes,
       totalChunks,
@@ -350,6 +449,219 @@ export function createPulseChunker({ Brain, Logger } = {}) {
     });
 
     return result;
+  }
+
+  // --------------------------------------------------------------------------
+  // Route Descriptor Folding — imports/assets/payloads
+  // --------------------------------------------------------------------------
+  async function foldRouteDescriptor(descriptor, { laneId, envelopeId, userId, baseVersion }) {
+    const { route, imports, assets, payloads } = descriptor;
+
+    const resolvedImports = [];
+    const resolvedAssets  = [];
+    const resolvedPayloads = [];
+
+    // Imports: usually code / config / schemas
+    for (const imp of imports) {
+      try {
+        const resolved = await resolveCacheRequest(imp, baseVersion, false);
+        resolvedImports.push(resolved);
+      } catch (e) {
+        warn("[PulseChunker v14] Failed to resolve import", { route, imp, error: e?.message });
+      }
+    }
+
+    // Assets: images / static / binary
+    for (const asset of assets) {
+      try {
+        const resolved = await resolveCacheRequest(asset, baseVersion, false);
+        resolvedAssets.push(resolved);
+      } catch (e) {
+        warn("[PulseChunker v14] Failed to resolve asset", { route, asset, error: e?.message });
+      }
+    }
+
+    // Payloads: primary data
+    for (const p of payloads) {
+      try {
+        const resolved = await resolveCacheRequest(p, baseVersion, false);
+        resolvedPayloads.push(resolved);
+      } catch (e) {
+        warn("[PulseChunker v14] Failed to resolve payload", { route, payload: p, error: e?.message });
+      }
+    }
+
+    const folded = {
+      route,
+      imports: resolvedImports,
+      assets: resolvedAssets,
+      payloads: resolvedPayloads
+    };
+
+    const { kind, buffer } = normalizeBackendPayload(folded);
+    const metaChunk = chunkPayload({
+      userId,
+      payload: buffer,
+      baseVersion: baseVersion || "v1",
+      presenceTag: "route-descriptor",
+      band: "dual"
+    });
+
+    const presence = buildPresenceEnvelope({
+      laneId,
+      envelopeId,
+      band: "dual",
+      wave: "coherent",
+      dualBand: true,
+      presenceTag: "route-descriptor",
+      ok: true
+    });
+
+    const lore = generateLoreHeader({
+      meta: PulseChunkerMeta,
+      payloadType: kind,
+      baseVersion,
+      presenceTag: "route-descriptor",
+      band: "dual"
+    });
+
+    const dna = {
+      __lore: lore,
+      __chunk: folded
+    };
+
+    return {
+      ok: true,
+      data: dna,
+      kind,
+      presence,
+      sessionId: metaChunk.sessionId,
+      payloadBytes: metaChunk.payloadBytes,
+      payloadHash: metaChunk.payloadHash
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // Generic Chunk Route — used by CNS fetchExternalResource
+  // --------------------------------------------------------------------------
+  async function chunkRoute({
+    url,
+    laneId,
+    envelopeId,
+    userId,
+    baseVersion,
+    sizeOnly,
+    payload,
+    routeDescriptor
+  }) {
+    try {
+      // Route descriptor path
+      if (routeDescriptor && isRouteDescriptor(routeDescriptor)) {
+        return await foldRouteDescriptor(routeDescriptor, {
+          laneId,
+          envelopeId,
+          userId,
+          baseVersion
+        });
+      }
+
+      // Cache-aware payload path
+      const resolved = await resolveCacheRequest(payload ?? url, baseVersion, sizeOnly);
+
+      const { kind, buffer, raw } = normalizeBackendPayload(resolved);
+
+      const metaChunk = chunkPayload({
+        userId,
+        payload: buffer,
+        baseVersion: baseVersion || "v1",
+        presenceTag: "default",
+        band: "dual",
+        sizeOnly: !!sizeOnly
+      });
+
+      const presence = buildPresenceEnvelope({
+        laneId,
+        envelopeId,
+        band: "dual",
+        wave: "coherent",
+        dualBand: true,
+        presenceTag: "default",
+        ok: true
+      });
+
+      const lore = generateLoreHeader({
+        meta: PulseChunkerMeta,
+        payloadType: kind,
+        baseVersion,
+        presenceTag: "default",
+        band: "dual"
+      });
+
+      const dna = {
+        __lore: lore,
+        __chunk: raw
+      };
+
+      return {
+        ok: true,
+        data: dna,
+        kind,
+        presence,
+        sessionId: metaChunk.sessionId,
+        payloadBytes: metaChunk.payloadBytes,
+        payloadHash: metaChunk.payloadHash
+      };
+    } catch (e) {
+      error("[PulseChunker v14] chunkRoute failed", {
+        url,
+        laneId,
+        envelopeId,
+        error: e?.message
+      });
+
+      const presence = buildPresenceEnvelope({
+        laneId,
+        envelopeId,
+        band: "dual",
+        wave: "distorted",
+        dualBand: true,
+        presenceTag: "error",
+        ok: false
+      });
+
+      return {
+        ok: false,
+        error: e?.message || "Chunk route failed",
+        presence
+      };
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // CNS Handler — fetchExternalResource adapter
+  // --------------------------------------------------------------------------
+  async function handleFetchExternalResource(request) {
+    const {
+      url,
+      laneId,
+      envelopeId,
+      userId,
+      baseVersion,
+      sizeOnly,
+      payload,
+      routeDescriptor
+    } = request || {};
+
+    return await chunkRoute({
+      url,
+      laneId,
+      envelopeId,
+      userId,
+      baseVersion,
+      sizeOnly,
+      payload,
+      routeDescriptor
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -369,6 +681,8 @@ export function createPulseChunker({ Brain, Logger } = {}) {
     // Cache / route helpers
     resolveCacheRequest,
     generateCache,
+    chunkRoute,
+    handleFetchExternalResource,
 
     // Utilities
     getSession(sessionId) {

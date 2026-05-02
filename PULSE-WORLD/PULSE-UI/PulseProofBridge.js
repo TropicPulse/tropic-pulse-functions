@@ -13,6 +13,11 @@ const hasBroadcastChannel =
 
 const channel = hasBroadcastChannel ? new BroadcastChannel("PulseCNS") : null;
 
+// Paths that should NEVER block waiting for CNS_RESPONSE
+const FIRE_AND_FORGET_PATHS = new Set([
+  "proxy.dnaVisibility",
+]);
+
 // -----------------------------------------------------------------------------
 // CALLBACK REGISTRIES (UI registers handlers here)
 // -----------------------------------------------------------------------------
@@ -53,6 +58,7 @@ function traceInbound(label, data) {
 
 // -----------------------------------------------------------------------------
 // SAFE ROUTE — CNS_REQUEST → CNS_RESPONSE (with timeout, SSR-safe)
+//  - SPECIAL: certain paths (e.g. proxy.dnaVisibility) are auto fire-and-forget
 // -----------------------------------------------------------------------------
 export function safeRoute(path, payload = {}, timeoutMs = 10000) {
   trace("CNS (SIGNAL)", { path, payload });
@@ -70,6 +76,19 @@ export function safeRoute(path, payload = {}, timeoutMs = 10000) {
 
   const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  // 🔹 Auto fire-and-forget for telemetry-style paths
+  if (FIRE_AND_FORGET_PATHS.has(path)) {
+    channel.postMessage({
+      type: "CNS_REQUEST",
+      requestId,
+      path,
+      payload,
+    });
+    // Never wait for a response
+    return Promise.resolve(null);
+  }
+
+  // Normal request/response path with timeout
   return new Promise((resolve) => {
     let settled = false;
 
@@ -118,7 +137,7 @@ export function safeRoute(path, payload = {}, timeoutMs = 10000) {
 }
 
 // -----------------------------------------------------------------------------
-// FIRE-AND-FORGET ROUTE — for telemetry (dnaVisibility, etc.)
+// FIRE-AND-FORGET ROUTE — explicit helper for telemetry, logs, etc.
 // -----------------------------------------------------------------------------
 export function fireAndForgetRoute(path, payload = {}) {
   trace("CNS (SIGNAL, FIRE-AND-FORGET)", { path, payload });

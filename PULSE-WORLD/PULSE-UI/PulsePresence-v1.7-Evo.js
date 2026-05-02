@@ -9,7 +9,7 @@
 console.log("Presence");
 console.log("[PulseChunks-v2.0-MULTILANE-HYBRID] Membrane chunker loading...");
 
-import { safeRoute as route } from "./PulseProofBridge.js";
+import { safeRoute as route, fireAndForgetRoute } from "./PulseBridge.js";
 import { normalizeChunkValue, normalizeImage } from "./PulsePresenceNormalizer.js";
 
 // ============================================================================
@@ -190,7 +190,7 @@ function buildChunkPresenceEnvelope({ url, fromCache, degraded, kind }) {
 // ============================================================================
 //  32-LANE CNS ROUTER — HYBRID: GLOBAL CACHE + PER-LANE CNS/STATS
 // ============================================================================
-const LANE_COUNT = 32;          // 2^5 — sweet spot
+const LANE_COUNT = 32;
 const LANE_MASK  = LANE_COUNT - 1;
 
 function hashKey(key = "") {
@@ -229,7 +229,7 @@ function createLane(id) {
 
       const envelopeId = `lane-${id}-${++this.envelopeCounter}`;
 
-      const routed = await window.route("fetchExternalResource", {
+      const routed = await route("fetchExternalResource", {
         url,
         layer: "A1",
         reflexOrigin: "PulseChunks",
@@ -271,9 +271,9 @@ function getLaneStatsSnapshot() {
 //  UNIVERSAL CHUNK FETCHER — v2.0 MULTILANE HYBRID
 // ============================================================================
 async function fetchChunk(url) {
-  // Frontend DNA visibility logging (non-blocking)
+  // Frontend DNA visibility logging — non-blocking via bridge rules
   try {
-    await route("proxy.dnaVisibility", {
+    fireAndForgetRoute("proxy.dnaVisibility", {
       url,
       timestamp: Date.now(),
       degraded: chunksDegraded,
@@ -373,7 +373,7 @@ async function fetchChunk(url) {
 }
 
 // ============================================================================
-//  IMAGE-SPECIFIC CHUNKER — MINIMAL, SES-SAFE NORMALIZATION
+//  IMAGE-SPECIFIC CHUNKER — NORMALIZER-ALIGNED
 // ============================================================================
 export async function getImage(url) {
   const { value, ok, error, envelope } = await fetchChunk(url);
@@ -387,29 +387,24 @@ export async function getImage(url) {
     return url;
   }
 
-  const v = value;
+  const src =
+    normalizeImage(value) ||
+    normalizeChunkValue(value, "image") ||
+    null;
 
-  if (typeof v === "string") {
-    return v;
+  if (!src) {
+    console.warn("[PulseChunks] getImage unknown image format, falling back to URL:", {
+      url,
+      value
+    });
+    return url;
   }
 
-  if (v && typeof v === "object" && typeof v.url === "string") {
-    return v.url;
-  }
-
-  if (v && typeof v === "object" && typeof v.base64 === "string") {
-    return `data:image/png;base64,${v.base64}`;
-  }
-
-  console.warn("[PulseChunks] getImage unknown image format, falling back to URL:", {
-    url,
-    value: v
-  });
-  return url;
+  return src;
 }
 
 // ============================================================================
-//  LORE ATTACHMENT — NOW ACTUALLY USED
+//  LORE ATTACHMENT — USED BY DNA MODE
 // ============================================================================
 function attachLore(chunk, metaPack) {
   const lore = generateLoreHeader(metaPack);
@@ -592,8 +587,8 @@ window.PulseChunks = {
   dechunk,
   dechunkAll,
   normalizeChunkValue,
-  lanes,                 // raw lane objects (for deep debugging)
-  getLaneStats: getLaneStatsSnapshot, // snapshot view for tools
+  lanes,
+  getLaneStats: getLaneStatsSnapshot,
 };
 
 export default window.PulseChunks;
