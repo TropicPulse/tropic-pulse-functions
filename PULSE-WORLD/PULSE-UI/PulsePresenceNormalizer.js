@@ -76,7 +76,7 @@ function toObjectURL(value, mime = "application/octet-stream") {
   return URL.createObjectURL(blob);
 }
 
-function normalizeImage(value) {
+export function normalizeImage(value) {
   // 1. Direct URL string
   if (typeof value === "string") {
     return value;
