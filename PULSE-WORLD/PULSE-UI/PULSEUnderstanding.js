@@ -38,19 +38,19 @@ import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";
 //  - User pulls OS; OS pulls everything else.
 //  - Understanding depends on User, not directly on OS barrels.
 // ============================================================================
-import createPulseWorldCore from "../PULSE-EXPANSION/PulseUser-v12.3-Presence.js";
+import createPulseWorldCore from "../PULSE-BAND/PULSE-EXPANSION/PulseUser-v12.3-Presence.js";
 
 
 // ============================================================================
 //  IMPORTS — SYMBOLIC / BINARY ORGANS (UNCHANGED)
 //  - These are still the organ-level pieces we unify under the kernel.
 // ============================================================================
-import { createProxy as PulseProxySym } from "../PULSE-PROXY/PulseProxy-v11-EVO.js";
-import { PulseRouter as PulseRouterSym } from "../PULSE-ROUTER/PulseRouter-v11-EVO.js";
-import { createGPUDispatch as PulseGPUSym } from "../PULSE-GPU/PulseGPU-v11-EVO.js";
-import { createPulseMesh as PulseMeshSym } from "../PULSE-MESH/PulseMesh-v11-EVO.js";
-import { createPulseSend as PulseSendSym } from "../PULSE-SEND/PulseSend-v11-EVO.js";
-import { createEarn as PulseEarnSym } from "../PULSE-EARN/PulseEarn-v12.3-Presence.js";
+import { createProxy as PulseProxySym } from "../PULSE-BAND/PULSE-PROXY/PulseProxy-v11-EVO.js";
+import { PulseRouter as PulseRouterSym } from "../PULSE-BAND/PULSE-ROUTER/PulseRouter-v11-EVO.js";
+import { createGPUDispatch as PulseGPUSym } from "../PULSE-BAND/PULSE-GPU/PulseGPU-v11-EVO.js";
+import { createPulseMesh as PulseMeshSym } from "../PULSE-BAND/PULSE-MESH/PulseMesh-v11-EVO.js";
+import { createPulseSend as PulseSendSym } from "../PULSE-BAND/PULSE-SEND/PulseSend-v11-EVO.js";
+import { createEarn as PulseEarnSym } from "../PULSE-BAND/PULSE-EARN/PulseEarn-v12.3-Presence.js";
 
 
 // ============================================================================
@@ -59,11 +59,11 @@ import { createEarn as PulseEarnSym } from "../PULSE-EARN/PulseEarn-v12.3-Presen
 // ============================================================================
 import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-AI/aiDualBand-v11-Evo.js";
 
-import { createBinaryProxy } from "../PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
-import { createBinaryRouter as PulseRouterBin } from "../PULSE-ROUTER/PulseBinaryRouter-v11-EVO.js";
-import { PulseBinaryGPU as PulseGPUBin } from "../PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
-import { createBinaryMesh as PulseMeshBin } from "../PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
-import { createBinarySend as PulseSendBin } from "../PULSE-SEND/PulseBinarySend-v11-EVO.js";
+import { createBinaryProxy } from "../PULSE-BAND/PULSE-PROXY/PulseBinaryProxy-v11-EVO.js";
+import { createBinaryRouter as PulseRouterBin } from "../PULSE-BAND/PULSE-ROUTER/PulseBinaryRouter-v11-EVO.js";
+import { PulseBinaryGPU as PulseGPUBin } from "../PULSE-BAND/PULSE-GPU/PulseBinaryGPU-v11-Evo.js";
+import { createBinaryMesh as PulseMeshBin } from "../PULSE-BAND/PULSE-MESH/PulseBinaryMesh-v11-EVO.js";
+import { createBinarySend as PulseSendBin } from "../PULSE-BAND/PULSE-SEND/PulseBinarySend-v11-EVO.js";
 
 
 // ============================================================================

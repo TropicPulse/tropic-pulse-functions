@@ -6,9 +6,9 @@
 // ============================================================================
 
 import { PulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
-import { createPulseV3 } from "./PulseV3UnifiedOrganism-v11-Evo.js";
-import { createPulseV2 } from "./PulseV2EvolutionEngine-v11-Evo.js";
-import { createLegacyPulse } from "./PulseSendLegacyPulse-v11-Evo.js";
+import { createPulseV3 } from "../PULSE-SEND/PulseV3UnifiedOrganism-v11-Evo.js";
+import { createPulseV2 } from "../PULSE-SEND/PulseV2EvolutionEngine-v11-Evo.js";
+import { createLegacyPulse } from "../PULSE-SEND/PulseSendLegacyPulse-v11-Evo.js";
 
 // ============================================================================
 // CORE MEMORY — IMMORTAL IMPULSE MEMORY
