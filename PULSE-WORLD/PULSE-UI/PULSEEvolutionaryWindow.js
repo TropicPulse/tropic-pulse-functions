@@ -526,7 +526,7 @@ if (isBrowser()) {
 
       // UI FLOW BOOT
       try {
-        const flowContext = await PulseUIFlow.initUIFlow();
+        const flowContext = await PulseUIFlow();
         window.PulseUI = window.PulseUI
           ? Object.freeze({
               ...window.PulseUI,
