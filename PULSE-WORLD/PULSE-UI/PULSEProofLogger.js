@@ -3,8 +3,8 @@
 //  PROOF LOGGER • AI CONSOLE EXTENSION • OFFLINE-FIRST TELEMETRY
 // ============================================================================
 console.log("Logger");
-import { route } from "../PULSE-BAND/PULSE-OS/PulseOSCNSNervousSystem.js";
 
+import { safeRoute as route } from "./PulseProofBridge.js";
 // Capture original console to avoid recursion
 const _c = { ...console };
 
@@ -222,55 +222,65 @@ export function log(...args) {
     return;
   }
 
-  // Local console is ALWAYS written — offline-first
-  if (raw) {
-    _c.log(message, ...rest);
-  } else {
-    _c.log(`%c${prefix} — ${message}`, `color:${color}; font-weight:bold;`, ...rest);
-  }
+  const safeMessage = mark404(message);
 
-  // Telemetry is best-effort, never required for logging
-  sendToFirebase("log", message, rest);
+if (raw) {
+  _c.log(safeMessage, ...rest);
+} else {
+  _c.log(`%c${prefix} — ${safeMessage}`, `color:${color}; font-weight:bold;`, ...rest);
+}
+
+sendToFirebase("log", safeMessage, rest);
+
 }
 
 export function warn(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  _c.warn(
-    `%c${prefix} ⚠️ [WARN] — ${message}`,
-    "color:#FFEE58; font-weight:bold;",
-    ...rest
-  );
+ const safeMessage = mark404(message);
 
-  sendToFirebase("warn", message, rest);
+_c.warn(
+  `%c${prefix} ⚠️ [WARN] — ${safeMessage}`,
+  "color:#FFEE58; font-weight:bold;",
+  ...rest
+);
+
+sendToFirebase("warn", safeMessage, rest);
+
 }
 
 export function error(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  _c.error(
-    `%c${prefix} 🟥 [ERROR] — ${message}`,
-    "color:#EF5350; font-weight:bold;",
-    ...rest
-  );
+ const safeMessage = mark404(message);
 
-  sendToFirebase("error", message, rest);
+_c.error(
+  `%c${prefix} 🟥 [ERROR] — ${safeMessage}`,
+  "color:#EF5350; font-weight:bold;",
+  ...rest
+);
+
+sendToFirebase("error", safeMessage, rest);
+
 }
 
 export function critical(...args) {
   const { subsystem, message, rest } = normalizeArgs(args);
   const prefix = formatPrefix(subsystem);
 
-  _c.groupCollapsed(
-    `%c${prefix} 💀 [CRITICAL] — ${message}`,
-    "color:#D32F2F; font-weight:bold; font-size:14px;"
-  );
-  _c.error(`%c${message}`, "color:#D32F2F; font-weight:bold;", ...rest);
-  _c.groupEnd();
+  const safeMessage = mark404(message);
 
-  sendToFirebase("critical", message, rest);
+_c.groupCollapsed(
+  `%c${prefix} 💀 [CRITICAL] — ${safeMessage}`,
+  "color:#D32F2F; font-weight:bold; font-size:14px;"
+);
+_c.error(`%c${safeMessage}`, "color:#D32F2F; font-weight:bold;", ...rest);
+_c.groupEnd();
+
+sendToFirebase("critical", safeMessage, rest);
+
 }
 
 // -----------------------------------------------------------------------------
@@ -284,6 +294,13 @@ export function group(subsystem, label) {
 
 export function groupEnd() {
   _c.groupEnd();
+}
+
+function mark404(message) {
+  if (typeof message === "string" && message.trim() === "404") {
+    return "404*";
+  }
+  return message;
 }
 
 // -----------------------------------------------------------------------------
