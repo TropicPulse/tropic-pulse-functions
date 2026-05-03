@@ -52,7 +52,7 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import { logger } from "../../PULSE-UI/_BACKEND/PulseProofLogger.js";
+import { logger } from "../../PULSE-UI/_CONNECTORS/PulseProofLogger.js";
 import {
   pulseCastle,
   PulseCastleMeta,

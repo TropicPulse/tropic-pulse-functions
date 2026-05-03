@@ -54,6 +54,8 @@ AI_EXPERIENCE_META = {
 }
 */
 
+import { safeRoute as route } from "./_BACKEND/PulseProofBridge.js";
+
 // ============================================================================
 // IMMORTAL LOCALSTORAGE MIRROR — PulseUIFlowStore
 // ============================================================================
@@ -186,8 +188,6 @@ function logFlow(stage, details = {}) {
     safeConsoleLog("[PulseUIFlow-v13]", stage, details);
   }
 }
-
-import { safeRoute as route } from "./PulseProofBridge.js";
 
 // ============================================================================
 // INTENT MAP (unchanged)

@@ -5,7 +5,7 @@
 //  PURE SENSOR. NO THINKING. NO DECISIONS. NO GLOBAL STATE.
 // ============================================================================
 
-import { VitalsLogger as logger, emitTelemetry }        from "../../PULSE-UI/_BACKEND/PulseProofLogger.js";
+import { VitalsLogger as logger, emitTelemetry }        from "../../PULSE-UI/_CONNECTORS/PulseProofLogger.js";
 // ============================================================================
 //  ORGAN IDENTITY — v12.3‑EVO A‑B‑A
 // ============================================================================

@@ -65,7 +65,7 @@ AI_EXPERIENCE_META = {
 // ============================================================================
 //  IMPORTS (backend-safe)
 // ============================================================================
-import { logger } from "../../PULSE-UI/_BACKEND/PulseProofLogger.js";
+import { logger } from "../../PULSE-UI/_CONNECTORS/PulseProofLogger.js";
 
 import {
   createPulseServer,

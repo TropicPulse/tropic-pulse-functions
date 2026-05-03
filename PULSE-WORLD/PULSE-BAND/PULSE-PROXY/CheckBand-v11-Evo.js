@@ -68,7 +68,7 @@ AI_EXPERIENCE_META = {
 
 const admin = global.db;
 const db    = global.db;
-import { VitalsLogger as logger }        from "../../PULSE-UI/_BACKEND/PulseProofLogger.js";
+import { VitalsLogger as logger }        from "../../PULSE-UI/_CONNECTORS/PulseProofLogger.js";
 import { PulseLineage } from "./PulseProxyBBB.js";
 
 export const PulseOSCheckBandMeta = Object.freeze({

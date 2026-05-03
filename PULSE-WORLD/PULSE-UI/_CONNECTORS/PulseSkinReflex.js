@@ -74,11 +74,11 @@ EXPORT_META = {
 
 */
 
-import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
+import PulseUIErrors from "../PulseUIErrors-v12-Evo.js";
 import PulsePageScanner from "../PulsePageScanner.js";
-import createPulseRouteMemory from "./PulseRouteMemory.js";
-import { safeRoute as route } from "./PulseProofBridge.js";
-import { getUIFlowSnapshot } from "./PulseUIFlow-v12-Evo.js";
+import createPulseRouteMemory from "../PulseRouteMemory.js";
+import { safeRoute as route } from "../_BACKEND/PulseProofBridge.js";
+import { getUIFlowSnapshot } from "../PulseUIFlow-v12-Evo.js";
 
 // ---------------------------------------------------------------------------
 // ROLE

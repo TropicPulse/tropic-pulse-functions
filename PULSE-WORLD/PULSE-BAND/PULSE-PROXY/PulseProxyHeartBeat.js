@@ -10,7 +10,7 @@
 const admin = global.db;
 const db    = global.db;
 
-import { VitalsLogger as logger }        from "../../PULSE-UI/_BACKEND/PulseProofLogger.js";
+import { VitalsLogger as logger }        from "../../PULSE-UI/_CONNECTORS/PulseProofLogger.js";
 import { safeRoute as route } from "../../PULSE-UI/_BACKEND/PulseProofBridge.js";
 import { PulseLineage } from "./PulseProxyBBB.js";
 // ============================================================================
