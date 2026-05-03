@@ -75,13 +75,11 @@ import PulseEarnMktBroker         from "./PulseEarnMktBroker.js";
 import PulseEarnMktCourier        from "./PulseEarnMktCourier.js";
 import PulseEarnMktForager        from "./PulseEarnMktForager.js";
 
-// --- PULSE-NET ORGANISM BRIDGE (v15-FAMILY-IMMORTAL) -----------------------
 import {
-  startPulseNet,
-  PulseNetForward,
-  PulseNetBackward,
-  PulseNetOrganism
-} from "../../PULSE-UI/PULSE-NET.js";
+  PulseNetBoot,
+  PulseNet
+} from "../PULSE-BRIDGE/PulseProofBridge.js";
+
 
 // --- PULSE-CORE MEMORY SPINE (FULL SPINE) ----------------------------------
 import PulseCoreMemory                from "../PULSE-CORE/PulseCoreMemory.js";
@@ -89,14 +87,6 @@ import PulseCoreAIMemoryAdapter      from "../PULSE-CORE/PulseCoreAIMemoryAdapte
 import PulseCoreEarnMemoryAdapter     from "../PULSE-CORE/PulseCoreEarnMemoryAdapter.js";
 import PulseBinaryCoreOverlay         from "../PULSE-CORE/PulseBinaryCoreOverlay.js";
 
-// IMMORTAL: no top-level ticking, no time-based math here.
-// We only expose structural accessors to the running PULSE-NET organism.
-// Host code (not this file) may call startPulseNet(intervalMs) if desired.
-const PulseNet = Object.freeze({
-  forwardEngine: () => PulseNetForward(),
-  backwardEngine: () => PulseNetBackward(),
-  organism: () => PulseNetOrganism()
-});
 
 // CoreMemory bridge: structural, deterministic, keyed by memory surfaces.
 const CoreMemory = Object.freeze({

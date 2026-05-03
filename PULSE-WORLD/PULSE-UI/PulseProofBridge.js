@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// PulseBridge.js — LOCAL PORT BRIDGE for FRONT ↔ CNS (SIGNAL VERSION)
+// PulseProofBridge.js — LOCAL PORT BRIDGE for FRONT ↔ CNS (SIGNAL VERSION)
 //  - Request/response routing with timeouts
 //  - Fire-and-forget signals for telemetry (dnaVisibility, etc.)
 //  - Dev tracing
@@ -410,6 +410,24 @@ export function startUnderstanding(options = {}) {
 }
 
 // -----------------------------------------------------------------------------
+// START PULSE-NET
+// -----------------------------------------------------------------------------
+export function startPulseNet(options = {}) {
+  trace("PULSENET_START (SIGNAL)", options);
+
+  appendBridgeRecord("pulsenet_start_outbound", options);
+
+  if (!channel) return;
+
+  channel.postMessage({
+    type: "PULSENET_START",
+    timestamp: Date.now(),
+    options,
+  });
+}
+
+
+// -----------------------------------------------------------------------------
 // INBOUND SIGNAL HANDLER — AI → UI events
 // -----------------------------------------------------------------------------
 if (channel) {
@@ -441,18 +459,20 @@ if (channel) {
     }
   };
 }
-
 // -----------------------------------------------------------------------------
 // ALIASES
 // -----------------------------------------------------------------------------
 export const route = safeRoute;
 export const PulseBinaryOrganismBoot = startDualBandAI;
 export const PulseUnderstandingBoot = startUnderstanding;
+export const PulseNetBoot = startPulseNet;   // ← NEW (boots Pulse-Net by SIGNAL)
 
 export const PulseProofBridge = {
   route,
-  coreMemory: coreMemoryBridge
+  coreMemory: coreMemoryBridge,
+  PulseNetBoot,              // ← expose Pulse-Net boot through the bridge
 };
+
 
 // -----------------------------------------------------------------------------
 // GLOBAL EXPOSURE OF IMMORTAL STORE
