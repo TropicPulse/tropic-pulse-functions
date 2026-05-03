@@ -57,17 +57,17 @@ import {
   pulseCastle,
   PulseCastleMeta,
   summarizeCastlePresence
-} from "./PulseCastle-v13-Presence.js";
+} from "./PulseCastle-v12.3-Presence.js";
 
 import {
   PulseBeaconMeta as PulseBeaconEngineMeta,
   createPulseBeaconEngine
-} from "./PulseBeaconEngine-v14-IMMORTAL.js";
+} from "./PulseBeaconEngine-v12.3-Presence.js";
 
 import {
   PulseBeaconMeshMeta,
   PulseBeaconMesh
-} from "./PulseBeaconMesh-v13-PRESENCE-EVO++.js";
+} from "./PulseBeaconMesh-v12.3-Presence.js";
 
 import { PulseWorldCoreMeta } from "./PulseUser-v12.3-Presence.js";
 import { PulseRouterMeta } from "./PulseRouter-v12.3-Presence.js";
