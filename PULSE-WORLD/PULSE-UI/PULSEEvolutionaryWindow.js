@@ -44,11 +44,8 @@ AI_EXPERIENCE_META = {
 */
 
 console.log("Window");
-import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
-import { VitalsMonitor as PulseVitalsMonitor } from "./PulseProofMonitor.js";
-import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
 import { route, startUnderstanding as PulseUnderstanding, PulseBinaryOrganismBoot } from "./PulseProofBridge.js";
-import { initUIFlow as PulseUIFlow } from "./PulseUIFlow-v12-EVO.js";
+
 
 
 
@@ -388,10 +385,10 @@ if (isBrowser()) {
 
             // Route through logger's route if available
             const hasLoggerRoute =
-              PulseLogger && typeof PulseLogger.route === "function";
+              window.PulseLogger && typeof window.PulseLogger.route === "function";
 
             if (hasLoggerRoute && typeof url === "string") {
-              const result = await PulseLogger.route("fetchProxy", {
+              const result = await window.PulseLogger.route("fetchProxy", {
                 url,
                 options
               });
@@ -461,12 +458,12 @@ if (isBrowser()) {
 // ============================================================================
 try {
   // Always-on vitals monitor (backend optional)
-  if (PulseVitalsMonitor && typeof PulseVitalsMonitor.PulseRole === "object") {
+  if (window.VitalsMonitor && typeof window.VitalsMonitor.PulseRole === "object") {
     // no explicit start needed; updateUserMetrics is called by organs
   }
 
   // Logger init (AI console, telemetry, console hijack already done in logger file)
-  if (PulseLogger && typeof PulseLogger.meta === "object") {
+  if (window.PulseLogger && typeof window.PulseLogger.meta === "object") {
     // no explicit init required; logger file already hijacks console
   }
 } catch (err) {
@@ -474,7 +471,7 @@ try {
 }
 
 try {
-  PulseUIErrors.init?.();
+  window.PulseUIErrors.init?.();
 } catch (err) {
   console.error(
     "[PulseEvolutionaryWindow] Error spine failed to initialize:",
@@ -562,14 +559,14 @@ if (isBrowser()) {
 
       // UI FLOW BOOT
       try {
-        const flowContext = await PulseUIFlow();
+        const flowContext = await window.PulseUIFlow();
         window.PulseUI = window.PulseUI
           ? Object.freeze({
               ...window.PulseUI,
-              Flow: PulseUIFlow,
+              Flow: window.PulseUIFlow,
               context: flowContext
             })
-          : Object.freeze({ Flow: PulseUIFlow, context: flowContext });
+          : Object.freeze({ Flow: window.PulseUIFlow, context: flowContext });
       } catch (flowErr) {
         console.error("[PulseEvolutionaryWindow] UIFlow boot failed:", flowErr);
       }
@@ -632,10 +629,10 @@ if (isBrowser()) {
 
             try {
               const hasLoggerRoute =
-                PulseLogger && typeof PulseLogger.route === "function";
+                window.PulseLogger && typeof window.PulseLogger.route === "function";
 
               if (hasLoggerRoute) {
-                data = await PulseLogger.route("fetchProxy", {
+                data = await window.PulseLogger.route("fetchProxy", {
                   url: url + query,
                   method,
                   body: bodyOrQuery,
@@ -700,12 +697,12 @@ if (isBrowser()) {
 // EXPORT — PORTAL API
 // ============================================================================
 export default Object.freeze({
-  VitalsMonitor: PulseVitalsMonitor,
-  Logger: PulseLogger,
+  VitalsMonitor: window.VitalsMonitor,
+  Logger: window.PulseLogger,
   Understanding: PulseUnderstanding,
   SurfaceEnvironment: PulseSurfaceEnvironment,
-  UIFlow: PulseUIFlow,
-  Errors: PulseUIErrors,
+  UIFlow: window.PulseUIFlow,
+  Errors: window.PulseUIErrors,
   meta: {
     pulseRole,
     surfaceMeta,

@@ -320,12 +320,18 @@ input[type="file"] {
 
 <!-- Backend Connector Layer -->
 <script type="module">
- import { VitalsLogger as PulseLogger }        from "../PULSEProofLogger.js";
-/* 0. BOOT MEMBRANE — MUST BE FIRST */
-import * as PulseWindow from "../PULSEEvolutionaryWindow.js";
-
+import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
+import { VitalsMonitor as PulseVitalsMonitor } from "./PulseProofMonitor.js";
+import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
+import { initUIFlow as PulseUIFlow } from "./PulseUIFlow-v12-EVO.js";
 /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
-import * as PulseSkinReflex from "../PulseSkinReflex.js"; // PageScannerV12 auto hooks window here
+import * as PulseSkinReflex from "./PulseSkinReflex.js"; // PageScannerV12 auto hooks window here
+import PulseChunks from "./PulsePresence-v2.js";
+/* 0. BOOT MEMBRANE — MUST BE FIRST */
+import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
+
+// Expose PulseChunks
+    window.PulseChunks = window.PulseChunks || PulseChunks;
 
 /* ============================================================================
    PULSE DIAGNOSTICS — PAGE BRAIN

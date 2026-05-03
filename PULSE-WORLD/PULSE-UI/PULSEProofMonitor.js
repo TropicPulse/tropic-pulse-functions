@@ -780,9 +780,11 @@ export const VitalsMonitor = {
 try {
   if (typeof window !== "undefined") {
     window.PulseVitalsStore = PulseVitalsStore;
+    window.VitalsMonitor = VitalsMonitor;
   }
   if (typeof globalThis !== "undefined") {
     globalThis.PulseVitalsStore = PulseVitalsStore;
+    globalThis.VitalsMonitor = VitalsMonitor;
   }
 } catch {
   // never throw

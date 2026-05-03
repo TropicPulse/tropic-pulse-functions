@@ -269,8 +269,10 @@ export default PulseUIErrors;
 try {
   if (typeof window !== "undefined") {
     window.PulseUIErrorStore = PulseUIErrorStore;
+    window.PulseUIErrors = PulseUIErrors;
   }
   if (typeof globalThis !== "undefined") {
     globalThis.PulseUIErrorStore = PulseUIErrorStore;
+    globalThis.PulseUIErrors = PulseUIErrors;
   }
 } catch {}
