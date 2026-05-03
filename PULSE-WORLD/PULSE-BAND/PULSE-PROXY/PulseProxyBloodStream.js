@@ -5,7 +5,7 @@
 //  PURE NERVOUS‑SYSTEM ORGAN — NO BACKEND, NO DOM, NO GPU, NO STATE MUTATION
 //  v12.3‑EVO‑BINARY‑MAX‑ABA + CACHE/CHUNK/PRESENCE ADVANTAGE
 // ============================================================================
-import { VitalsLogger as logger, PulseVersion,PulseRoles, PulseLineage }        from "./PulseProofLogger.js";
+import { VitalsLogger as logger, PulseVersion,PulseRoles, PulseLineage }        from "../../PULSE-UI/PULSEProofLogger.js";
 
 // ============================================================================
 //  ORGAN IDENTITY — v12.3‑EVO A‑B‑A

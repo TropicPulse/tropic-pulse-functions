@@ -78,7 +78,7 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import { createForwardEngine } from "./PULSE-BAND/PULSE-ENGINE/ForwardEngine.js";
+import { createForwardEngine } from "../PULSE-BAND/PULSE-ENGINE/ForwardEngine.js";
 import { createBackwardEngine } from "../PULSE-BAND/PULSE-ENGINE/BackwardEngine.js";
 import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
 import { initUIFlow } from "./PulseUIFlow-v12-Evo.js";

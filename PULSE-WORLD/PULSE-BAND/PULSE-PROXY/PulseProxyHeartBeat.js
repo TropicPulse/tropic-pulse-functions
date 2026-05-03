@@ -11,7 +11,7 @@ const admin = global.db;
 const db    = global.db;
 
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { VitalsLogger as logger }        from "./PulseProofLogger.js";
+import { VitalsLogger as logger }        from "../../PULSE-UI/PulseProofLogger.js";
 import { PulseLineage } from "./PulseProxyBBB.js";
 // ============================================================================
 // HEARTBEAT IDENTITY — v12.3‑EVO‑BINARY‑MAX‑ABA
