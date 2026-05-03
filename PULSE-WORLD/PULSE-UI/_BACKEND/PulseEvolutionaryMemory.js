@@ -79,8 +79,7 @@ EXPORT_META = {
 }
 
 */
-
-import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
+import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
 
 export const MemoryRole = {
   type: "Organ",
@@ -115,7 +114,7 @@ export function createPulseEvolutionaryMemory({
 } = {}) {
 
   // CoreMemory v15 IMMORTAL
-  const Core = createPulseCoreMemory({ log, warn });
+  const Core = PulseProofBridge.coreMemory;
 
   const MemoryState = {
     lastSaved: null,

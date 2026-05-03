@@ -44,15 +44,15 @@
        JS LAYER (CORTEX)
        ============================================================================ -->
   <script type="module">
-import { VitalsLogger as PulseLogger }        from "./PulseProofLogger.js";
-import { VitalsMonitor as PulseVitalsMonitor } from "./PulseProofMonitor.js";
-import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
-import { initUIFlow as PulseUIFlow } from "./PulseUIFlow-v12-EVO.js";
+import { VitalsLogger as PulseLogger }        from "./_BACKEND/PulseProofLogger.js";
+import { VitalsMonitor as PulseVitalsMonitor } from "./_CONNECTORS/PulseProofMonitor.js";
+import PulseUIErrors from "./_CONNECTORS/PulseUIErrors-v12-EVO.js";
+import { initUIFlow as PulseUIFlow } from "./_CONNECTORS/PulseUIFlow-v12-EVO.js";
 /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
-import * as PulseSkinReflex from "./PulseSkinReflex.js"; // PageScannerV12 auto hooks window here
+import * as PulseSkinReflex from "./_CONNECTORS/PulseSkinReflex.js"; // PageScannerV12 auto hooks window here
 import PulseChunks from "./PulsePresence-v2.js";
 /* 0. BOOT MEMBRANE — MUST BE FIRST */
-import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
+import * as PulseWindow from "./PulseNetEvolutionaryWindow.js";
 
 // Expose PulseChunks
     window.PulseChunks = window.PulseChunks || PulseChunks;
@@ -61,15 +61,15 @@ import * as PulseWindow from "./PULSEEvolutionaryWindow.js";
   }
 
   // Icons
-  import { PulseIcons } from "./PulseEvolutionaryIcons.js";
+  import { PulseIcons } from "./_BACKEND/PulseEvolutionaryIcons.js";
 
   // UI organism organs
-  import { createPulseEvolutionaryCode } from "./PulseEvolutionaryCode.js";
-  import { createPulseEvolutionaryMemory } from "./PulseEvolutionaryMemory.js";
-  import { createPulseEvolutionaryBrain } from "./PulseEvolutionaryBrain.js";
-  import { createPulseEvolutionaryImpulse } from "./PulseEvolutionaryImpulse.js";
-  import { createPulseEvolutionaryRouter } from "./PulseEvolutionaryRouter.js";
-  import { createPulseEvolutionaryBinary } from "./PulseEvolutionaryBinary.js";
+  import { createPulseEvolutionaryCode } from "./_BACKEND/PulseEvolutionaryCode.js";
+  import { createPulseEvolutionaryMemory } from "./_BACKEND/PulseEvolutionaryMemory.js";
+  import { createPulseEvolutionaryBrain } from "./_BACKEND/PulseEvolutionaryBrain.js";
+  import { createPulseEvolutionaryImpulse } from "./_BACKEND/PulseEvolutionaryImpulse.js";
+  import { createPulseEvolutionaryRouter } from "./_BACKEND/PulseEvolutionaryRouter.js";
+  import { createPulseEvolutionaryBinary } from "./_BACKEND/PulseEvolutionaryBinary.js";
 
   // AI organs (example: aiEarn)
   import * as aiEarn from "../PULSE-BAND/PULSE-AI/aiEarn.js";
