@@ -72,15 +72,9 @@ import { createBinarySend } from "../PULSE-SEND/PulseBinarySend-v11-Evo.js";
 // ============================================================================
 //  MEMORY + STATE
 // ============================================================================
-import {
-  readCoreMemoryEarn,
-  writeCoreMemoryEarn
-} from "../PULSE-CORE/PulseCoreEarnMemoryAdapter.js";
+import { readCoreMemoryEarn, writeCoreMemoryEarn} from "../PULSE-CORE/PulseCoreEarnMemoryAdapter.js";
 
-import {
-  readCoreMemorySend,
-  writeCoreMemorySend
-} from "../PULSE-CORE/PulseCoreSendMemoryAdapter.js";
+import { readCoreMemorySend, writeCoreMemorySend} from "../PULSE-CORE/PulseCoreSendMemoryAdapter.js";
 
 import { PulseOrganismMap } from "../PULSE-OS/PulseOrganismMap.js";
 import { PulseIQMap } from "../PULSE-OS/PulseIQMap.js";

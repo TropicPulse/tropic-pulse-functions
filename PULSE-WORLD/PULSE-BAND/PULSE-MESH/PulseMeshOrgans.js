@@ -1,25 +1,27 @@
 // ============================================================================
-//  PULSE OS v12.3-PRESENCE-EVO-MAX-PRIME — SURVIVAL ORGANS LAYER  // orange
+//  PULSE OS v15.0-MESH-ORGANS-EVO — SURVIVAL / MESH ORGANS LAYER  // orange
 //  “Functional Organ Map of the Mesh Body”
 //  Capability Signatures • Deterministic Organ Matching • Metadata-Only
 // ============================================================================
 //
-// IDENTITY (v12.3):
+// IDENTITY (v15.0):
 // ------------------
-// • Maps impulses to functional organs (storage, routing, security, earnPrep).
+// • Maps impulses to functional + mesh organs (storage, routing, security,
+//   earnPrep, binaryPrep, meshSignal, presence, meshFlow, meshCognition,
+//   meshAwareness).
 // • Pure metadata-only classification — zero payload mutation.
 // • Deterministic-field, drift-proof, SDN-aligned.
 // • No pressure gating.
 // • Multi-instance-ready, unified-advantage-field,
-//   binary-aware, dual-mode-ready, presence-aware.
+//   binary-aware, dual-mode-ready, presence-aware, mesh-aware.
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshOrgans",
-  version: "v14.9-MESH-ORGANS",
+  version: "v15.0-MESH-ORGANS-EVO",
   layer: "mesh",
   role: "mesh_organ_registry",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
     organRegistry: true,            // Registry of mesh organs
@@ -32,7 +34,10 @@ AI_EXPERIENCE_META = {
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
-    zeroExternalMutation: true
+    zeroExternalMutation: true,
+    meshAware: true,                // NEW: mesh-level organ tagging
+    presenceAware: true,            // Presence-band aware
+    coordinatorFree: true           // No global coordination here
   },
 
   contract: {
@@ -49,31 +54,70 @@ AI_EXPERIENCE_META = {
   }
 }
 */
+// ============================================================================
+//  PULSE OS v15.0-MESH-ORGANS-EVO-IMMORTAL  // orange
+//  “Functional Organ Map of the Mesh Body”
+//  Capability Signatures • Deterministic Organ Matching • Metadata-Only
+// ============================================================================
 
 export function createPulseOrgans() {
 
   // -------------------------------------------------------
-  // ORGAN DEFINITIONS (v12.3)
-  // Deterministic, pressure-free, SDN-aligned, presence-aware.
+  // IMMORTAL META (v15)
+  // -------------------------------------------------------
+  const organMeta = {
+    layer: "PulseOrgans",
+    role: "FUNCTIONAL_ORGAN_MAP",
+    version: "15.0-MESH-ORGANS-EVO-IMMORTAL",
+    target: "full-mesh",
+    selfRepairable: true,
+    evo: {
+      dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
+      presenceAware: true,
+      bandAware: true,
+      localAware: true,
+      internetAware: true,
+
+      advantageCascadeAware: true,
+      pulseEfficiencyAware: true,
+      driftProof: true,
+      multiInstanceReady: true,
+
+      unifiedAdvantageField: true,
+      deterministicField: true,
+      futureEvolutionReady: true,
+
+      signalFactoringAware: true,
+      meshPressureAware: true,
+      auraPressureAware: true,
+      meshAware: true,
+
+      zeroCompute: true,
+      zeroMutation: true,
+      zeroRoutingInfluence: true
+    }
+  };
+
+
+  // -------------------------------------------------------
+  // ORGAN DEFINITIONS (v15 IMMORTAL)
   // -------------------------------------------------------
   const PulseOrgans = {
 
-    // -------------------------------------------------------
-    // STORAGE ORGAN — deterministic, safe default
-    // -------------------------------------------------------
     storage: {
       id: "organ-storage",
+      lineage: "mesh-storage-v15",
       capabilities: ["store", "retrieve", "index"],
       match(impulse) {
         return impulse.flags?.cortex_intent === "normal";
       }
     },
 
-    // -------------------------------------------------------
-    // ROUTING ORGAN — deterministic, based on intent + score
-    // -------------------------------------------------------
     routing: {
       id: "organ-routing",
+      lineage: "mesh-routing-v15",
       capabilities: ["route", "shape", "classify"],
       match(impulse) {
         return impulse.flags?.cortex_intent === "push_hard" ||
@@ -81,11 +125,9 @@ export function createPulseOrgans() {
       }
     },
 
-    // -------------------------------------------------------
-    // SECURITY ORGAN — anomaly-first
-    // -------------------------------------------------------
     security: {
       id: "organ-security",
+      lineage: "mesh-security-v15",
       capabilities: ["validate", "verify", "protect"],
       match(impulse) {
         return impulse.flags?.cortex_anomaly ||
@@ -94,11 +136,9 @@ export function createPulseOrgans() {
       }
     },
 
-    // -------------------------------------------------------
-    // EARN PREP ORGAN — deterministic, based on routeHint
-    // -------------------------------------------------------
     earnPrep: {
       id: "organ-earnprep",
+      lineage: "mesh-earnprep-v15",
       capabilities: ["prepare", "shape_intent", "assign_earner"],
       match(impulse) {
         return typeof impulse.routeHint === "string" &&
@@ -106,94 +146,95 @@ export function createPulseOrgans() {
       }
     },
 
-    // -------------------------------------------------------
-    // BINARY PREP ORGAN — v12.3
-    // Activated when binary mode or binary presence-band is active
-    // -------------------------------------------------------
     binaryPrep: {
       id: "organ-binaryprep",
+      lineage: "mesh-binaryprep-v15",
       capabilities: ["binary_prepare", "binary_shape", "binary_assign"],
       match(impulse) {
         return impulse.flags?.binary_mode === true ||
-               impulse.band === "binary";
+               impulse.band === "binary" ||
+               impulse.flags?.hormone_prefers_binary === true;
       }
     },
 
-    // -------------------------------------------------------
-    // MESH SIGNAL ORGAN — v12.3
-    // Activated when mesh-level signals or presence-band signals appear
-    // -------------------------------------------------------
     meshSignal: {
       id: "organ-meshsignal",
+      lineage: "mesh-signal-v15",
       capabilities: ["mesh_signal", "mesh_factor", "mesh_trace"],
       match(impulse) {
         return impulse.flags?.aura_prefers_factored_paths ||
                impulse.flags?.mesh_signal ||
                impulse.flags?.aura_system_under_tension ||
+               impulse.flags?.hormone_factoring_pressure ||
                impulse.band === "dual";
       }
     },
 
-    // -------------------------------------------------------
-    // PRESENCE ORGAN — v12.3
-    // Activated when presence-band metadata is present
-    // -------------------------------------------------------
     presence: {
       id: "organ-presence",
+      lineage: "mesh-presence-v15",
       capabilities: ["presence_shape", "presence_tag", "presence_band"],
       match(impulse) {
         return typeof impulse.band === "string" &&
                ["binary", "symbolic", "dual"].includes(impulse.band);
+      }
+    },
+
+    meshFlow: {
+      id: "organ-meshflow",
+      lineage: "mesh-flow-v15",
+      capabilities: ["mesh_flow_tag", "mesh_flow_shape"],
+      match(impulse) {
+        return impulse.flags?.mesh_flow ||
+               impulse.flags?.mesh_topology_change ||
+               impulse.flags?.mesh_lane_activity ||
+               impulse.flags?.hormone_mesh_storm_pressure;
+      }
+    },
+
+    meshCognition: {
+      id: "organ-meshcognition",
+      lineage: "mesh-cognition-v15",
+      capabilities: ["mesh_cognition_tag", "mesh_reasoning_tag"],
+      match(impulse) {
+        return impulse.flags?.mesh_cognition ||
+               impulse.flags?.mesh_decision ||
+               impulse.flags?.mesh_coordinator_signal ||
+               impulse.flags?.hormone_dual_mode_ready;
+      }
+    },
+
+    meshAwareness: {
+      id: "organ-meshawareness",
+      lineage: "mesh-awareness-v15",
+      capabilities: ["mesh_awareness_tag", "mesh_presence_tag"],
+      match(impulse) {
+        return impulse.flags?.mesh_presence ||
+               impulse.flags?.mesh_state_probe ||
+               impulse.flags?.mesh_observe_only ||
+               impulse.flags?.hormone_presence_dual_pressure;
       }
     }
   };
 
 
   // ========================================================================
-  // ORGAN ENGINE (v12.3)
-  // “Attach functional organ identity to the impulse”
+  // ORGAN ENGINE (v15 IMMORTAL)
   // ========================================================================
   function applyPulseOrgans(impulse) {
+    impulse = impulse || {};
     impulse.flags = impulse.flags || {};
     impulse.organs = impulse.organs || [];
 
-    // attach v12.3 organ meta
-    impulse.flags.organ_meta = {
-      layer: "PulseOrgans",
-      role: "FUNCTIONAL_ORGAN_MAP",
-      version: "12.3-PRESENCE-EVO-MAX-PRIME",
-      target: "full-mesh",
-      selfRepairable: true,
-      evo: {
-        dualMode: true,
-        binaryAware: true,
-        symbolicAware: true,
-        presenceAware: true,
-        bandAware: true,
-        localAware: true,
-        internetAware: true,
-        advantageCascadeAware: true,
-        pulseEfficiencyAware: true,
-        driftProof: true,
-        multiInstanceReady: true,
-        unifiedAdvantageField: true,
-        deterministicField: true,
-        futureEvolutionReady: true,
-        signalFactoringAware: true,
-        meshPressureAware: true,
-        auraPressureAware: true,
-        zeroCompute: true,
-        zeroMutation: true,
-        zeroRoutingInfluence: true
-      }
-    };
+    impulse.flags.organ_meta = organMeta;
 
-    // deterministic organ matching (no pressure)
     for (const key of Object.keys(PulseOrgans)) {
       const organ = PulseOrgans[key];
       if (organ.match(impulse)) {
         impulse.organs.push(organ.id);
+
         impulse.flags[`organ_${organ.id}`] = true;
+        impulse.flags[`organ_lineage_${organ.id}`] = organ.lineage;
       }
     }
 
@@ -202,6 +243,7 @@ export function createPulseOrgans() {
 
   return {
     apply: applyPulseOrgans,
-    organs: PulseOrgans
+    organs: PulseOrgans,
+    meta: organMeta
   };
 }

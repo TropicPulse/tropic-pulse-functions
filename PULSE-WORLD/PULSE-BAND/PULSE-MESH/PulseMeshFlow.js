@@ -1,8 +1,8 @@
 // ============================================================================
-// [pulse:mesh] COMMUNITY_FLOW_LAYER v12.3-PRESENCE-EVO-MAX-PRIME  // rainbow
+// [pulse:mesh] COMMUNITY_FLOW_LAYER v15-EVO-IMMORTAL  // rainbow
 // Full-Spectrum Coordination • Deterministic Lifecycle Sequencer
 // Metadata-Only • Zero Recursion • Zero Routing • SDN-Aligned
-// Presence-Aware • Binary-Aware • Dual-Band • Drift-Proof
+// Presence-Aware • Binary-Aware • Dual-Band • Drift-Proof • Echo-Aware
 // ============================================================================
 //
 // IDENTITY — THE FLOW ORGAN (v12.3):
@@ -70,6 +70,7 @@ AI_EXPERIENCE_META = {
 }
 */
 
+
 export function createPulseMeshFlow({
   applyPulseSkin,
   createCommunityReflex,
@@ -88,13 +89,10 @@ export function createPulseMeshFlow({
   error
 }) {
 
-  // ---------------------------------------------------------------------------
-  // META — v12.3 identity
-  // ---------------------------------------------------------------------------
   const meta = {
     layer: "PulseFlow",
     role: "FLOW_ORCHESTRATOR",
-    version: "12.3-PRESENCE-EVO-MAX-PRIME",
+    version: "15-EVO-IMMORTAL",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -121,39 +119,48 @@ export function createPulseMeshFlow({
       flowAware: true,
       driftAware: true,
 
+      echoAware: true,
       zeroCompute: true,
       zeroMutation: true,
       zeroRoutingInfluence: true
     }
   };
 
-
-  // ---------------------------------------------------------------------------
-  // FLOW ENGINE (v12.3)
-  // ---------------------------------------------------------------------------
   function PulseFlow() {
     const reflex = createCommunityReflex();
 
     return {
       meta,
 
-      // -----------------------------------------------------------------------
-      // FLOW_RUN (v12.3)
-      // -----------------------------------------------------------------------
       async run(impulse, entryNodeId, context = {}) {
         impulse.flags = impulse.flags || {};
         impulse.flags.flow_meta = meta;
         impulse.flags.flow_started = true;
 
-        // v12.3: dual-band + presence tagging
-        if (context.binaryMode) impulse.flags.binary_mode = true;
-        if (context.dualMode) impulse.flags.dual_mode = true;
+        // -------------------------------------------------------------------
+        // MODE / BAND / PRESENCE TAGGING (dual-band + presence-aware)
+        // -------------------------------------------------------------------
+        const binaryMode = !!context.binaryMode;
+        const dualMode   = !!context.dualMode;
+        const echoMode   = !!context.echoMode;
 
+        if (binaryMode) impulse.flags.binary_mode = true;
+        if (dualMode)   impulse.flags.dual_mode   = true;
+        if (echoMode)   impulse.flags.echo_mode   = true;
+
+        // presence band + tag
         if (context.presenceBand) impulse.band = context.presenceBand;
-        if (context.presenceTag) impulse.flags.aura_presence_tag = context.presenceTag;
+        else if (!impulse.band)   impulse.band = binaryMode ? "binary" : "symbolic";
 
+        if (context.presenceTag) {
+          impulse.flags.aura_presence_tag = context.presenceTag;
+        } else if (!impulse.flags.aura_presence_tag) {
+          impulse.flags.aura_presence_tag = "PulseFlow-v15";
+        }
+
+        // Halo: impulse start
         PulseHaloCounters?.impulseStarted?.({
-          mode: context.binaryMode ? "binary" : context.dualMode ? "dual" : "symbolic",
+          mode: binaryMode ? "binary" : dualMode ? "dual" : "symbolic",
           band: impulse.band,
           presenceTag: impulse.flags.aura_presence_tag
         });
@@ -165,7 +172,8 @@ export function createPulseMeshFlow({
           // 2. REFLEX
           const reflexDecision = reflex(impulse, {
             trustLevel: context.trustLevel,
-            load: context.load
+            load: context.load,
+            echoMode
           });
 
           impulse.flags[`flow_reflex_${reflexDecision ? "pass" : "drop"}`] = true;
@@ -175,20 +183,43 @@ export function createPulseMeshFlow({
             return finalize(impulse);
           }
 
-          // 3. CORTEX
-          applyPulseCortex(impulse, context);
+          // 3. CORTEX (strategic layer, echo-aware via context)
+          applyPulseCortex(impulse, {
+            ...context,
+            echoMode
+          });
 
           // 4. TENDONS
-          applyTendons(impulse);
+          applyTendons(impulse, { echoMode });
 
           // 5. ORGANS
-          applyPulseOrgans(impulse);
+          applyPulseOrgans(impulse, { echoMode });
 
           // 6. IMMUNE
           const immuneBefore = impulse.flags.immune_quarantined;
-          applyPulseImmune(impulse);
+          applyPulseImmune(impulse, { echoMode });
           if (impulse.flags.immune_quarantined && !immuneBefore) {
             PulseHaloCounters?.immuneQuarantined?.();
+          }
+
+          // -----------------------------------------------------------------
+          // ECHO MODE: READ-ONLY DIAGNOSTIC PATH
+          //   • No memory writes
+          //   • No hormones
+          //   • No Router / SendSystem
+          // -----------------------------------------------------------------
+          if (echoMode) {
+            log?.("[PulseFlow v15] Echo-mode run (diagnostic, read-only)", {
+              entryNodeId,
+              band: impulse.band,
+              presenceTag: impulse.flags.aura_presence_tag
+            });
+
+            // Aura still tags tension/loops for diagnostics, but other organs
+            // should respect echoMode and avoid side effects.
+            applyPulseAura(impulse, { echoMode });
+
+            return finalize(impulse);
           }
 
           // 7. MEMORY
@@ -210,7 +241,7 @@ export function createPulseMeshFlow({
           }
 
           // 9. AURA
-          const auraBeforeLoop = impulse.flags.aura_in_loop;
+          const auraBeforeLoop    = impulse.flags.aura_in_loop;
           const auraBeforeTension = impulse.flags.aura_system_under_tension;
 
           applyPulseAura(impulse);
@@ -222,25 +253,35 @@ export function createPulseMeshFlow({
             PulseHaloCounters?.auraTensionTagged?.();
           }
 
-          // 10. ROUTER v12.3 — deterministic routing
+          // 10. ROUTER — deterministic routing
           const routed = await Router.route("pulse", {
             impulse,
             entryNodeId,
             sdnContext: context.sdnContext,
-            binaryMode: context.binaryMode,
+            binaryMode,
             presenceBand: impulse.band
           });
 
-          // 11. SEND SYSTEM v12.3 — deterministic movement
+          // track hops if Router annotates them
+          if (typeof routed?.hops === "number") {
+            PulseHaloCounters?.meshHops?.(routed.hops);
+          }
+
+          // 11. SEND SYSTEM — deterministic movement
           const moved = await SendSystem.move(routed);
 
           // 12. SKIN EXIT
           applyPulseSkin(moved, "exit");
 
+          // Flow throttling awareness (if any guard tagged it)
+          if (moved.flags?.flow_throttled) {
+            PulseHaloCounters?.impulseThrottled?.();
+          }
+
           return finalize(moved);
 
         } catch (err) {
-          warn?.("[PulseFlow v12.3] Flow error:", err);
+          warn?.("[PulseFlow v15] Flow error", { error: String(err) });
           impulse.flags.flow_error = String(err);
           return finalize(impulse);
         }
@@ -248,10 +289,6 @@ export function createPulseMeshFlow({
     };
   }
 
-
-  // ---------------------------------------------------------------------------
-  // FINALIZER
-  // ---------------------------------------------------------------------------
   function finalize(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.flags.flow_completed = true;
@@ -261,10 +298,6 @@ export function createPulseMeshFlow({
     return impulse;
   }
 
-
-  // ---------------------------------------------------------------------------
-  // PUBLIC INTERFACE
-  // ---------------------------------------------------------------------------
   return {
     create: PulseFlow
   };

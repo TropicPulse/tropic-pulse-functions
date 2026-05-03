@@ -1,12 +1,13 @@
 // ============================================================================
-// [pulse:mesh] PULSE_MESH_THALAMUS v12.3+  // white‑violet
+// FILE: /organs/thalamus/PulseMeshThalamus-v15.0-IMMORTAL.js
+// [pulse:mesh] PULSE_MESH_THALAMUS v15.0-MESH-IMMORTAL  // white‑violet
 // Sensory Relay Gate • Perception Filter • Neural Signal Interpreter
 // Deterministic • Metadata‑Only • Zero Pressure Logic
 // Full Advantage Stack: Prewarm • Chunk • Cache • Presence-Band
 // ============================================================================
 //
-// IDENTITY — THALAMUS (v12.3+):
-// -----------------------------
+// IDENTITY — THALAMUS (v15.0-IMMORTAL):
+// -------------------------------------
 // • First neural relay after ShadowGuard.
 // • Interprets shellState → safe neuralState.
 // • Performs structural validation only (no pressure logic).
@@ -16,34 +17,45 @@
 // • Binary-aware, dual-mode-ready, presence-band-aware, dual-band-ready.
 // • No pressure gating, no route-mode logic, no factoring logic.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshThalamus",
-  version: "v14.9-MESH-THALAMUS",
+  version: "v15.0-MESH-THALAMUS-IMMORTAL",
   layer: "mesh",
   role: "mesh_deterministic_relay",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
     thalamus: true,                 // This IS the thalamus organ
     relayOnly: true,                // Pure relay, no logic
+
     metadataOnly: true,             // No routing, no pressure, no factoring
     deterministic: true,
     driftProof: true,
+
     binaryAware: true,
     symbolicAware: true,
     dualBand: true,
+    presenceAware: true,
+    meshAware: true,
+
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
-    zeroExternalMutation: true
+    zeroExternalMutation: true,
+
+    unifiedAdvantageField: true,
+    coordinatorFree: true
   },
 
   contract: {
     always: [
       "PulseMeshFlow",
       "PulseMeshAwareness",
-      "PulseMeshCognition"
+      "PulseMeshCognition",
+      "PulseMeshSenses",
+      "PulseMeshSurvivalInstincts"
     ],
     never: [
       "legacyMeshThalamus",
@@ -60,13 +72,15 @@ AI_EXPERIENCE_META = {
 const ThalamusMeta = {
   layer: "PulseMeshThalamus",
   role: "THALAMUS_RELAY",
-  version: "12.3+",
+  version: "15.0-MESH-THALAMUS-IMMORTAL",
   target: "full-mesh",
   selfRepairable: true,
   evo: {
     dualMode: true,
     binaryAware: true,
     symbolicAware: true,
+    presenceAware: true,
+    bandAware: true,
     localAware: true,
     internetAware: true,
 
@@ -83,11 +97,11 @@ const ThalamusMeta = {
     meshPressureAware: true,
     auraPressureAware: true,
 
-    // v12.3+ advantage flags
+    // v15.0+ advantage flags
     prewarmAware: true,
     chunkAware: true,
     cacheAware: true,
-    presenceAware: true,
+    presenceAwareAdvantage: true,
     dualBandReady: true,
 
     zeroCompute: true,
@@ -110,8 +124,8 @@ export function createPulseMeshThalamus({
 }) {
 
   // ------------------------------------------------------
-  // Presence-band classifier (v12.3+)
-// ------------------------------------------------------
+  // Presence-band classifier (v15.0-IMMORTAL)
+  // ------------------------------------------------------
   function classifyPresenceBand({ binaryMode, dualMode }) {
     if (binaryMode && dualMode) return "dual";
     if (binaryMode) return "binary";
@@ -123,20 +137,20 @@ export function createPulseMeshThalamus({
   //  SIGNAL RELAY ENGINE — Thalamic Interpretation Layer
   // ======================================================
   function interpretShellSignal(input) {
-    groupCollapsed(
-      "%c[PulseThalamus v12.3+] Relay",
+    groupCollapsed?.(
+      "%c[PulseThalamus v15.0-IMMORTAL] Relay",
       "color:#CE93D8; font-weight:bold;"
     );
 
     try {
-      log("thalamus", "ShadowGuard → Thalamus relay initiated.");
+      log?.("thalamus", "ShadowGuard → Thalamus relay initiated.");
 
       // ------------------------------------------------------------
       // VALIDATION — Ensure input is well-formed
       // ------------------------------------------------------------
       if (!input || typeof input !== "object") {
-        warn("thalamus", "Malformed shell signal received.");
-        groupEnd();
+        warn?.("thalamus", "Malformed shell signal received.");
+        groupEnd?.();
         return null;
       }
 
@@ -149,8 +163,8 @@ export function createPulseMeshThalamus({
       } = input;
 
       if (!shellState) {
-        error("thalamus", "Missing shellState in thalamic relay.");
-        groupEnd();
+        error?.("thalamus", "Missing shellState in thalamic relay.");
+        groupEnd?.();
         return null;
       }
 
@@ -163,7 +177,7 @@ export function createPulseMeshThalamus({
       if (shellState === null) perceptionSafe = false;
 
       // ------------------------------------------------------------
-      // MODE + PRESENCE-BAND TAGGING — v12.3+
+      // MODE + PRESENCE-BAND TAGGING — v15.0-IMMORTAL
       // ------------------------------------------------------------
       const mode = binaryMode ? "binary" : dualMode ? "dual" : "symbolic";
       const presenceBand = classifyPresenceBand({ binaryMode, dualMode });
@@ -184,7 +198,7 @@ export function createPulseMeshThalamus({
           dual_mode: !!dualMode,
           presence_band: presenceBand
         },
-        // v12.3+ unified-advantage-field surfaces (metadata-only)
+        // v15.0+ unified-advantage-field surfaces (metadata-only)
         thalamus_advantage_meta: {
           prewarm_surface: true,
           chunk_surface: true,
@@ -196,18 +210,18 @@ export function createPulseMeshThalamus({
 
       if (!perceptionSafe) {
         output.perceptionFlags.stabilized = true;
-        warn("thalamus", "Perception stabilized due to malformed signal.");
+        warn?.("thalamus", "Perception stabilized due to malformed signal.");
       }
 
-      log("thalamus", "Thalamic signal prepared for PulseBand.");
-      log("thalamus", "Output payload", output);
+      log?.("thalamus", "Thalamic signal prepared for PulseBand.");
+      log?.("thalamus", "Output payload", output);
 
-      groupEnd();
+      groupEnd?.();
       return output;
 
     } catch (err) {
-      error("thalamus", "Critical thalamic relay failure", err);
-      groupEnd();
+      error?.("thalamus", "Critical thalamic relay failure", err);
+      groupEnd?.();
       return null;
     }
   }

@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: /organs/immune/PulseMeshImmuneSystem.js
-// PULSE OS — v12.3-PRESENCE-EVO-MAX-PRIME
+// PULSE OS — v15-EVO-IMMORTAL
 // MESH IMMUNE SYSTEM COMMANDER — “THE IMMUNE COMMANDER”
-// Deterministic • Declarative • Zero Drift • Pure Logic
+// Deterministic • Declarative • Zero Drift • Pure Logic • Presence/Band-Aware
 // ============================================================================
 //
-// ROLE (v12.3):
+// ROLE (v15-EVO-IMMORTAL):
 //   • Receives diagnostic snapshots (Halo, Echo, Field, SDN).
 //   • Performs deterministic triage (no pressure thresholds).
 //   • Emits declarative repair directives for:
@@ -18,24 +18,25 @@
 //   • Presence-aware, binary-aware, dual-band-ready.
 //   • Zero randomness, zero timestamps, zero mutation.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshImmuneSystem",
-  version: "v14.9-MESH-IMMUNE",
+  version: "v15.0-MESH-IMMUNE-IMMORTAL",
   layer: "mesh",
   role: "mesh_immune_engine",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
-    immune: true,                   // Immune logic
-    anomalyDetection: true,         // Detects abnormal impulses
-    driftDetection: true,           // Detects mesh drift
-    binaryAware: true,              // Binary immune flags
-    symbolicAware: true,            // Symbolic immune flags
+    immune: true,
+    anomalyDetection: true,
+    driftDetection: true,
+    binaryAware: true,
+    symbolicAware: true,
     dualBand: true,
     deterministic: true,
     driftProof: true,
-    metadataOnly: true,             // No routing, no compute
+    metadataOnly: true,
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
@@ -69,12 +70,12 @@ export function createPulseMeshImmuneSystem({
 }) {
 
   // ---------------------------------------------------------------------------
-  // META — v12.3 identity
+  // META — v15-EVO-IMMORTAL identity
   // ---------------------------------------------------------------------------
   const meta = {
     layer: "PulseMeshImmuneSystem",
     role: "IMMUNE_COMMANDER",
-    version: "12.3-PRESENCE-EVO-MAX-PRIME",
+    version: "15-EVO-IMMORTAL",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -104,12 +105,52 @@ export function createPulseMeshImmuneSystem({
       zeroCompute: true,
       zeroMutation: true,
       zeroRoutingInfluence: true
-    }
+    },
+    // optional: surface the underlying immunity engine meta for backend AI
+    immunityEngine: PulseImmunity?.meta || null
   };
 
 
   // ---------------------------------------------------------------------------
-  // HEALER REGISTRY (v12.3)
+  // ISSUE ENRICHMENT (v15)
+  // Deterministic enrichment with mode/band + lineage hints.
+  // ---------------------------------------------------------------------------
+  function enrichIssue(issue, context = {}) {
+    const base = issue || {};
+
+    return {
+      ...base,
+      // mode/band awareness
+      binaryMode: !!context.binaryMode,
+      dualMode: !!context.dualMode,
+      presenceBand: context.presenceBand || base.presenceBand || "symbolic",
+
+      // lineage hints (if present in diag snapshot issue)
+      lineageDepth: typeof base.lineageDepth === "number"
+        ? base.lineageDepth
+        : null,
+      meshNodeId: base.meshNodeId ?? null,
+      factoringDepth: base.factoringDepth ?? null,
+
+      // severity normalization
+      severity: normalizeSeverity(base.severity),
+
+      // stable tags
+      tags: Array.isArray(base.tags) ? base.tags.slice() : []
+    };
+  }
+
+  function normalizeSeverity(sev) {
+    if (sev == null) return 1;
+    if (typeof sev !== "number" || Number.isNaN(sev)) return 1;
+    if (sev < 0) return 0;
+    if (sev > 10) return 10;
+    return sev;
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // HEALER REGISTRY (v15)
   // Declarative — no direct mutation.
   // ---------------------------------------------------------------------------
   const HEALER_REGISTRY = [
@@ -123,11 +164,14 @@ export function createPulseMeshImmuneSystem({
         action: "repair",
         details: {
           driftType: issue.driftType ?? "unspecified",
-          severity: issue.severity ?? "info",
+          severity: issue.severity ?? 1,
           note: issue.message ?? null,
-          presenceBand: issue.presenceBand ?? null
+          presenceBand: issue.presenceBand ?? null,
+          lineageDepth: issue.lineageDepth ?? null
         },
-        result: GPUHealer.repair(issue),
+        result: GPUHealer?.repair
+          ? GPUHealer.repair(issue)
+          : null,
         issue
       })
     },
@@ -150,11 +194,14 @@ export function createPulseMeshImmuneSystem({
           action: "route_repair",
           details: {
             driftType: issue.driftType ?? "unspecified",
-            severity: issue.severity ?? "info",
+            severity: issue.severity ?? 1,
             note: issue.message ?? null,
-            presenceBand: issue.presenceBand ?? null
+            presenceBand: issue.presenceBand ?? null,
+            lineageDepth: issue.lineageDepth ?? null
           },
-          result: RouteResponder(issue),
+          result: RouteResponder
+            ? RouteResponder(issue)
+            : null,
           issue
         };
       }
@@ -169,7 +216,7 @@ export function createPulseMeshImmuneSystem({
         action: "self_repair",
         details: {
           driftType: issue.driftType ?? "unspecified",
-          severity: issue.severity ?? "info",
+          severity: issue.severity ?? 1,
           note: issue.message ?? null,
           presenceBand: issue.presenceBand ?? null
         },
@@ -188,7 +235,7 @@ export function createPulseMeshImmuneSystem({
           driftType: issue.driftType ?? "unspecified",
           factoringDepth: issue.factoringDepth ?? null,
           meshNodeId: issue.meshNodeId ?? null,
-          severity: issue.severity ?? "info",
+          severity: issue.severity ?? 1,
           note: issue.message ?? null,
           presenceBand: issue.presenceBand ?? null
         },
@@ -199,7 +246,7 @@ export function createPulseMeshImmuneSystem({
 
 
   // ---------------------------------------------------------------------------
-  // TRIAGE (v12.3)
+  // TRIAGE (v15)
   // Deterministic ordering — no pressure thresholds.
   // ---------------------------------------------------------------------------
   function triage(analysis) {
@@ -213,8 +260,11 @@ export function createPulseMeshImmuneSystem({
       if (sb !== sa) return sb - sa;
 
       // Mesh issues prioritized secondarily
-      const aIsMesh = /mesh|pathway|factoring|stall|missing_node/i.test(a.message || "");
-      const bIsMesh = /mesh|pathway|factoring|stall|missing_node/i.test(b.message || "");
+      const aMsg = a.message || "";
+      const bMsg = b.message || "";
+
+      const aIsMesh = /mesh|pathway|factoring|stall|missing_node/i.test(aMsg);
+      const bIsMesh = /mesh|pathway|factoring|stall|missing_node/i.test(bMsg);
 
       if (aIsMesh && !bIsMesh) return -1;
       if (!aIsMesh && bIsMesh) return 1;
@@ -225,7 +275,7 @@ export function createPulseMeshImmuneSystem({
 
 
   // ---------------------------------------------------------------------------
-  // DISPATCH (v12.3)
+  // DISPATCH (v15)
   // Declarative — no direct healing.
   // ---------------------------------------------------------------------------
   async function dispatch(issue) {
@@ -233,9 +283,21 @@ export function createPulseMeshImmuneSystem({
 
     for (const healer of HEALER_REGISTRY) {
       if (healer.match.test(msg)) {
-        return healer.handler(issue);
+        const res = healer.handler(issue);
+        log && log("[PulseMeshImmuneSystem] Dispatch", {
+          healer: healer.name,
+          issueMessage: msg,
+          severity: issue.severity,
+          presenceBand: issue.presenceBand
+        });
+        return res;
       }
     }
+
+    warn && warn("[PulseMeshImmuneSystem] No healer found for issue", {
+      message: msg,
+      severity: issue.severity
+    });
 
     return {
       ok: false,
@@ -246,7 +308,7 @@ export function createPulseMeshImmuneSystem({
 
 
   // ---------------------------------------------------------------------------
-  // COMMAND CYCLE (v12.3)
+  // COMMAND CYCLE (v15)
   // Pure triage + directive emission.
   // ---------------------------------------------------------------------------
   async function command(diagSnapshot, context = {}) {
@@ -256,7 +318,11 @@ export function createPulseMeshImmuneSystem({
       presenceBand: context.presenceBand
     });
 
-    const orderedIssues = triage(analysis);
+    const enrichedIssues = (analysis.issues || []).map((issue) =>
+      enrichIssue(issue, context)
+    );
+
+    const orderedIssues = triage({ ...analysis, issues: enrichedIssues });
 
     const results = [];
 
@@ -272,7 +338,10 @@ export function createPulseMeshImmuneSystem({
       dualMode: !!context.dualMode,
       presenceBand: context.presenceBand || "symbolic",
       meta,
-      analysis,
+      analysis: {
+        ...analysis,
+        issues: enrichedIssues
+      },
       orderedIssues,
       results
     };

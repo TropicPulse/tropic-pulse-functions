@@ -61,33 +61,48 @@ AI_EXPERIENCE_META = {
   }
 }
 */
+// ============================================================================
+// FILE: /organs/skin/PulseMeshSkin-v15-EVO-IMMORTAL.js
+// [pulse:mesh] PULSE_OS_SKIN_LAYER v15-EVO-IMMORTAL  // silver-white
+// Boundary Membrane • Entry–Exit Normalization • Deterministic Skin
+// Zero-Trust Surface • Presence/Band-Aware • Dual-Mode Ready
+// ============================================================================
 
 export function createPulseSkin({ log, warn, error }) {
 
+  // ==========================================================================
+  // IMMORTAL META — v15
+  // ==========================================================================
   const SkinState = {
-    meta: {
+    meta: Object.freeze({
       layer: "PulseSkin",
       role: "BOUNDARY_MEMBRANE",
-      version: "12.3-PRESENCE-EVO-MAX-PRIME",
+      version: "15-EVO-IMMORTAL",
+      lineage: "PulseMesh-v15",
       target: "full-mesh",
       selfRepairable: true,
+
       evo: {
-        dualMode: true,
-        binaryAware: true,
-        symbolicAware: true,
+        skin: true,
+        boundaryLayer: true,
+        zeroTrustSurface: true,
+        metadataOnly: true,
+        deterministic: true,
+        driftProof: true,
+
         presenceAware: true,
         bandAware: true,
-        localAware: true,
-        internetAware: true,
+        binaryAware: true,
+        symbolicAware: true,
+        dualBand: true,
+        meshAware: true,
 
         advantageCascadeAware: true,
         pulseEfficiencyAware: true,
-        driftProof: true,
-        multiInstanceReady: true,
-
         unifiedAdvantageField: true,
         deterministicField: true,
         futureEvolutionReady: true,
+        multiInstanceReady: true,
 
         signalFactoringAware: true,
         meshPressureAware: true,
@@ -95,62 +110,102 @@ export function createPulseSkin({ log, warn, error }) {
 
         zeroCompute: true,
         zeroMutation: true,
-        zeroRoutingInfluence: true
+        zeroRoutingInfluence: true,
+        zeroNetworkFetch: true,
+        zeroExternalMutation: true
+      },
+
+      contract: {
+        always: [
+          "normalize entry",
+          "normalize exit",
+          "preserve payload",
+          "preserve determinism",
+          "strip internal metadata safely"
+        ],
+        never: [
+          "mutate payload",
+          "route",
+          "compute",
+          "inject randomness",
+          "modify score beyond normalization",
+          "modify energy beyond normalization"
+        ]
       }
-    }
+    })
   };
 
-  // ========================================================================
-  //  SKIN PACK (v12.3)
-  // ========================================================================
+  // ==========================================================================
+  // SKIN PACK — IMMORTAL ENTRY/EXIT NORMALIZATION
+  // ==========================================================================
   const PulseSkin = {
 
-    // -------------------------------------------------------
-    // ENTRY NORMALIZATION — deterministic
-    // -------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // ENTRY NORMALIZATION — deterministic, zero-trust, metadata-only
+    // ------------------------------------------------------------------------
     normalizeEntry(impulse) {
       impulse.flags = impulse.flags || {};
       impulse.flags.skin_entry_normalized = true;
+      impulse.flags.skin_lineage = "skin-v15-immortal";
 
-      // v12.3: mode + presence-band tagging
+      // ---------------------------------------------------
+      // MODE + PRESENCE-BAND DETERMINISTIC TAGGING
+      // ---------------------------------------------------
       if (impulse.flags.binary_mode) {
         impulse.flags.skin_mode = "binary";
         impulse.band = "binary";
-      } else if (impulse.flags.dual_mode) {
+        impulse.flags.skin_band_lineage = "band-binary-v15";
+      }
+      else if (impulse.flags.dual_mode) {
         impulse.flags.skin_mode = "dual";
         impulse.band = "dual";
-      } else {
+        impulse.flags.skin_band_lineage = "band-dual-v15";
+      }
+      else {
         impulse.flags.skin_mode = "symbolic";
         impulse.band = "symbolic";
+        impulse.flags.skin_band_lineage = "band-symbolic-v15";
       }
 
-      // deterministic normalization
+      // ---------------------------------------------------
+      // SCORE + ENERGY NORMALIZATION (deterministic)
+      // ---------------------------------------------------
       impulse.score = clamp01(impulse.score ?? 0.5);
       impulse.energy = Math.max(0.05, impulse.energy ?? 1);
 
-      // v12.3: presence-band metadata
+      // ---------------------------------------------------
+      // PRESENCE-BAND METADATA
+      // ---------------------------------------------------
       impulse.flags.skin_presence_band = impulse.band;
+
+      // ---------------------------------------------------
+      // IMMORTAL SURFACE SIGNATURE
+      // ---------------------------------------------------
+      impulse.flags.skin_surface_signature = "surface-v15-immortal";
 
       return impulse;
     },
 
-    // -------------------------------------------------------
-    // EXIT NORMALIZATION — deterministic
-    // -------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // EXIT NORMALIZATION — deterministic, metadata scrubbing
+    // ------------------------------------------------------------------------
     normalizeExit(impulse) {
       impulse.flags = impulse.flags || {};
       impulse.flags.skin_exit_normalized = true;
 
-      // v12.3: strip internal metadata safely
-      impulse.flags.internal_metadata_stripped = true;
+      // IMMORTAL: safe metadata scrubbing
+      impulse.flags.skin_exit_scrubbed = true;
+
+      // We do NOT delete flags — we mark them as scrubbed.
+      // Router/SendSystem may remove internal flags later.
 
       return impulse;
     }
   };
 
-  // ========================================================================
-  //  SKIN ENGINE (v12.3)
-  // ========================================================================
+  // ==========================================================================
+  // SKIN ENGINE — IMMORTAL
+  // ==========================================================================
   function applyPulseSkin(impulse, phase = "entry") {
     impulse.flags = impulse.flags || {};
     impulse.flags.skin_meta = SkinState.meta;
@@ -159,8 +214,7 @@ export function createPulseSkin({ log, warn, error }) {
       PulseSkin.normalizeEntry(impulse);
     }
 
-    // v12.3: NO friction, NO noise, NO boundary load modulation
-    // Skin is pure normalization only.
+    // IMMORTAL SKIN: no friction, no noise, no shaping, no compute.
 
     if (phase === "exit") {
       PulseSkin.normalizeExit(impulse);
@@ -179,7 +233,7 @@ export function createPulseSkin({ log, warn, error }) {
 
 
 // ============================================================================
-//  HELPERS
+// HELPERS
 // ============================================================================
 function clamp01(v) {
   if (typeof v !== "number" || Number.isNaN(v)) return 0;

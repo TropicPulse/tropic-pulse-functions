@@ -1,29 +1,44 @@
 // ============================================================================
-// FILE: BinaryMesh-v13-Evo.js
-// BINARY MESH — v13-EVO-PRIME
+// FILE: BinaryMesh-v15-EVO.js
+// BINARY MESH — v15-EVO-IMMORTAL
 // “PURE BINARY CONNECTIVE TISSUE / BINARY-FIRST / SYMBOLIC FALLBACK”
 // ============================================================================
 //
 // ROLE:
 //   • Primary binary connective tissue between binary organs.
 //   • Zero symbolic data in the binary path (0/1 arrays only).
-//   • Deterministic, drift-proof, mutation-safe.
-//   • Presence-aware + dual-band.
+//   • Deterministic, drift-proof, mutation-safe, presence-aware.
+//   • Dual-band aware (binary primary, symbolic fallback).
 //   • Falls back to symbolic PulseMesh when binary contract is violated.
 //
-// CONTRACT (v13):
+// ARCHITECTURAL POSITION:
+//   • Lives in mesh_binary layer.
+//   • Sits under OrganismMesh as the binary nervous system.
+//   • Talks to symbolic mesh via fallback (PulseMeshFlow, PresenceRelay, etc.).
+//   • Never routes, never computes semantics — only validates and passes bits.
+//
+// GUARANTEES:
+//   • No randomness, no timing, no env access.
+//   • No dynamic imports, no eval.
+//   • No network, no filesystem.
+//   • Zero mutation of input bits.
+//   • Mesh-topology-aware only via symbolic fallback.
+//   • Presence-aware only via control metadata (band, presenceTag).
+//
+// CONTRACT (v15):
 //   • INPUT (data path):
 //       - bits: number[] (0 or 1 only)
 //   • INPUT (control path):
-//       - from: string.
+//       - from: string
 //       - options: { band?, presenceTag?, trace? }
 //   • OUTPUT:
 //       - bits (unchanged) OR symbolic fallback result
 //
 // SAFETY:
-//   • No randomness, no timing, no env access.
-//   • No dynamic imports, no eval.
+//   • Pure binary path is metadata-only, non-executable.
+//   • Fallback path is symbolicMesh.transmit with explicit reason.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseBinaryMesh",
@@ -67,22 +82,29 @@ AI_EXPERIENCE_META = {
 }
 */
 
+// ============================================================================
+// META — v15-EVO-IMMORTAL
+// ============================================================================
 export const BinaryMeshMeta = Object.freeze({
   layer: "BinaryNervousSystem",
   role: "PURE_BINARY_MESH",
-  version: "v13-EVO-PRIME",
-  identity: "BinaryMesh-v13-EVO-PRIME",
+  version: "v15-EVO-IMMORTAL",
+  identity: "BinaryMesh-v15-EVO-IMMORTAL",
   guarantees: Object.freeze({
-    pureBinaryPath: true,
-    zeroSymbolicInDataPath: true,
-    deterministic: true,
-    driftProof: true,
-    mutationSafe: true,
-    presenceAware: true,
-    bandAware: true,
-    noRandomness: true,
-    noTiming: true,
-    noEnvAccess: true
+    pureBinaryPath: true,            // Only 0/1 arrays on data path
+    zeroSymbolicInDataPath: true,    // No strings/objects in binary path
+    deterministic: true,             // Same input → same output
+    driftProof: true,                // No topology or behavior drift
+    mutationSafe: true,              // Never mutates input bits
+    presenceAware: true,             // Reads band/presenceTag metadata
+    bandAware: true,                 // Binary primary, symbolic fallback
+    noRandomness: true,              // No RNG
+    noTiming: true,                  // No timing-based behavior
+    noEnvAccess: true,               // No env, no process
+    zeroNetwork: true,               // No network access
+    zeroFilesystem: true,            // No FS access
+    nonExecutableBinary: true,       // Bits are data, never code
+    metadataOnly: true               // No semantic interpretation of bits
   }),
   contract: Object.freeze({
     inputDataPath: ["bits"],
@@ -93,7 +115,7 @@ export const BinaryMeshMeta = Object.freeze({
 });
 
 // ============================================================================
-// IMPORTS — MESH SUBSYSTEMS
+// IMPORTS — MESH SUBSYSTEMS (SYMBOLIC SIDE)
 // ============================================================================
 import { createOrganismMesh } from "./OrganismMesh-v1-EVO.js";
 
@@ -131,16 +153,17 @@ function safeLog(fn, fallback) {
 }
 
 // ============================================================================
-// BINARY MESH FACTORY — v13-EVO-PRIME
+// BINARY MESH FACTORY — v15-EVO-IMMORTAL
 // ============================================================================
 export function createBinaryMesh({
-  symbolicMesh,           // PulseMesh-v13 (symbolic fallback)
+  symbolicMesh,           // PulseMesh (symbolic fallback)
   trace = false,
   maxBitsLength = 64,
   defaultBand = "binary",
-  defaultPresenceTag = "BinaryMesh-v13"
+  defaultPresenceTag = "BinaryMesh-v15"
 } = {}) {
 
+  // links[from] = to
   const links = Object.create(null);
 
   const logWarn = safeLog(globalThis?.warn, console?.warn);
@@ -149,13 +172,26 @@ export function createBinaryMesh({
   // -------------------------------------------------------------------------
   // LINK REGISTRATION
   // -------------------------------------------------------------------------
+  //  ROLE:
+  //    • Declares a binary path from one organ to another.
+  //    • Purely topological — no semantics, no routing logic.
+  // -------------------------------------------------------------------------
   function link(from, to) {
     links[from] = to;
   }
 
   // -------------------------------------------------------------------------
   // SYMBOLIC FALLBACK (binary → symbolic)
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  //  TRIGGERS:
+  //    • missing-link        — no binary path for `from`
+  //    • non-binary-input    — bits not pure 0/1 or length invalid
+  //
+  //  BEHAVIOR:
+  //    • Logs (if trace).
+  //    • Wraps bits + metadata into a symbolic packet.
+  //    • Calls symbolicMesh.transmit(from, packet, { band: "symbolic", ... }).
+  // -------------------------------------------------------------------------
   function fallback(reason, from, bits, {
     band = defaultBand,
     presenceTag = defaultPresenceTag
@@ -169,7 +205,7 @@ export function createBinaryMesh({
 
     if (trace) {
       logWarn(
-        `[BinaryMesh v13] FALLBACK (${reason}) from:${from} band:${band} presence:${presenceTag}`,
+        `[BinaryMesh v15] FALLBACK (${reason}) from:${from} band:${band} presence:${presenceTag}`,
         bits
       );
     }
@@ -185,13 +221,26 @@ export function createBinaryMesh({
 
     return symbolicMesh.transmit(from, packet, {
       band: "symbolic",
-      presenceTag: "PulseMesh-v13"
+      presenceTag: "PulseMesh-v15"
     });
   }
 
   // -------------------------------------------------------------------------
   // PURE BINARY TRANSMISSION (binary-first)
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
+//  INPUT:
+//    • from: string
+//    • bits: number[] (0/1 only)
+//    • options: { band?, presenceTag? }
+//
+//  OUTPUT:
+//    • bits (unchanged) OR symbolic fallback result
+//
+//  RULES:
+//    • If no link[from] → fallback("missing-link").
+//    • If bits not pure binary or length invalid → fallback("non-binary-input").
+//    • Otherwise: return bits as-is (pure binary path).
+// -------------------------------------------------------------------------
   function transmit(from, bits, {
     band = defaultBand,
     presenceTag = defaultPresenceTag
@@ -209,12 +258,12 @@ export function createBinaryMesh({
 
     if (trace) {
       logInfo(
-        `[BinaryMesh v13] ${from} → ${to} band:${band} presence:${presenceTag}`,
+        `[BinaryMesh v15] ${from} → ${to} band:${band} presence:${presenceTag}`,
         bits
       );
     }
 
-    // Pure binary path — never mutate bits
+    // Pure binary path — never mutate bits, never interpret them.
     return bits;
   }
 
@@ -231,6 +280,15 @@ export function createBinaryMesh({
 
 // ============================================================================
 // LOCAL BINARY SUBSYSTEMS — LIVE ON THIS PAGE
+// ============================================================================
+//
+//  PulseBinaryMeshPresence:
+//    • Thin wrapper that exposes a `pulse` API over the binary mesh.
+//    • Used for presence-band binary signaling (pings, heartbeats, etc.).
+//
+//  PulseBinaryMeshPrime:
+//    • Extension point for future binary-first logic.
+//    • Currently just forwards to binaryMesh.transmit (pure connective tissue).
 // ============================================================================
 const PulseBinaryMeshPresence = {
   create({ context, binaryMesh, log, warn }) {
@@ -256,7 +314,7 @@ const PulseBinaryMeshPrime = {
     }
 
     function process(from, bits, options) {
-      // extend with your prime binary logic as needed
+      // Extension point for prime binary logic — keep pure, metadata-only.
       return binaryMesh.transmit(from, bits, options);
     }
 
@@ -268,15 +326,22 @@ const PulseBinaryMeshPrime = {
 };
 
 // ============================================================================
-// BINARY MESH ENVIRONMENT — v13-EVO-PRIME
+// BINARY MESH ENVIRONMENT — v15-EVO-IMMORTAL
 //   BINARY BARREL: BOOT ORGANISM, LOAD SUBSYSTEMS, WIRE, PREWARM
+// ============================================================================
+//
+//  ROLE:
+//    • Boots OrganismMesh (symbolic + binary envs).
+//    • Exposes binaryMesh + local binary subsystems.
+//    • Wires symbolic-adjacent mesh subsystems.
+//    • Provides a single `prewarm` entrypoint for the whole binary environment.
 // ============================================================================
 export function createBinaryMeshEnvironment({
   context = {},
   trace = false,
   maxBitsLength = 64,
   defaultBand = "binary",
-  defaultPresenceTag = "BinaryMesh-v13"
+  defaultPresenceTag = "BinaryMesh-v15"
 } = {}) {
 
   const log   = context.log   || safeLog(globalThis?.log, console?.log);
@@ -285,22 +350,21 @@ export function createBinaryMeshEnvironment({
 
   // -------------------------------------------------------
   // 0) BOOT THE ORGANISM (ROUTE THROUGH ORGANISMMESH)
-// -------------------------------------------------------
+  // -------------------------------------------------------
   const organism = createOrganismMesh({
     context,
-    fallbackProxy: null,          // binary → symbolic handled by binaryMesh itself
-    trace,
-    defaultBand,
-    defaultPresenceTag
+    symbolicMeshEnv: context.symbolicMeshEnv,
+    binaryMeshEnv: context.binaryMeshEnv,
+    trace
   });
 
-  // organism exposes both meshes
-  const symbolicMesh = organism.symbolicMeshEnv.symbolicMesh;
-  const binaryMesh   = organism.binaryMeshEnv.binaryMesh;
+  // organism exposes both meshes via its envs
+  const symbolicMesh = organism.symbolicMeshEnv?.symbolicMesh || organism.symbolicMeshEnv;
+  const binaryMesh   = organism.binaryMeshEnv?.binaryMesh   || organism.binaryMeshEnv;
 
   // -------------------------------------------------------
   // 1) BINARY SUBSYSTEMS (LOCAL)
-// -------------------------------------------------------
+  // -------------------------------------------------------
   const binaryPresence = PulseBinaryMeshPresence?.create
     ? PulseBinaryMeshPresence.create({ context, binaryMesh, log, warn })
     : null;
@@ -380,20 +444,20 @@ export function createBinaryMeshEnvironment({
   // 4) PREWARM
   // -------------------------------------------------------
   function prewarm() {
-    log("[BinaryMesh v13] Prewarm start");
+    log("[BinaryMesh v15] Prewarm start");
 
     for (const [name, system] of Object.entries(ALL_SYSTEMS)) {
       if (system && typeof system.prewarm === "function") {
         try {
           system.prewarm();
-          log("[BinaryMesh v13] Prewarmed system", { name });
+          log("[BinaryMesh v15] Prewarmed system", { name });
         } catch (e) {
-          warn("[BinaryMesh v13] Prewarm failed", { name, error: e?.message });
+          warn("[BinaryMesh v15] Prewarm failed", { name, error: e?.message });
         }
       }
     }
 
-    log("[BinaryMesh v13] Prewarm complete");
+    log("[BinaryMesh v15] Prewarm complete");
   }
 
   // -------------------------------------------------------

@@ -1,52 +1,79 @@
 // ============================================================================
-//  PULSE OS v12.3+ — SURVIVAL INSTINCTS LAYER  // amber
-//  “Skin-Level Reflex Arc / Local Survival Gate”
-//  Deterministic Survival Arc • Fast Instinct Engine • Pure 1/0 Decisions
-//  Full Advantage Stack: Presence-Aware • Unified-Advantage-Field-Aligned
+// FILE: /organs/survival/PulseMeshSurvivalInstincts-v15.1-IMMORTAL-PLUS.js
+// PULSE OS v15.1-MESH-IMMORTAL-PLUS — SURVIVAL INSTINCTS LAYER  // amber
+// “Skin-Level Reflex Arc / Local Survival Gate”
+// Deterministic Survival Arc • Fast Instinct Engine • Pure 1/0 Decisions
+// Full Advantage Stack: Presence-Aware • Mesh-Aware • Organ-Aware
+// Unified-Advantage-Field • IMMORTAL, Coordinator-Free, Metadata-Only
 // ============================================================================
 //
-//  IDENTITY (v12.3+):
-//  ------------------
-//  • Lowest-level survival organ (skin-level reflex).
-//  • Pure 1/0 instinct engine — no compute, no routing, no shaping.
-//  • Drops or keeps impulses instantly based on local state + anomaly flags.
-//  • Zero payload mutation — metadata-only.
-//  • Deterministic, drift-proof, AND-architecture aligned.
-//  • Binary-aware, dual-mode-ready, presence-band-aware.
-//  • No pressure gating, no internet-mode logic, no factoring pressure.
-//  • Unified-advantage-field compliant (tags only, no side effects).
+// IDENTITY (v15.1-IMMORTAL-PLUS):
+// -------------------------------
+// • Lowest-level survival organ (skin-level reflex).
+// • Pure 1/0 instinct engine — no routing, no shaping, no compute.
+// • Drops or keeps impulses instantly based on local state + anomaly flags.
+// • Zero payload mutation — metadata-only tags only (no payload writes).
+// • Deterministic, drift-proof, AND-architecture aligned.
+// • Binary-aware, dual-mode-ready, presence-band-aware, mesh-aware.
+// • Organ-aware: tags itself as the survival organ in the mesh organ field.
+// • Unified-advantage-field compliant (tags only, no side effects).
 // ============================================================================
 
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshSurvivalInstincts",
-  version: "v14.9-MESH-SURVIVAL",
+  version: "v15.1-MESH-SURVIVAL-IMMORTAL-PLUS",
   layer: "mesh",
   role: "mesh_survival_and_threat_engine",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
     survival: true,                 // This IS the survival organ
     threatDetection: true,          // Detects mesh-level threats
     reflexPriority: true,           // Prioritizes reflex impulses
-    binaryAware: true,              // Binary threat flags
-    symbolicAware: true,            // Symbolic threat signals
+
+    // Band + mesh awareness
+    binaryAware: true,
+    symbolicAware: true,
     dualBand: true,
+    presenceAware: true,
+    bandAware: true,
+    meshAware: true,
+
+    // Organ + registry awareness (metadata-only)
+    organAware: true,
+    meshOrgansAware: true,
+    organRegistryAware: true,
+
+    // Determinism + safety
     deterministic: true,
     driftProof: true,
     metadataOnly: true,             // No routing, no compute
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
-    zeroExternalMutation: true
+    zeroExternalMutation: true,
+
+    // Advantage field
+    unifiedAdvantageField: true,
+    advantageCascadeAware: true,
+    pulseEfficiencyAware: true,
+
+    // Coordination
+    coordinatorFree: true,
+    multiInstanceReady: true,
+    futureEvolutionReady: true
   },
 
   contract: {
     always: [
+      "PulseMeshImmuneMembrane",
       "PulseMeshImmuneSystem",
       "PulseMeshEcho",
       "PulseMeshFlow",
-      "PulseMeshAwareness"
+      "PulseMeshAwareness",
+      "PulseMeshSkin",
+      "PulseMeshOrgans"
     ],
     never: [
       "legacyMeshSurvival",
@@ -58,7 +85,7 @@ AI_EXPERIENCE_META = {
 */
 
 // -----------------------------------------------------------
-//  Presence-Band Helper (v12.3+)
+// Presence-Band Helper (v15.1)
 // -----------------------------------------------------------
 function classifyPresenceBand(impulse) {
   const f = impulse.flags || {};
@@ -68,9 +95,9 @@ function classifyPresenceBand(impulse) {
   return "symbolic";
 }
 
-
 // -----------------------------------------------------------
-//  Instinct Pack (v12.3+)
+// Instinct Pack (v15.1-IMMORTAL-PLUS)
+// Pure 1/0 decisions, metadata-only
 // -----------------------------------------------------------
 
 export const SurvivalInstincts = {
@@ -118,7 +145,7 @@ export const SurvivalInstincts = {
   },
 
   // [pulse:mesh] INSTINCT_BINARY_MODE  // cyan
-  // v12.3+: binary-mode reflex tightening
+  // v15.1: binary-mode reflex tightening
   binaryMode(impulse) {
     if (!impulse.flags?.binary_mode) return 1;
     // binary mode requires higher structural integrity
@@ -128,7 +155,7 @@ export const SurvivalInstincts = {
   },
 
   // [pulse:mesh] INSTINCT_DUAL_MODE  // blue
-  // v12.3+: dual-mode reflex softening
+  // v15.1: dual-mode reflex softening
   dualMode(impulse) {
     if (!impulse.flags?.dual_mode) return 1;
     // dual mode tolerates slightly higher hop count
@@ -137,10 +164,9 @@ export const SurvivalInstincts = {
   }
 };
 
-
 // -----------------------------------------------------------
-//  Combined Survival Instinct Engine (v12.3+)
-//  Presence-band aware, unified-advantage-field aligned
+// Combined Survival Instinct Engine (v15.1-IMMORTAL-PLUS)
+// Presence-band aware, mesh-organ aware, unified-advantage-field aligned
 // -----------------------------------------------------------
 
 export function createSurvivalInstincts() {
@@ -158,13 +184,16 @@ export function createSurvivalInstincts() {
   const meta = {
     layer: "SurvivalInstincts",
     role: "SURVIVAL_REFLEX",
-    version: "12.3+",
+    version: "15.1-MESH-SURVIVAL-IMMORTAL-PLUS",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
       binaryAware: true,
       symbolicAware: true,
+      presenceAware: true,
+      bandAware: true,
+      meshAware: true,
       localAware: true,
       internetAware: true,
 
@@ -181,12 +210,17 @@ export function createSurvivalInstincts() {
       meshPressureAware: true,
       auraPressureAware: true,
 
-      // v12.3+ advantage flags (tags only)
+      // v15.1+ advantage flags (tags only)
       prewarmAware: true,
       chunkAware: true,
       cacheAware: true,
-      presenceAware: true,
+      presenceAwareAdvantage: true,
       dualBandReady: true,
+
+      // Organ + registry awareness
+      organAware: true,
+      meshOrgansAware: true,
+      organRegistryAware: true,
 
       zeroCompute: true,
       zeroMutation: true,
@@ -195,11 +229,21 @@ export function createSurvivalInstincts() {
   };
 
   return function survivalInstinctEngine(impulse, node) {
+    // Ensure metadata containers exist
     impulse.meta = impulse.meta || {};
-    impulse.meta.reflex = meta;
     impulse.flags = impulse.flags || {};
+    impulse.organs = impulse.organs || [];
 
-    // v12.3+: presence-band tagging (metadata-only)
+    // Attach survival meta
+    impulse.meta.reflex = meta;
+
+    // Mesh-organ tagging: declare this impulse touched survival organ
+    if (!impulse.organs.includes("organ-survival")) {
+      impulse.organs.push("organ-survival");
+    }
+    impulse.flags.organ_organ_survival = true;
+
+    // v15.1: presence-band tagging (metadata-only)
     const presenceBand = classifyPresenceBand(impulse);
     impulse.flags.survival_presence_band = presenceBand;
     impulse.flags.survival_advantage_meta = {
@@ -209,14 +253,17 @@ export function createSurvivalInstincts() {
       presence_band: presenceBand
     };
 
+    // Pure 1/0 instinct chain
     for (const fn of instinctFns) {
       const decision = fn(impulse, node);
       if (decision === 0) {
         impulse.flags[`instinct_${fn.name}_drop`] = true;
+        impulse.flags.survival_dropped = true;
         return 0;
       }
     }
 
+    impulse.flags.survival_passed = true;
     return 1;
   };
 }

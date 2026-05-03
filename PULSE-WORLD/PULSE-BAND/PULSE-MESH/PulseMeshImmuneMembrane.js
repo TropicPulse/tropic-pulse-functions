@@ -1,20 +1,21 @@
 // ============================================================================
-//  PULSE OS v12.3-PRESENCE-EVO-MAX-PRIME — IMMUNE MEMBRANE LAYER  // red
+//  PULSE OS v15-EVO-IMMORTAL — IMMUNE MEMBRANE LAYER  // red
 //  “System Safety Membrane / Structural Validation / Quarantine / Metadata‑Only”
 // ============================================================================
 //
-// IDENTITY — IMMUNE MEMBRANE (v12.3):
-// -----------------------------------
+// IDENTITY — IMMUNE MEMBRANE (v15-EVO-IMMORTAL):
+// ---------------------------------------------
 // • First-line safety membrane for all impulses.
 // • Pure structural validation — no pressure gating.
 // • Pure metadata-only — zero payload mutation.
 // • No routing logic, no compute, no shaping.
 // • Quarantines unsafe or malformed impulses deterministically.
 // • SDN-aligned: validates impulses before Router receives them.
-// • Presence-aware, binary-aware, dual-band-ready, drift-proof.
+// • Presence-aware, binary-aware, dual-band-ready, drift-proof,
+//   advantage-aware, mesh-pressure-aware, flow-aware, drift-aware.
 //
-// SAFETY CONTRACT (v12.3):
-// -------------------------
+// SAFETY CONTRACT (v15):
+// ----------------------
 // • No payload access.
 // • No score/energy mutation.
 // • No routing override.
@@ -23,25 +24,27 @@
 // • Deterministic-field, drift-proof.
 // • Unified-advantage-field, multi-instance-ready.
 // • Zero randomness, zero timestamps, zero async.
+// • Zero mutation of input outside metadata flags.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshImmuneMembrane",
-  version: "v14.9-MESH-IMMUNE-MEMBRANE",
+  version: "v15-EVO-IMMORTAL",
   layer: "mesh",
   role: "mesh_integrity_and_immune_barrier",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
-    immune: true,                   // This IS the immune membrane
-    driftDetection: true,           // Detects drift in mesh signals
-    anomalyDetection: true,         // Detects abnormal impulses
-    binaryAware: true,              // Binary immune flags
-    symbolicAware: true,            // Symbolic immune flags
+    immune: true,
+    driftDetection: true,
+    anomalyDetection: true,
+    binaryAware: true,
+    symbolicAware: true,
     dualBand: true,
     deterministic: true,
     driftProof: true,
-    metadataOnly: true,             // No routing, no compute
+    metadataOnly: true,
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
@@ -70,7 +73,7 @@ export function createPulseImmune() {
   const meta = {
     layer: "PulseImmune",
     role: "IMMUNE_MEMBRANE",
-    version: "12.3-PRESENCE-EVO-MAX-PRIME",
+    version: "15-EVO-IMMORTAL",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -94,6 +97,8 @@ export function createPulseImmune() {
       signalFactoringAware: true,
       meshPressureAware: true,
       auraPressureAware: true,
+      flowAware: true,
+      driftAware: true,
 
       zeroCompute: true,
       zeroMutation: true,
@@ -103,7 +108,7 @@ export function createPulseImmune() {
 
 
   // ---------------------------------------------------------------------------
-  // STRUCTURAL VALIDATION (v12.3)
+  // STRUCTURAL VALIDATION (v15)
   // ---------------------------------------------------------------------------
   function validateStructure(impulse) {
     if (!impulse.id) return fail("missing_id");
@@ -115,29 +120,32 @@ export function createPulseImmune() {
 
   function validateFlags(impulse) {
     const flags = impulse.flags || {};
-    if (Object.keys(flags).length > 128) return fail("too_many_flags");
+    const keys = Object.keys(flags);
+
+    if (keys.length > 256) return fail("too_many_flags");
+
+    // v15: forbid obviously unsafe meta flags
+    if (flags.unsafe_override === true) return fail("unsafe_override_flag");
+
     return pass();
   }
 
 
   // ---------------------------------------------------------------------------
   // MODE SANITY (binary/symbolic/dual/presence-band)
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
   function validateMode(impulse) {
     const f = impulse.flags || {};
     const band = impulse.band;
 
-    // conflicting explicit mode flags
     if (f.binary_mode && f.symbolic_mode) {
       return fail("conflicting_modes");
     }
 
-    // binary mode requires explicit mode tag
     if (f.binary_mode && typeof impulse.mode !== "string") {
       return fail("binary_mode_missing_tag");
     }
 
-    // presence-band sanity
     if (band && !["binary", "symbolic", "dual"].includes(band)) {
       return fail("invalid_presence_band");
     }
@@ -147,7 +155,7 @@ export function createPulseImmune() {
 
 
   // ---------------------------------------------------------------------------
-  // ANOMALY QUARANTINE (v12.3)
+  // ANOMALY QUARANTINE (v15)
   // ---------------------------------------------------------------------------
   function quarantine(impulse) {
     const f = impulse.flags || {};
@@ -177,7 +185,7 @@ export function createPulseImmune() {
 
 
   // ---------------------------------------------------------------------------
-  // ROUTE HINT SANITY (v12.3)
+  // ROUTE HINT SANITY (v15)
   // ---------------------------------------------------------------------------
   function routeSanity(impulse) {
     const hint = impulse.routeHint;
@@ -193,7 +201,7 @@ export function createPulseImmune() {
 
 
   // ---------------------------------------------------------------------------
-  // ENERGY FLOOR (v12.3)
+  // ENERGY FLOOR (v15)
   // ---------------------------------------------------------------------------
   function energyFloor(impulse) {
     if (isNaN(impulse.energy)) return fail("energy_nan");
@@ -203,8 +211,41 @@ export function createPulseImmune() {
 
 
   // ---------------------------------------------------------------------------
-  // IMMUNE ENGINE (v12.3)
+  // PRESSURE / DRIFT REFLECTION (metadata-only, no gating)
   // ---------------------------------------------------------------------------
+  function reflectPressureAndDrift(impulse) {
+    const f = impulse.flags || {};
+
+    let pressureScore = 0;
+    if (f.flow_throttled) pressureScore += 0.3;
+    if (f.aura_system_under_tension) pressureScore += 0.3;
+    if (f.aura_in_loop) pressureScore += 0.2;
+    if (f.cortex_anomaly || f.cortex_flow_anomaly || f.cortex_factoring_anomaly) {
+      pressureScore += 0.3;
+    }
+
+    const driftScore =
+      (f.aura_in_loop ? 0.3 : 0) +
+      (f.aura_system_under_tension ? 0.2 : 0) +
+      (f.immune_quarantined ? 0.3 : 0);
+
+    if (pressureScore > 0) {
+      impulse.flags.immune_pressure_reflection = clamp01(pressureScore);
+    }
+
+    if (driftScore > 0) {
+      impulse.flags.immune_drift_reflection = clamp01(driftScore);
+    }
+
+    if (pressureScore > 0 || driftScore > 0) {
+      impulse.flags.immune_watch_only = true;
+    }
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // IMMUNE ENGINE (v15)
+// ---------------------------------------------------------------------------
   function applyPulseImmune(impulse) {
     impulse.flags = impulse.flags || {};
     impulse.flags.immune_meta = meta;
@@ -223,11 +264,14 @@ export function createPulseImmune() {
       if (!result.ok) {
         impulse.flags[`immune_${result.reason}`] = true;
         impulse.flags.immune_failed = true;
+        // still reflect pressure/drift for diagnostics
+        reflectPressureAndDrift(impulse);
         return impulse;
       }
     }
 
     impulse.flags.immune_passed = true;
+    reflectPressureAndDrift(impulse);
     return impulse;
   }
 
@@ -240,3 +284,7 @@ export function createPulseImmune() {
 // ---------------------------------------------------------------------------
 function pass() { return { ok: true }; }
 function fail(reason) { return { ok: false, reason }; }
+function clamp01(v) {
+  if (typeof v !== "number" || Number.isNaN(v)) return 0;
+  return Math.max(0, Math.min(1, v));
+}

@@ -1,16 +1,16 @@
 // ============================================================================
 // FILE: /organs/senses/PulseMeshSenses.js
-// [pulse:senses] PULSE_MESH_SENSES v12.3-Presence  // white-silver
+// [pulse:senses] PULSE_MESH_SENSES v15-EVO-IMMORTAL  // white-silver
 // Unified Sensory Cortex • Metadata-Only • System Awareness Brain
 // ============================================================================
 //
-// IDENTITY — THE SENSES CORTEX (v12.3-Presence):
-// ---------------------------------------
+// IDENTITY — THE SENSES CORTEX (v15-EVO-IMMORTAL):
+// ------------------------------------------------
 // • Unified sensory cortex for the organism.
 // • Reads from:
 //      - PulseHalo (counters + safety + mesh metrics)
 //      - PulseField (internal weather + pressure signals)
-//      - PulseEcho (diagnostic reflection sonar)
+//      - PulseEcho (diagnostic reflection sonar v15)
 //      - PulseClinician (endocrine + mesh interpretation)
 //      - SDN context (v12.3-Presence nervous system)
 // • Produces a deterministic unified awareness model for:
@@ -19,27 +19,28 @@
 //      - Clinician
 //      - Immune Commander
 //
-// SAFETY CONTRACT (v12.3-Presence):
-// ---------------------------
+// SAFETY CONTRACT (v15-EVO-IMMORTAL):
+// -----------------------------------
 // • Metadata-only.
 // • Read-only — NEVER mutates impulses.
 // • No routing, no hormones, no memory writes.
 // • Deterministic-field: same system → same awareness snapshot.
 // • Zero imports — all dependencies injected by CNS Brain.
-// • Binary-aware, dual-mode-ready, drift-proof.
+// • Binary-aware, dual-mode-ready, mesh-aware, presence-aware, drift-proof.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshSenses",
-  version: "v14.9-MESH-SENSES",
+  version: "v15-EVO-IMMORTAL",
   layer: "mesh",
   role: "mesh_sensory_engine",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
     senses: true,                   // This IS the sensory organ
     presenceAware: true,            // Reads presence field
-    meshAware: true,                // Reads mesh topology
+    meshAware: true,                // Reads mesh topology + mesh metrics
     binaryAware: true,              // Binary sensory packets
     symbolicAware: true,            // Symbolic sensory packets
     dualBand: true,
@@ -81,7 +82,7 @@ export function createPulseSenses({
   const sensesMeta = {
     layer: "PulseSenses",
     role: "AWARENESS_CORTEX",
-    version: "12.3-PRESENCE-EVO-MAX-PRIME",
+    version: "15-EVO-IMMORTAL",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -108,6 +109,7 @@ export function createPulseSenses({
       flowAware: true,
       driftAware: true,
 
+      meshAware: true,
       zeroCompute: true,
       zeroMutation: true,
       zeroRoutingInfluence: true
@@ -122,7 +124,7 @@ export function createPulseSenses({
     },
 
     // -------------------------------------------------------
-    // STATUS — Unified Sensory Model (v12.3)
+    // STATUS — Unified Sensory Model (v15-EVO-IMMORTAL)
     // -------------------------------------------------------
     status(entryNodeId, context = {}) {
       const halo = PulseHalo.status();
@@ -142,7 +144,7 @@ export function createPulseSenses({
     },
 
     // -------------------------------------------------------
-    // AWARENESS PAGE VIEW (v12.3)
+    // AWARENESS PAGE VIEW (v15-EVO-IMMORTAL)
     // -------------------------------------------------------
     forAwarenessPage(entryNodeId, context = {}) {
       const unified = this.status(entryNodeId, context);
@@ -164,7 +166,7 @@ export function createPulseSenses({
     },
 
     // -------------------------------------------------------
-    // AI VIEW (v12.3)
+    // AI VIEW (v15-EVO-IMMORTAL)
     // -------------------------------------------------------
     forAI(entryNodeId, context = {}) {
       const unified = this.status(entryNodeId, context);
@@ -187,7 +189,7 @@ export function createPulseSenses({
     },
 
     // -------------------------------------------------------
-    // CLINICIAN VIEW (v12.3)
+    // CLINICIAN VIEW (v15-EVO-IMMORTAL)
     // -------------------------------------------------------
     forClinician(entryNodeId, context = {}) {
       return this.status(entryNodeId, context).clinician_view;
@@ -199,19 +201,26 @@ export function createPulseSenses({
 
 
 // ============================================================================
-// UNIFIED AWARENESS BUILDER (v12.3)
+// UNIFIED AWARENESS BUILDER (v15-EVO-IMMORTAL)
 // ============================================================================
 function buildUnifiedAwareness({ meta, halo, field, echo, clinician, sdn }) {
   const performancePercent = clinician.performancePercent ?? 100;
   const performanceHint = estimatePerformanceHint(performancePercent, field, echo);
 
+  // Prefer Echo’s stability/drift if present, fall back to Field/Halo
   const stability = {
-    value: field.stability ?? halo.health?.stability ?? 1,
+    value:
+      typeof echo.stability === "number"
+        ? echo.stability
+        : field.stability ?? halo.health?.stability ?? 1,
     label: "Internal Stability"
   };
 
   const drift = {
-    value: field.driftPressure ?? halo.health?.drift_risk ?? 0,
+    value:
+      typeof echo.driftRisk === "number"
+        ? echo.driftRisk
+        : field.driftPressure ?? halo.health?.drift_risk ?? 0,
     label: "Drift Pressure"
   };
 
@@ -239,30 +248,47 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician, sdn }) {
     // v12.3 presence-band pressures
     presence_binary_pressure: field.presenceBinaryPressure,
     presence_symbolic_pressure: field.presenceSymbolicPressure,
-    presence_dual_pressure: field.presenceDualPressure
+    presence_dual_pressure: field.presenceDualPressure,
+
+    // v15: echo flow/aura hints
+    flow_throttled: !!echo.flow?.throttled,
+    flow_throttled_reason: echo.flow?.reason || null
   };
 
   const safety = {
     reflex_drops: halo.safety?.reflex_drops ?? 0,
     immune_quarantines: halo.safety?.immune_quarantines ?? 0,
-    anomaly_rate: halo.safety?.anomaly_rate ?? 0
+    anomaly_rate: halo.safety?.anomaly_rate ?? 0,
+
+    // v15: echo immune flags
+    immune_quarantined: !!echo.immune?.quarantined
   };
 
   const hormones = {
     boosts: halo.hormones?.boosts ?? 0,
     damps: halo.hormones?.damps ?? 0,
     modulation_events: halo.hormones?.modulation_events ?? 0,
-    tone: halo.hormones?.tone ?? null
+    tone: halo.hormones?.tone ?? null,
+
+    // v15: echo hormone event
+    last_event: echo.hormones?.event || null
   };
 
   const aura = {
     loops: halo.aura?.loops ?? 0,
-    syncs: halo.aura?.syncs ?? 0
+    syncs: halo.aura?.syncs ?? 0,
+
+    // v15: echo aura flags
+    in_loop: !!echo.aura?.inLoop,
+    stabilization_needed: !!echo.aura?.stabilizationNeeded,
+    system_under_tension: !!echo.aura?.systemUnderTension
   };
 
   const mesh = {
-    hops: halo.mesh?.hops ?? 0,
-    avg_hops: halo.mesh?.avg_hops ?? 0
+    hops: halo.mesh?.hops ?? echo.mesh?.hops ?? 0,
+    avg_hops: halo.mesh?.avg_hops ?? 0,
+    stalled: !!echo.mesh?.stalled,
+    reflex_drops: !!echo.mesh?.reflexDrops
   };
 
   const sdnView = {
@@ -271,16 +297,20 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician, sdn }) {
     mode: sdn.mode ?? "normal"
   };
 
-  // v12.3: mode + presence-band awareness
+  // v15: mode + presence-band awareness (prefer Echo presence)
   const mode = {
     binary: echo.mode?.binary ?? false,
     symbolic: !echo.mode?.binary,
     dual: echo.mode?.dual ?? false
   };
 
+  const presenceBand =
+    echo.presence?.band ||
+    (echo.mode?.binary ? "binary" : echo.mode?.dual ? "dual" : "symbolic");
+
   const presence = {
-    band: echo.mode?.binary ? "binary" :
-          echo.mode?.dual ? "dual" : "symbolic",
+    band: presenceBand,
+    tag: echo.presence?.tag || null,
     binary_pressure: field.presenceBinaryPressure,
     symbolic_pressure: field.presenceSymbolicPressure,
     dual_pressure: field.presenceDualPressure
@@ -294,6 +324,7 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician, sdn }) {
     safety,
     hormones,
     aura,
+    mesh,
     sdn: sdnView,
     mode,
     presence
@@ -307,6 +338,7 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician, sdn }) {
     safety,
     hormones,
     aura,
+    mesh,
     sdn: sdnView,
     mode,
     presence
@@ -333,13 +365,13 @@ function buildUnifiedAwareness({ meta, halo, field, echo, clinician, sdn }) {
 
 
 // ============================================================================
-// NARRATIVE + PERFORMANCE HINTS (v12.3)
+// NARRATIVE + PERFORMANCE HINTS (v15-EVO-IMMORTAL)
 // ============================================================================
 function estimatePerformanceHint(perf, field, echo) {
   if (perf > 100) return "overperforming_compensated";
   if (perf > 95) return "stable_optimal";
   if (perf > 85) return "stable_compensating";
-  if (field.driftPressure > 0.4 || echo.aura?.loop) return "drift_rising";
+  if (field.driftPressure > 0.4 || echo.aura?.inLoop) return "drift_rising";
   if (field.meshStormPressure > 0.4) return "routing_turbulence";
   return "mixed_state";
 }
@@ -352,6 +384,7 @@ function buildNarrativeForYou({
   safety,
   hormones,
   aura,
+  mesh,
   sdn,
   mode,
   presence
@@ -379,17 +412,30 @@ function buildNarrativeForYou({
   if (environment.aura_tension > 0.4) parts.push("Aura Tension is active — stabilization loops are engaged.");
   if (environment.mesh_storm_pressure > 0.4) parts.push("Mesh Storm Pressure is rising — routing turbulence detected.");
 
+  if (aura.in_loop) parts.push("Aura Loop detected — some patterns may be cycling.");
   if (aura.loops > 0) parts.push("Aura Loops are active — some patterns may be cycling.");
   if (aura.syncs > 0) parts.push("Aura Sync events are helping stabilize the system.");
 
   if (hormones.modulation_events > 0) parts.push("Hormone Modulation is active — system is compensating.");
 
-  if (safety.immune_quarantines > 0 || safety.reflex_drops > 0) {
+  if (safety.immune_quarantines > 0 || safety.reflex_drops > 0 || safety.immune_quarantined) {
     parts.push("Safety systems are isolating unsafe impulses.");
   }
 
   if (sdn.active_impulses > 1000) {
     parts.push("SDN load is elevated — impulse traffic is high.");
+  }
+
+  if (mesh.hops > 0 && mesh.hops < 5) {
+    parts.push("Mesh routing is light — pathways are short and efficient.");
+  } else if (mesh.hops >= 5 && mesh.hops < 15) {
+    parts.push("Mesh routing is moderate — pathways are actively engaged.");
+  } else if (mesh.hops >= 15) {
+    parts.push("Mesh routing is high — pathways are long and busy.");
+  }
+
+  if (mesh.stalled) {
+    parts.push("Mesh reports stalled segments — some pathways may be congested or paused.");
   }
 
   return parts.join(" ");
@@ -403,6 +449,7 @@ function buildNarrativeForAI({
   safety,
   hormones,
   aura,
+  mesh,
   sdn,
   mode,
   presence
@@ -414,15 +461,24 @@ function buildNarrativeForAI({
     ...environment,
     reflex_drops: safety.reflex_drops,
     immune_quarantines: safety.immune_quarantines,
+    immune_quarantined_flag: safety.immune_quarantined,
     hormone_events: hormones.modulation_events,
     hormone_tone: hormones.tone,
+    hormone_last_event: hormones.last_event,
     aura_loops: aura.loops,
     aura_syncs: aura.syncs,
+    aura_in_loop: aura.in_loop,
+    aura_system_under_tension: aura.system_under_tension,
+    mesh_hops: mesh.hops,
+    mesh_avg_hops: mesh.avg_hops,
+    mesh_stalled: mesh.stalled,
+    mesh_reflex_drops: mesh.reflex_drops,
     sdn_active_impulses: sdn.active_impulses,
     sdn_mode: sdn.mode,
     binary_mode: mode.binary,
     dual_mode: mode.dual,
     presence_band: presence.band,
+    presence_tag: presence.tag,
     presence_binary_pressure: presence.binary_pressure,
     presence_symbolic_pressure: presence.symbolic_pressure,
     presence_dual_pressure: presence.dual_pressure

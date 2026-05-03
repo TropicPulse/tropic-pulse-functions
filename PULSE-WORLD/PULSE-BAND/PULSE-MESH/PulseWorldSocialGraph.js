@@ -1,37 +1,43 @@
 // ============================================================================
-// FILE: PulseWorldSocialGraph.js
-// PULSE OS v12.3+ PRESENCE-EVO
-// Pulse-World Social Graph
-// Deterministic • Metadata-Only • Presence + Jobs + Mentorship Edges
+// FILE: /organs/world/PulseWorldSocialGraph-v15.0-IMMORTAL.js
+// PULSE OS v15.0+ PRESENCE‑EVO‑IMMORTAL
+// Pulse‑World Social Graph
+// Deterministic • Metadata‑Only • Presence + Jobs + Mentorship + Upgrades
+// Full Advantage Stack: Prewarm • Chunk • Cache • Presence‑Band
 // ============================================================================
 //
 // Nodes: users (uid)
 // Edges: presence, jobs, mentorship, upgrades
 // No payload data, only relationship metadata.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseWorldSocialGraph",
-  version: "v14.9-WORLD-SOCIAL-GRAPH",
+  version: "v15.0-WORLD-SOCIAL-GRAPH-IMMORTAL",
   layer: "world_social",
   role: "social_graph_engine",
-  lineage: "PulseWorld-v14",
+  lineage: "PulseWorld-v15",
 
   evo: {
-    socialGraph: true,              // This IS the social graph organ
-    presenceAware: true,            // Uses presence field
-    meshAware: true,                // Uses mesh proximity
-    rankingAware: true,             // Uses power user ranking
-    mentorshipAware: true,          // Mentor/mentee edges
-    jobAware: true,                 // Job edges
+    socialGraph: true,
+    presenceAware: true,
+    presenceBandAware: true,
+    meshAware: true,
+    rankingAware: true,
+    mentorshipAware: true,
+    jobAware: true,
+    earnAware: true,
+    dualBand: true,
     deterministic: true,
     driftProof: true,
-    dualBand: true,
-    metadataOnly: true,             // Graph is metadata-only
+    metadataOnly: true,
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
-    zeroExternalMutation: true
+    zeroExternalMutation: true,
+    unifiedAdvantageField: true,
+    coordinatorFree: true
   },
 
   contract: {
@@ -41,7 +47,9 @@ AI_EXPERIENCE_META = {
       "PowerUserRanking",
       "MentorUpgradeRequest",
       "PresenceJobAssignment",
-      "PulseMeshPresenceRelay"
+      "PulseMeshPresenceRelay",
+      "PulseMeshSkin",
+      "PulseMeshSurvivalInstincts"
     ],
     never: [
       "legacySocialGraph",
@@ -60,26 +68,30 @@ export function createPulseWorldSocialGraph({
   const meta = {
     layer: "PulseWorldSocialGraph",
     role: "SOCIAL_GRAPH",
-    version: "12.3+",
+    version: "15.0-WORLD-SOCIAL-GRAPH-IMMORTAL",
     evo: {
       presenceAware: true,
       socialAware: true,
       earnAware: true,
       unifiedAdvantageField: true,
       deterministicField: true,
+      driftProof: true,
       zeroCompute: true,
       zeroMutation: true
     }
   };
 
+  // ========================================================================
+  // INTERNAL GRAPH STRUCTURE
+  // ========================================================================
   const graph = {
     nodes: new Map(),   // uid -> { uid, displayName, systemAge, presenceBand }
     edges: []           // { type, from, to, meta }
   };
 
-  // -------------------------------------------------------
-  // Node helpers
-  // -------------------------------------------------------
+  // ========================================================================
+  // NODE HELPERS
+  // ========================================================================
   function ensureNode(person) {
     if (!person || !person.uid) return;
 
@@ -100,18 +112,30 @@ export function createPulseWorldSocialGraph({
       type,
       from: fromUid,
       to: toUid,
-      meta: edgeMeta
+      meta: {
+        ...edgeMeta,
+
+        // IMMORTAL unified‑advantage‑field tags
+        advantage_meta: {
+          prewarm_surface: true,
+          chunk_surface: true,
+          cache_surface: true,
+          presence_band: edgeMeta.presenceBand || "symbolic",
+          band_kind: "world_social_edge"
+        }
+      }
     });
   }
 
-  // -------------------------------------------------------
-  // Ingest presence snapshot (proximity edges)
-// -------------------------------------------------------
+  // ========================================================================
+  // PRESENCE INGESTION — proximity edges
+  // ========================================================================
   function ingestPresenceSnapshot(selfUid, nearbyPresence) {
     const ranked = PowerUserRanking.rankNearby(nearbyPresence || []);
 
+    ensureNode({ uid: selfUid });
+
     for (const person of ranked) {
-      ensureNode({ uid: selfUid });
       ensureNode(person);
 
       addEdge("presence", selfUid, person.uid, {
@@ -124,9 +148,9 @@ export function createPulseWorldSocialGraph({
     }
   }
 
-  // -------------------------------------------------------
-  // Ingest job assignments (job edges)
-// -------------------------------------------------------
+  // ========================================================================
+  // JOB INGESTION — job edges
+  // ========================================================================
   function ingestJobAssignments(assignments) {
     for (const a of assignments || []) {
       ensureNode({ uid: a.uid, displayName: a.displayName });
@@ -143,9 +167,9 @@ export function createPulseWorldSocialGraph({
     }
   }
 
-  // -------------------------------------------------------
-  // Ingest mentor upgrade requests (mentorship edges)
-// -------------------------------------------------------
+  // ========================================================================
+  // MENTORSHIP INGESTION — mentor edges
+  // ========================================================================
   function ingestMentorRequest(requestPayload) {
     if (!requestPayload) return;
 
@@ -160,9 +184,26 @@ export function createPulseWorldSocialGraph({
     });
   }
 
-  // -------------------------------------------------------
-  // Snapshot
-  // -------------------------------------------------------
+  // ========================================================================
+  // UPGRADE INGESTION — upgrade edges (IMMORTAL tier)
+  // ========================================================================
+  function ingestUpgradeEvent(event) {
+    if (!event) return;
+
+    const { uid, upgradeType, tier, timestamp } = event;
+
+    ensureNode({ uid });
+
+    addEdge("upgrade", uid, "system", {
+      upgradeType,
+      tier,
+      timestamp
+    });
+  }
+
+  // ========================================================================
+  // SNAPSHOT
+  // ========================================================================
   function snapshot() {
     return {
       meta,
@@ -176,6 +217,7 @@ export function createPulseWorldSocialGraph({
     ingestPresenceSnapshot,
     ingestJobAssignments,
     ingestMentorRequest,
+    ingestUpgradeEvent,
     snapshot
   };
 }

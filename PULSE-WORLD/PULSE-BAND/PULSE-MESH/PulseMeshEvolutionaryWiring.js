@@ -1,15 +1,16 @@
 // ============================================================================
-//  EvolutionaryWiring.js — v12.3-PRESENCE-EVO-MAX-PRIME
+//  EvolutionaryWiring.js — v15-EVO-IMMORTAL
 //  PulseMesh Wiring Organ • Nervous System Pathway Selector
+//  Binary-Aware • Presence-Aware • Advantage-Aware • Drift-Proof
 // ============================================================================
 //
 //  WHAT THIS ORGAN IS:
 //  --------------------
 //  • The wiring layer of the Pulse Nervous System.
 //  • Chooses wiring surfaces for symbolic + binary + dual-band pulses.
-//  • Pattern-aware, lineage-aware, presence-aware, deterministic.
+//  • Pattern-aware, lineage-aware, presence-aware, advantage-aware, deterministic.
 //  • Self-repairing: bad wiring auto-corrects to safe defaults.
-//  • Zero compute, zero mutation outside instance.
+//  • Zero compute on payloads, zero mutation of input impulses.
 //
 //  WHAT THIS ORGAN IS NOT:
 //  ------------------------
@@ -19,32 +20,37 @@
 //  • Not a network layer.
 //  • Not a messenger.
 //
-//  SAFETY CONTRACT (v12.3):
-//  -------------------------
+//  SAFETY CONTRACT (v15):
+//  -----------------------
 //  • No imports.
 //  • No network.
 //  • No randomness.
 //  • No timestamps.
 //  • Pure deterministic wiring logic.
-//  • Zero mutation outside instance.
-//  • Presence-aware, binary-aware, dual-band-aware.
+//  • Zero mutation of input impulses.
+//  • Presence-aware, binary-aware, dual-band-aware, advantage-aware.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshEvolutionaryWiring",
-  version: "v14.9-MESH-EVOLUTIONARY-WIRING",
+  version: "v15-EVO-IMMORTAL",
   layer: "mesh",
   role: "mesh_lineage_and_wiring_engine",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
-    evolutionaryWiring: true,       // This IS the wiring evolution organ
-    lineageAware: true,             // Organ lineage + signature
-    signatureAware: true,           // organSignature, meshSignature, patternHash
-    deterministic: true,            // No randomness in wiring
-    driftProof: true,               // Wiring must never drift
-    metadataOnly: true,             // No routing, no compute
-    dualBand: true,                 // Symbolic + binary lineage
+    evolutionaryWiring: true,
+    lineageAware: true,
+    signatureAware: true,
+    deterministic: true,
+    driftProof: true,
+    metadataOnly: true,
+    dualBand: true,
+    presenceAware: true,
+    binaryAware: true,
+    bandAware: true,
+    advantageAware: true,
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
@@ -67,13 +73,13 @@ AI_EXPERIENCE_META = {
 */
 
 
-// ⭐ PulseRole — identifies this as the PulseMesh Wiring Organ (v12.3)
+// ⭐ PulseRole — identifies this as the PulseMesh Wiring Organ (v15)
 export const PulseRole = {
   type: "Mesh",
   subsystem: "PulseMesh",
   layer: "Wiring",
-  version: "12.3-PRESENCE-EVO-MAX-PRIME",
-  identity: "PulseMesh-Wiring-v12.3",
+  version: "15-EVO-IMMORTAL",
+  identity: "PulseMesh-Wiring-v15",
 
   evo: {
     driftProof: true,
@@ -87,16 +93,17 @@ export const PulseRole = {
     symbolicAware: true,
     presenceAware: true,
     bandAware: true,
+    advantageAware: true,
     futureEvolutionReady: true,
 
     unifiedAdvantageField: true,
     deterministicField: true,
-    pulseMesh12Ready: true
+    pulseMesh15Ready: true
   },
 
   pulseContract: "Pulse-v1/v2/v3",
-  routerContract: "PulseRouter-v12.3",
-  sendContract: "PulseSend-v12.3"
+  routerContract: "PulseRouter-v15",
+  sendContract: "PulseSend-v15"
 };
 
 
@@ -104,117 +111,156 @@ export const PulseRole = {
 //  INTERNAL HELPERS — deterministic, tiny, pure
 // ============================================================================
 
-// Build a wiring key from organ + lineage depth + mode + presence band
+// Build a wiring key from organ + lineage depth + mode + band + presenceTag + pattern hash
 function buildWiringKey(targetOrgan, pulse) {
   const depth = Array.isArray(pulse.lineage) ? pulse.lineage.length : 0;
   const mode = pulse.mode || "symbolic";
   const band = pulse.band || "symbolic";
-  return `${targetOrgan}::d${depth}::${mode}::${band}`;
+  const presenceTag = pulse.flags?.aura_presence_tag || "none";
+  const pattern = (pulse.pattern || "").toLowerCase();
+  const patternHash = simplePatternHash(pattern);
+
+  return `${targetOrgan}::d${depth}::${mode}::${band}::${presenceTag}::p${patternHash}`;
 }
 
-// Infer default wiring surface from organ + pattern + mode + presence band
+// Very small deterministic hash for pattern strings (metadata-only)
+function simplePatternHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return h.toString(16);
+}
+
+// Infer default wiring surface from organ + pattern + mode + presence band + advantage hints
 function inferDefaultWiring(targetOrgan, pulse) {
   const p = (pulse.pattern || "").toLowerCase();
   const mode = pulse.mode || "symbolic";
   const band = pulse.band || "symbolic";
 
-  // Presence-band bias
-  if (band === "binary") {
-    if (targetOrgan === "GPU") return "gpuBinaryBurst";
-    if (targetOrgan === "Earn") return "earnBinaryChain";
+  const binaryBias = clamp01(pulse.flags?.aura_binary_mesh_bias ?? 0);
+  const factoringBias = clamp01(pulse.flags?.aura_factoring_bias ?? 0);
+
+  const prefersBinary = band === "binary" || mode === "binary" || binaryBias > 0.3;
+  const prefersDual = band === "dual" || mode === "dual";
+  const prefersFactored = factoringBias > 0.4;
+
+  // Presence-band + advantage bias first
+  if (prefersBinary) {
+    if (targetOrgan === "GPU") return prefersFactored ? "gpuBinaryFactoredBurst" : "gpuBinaryBurst";
+    if (targetOrgan === "Earn") return prefersFactored ? "earnBinaryFactoredChain" : "earnBinaryChain";
     if (targetOrgan === "OS") return "osBinaryBridge";
-    if (targetOrgan === "Mesh") return "meshBinarySignal";
-    return "binaryPreferred";
+    if (targetOrgan === "Mesh") return prefersFactored ? "meshBinaryFactoredSignal" : "meshBinarySignal";
+    return prefersFactored ? "binaryFactoredPreferred" : "binaryPreferred";
   }
 
-  if (band === "dual") {
-    if (targetOrgan === "GPU") return "gpuDualBurst";
-    if (targetOrgan === "Earn") return "earnDualChain";
+  if (prefersDual) {
+    if (targetOrgan === "GPU") return prefersFactored ? "gpuDualFactoredBurst" : "gpuDualBurst";
+    if (targetOrgan === "Earn") return prefersFactored ? "earnDualFactoredChain" : "earnDualChain";
     if (targetOrgan === "OS") return "osDualBridge";
-    if (targetOrgan === "Mesh") return "meshDualSignal";
-    return "dualPreferred";
+    if (targetOrgan === "Mesh") return prefersFactored ? "meshDualFactoredSignal" : "meshDualSignal";
+    return prefersFactored ? "dualFactoredPreferred" : "dualPreferred";
   }
 
-  // Mode bias (symbolic vs binary)
-  if (mode === "binary") {
-    if (targetOrgan === "GPU") return "gpuBinaryBurst";
-    if (targetOrgan === "Earn") return "earnBinaryChain";
-    if (targetOrgan === "OS") return "osBinaryBridge";
-    if (targetOrgan === "Mesh") return "meshBinarySignal";
-    return "binaryPreferred";
-  }
-
-  // Symbolic defaults
-  if (targetOrgan === "GPU") return "gpuBurst";
-  if (targetOrgan === "Earn") return "earnCreditChain";
+  // Symbolic defaults with pattern hints
+  if (targetOrgan === "GPU") return prefersFactored ? "gpuFactoredBurst" : "gpuBurst";
+  if (targetOrgan === "Earn") return prefersFactored ? "earnFactoredCreditChain" : "earnCreditChain";
   if (targetOrgan === "OS") return "osBridge";
-  if (targetOrgan === "Mesh") return "meshSignal";
+  if (targetOrgan === "Mesh") return prefersFactored ? "meshFactoredSignal" : "meshSignal";
 
-  // Pattern hints
-  if (p.includes("gpu")) return "gpuBurst";
-  if (p.includes("earn")) return "earnCreditChain";
+  if (p.includes("gpu")) return prefersFactored ? "gpuFactoredBurst" : "gpuBurst";
+  if (p.includes("earn")) return prefersFactored ? "earnFactoredCreditChain" : "earnCreditChain";
   if (p.includes("os")) return "osBridge";
-  if (p.includes("mesh")) return "meshSignal";
+  if (p.includes("mesh")) return prefersFactored ? "meshFactoredSignal" : "meshSignal";
 
-  return "neutral";
+  return prefersFactored ? "neutralFactored" : "neutral";
+}
+
+function clamp01(v) {
+  if (typeof v !== "number" || Number.isNaN(v)) return 0;
+  return Math.max(0, Math.min(1, v));
 }
 
 
 // ============================================================================
-//  FACTORY — Create PulseMesh Wiring Organ (v12.3)
+//  FACTORY — Create PulseMesh Wiring Organ (v15-EVO-IMMORTAL)
 // ============================================================================
 //
 //  Behavior:
 //    • wiringFor(targetOrgan, pulse) → returns wiring surface
 //    • remember(targetOrgan, pulse, outcome) → stores reflexive wiring memory
+//    • snapshot() → returns wiring meta-memory for backendAI / Awareness
 //
 //  Memory model:
-//    • internal map: wiringKey → { surface, successCount, failureCount }
+//    • internal map: wiringKey → { surface, successCount, failureCount, band, presenceTag, advantage }
 //    • deterministic fallback: if failures dominate → safeFallback
-//    • presence-aware: wiring memory is band-scoped
+//    • presence-aware: wiring memory is band + presenceTag scoped
+//    • advantage-aware: tracks binary/factored preference usage
 // ============================================================================
 
 export function createPulseMeshWiring({ log } = {}) {
-  const memory = {}; // wiringKey → { surface, successCount, failureCount }
+  const memory = Object.create(null); // wiringKey → entry
+
+  const meta = {
+    layer: "PulseMeshWiring",
+    role: "WIRING_ORGAN",
+    version: "15-EVO-IMMORTAL",
+    target: "full-mesh",
+    selfRepairable: true,
+    evo: {
+      driftProof: true,
+      patternAware: true,
+      lineageAware: true,
+      reflexReady: true,
+      wiringReady: true,
+      selfRepairReady: true,
+      dualModeReady: true,
+      binaryAware: true,
+      symbolicAware: true,
+      presenceAware: true,
+      bandAware: true,
+      advantageAware: true,
+      unifiedAdvantageField: true,
+      deterministicField: true,
+      futureEvolutionReady: true
+    }
+  };
 
   function wiringFor(targetOrgan, pulse) {
     const key = buildWiringKey(targetOrgan, pulse);
-    const entry = memory[key];
+    let entry = memory[key];
 
-    let surface;
-
-    if (entry && entry.surface) {
-      surface = entry.surface;
-    } else {
-      surface = inferDefaultWiring(targetOrgan, pulse);
-      memory[key] = {
-        surface,
-        successCount: 0,
-        failureCount: 0
-      };
+    if (!entry) {
+      const surface = inferDefaultWiring(targetOrgan, pulse);
+      entry = memory[key] = createEntry(surface, pulse);
     }
 
-    log && log("[PulseMesh-Wiring-v12.3] Selecting wiring surface", {
+    log && log("[PulseMesh-Wiring-v15] Selecting wiring surface", {
       jobId: pulse.jobId,
       pattern: pulse.pattern,
       targetOrgan,
-      lineageDepth: pulse.lineage?.length || 0,
-      mode: pulse.mode,
-      band: pulse.band,
+      lineageDepth: Array.isArray(pulse.lineage) ? pulse.lineage.length : 0,
+      mode: pulse.mode || "symbolic",
+      band: pulse.band || "symbolic",
+      presenceTag: pulse.flags?.aura_presence_tag || "none",
       wiringKey: key,
-      surface
+      surface: entry.surface,
+      successCount: entry.successCount,
+      failureCount: entry.failureCount,
+      advantage: entry.advantage
     });
 
-    return surface;
+    return entry.surface;
   }
 
   function remember(targetOrgan, pulse, outcome = "success") {
     const key = buildWiringKey(targetOrgan, pulse);
-    const entry = memory[key] || {
-      surface: inferDefaultWiring(targetOrgan, pulse),
-      successCount: 0,
-      failureCount: 0
-    };
+    let entry = memory[key];
+
+    if (!entry) {
+      const surface = inferDefaultWiring(targetOrgan, pulse);
+      entry = memory[key] = createEntry(surface, pulse);
+    }
 
     if (outcome === "success") {
       entry.successCount += 1;
@@ -222,31 +268,98 @@ export function createPulseMeshWiring({ log } = {}) {
       entry.failureCount += 1;
     }
 
+    // Advantage tracking
+    const binaryBias = clamp01(pulse.flags?.aura_binary_mesh_bias ?? 0);
+    const factoringBias = clamp01(pulse.flags?.aura_factoring_bias ?? 0);
+
+    if (binaryBias > 0) {
+      entry.advantage.binaryPreferenceSamples += 1;
+      entry.advantage.binaryPreferenceTotal += binaryBias;
+    }
+
+    if (factoringBias > 0) {
+      entry.advantage.factoringBiasSamples += 1;
+      entry.advantage.factoringBiasTotal += factoringBias;
+    }
+
     // ⭐ Self-repair: if failures dominate, switch to safeFallback
     if (entry.failureCount > entry.successCount) {
       entry.surface = "safeFallback";
     }
 
-    memory[key] = entry;
-
-    log && log("[PulseMesh-Wiring-v12.3] Remembering wiring", {
+    log && log("[PulseMesh-Wiring-v15] Remembering wiring", {
       jobId: pulse.jobId,
       pattern: pulse.pattern,
       targetOrgan,
-      mode: pulse.mode,
-      band: pulse.band,
+      mode: pulse.mode || "symbolic",
+      band: pulse.band || "symbolic",
+      presenceTag: pulse.flags?.aura_presence_tag || "none",
       wiringKey: key,
       surface: entry.surface,
       successCount: entry.successCount,
-      failureCount: entry.failureCount
+      failureCount: entry.failureCount,
+      advantage: entry.advantage
     });
 
     return entry;
   }
 
+  function createEntry(surface, pulse) {
+    return {
+      surface,
+      successCount: 0,
+      failureCount: 0,
+      band: pulse.band || "symbolic",
+      presenceTag: pulse.flags?.aura_presence_tag || "none",
+      advantage: {
+        binaryPreferenceSamples: 0,
+        binaryPreferenceTotal: 0,
+        factoringBiasSamples: 0,
+        factoringBiasTotal: 0
+      }
+    };
+  }
+
+  // Snapshot for cognition / awareness / backend AI
+  function snapshot() {
+    const entries = [];
+    for (const key in memory) {
+      if (!Object.prototype.hasOwnProperty.call(memory, key)) continue;
+      const e = memory[key];
+      entries.push({
+        key,
+        surface: e.surface,
+        successCount: e.successCount,
+        failureCount: e.failureCount,
+        band: e.band,
+        presenceTag: e.presenceTag,
+        advantage: {
+          binaryPreferenceSamples: e.advantage.binaryPreferenceSamples,
+          binaryPreferenceAvg:
+            e.advantage.binaryPreferenceSamples > 0
+              ? e.advantage.binaryPreferenceTotal / e.advantage.binaryPreferenceSamples
+              : 0,
+          factoringBiasSamples: e.advantage.factoringBiasSamples,
+          factoringBiasAvg:
+            e.advantage.factoringBiasSamples > 0
+              ? e.advantage.factoringBiasTotal / e.advantage.factoringBiasSamples
+              : 0
+        }
+      });
+    }
+
+    return {
+      meta,
+      entriesCount: entries.length,
+      entries
+    };
+  }
+
   return {
     PulseRole,
+    meta,
     wiringFor,
-    remember
+    remember,
+    snapshot
   };
 }

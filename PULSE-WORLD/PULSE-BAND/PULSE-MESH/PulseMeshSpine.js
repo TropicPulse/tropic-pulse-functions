@@ -1,58 +1,72 @@
+
 // ============================================================================
-// FILE: PulseMeshSpine.js
-// PULSE OS — v12.3+ PRESENCE-EVO
-// COMMUNITY_SPINE_LAYER  // teal
-// Distributed Routing Spine • Reflex + Cortex + Tendons + Signal Factoring
-// Full Advantage Stack: Prewarm • Chunk • Cache • Presence-Band
-// Metadata-Only • Deterministic • Drift-Proof • Local-First • Dual-Mode
-// ============================================================================
-//
-// IDENTITY — THE SPINE (v12.3+ PRESENCE-EVO):
-// ------------------------------------------
-// • Routes impulses between nodes (devices, services, earners).
-// • Applies 1/0 reflex at each hop (instinct-style filtering).
-// • Applies cortex shaping (risk, novelty, cooperation, load).
-// • Applies tendon shaping (intent, routeHint, energy shaping).
-// • Applies SIGNAL FACTORING (progressive 1/0 branch reduction).
-// • Accumulates mesh metadata: hops, score, energy, routeHint.
-// • Emits drift + flow + factoring + presence signals to Mesh Immune / GlobalHealer.
-// • NEVER mutates payload data, NEVER performs compute.
-// • Deterministic-field, mesh-pressure-aware, aura-pressure-aware.
-// • v12.3+: binary-aware, dual-mode-ready, unified-advantage-field,
-//           prewarm-aware, chunk-aware, cache-aware, presence-aware.
+// FILE: PulseMeshSpine-v15.0-IMMORTAL.js
+// [pulse:mesh] PULSE_MESH_SPINE v15.0-MESH-SPINE-IMMORTAL  // deep-orange
+// Deterministic Pathway Engine • Advantage Surfaces • Dual-Band Mesh Spine
+// Metadata-Only • No Payload Access • No Network Fetch • Drift-Proof
 // ============================================================================
 //
-// SAFETY CONTRACT (v12.3+):
-// -------------------------
-// • Metadata-only.
-// • No payload access.
-// • No compute.
-// • No autonomy.
-// • No async, no timestamps, no randomness.
-// • Deterministic, drift-proof routing behavior.
-// • Local-first; internet paths are explicit, not default.
-// • Healing only via routed healers / directives, never inline.
-// • All advantages are metadata-only: prewarm/chunk/cache/presence
-//   are tags + snapshots, never side-effectful I/O.
+// IDENTITY — MESH SPINE (v15.0-IMMORTAL):
+// --------------------------------------
+// • Deterministic routing spine for the mesh organism.
+// • Pure pathway engine: chooses next hops, never moves packets itself.
+// • Emits full advantage surfaces:
+//      - Prewarm surface (next-hop + presence-band)
+//      - Chunk surface (lineage + factoring + aura bias)
+//      - Cache surface (stable neighbor profile)
+//      - Presence surface (global presence-band + hop index)
+// • Records lineage, drift, flow, trust, load, factoring, presence.
+// • No timestamps — uses deterministic meshCycle counter.
+// • Presence-aware, binary-aware, dual-band, mesh-aware, SDN-aligned.
+//
+// SAFETY CONTRACT (v15.0-IMMORTAL):
+// ---------------------------------
+// • No payload access, no payload mutation.
+// • No external network fetch, no CNS access.
+// • No direct movement — Router/SendSystem own movement.
+// • No recursion, bounded hops, deterministic loop exit.
+// • Deterministic-field, unified-advantage-field, drift-proof.
+// • Multi-instance-ready, zero randomness, zero timestamps.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshSpine",
-  version: "v14.9-MESH-SPINE",
+  version: "v15.0-MESH-SPINE-IMMORTAL",
   layer: "mesh",
-  role: "mesh_spinal_cord_and_conduction_spine",
-  lineage: "PulseMesh-v14",
+  role: "mesh_routing_spine",
+  lineage: "PulseMesh-v15",
 
   evo: {
-    spine: true,                    // This IS the mesh spinal cord
-    conductor: true,                // Conduction backbone
-    routingSpine: true,             // Routing spine
-    binaryAware: true,              // Binary conduction hints
-    symbolicAware: true,            // Symbolic conduction hints
-    dualBand: true,
+    meshSpine: true,                // This IS the mesh routing spine
+    routingSpine: true,             // Pathway engine, no movement
+    metadataOnly: true,             // No payload, no external mutation
     deterministic: true,
     driftProof: true,
-    zeroMutationOfInput: true,
+    dualBand: true,
+    presenceAware: true,
+    meshAware: true,
+    binaryAware: true,
+    symbolicAware: true,
+
+    // Advantage surfaces
+    advantageSurfaces: true,
+    prewarmSurface: true,
+    chunkSurface: true,
+    cacheSurface: true,
+    presenceSurface: true,
+
+    // Lineage + drift + flow
+    lineageAware: true,
+    driftAware: true,
+    flowAware: true,
+    trustAware: true,
+    loadAware: true,
+    factoringAware: true,
+
+    // IMMORTAL flags
+    immortal: true,
+    zeroMutationOfInput: false,     // Mutates only metadata on impulse
     zeroNetworkFetch: true,
     safeRouteFree: true,
     zeroExternalMutation: true
@@ -61,9 +75,9 @@ AI_EXPERIENCE_META = {
   contract: {
     always: [
       "PulseMeshFlow",
+      "PulseMeshImmuneSystem",
       "PulseMeshAwareness",
-      "PulseMeshCognition",
-      "PulseMeshCortex"
+      "PulseMeshAura"
     ],
     never: [
       "legacyMeshSpine",
@@ -71,19 +85,15 @@ AI_EXPERIENCE_META = {
       "fetchViaCNS"
     ]
   }
-}
+};
 */
-
-import { createCommunityReflex } from "./CommunityReflex.js";
+import { createCommunityReflex } from "./PulseMeshFlow.js";
 import { applyPulseCortex } from "./PulseMeshCortex.js";
 import { applyPulseMeshTendons } from "./PulseMeshTendons.js";
 import { applyMeshSignalFactoring } from "./PulseMeshSignalFactoring.js";
-import { recordMeshDriftEvent } from "./GlobalHealer.js";
+import { createGlobalHealerV12 as recordMeshDriftEvent } from "../PULSE-OS/PulseOSImmuneSystem.js";
 import "./MeshScanner.js";
 
-// ============================================================================
-// MeshMemory — lineage + drift + flow + factoring + advantage (metadata-only)
-// ============================================================================
 export const MeshMemory = {
   drift: [],
   flow: [],
@@ -95,7 +105,7 @@ export const MeshMemory = {
   factoringDepth: [],
   factoringBias: [],
 
-  // v12.3+ advantage memory
+  // v15.0+ advantage memory
   prewarm: [],
   chunks: [],
   cache: [],
@@ -106,7 +116,7 @@ export const MeshMemory = {
 let meshCycle = 0;
 
 // ============================================================================
-// Mesh Factory (v12.3+ PRESENCE-EVO)
+// Mesh Factory (v15.0-MESH-IMMORTAL)
 // ============================================================================
 export function createPulseMesh() {
   return {
@@ -115,13 +125,15 @@ export function createPulseMesh() {
     meta: {
       layer: "PulseMeshSpine",
       role: "ROUTING_SPINE",
-      version: "12.3+",
+      version: "15.0-MESH-SPINE-IMMORTAL",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
         dualMode: true,
         binaryAware: true,
         symbolicAware: true,
+        presenceAware: true,
+        bandAware: true,
         localAware: true,
         internetAware: true,
 
@@ -140,11 +152,10 @@ export function createPulseMesh() {
         flowAware: true,
         driftAware: true,
 
-        // v12.3+ advantage flags
+        // v15.0+ advantage flags
         prewarmAware: true,
         chunkAware: true,
         cacheAware: true,
-        presenceAware: true,
         dualBandReady: true,
         gpuWarmAware: true,
 
@@ -155,7 +166,8 @@ export function createPulseMesh() {
       reach: {
         estimatedHops: 0,
         estimatedMeters: 0,
-        mode: "direct"
+        mode: "direct",
+        localityMode: "local-first"
       }
     }
   };
@@ -223,7 +235,7 @@ function recordFactoring(impulse) {
 }
 
 // ============================================================================
-// v12.3+ ADVANTAGE SURFACES (metadata-only)
+// v15.0+ ADVANTAGE SURFACES (metadata-only)
 // Prewarm • Chunk • Cache • Presence-Band
 // ============================================================================
 
@@ -347,7 +359,7 @@ function recordPresenceSurface(impulse, node) {
 }
 
 // ============================================================================
-// Routing Entry Point (v12.3+ PRESENCE-EVO)
+// Routing Entry Point (v15.0-MESH-IMMORTAL)
 // Metadata-only • Deterministic • Local-first • Dual-Mode • Full Advantage
 // ============================================================================
 export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
@@ -356,8 +368,9 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
   impulse.flags = impulse.flags || {};
   impulse.flags.mesh_meta = mesh.meta;
   impulse.flags.mesh_route_started = true;
+  impulse.flags.mesh_spine_surface = true;
 
-  // v12.3+: mode tagging (binary / dual / symbolic)
+  // v15.0: mode tagging (binary / dual / symbolic)
   const binaryMode = !!context.binaryMode || !!impulse.flags.binary_mode;
   const dualMode = !!context.dualMode || !!impulse.flags.dual_mode;
 
@@ -382,7 +395,7 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
         severity: "warning",
         meshNodeId: currentNodeId,
         note: "Mesh node missing during routing",
-        fileName: "PulseMeshSpine.js",
+        fileName: "PulseMeshSpine-v15.0-IMMORTAL.js",
         functionName: "routeImpulse",
         fieldName: "nodes"
       });
@@ -434,7 +447,7 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
         severity: "warning",
         meshNodeId: node.id,
         note: "Mesh routing exceeded max hops — safety stop",
-        fileName: "PulseMeshSpine.js",
+        fileName: "PulseMeshSpine-v15.0-IMMORTAL.js",
         functionName: "routeImpulse",
         fieldName: "hops"
       });
@@ -449,7 +462,7 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
     }
 
     // -------------------------------------------------------
-    // v12.3+ ADVANTAGE SURFACES (prewarm/chunk/cache/presence)
+    // v15.0+ ADVANTAGE SURFACES (prewarm/chunk/cache/presence)
     // -------------------------------------------------------
     recordPrewarmSurface(mesh, impulse, node, { binaryMode, dualMode });
     recordChunkSurface(impulse, node);
@@ -480,7 +493,7 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
         severity: "info",
         meshNodeId: node.id,
         note: "Reflex dropped impulse",
-        fileName: "PulseMeshSpine.js",
+        fileName: "PulseMeshSpine-v15.0-IMMORTAL.js",
         functionName: "routeImpulse",
         fieldName: "reflex"
       });
@@ -553,7 +566,7 @@ export function routeImpulse(mesh, impulse, entryNodeId, context = {}) {
         severity: "warning",
         meshNodeId: node.id,
         note: "Mesh routing stalled — no available neighbors",
-        fileName: "PulseMeshSpine.js",
+        fileName: "PulseMeshSpine-v15.0-IMMORTAL.js",
         functionName: "routeImpulse",
         fieldName: "neighbors"
       });
@@ -626,7 +639,7 @@ function selectNextHop(mesh, node, visited, impulse, { binaryMode, dualMode }) {
       if (locality === "edge") penalty += 0.05;
       if (locality === "internet") penalty += 0.15;
 
-      // v12.3+: mode-aware tweaks
+      // v15.0: mode-aware tweaks
       // binary mode prefers lower-hop, higher-trust, local-first paths
       if (binaryMode) {
         if (locality === "internet") penalty += 0.1;

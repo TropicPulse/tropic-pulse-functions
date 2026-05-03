@@ -1,36 +1,35 @@
 // ============================================================================
-// FILE: /organs/halo/PulseHalo-v12.3-PRESENCE-EVO-MAX-PRIME.js
-// [pulse:halo] PULSE_OS_AWARENESS_RING v12.3-PRESENCE-EVO-MAX-PRIME  // white
-// Read-Only Awareness Ring • System Dashboard • Metadata-Only Reflection
-// Presence-Aware • Binary-Aware • Advantage-Field-Aware
+// FILE: PulseHalo-v15-EVO-IMMORTAL.js
+// PULSE HALO — AWARENESS RING
+// System-wide Awareness Ring • Mesh + Presence + Advantage Telemetry
+// Metadata-only • Zero Compute (no heavy logic) • Zero Payload Access
+// Presence-aware • Binary-aware • Advantage-cascade-aware
 // ============================================================================
 //
-// IDENTITY — THE AWARENESS RING (v12.3-PRESENCE-EVO-MAX-PRIME):
-//  ------------------------------------------------------------
-//  • Read-only awareness ring around the organism.
-//  • Aggregates metadata from all subsystems (symbolic + binary + dual).
-//  • Exposes safe system status to backendAI + Awareness Page.
-//  • NEVER computes payloads.
-//  • NEVER mutates impulses.
-//  • NEVER influences routing or decisions.
-//  • Pure reflection layer (dashboard organ).
+// IDENTITY — THE HALO FIELD (v15-EVO-IMMORTAL):
+//  --------------------------------------------
+//  • Organism-wide awareness ring around all impulses and mesh activity.
+//  • Counts, classifies, and summarizes behavior — never touches payloads.
+//  • Dual-mode aware: symbolic / binary / dual-mode impulses.
+//  • Presence-band aware: symbolic / binary / dual presence bands.
+//  • Advantage-field aware: factored paths, binary preference, advantage events.
+//  • Feeds dashboards, AI views, and health indicators (stability, drift).
+//  • Fully deterministic: same sequence of counter calls → same HaloState.
+//  • Zero randomness, zero timestamps, zero async, zero network, zero FS.
 //
-// SAFETY CONTRACT (v12.3):
-//  • Metadata-only
-//  • Read-only external surface
-//  • No loops, no sync, no hormones, no memory writes (by itself)
-//  • No autonomy, no sentience, no self-model
-//  • Backend-safe, frontend-safe, global-safe
-//  • Presence-aware, but presence is metadata-only
-//
-// ADVANTAGE CASCADE (v12.3):
-//  • Inherits ANY advantage from ANY organ automatically (metadata reflection)
-//  • Unified-advantage-field: ALL advantages visible unless unsafe
-//  • Future-evolution-ready
-//  • Signal factoring awareness (metadata-only)
-//  • Binary-aware: reflects binary vs symbolic vs dual activity (metadata-only)
-//  • Presence-aware: reflects band + presence tags (metadata-only)
+// SAFETY CONTRACT (v15):
+//  ----------------------
+//  • No randomness
+//  • No timestamps
+//  • No payload access (metadata-only counters)
+//  • No async
+//  • No network, no filesystem, no env access
+//  • Fail-open: missing fields → safe defaults
+//  • Deterministic: same counter calls → same HaloState
+//  • Zero imports — CNS injects everything
+//  • Presence-aware and band-aware only via metadata
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshAwareness",
@@ -67,15 +66,15 @@ AI_EXPERIENCE_META = {
 }
 */
 
-
 // ============================================================================
 //  FACTORY — ALL DEPENDENCIES INJECTED BY THE CNS BRAIN
 //  (Awareness Ring MUST HAVE ZERO IMPORTS)
 // ============================================================================
-export function createPulseHalo({ log, warn, error }) {
+export function createPulseHalo({ log, warn, error } = {}) {
 
   // -----------------------------------------------------------
   // INTERNAL STATE (metadata-only counters)
+  //   • No payloads, no identities, only aggregate counts.
 // -----------------------------------------------------------
   const HaloState = {
     impulses_total: 0,
@@ -119,7 +118,7 @@ export function createPulseHalo({ log, warn, error }) {
     meta: {
       layer: "PulseHalo",
       role: "AWARENESS_RING",
-      version: "12.3-PRESENCE-EVO-MAX-PRIME",
+      version: "15-EVO-IMMORTAL",
       target: "full-mesh",
       selfRepairable: true,
       evo: {
@@ -136,9 +135,9 @@ export function createPulseHalo({ log, warn, error }) {
         futureEvolutionReady: true,
         signalFactoringAware: true,
 
-        zeroCompute: true,
-        zeroMutation: true,
-        zeroRoutingInfluence: true,
+        zeroCompute: true,           // no heavy compute, only ratios/heuristics
+        zeroMutation: true,          // never mutates external objects
+        zeroRoutingInfluence: true,  // awareness-only, no routing decisions
 
         // binary + presence awareness
         binaryAware: true,
@@ -156,38 +155,72 @@ export function createPulseHalo({ log, warn, error }) {
   //  (metadata-only, no payload access)
 // -----------------------------------------------------------
   const PulseHaloCounters = {
+    // Called when an impulse starts its journey.
     impulseStarted({ mode, band, presenceTag } = {}) {
       HaloState.impulses_total++;
       classifyMode(mode);
       classifyBand(band);
       trackPresenceTag(presenceTag);
     },
-    impulseCompleted() { HaloState.impulses_completed++; },
 
-    reflexDropped() { HaloState.reflex_drops++; },
-    immuneQuarantined() { HaloState.immune_quarantines++; },
+    // Called when an impulse completes successfully.
+    impulseCompleted() {
+      HaloState.impulses_completed++;
+    },
 
-    auraLooped() { HaloState.aura_loops++; },
-    auraSyncTagged() { HaloState.aura_syncs++; },
+    // Safety-related events.
+    reflexDropped() {
+      HaloState.reflex_drops++;
+    },
+    immuneQuarantined() {
+      HaloState.immune_quarantines++;
+    },
 
-    hormoneBoost() { HaloState.hormone_boosts++; },
-    hormoneDamp() { HaloState.hormone_damps++; },
+    // Aura-related events.
+    auraLooped() {
+      HaloState.aura_loops++;
+    },
+    auraSyncTagged() {
+      HaloState.aura_syncs++;
+    },
 
-    memoryWrite() { HaloState.memory_writes++; },
+    // Hormone modulation events.
+    hormoneBoost() {
+      HaloState.hormone_boosts++;
+    },
+    hormoneDamp() {
+      HaloState.hormone_damps++;
+    },
 
-    meshHops(count = 1) { HaloState.mesh_hops += count; },
+    // Memory events.
+    memoryWrite() {
+      HaloState.memory_writes++;
+    },
 
-    impulseThrottled() { HaloState.flow_throttles++; },
+    // Mesh traversal events.
+    meshHops(count = 1) {
+      HaloState.mesh_hops += count;
+    },
 
-    factoringCollapsedManyToOne() { HaloState.factoring_collapse_events++; },
-    factoringBiasHigh() { HaloState.factoring_bias_high++; },
+    // Flow throttling events.
+    impulseThrottled() {
+      HaloState.flow_throttles++;
+    },
+
+    // Factoring events.
+    factoringCollapsedManyToOne() {
+      HaloState.factoring_collapse_events++;
+    },
+    factoringBiasHigh() {
+      HaloState.factoring_bias_high++;
+    },
     factoredPathUsed() {
       HaloState.factored_path_uses++;
       HaloState.advantage_factored_paths++;
       HaloState.advantage_events++;
     },
 
-    // advantage-field hooks (metadata-only)
+    // Advantage-field hooks (metadata-only).
     advantageBinaryPreferred() {
       HaloState.advantage_binary_pref++;
       HaloState.advantage_events++;
@@ -233,7 +266,14 @@ export function createPulseHalo({ log, warn, error }) {
   // SNAPSHOT (read-only)
 // -----------------------------------------------------------
   function snapshot() {
-    return { ...HaloState, meta: { ...HaloState.meta, evo: { ...HaloState.meta.evo } } };
+    // Shallow clone; safe for dashboards + AI views.
+    return {
+      ...HaloState,
+      meta: {
+        ...HaloState.meta,
+        evo: { ...HaloState.meta.evo }
+      }
+    };
   }
 
 
@@ -334,7 +374,7 @@ export function createPulseHalo({ log, warn, error }) {
 
 
   // -----------------------------------------------------------
-  // BACKEND_AI_VIEW (same as status)
+  // BACKEND_AI_VIEW (same as status, AI-facing)
 // -----------------------------------------------------------
   function statusForBackendAI() {
     return status();
@@ -348,6 +388,7 @@ export function createPulseHalo({ log, warn, error }) {
     return d ? n / d : 0;
   }
 
+  // Stability: 1 - anomaly density (clamped to [0,1]).
   function stability(s) {
     const anomalies =
       s.reflex_drops + s.immune_quarantines + s.aura_loops;
@@ -356,11 +397,15 @@ export function createPulseHalo({ log, warn, error }) {
     return Math.max(0, 1 - Math.min(1, r));
   }
 
+  // Drift: loop density minus sync protection (clamped to [0,1]).
   function drift(s) {
     const loops = s.aura_loops || 0;
     const syncs = s.aura_syncs || 0;
-    const base = loops / ((s.impulses_total || 1));
-    const sync_protect = Math.min(0.5, syncs / ((s.impulses_total || 1)));
+    const volume = s.impulses_total || 1;
+
+    const base = loops / volume;
+    const sync_protect = Math.min(0.5, syncs / volume);
+
     return Math.max(0, Math.min(1, base - sync_protect));
   }
 

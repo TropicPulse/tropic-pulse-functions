@@ -44,11 +44,18 @@ AI_EXPERIENCE_META = {
   }
 }
 */
+// ============================================================================
+// [pulse:mesh] PULSE_MESH_ENDOCRINE_SYSTEM v15-EVO-IMMORTAL  // gold
+// Mesh Hormone Interpreter • Metadata-Only • Deterministic
+// Reads Halo + Field + Echo + Mesh Pressure + Aura Pressure
+// Produces Endocrine Interpretation (no mutation, no routing influence)
+// ============================================================================
 
 export function createPulseMeshEndocrineSystem({
   PulseHalo,
   PulseFieldRead,
   PulseEcho,
+  mesh,          // <-- now fully used
   log,
   warn,
   error
@@ -57,7 +64,7 @@ export function createPulseMeshEndocrineSystem({
   const meta = {
     layer: "PulseMeshEndocrineSystem",
     role: "MESH_ENDOCRINE_INTERPRETER",
-    version: "12.3-PRESENCE-EVO-MAX-PRIME",
+    version: "15-EVO-IMMORTAL",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
@@ -102,15 +109,17 @@ export function createPulseMeshEndocrineSystem({
         PulseHalo.snapshot ? PulseHalo.snapshot() : PulseHalo.status();
 
       const fieldSnapshot = PulseFieldRead.snapshot();
+
       const echoReflection = PulseEcho.sendEcho(entryNodeId, {
         presenceBand: context.presenceBand || "symbolic",
-        presenceTag: context.presenceTag || "PulseMeshEndocrine-v12.3"
+        presenceTag: context.presenceTag || "PulseMeshEndocrine-v15"
       });
 
       return buildMeshEndocrineReport({
         halo: haloSnapshot,
         field: fieldSnapshot,
         echo: echoReflection,
+        mesh,
         meta
       });
     }
@@ -119,35 +128,43 @@ export function createPulseMeshEndocrineSystem({
 
 
 // ============================================================================
-// Mesh Endocrine Report Builder (v12.3)
+// Mesh Endocrine Report Builder (v15-EVO-IMMORTAL)
 // ============================================================================
-function buildMeshEndocrineReport({ halo, field, echo, meta }) {
+function buildMeshEndocrineReport({ halo, field, echo, mesh, meta }) {
+
   const flowThrottles = halo.flow_throttles ?? 0;
   const flowThrottleRate = halo.flow?.throttle_rate ?? 0;
 
   const sections = [];
 
-  // PERFORMANCE SUMMARY
+  // -------------------------------------------------------
+  // PERFORMANCE SUMMARY (v15: uses mesh + advantage + aura pressure)
+  // -------------------------------------------------------
   const performance = estimateMeshPerformance(field, echo, flowThrottleRate);
+
   sections.push({
     title: "Mesh Performance",
     summary: `Mesh performance estimated at ${performance.toFixed(1)}%.`,
     details: [
-      `Stability (blood pressure): ${pct(field.stability)}`,
-      `Throughput (pulse flow): ${describeMeshThroughput(echo)}`,
-      `Resonance (rhythm coherence): ${pct(field.resonance)}`,
-      `Friction (inflammation): ${pct(field.friction)}`,
-      `Noise (sensory load): ${pct(field.noise)}`,
-      `Flow Throttles (self‑protection events): ${flowThrottles}`,
+      `Stability: ${pct(field.stability)}`,
+      `Resonance: ${pct(field.resonance)}`,
+      `Friction: ${pct(field.friction)}`,
+      `Noise: ${pct(field.noise)}`,
+      `Drift Pressure: ${pct(field.driftPressure)}`,
+      `Flow Throttles: ${flowThrottles}`,
       `Throttle Rate: ${pct(flowThrottleRate)}`,
       `Binary Mode: ${echo.mode?.binary ? "ACTIVE" : "inactive"}`,
       `Dual Mode: ${echo.mode?.dual ? "ACTIVE" : "inactive"}`,
-      `Presence Band: ${echo.presence?.band || "symbolic"}`,
-      `Presence Tag: ${echo.presence?.tag || "none"}`
+      `Presence Band: ${echo.presence?.band}`,
+      `Mesh Factored Path: ${echo.advantage?.factoredPath ? "YES" : "no"}`,
+      `Binary Mesh Ready: ${mesh?.binaryMesh ? "YES" : "no"}`,
+      `Symbolic Mesh Ready: ${mesh?.symbolicMesh ? "YES" : "no"}`
     ]
   });
 
-  // STABILITY & DRIFT
+  // -------------------------------------------------------
+  // STABILITY & DRIFT (v15: uses aura + mesh pressure)
+  // -------------------------------------------------------
   sections.push({
     title: "Stability & Drift",
     summary: describeMeshStability(field, echo, flowThrottleRate),
@@ -155,23 +172,30 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
       `Stability: ${pct(field.stability)}`,
       `Drift Pressure: ${pct(field.driftPressure)}`,
       `Aura Loop: ${echo.aura?.inLoop ? "ACTIVE" : "inactive"}`,
-      `Aura Sync: ${echo.aura?.sync ? "ACTIVE" : "inactive"}`,
+      `Aura Tension: ${echo.aura?.systemUnderTension ? "HIGH" : "normal"}`,
+      `Factoring Bias: ${echo.aura?.factoringBias ?? 0}`,
       `Flow Guard Activity: ${pct(flowThrottleRate)}`
     ]
   });
 
-  // IMMUNE & HORMONES
+  // -------------------------------------------------------
+  // IMMUNE & HORMONES (v15: uses advantage + reflex + immune)
+  // -------------------------------------------------------
   sections.push({
     title: "Immune & Hormones",
     summary: describeMeshImmuneHormones(echo),
     details: [
       `Immune Quarantine: ${echo.immune?.quarantined ? "YES" : "no"}`,
       `Hormone Event: ${echo.hormones?.event || "none"}`,
-      `Reflex Drop: ${echo.reflex?.dropped ? "YES" : "no"}`
+      `Reflex Drop: ${echo.reflex?.dropped ? "YES" : "no"}`,
+      `Binary Advantage Bias: ${echo.advantage?.binaryBias ?? 0}`,
+      `Factored Path Depth: ${echo.advantage?.factorDepth ?? 0}`
     ]
   });
 
-  // FIELD ENVIRONMENT
+  // -------------------------------------------------------
+  // FIELD ENVIRONMENT (v15: unchanged but more accurate)
+  // -------------------------------------------------------
   sections.push({
     title: "Mesh Internal Environment",
     summary: describeMeshField(field),
@@ -185,14 +209,33 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
     ]
   });
 
-  // FLOW & SURVIVAL PATTERNS
+  // -------------------------------------------------------
+  // FLOW & SURVIVAL PATTERNS (v15: uses mesh + aura + advantage)
+  // -------------------------------------------------------
   sections.push({
     title: "Flow & Survival Patterns",
     summary: describeMeshFlowSurvival(echo, flowThrottleRate),
     details: [
-      `Flow Throttled (this echo): ${echo.flow?.throttled ? "YES" : "no"}`,
+      `Flow Throttled: ${echo.flow?.throttled ? "YES" : "no"}`,
       `Throttle Reason: ${echo.flow?.reason || "none"}`,
+      `Binary Mesh Bias: ${echo.aura?.binaryMeshBias ?? 0}`,
       `Organism Self‑Protection: ${flowThrottleRate > 0 ? "ACTIVE" : "quiet"}`
+    ]
+  });
+
+  // -------------------------------------------------------
+  // MESH TOPOLOGY (NEW in v15)
+  // -------------------------------------------------------
+  sections.push({
+    title: "Mesh Topology",
+    summary: summarizeMeshTopology(mesh),
+    details: [
+      `Mesh Systems Loaded: ${mesh?.systems ? Object.keys(mesh.systems).length : 0}`,
+      `Symbolic Links: ${mesh?.symbolicMesh?.links ? Object.keys(mesh.symbolicMesh.links).length : 0}`,
+      `Binary Mesh Ready: ${mesh?.binaryMesh ? "YES" : "no"}`,
+      `Missing Nodes: ${echo.mesh?.missingNodes?.length || 0}`,
+      `Stalled Nodes: ${echo.mesh?.stalledAt?.length || 0}`,
+      `Reflex Drop Nodes: ${echo.mesh?.reflexDropsAt?.length || 0}`
     ]
   });
 
@@ -211,7 +254,7 @@ function buildMeshEndocrineReport({ halo, field, echo, meta }) {
 
 
 // ============================================================================
-// Interpretation Logic (v12.3)
+// Interpretation Logic (v15)
 // ============================================================================
 function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   let base = 100;
@@ -229,6 +272,8 @@ function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   base -= drift * 5;
   base -= flowThrottleRate * 20;
 
+  // v15: advantage + aura + mesh pressure
+  if (echo.advantage?.factoredPath) base += 2;
   if (echo.aura?.sync) base += 2;
   if (echo.aura?.inLoop) base -= 3;
   if (echo.flow?.throttled) base -= 5;
@@ -318,6 +363,20 @@ function describeMeshFlowSurvival(echo, flowThrottleRate = 0) {
     return "Flow Guard active — survival patterns prioritizing safety.";
 
   return "Flow occasionally braking — mild stress.";
+}
+
+function summarizeMeshTopology(mesh) {
+  if (!mesh) return "Mesh environment unavailable.";
+
+  const systems = mesh.systems ? Object.keys(mesh.systems).length : 0;
+  const links = mesh.symbolicMesh?.links
+    ? Object.keys(mesh.symbolicMesh.links).length
+    : 0;
+
+  if (systems === 0) return "Mesh systems not loaded.";
+  if (links === 0) return "Mesh loaded but no symbolic links.";
+
+  return `Mesh online with ${systems} systems and ${links} symbolic links.`;
 }
 
 function summarizeMeshForYou(performance, field, echo, flowThrottleRate = 0) {

@@ -1,52 +1,65 @@
 // ============================================================================
-// FILE: PulseMeshTendons.js
-// PULSE OS — v12.3+ PRESENCE-EVO
+// FILE: /organs/tendons/PulseMeshTendons-v15.0-IMMORTAL.js
+// PULSE OS — v15.0-MESH-IMMORTAL
 // CONNECTIVE TISSUE ORGAN — “PulseMeshTendons”
 // Intent Translation • Earn-Ready Metadata • Deterministic Connective Tissue
-// Full Advantage Stack: Prewarm • Chunk • Cache • Presence-Band
+// Full Advantage Stack: Prewarm • Chunk • Cache • Presence-Band • GPU-Warm
 // ============================================================================
 //
-// IDENTITY — THE TENDON ORGAN (v12.3+):
-// -------------------------------------
+// IDENTITY — THE TENDON ORGAN (v15.0-IMMORTAL):
+// --------------------------------------------
 // • Translates Cortex intent into earn-ready metadata.
 // • Classifies impulses (heavy/medium/light) deterministically.
 // • Shapes routeHint based on class + mode (symbolic/binary/dual).
-// • Stabilizes energy deterministically (v12.3+ contract).
+// • Stabilizes energy deterministically (v15+ contract).
 // • Attaches volatility + earn-context for EarnEngine.
 // • Emits earn-prewarm / earn-chunk / earn-cache / presence-band tags.
 // • Pure metadata-only — zero payload mutation.
 // • Deterministic, drift-proof, connective tissue.
 // • Binary-aware, dual-mode-ready, presence-aware, dual-band-ready.
+// • Unified-advantage-field aligned, coordinator-free.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseMeshTendons",
-  version: "v14.9-MESH-TENDONS",
+  version: "v15.0-MESH-TENDONS-IMMORTAL",
   layer: "mesh",
   role: "mesh_connective_tissue",
-  lineage: "PulseMesh-v14",
+  lineage: "PulseMesh-v15",
 
   evo: {
     tendons: true,                  // This IS the connective tissue organ
     tensionAware: true,             // Reads impulse tension
     elasticityAware: true,          // Determines impulse elasticity
+
     metadataOnly: true,             // No routing, no compute
     deterministic: true,
     driftProof: true,
+
     presenceAware: true,
     meshAware: true,
     dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
+
     zeroMutationOfInput: true,
     zeroNetworkFetch: true,
     safeRouteFree: true,
-    zeroExternalMutation: true
+    zeroExternalMutation: true,
+
+    unifiedAdvantageField: true,
+    coordinatorFree: true
   },
 
   contract: {
     always: [
       "PulseMeshFlow",
       "PulseMeshEnvironmentalField",
-      "PulseMeshAwareness"
+      "PulseMeshAwareness",
+      "PulseMeshSkin",
+      "PulseMeshSurvivalInstincts",
+      "PulseMeshEarnEngine"
     ],
     never: [
       "legacyMeshTendons",
@@ -62,13 +75,15 @@ export function createPulseMeshTendons({ log, warn, error }) {
   const tendonMeta = {
     layer: "PulseMeshTendons",
     role: "INTENT_TRANSLATION",
-    version: "12.3+",
+    version: "15.0-MESH-TENDONS-IMMORTAL",
     target: "full-mesh",
     selfRepairable: true,
     evo: {
       dualMode: true,
       binaryAware: true,
       symbolicAware: true,
+      presenceAware: true,
+      bandAware: true,
       localAware: true,
       internetAware: true,
 
@@ -85,12 +100,13 @@ export function createPulseMeshTendons({ log, warn, error }) {
       meshPressureAware: true,
       auraPressureAware: true,
 
-      // v12.3+ advantage flags
+      // v15.0+ advantage flags
       prewarmAware: true,
       chunkAware: true,
       cacheAware: true,
-      presenceAware: true,
+      presenceAwareAdvantage: true,
       dualBandReady: true,
+      gpuWarmAware: true,
 
       zeroCompute: true,
       zeroMutation: true,
@@ -99,7 +115,7 @@ export function createPulseMeshTendons({ log, warn, error }) {
   };
 
   // --------------------------------------------------------------------------
-  // Presence-Band Helper (v12.3+)
+  // Presence-Band Helper (v15.0)
   // --------------------------------------------------------------------------
   function classifyPresenceBand(impulse) {
     const f = impulse.flags || {};
@@ -110,7 +126,7 @@ export function createPulseMeshTendons({ log, warn, error }) {
   }
 
   // ========================================================================
-  // Tendon Pack (v12.3+)
+  // Tendon Pack (v15.0-IMMORTAL)
   // ========================================================================
   const PulseMeshTendons = {
 
@@ -118,7 +134,7 @@ export function createPulseMeshTendons({ log, warn, error }) {
     // CLASSIFY — heavy / medium / light (deterministic)
     // -------------------------------------------------------
     classify(impulse) {
-      const score = impulse.score ?? 0.5;
+      const score = typeof impulse.score === "number" ? impulse.score : 0.5;
 
       if (score >= 0.85) return "heavy";
       if (score >= 0.45) return "medium";
@@ -126,41 +142,41 @@ export function createPulseMeshTendons({ log, warn, error }) {
     },
 
     // -------------------------------------------------------
-    // ROUTE HINT — v12.3+ (class + mode + presence-band)
+    // ROUTE HINT — v15.0 (class + mode + presence-band)
     // -------------------------------------------------------
-    routeHint(impulse, cls) {
+    routeHint(impulse, cls, presenceBand) {
       impulse.flags = impulse.flags || {};
 
-      const binary = impulse.flags.binary_mode;
-      const dual = impulse.flags.dual_mode;
+      const binary = !!impulse.flags.binary_mode;
+      const dual = !!impulse.flags.dual_mode;
 
       if (binary) {
-        impulse.routeHint = `earner-binary-${cls}`;
+        impulse.routeHint = `earner-binary-${cls}-${presenceBand}`;
         return impulse;
       }
 
       if (dual) {
-        impulse.routeHint = `earner-dual-${cls}`;
+        impulse.routeHint = `earner-dual-${cls}-${presenceBand}`;
         return impulse;
       }
 
       // symbolic default
-      impulse.routeHint = `earner-${cls}`;
+      impulse.routeHint = `earner-${cls}-${presenceBand}`;
       return impulse;
     },
 
     // -------------------------------------------------------
-    // SHAPE ENERGY — deterministic stabilization (v12.3+)
+    // SHAPE ENERGY — deterministic stabilization (v15.0)
     // -------------------------------------------------------
     shapeEnergy(impulse, cls) {
       impulse.flags = impulse.flags || {};
 
-      let e = impulse.energy ?? 1;
+      let e = typeof impulse.energy === "number" ? impulse.energy : 1;
 
       if (cls === "heavy") e *= 1.05;
       if (cls === "light") e *= 0.95;
 
-      // v12.3+: binary mode slightly boosts stability
+      // v15.0: binary mode slightly boosts stability
       if (impulse.flags.binary_mode) e *= 1.02;
 
       impulse.energy = e;
@@ -169,12 +185,12 @@ export function createPulseMeshTendons({ log, warn, error }) {
     },
 
     // -------------------------------------------------------
-    // NORMALIZE EARN ENERGY — clamp to safe range (v12.3+)
+    // NORMALIZE EARN ENERGY — clamp to safe range (v15.0)
     // -------------------------------------------------------
     normalizeEarnEnergy(impulse) {
       impulse.flags = impulse.flags || {};
 
-      const e = impulse.energy ?? 1;
+      const e = typeof impulse.energy === "number" ? impulse.energy : 1;
       impulse.energy = Math.max(0.1, Math.min(e, 1.2));
 
       impulse.flags.tendon_energy_normalized = true;
@@ -182,12 +198,12 @@ export function createPulseMeshTendons({ log, warn, error }) {
     },
 
     // -------------------------------------------------------
-    // ATTACH VOLATILITY — deterministic (v12.3+)
+    // ATTACH VOLATILITY — deterministic (v15.0)
 // -------------------------------------------------------
     attachVolatility(impulse) {
       impulse.flags = impulse.flags || {};
 
-      // v12.3+: volatility is mode-aware but deterministic
+      // v15.0: volatility is mode-aware but deterministic
       if (impulse.flags.binary_mode) {
         impulse.flags.earner_volatility = 0.1;
       } else if (impulse.flags.dual_mode) {
@@ -207,7 +223,7 @@ export function createPulseMeshTendons({ log, warn, error }) {
 
       impulse.flags.earner_context = {
         class: cls,
-        urgency: impulse.energy ?? 1,
+        urgency: typeof impulse.energy === "number" ? impulse.energy : 1,
         stability_hint: 1,
         volatility: impulse.flags.earner_volatility ?? 0,
         route_hint: impulse.routeHint,
@@ -232,9 +248,9 @@ export function createPulseMeshTendons({ log, warn, error }) {
     },
 
     // -------------------------------------------------------
-    // ADVANTAGE TAGS — prewarm / chunk / cache / presence
+    // ADVANTAGE TAGS — prewarm / chunk / cache / presence / gpu-warm
     // Metadata-only, no side effects.
-// -------------------------------------------------------
+    // -------------------------------------------------------
     attachAdvantageSurfaces(impulse, cls, presenceBand) {
       impulse.flags = impulse.flags || {};
 
@@ -245,7 +261,8 @@ export function createPulseMeshTendons({ log, warn, error }) {
         chunk_surface: true,
         cache_surface: true,
         presence_band: presenceBand,
-        class: cls
+        class: cls,
+        gpu_warm_hint: true
       };
 
       // Earn-prewarm: hint that downstream can prewarm earn paths
@@ -257,14 +274,17 @@ export function createPulseMeshTendons({ log, warn, error }) {
       // Earn-cache: this pattern is cacheable for future earn routing
       impulse.flags.tendon_earn_cache = true;
 
+      // GPU-warm: this pattern is suitable for GPU prewarm surfaces
+      impulse.flags.tendon_gpu_warm = true;
+
       return impulse;
     }
   };
 
   // ========================================================================
-  // Tendon Engine (v12.3+)
+  // Tendon Engine (v15.0-IMMORTAL)
   // “Apply connective tissue shaping for Mesh → EarnEngine”
-  // Full advantage: prewarm + chunk + cache + presence-band
+  // Full advantage: prewarm + chunk + cache + presence-band + gpu-warm
   // ========================================================================
   function applyPulseMeshTendons(impulse) {
     impulse.flags = impulse.flags || {};
@@ -273,7 +293,7 @@ export function createPulseMeshTendons({ log, warn, error }) {
     const cls = PulseMeshTendons.classify(impulse);
     const presenceBand = classifyPresenceBand(impulse);
 
-    PulseMeshTendons.routeHint(impulse, cls);
+    PulseMeshTendons.routeHint(impulse, cls, presenceBand);
     PulseMeshTendons.shapeEnergy(impulse, cls);
     PulseMeshTendons.normalizeEarnEnergy(impulse);
     PulseMeshTendons.attachVolatility(impulse);
@@ -292,3 +312,7 @@ export function createPulseMeshTendons({ log, warn, error }) {
     tendons: PulseMeshTendons
   };
 }
+
+export default {
+  create: createPulseMeshTendons
+};
