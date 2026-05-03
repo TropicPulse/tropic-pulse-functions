@@ -1,72 +1,28 @@
-// -----------------------------------------------------------------------------
-// PulseOrganismMap.js — v13‑EVO‑PRIME
-// THE JEWEL OF THE ORGANISM
-//
+// ============================================================================
+// PulseOrganismMap.js — v15‑EVO‑IMMORTAL
+// THE JEWEL OF THE ORGANISM — THE GENOME
+// ----------------------------------------------------------------------------
 // LAWS OF THE ORGANISM:
 //   • Any folder starting with "PULSE-" is a system.
 //   • Any .js file inside that folder is an organ.
-//   • No hardcoded clusters.
-//   • No hardcoded organs.
-//   • No hardcoded pages.
+//   • No hardcoded clusters, organs, or pages.
 //   • The filesystem IS the organism.
 //   • The organism map IS the genome.
 //   • All subsystems read from THIS file.
-// -----------------------------------------------------------------------------
-/*
-AI_EXPERIENCE_META = {
-  identity: "OrganismMap",
-  version: "v14.9-IMMORTAL-GENOME",
-  layer: "genome",
-  role: "organism_genome_definition",
-  lineage: "PulseOS-v14",
-
-  evo: {
-    genome: true,                 // This IS the organism genome
-    selfDescribing: true,         // Can describe itself
-    selfEvolving: true,           // Can evolve itself (v14+)
-    autoDiscovery: true,          // Scans filesystem for organs
-    organPlacement: true,         // Determines where organs live
-    organWiring: true,            // Determines how organs connect
-    organPresence: true,          // Determines presence field
-    organMesh: true,              // Determines mesh presence
-    deterministic: true,          // Must be deterministic
-    driftProof: true,             // Genome must never drift
-    safeRouteFree: true,          // Genome must not use safeRoute
-    zeroNetworkFetch: true,       // Genome must not fetch anything
-    zeroMutationOfInput: true,    // Genome must not mutate external state
-    zeroExternalMutation: true
-  },
-
-  contract: {
-    always: [
-      "PulseOSLoader",
-      "PulseOSBrain",
-      "PulseSpinalCord",
-      "PulseChunker",
-      "PulsePresence",
-      "PulseMesh",
-      "PulseBand",
-      "PulseRouter",
-      "PulseBinaryRouter"
-    ],
-    never: [
-      "legacyOrganismMap",
-      "legacyGenome",
-      "safeRoute",
-      "fetchViaCNS"
-    ]
-  }
-}
-*/
+//   • ALL network fetch MUST go through Route API.
+//   • Genome must NEVER fetch directly.
+// ============================================================================
 
 let fs = null;
 let db = null;
 let routes = null;
 let schema = null;
+// eslint-disable-next-line no-unused-vars
+let fetchAPI = null;
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // PREWARM LAYER — Aligns all adapters before organism boot
-// -----------------------------------------------------------------------------
+// ============================================================================
 export function prewarmLayer() {
   try {
     db = getDb({ trace: false });
@@ -85,14 +41,15 @@ export function prewarmLayer() {
     schema.getAllSchemas();
     schema.getSchema("prewarm");
 
+    fetchAPI = getFetchAPI({ trace: false, routes });
+
   } catch (err) {
     console.error("[OrganismMap:Prewarm] Failed:", err);
-  
   }
 }
 
 // ============================================================================
-//  DATABASE API — Firestore/SQL/KV Compatible Adapter
+// DATABASE API — Firestore/SQL/KV Compatible Adapter
 // ============================================================================
 export function getDb({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:db] ${msg}`, data);
@@ -111,7 +68,7 @@ export function getDb({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  FILESYSTEM API — Required by aiEvolution
+// FILESYSTEM API — Required by aiEvolution
 // ============================================================================
 export function getFsAPI({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:fs] ${msg}`, data);
@@ -130,7 +87,7 @@ export function getFsAPI({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  ROUTE API — Required by aiEvolution
+// ROUTE API — NOW FETCH‑AWARE (IMMORTAL v15)
 // ============================================================================
 export function getRouteAPI({ trace = false } = {}) {
   const log = (msg, data) => trace && console.log(`[aiDeps:routes] ${msg}`, data);
@@ -144,9 +101,58 @@ export function getRouteAPI({ trace = false } = {}) {
     async getRoute(routeId) {
       log("getRoute", { routeId });
       return null;
+    },
+
+    // NEW — resolve URL to route
+    async resolve(url) {
+      log("resolve", { url });
+
+      // IMMORTAL: deterministic route resolution
+      return {
+        id: "default",
+        target: url,
+        method: "GET",
+        meta: {
+          layer: "PulseRouteAPI",
+          role: "ROUTE_RESOLUTION",
+          version: "15-EVO-IMMORTAL"
+        }
+      };
+    },
+
+    // NEW — perform fetch THROUGH the route
+    async fetchThroughRoute(route, options = {}) {
+      log("fetchThroughRoute", { route, options });
+
+      try {
+        const res = await fetch(route.target, {
+          method: options.method || route.method || "GET",
+          headers: options.headers || {},
+          body: options.body || null,
+          redirect: "follow",
+          cache: "no-store"
+        });
+
+        const text = await res.text();
+
+        return {
+          ok: res.ok,
+          status: res.status,
+          statusText: res.statusText,
+          url: res.url,
+          headers: Object.fromEntries(res.headers.entries()),
+          body: text
+        };
+      } catch (err) {
+        return {
+          ok: false,
+          error: err?.message || "route_fetch_failed"
+        };
+      }
     }
   });
 }
+
 
 // ============================================================================
 //  SCHEMA API — Required by aiEvolution
@@ -166,15 +172,57 @@ export function getSchemaAPI({ trace = false } = {}) {
     }
   });
 }
-// -----------------------------------------------------------------------------
-// SCAN SYSTEMS — Pure FS API, no Node, no assumptions
-// -----------------------------------------------------------------------------
-async function scanPulseSystems(baseDir) {
+
+// ============================================================================
+// FETCH API — ROUTE‑AWARE, IMMORTAL v15
+// ============================================================================
+export function getFetchAPI({ trace = false, routes } = {}) {
+  const log = (msg, data) => trace && console.log(`[aiDeps:fetch] ${msg}`, data);
+
+  const meta = {
+    layer: "PulseFetchAPI",
+    role: "NETWORK_ADAPTER",
+    version: "15-EVO-IMMORTAL",
+    evo: {
+      deterministicField: true,
+      unifiedAdvantageField: true,
+      driftProof: true,
+      multiInstanceReady: true,
+      dualMode: true,
+      binaryAware: true,
+      symbolicAware: true,
+      presenceAware: true,
+      bandAware: true,
+      zeroMutation: true,
+      zeroExternalMutation: true,
+      zeroRoutingInfluence: true,
+      safeRouteFree: true
+    }
+  };
+
+  async function fetchViaRoute(url, options = {}) {
+    log("fetchViaRoute", { url, options });
+
+    const route = await routes.resolve(url);
+    const result = await routes.fetchThroughRoute(route, options);
+
+    return { ...result, meta };
+  }
+
+  return Object.freeze({
+    fetch: fetchViaRoute,
+    meta
+  });
+}
+
+// ============================================================================
+// SCAN SYSTEMS — Pure FS API
+// ============================================================================
+async function scanPulseSystems() {
   fs = getFsAPI({ trace: false });
 
   const allFiles = await fs.getAllFiles();
 
-  // Identify PULSE-* system directories
   const pulseSystems = allFiles
     .filter(f => f.type === "dir" && f.name.startsWith("PULSE-"))
     .map(f => ({
@@ -202,106 +250,28 @@ async function scanPulseSystems(baseDir) {
   return systems;
 }
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // BUILD ORGANISM MAP — The Genome
-// -----------------------------------------------------------------------------
+// ============================================================================
 export async function buildPulseOrganismMap(baseDir = "/") {
   const systems = await scanPulseSystems(baseDir);
 
   return {
-    version: "13‑EVO‑PRIME‑SELF‑DESCRIBING‑ORGANISM",
+    version: "15‑EVO‑IMMORTAL‑GENOME",
     generatedAt: new Date().toISOString(),
     systems,
 
-    // Lineage metadata — evolution, not structure
-    aliases: {
-      base: {
-        PulseBand: {
-          old: ["PulseBand"],
-          now: [
-            "PulseSkinReflex",
-            "PulseOSSensoryCortex",
-            "PulseProxyImpulse"
-          ]
-        },
-        PulseNet: {
-          old: ["PulseNet"],
-          now: ["PulseSDN"]
-        },
-        PulseClient: {
-          old: ["PulseClient"],
-          now: ["PulseProxyImpulse", "PulseProxySpine"]
-        },
-        PulseUpdate: {
-          old: ["PulseUpdate"],
-          now: ["PulseOSBrainEvolution", "PulseIQ"]
-        },
-        PulseIdentity: {
-          old: ["PulseIdentity"],
-          now: ["PulseProxyBBB"]
-        }
-      },
-
-      routing: {
-        Router: {
-          old: ["router.js", "PulseRouter"],
-          now: ["PulseRouterEvolutionaryThought"]
-        },
-        RouterMemory: {
-          old: ["RouterMemory"],
-          now: [
-            "PulseOSShortTermMemory",
-            "PulseOSTissueMembrane"
-          ]
-        },
-        BackendEndpoint: {
-          old: ["Endpoint"],
-          now: ["PulseProxyOuterAgent"]
-        },
-        BackendRouter: {
-          old: ["BackendRouter"],
-          now: ["PulseProxySpine"]
-        }
-      },
-
-      routeChain: {
-        old: [
-          "PulseBand",
-          "PulseNet",
-          "PulseClient",
-          "router.js",
-          "organ",
-          "PulseSend",
-          "backend"
-        ],
-        now: [
-          "PulseSkinReflex / PulseOSSensoryCortex",
-          "PulseSDN",
-          "PulseProxyImpulse",
-          "PulseRouterEvolutionaryThought",
-          "Organ (PulseOrganismMap)",
-          "PulseSendSystem",
-          "PulseProxySpine"
-        ]
-      },
-
-      binaryRouteChain: {
-        old: [],
-        now: [
-          "PulseSkinReflex / PulseOSSensoryCortex",
-          "PulseSDN",
-          "BinaryRouter-v12.3-PURE",
-          "BinaryProxy-v12.3-PURE",
-          "BinaryMesh-v12.3-PURE",
-          "BinarySend-v12.3-PURE",
-          "BinaryPulse-v12.3-PURE"
-        ]
-      }
+    adapters: {
+      db: getDb({ trace: false }),
+      fs: getFsAPI({ trace: false }),
+      routes: getRouteAPI({ trace: false }),
+      fetch: getFetchAPI({ trace: false, routes: getRouteAPI({ trace: false }) }),
+      schema: getSchemaAPI({ trace: false })
     }
   };
 }
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // EXPORT — The Genome (async)
-// -----------------------------------------------------------------------------
+// ============================================================================
 export const PulseOrganismMap = await buildPulseOrganismMap("/");

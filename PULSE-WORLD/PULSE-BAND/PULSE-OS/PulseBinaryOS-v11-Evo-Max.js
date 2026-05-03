@@ -169,21 +169,23 @@ export const PulseBinaryOSMeta = Object.freeze({
   })
 });
 
-
 // ============================================================================
 //  ORGANISM BOOTSTRAP SET — v12.3 (SYMBOLIC KERNEL SIDE)
 // ============================================================================
-import { withModuleInitGuard, withOrganGuard } from "./PulseOSGovernor.js";                    // Supervisor organ
-import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";               // CNS brain organ
-import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";          // Evolution organ
-import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";       // Wiring organ
+import { withModuleInitGuard, withOrganGuard } from "./PulseOSGovernor.js"; // Supervisor organ
+import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";                 // CNS brain organ
+import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";            // Evolution organ
+import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";         // Wiring organ
+
 // Presence / Mesh presence (symbolic/OS side, optional)
-import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";                 // OS Presence Organ (optional)
-import {createBinaryMeshEnvironment as PulseMeshPresence} from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js";        // Mesh Presence Relay (optional)
+import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";         // OS Presence Organ (optional)
+import { createBinaryMeshEnvironment as createBinaryMeshEnv } from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js"; // Mesh env (binary+symbolic)
+
+import { createPulseMeshPresenceRelay as PulseMeshPresence } from "../PULSE-MESH/PulseMeshPresenceRelay-v12.4-EVO.js"; // Mesh env (binary+symbolic)
 // ============================================================================
 // PULSE OS v13-PRESENCE-EVO+ — WORLD BARREL
 // ============================================================================
-import { createPulseExpansion, pulseExpansion, PulseExpansionMeta } from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
+import { createPulseExpansion, pulseExpansion, PulseExpansionMeta} from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
 
 // (optional) direct access if you want to surface them:
 const Expansion = pulseExpansion; // singleton
@@ -206,6 +208,7 @@ export const PulseWorld = Object.freeze({
     return Expansion.buildExpansionPlan(payload);
   }
 });
+
 // ============================================================================
 //  CONTEXT — BINARY OS KERNEL IDENTITY (v12.3-SPINE-BINARY)
 // ============================================================================
@@ -251,7 +254,7 @@ const PULSE_BINARY_OS_CONTEXT = Object.freeze({
 // ============================================================================
 //  PURE BINARY KERNEL BOOT — NO WINDOW, NO CONSOLE, NO TIMESTAMPS
 // ============================================================================
-async function buildPulseBinaryOSKernel() {
+async function _buildPulseBinaryOSKernel() {
   const meta = PULSE_BINARY_OS_CONTEXT;
 
   // 1) Evolution organ (binary growth engine)
@@ -264,14 +267,25 @@ async function buildPulseBinaryOSKernel() {
     ? PulseOSBrain.PulseOSBrain()
     : PulseOSBrain;
 
-  // 3) Spinal Cord organ (binary wiring fabric)
-  const SpinalCord = typeof PulseSpinalCord.createPulseOSSpinalCord === "function"
-    ? PulseSpinalCord.createPulseOSSpinalCord({
-        Brain,
-        Evolution,
-        log: null,   // binary kernel does not log
-        warn: null   // binary kernel does not warn
-      })
+  // 3) Spinal Cord organ (binary wiring fabric) — guarded
+  const createSpinal = typeof PulseSpinalCord.createPulseOSSpinalCord === "function"
+    ? PulseSpinalCord.createPulseOSSpinalCord
+    : null;
+
+  const SpinalCord = createSpinal
+    ? (withOrganGuard
+        ? withOrganGuard("PulseOSSpinalCord", createSpinal)({
+            Brain,
+            Evolution,
+            log: null,   // binary kernel does not log
+            warn: null   // binary kernel does not warn
+          })
+        : createSpinal({
+            Brain,
+            Evolution,
+            log: null,
+            warn: null
+          }))
     : PulseSpinalCord;
 
   // 4) CORE MEMORY (if v12.3 stack exposes it via Evolution or Brain)
@@ -312,34 +326,51 @@ async function buildPulseBinaryOSKernel() {
     });
   }
 
-  // 7) MESH PRESENCE RELAY (Mesh-level presence organ, optional)
+  
+  // 5) Mesh Presence Relay (Mesh-level presence organ)
   let MeshPresenceRelay = null;
-  if (
-    PulseMeshPresence &&
-    typeof PulseMeshPresence.buildMeshPresenceRelay === "function"
-  ) {
+  if (PulseMeshPresence?.buildMeshPresenceRelay) {
     MeshPresenceRelay = PulseMeshPresence.buildMeshPresenceRelay({
       Brain,
       Evolution,
       SpinalCord,
-      MemoryCore,
-      BinaryOverlay,
       PresenceField,
       meta
     });
-  } else if (
-    PulseMeshPresence &&
-    typeof PulseMeshPresence.PulseMeshPresenceRelay === "function"
-  ) {
+  } else if (PulseMeshPresence?.PulseMeshPresenceRelay) {
     MeshPresenceRelay = PulseMeshPresence.PulseMeshPresenceRelay({
       Brain,
       Evolution,
       SpinalCord,
-      MemoryCore,
-      BinaryOverlay,
       PresenceField,
       meta
     });
+  }
+
+  // 7) BINARY MESH ENVIRONMENT (Mesh-level presence + mesh subsystems, optional)
+  let BinaryMeshEnv = null;
+
+  if (typeof createBinaryMeshEnv === "function") {
+    BinaryMeshEnv = createBinaryMeshEnv({
+      context: {
+        // OS‑kernel context surfaced into mesh env
+        meta,
+        Brain,
+        Evolution,
+        SpinalCord,
+        MemoryCore,
+        BinaryOverlay,
+        PresenceField,
+
+        // mesh bus + clocks + identity if exposed by organs
+        MeshBus: SpinalCord?.MeshBus,
+        SystemClock: Brain?.SystemClock,
+        IdentityDirectory: Brain?.IdentityDirectory
+      },
+      trace: false
+    });
+
+    MeshPresenceRelay = BinaryMeshEnv?.meshPresenceRelay || null;
   }
 
   // PURE BINARY ORGANISM KERNEL
@@ -351,6 +382,7 @@ async function buildPulseBinaryOSKernel() {
     MemoryCore,
     BinaryOverlay,
     PresenceField,
+    BinaryMeshEnv,
     MeshPresenceRelay,
 
     // Binary kernel does NOT have symbolic governor
@@ -362,12 +394,15 @@ async function buildPulseBinaryOSKernel() {
   };
 }
 
+// Wrap kernel build with module init guard if available
+const buildPulseBinaryOSKernel = withModuleInitGuard
+  ? withModuleInitGuard("PulseBinaryOSKernel", _buildPulseBinaryOSKernel)
+  : _buildPulseBinaryOSKernel;
 
 // ============================================================================
 //  BINARY KERNEL PROMISE — PURE ORGANISM CORE
 // ============================================================================
 const PulseBinaryOSKernelPromise = buildPulseBinaryOSKernel();
-
 
 // ============================================================================
 //  OPTIONAL BROWSER SHELL — ONLY IF WINDOW EXISTS
@@ -383,6 +418,7 @@ if (typeof window !== "undefined") {
       MemoryCore: Kernel.MemoryCore,
       BinaryOverlay: Kernel.BinaryOverlay,
       PresenceField: Kernel.PresenceField,
+      BinaryMeshEnv: Kernel.BinaryMeshEnv,
       MeshPresenceRelay: Kernel.MeshPresenceRelay
     };
 
@@ -394,7 +430,6 @@ if (typeof window !== "undefined") {
     // console.error("[PulseBinaryOS-v12.3-Spine-Binary] Kernel bootstrap failed:", _err);
   });
 }
-
 
 // ============================================================================
 //  EXPORTS — FULL BINARY OS KERNEL (v12.3-SPINE-BINARY)

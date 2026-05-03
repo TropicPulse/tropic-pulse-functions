@@ -51,7 +51,7 @@ AI_EXPERIENCE_META = {
 */
 
 import { prewarmSDN } from "./PulseSDN-Prewarm-v12-Evo.js";
-import { PageScannerV12 } from "../../PULSE-UI/_CONNECTORS/PulseSkinReflex.js";
+import { PageScannerV12 } from "../../PULSE-UI/_BACKEND/PulseSkinReflex.js";
 
 // ============================================================================
 // SPINAL CORD IDENTITY — v13.0-PRESENCE-IMMORTAL

@@ -55,7 +55,7 @@ export function createPulseMeshEndocrineSystem({
   PulseHalo,
   PulseFieldRead,
   PulseEcho,
-  mesh,          // <-- now fully used
+  mesh,
   log,
   warn,
   error
@@ -135,12 +135,14 @@ function buildMeshEndocrineReport({ halo, field, echo, mesh, meta }) {
   const flowThrottles = halo.flow_throttles ?? 0;
   const flowThrottleRate = halo.flow?.throttle_rate ?? 0;
 
+  const throughput = describeMeshThroughput(echo);
+
   const sections = [];
 
   // -------------------------------------------------------
-  // PERFORMANCE SUMMARY (v15: uses mesh + advantage + aura pressure)
+  // PERFORMANCE SUMMARY (v15: uses throughput + advantage + aura pressure)
   // -------------------------------------------------------
-  const performance = estimateMeshPerformance(field, echo, flowThrottleRate);
+  const performance = estimateMeshPerformance(field, echo, flowThrottleRate, throughput);
 
   sections.push({
     title: "Mesh Performance",
@@ -153,6 +155,7 @@ function buildMeshEndocrineReport({ halo, field, echo, mesh, meta }) {
       `Drift Pressure: ${pct(field.driftPressure)}`,
       `Flow Throttles: ${flowThrottles}`,
       `Throttle Rate: ${pct(flowThrottleRate)}`,
+      `Throughput: ${throughput}`,
       `Binary Mode: ${echo.mode?.binary ? "ACTIVE" : "inactive"}`,
       `Dual Mode: ${echo.mode?.dual ? "ACTIVE" : "inactive"}`,
       `Presence Band: ${echo.presence?.band}`,
@@ -163,79 +166,84 @@ function buildMeshEndocrineReport({ halo, field, echo, mesh, meta }) {
   });
 
   // -------------------------------------------------------
-  // STABILITY & DRIFT (v15: uses aura + mesh pressure)
+  // STABILITY & DRIFT (v15: uses aura + mesh pressure + throughput)
   // -------------------------------------------------------
   sections.push({
     title: "Stability & Drift",
-    summary: describeMeshStability(field, echo, flowThrottleRate),
+    summary: describeMeshStability(field, echo, flowThrottleRate, throughput),
     details: [
       `Stability: ${pct(field.stability)}`,
       `Drift Pressure: ${pct(field.driftPressure)}`,
       `Aura Loop: ${echo.aura?.inLoop ? "ACTIVE" : "inactive"}`,
       `Aura Tension: ${echo.aura?.systemUnderTension ? "HIGH" : "normal"}`,
       `Factoring Bias: ${echo.aura?.factoringBias ?? 0}`,
-      `Flow Guard Activity: ${pct(flowThrottleRate)}`
+      `Flow Guard Activity: ${pct(flowThrottleRate)}`,
+      `Throughput: ${throughput}`
     ]
   });
 
   // -------------------------------------------------------
-  // IMMUNE & HORMONES (v15: uses advantage + reflex + immune)
+  // IMMUNE & HORMONES (v15: uses advantage + reflex + immune + throughput)
   // -------------------------------------------------------
   sections.push({
     title: "Immune & Hormones",
-    summary: describeMeshImmuneHormones(echo),
+    summary: describeMeshImmuneHormones(echo, throughput),
     details: [
       `Immune Quarantine: ${echo.immune?.quarantined ? "YES" : "no"}`,
       `Hormone Event: ${echo.hormones?.event || "none"}`,
       `Reflex Drop: ${echo.reflex?.dropped ? "YES" : "no"}`,
       `Binary Advantage Bias: ${echo.advantage?.binaryBias ?? 0}`,
-      `Factored Path Depth: ${echo.advantage?.factorDepth ?? 0}`
+      `Factored Path Depth: ${echo.advantage?.factorDepth ?? 0}`,
+      `Throughput: ${throughput}`
     ]
   });
 
   // -------------------------------------------------------
-  // FIELD ENVIRONMENT (v15: unchanged but more accurate)
+  // FIELD ENVIRONMENT (v15: unchanged but throughput-aware)
   // -------------------------------------------------------
   sections.push({
     title: "Mesh Internal Environment",
-    summary: describeMeshField(field),
+    summary: describeMeshField(field, throughput),
     details: [
       `Friction: ${pct(field.friction)}`,
       `Noise: ${pct(field.noise)}`,
       `Load Wave: ${pct(field.loadWave)}`,
       `External Heat: ${pct(field.externalHeat)}`,
       `External Storm: ${pct(field.externalStorm)}`,
-      `External Signal: ${pct(field.externalSignal)}`
+      `External Signal: ${pct(field.externalSignal)}`,
+      `Throughput: ${throughput}`
     ]
   });
 
   // -------------------------------------------------------
-  // FLOW & SURVIVAL PATTERNS (v15: uses mesh + aura + advantage)
+  // FLOW & SURVIVAL PATTERNS (v15: uses mesh + aura + advantage + throughput)
   // -------------------------------------------------------
   sections.push({
     title: "Flow & Survival Patterns",
-    summary: describeMeshFlowSurvival(echo, flowThrottleRate),
+    summary: describeMeshFlowSurvival(echo, flowThrottleRate, throughput),
     details: [
       `Flow Throttled: ${echo.flow?.throttled ? "YES" : "no"}`,
       `Throttle Reason: ${echo.flow?.reason || "none"}`,
       `Binary Mesh Bias: ${echo.aura?.binaryMeshBias ?? 0}`,
-      `Organism Self‑Protection: ${flowThrottleRate > 0 ? "ACTIVE" : "quiet"}`
+      `Organism Self‑Protection: ${flowThrottleRate > 0 ? "ACTIVE" : "quiet"}`,
+      `Throughput: ${throughput}`
     ]
   });
 
   // -------------------------------------------------------
-  // MESH TOPOLOGY (NEW in v15)
+  // MESH TOPOLOGY (v15: throughput-aware)
   // -------------------------------------------------------
   sections.push({
     title: "Mesh Topology",
-    summary: summarizeMeshTopology(mesh),
+    summary: summarizeMeshTopology(mesh, throughput),
     details: [
       `Mesh Systems Loaded: ${mesh?.systems ? Object.keys(mesh.systems).length : 0}`,
       `Symbolic Links: ${mesh?.symbolicMesh?.links ? Object.keys(mesh.symbolicMesh.links).length : 0}`,
       `Binary Mesh Ready: ${mesh?.binaryMesh ? "YES" : "no"}`,
       `Missing Nodes: ${echo.mesh?.missingNodes?.length || 0}`,
       `Stalled Nodes: ${echo.mesh?.stalledAt?.length || 0}`,
-      `Reflex Drop Nodes: ${echo.mesh?.reflexDropsAt?.length || 0}`
+      `Reflex Drop Nodes: ${echo.mesh?.reflexDropsAt?.length || 0}`,
+      `Throughput: ${throughput}`
     ]
   });
 
@@ -245,7 +253,8 @@ function buildMeshEndocrineReport({ halo, field, echo, mesh, meta }) {
       performance,
       field,
       echo,
-      flowThrottleRate
+      flowThrottleRate,
+      throughput
     ),
     sections,
     meta
@@ -256,7 +265,7 @@ function buildMeshEndocrineReport({ halo, field, echo, mesh, meta }) {
 // ============================================================================
 // Interpretation Logic (v15)
 // ============================================================================
-function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
+function estimateMeshPerformance(field, echo, flowThrottleRate = 0, throughput) {
   let base = 100;
 
   const stability = field.stability ?? 1;
@@ -279,6 +288,12 @@ function estimateMeshPerformance(field, echo, flowThrottleRate = 0) {
   if (echo.flow?.throttled) base -= 5;
   if (echo.mode?.binary) base += 1;
 
+  // v15: throughput weighting
+  if (throughput === "minimal routing") base += 2;
+  if (throughput === "light routing") base += 1;
+  if (throughput === "moderate routing") base -= 1;
+  if (throughput === "high routing") base -= 3;
+
   return Math.max(0, base);
 }
 
@@ -289,6 +304,7 @@ function describeMeshThroughput(echo) {
   if (hops < 15) return "moderate routing";
   return "high routing";
 }
+
 
 function describeMeshStability(field, echo, flowThrottleRate = 0) {
   const stability = field.stability ?? 1;

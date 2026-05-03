@@ -75,7 +75,6 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import cors from "cors";
 import fetch from "node-fetch";
 
 export function pulseCors(req, res, next) {

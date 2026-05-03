@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — EXPERIENCE FRAME ORGAN
+//  PULSE OS v14-IMMORTAL — EXPERIENCE FRAME ORGAN
 //  Conversational Repair • Misalignment Handling • UX Harmonization
 //  PURE FUNCTIONAL ON INPUT/OUTPUT. NO BINARY MUTATION.
 // ============================================================================

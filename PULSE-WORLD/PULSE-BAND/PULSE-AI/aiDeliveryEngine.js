@@ -1,5 +1,5 @@
 // ============================================================================
-//  aiDeliveryEngine.js — Pulse OS v12.3‑Presence
+//  aiDeliveryEngine.js — Pulse OS v14‑IMMORTAL
 //  Delivery Organ • Clarity Engine • Drift‑Proof Formatting
 //  PURE DELIVERY. ZERO MUTATION OF MEANING. ZERO RANDOMNESS.
 // ============================================================================
@@ -9,7 +9,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_tools",
   role: "delivery_engine",
-  lineage: "aiDeliveryEngine-v10 → v12 → v14-IMMORTAL",
+  lineage: "aiDeliveryEngine-v10 → v12 → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     deliveryEngine: true,
@@ -33,13 +33,13 @@ AI_EXPERIENCE_META = {
 */
 
 // ─────────────────────────────────────────────────────────────
-// META BLOCK — ORGAN IDENTITY (v12.3‑Presence)
+// META BLOCK — ORGAN IDENTITY (v14‑IMMORTAL)
 // ─────────────────────────────────────────────────────────────
 export const DeliveryEngineMeta = Object.freeze({
   layer: "PulseAIDeliveryEngine",
   role: "DELIVERY_ENGINE_ORGAN",
-  version: "12.3-Presence",
-  identity: "aiDeliveryEngine-v12.3-Presence",
+  version: "14-IMMORTAL",
+  identity: "aiDeliveryEngine-v14-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -60,7 +60,7 @@ export const DeliveryEngineMeta = Object.freeze({
 
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "14-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -137,7 +137,56 @@ function emitDeliveryPacket(type, payload) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// DELIVERY ENGINE PREWARM — v12.3‑Presence
+// CORE DELIVERY ORGAN — v14‑IMMORTAL
+// ─────────────────────────────────────────────────────────────
+export const aiDeliveryEngine = {
+  meta: DeliveryEngineMeta,
+
+  // CORE DELIVERY LOGIC (meaning‑preserving cleanup)
+  deliver(text) {
+    if (!text || typeof text !== "string") {
+      return "";
+    }
+
+    let output = text;
+
+    // Remove excessive whitespace (but keep single spaces)
+    output = output.replace(/\s+/g, " ");
+
+    // Fix double punctuation
+    output = output.replace(/\. \./g, ".");
+
+    // Remove accidental trailing commas or periods (collapse runs)
+    output = output.replace(/[,\.]+$/, (match) => match[0]);
+
+    // Trim edges
+    output = output.trim();
+
+    return output;
+  },
+
+  // ADVANCED DELIVERY — STRUCTURE CLEANUP (line‑level)
+  structure(text) {
+    if (!text || typeof text !== "string") return "";
+
+    return text
+      .replace(/\n\s*\n\s*\n/g, "\n\n") // collapse triple+ newlines
+      .replace(/–/g, "-")              // normalize en-dash
+      .replace(/—/g, "-")              // normalize em-dash
+      .trim();
+  },
+
+  // FINAL DELIVERY PIPELINE — idempotent, drift‑proof
+  finalize(text) {
+    const delivered = this.deliver(text);
+    const structured = this.structure(delivered);
+
+    return structured;
+  }
+};
+
+// ─────────────────────────────────────────────────────────────
+// DELIVERY ENGINE PREWARM — v14‑IMMORTAL
 // ─────────────────────────────────────────────────────────────
 export function prewarmDeliveryEngine() {
   try {
@@ -163,55 +212,6 @@ export function prewarmDeliveryEngine() {
     });
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// CORE DELIVERY ORGAN — v12.3‑Presence
-// ─────────────────────────────────────────────────────────────
-export const aiDeliveryEngine = {
-  meta: DeliveryEngineMeta,
-
-  // CORE DELIVERY LOGIC
-  deliver(text) {
-    if (!text || typeof text !== "string") {
-      return "";
-    }
-
-    let output = text;
-
-    // Remove excessive whitespace
-    output = output.replace(/\s+/g, " ");
-
-    // Fix double punctuation
-    output = output.replace(/\. \./g, ".");
-
-    // Remove accidental trailing commas or periods
-    output = output.replace(/[,\.]+$/, (match) => match[0]);
-
-    // Trim edges
-    output = output.trim();
-
-    return output;
-  },
-
-  // ADVANCED DELIVERY — STRUCTURE CLEANUP
-  structure(text) {
-    if (!text) return "";
-
-    return text
-      .replace(/\n\s*\n\s*\n/g, "\n\n") // collapse triple newlines
-      .replace(/–/g, "-")              // normalize dashes
-      .replace(/—/g, "-")              // normalize em-dashes
-      .trim();
-  },
-
-  // FINAL DELIVERY PIPELINE
-  finalize(text) {
-    const delivered = this.deliver(text);
-    const structured = this.structure(delivered);
-
-    return structured;
-  }
-};
 
 export default aiDeliveryEngine;
 

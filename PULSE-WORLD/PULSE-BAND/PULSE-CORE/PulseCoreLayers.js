@@ -1,23 +1,24 @@
 // ============================================================================
-//  PulseCoreLayers.js — v12‑EVO‑PRESENCE‑MAX
+//  PulseCoreLayers.js — v15-IMMORTAL-LAYERS
 //  ORGANISM‑WIDE MEMORY LAYER MANAGER
 //  “RAM IS A SCRATCHPAD. CORE IS THE TRUTH. PRESENCE DECIDES EVERYTHING.”
-//  • MetaBlock (v12 identity)
+//  • MetaBlock (v15 IMMORTAL identity)
 //  • PulseRol / PresenceRol
-//  • DNA‑aware
-//  • Version‑aware
+//  • DNA‑aware, version‑aware
 //  • Hot‑loop integration
 //  • TTL + healing alignment
 //  • GPU‑promotion rules
-//  • Governor‑aligned (v12)
+//  • Governor‑aligned (CoreMemory v15 lineage)
+//  • Dual‑band / binary‑aware placement hints
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseCoreLayers",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL-LAYERS",
   layer: "corememory_layers",
   role: "corememory_physical_layer_map",
-  lineage: "PulseCoreMemory-v14",
+  lineage: "PulseCoreMemory-v15-IMMORTAL",
 
   evo: {
     layerMap: true,                // RAM, DiskPrimary, DiskSecondary, GPU, Proxy
@@ -48,7 +49,7 @@ AI_EXPERIENCE_META = {
       "fetchViaCNS"
     ]
   }
-}
+};
 */
 
 export const CoreLayersRole = {
@@ -56,7 +57,7 @@ export const CoreLayersRole = {
   subsystem: "Core",
   layer: "LayerManager",
   identity: "PulseCoreLayers",
-  version: "12.0-Evo-Presence",
+  version: "15.0-IMMORTAL-LAYERS",
 
   evo: {
     binaryNative: true,
@@ -68,27 +69,28 @@ export const CoreLayersRole = {
     dnaAware: true,
     governorAligned: true,
     presenceAware: true,
-    versionAware: true
+    versionAware: true,
+    deterministic: true,
+    driftProof: true
   }
 };
 
 // ============================================================================
-//  v12 IDENTITY BLOCK (MetaBlock)
+//  v15 IDENTITY BLOCK (MetaBlock)
 // ============================================================================
 export const CoreLayersMetaBlock = {
   identity: "PulseCoreLayers",
   subsystem: "Core",
   layer: "LayerManager",
   role: "Memory-Layer-Governor",
-  version: "12.0-Evo-Presence",
+  version: "15.0-IMMORTAL-LAYERS",
   evo: CoreLayersRole.evo
 };
 
 // ============================================================================
-//  MEMORY LAYER DEFINITIONS (v12)
+//  MEMORY LAYER DEFINITIONS (v15)
 // ============================================================================
 export const PulseCoreLayers = {
-
   RAM: {
     id: "ram",
     speed: "fastest",
@@ -101,6 +103,8 @@ export const PulseCoreLayers = {
       "gpuWarmBuffers",
       "proxyTempBuffers"
     ],
+    bandHint: "dual",
+    hydrationRole: "scratchpad",
     metaBlock: CoreLayersMetaBlock
   },
 
@@ -116,6 +120,8 @@ export const PulseCoreLayers = {
       "patternMaps",
       "evolutionState"
     ],
+    bandHint: "symbolic-primary",
+    hydrationRole: "truth",
     metaBlock: CoreLayersMetaBlock
   },
 
@@ -130,6 +136,8 @@ export const PulseCoreLayers = {
       "routeSnapshotsMirror",
       "patternMapsMirror"
     ],
+    bandHint: "symbolic-mirror",
+    hydrationRole: "backup",
     metaBlock: CoreLayersMetaBlock
   },
 
@@ -144,6 +152,8 @@ export const PulseCoreLayers = {
       "binaryTransforms",
       "uiHydrationGraphs"
     ],
+    bandHint: "binary-primary",
+    hydrationRole: "compute-surface",
     metaBlock: CoreLayersMetaBlock
   },
 
@@ -157,55 +167,98 @@ export const PulseCoreLayers = {
       "dedupedOutbound",
       "clientVersionMaps"
     ],
+    bandHint: "binary-transit",
+    hydrationRole: "edge-buffer",
     metaBlock: CoreLayersMetaBlock
   }
 };
 
 // ============================================================================
-//  LAYER DECISION ENGINE (v12)
+//  LAYER DECISION ENGINE (v15-IMMORTAL)
+//  • uses dataType + dnaTag + routeId
+//  • GPU‑aware, proxy‑aware
+//  • still compatible with v12 call sites
 // ============================================================================
 export const PulseCoreLayerRules = {
-
   // ---------------------------------------------------------
   //  RULE 1 — WHERE DOES NEW DATA GO?
-  //  v12: dnaTag + dataType + routeId + presence
+  //  v15: dnaTag + dataType + routeId (presence/band implied by dataType)
   // ---------------------------------------------------------
   decidePlacement(dataType, dnaTag, routeId) {
+    const dt = String(dataType || "generic").toLowerCase();
+    const route = String(routeId || "global");
+
+    const gpuPreferred =
+      dt.includes("gpu") ||
+      dt.includes("binary") ||
+      route.includes("gpu") ||
+      route.includes("render");
+
+    const proxyPreferred =
+      dt.includes("proxy") ||
+      dt.includes("network") ||
+      dt.includes("transit");
+
+    const primary = "disk-primary";
+    const secondary = "disk-secondary";
+    const ram = "ram";
+    const gpu = gpuPreferred ? "gpu" : "ram";
+    const proxy = proxyPreferred ? "proxy" : "ram";
+
     return {
-      primary: "disk-primary",
-      secondary: "disk-secondary",
-      ram: "ram",
-      gpu: dataType.includes("gpu") ? "gpu" : "ram",
-      proxy: "proxy"
+      primary,
+      secondary,
+      ram,
+      gpu,
+      proxy,
+      dnaTag,
+      routeId: route
     };
   },
 
   // ---------------------------------------------------------
   //  RULE 2 — WHEN TO PROMOTE?
-  //  v12: hotLoop + GPU‑ready + repeated access
+  //  v15: hotLoop + GPU‑ready + repeated access + route hint
   // ---------------------------------------------------------
-  shouldPromote({ hits, dataType }) {
-    if (dataType.includes("gpu")) return hits > 1;
-    return hits > 3;
+  shouldPromote({ hits, dataType, routeId, dnaTag } = {}) {
+    const dt = String(dataType || "generic").toLowerCase();
+    const route = String(routeId || "global");
+    const h = Number(hits || 0);
+
+    if (dt.includes("gpu")) return h > 1;
+    if (route.includes("hot") || route.includes("loop")) return h > 2;
+    if (String(dnaTag || "").includes("prime")) return h > 2;
+
+    return h > 3;
   },
 
   // ---------------------------------------------------------
   //  RULE 3 — WHEN TO DEMOTE?
-  //  v12: cold data + stale patterns + TTL
+  //  v15: cold data + stale patterns + TTL
   // ---------------------------------------------------------
-  shouldDemote({ hits, lastAccess }) {
+  shouldDemote({ hits, lastAccess, layerId } = {}) {
     const now = Date.now();
     const TTL = 7 * 24 * 60 * 60 * 1000;
-    if (now - lastAccess > TTL) return true;
-    return hits < 1;
+    const h = Number(hits || 0);
+    const last = Number(lastAccess || 0);
+    const layer = String(layerId || "");
+
+    if (layer === "ram" || layer === "gpu") {
+      if (now - last > TTL / 4) return true;
+      return h < 1;
+    }
+
+    if (now - last > TTL) return true;
+    return h < 1;
   },
 
   // ---------------------------------------------------------
   //  RULE 4 — WHEN TO FLUSH?
-  //  v12: RAM always flushes, GPU flushes on boot, proxy flushes on drift
+  //  v15: RAM always flushes, GPU flushes on boot, proxy flushes on drift
   // ---------------------------------------------------------
   shouldFlush(layerId) {
-    return layerId === "ram" || layerId === "gpu";
+    const id = String(layerId || "");
+    return id === "ram" || id === "gpu";
   }
 };
 

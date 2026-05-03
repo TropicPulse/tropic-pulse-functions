@@ -14,64 +14,82 @@
 //  • Zero mutation outside instance.
 // ============================================================================
 
+import PulseProxyHeart from "./PulseProxyHeart.js";
+import PulseProxyBloodPressure from "./PulseProxyBloodPressure.js";
+import PulseProxyCirculatorySystem from "./PulseProxyCirculatorySystem.js";
+
+import PulseProxyHypothalamus from "./PulseProxyHypothalamus.js";
+import PulseProxySpine from "./PulseProxySpine-v11-Evo.js";
+
+import pulseband from "./PulseProxyPNSNervousSystem-v11-Evo.js";   // PNS
+import PulseProxySynapse from "./PulseProxySynapse.js";            // Synapse junctions
+
+import { PulseClient, PulseNet, PULSE_LIMBIC_SHADOW_META } from "./PulseProxyLimbic.js";
+
+import {
+  scanUserScoresForInstanceHints,
+  checkProxyHealthAndMetrics
+} from "./PulseProxyWBCells.js";
+
+import {
+  cleanupSessionsBefore,
+  cleanupErrorsBefore,
+  cleanupRedownloadsBefore
+} from "./PulseProxyPNSPurifier.js";
+
+import PulseProxyOuterAgent from "./PulseProxyOuterAgent.js";
+import createPulseProxyInnerAgent from "./PulseProxyInnerAgent.js";
+
+import PulseProxyImpulse from "./PulseProxyImpulse.js";
+
+import PulseProxyBloodstream from "./PulseProxyBloodstream.js";
+
+import PulseProxyAdrenalSystem from "./PulseProxyAdrenalSystem.js";
+
+import PulseProxyBBB from "./PulseProxyBBB.js";
+
+import pulseHistoryRepair from "./PulseProxyPNSRepair.js";
+
 
 // ============================================================================
-//  ProxyRole — identifies this as the Proxy v12.3-Evo A‑B‑A Organism (symbolic)
+//  PROXY ROLE / META — tie all imported organs into a single identity
 // ============================================================================
-export const ProxyRole = {
-  type: "Proxy",
-  subsystem: "Proxy",
-  layer: "NervousSystem",
-  version: "12.3-EVO",
-  identity: "PulseProxy-v12.3-Evo",
-
-  evo: {
-    driftProof: true,
-    patternAware: true,
-    lineageAware: true,
-    shapeAware: true,
-    evolutionEngineReady: true,
-    routerAwareReady: true,
-    meshAwareReady: true,
-    sendAwareReady: true,
-    futureEvolutionReady: true,
-
-    unifiedAdvantageField: true,
-    proxyV2Ready: true,
-
-    ancestryAware: true,
-    loopTheoryAware: true,
-    tierAware: true,
-    advantageFieldAware: true,
-
-    continuanceAware: true,
-    legacyBridgeCapable: true,
-
-    // A‑B‑A awareness
-    bandAware: true,
-    waveFieldAware: true,
-    binaryFieldAware: true,
-
-    // 12.3+ dual-band + presence/harmonics
-    dualBandCompatible: true,
-    presenceAware: true,
-    harmonicsAware: true,
-    epochStable: true,
-
-    // Passive band abilities (symbolic hints only)
-    passivePrewarm: true,
-    passiveCache: true,
-    passiveChunk: true,
-    passiveRemember: true
+const ProxyRole = Object.freeze({
+  layer: "SymbolicProxy",
+  version: "v13-Evo",
+  role: "SYMBOLIC_PROXY_BRIDGE",
+  lineage: {
+    spine: "PulseProxySpine-v11-Evo",
+    pns: "PulseProxyPNSNervousSystem-v11-Evo",
+    synapse: "PulseProxySynapse",
+    limbic: PULSE_LIMBIC_SHADOW_META?.identity || "LimbicShadow",
+    client: "PulseClient",
+    net: "PulseNet"
   },
+  organs: Object.freeze({
+    heart: PulseProxyHeart,
+    bloodPressure: PulseProxyBloodPressure,
+    circulatorySystem: PulseProxyCirculatorySystem,
+    hypothalamus: PulseProxyHypothalamus,
+    spine: PulseProxySpine,
+    pns: pulseband,
+    synapse: PulseProxySynapse,
+    client: PulseClient,
+    net: PulseNet,
+    outerAgent: PulseProxyOuterAgent,
+    innerAgentFactory: createPulseProxyInnerAgent,
+    impulse: PulseProxyImpulse,
+    bloodstream: PulseProxyBloodstream,
+    adrenalSystem: PulseProxyAdrenalSystem,
+    bbb: PulseProxyBBB,
+    historyRepair: pulseHistoryRepair
+  }),
+  safety: Object.freeze({
+    limbicShadowMeta: PULSE_LIMBIC_SHADOW_META || null
+  })
+});
 
-  routingContract: "PulseRouter-v12.3-Evo-A2",
-  meshContract: "PulseMesh-v12.3",
-  sendContract: "PulseSend-v12.3",
-  gpuOrganContract: "PulseGPU-v12.3",
-  minerContract: "PulseMiner-v12.3",
-  pulseCompatibility: "Pulse-v1/v2/v3/v4"
-};
+
 
 export const PulseProxyOrganismMeta = Object.freeze({
   layer: "PulseProxyOrganism",
@@ -176,82 +194,9 @@ export const PulseProxyOrganismMeta = Object.freeze({
     return: "deterministic organism snapshot + signatures"
   })
 });
-
-// ============================================================================
-//  PULSE PROXY ORGAN — v13‑EVO (symbolic)
-//  Forward‑only, no barrels, no mesh imports, no loops
-// ============================================================================
-
-// ---------------------------------------------------------------------------
-// CORE VITALS
-// ---------------------------------------------------------------------------
-import PulseProxyHeart from "./PulseProxyHeart.js";
-import PulseProxyBloodPressure from "./PulseProxyBloodPressure.js";
-import PulseProxyCirculatorySystem from "./PulseProxyCirculatorySystem.js";
-
-// ---------------------------------------------------------------------------
-// HORMONAL / AUTONOMIC CONTROL
-// ---------------------------------------------------------------------------
-import PulseProxyHypothalamus from "./PulseProxyHypothalamus.js";
-import PulseProxySpine from "./PulseProxySpine-v11-Evo.js";
-
-// ---------------------------------------------------------------------------
-// NERVOUS SYSTEMS (PNS FIRST, THEN CNS)
-// ---------------------------------------------------------------------------
-import pulseband from "./PulseProxyPNSNervousSystem-v11-Evo.js";   // PNS
-import PulseProxySynapse from "./PulseProxySynapse.js";            // Synapse junctions
-
-// ---------------------------------------------------------------------------
-// LIMBIC SYSTEM (INSTINCT / EMOTION / SURVIVAL)
-// ---------------------------------------------------------------------------
-import { PulseClient, PulseNet, PULSE_LIMBIC_SHADOW_META } from "./PulseProxyLimbic.js";
-
-// ---------------------------------------------------------------------------
-// IMMUNE SYSTEM (DEFENSE / PURIFICATION)
-// ---------------------------------------------------------------------------
-import {scanUserScoresForInstanceHints, checkProxyHealthAndMetrics } from "./PulseProxyWBCells.js";
-import { cleanupSessionsBefore, cleanupErrorsBefore, cleanupRedownloadsBefore } 
-  from "./PulseProxyPNSPurifier.js";
-
-// ---------------------------------------------------------------------------
-// AGENTS (EXTERNAL + INTERNAL AMBASSADORS)
-// ---------------------------------------------------------------------------
-import PulseProxyOuterAgent from "./PulseProxyOuterAgent.js";
-import createPulseProxyInnerAgent from "./PulseProxyInnerAgent.js";
-
-// ---------------------------------------------------------------------------
-// SIGNALING + IMPULSE LAYER
-// ---------------------------------------------------------------------------
-import PulseProxyImpulse from "./PulseProxyImpulse.js";
-
-// ---------------------------------------------------------------------------
-// TRANSPORT LAYER (BLOODSTREAM)
-// ---------------------------------------------------------------------------
-import PulseProxyBloodstream from "./PulseProxyBloodstream.js";
-
-// ---------------------------------------------------------------------------
-// STRESS / REFLEX ACCELERATION
-// ---------------------------------------------------------------------------
-import PulseProxyAdrenalSystem from "./PulseProxyAdrenalSystem.js";
-
-// ---------------------------------------------------------------------------
-// BOUNDARY LAYER (BLOOD–BRAIN BARRIER)
-// ---------------------------------------------------------------------------
-import PulseProxyBBB from "./PulseProxyBBB.js";
-
-// ---------------------------------------------------------------------------
-// REPAIR / REGENERATION
-// ---------------------------------------------------------------------------
-import pulseHistoryRepair from "./PulseProxyPNSRepair.js";
-
-
-// If ProxyRole actually lives in one of these, you can re‑export or import it from there.
-// For now, keep symbolic proxy independent of a specific enum and just expose the proxy role symbolically:
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
-//  (Your helper block, unchanged.)
 // ============================================================================
-
 function buildLineage(parentLineage, pattern) {
   const base = Array.isArray(parentLineage) ? parentLineage : [];
   return [...base, pattern];
@@ -498,6 +443,41 @@ function buildPresenceAndHarmonics(pattern, lineage) {
   };
 }
 
+// physiology envelope — uses heart, blood, circulatory, hypothalamus, spine, PNS, synapse, bloodstream, adrenal, BBB
+function buildPhysiologyEnvelope() {
+  return {
+    heartAvailable: !!PulseProxyHeart,
+    bloodPressureAvailable: !!PulseProxyBloodPressure,
+    circulatorySystemAvailable: !!PulseProxyCirculatorySystem,
+    hypothalamusAvailable: !!PulseProxyHypothalamus,
+    spineAvailable: !!PulseProxySpine,
+    pnsAvailable: !!pulseband,
+    synapseAvailable: !!PulseProxySynapse,
+    bloodstreamAvailable: !!PulseProxyBloodstream,
+    adrenalSystemAvailable: !!PulseProxyAdrenalSystem,
+    bbbAvailable: !!PulseProxyBBB
+  };
+}
+
+// limbic envelope — uses limbic meta, client, net
+function buildLimbicEnvelope() {
+  return {
+    limbicMeta: PULSE_LIMBIC_SHADOW_META || null,
+    clientAvailable: !!PulseClient,
+    netAvailable: !!PulseNet
+  };
+}
+
+// agents envelope — uses outer/inner agents, impulse, history repair
+function buildAgentsEnvelope() {
+  return {
+    outerAgentAvailable: !!PulseProxyOuterAgent,
+    innerAgentFactoryAvailable: !!createPulseProxyInnerAgent,
+    impulseAvailable: !!PulseProxyImpulse,
+    historyRepairAvailable: !!pulseHistoryRepair
+  };
+}
+
 // ============================================================================
 //  FACTORY — v13+ symbolic proxy
 // ============================================================================
@@ -534,207 +514,176 @@ export function createProxy({
   );
 
   const { band, bandSignature } = buildBandSignature(pattern);
-  const binaryField = buildBinaryField(pattern, lineage);
-  const waveField   = buildWaveField(pattern, lineage);
+  const binaryField             = buildBinaryField(pattern, lineage);
+  const waveField               = buildWaveField(pattern, lineage);
+  const presenceHarmonics       = buildPresenceAndHarmonics(pattern, lineage);
 
-  const presence = buildPresenceAndHarmonics(pattern, lineage);
+  const physiologyEnvelope = buildPhysiologyEnvelope();
+  const limbicEnvelope     = buildLimbicEnvelope();
+  const agentsEnvelope     = buildAgentsEnvelope();
 
-  return {
-    ProxyRole,
-    jobId,
-    pattern,
-    payload,
-    priority,
-    returnTo,
-    lineage,
-    pageId,
-    meta: {
-      shapeSignature,
-      evolutionStage,
-
-      patternAncestry,
-      lineageSignature,
-      pageAncestrySignature,
-
-      healthScore,
-      tier,
-      advantageField,
-
-      proxyMode,
-      returnArcAssist: true,
-      preferProxyBeforeMesh: true,
-      diagnostics,
-
-      band,
-      bandSignature,
-      binaryField,
-      waveField,
-
-      _abaBand: band,
-      _abaBinaryDensity: binaryField.binarySurface.density,
-      _abaWaveAmplitude: waveField.amplitude,
-
-      presenceBandState: presence.presenceBandState,
-      harmonicDrift: presence.harmonicDrift,
-      coherenceScore: presence.coherenceScore,
-      pulsePrewarm: presence.pulsePrewarm,
-      pulseCacheMode: presence.pulseCacheMode,
-      pulseChunkMode: presence.pulseChunkMode,
-      pulseRemember: presence.pulseRemember,
-      dualBandMode: presence.dualBandMode
-    },
-
-    // forward references to other proxy organs (symbolic, not invoked here)
-    organs: {
-      heart: PulseProxyHeart,
-      bloodPressure: PulseProxyBloodPressure,
-      circulatorySystem: PulseProxyCirculatorySystem,
-      hypothalamus: PulseProxyHypothalamus,
-      spine: PulseProxySpine
-    }
-  };
-}
-
-
-// ============================================================================
-//  EVOLUTION ENGINE — evolve an existing Proxy deterministically (symbolic)
-// ============================================================================
-// ============================================================================
-//  EVOLUTION ENGINE — evolve an existing Proxy deterministically (symbolic)
-//  v13‑EVO upgrade (no drift, no new imports, your structure preserved)
-// ============================================================================
-export function evolveProxy(proxy, context = {}) {
-  // v13: deterministic forward-only pattern evolution
-  const nextPattern = evolvePattern(proxy.pattern, context);
-
-  // v13: lineage extends with evolved pattern
-  const nextLineage = buildLineage(proxy.lineage, nextPattern);
-
-  // v13: recompute all signatures deterministically
-  const shapeSignature  = computeShapeSignature(nextPattern, nextLineage);
-  const evolutionStage  = computeEvolutionStage(nextPattern, nextLineage);
-
-  const patternAncestry  = buildPatternAncestry(nextPattern);
-  const lineageSignature = buildLineageSignature(nextLineage);
-  const pageId           = proxy.pageId || "NO_PAGE";
-
-  const pageAncestrySignature = buildPageAncestrySignature({
-    pattern: nextPattern,
-    lineage: nextLineage,
-    pageId
+  const evolvedPattern = evolvePattern(pattern, {
+    routerHint: pattern.includes("router") ? "router" : null,
+    meshHint: pattern.includes("mesh") ? "mesh" : null,
+    sendHint: pattern.includes("send") ? "send" : null
   });
 
-  // v13: health + tier + advantage
-  const healthScore    = computeHealthScore(nextPattern, nextLineage);
-  const tier           = classifyDegradationTier(healthScore);
-  const advantageField = buildAdvantageField(nextPattern, nextLineage);
-  const proxyMode      = computeProxyMode(tier, nextPattern);
+  const proxyId = `${jobId || "NO_JOB"}::${lineageSignature}::${pageAncestrySignature}`;
 
-  const diagnostics = buildProxyDiagnostics(
-    nextPattern,
-    nextLineage,
-    healthScore,
-    tier
-  );
-
-  // v13 A‑B‑A surfaces
-  const { band, bandSignature } = buildBandSignature(nextPattern);
-  const binaryField = buildBinaryField(nextPattern, nextLineage);
-  const waveField   = buildWaveField(nextPattern, nextLineage);
-
-  // v13 presence/harmonics
-  const presence = buildPresenceAndHarmonics(nextPattern, nextLineage);
-
-  // v13: contextual hints preserved
-  const {
-    routerHint,
-    meshHint,
-    sendHint,
-    healthHint,
-    tierHint
-  } = context || {};
-
-  return {
-    ProxyRole,                 // unchanged
-    jobId: proxy.jobId,
-    pattern: nextPattern,
-    payload: proxy.payload,
-    priority: proxy.priority,
-    returnTo: proxy.returnTo,
-    lineage: nextLineage,
+  // Core proxy envelope (symbolic)
+  const proxyEnvelope = {
+    proxyId,
+    jobId: jobId || null,
+    pattern,
+    evolvedPattern,
+    patternAncestry,
+    lineage,
+    lineageSignature,
     pageId,
+    pageAncestrySignature,
+    shapeSignature,
+    evolutionStage,
+    healthScore,
+    degradationTier: tier,
+    advantageField,
+    proxyMode,
+    diagnostics,
+    band,
+    bandSignature,
+    binaryField,
+    waveField,
+    presenceHarmonics,
+    physiologyEnvelope,
+    limbicEnvelope,
+    agentsEnvelope,
+    priority,
+    returnTo,
+    payload
+  };
 
-    meta: {
-      // v13 identity
-      shapeSignature,
-      evolutionStage,
+  // -------------------------------------------------------------------------
+  //  AGENT HELPERS — actually use outer/inner agents + impulse
+  // -------------------------------------------------------------------------
+  function createInnerAgent(context = {}) {
+    if (!createPulseProxyInnerAgent) return null;
+    return createPulseProxyInnerAgent({
+      proxyId,
+      pattern,
+      lineage,
+      context
+    });
+  }
 
-      // ancestry
-      patternAncestry,
-      lineageSignature,
-      pageAncestrySignature,
+  function dispatchToOuterAgent(context = {}) {
+    if (!PulseProxyOuterAgent) return null;
+    return PulseProxyOuterAgent({
+      proxyId,
+      pattern,
+      lineage,
+      payload,
+      context
+    });
+  }
 
-      // health + tier
-      healthScore,
-      tier,
-      advantageField,
+  function sendImpulse(impulsePayload = {}) {
+    if (!PulseProxyImpulse) return null;
+    return PulseProxyImpulse({
+      proxyId,
+      pattern,
+      lineage,
+      payload: impulsePayload
+    });
+  }
 
-      // mode + diagnostics
-      proxyMode,
-      returnArcAssist: true,
-      preferProxyBeforeMesh: true,
-      diagnostics,
+  // -------------------------------------------------------------------------
+  //  DIAGNOSTICS — uses WB cells (scores + health metrics)
+// -------------------------------------------------------------------------
+  async function runDiagnostics({ instanceId, beforeTimestamp } = {}) {
+    const scores = await scanUserScoresForInstanceHints(instanceId || null);
+    const health = await checkProxyHealthAndMetrics();
 
-      // v13 contextual hints
-      proxyHints: {
-        routerHint: routerHint || null,
-        meshHint: meshHint || null,
-        sendHint: sendHint || null,
-        healthHint: typeof healthHint === "number" ? healthHint : null,
-        tierHint: tierHint || null
-      },
+    return {
+      role: ProxyRole,
+      proxyId,
+      pattern,
+      lineage,
+      scores,
+      health,
+      beforeTimestamp: beforeTimestamp || null
+    };
+  }
 
-      // v13 A‑B‑A surfaces
-      band,
-      bandSignature,
-      binaryField,
-      waveField,
+  // -------------------------------------------------------------------------
+  //  MAINTENANCE — uses PNS purifier + history repair
+// -------------------------------------------------------------------------
+  async function runMaintenance({ beforeTimestamp } = {}) {
+    const ts = beforeTimestamp || Date.now();
 
-      // v13 A‑B‑A hints
-      _abaBand: band,
-      _abaBinaryDensity: binaryField.binarySurface.density,
-      _abaWaveAmplitude: waveField.amplitude,
+    const sessions    = await cleanupSessionsBefore(ts);
+    const errors      = await cleanupErrorsBefore(ts);
+    const redownloads = await cleanupRedownloadsBefore(ts);
+    const historyFix  = await pulseHistoryRepair({ before: ts });
 
-      // v13 presence/harmonics
-      presenceBandState: presence.presenceBandState,
-      harmonicDrift: presence.harmonicDrift,
-      coherenceScore: presence.coherenceScore,
-      pulsePrewarm: presence.pulsePrewarm,
-      pulseCacheMode: presence.pulseCacheMode,
-      pulseChunkMode: presence.pulseChunkMode,
-      pulseRemember: presence.pulseRemember,
-      dualBandMode: presence.dualBandMode,
+    return {
+      role: ProxyRole,
+      proxyId,
+      pattern,
+      lineage,
+      sessions,
+      errors,
+      redownloads,
+      historyFix
+    };
+  }
 
-      // v13 loop theory (unchanged, stable)
-      loopTheory: {
-        routingCompletion: true,
-        allowLoopfieldPropulsion: true,
-        pulseComputeContinuity: true,
-        errorRouteAround: true,
+  // -------------------------------------------------------------------------
+  //  PUBLIC PROXY OBJECT — no abilities removed, only enriched
+  // -------------------------------------------------------------------------
+  return {
+    role: ProxyRole,
+    envelope: proxyEnvelope,
 
-        continuanceCapable: true,
-        preferContinuanceOnOrganFailure: true
-      }
-    }
+    // core identity
+    getId() {
+      return proxyId;
+    },
+
+    getLineage() {
+      return [...lineage];
+    },
+
+    getDiagnostics() {
+      return { ...diagnostics };
+    },
+
+    getMode() {
+      return proxyMode;
+    },
+
+    getBand() {
+      return band;
+    },
+
+    // envelopes
+    getPhysiologyEnvelope() {
+      return { ...physiologyEnvelope };
+    },
+
+    getLimbicEnvelope() {
+      return { ...limbicEnvelope };
+    },
+
+    getAgentsEnvelope() {
+      return { ...agentsEnvelope };
+    },
+
+    // agents / impulses
+    createInnerAgent,
+    dispatchToOuterAgent,
+    sendImpulse,
+
+    // async ops
+    runDiagnostics,
+    runMaintenance
   };
 }
-
-
-// ============================================================================
-//  DEFAULT EXPORT
-// ============================================================================
-export default {
-  createProxy,
-  evolveProxy
-};
-

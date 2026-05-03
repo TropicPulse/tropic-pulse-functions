@@ -1,6 +1,6 @@
 // ============================================================================
-//  aiExecutionEngine.js — Pulse OS v12.3‑Presence
-//  Dual‑Band Execution • Persona Routing • Organ Dispatch • Packet‑Ready
+//  aiExecutionEngine.js — Pulse OS v14‑IMMORTAL
+//  Dual‑Band Execution • Persona Routing • Organ Dispatch • Context Fusion
 //  PURE EXECUTION. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 /*
@@ -9,7 +9,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_core",
   role: "ai_execution_engine",
-  lineage: "aiEngine-v9 → v11 → v14-IMMORTAL",
+  lineage: "aiEngine-v9 → v11 → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     executionEngine: true,
@@ -17,6 +17,10 @@ AI_EXPERIENCE_META = {
     dualBand: true,
     symbolicPrimary: true,
     binaryAware: true,
+    contextAware: true,
+    arteryAware: true,
+    emotionAware: true,
+    deliveryAware: true,
 
     deterministic: true,
     driftProof: true,
@@ -27,7 +31,7 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiBrainstem", "aiCortex", "aiContextEngine"],
+    always: ["aiBrainstem", "aiCortex", "aiContextEngine", "aiDualBand"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -36,8 +40,8 @@ AI_EXPERIENCE_META = {
 export const ExecutionEngineMeta = Object.freeze({
   layer: "PulseAIExecutionKernel",
   role: "EXECUTION_ENGINE",
-  version: "12.3-Presence",
-  identity: "aiExecutionEngine-v12.3-Presence",
+  version: "14-IMMORTAL",
+  identity: "aiExecutionEngine-v14-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -50,6 +54,10 @@ export const ExecutionEngineMeta = Object.freeze({
     routingAware: true,
     symbolicAware: true,
     binaryAware: true,
+    contextAware: true,
+    arteryAware: true,
+    emotionAware: true,
+    deliveryAware: true,
 
     packetAware: true,
     windowAware: true,
@@ -59,19 +67,21 @@ export const ExecutionEngineMeta = Object.freeze({
     gpuFriendly: true,
 
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "14-IMMORTAL"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Execute AI operations through persona routing, boundaries, and dual-band context.",
+      "Execute AI operations through persona routing, boundaries, dual-band context, and artery-aware vitals.",
     never: Object.freeze([
       "mutate context",
       "mutate organs",
       "bypass boundaries",
       "bypass permissions",
       "introduce randomness",
-      "alter persona logic"
+      "alter persona logic",
+      "override dual-band safety",
+      "ignore artery pressure"
     ]),
     always: Object.freeze([
       "build deterministic cognitive frame",
@@ -79,9 +89,10 @@ export const ExecutionEngineMeta = Object.freeze({
       "resolve persona safely",
       "enforce boundaries",
       "enforce permissions",
+      "respect dual-band artery vitals",
       "route execution through correct mode",
-      "return unified response packet",
-      "emit deterministic execution packets"
+      "emit context + execution packets deterministically",
+      "return unified response packet"
     ])
   }),
 
@@ -99,6 +110,7 @@ export const ExecutionEngineMeta = Object.freeze({
         "start",
         "permission-denied",
         "mode-selected",
+        "context-frame",
         "complete",
         "error"
       ]
@@ -133,14 +145,14 @@ function emitExecutionPacket(type, payload = {}) {
 }
 
 // ============================================================================
-//  PREWARM — warms routing + persona + boundaries (Presence‑grade)
+//  PREWARM — warms routing + persona + boundaries + artery (IMMORTAL‑grade)
 // ============================================================================
 export function prewarmExecutionEngine({ trace = false } = {}) {
   try {
-    const sampleRequest = { domain: "system", action: "read" };
+    const sampleRequest = { domain: "system", action: "read", intent: "prewarm" };
 
     const packet = emitExecutionPacket("prewarm", {
-      message: "Execution engine prewarmed and routing pathways aligned.",
+      message: "Execution engine prewarmed and routing + persona pathways aligned.",
       sampleRequest
     });
 
@@ -155,19 +167,20 @@ export function prewarmExecutionEngine({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  MAIN EXECUTION ENTRY — v12.3‑Presence
+//  MAIN EXECUTION ENTRY — v14‑IMMORTAL (Dual‑Band + Context‑Fusion)
 // ============================================================================
 export async function runAI(request = {}, operation, deps = {}, dualBand = null) {
   const { db, fsAPI, routeAPI, schemaAPI } = deps || {};
 
-  // 1) Build Cognitive Frame
+  // 1) Build initial Cognitive Frame (symbolic baseline)
   const context = createAIContext(request);
   context.logStep?.("AI context initialized.");
 
   const startPacket = emitExecutionPacket("start", {
     requestSummary: {
       domain: request.domain || "system",
-      action: request.action || "read"
+      action: request.action || "read",
+      intent: request.intent || "analyze"
     }
   });
 
@@ -177,7 +190,7 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
   context.organs = brainstem.organs;
   context.brainstemPacket = brainstem.packet;
 
-  // 3) Dual‑Band Routing
+  // 3) Dual‑Band Routing (symbolic router + dualBand hints)
   const routing = routeAIRequest(request, dualBand);
   context.routing = routing;
 
@@ -185,9 +198,11 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
     metabolic: {
       pressure: routing.dualBand?.binaryPressure ?? 0,
       load: routing.dualBand?.binaryLoad ?? 0
-    }
+    },
+    artery: dualBand?.artery?.organism || null
   };
 
+  // 4) Persona Resolution (dual‑band aware)
   const persona = resolvePersonaV11({
     personaId: routing.personaId,
     userId: context.userId,
@@ -199,7 +214,7 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
   context.persona = persona;
   context.personaId = persona.id;
 
-  // 4) Boundary Mode + Permissions
+  // 5) Boundary Mode + Permissions (dual‑band aware)
   const boundaryMode = persona.boundaryMode;
   context.boundaryMode = boundaryMode;
 
@@ -225,13 +240,38 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
     return buildAIResponse(null, context, packet, startPacket, null);
   }
 
-  // 5) Persona Execution Pathway
-  let result = null;
-  let modePacket = emitExecutionPacket("mode-selected", {
+  // 6) Dual‑Band Context Fusion (if dualBand surface is available)
+  let contextFramePacket = null;
+  if (dualBand && dualBand.symbolic && dualBand.symbolic.contextEngine) {
+    const contextEngine = dualBand.symbolic.contextEngine;
+    const dualBandPayload = {
+      brainstem: {
+        context: { userId: context.userId, userIsOwner: context.userIsOwner },
+        organs: context.organs
+      },
+      request,
+      routerPacket: routing,
+      persona,
+      binaryVitals: {
+        throughput: routing.dualBand?.binaryThroughput ?? 1,
+        pressure: binaryVitals.metabolic.pressure ?? 0,
+        load: binaryVitals.metabolic.load ?? 0
+      },
+      dualBand
+    };
+
+    contextFramePacket = contextEngine.buildContextFrame(dualBandPayload);
+    context.contextFrame = contextFramePacket;
+  }
+
+  const modePacket = emitExecutionPacket("mode-selected", {
     personaId: persona.id,
     boundaryMode,
     binaryVitals
   });
+
+  // 7) Persona Execution Pathway (architect / observer / tourguide / default)
+  let result = null;
 
   try {
     context.logStep?.("Executing AI operation...");
@@ -256,7 +296,8 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
     const completePacket = emitExecutionPacket("complete", {
       personaId: persona.id,
       boundaryMode,
-      binaryVitals
+      binaryVitals,
+      artery: binaryVitals.artery || null
     });
 
     return buildAIResponse(
@@ -264,7 +305,8 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
       context,
       completePacket,
       startPacket,
-      modePacket
+      modePacket,
+      contextFramePacket
     );
   } catch (err) {
     context.flagSlowdown?.("Operation threw an exception.");
@@ -282,15 +324,23 @@ export async function runAI(request = {}, operation, deps = {}, dualBand = null)
       context,
       errorPacket,
       startPacket,
-      modePacket
+      modePacket,
+      contextFramePacket
     );
   }
 }
 
 // ============================================================================
-//  RESPONSE BUILDER — v12.3‑Presence
+//  RESPONSE BUILDER — v14‑IMMORTAL (Dual‑Band + Context Frame)
 // ============================================================================
-function buildAIResponse(result, context, packet, startPacket, modePacket) {
+function buildAIResponse(
+  result,
+  context,
+  packet,
+  startPacket,
+  modePacket,
+  contextFramePacket
+) {
   return Object.freeze({
     result,
     context,
@@ -299,9 +349,11 @@ function buildAIResponse(result, context, packet, startPacket, modePacket) {
     boundaryMode: context.boundaryMode,
     permissions: context.permissions,
     organs: context.organs,
+    contextFrame: context.contextFrame || null,
     packets: {
       start: startPacket || null,
       mode: modePacket || null,
+      contextFrame: contextFramePacket || null,
       final: packet || null
     }
   });

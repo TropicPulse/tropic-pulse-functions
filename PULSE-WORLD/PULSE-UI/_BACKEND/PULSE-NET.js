@@ -86,8 +86,8 @@ AI_EXPERIENCE_META = {
 import { aiOvermindPrime } from "../../PULSE-BAND/PULSE-AI/aiOvermindPrime.js";
 import { createForwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/ForwardEngine.js";
 import { createBackwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/BackwardEngine.js";
-import PulseUIErrors from "../_CONNECTORS/PulseUIErrors-v12-Evo.js";
-import { initUIFlow } from "../_CONNECTORS/PulseUIFlow-v12-Evo.js";
+import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v12-Evo.js";
+import { initUIFlow } from "../_FRONTEND/PulseUIFlow-v12-Evo.js";
 import { safeRoute as route } from "./PulseProofBridge.js";
 
 // ============================================================================

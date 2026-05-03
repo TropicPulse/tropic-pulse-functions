@@ -1,7 +1,16 @@
 // ============================================================================
-//  PULSE OS v12.3‑Presence — CONTEXT ENGINE
-//  Context Fusion • Routing Frame • Safety + Persona Snapshot
+//  PULSE OS v14‑IMMORTAL — CONTEXT ENGINE
+//  Context Fusion • Routing Frame • Safety + Persona + Memory Snapshot
 //  PURE CONTEXT. ZERO MUTATION. ZERO RANDOMNESS.
+// ============================================================================
+//
+//  v14‑IMMORTAL Upgrades:
+//   • Presence‑aware (windowId + routeId + dnaTag)
+//   • Dualband‑safe symbolic+binary fusion
+//   • MemorySpine + GPU + Boundaries‑aware (read‑only vitals)
+//   • Brainstem v14‑IMMORTAL compatible
+//   • Deterministic ContextFrame + ContextPacket emission
+//   • Multi‑instance, per‑request attach
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
@@ -9,7 +18,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_core",
   role: "context_engine",
-  lineage: "aiContextEngine-v10 → v12 → v14-IMMORTAL",
+  lineage: "aiContextEngine-v10 → v12 → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     contextEngine: true,
@@ -36,8 +45,8 @@ AI_EXPERIENCE_META = {
 export const ContextEngineMeta = Object.freeze({
   layer: "PulseAIContextEngine",
   role: "CONTEXT_ENGINE_ORGAN",
-  version: "12.3-Presence",
-  identity: "aiContextEngine-v12.3-Presence",
+  version: "14-IMMORTAL",
+  identity: "aiContextEngine-v14-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -50,6 +59,9 @@ export const ContextEngineMeta = Object.freeze({
     personalAware: true,
     overmindAware: true,
     organismAware: true,
+    memorySpineAware: true,
+    gpuAware: true,
+    boundariesAware: true,
 
     packetAware: true,
     presenceAware: true,
@@ -58,12 +70,12 @@ export const ContextEngineMeta = Object.freeze({
 
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "12.3-Presence"
+    epoch: "14-IMMORTAL"
   }),
 
   contract: Object.freeze({
     purpose: [
-      "Fuse Brainstem context, Router packet, Persona state, and SafetyFrame into a unified ContextFrame",
+      "Fuse Brainstem context, Router packet, Persona state, SafetyFrame, and Memory/GPU vitals into a unified ContextFrame",
       "Expose a deterministic context surface for Overmind and Cortex",
       "Keep identity, permissions, and boundaries read-only and explicit"
     ],
@@ -73,6 +85,7 @@ export const ContextEngineMeta = Object.freeze({
       "mutate Router packet",
       "mutate persona definitions",
       "override SafetyFrame decisions",
+      "override BoundariesEngine decisions",
       "introduce randomness",
       "perform cognition or intent handling"
     ]),
@@ -81,6 +94,7 @@ export const ContextEngineMeta = Object.freeze({
       "remain deterministic for same inputs",
       "respect persona, boundaries, and permissions contracts",
       "surface dual-band vitals as read-only hints",
+      "surface memory + gpu vitals as read-only hints",
       "emit deterministic context-engine packets",
       "return frozen context frames"
     ])
@@ -121,7 +135,55 @@ function emitContextEnginePacket(type, payload) {
 }
 
 // ============================================================================
-//  CONTEXT ENGINE PREWARM — v12.3‑Presence
+//  INTERNAL VITALS HELPERS (read-only)
+// ============================================================================
+function readMemoryVitals(memory) {
+  if (!memory) return null;
+  try {
+    const hot = typeof memory.getHotKeys === "function"
+      ? memory.getHotKeys(3)
+      : [];
+    const meta = memory.Meta || {};
+    return Object.freeze({
+      hotKeyCount: hot.length || 0,
+      lastFlushEpoch: meta.lastFlushEpoch || 0,
+      lastLoadEpoch: meta.lastLoadEpoch || 0,
+      fallbackUsed: !!meta.fallbackUsed,
+      lastBandUsed: meta.lastBandUsed || null,
+      version: meta.version || null,
+      dnaTag: meta.dnaTag || null
+    });
+  } catch {
+    return null;
+  }
+}
+
+function readGpuVitals(gpu) {
+  if (!gpu) return null;
+  try {
+    const meta = gpu.GPUOrchestratorMeta || gpu.meta || {};
+    return Object.freeze({
+      identity: meta.identity || null,
+      version: meta.version || null
+    });
+  } catch {
+    return null;
+  }
+}
+
+function readBoundariesVitals(boundariesPacket) {
+  if (!boundariesPacket) return null;
+  return Object.freeze({
+    packetType: boundariesPacket.packetType || null,
+    personaId: boundariesPacket.personaId || null,
+    mode: boundariesPacket.mode || null,
+    driftDetected: !!boundariesPacket.driftDetected,
+    driftCount: boundariesPacket.driftCount || 0
+  });
+}
+
+// ============================================================================
+//  CONTEXT ENGINE PREWARM — v14‑IMMORTAL
 // ============================================================================
 export function prewarmContextEngine(config = {}) {
   try {
@@ -130,8 +192,15 @@ export function prewarmContextEngine(config = {}) {
     const warm = new AiContextEngine({ safetyFrame, experienceFrame });
 
     const warmBrainstem = {
-      context: { userId: "prewarm", userIsOwner: false },
-      organs: { encoder: {}, memory: {} }
+      context: {
+        userId: "prewarm",
+        userIsOwner: false,
+        windowId: "win-prewarm",
+        routeId: "context-prewarm",
+        dnaTag: "prewarm-dna"
+      },
+      organs: { encoder: {}, memory: {} },
+      packet: { packetType: "brainstem-prewarm" }
     };
 
     const warmRequest = {
@@ -179,7 +248,9 @@ export function prewarmContextEngine(config = {}) {
     const warmDualBand = {
       organism: {
         organismSnapshot: () => ({ snapshot: "prewarm" })
-      }
+      },
+      memory: null,
+      gpu: null
     };
 
     warm.buildContextFrame({
@@ -188,7 +259,8 @@ export function prewarmContextEngine(config = {}) {
       routerPacket: warmRouter,
       persona: warmPersona,
       binaryVitals: warmBinaryVitals,
-      dualBand: warmDualBand
+      dualBand: warmDualBand,
+      boundariesPacket: null
     });
 
     return emitContextEnginePacket("prewarm", {
@@ -203,7 +275,7 @@ export function prewarmContextEngine(config = {}) {
 }
 
 // ============================================================================
-//  CORE IMPLEMENTATION — v12.3‑Presence (Hybrid)
+//  CORE IMPLEMENTATION — v14‑IMMORTAL
 // ============================================================================
 export class AiContextEngine {
   constructor({ safetyFrame = null, experienceFrame = null } = {}) {
@@ -217,7 +289,8 @@ export class AiContextEngine {
     routerPacket = {},
     persona = {},
     binaryVitals = {},
-    dualBand = null
+    dualBand = null,
+    boundariesPacket = null
   } = {}) {
     const baseContext = brainstem.context || {};
     const organs = brainstem.organs || {};
@@ -244,12 +317,18 @@ export class AiContextEngine {
       archetypePrimaryPage: routerPacket.archetypes?.primaryPage || null
     };
 
+    const memory = dualBand?.memory || baseContext.memory || null;
+    const gpu = dualBand?.gpu || baseContext.gpu || null;
+
     const frame = Object.freeze({
       meta: ContextEngineMeta,
 
       user: Object.freeze({
         userId: baseContext.userId || null,
-        userIsOwner: !!baseContext.userIsOwner
+        userIsOwner: !!baseContext.userIsOwner,
+        windowId: baseContext.windowId || null,
+        routeId: baseContext.routeId || null,
+        dnaTag: baseContext.dnaTag || null
       }),
 
       persona: Object.freeze({
@@ -275,6 +354,11 @@ export class AiContextEngine {
         safetyFrameMeta: this.safetyFrame?.meta || null
       }),
 
+      boundaries: Object.freeze({
+        packet: boundariesPacket || null,
+        vitals: readBoundariesVitals(boundariesPacket)
+      }),
+
       dualBand: Object.freeze({
         hints: dualBandHints,
         binaryVitals: binaryVitals || {},
@@ -282,9 +366,19 @@ export class AiContextEngine {
           dualBand?.organism?.organismSnapshot?.() || null
       }),
 
+      memory: Object.freeze({
+        vitals: readMemoryVitals(memory)
+      }),
+
+      gpu: Object.freeze({
+        vitals: readGpuVitals(gpu)
+      }),
+
       organs: Object.freeze({
         ...organs
-      })
+      }),
+
+      brainstemPacket: brainstem.packet || null
     });
 
     return emitContextEnginePacket("context:frame", frame);
@@ -292,7 +386,7 @@ export class AiContextEngine {
 }
 
 // ============================================================================
-//  PUBLIC API — v12.3‑Presence
+//  PUBLIC API — v14‑IMMORTAL
 // ============================================================================
 export function createContextEngine(config = {}) {
   prewarmContextEngine(config);

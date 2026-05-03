@@ -1,5 +1,5 @@
 /**
- * aiScheduler.js — Pulse OS v12.3‑EVO+ Organ
+ * aiScheduler.js — Pulse OS v15‑IMMORTAL Organ
  * ---------------------------------------------------------
  * CANONICAL ROLE:
  *   Binary Scheduler of Pulse OS.
@@ -16,21 +16,26 @@
  *     - temporal cost
  *     - temporal budget
  *     - descriptive buckets
- *     - task-density temporal arteries v3
+ *     - task-density temporal arteries v4 (IMMORTAL)
  *     - multi-instance harmony + soft spiral warnings (non-blocking)
  *     - task-level prewarm + binary chunk awareness
+ *     - window-safe scheduler snapshot
+ *     - lineage-aware drift protection (IMMORTAL)
  */
 /*
 AI_EXPERIENCE_META = {
   identity: "aiScheduler",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "ai_scheduler",
-  lineage: "aiScheduler-v10 → v14-IMMORTAL",
+  lineage: "aiScheduler-v10 → v12.3-EVO+ → v15-IMMORTAL",
 
   evo: {
     schedulingEngine: true,
     stageTiming: true,
+    temporalArteryV4: true,
+    chunkAware: true,
+    prewarmAware: true,
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
@@ -53,8 +58,8 @@ AI_EXPERIENCE_META = {
 export const SchedulerMeta = Object.freeze({
   layer: "BinaryNervousSystem",
   role: "BINARY_SCHEDULER_ORGAN",
-  version: "12.3-EVO+",
-  identity: "aiBinaryScheduler-v12.3-EVO+",
+  version: "15-IMMORTAL",
+  identity: "aiBinaryScheduler-v15-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -66,14 +71,18 @@ export const SchedulerMeta = Object.freeze({
     arteryAware: true,
     reflexAware: true,
     pipelineAware: true,
+    chunkAware: true,
+    prewarmAware: true,
+    lineageAware: true,
+    spiralAware: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-EVO+"
+    epoch: "15-IMMORTAL"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic binary scheduling of tasks, pulses, jobs, and reflex triggers with temporal artery metrics v3.",
+      "Provide deterministic binary scheduling of tasks, pulses, jobs, and reflex triggers with temporal artery metrics v4 and window-safe snapshots.",
 
     never: Object.freeze([
       "introduce randomness",
@@ -82,22 +91,29 @@ export const SchedulerMeta = Object.freeze({
       "override reflex decisions",
       "block the organism",
       "generate symbolic state",
-      "perform cognition"
+      "perform cognition",
+      "emit non-binary payloads",
+      "leak task payloads in artery snapshots"
     ]),
 
     always: Object.freeze([
       "treat all inputs as read-only",
       "emit binary-only outputs",
-      "compute temporal artery metrics v3",
+      "compute temporal artery metrics v4",
       "maintain deterministic tick timing",
       "remain drift-proof",
-      "remain non-blocking"
+      "remain non-blocking",
+      "emit window-safe scheduler snapshots"
     ])
-  })
+  }),
+
+  boundaryReflex() {
+    return "BinaryScheduler is a deterministic temporal organ — it never mutates external organs or performs cognition.";
+  }
 });
 
 // ============================================================================
-//  ARTERY HELPERS — v3 (PURE, STATELESS)
+//  ARTERY HELPERS — v4 (PURE, STATELESS)
 // ============================================================================
 
 function bucketLevel(v) {
@@ -125,12 +141,12 @@ function bucketCost(v) {
 }
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v12.3‑EVO+
+//  ORGAN IMPLEMENTATION — v15‑IMMORTAL
 // ============================================================================
 
 export class AIBinaryScheduler {
   constructor(config = {}) {
-    this.id = config.id || "ai-binary-scheduler";
+    this.id = config.id || SchedulerMeta.identity;
     this.encoder = config.encoder;
     this.pipeline = config.pipeline || null;
     this.reflex = config.reflex || null;
@@ -146,7 +162,7 @@ export class AIBinaryScheduler {
     this._timer = null;
     this._tickInterval = config.tickInterval || 250; // deterministic tick
 
-    // temporal window for artery v3
+    // temporal window for artery v4
     this.windowMs =
       typeof config.windowMs === "number" && config.windowMs > 0
         ? config.windowMs
@@ -163,6 +179,34 @@ export class AIBinaryScheduler {
         ? config.chunkSize
         : 4096;
     this._autoPrewarm = !!config.autoPrewarm;
+
+    // lineage / drift tags (symbolic-only, external Evolution organ may read)
+    this.lineage = Object.freeze({
+      version: SchedulerMeta.version,
+      epoch: SchedulerMeta.evo.epoch,
+      identity: SchedulerMeta.identity
+    });
+
+    // window-safe scheduler artery snapshot
+    this.schedulerArtery = {
+      lastThroughput: 1,
+      lastPressure: 0,
+      lastCost: 0,
+      lastBudget: 1,
+      lastTaskCount: 0,
+      snapshot: () =>
+        Object.freeze({
+          version: SchedulerMeta.version,
+          epoch: SchedulerMeta.evo.epoch,
+          instanceIndex: this.instanceIndex,
+          instanceCount: AIBinaryScheduler.getInstanceCount(),
+          throughput: this.schedulerArtery.lastThroughput,
+          pressure: this.schedulerArtery.lastPressure,
+          cost: this.schedulerArtery.lastCost,
+          budget: this.schedulerArtery.lastBudget,
+          taskCount: this.schedulerArtery.lastTaskCount
+        })
+    };
 
     // multi-instance identity
     this.instanceIndex = AIBinaryScheduler._registerInstance();
@@ -201,7 +245,7 @@ export class AIBinaryScheduler {
 
   // ---------------------------------------------------------
   //  BINARY CHUNKING (PAYLOAD-LEVEL, PURE BINARY)
-// ---------------------------------------------------------
+  // ---------------------------------------------------------
 
   _chunkBinary(binary) {
     if (typeof binary !== "string") return [];
@@ -214,7 +258,7 @@ export class AIBinaryScheduler {
   }
 
   // ---------------------------------------------------------
-  //  TEMPORAL ARTERY SNAPSHOT v3
+  //  TEMPORAL ARTERY SNAPSHOT v4 (IMMORTAL)
   // ---------------------------------------------------------
 
   _computeTemporalArtery() {
@@ -247,9 +291,13 @@ export class AIBinaryScheduler {
       avgInterval > 0 ? Math.min(1, 1000 / avgInterval) : 0;
     const loadFactor = Math.min(1, harmonicLoad / 128);
 
+    // IMMORTAL-grade: slightly bias pressure upward when tightIntervals are high
+    const tightFactor =
+      taskCount > 0 ? Math.min(1, tightIntervals / taskCount) : 0;
+
     const pressureBase = Math.max(
       0,
-      Math.min(1, (taskDensity + intervalFactor + loadFactor) / 3)
+      Math.min(1, (taskDensity + intervalFactor + loadFactor + tightFactor) / 4)
     );
     const pressure = pressureBase;
 
@@ -258,6 +306,13 @@ export class AIBinaryScheduler {
 
     const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
     const budget = Math.max(0, Math.min(1, throughput - cost));
+
+    // update window-safe artery snapshot
+    this.schedulerArtery.lastThroughput = throughput;
+    this.schedulerArtery.lastPressure = pressure;
+    this.schedulerArtery.lastCost = cost;
+    this.schedulerArtery.lastBudget = budget;
+    this.schedulerArtery.lastTaskCount = taskCount;
 
     const artery = {
       instanceIndex: this.instanceIndex,
@@ -292,6 +347,10 @@ export class AIBinaryScheduler {
     return this._computeTemporalArtery();
   }
 
+  getSchedulerSnapshot() {
+    return this.schedulerArtery.snapshot();
+  }
+
   // ---------------------------------------------------------
   //  TASK REGISTRATION
   // ---------------------------------------------------------
@@ -308,6 +367,8 @@ export class AIBinaryScheduler {
     }
 
     const binaryPayload = this.encoder.encode(payload);
+    this._assertBinary(binaryPayload);
+
     const chunks = this._chunkBinary(binaryPayload);
 
     const task = {
@@ -492,7 +553,7 @@ export class AIBinaryScheduler {
 }
 
 // ============================================================================
-//  FACTORY — v12.3‑EVO+
+//  FACTORY — v15‑IMMORTAL
 // ============================================================================
 
 export function createAIBinaryScheduler(config) {

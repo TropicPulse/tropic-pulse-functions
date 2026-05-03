@@ -85,17 +85,20 @@ AI_EXPERIENCE_META = {
 // ============================================================================
 //  ORGANISM BOOTSTRAP SET — v12.3 (SYMBOLIC KERNEL SIDE)
 // ============================================================================
-import { withModuleInitGuard, withOrganGuard } from "./PulseOSGovernor.js";                    // Supervisor organ
-import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";               // CNS brain organ
-import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";          // Evolution organ
-import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";       // Wiring organ
+import { withModuleInitGuard, withOrganGuard } from "./PulseOSGovernor.js"; // Supervisor organ
+import * as PulseOSBrain from "./PulseOSBrain-v11-Evo.js";                 // CNS brain organ
+import * as PulseOSEvolution from "./PulseOSBrainEvolution.js";            // Evolution organ
+import * as PulseSpinalCord from "./PulseOSSpinalCord-v12-Evo.js";         // Wiring organ
+
 // Presence / Mesh presence (symbolic/OS side, optional)
-import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";                 // OS Presence Organ (optional)
-import {createPulseMeshEnvironment as PulseMeshPresence} from "../PULSE-MESH/PulseMesh-v11-Evo.js";        // Mesh Presence Relay (optional)
+import * as PulseOSPresence from "./PulseOSPresence-v12.4-EVO.js";         // OS Presence Organ (optional)
+import { createBinaryMeshEnvironment as createBinaryMeshEnv } from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js"; // Mesh env (binary+symbolic)
+
+import { createPulseMeshPresenceRelay as PulseMeshPresence } from "../PULSE-MESH/PulseMeshPresenceRelay-v12.4-EVO.js"; // Mesh env (binary+symbolic)
 // ============================================================================
 // PULSE OS v13-PRESENCE-EVO+ — WORLD BARREL
 // ============================================================================
-import { createPulseExpansion, pulseExpansion, PulseExpansionMeta } from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
+import { createPulseExpansion, pulseExpansion, PulseExpansionMeta} from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
 // (optional) direct access if you want to surface them:
 const Expansion = pulseExpansion; // singleton
 const ExpansionMeta = PulseExpansionMeta;
@@ -279,34 +282,43 @@ function runThroughGovernor(organName, pulseOrImpulse, fn) {
     return result;
   });
 }
-
 // ============================================================================
 //  KERNEL BOOTSTRAP — SYMBOLIC OS BOOT (EVOLUTION + BRAIN + SPINAL CORD + PRESENCE)
 // ============================================================================
-async function buildPulseOSKernel() {
+
+async function _buildPulseOSKernel() {
+
   // 1) Evolution organ (symbolic growth engine)
   const Evolution = typeof PulseOSEvolution.PulseOSEvolution === "function"
     ? PulseOSEvolution.PulseOSEvolution({ understanding: PULSE_OS_CONTEXT })
     : PulseOSEvolution;
 
-  // 2) Brain organ (symbolic CNS) — v12.6: direct instantiation only
+  // 2) Brain organ (symbolic CNS)
   const Brain = typeof PulseOSBrain.PulseOSBrain === "function"
     ? PulseOSBrain.PulseOSBrain()
     : PulseOSBrain;
 
-  // 3) Spinal Cord organ (symbolic wiring fabric)
-  const SpinalCord = typeof PulseSpinalCord.createPulseOSSpinalCord === "function"
-    ? PulseSpinalCord.createPulseOSSpinalCord({
-        Brain,
-        Evolution,
-        log: Brain?.log,
-        warn: Brain?.warn
-      })
+  // 3) Spinal Cord organ (symbolic wiring fabric) — guarded
+  const createSpinal = PulseSpinalCord?.createPulseOSSpinalCord;
+  const SpinalCord = createSpinal
+    ? (withOrganGuard
+        ? withOrganGuard("PulseOSSpinalCord", createSpinal)({
+            Brain,
+            Evolution,
+            log: Brain?.log,
+            warn: Brain?.warn
+          })
+        : createSpinal({
+            Brain,
+            Evolution,
+            log: Brain?.log,
+            warn: Brain?.warn
+          }))
     : PulseSpinalCord;
 
   const meta = { ...PULSE_OS_CONTEXT };
 
-  // 4) Presence Field (OS-level presence organ, optional)
+  // 4) Presence Field (OS-level presence organ)
   let PresenceField = null;
   if (PulseOSPresence?.buildPresenceField) {
     PresenceField = PulseOSPresence.buildPresenceField({
@@ -324,7 +336,7 @@ async function buildPulseOSKernel() {
     });
   }
 
-  // 5) Mesh Presence Relay (Mesh-level presence organ, optional)
+  // 5) Mesh Presence Relay (Mesh-level presence organ)
   let MeshPresenceRelay = null;
   if (PulseMeshPresence?.buildMeshPresenceRelay) {
     MeshPresenceRelay = PulseMeshPresence.buildMeshPresenceRelay({
@@ -344,6 +356,25 @@ async function buildPulseOSKernel() {
     });
   }
 
+  // 6) Binary Mesh Environment (optional but fully supported)
+  let BinaryMeshEnv = null;
+  if (typeof createBinaryMeshEnv === "function") {
+    BinaryMeshEnv = createBinaryMeshEnv({
+      context: {
+        meta,
+        Brain,
+        Evolution,
+        SpinalCord,
+        PresenceField,
+        MeshPresenceRelay,
+        MeshBus: SpinalCord?.MeshBus,
+        SystemClock: Brain?.SystemClock,
+        IdentityDirectory: Brain?.IdentityDirectory
+      },
+      trace: false
+    });
+  }
+
   // FINAL SYMBOLIC KERNEL (v12.6‑EVO)
   const PulseKernel = {
     meta,
@@ -352,6 +383,8 @@ async function buildPulseOSKernel() {
     SDN: SpinalCord,
     PresenceField,
     MeshPresenceRelay,
+    BinaryMeshEnv,
+
     Governed: {
       run: runThroughGovernor
     }
@@ -360,6 +393,11 @@ async function buildPulseOSKernel() {
   return PulseKernel;
 }
 
+// Wrap with module init guard
+const buildPulseOSKernel = withModuleInitGuard
+  ? withModuleInitGuard("PulseOSKernel", _buildPulseOSKernel)
+  : _buildPulseOSKernel;
+
 const PulseOSKernelPromise = buildPulseOSKernel();
 
 
@@ -367,19 +405,21 @@ const PulseOSKernelPromise = buildPulseOSKernel();
 //  GLOBAL BROADCAST — SYMBOLIC SHELL ONLY
 // ============================================================================
 if (typeof window !== "undefined") {
-  PulseOSKernelPromise.then((PulseKernel) => {
+  PulseOSKernelPromise.then((Kernel) => {
+    const exposed = {
+      meta: Kernel.meta,
+      Brain: Kernel.Brain,
+      Evolution: Kernel.Evolution,
+      SDN: Kernel.SDN,
+      PresenceField: Kernel.PresenceField,
+      MeshPresenceRelay: Kernel.MeshPresenceRelay,
+      BinaryMeshEnv: Kernel.BinaryMeshEnv,
+      Governed: Kernel.Governed
+    };
+
     window.Pulse = window.Pulse
-      ? {
-          ...window.Pulse,
-          meta: PulseKernel.meta,
-          Brain: PulseKernel.Brain,
-          Evolution: PulseKernel.Evolution,
-          SDN: PulseKernel.SDN,
-          PresenceField: PulseKernel.PresenceField,
-          MeshPresenceRelay: PulseKernel.MeshPresenceRelay,
-          Governed: PulseKernel.Governed
-        }
-      : PulseKernel;
+      ? Object.freeze({ ...window.Pulse, ...exposed })
+      : Object.freeze(exposed);
   }).catch((err) => {
     console.error("[PulseOS-v12.3-Spine-Symbolic] Kernel bootstrap failed:", err);
   });

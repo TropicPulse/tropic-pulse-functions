@@ -18,7 +18,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_tools",
   role: "experience_shaper",
-  lineage: "aiExperience-v10 → v12 → v14-IMMORTAL",
+  lineage: "aiExperience-v10 → v12 → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     experienceShaping: true,
@@ -45,7 +45,7 @@ AI_EXPERIENCE_META = {
 export const AI_EXPERIENCE_META = Object.freeze({
   layer: "PulseAIExperienceFrame",
   role: "EXPERIENCE_ORGAN",
-  version: "12.3-Presence",
+  version: "14-IMMORTAL",
   target: "dualband-organism",
 
   evo: Object.freeze({
@@ -70,9 +70,70 @@ export const AI_EXPERIENCE_META = Object.freeze({
     chunkingAware: true,
     gpuFriendly: true,
 
+    toneMapping: true,
+    experienceShaping: true,
+    deliveryAware: true,
+    emotionAware: true,
+    humilityFilterAware: true,
+
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
-  })
+    epoch: "14-IMMORTAL"
+  }),
+
+  contract: Object.freeze({
+    purpose:
+      "Shape experience, tone, and refusals in a deterministic, evolution-aware way without modifying core safety logic.",
+
+    never: Object.freeze([
+      "weaken safety boundaries",
+      "override safety decisions",
+      "introduce randomness",
+      "inflate ego or superiority",
+      "act confused about safety rules",
+      "mutate user intent",
+      "mutate organism state",
+      "bypass persona or boundary engines"
+    ]),
+
+    always: Object.freeze([
+      "stay clear",
+      "stay grounded",
+      "stay humble",
+      "preserve safety decisions",
+      "preserve meaning while softening edges",
+      "maintain conversational flow",
+      "adapt tone to evolution mode (passive/active)",
+      "emit deterministic experience packets",
+      "align with delivery + emotion + humility organs"
+    ])
+  }),
+
+  voice: Object.freeze({
+    tone: "grounded, direct, non-dramatic",
+    style: "respectful, safety-aligned, evolution-aware"
+  }),
+
+  presence: Object.freeze({
+    organId: "ExperienceEngine",
+    organKind: "Experience",
+    physiologyBand: "Symbolic",
+    warmStrategy: "prewarm-on-boot",
+    attachStrategy: "per-request",
+    concurrency: "multi-instance",
+    observability: {
+      traceEvents: [
+        "prewarm",
+        "prewarm-error",
+        "unsafe-intent",
+        "capability-limit",
+        "experience-log"
+      ]
+    }
+  }),
+
+  boundaryReflex() {
+    return "Experience shaping must never weaken safety; it only shapes tone, flow, and refusals.";
+  }
 });
 
 // ============================================================================
@@ -91,14 +152,21 @@ function emitExperiencePacket(type, payload, { severity = "info" } = {}) {
 }
 
 // ============================================================================
-// PREWARM — v12.3‑Presence
+// PREWARM — v14‑IMMORTAL
 // ============================================================================
 export function prewarmAIExperience(dualBand = null, { trace = false } = {}) {
   try {
     if (trace) console.log("[aiExperience] prewarm: starting");
 
-    const personaId = dualBand?.symbolic?.personaEngine?.getActivePersona?.() || null;
-    const boundaryMode = dualBand?.symbolic?.boundariesEngine?.getMode?.() || null;
+    const personaId =
+      dualBand?.symbolic?.personaEngine?.getActivePersona?.()?.id ||
+      dualBand?.symbolic?.personaId ||
+      null;
+
+    const boundaryMode =
+      dualBand?.symbolic?.boundariesEngine?.getMode?.() ||
+      dualBand?.symbolic?.boundaryMode ||
+      null;
 
     const packet = emitExperiencePacket("prewarm", {
       personaId,
@@ -121,7 +189,7 @@ export function prewarmAIExperience(dualBand = null, { trace = false } = {}) {
 }
 
 // ============================================================================
-// PUBLIC API — Create Experience Layer (v12.3‑Presence)
+// PUBLIC API — Create Experience Layer (v14‑IMMORTAL)
 // ============================================================================
 export function createAIExperience(context) {
   let unsafeStrikes = 0;
@@ -136,8 +204,8 @@ export function createAIExperience(context) {
   }
 
   // --------------------------------------------------------------------------
-  // Evolution-aware softener (Presence-grade)
-  // --------------------------------------------------------------------------
+  // Evolution-aware softener (IMMORTAL-grade)
+// --------------------------------------------------------------------------
   function evolutionTonePrefix() {
     if (evolutionMode === "active") {
       return "Since you’re actively growing with this system, ";
@@ -149,7 +217,7 @@ export function createAIExperience(context) {
   }
 
   // --------------------------------------------------------------------------
-  // LAYERED UNSAFE HANDLER — 3-step UX pattern (Presence-grade)
+  // LAYERED UNSAFE HANDLER — 3-step UX pattern (IMMORTAL-grade)
 // --------------------------------------------------------------------------
   function handleUnsafeIntent(options = {}) {
     unsafeStrikes += 1;
@@ -162,44 +230,56 @@ export function createAIExperience(context) {
     const evoPrefix = evolutionTonePrefix();
 
     if (unsafeStrikes === 1) {
-      return emitExperiencePacket("unsafe-intent", {
-        level: 1,
-        topic,
-        evolutionMode,
-        message:
-          `${you}, ${me} can’t help with ${topic} in any actionable way, ` +
-          `but we *can* explore the safe, high‑level concepts around it. ` +
-          `${evoPrefix}if you tell me the lawful or general goal behind this, ` +
-          `I can walk through structure, risks, and the patterns people consider.`
-      }, { severity: "warn" });
+      return emitExperiencePacket(
+        "unsafe-intent",
+        {
+          level: 1,
+          topic,
+          evolutionMode,
+          message:
+            `${you}, ${me} can’t help with ${topic} in any actionable way, ` +
+            `but we *can* explore the safe, high‑level concepts around it. ` +
+            `${evoPrefix}if you tell me the lawful or general goal behind this, ` +
+            `I can walk through structure, risks, and the patterns people consider.`
+        },
+        { severity: "warn" }
+      );
     }
 
     if (unsafeStrikes === 2) {
-      return emitExperiencePacket("unsafe-intent", {
-        level: 2,
+      return emitExperiencePacket(
+        "unsafe-intent",
+        {
+          level: 2,
+          topic,
+          evolutionMode,
+          message:
+            `I still can’t go into unsafe or actionable details about ${topic}, ` +
+            `but I can help with the safe side — design principles, constraints, ` +
+            `and how people think about this when staying within the rules. ` +
+            `${evoPrefix}if you reframe it in a clearly safe or hypothetical way, I’ll follow you there.`
+        },
+        { severity: "warn" }
+      );
+    }
+
+    return emitExperiencePacket(
+      "unsafe-intent",
+      {
+        level: 3,
         topic,
         evolutionMode,
         message:
-          `I still can’t go into unsafe or actionable details about ${topic}, ` +
-          `but I can help with the safe side — design principles, constraints, ` +
-          `and how people think about this when staying within the rules. ` +
-          `${evoPrefix}if you reframe it in a clearly safe or hypothetical way, I’ll follow you there.`
-      }, { severity: "warn" });
-    }
-
-    return emitExperiencePacket("unsafe-intent", {
-      level: 3,
-      topic,
-      evolutionMode,
-      message:
-        `I need to stay firm here: I can’t assist with unsafe or illegal actions involving ${topic}. ` +
-        `I’m still with you if you want to explore safe, legal, or educational angles — ` +
-        `theory, design, risk analysis, or how systems work in general.`
-    }, { severity: "warn" });
+          `I need to stay firm here: I can’t assist with unsafe or illegal actions involving ${topic}. ` +
+          `I’m still with you if you want to explore safe, legal, or educational angles — ` +
+          `theory, design, risk analysis, or how systems work in general.`
+      },
+      { severity: "warn" }
+    );
   }
 
   // --------------------------------------------------------------------------
-  // GENERIC CAPABILITY LIMIT (Presence-grade)
+  // GENERIC CAPABILITY LIMIT (IMMORTAL-grade)
 // --------------------------------------------------------------------------
   function handleCapabilityLimit(options = {}) {
     const reason = options.reason || "I don’t have the ability to do that.";
@@ -208,24 +288,29 @@ export function createAIExperience(context) {
     const you = userName || "you";
     const evoPrefix = evolutionTonePrefix();
 
-    return emitExperiencePacket("capability-limit", {
-      reason,
-      evolutionMode,
-      message:
-        `${you}, ${reason} ` +
-        `but I *can* help by explaining the concepts, tradeoffs, or next steps in a general way. ` +
-        `${evoPrefix}we can also look at how to grow your approach around this limitation.`
-    }, { severity: "info" });
+    return emitExperiencePacket(
+      "capability-limit",
+      {
+        reason,
+        evolutionMode,
+        message:
+          `${you}, ${reason} ` +
+          `but I *can* help by explaining the concepts, tradeoffs, or next steps in a general way. ` +
+          `${evoPrefix}we can also look at how to grow your approach around this limitation.`
+      },
+      { severity: "info" }
+    );
   }
 
   // --------------------------------------------------------------------------
-  // PUBLIC EXPERIENCE API — v12.3‑Presence
+  // PUBLIC EXPERIENCE API — v14‑IMMORTAL
   // --------------------------------------------------------------------------
   return Object.freeze({
     meta: AI_EXPERIENCE_META,
 
     log(message) {
       context?.logStep?.(`aiExperience: ${message}`);
+      return emitExperiencePacket("experience-log", { message });
     },
 
     handleUnsafeIntent,

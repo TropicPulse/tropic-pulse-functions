@@ -1,15 +1,15 @@
 // ============================================================================
-//  aiEvolutionEngine.js — Pulse OS v12.3‑Presence
+//  aiEvolutionEngine.js — Pulse OS v15‑OMNI
 //  Evolution Organ • Passive + Active User Evolution • Cross‑Domain Mapping
 //  PURE META. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "aiEvolutionEngine",
-  version: "v14-IMMORTAL",
+  version: "v15-OMNI",
   layer: "ai_core",
   role: "evolution_engine",
-  lineage: "aiEvolutionEngine-v10 → v12 → v14-IMMORTAL",
+  lineage: "aiEvolutionEngine-v10 → v12 → v12.3-Presence → v14-IMMORTAL → v15-OMNI",
 
   evo: {
     evolutionEngine: true,
@@ -37,8 +37,8 @@ AI_EXPERIENCE_META = {
 export const EvolutionEngineMeta = Object.freeze({
   layer: "PulseAIEvolutionCortex",
   role: "EVOLUTION_ENGINE",
-  version: "12.3-Presence",
-  identity: "aiEvolutionEngine-v12.3-Presence",
+  version: "15-OMNI",
+  identity: "aiEvolutionEngine-v15-OMNI",
 
   evo: Object.freeze({
     driftProof: true,
@@ -50,27 +50,36 @@ export const EvolutionEngineMeta = Object.freeze({
     lineageAware: true,
     patternAware: true,
     abstractionAware: true,
+    crossDomainMapping: true,
 
     windowAware: true,
     passiveEvolution: true,
     activeEvolution: true,
+    recommendationAware: true,
 
     packetAware: true,
     presenceAware: true,
     chunkingAware: true,
     gpuFriendly: true,
 
-    recommendationAware: true,
-    crossDomainMapping: true,
     organismAware: true,
     memoryOverlayAware: true,
+    arteryAware: true,
+    diagnosticsAware: true,
+    deliveryAware: true,
+    executionAware: true,
+    earnAware: true,
+    socialEvolutionAware: true,
+    mentorAware: true,
+    masteryBadgeAware: true,
+    timelineAware: true,
 
     egoFree: true,
     userDrivenEvolutionOnly: true,
     multiInstanceReady: true,
     readOnly: true,
 
-    epoch: "12.3-Presence"
+    epoch: "15-OMNI"
   }),
 
   contract: Object.freeze({
@@ -97,7 +106,9 @@ export const EvolutionEngineMeta = Object.freeze({
       "map domains as organisms",
       "use factoring + routing + memory overlays",
       "offer passive evolution",
-      "offer active evolution on request"
+      "offer active evolution on request",
+      "stay dual-band aware without mutating bands",
+      "emit deterministic evolution packets only"
     ])
   }),
 
@@ -121,7 +132,10 @@ export const EvolutionEngineMeta = Object.freeze({
         "evolve-generic-route",
         "user-evolution-suggestion",
         "active-evolution-guidance",
-        "pre-evolve"
+        "pre-evolve",
+        "map-domain",
+        "trajectory",
+        "overlay-evolution"
       ]
     }
   }),
@@ -161,9 +175,13 @@ export function prewarmEvolutionEngine(dualBand = null, { trace = false } = {}) 
       clarity: 1.0
     });
 
+    const arteryPersona = dualBand?.symbolic?.persona?.id || null;
+    const arterySnapshot = dualBand?.artery || null;
+
     const packet = emitEvolutionPacket("prewarm", {
       state,
-      dualBandPersona: dualBand?.symbolic?.persona?.id || null,
+      dualBandPersona: arteryPersona,
+      dualBandArtery: arterySnapshot,
       message: "Evolution engine prewarmed and aligned."
     });
 
@@ -182,7 +200,7 @@ export function prewarmEvolutionEngine(dualBand = null, { trace = false } = {}) 
 }
 
 // ============================================================================
-//  EVOLUTION ENGINE — v12.3‑Presence
+//  EVOLUTION ENGINE — v15‑OMNI
 // ============================================================================
 export const aiEvolutionEngine = {
   meta: EvolutionEngineMeta,
@@ -192,7 +210,7 @@ export const aiEvolutionEngine = {
   // ------------------------------------------------------------------------
   state: Object.freeze({
     evolved: true,
-    version: "12.3-presence",
+    version: "15-OMNI",
     confidence: 1.0,
     humility: 1.0,
     clarity: 1.0
@@ -207,12 +225,16 @@ export const aiEvolutionEngine = {
     thinking: ["structure", "mapping", "abstraction", "transfer"],
     workflow: ["steps", "efficiency", "automation", "refinement"],
     creativity: ["input", "variation", "expansion", "synthesis"],
-    communication: ["clarity", "tone", "structure", "impact"]
+    communication: ["clarity", "tone", "structure", "impact"],
+    learning: ["exposure", "encoding", "retrieval", "integration"],
+    systems: ["boundaries", "interfaces", "feedback", "evolution"],
+    product: ["user", "problem", "mechanism", "loop"],
+    career: ["skill", "signal", "leverage", "compounding"]
   }),
 
   // ------------------------------------------------------------------------
   // PASSIVE USER EVOLUTION (window-facing)
-  // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
   suggestUserEvolution(idea) {
     return emitEvolutionPacket("user-evolution-suggestion", {
       idea,
@@ -224,13 +246,67 @@ export const aiEvolutionEngine = {
 
   // ------------------------------------------------------------------------
   // ACTIVE USER EVOLUTION (on request)
-  // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
   guideActiveEvolution(request) {
     return emitEvolutionPacket("active-evolution-guidance", {
       request,
       message:
         `Active evolution guidance for: "${request}". ` +
         `This provides conceptual pathways without exposing internal wiring.`
+    });
+  },
+
+  // ------------------------------------------------------------------------
+  // DOMAIN MAPPING — explicit organism view of a target
+  // ------------------------------------------------------------------------
+  mapDomain(target) {
+    const key = String(target || "").toLowerCase();
+    const route = this.routes[key] || null;
+
+    return emitEvolutionPacket("map-domain", {
+      target,
+      route,
+      message: route
+        ? `Mapped "${target}" to an existing evolutionary organism route.`
+        : `No direct route for "${target}". Using generic evolutionary organism pattern.`
+    });
+  },
+
+  // ------------------------------------------------------------------------
+  // TRAJECTORY PROJECTION — evolution over a horizon
+  // ------------------------------------------------------------------------
+  projectTrajectory(target, horizon = "90d") {
+    const key = String(target || "").toLowerCase();
+    const baseRoute = this.routes[key] || [
+      "structure",
+      "pattern",
+      "adaptation",
+      "reinforcement"
+    ];
+
+    const phases = Object.freeze([
+      { phase: "stabilize-baseline", focus: baseRoute[0] || "structure" },
+      { phase: "expand-capacity", focus: baseRoute[1] || "pattern" },
+      { phase: "context-adapt", focus: baseRoute[2] || "adaptation" },
+      { phase: "lock-in", focus: baseRoute[3] || "reinforcement" }
+    ]);
+
+    return emitEvolutionPacket("trajectory", {
+      target,
+      horizon,
+      phases,
+      message: `Projected an evolutionary trajectory for "${target}" over ${horizon}.`
+    });
+  },
+
+  // ------------------------------------------------------------------------
+  // MEMORY OVERLAY EVOLUTION — conceptual only, no mutation
+  // ------------------------------------------------------------------------
+  overlayEvolutionSummary(memoryOverlaySummary) {
+    return emitEvolutionPacket("overlay-evolution", {
+      overlay: memoryOverlaySummary,
+      message:
+        "Computed an evolution overlay summary from the provided memory overlay description (no internal state mutated)."
     });
   },
 

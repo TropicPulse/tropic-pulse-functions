@@ -1,23 +1,24 @@
 // ============================================================================
-//  PulseCoreBrain.js — v12‑EVO‑PRESENCE‑MAX
+//  PulseCoreBrain.js — v15-IMMORTAL-BRAIN
 //  ORGANISM‑WIDE PATTERN INTELLIGENCE ENGINE
 //  “THINK ONCE. REUSE FOREVER. NEVER DRIFT.”
-//  • MetaBlock (v12 identity)
+//  • v15 AI_EXPERIENCE_META (IMMORTAL identity)
 //  • dnaTag + version aware
-//  • presence aware
+//  • presence / band / route aware (via meta + overlay)
 //  • lineage + ancestry
-//  • advantage scoring
+//  • advantage scoring (band + route + dnaTag)
 //  • dual‑band metadata alignment
-//  • CoreMemory persistence
-//  • deterministic canonicalization
+//  • CoreMemory persistence (route‑scoped)
+//  • deterministic canonicalization (structural)
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseCoreBrain",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL-BRAIN",
   layer: "corememory_brain",
   role: "corememory_symbolic_brain",
-  lineage: "PulseCoreMemory-v14",
+  lineage: "PulseCoreMemory-v15-IMMORTAL",
 
   evo: {
     symbolicPrimary: true,
@@ -49,7 +50,7 @@ AI_EXPERIENCE_META = {
       "fetchViaCNS"
     ]
   }
-}
+};
 */
 
 export const CoreBrainRole = {
@@ -57,7 +58,7 @@ export const CoreBrainRole = {
   subsystem: "Core",
   layer: "Brain",
   identity: "PulseCoreBrain",
-  version: "12.0-Evo-Presence",
+  version: "15.0-IMMORTAL-BRAIN",
 
   evo: {
     deterministic: true,
@@ -69,19 +70,21 @@ export const CoreBrainRole = {
     presenceAware: true,
     versionAware: true,
     lineageAware: true,
-    advantageAware: true
+    advantageAware: true,
+    bandAware: true,
+    overlayAware: true
   }
 };
 
 // ---------------------------------------------------------------------------
-//  v12 IDENTITY BLOCK (MetaBlock)
+//  v15 IDENTITY BLOCK (MetaBlock)
 // ---------------------------------------------------------------------------
 export const CoreBrainMetaBlock = {
   identity: "PulseCoreBrain",
   subsystem: "Core",
   layer: "Brain",
   role: "Pattern-Intelligence",
-  version: "12.0-Evo-Presence",
+  version: "15.0-IMMORTAL-BRAIN",
   evo: CoreBrainRole.evo
 };
 
@@ -104,12 +107,19 @@ function normalizeStructure(struct) {
   }
 }
 
+// deterministic epoch for pattern creation (no Date.now in identity)
+let BRAIN_EPOCH = 0;
+function nextBrainEpoch() {
+  BRAIN_EPOCH += 1;
+  return BRAIN_EPOCH;
+}
+
 // ---------------------------------------------------------------------------
-//  CREATE BRAIN (v12)
+//  CREATE BRAIN (v15-IMMORTAL-BRAIN)
 // ---------------------------------------------------------------------------
 export function createPulseCoreBrain({
   dnaTag = "default-dna",
-  version = "12.0-Evo-Presence",
+  version = "15.0-IMMORTAL-BRAIN",
   overlay = null,
   coreMemory = null,
   coreMemoryRouteId = "brain-patterns",
@@ -123,31 +133,50 @@ export function createPulseCoreBrain({
   };
 
   function safeLog(stage, details = {}) {
-    try { log("[PulseCoreBrain]", stage, JSON.stringify(details)); }
+    try { log("[PulseCoreBrain-v15]", stage, JSON.stringify(details)); }
     catch {}
   }
 
   // -------------------------------------------------------------------------
-  //  INTERNAL: ADVANTAGE SCORING (v12)
+  //  INTERNAL: ADVANTAGE SCORING (v15)
+  //  • dnaTag match
+  //  • non-global route
+  //  • type awareness
+  //  • band awareness
+  //  • overlay hint (optional)
   // -------------------------------------------------------------------------
   function scorePattern(meta) {
     let score = 0;
+
     if (meta.dnaTag === dnaTag) score += 2;
     if (meta.routeId && meta.routeId !== "global") score += 1;
     if (meta.type) score += 1;
+    if (meta.band === "binary") score += 1;
+
+    if (overlay && typeof overlay.scorePattern === "function") {
+      try {
+        const overlayScore = overlay.scorePattern(meta);
+        if (typeof overlayScore === "number") {
+          score += overlayScore;
+        }
+      } catch (err) {
+        warn("[PulseCoreBrain-v15] OVERLAY_SCORE_ERROR", String(err));
+      }
+    }
+
     return score;
   }
 
   // -------------------------------------------------------------------------
-  //  INTERNAL: LINEAGE + ANCESTRY (v12)
-  // -------------------------------------------------------------------------
+  //  INTERNAL: LINEAGE + ANCESTRY (v15)
+// -------------------------------------------------------------------------
   function assignLineage(meta) {
     meta.lineage = `${dnaTag}:${version}:${meta.patternId}`;
     meta.ancestry = [dnaTag, version];
   }
 
   // -------------------------------------------------------------------------
-  //  LOAD FROM CORE MEMORY (v12)
+  //  LOAD FROM CORE MEMORY (v15)
 // -------------------------------------------------------------------------
   function loadFromCoreMemory() {
     if (!coreMemory) return;
@@ -157,15 +186,16 @@ export function createPulseCoreBrain({
       Patterns.index = snapshot.index || Object.create(null);
 
       safeLog("LOAD_FROM_CORE_MEMORY", {
-        patterns: Object.keys(Patterns.byId).length
+        patterns: Object.keys(Patterns.byId).length,
+        routeId: coreMemoryRouteId
       });
     } catch (err) {
-      warn("[PulseCoreBrain] LOAD_FROM_CORE_MEMORY_ERROR", String(err));
+      warn("[PulseCoreBrain-v15] LOAD_FROM_CORE_MEMORY_ERROR", String(err));
     }
   }
 
   // -------------------------------------------------------------------------
-  //  FLUSH TO CORE MEMORY (v12)
+  //  FLUSH TO CORE MEMORY (v15)
 // -------------------------------------------------------------------------
   function flushToCoreMemory() {
     if (!coreMemory) return;
@@ -177,15 +207,16 @@ export function createPulseCoreBrain({
       coreMemory.setRouteSnapshot(coreMemoryRouteId, snapshot);
 
       safeLog("FLUSH_TO_CORE_MEMORY", {
-        patterns: Object.keys(Patterns.byId).length
+        patterns: Object.keys(Patterns.byId).length,
+        routeId: coreMemoryRouteId
       });
     } catch (err) {
-      warn("[PulseCoreBrain] FLUSH_TO_CORE_MEMORY_ERROR", String(err));
+      warn("[PulseCoreBrain-v15] FLUSH_TO_CORE_MEMORY_ERROR", String(err));
     }
   }
 
   // -------------------------------------------------------------------------
-  //  REGISTER PATTERN (v12)
+  //  REGISTER PATTERN (v15-IMMORTAL)
 // -------------------------------------------------------------------------
   function registerPattern(struct, meta = {}) {
     const normalized = normalizeStructure(struct || {});
@@ -203,12 +234,17 @@ export function createPulseCoreBrain({
 
     const patternId = simpleHash(normalized);
 
+    const band = meta.band || "symbolic";
+    const routeId = meta.routeId || "global";
+
     const enrichedMeta = {
       ...meta,
       dnaTag,
       version,
+      band,
+      routeId,
       patternId,
-      createdAt: Date.now()
+      createdEpoch: nextBrainEpoch()
     };
 
     assignLineage(enrichedMeta);
@@ -220,15 +256,17 @@ export function createPulseCoreBrain({
       meta: enrichedMeta
     };
 
-    // Presence‑touch propagation
-    if (overlay && overlay.touch) {
-      try { overlay.touch("brain", enrichedMeta.createdAt); }
+    // Presence / overlay touch
+    if (overlay && typeof overlay.touch === "function") {
+      try { overlay.touch("brain", enrichedMeta.createdEpoch, enrichedMeta); }
       catch {}
     }
 
     safeLog("REGISTER_PATTERN", {
       patternId,
-      score: enrichedMeta.score
+      score: enrichedMeta.score,
+      band,
+      routeId
     });
 
     return {
@@ -247,7 +285,7 @@ export function createPulseCoreBrain({
   }
 
   // -------------------------------------------------------------------------
-  //  FORMULA REGISTRATION (v12)
+  //  FORMULA REGISTRATION (v15)
 // -------------------------------------------------------------------------
   function registerFormula(formulaStr, meta = {}) {
     return registerPattern(
@@ -263,7 +301,7 @@ export function createPulseCoreBrain({
     Patterns.byId = Object.create(null);
     Patterns.index = Object.create(null);
     flushToCoreMemory();
-    safeLog("CLEAR_ALL");
+    safeLog("CLEAR_ALL", { routeId: coreMemoryRouteId });
   }
 
   // -------------------------------------------------------------------------
@@ -284,14 +322,17 @@ export function createPulseCoreBrain({
     clearAll,
 
     dnaTag,
-    version
+    version,
+    overlay,
+    coreMemoryRouteId
   };
 
   loadFromCoreMemory();
 
   safeLog("INIT", {
     identity: CoreBrainRole.identity,
-    version: CoreBrainRole.version
+    version: CoreBrainRole.version,
+    dnaTag
   });
 
   return PulseCoreBrain;

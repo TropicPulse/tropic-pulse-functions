@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — THE EGO
+//  PULSE OS v14-IMMORTAL — THE EGO
 //  Capability Contract • Self‑Regulation Layer • Evolutionary Control
 //  PURE PERMISSIONS. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
 // ============================================================================

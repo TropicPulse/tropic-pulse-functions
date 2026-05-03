@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — JURY FRAME ORGAN
+//  PULSE OS v14-IMMORTAL — JURY FRAME ORGAN
 //  World-Lens Registry for aiOvermind
 //  PURE FUNCTIONAL • ZERO STATE • ZERO MUTATION
 // ============================================================================

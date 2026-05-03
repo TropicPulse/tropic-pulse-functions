@@ -49,22 +49,29 @@ AI_EXPERIENCE_META = {
 }
 */
 
+// ---------------------------------------------------------------------------
+// LAYER CONSTANTS — NOW FULLY USED
+// ---------------------------------------------------------------------------
 const LAYER_ID   = "SHORT-TERM-MEMORY";
 const LAYER_NAME = "THE HIPPOCAMPAL BUFFER";
 const LAYER_ROLE = "B-LAYER NEURAL MEMORY";
 const LAYER_VER  = "12.3-Presence";
 
 // ============================================================================
-// MEMORY CONTEXT — organism-wide identity (v12.3-Presence)
+// MEMORY CONTEXT — organism-wide identity (v12.3-Presence → upgraded v15)
 // ============================================================================
 const MEMORY_CONTEXT = {
   label: "MEMORY",
   layer: "B‑Layer",
+  layerId: LAYER_ID,
+  layerName: LAYER_NAME,
+  layerRole: LAYER_ROLE,
   purpose: "Short‑Term Neural Buffer",
   context: "Stores logs before Heart.js flush",
   version: LAYER_VER,
   generation: "v12",
   target: "os-core",
+
   evo: {
     driftProof: true,
     deterministicNeuron: true,
@@ -85,7 +92,6 @@ const MEMORY_CONTEXT = {
     pressureAware: true,
     dispatchAware: true,
 
-    // v12.3+: chunk + cache + prewarm + GPU-friendly
     chunkAware: true,
     cacheAware: true,
     prewarmAware: true,
@@ -97,11 +103,16 @@ const MEMORY_CONTEXT = {
   }
 };
 
+// ============================================================================
+// ORGAN META — v15 IMMORTAL
+// ============================================================================
 export const PulseOSShortTermMemoryMeta = Object.freeze({
   layer: "PulseOSShortTermMemory",
-  role: "SHORT_TERM_NEURAL_MEMORY_ORGAN",
+  layerId: LAYER_ID,
+  layerName: LAYER_NAME,
+  layerRole: LAYER_ROLE,
   version: "v12.3-PRESENCE-CHUNK-MAX",
-  identity: "PulseOSShortTermMemory-v12.3-PRESENCE-CHUNK-MAX",
+  identity: `PulseOSShortTermMemory-${LAYER_VER}-IMMORTAL`,
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -109,7 +120,6 @@ export const PulseOSShortTermMemoryMeta = Object.freeze({
     multiInstanceReady: true,
     multiPresenceReady: true,
 
-    // Hippocampal laws
     shortTermNeuralBuffer: true,
     hippocampalBuffer: true,
     neuralMemoryOrgan: true,
@@ -118,7 +128,6 @@ export const PulseOSShortTermMemoryMeta = Object.freeze({
     immutableEntries: true,
     preHeartFlushBuffer: true,
 
-    // v12.3+: chunk + cache + prewarm + presence
     chunkAware: true,
     cacheAware: true,
     prewarmAware: true,
@@ -128,7 +137,6 @@ export const PulseOSShortTermMemoryMeta = Object.freeze({
     batchFriendly: true,
     gpuBufferAware: true,
 
-    // Execution prohibitions
     zeroNetwork: true,
     zeroBackend: true,
     zeroTiming: true,
@@ -139,7 +147,6 @@ export const PulseOSShortTermMemoryMeta = Object.freeze({
     zeroDynamicImports: true,
     zeroEval: true,
 
-    // Awareness
     symbolicAware: true,
     binaryAware: true,
     dualModeAware: true,
@@ -147,7 +154,6 @@ export const PulseOSShortTermMemoryMeta = Object.freeze({
     pressureAware: true,
     dispatchAware: true,
 
-    // Environment
     worldLensAware: false
   }),
 
@@ -215,7 +221,11 @@ function buildMemorySignature(entry) {
     eventType: entry.eventType || "unknown",
     modeKind: entry.modeKind || "symbolic",
     executionContext: entry.executionContext || {},
-    pressureSnapshot: entry.pressureSnapshot || {}
+    pressureSnapshot: entry.pressureSnapshot || {},
+    layerId: LAYER_ID,
+    layerRole: LAYER_ROLE,
+    layerName: LAYER_NAME,
+    layerVersion: LAYER_VER
   });
 }
 
@@ -234,10 +244,12 @@ function buildChunk(entries, index, totalChunks) {
   return {
     ...MEMORY_CONTEXT,
     kind: "ShortTermMemoryChunk",
+    layerId: LAYER_ID,
+    layerName: LAYER_NAME,
+    layerRole: LAYER_ROLE,
     chunkIndex: index,
     chunkCount: totalChunks,
     count: entries.length,
-    // logs are already immutable snapshots
     logs: entries
   };
 }
@@ -263,6 +275,9 @@ function buildPresenceView(logs) {
   return {
     ...MEMORY_CONTEXT,
     kind: "ShortTermPresenceView",
+    layerId: LAYER_ID,
+    layerName: LAYER_NAME,
+    layerRole: LAYER_ROLE,
     totalLogs: count,
     byMode,
     byEventType,
@@ -271,7 +286,7 @@ function buildPresenceView(logs) {
 }
 
 // ============================================================================
-// SHORT‑TERM MEMORY ORGAN — v12.3-Presence
+// SHORT‑TERM MEMORY ORGAN — v15 IMMORTAL
 // ============================================================================
 export const PulseOSShortTermMemory = {
   _logs: [],
@@ -288,6 +303,9 @@ export const PulseOSShortTermMemory = {
     const wrapped = {
       ...entry,
       ...MEMORY_CONTEXT,
+      layerId: LAYER_ID,
+      layerName: LAYER_NAME,
+      layerRole: LAYER_ROLE,
       memoryVersion: LAYER_VER,
       memorySignature
     };
@@ -333,6 +351,9 @@ export const PulseOSShortTermMemory = {
     return {
       ...MEMORY_CONTEXT,
       kind: "ShortTermMemorySnapshot",
+      layerId: LAYER_ID,
+      layerName: LAYER_NAME,
+      layerRole: LAYER_ROLE,
       version: LAYER_VER,
       count: this._logs.length,
       logs: [...this._logs]
@@ -340,9 +361,8 @@ export const PulseOSShortTermMemory = {
   },
 
   // --------------------------------------------------------------------------
-  // CHUNKS — GPU / streaming friendly view (read-only)
-//   maxChunkSize: how many entries per chunk (default 128)
-// --------------------------------------------------------------------------
+  // CHUNKS — GPU / streaming friendly view
+  // --------------------------------------------------------------------------
   getChunks({ maxChunkSize = 128 } = {}) {
     const logs = this._logs;
     if (!logs.length) return [];
@@ -370,6 +390,9 @@ export const PulseOSShortTermMemory = {
     return {
       ...MEMORY_CONTEXT,
       kind: "ShortTermMemoryPrewarm",
+      layerId: LAYER_ID,
+      layerName: LAYER_NAME,
+      layerRole: LAYER_ROLE,
       version: LAYER_VER,
       totalLogs: this._logs.length,
       totalChunks: chunks.length,
@@ -381,7 +404,6 @@ export const PulseOSShortTermMemory = {
   // PRESENCE VIEW — multi-presence, dual-band summary
   // --------------------------------------------------------------------------
   presenceView() {
-    const logs = this._logs;
-    return buildPresenceView(logs);
+    return buildPresenceView(this._logs);
   }
 };

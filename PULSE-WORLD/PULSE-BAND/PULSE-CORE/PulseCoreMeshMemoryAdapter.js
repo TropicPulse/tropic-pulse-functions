@@ -1,25 +1,27 @@
 // ============================================================================
-//  PulseMeshMemoryAdapter.js — v12‑EVO‑PRESENCE‑MAX
+//  PulseMeshMemoryAdapter.js — v15‑IMMORTAL‑MESH‑MEMORY‑ADAPTER
 //  “GPU LOADS ONCE. COMPUTES FOREVER. MEMORY NEVER DRIFTS.”
-//  • MetaBlock (v12 identity)
-//  • PulseRol / PresenceRol
-//  • DNA‑aware
-//  • Version‑aware
-//  • Hot‑loop promotion
-//  • Presence‑touch propagation
-//  • TTL + healing compatible
+//  • v15 IMMORTAL MetaBlock
+//  • dnaTag + version aware
+//  • presence‑touch propagation (overlay.touch + deterministic epoch)
+//  • hot‑loop promotion
+//  • dual‑band metadata (gpu-model/kernel/transform = binary)
+//  • lineage + mesh‑shape metadata
+//  • governor + evolution aligned
+//  • deterministic canonicalization (via BinaryOverlay v15)
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseCoreMeshMemoryAdapter",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL-MESH-MEMORY",
   layer: "corememory_adapter",
   role: "mesh_memory_adapter",
-  lineage: "PulseCoreMemory-v14",
+  lineage: "PulseCoreMemory-v15-IMMORTAL",
 
   evo: {
     adapter: true,
-    meshMemoryBridge: true,        // symbolic ↔ binary memory bridge for Mesh
+    meshMemoryBridge: true,
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
@@ -36,28 +38,36 @@ AI_EXPERIENCE_META = {
     always: [
       "PulseCoreMemory",
       "PulseCoreBrain",
-      "PulseCoreGovernor"
+      "PulseCoreGovernor",
+      "PulseBinaryCoreOverlay"
     ],
     never: [
       "safeRoute",
       "fetchViaCNS"
     ]
   }
-}
+};
 */
 
 import { createPulseBinaryOverlay } from "./PulseBinaryCoreOverlay.js";
 
+// deterministic epoch for Mesh adapter events
+let MESH_EPOCH = 0;
+function nextMeshEpoch() {
+  MESH_EPOCH += 1;
+  return MESH_EPOCH;
+}
+
 export function createPulseMeshMemoryAdapter({
   overlay = createPulseBinaryOverlay(),
   dnaTag = "default-dna",
-  version = "12.0-Evo-Presence",
+  version = "15.0-IMMORTAL-MESH-MEMORY",
   log = console.log
 } = {}) {
 
-  // ---------------------------------------------------------
-  //  v12 IDENTITY BLOCK (MetaBlock)
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
+  //  v15 IMMORTAL MetaBlock
+  // -------------------------------------------------------------------------
   const metaBlock = {
     identity: "PulseMeshMemoryAdapter",
     subsystem: "Mesh",
@@ -70,33 +80,58 @@ export function createPulseMeshMemoryAdapter({
       versionAware: true,
       hotLoop: true,
       presenceAware: true,
-      dualBandSafe: true
+      dualBandSafe: true,
+      meshAware: true,
+      deterministic: true,
+      driftProof: true
     }
   };
 
-  // ---------------------------------------------------------
-  //  INTERNAL: WRAP CANONICALIZE WITH v12 METADATA
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
+  //  INTERNAL: WRAP CANONICALIZE WITH v15 METADATA
+  // -------------------------------------------------------------------------
   function wrap(routeId, blob, dataType) {
+    const epoch = nextMeshEpoch();
+
+    const band =
+      dataType === "gpu-model" ||
+      dataType === "gpu-kernel" ||
+      dataType === "gpu-transform"
+        ? "binary"
+        : "symbolic";
+
+    const meshSize =
+      typeof blob === "object"
+        ? JSON.stringify(blob).length
+        : String(blob || "").length;
+
     const meta = {
       dataType,
       dnaTag,
       version,
-      lastTouched: Date.now(),
+      epoch,
+      band,
+      meshSize,
       metaBlock
     };
 
     // Presence‑touch propagation
     try {
-      overlay.touch(routeId, meta.lastTouched);
+      if (overlay.touch) {
+        overlay.touch(routeId, epoch, meta);
+      }
     } catch {}
 
-    return overlay.canonicalize(routeId, blob, meta);
+    // Canonicalize through v15 BinaryOverlay
+    return overlay.canonicalize(routeId, blob, {
+      dataType,
+      band
+    });
   }
 
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
   //  GPU MODEL / KERNEL / TRANSFORM REGISTRATION
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
   function registerModel(routeId, modelBlob) {
     return wrap(routeId, modelBlob, "gpu-model");
   }
@@ -109,19 +144,21 @@ export function createPulseMeshMemoryAdapter({
     return wrap(routeId, transform, "gpu-transform");
   }
 
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
   //  HOT‑LOOP PROMOTION HOOK
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
   function promoteHot(routeId, key) {
     try {
-      overlay.markHot(routeId, key);
-      log("[PulseMeshMemoryAdapter] HOT_PROMOTE", { routeId, key });
+      if (overlay.markHot) {
+        overlay.markHot(routeId, key);
+      }
+      log("[PulseMeshMemoryAdapter-v15] HOT_PROMOTE", { routeId, key });
     } catch {}
   }
 
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
   //  PUBLIC API
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
   return {
     metaBlock,
     dnaTag,

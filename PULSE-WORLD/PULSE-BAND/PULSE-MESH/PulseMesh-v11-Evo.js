@@ -107,24 +107,50 @@ export const PulseMeshMeta = Object.freeze({
     outputFallback: ["fallbackResult"]
   })
 });
+// ============================================================================
+// IMPORTS — MESH SUBSYSTEMS (SYMBOLIC SIDE)
+// ============================================================================
 
-// ============================================================================
-// IMPORTS — SYMBOLIC MESH SUBSYSTEMS (NO SELF-IMPORT)
-// ============================================================================
+// 0 — CORE ORGANISM BOOT
 import { createOrganismMesh } from "./OrganismMesh-v1-EVO.js";
+
+// 1 — SPINE (root of mesh nervous system)
+import PulseMeshSpine from "./PulseMeshSpine.js";
+
+// 2 — FLOW (mesh circulation)
 import PulseMeshFlow from "./PulseMeshFlow.js";
+
+// 3 — PRESENCE RELAY (mesh → world presence)
 import PulseMeshPresenceRelay from "./PulseMeshPresenceRelay-v12.4-EVO.js";
+
+// 4 — COGNITION (mesh-level cognition)
 import PulseMeshCognition from "./PulseMeshCognition.js";
+
+// 5 — ENDOCRINE (mesh hormones)
 import PulseMeshEndocrineSystem from "./PulseMeshEndocrineSystem.js";
+
+// 6 — IMMUNE SYSTEM (mesh immune layer)
 import PulseMeshImmuneSystem from "./PulseMeshImmuneSystem.js";
+
+// 7 — ORGANS (mesh organ registry)
 import PulseMeshOrgans from "./PulseMeshOrgans.js";
+
+// 8 — THALAMUS (relay after organs)
 import PulseMeshThalamus from "./PulseMeshThalamus.js";
 
+// ============================================================================
+// WORLD / PRESENCE LAYER
+// ============================================================================
 import PresenceAIView from "./PresenceAIView.js";
 import MentorUpgradeRequest from "./MentorUpgradeRequest.js";
+import { createPulseWorldSocialGraph } from "./PulseWorldSocialGraph.js";
 
+// ============================================================================
+// CORTEX + TENDONS (SHAPING LAYERS — ALWAYS LAST)
+// ============================================================================
 import { applyPulseCortex } from "./PulseMeshCortex.js";
 import { applyPulseMeshTendons } from "./PulseMeshTendons.js";
+
 // ============================================================================
 // INTERNAL HELPERS
 // ============================================================================
@@ -260,10 +286,11 @@ export function createPulseMesh({
 //
 //  ROLE:
 //    • Creates the symbolic mesh core.
-//    • Boots OrganismMesh and exposes organism hooks.
-//    • Wires symbolic mesh subsystems (flow, cognition, endocrine, etc.).
+//    • Boots OrganismMesh with Cortex + Tendons injected.
+//    • Wires symbolic mesh subsystems in correct IMMORTAL order.
 //    • Provides a single `prewarm` entrypoint for the symbolic mesh world.
 // ============================================================================
+
 export function createPulseMeshEnvironment({
   context = {},
   fallbackProxy,
@@ -277,7 +304,7 @@ export function createPulseMeshEnvironment({
   const error = context.error || safeLog(globalThis?.error, console?.error);
 
   // -------------------------------------------------------
-  // 0) CREATE SYMBOLIC CORE
+  // 0) CREATE SYMBOLIC CORE (CORTEX + TENDONS APPLIED IN FALLBACK)
   // -------------------------------------------------------
   const symbolicMesh = createPulseMesh({
     fallbackProxy,
@@ -287,32 +314,38 @@ export function createPulseMeshEnvironment({
   });
 
   // -------------------------------------------------------
-  // 1) BOOT THE ORGANISM (THE ROUTE)
-// -------------------------------------------------------
-//  NOTE:
-//    • OrganismMesh does not create meshes; it receives envs.
-//    • We pass symbolicMesh in as symbolicMeshEnv.
-//    • binaryMeshEnv is expected to be provided in context (from BinaryMesh env).
-// -------------------------------------------------------
+  // 1) BOOT ORGANISM (CORTEX + TENDONS INJECTED)
+  // -------------------------------------------------------
   const organism = createOrganismMesh({
-    context,
+    context: {
+      ...context,
+      applyPulseCortex,
+      applyPulseMeshTendons
+    },
     symbolicMeshEnv: { symbolicMesh },
     binaryMeshEnv: context.binaryMeshEnv,
     trace
   });
 
-  // organism exposes both meshes via its envs
-  const organismSymbolicEnv = organism.symbolicMeshEnv || { symbolicMesh };
-  const meshCore = organismSymbolicEnv.symbolicMesh || symbolicMesh;
+  const meshCore = organism.symbolicMeshEnv?.symbolicMesh || symbolicMesh;
 
   // -------------------------------------------------------
-  // 2) FLOW / TOPOLOGY
+  // 2) SPINE (ROOT OF MESH NERVOUS SYSTEM)
+  // -------------------------------------------------------
+  const meshSpine = PulseMeshSpine?.create
+    ? PulseMeshSpine.create({ context, mesh: meshCore, log, warn })
+    : null;
+
+  // -------------------------------------------------------
+  // 3) FLOW (MESH CIRCULATION)
   // -------------------------------------------------------
   const meshFlow = PulseMeshFlow?.create
     ? PulseMeshFlow.create({ context, mesh: meshCore, log, warn })
     : null;
 
-  // 3) PRESENCE RELAY
+  // -------------------------------------------------------
+  // 4) PRESENCE RELAY (MESH → WORLD PRESENCE)
+  // -------------------------------------------------------
   const meshPresenceRelay = PulseMeshPresenceRelay?.create
     ? PulseMeshPresenceRelay.create({
         MeshBus: context.MeshBus,
@@ -322,11 +355,16 @@ export function createPulseMeshEnvironment({
       })
     : null;
 
-  // 4) HIGHER-ORDER MESH SYSTEMS
+  // -------------------------------------------------------
+  // 5) COGNITION (MESH-LEVEL COGNITION)
+  // -------------------------------------------------------
   const meshCognition = PulseMeshCognition?.create
     ? PulseMeshCognition.create({ context, mesh: meshCore, flow: meshFlow, log, warn })
     : null;
 
+  // -------------------------------------------------------
+  // 6) ENDOCRINE / IMMUNE / ORGANS (STRUCTURAL LAYERS)
+  // -------------------------------------------------------
   const meshEndocrine = PulseMeshEndocrineSystem?.create
     ? PulseMeshEndocrineSystem.create({ context, mesh: meshCore, log, warn })
     : null;
@@ -339,11 +377,22 @@ export function createPulseMeshEnvironment({
     ? PulseMeshOrgans.create({ context, mesh: meshCore, log, warn })
     : null;
 
+  // -------------------------------------------------------
+  // 7) THALAMUS (AFTER ORGANS)
+  // -------------------------------------------------------
   const meshThalamus = PulseMeshThalamus?.create
-    ? PulseMeshThalamus.create({ context, mesh: meshCore, log, warn })
+    ? PulseMeshThalamus.create({
+        log,
+        warn,
+        error,
+        groupCollapsed: context.groupCollapsed || console.groupCollapsed?.bind(console),
+        groupEnd: context.groupEnd || console.groupEnd?.bind(console)
+      })
     : null;
 
-  // 5) VIEWS / UPGRADE / UX LAYERS
+  // -------------------------------------------------------
+  // 8) WORLD LAYER (PRESENCE + MENTOR + SOCIAL GRAPH)
+  // -------------------------------------------------------
   const presenceAIView = PresenceAIView?.create
     ? PresenceAIView.create({ context, mesh: meshCore, log, warn })
     : null;
@@ -352,62 +401,21 @@ export function createPulseMeshEnvironment({
     ? MentorUpgradeRequest.create({ context, mesh: meshCore, log, warn })
     : null;
 
-  // 6) ENVIRONMENT REGISTRY
+  const socialGraph = typeof createPulseWorldSocialGraph === "function"
+    ? createPulseWorldSocialGraph({
+        PowerUserRanking: context.PowerUserRanking,
+        log,
+        warn,
+        error
+      })
+    : null;
+
+  // -------------------------------------------------------
+  // 9) ENVIRONMENT REGISTRY (IMMORTAL ORDER)
+// -------------------------------------------------------
   const ALL_MESH_SYSTEMS = Object.freeze({
     symbolicMesh: meshCore,
-    meshFlow,
-    meshPresenceRelay,
-    meshCognition,
-    meshEndocrine,
-    meshImmune,
-    meshOrgans,
-    meshThalamus,
-    presenceAIView,
-    mentorUpgradeRequest
-  });
-
-  // 7) UNIVERSAL PREWARM
-  function prewarm() {
-    log("[PulseMesh v15] Prewarm start");
-
-    for (const [name, system] of Object.entries(ALL_MESH_SYSTEMS)) {
-      if (system && typeof system.prewarm === "function") {
-        try {
-          system.prewarm();
-          log("[PulseMesh v15] Prewarmed mesh system", { name });
-        } catch (e) {
-          warn("[PulseMesh v15] Prewarm failed for mesh system", {
-            name,
-            error: e?.message
-          });
-        }
-      }
-    }
-
-    log("[PulseMesh v15] Prewarm complete");
-  }
-
-  // 8) PUBLIC FACADE
-  function link(from, to) {
-    meshCore.link(from, to);
-  }
-
-  function transmit(from, packet, options = {}) {
-    return meshCore.transmit(from, packet, options);
-  }
-
-  function fallback(reason, from, packet, options = {}) {
-    return meshCore.fallback(reason, from, packet, options);
-  }
-
-  // 9) PUBLIC ENVIRONMENT API
-  const meshEnvironment = Object.freeze({
-    meta: PulseMeshMeta,
-
-    // core
-    symbolicMesh: meshCore,
-
-    // subsystems
+    meshSpine,
     meshFlow,
     meshPresenceRelay,
     meshCognition,
@@ -417,21 +425,60 @@ export function createPulseMeshEnvironment({
     meshThalamus,
     presenceAIView,
     mentorUpgradeRequest,
-
-    // controls
-    link,
-    transmit,
-    fallback,
-    prewarm,
-
-    // raw map
-    systems: ALL_MESH_SYSTEMS,
-
-    // organism hooks
-    organism
+    socialGraph
   });
 
-  return meshEnvironment;
+  // -------------------------------------------------------
+  // 10) UNIVERSAL PREWARM (IMMORTAL ORDER)
+// -------------------------------------------------------
+  function prewarm() {
+    log("[PulseMesh v15] Prewarm start");
+
+    for (const [name, system] of Object.entries(ALL_MESH_SYSTEMS)) {
+      if (system?.prewarm) {
+        try {
+          system.prewarm();
+          log("[PulseMesh v15] Prewarmed mesh system", { name });
+        } catch (e) {
+          warn("[PulseMesh v15] Prewarm failed", { name, error: e?.message });
+        }
+      }
+    }
+
+    log("[PulseMesh v15] Prewarm complete");
+  }
+
+  // -------------------------------------------------------
+  // 11) PUBLIC API
+  // -------------------------------------------------------
+  return Object.freeze({
+    meta: PulseMeshMeta,
+
+    // core
+    symbolicMesh: meshCore,
+
+    // subsystems
+    meshSpine,
+    meshFlow,
+    meshPresenceRelay,
+    meshCognition,
+    meshEndocrine,
+    meshImmune,
+    meshOrgans,
+    meshThalamus,
+    presenceAIView,
+    mentorUpgradeRequest,
+    socialGraph,
+
+    // controls
+    link: meshCore.link,
+    transmit: meshCore.transmit,
+    fallback: meshCore.fallback,
+    prewarm,
+
+    systems: ALL_MESH_SYSTEMS,
+    organism
+  });
 }
 
 export default {

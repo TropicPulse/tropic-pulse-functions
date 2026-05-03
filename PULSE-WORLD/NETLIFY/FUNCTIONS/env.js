@@ -8,7 +8,6 @@ import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import fetch from "node-fetch";
 //import { Readable } from "node:stream";
-import cors from "cors";
 import express from "express";
 
 import twilio from "twilio";

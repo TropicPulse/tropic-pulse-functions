@@ -46,7 +46,7 @@ import { createClient } from "redis";
 import { prewarmSDN } from "../PULSE-OS/PulseSDN-Prewarm-v12-Evo.js";
 
 import { createPulseEarnSendSystem } from "../PULSE-EARN/PulseEarnSendSystem.js";
-import { updateUserMetrics as recordUserMetrics } from "../../PULSE-UI/_CONNECTORS/PulseProofMonitor.js";
+import { updateUserMetrics as recordUserMetrics } from "../../PULSE-UI/_BACKEND/PulseProofMonitor.js";
 import startPulseTimer from "./PulseProxyHeart.js";
 import { createPulseOSHealerV12_3 as startPulseOSHealer } from "../PULSE-OS/PulseOSInflammatoryResponse.js";
 import { createGlobalHealerV12 as startGlobalHealer } from "../PULSE-OS/PulseOSImmuneSystem.js";

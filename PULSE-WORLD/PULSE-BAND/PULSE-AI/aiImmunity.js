@@ -1,52 +1,55 @@
-/**
- * aiImmunity.js — Pulse OS v11.3‑EVO Organ
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   This organ is the **Binary Immune System** of the organism.
- *
- *   It protects against:
- *     - corrupted binary packets
- *     - malformed signals
- *     - failing organs
- *     - drifted signatures
- *     - pipeline contamination
- *     - reflex misfires
- *
- *   It performs:
- *     - anomaly detection
- *     - organ quarantine
- *     - packet neutralization
- *     - structural isolation (via Anatomy)
- *     - binary immune artery scoring (throughput, pressure, cost, budget)
- *
- *   It is the organism’s:
- *     • immune core
- *     • quarantine engine
- *     • structural firewall
- *     • binary sanitation layer
- *     • internal immune artery source
- *
- *   IMMUNITY MODEL (v11.3‑EVO, binary‑first, no timestamps):
- *
- *     {
- *       type: "binary-immune-response",
- *       anomaly: <string>,
- *       organId: <string|null>,
- *       binary: { throughput, pressure, cost, budget, buckets },
- *       bits: <binary>,
- *       bitLength: <number>,
- *       cycle: <number>,          // deterministic local immune cycle
- *       band: "binary",
- *       highway: "binary_first_dualband"
- *     }
- */
+// ============================================================================
+//  aiImmunity.js — Pulse OS v15-IMMORTAL Organ
+//  Binary Immune System • Quarantine Engine • Binary-First • Dualband Artery
+// ----------------------------------------------------------------------------
+//  CANONICAL ROLE:
+//    This organ is the **Binary Immune System** of the organism.
+//
+//    It protects against:
+//      • corrupted binary packets
+//      • malformed signals
+//      • failing organs
+//      • drifted signatures
+//      • pipeline contamination
+//      • reflex misfires
+//
+//    It performs:
+//      • anomaly detection
+//      • organ quarantine
+//      • packet neutralization
+//      • structural isolation (via Anatomy)
+//      • binary immune artery scoring (throughput, pressure, cost, budget)
+//
+//    It is the organism’s:
+//      • immune core
+//      • quarantine engine
+//      • structural firewall
+//      • binary sanitation layer
+//      • internal immune artery source
+//
+//    IMMUNITY MODEL (v15‑IMMORTAL, binary‑first, no wall‑clock dependency):
+//
+//      {
+//        type: "binary-immune-response",
+//        anomaly: <string>,
+//        organId: <string|null>,
+//        binary: { throughput, pressure, cost, budget, ...buckets },
+//        bits: <binary>,
+//        bitLength: <number>,
+//        cycle: <number>,          // deterministic local immune cycle
+//        band: "binary",
+//        highway: "binary_first_dualband",
+//        immortalityEpoch: "v15-IMMORTAL"
+//      }
+// ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiImmunity",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "ai_immune_system",
-  lineage: "aiImmunity-v11 → v14-IMMORTAL",
+  lineage: "aiImmunity-v11 → v14-IMMORTAL → v15-IMMORTAL",
 
   evo: {
     immuneSystem: true,
@@ -61,7 +64,15 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    zeroTiming: true,
+    zeroWallClock: true,
+    zeroAsync: true,
+
+    arteryV3: true,
+    binaryFirstHighway: true,
+    immortalityEpoch: true
   },
 
   contract: {
@@ -72,14 +83,14 @@ AI_EXPERIENCE_META = {
 */
 
 // ============================================================================
-//  ORGAN IDENTITY — v11.3‑EVO (B2 Binary Immune System)
+//  ORGAN IDENTITY — v15‑IMMORTAL (B2 Binary Immune System)
 // ============================================================================
 export const PulseRole = Object.freeze({
   type: "ImmuneCore",
   subsystem: "AIBinaryImmunity",
   layer: "B2-BinaryImmuneSystem",
-  version: "11.3-EVO",
-  identity: "AIBinaryImmunity-v11.3-EVO",
+  version: "15-IMMORTAL",
+  identity: "AIBinaryImmunity-v15-IMMORTAL",
 
   evo: Object.freeze({
     // Core invariants
@@ -87,6 +98,7 @@ export const PulseRole = Object.freeze({
     deterministicField: true,
     unifiedAdvantageField: true,
     futureEvolutionReady: true,
+    immortalityEpoch: true,
 
     // Immune lineage
     immuneCore: true,
@@ -121,22 +133,23 @@ export const PulseRole = Object.freeze({
     windowAware: true,
     bluetoothReady: true,
 
-    // v11.3‑EVO extras
+    // v15‑IMMORTAL extras
     packetAware: true,
     arteryAware: true,
     driftAware: true,
-    prewarmAware: true
+    prewarmAware: true,
+    arteryV3: true
   })
 });
 
 // ---------------------------------------------------------
-//  META BLOCK — v11.3‑EVO + Dualband + Binary‑First Highway
+//  META BLOCK — v15‑IMMORTAL + Dualband + Binary‑First Highway
 // ---------------------------------------------------------
 export const ImmunityMeta = Object.freeze({
   layer: "BinaryDefense",
   role: "BINARY_IMMUNE_SYSTEM",
-  version: "11.3-EVO",
-  identity: "aiBinaryImmunity-v11.3-EVO",
+  version: "15-IMMORTAL",
+  identity: "aiBinaryImmunity-v15-IMMORTAL",
   band: "dualband",
   highway: "binary_first_dualband",
   intent: "binary_immune_defense",
@@ -167,7 +180,7 @@ export const ImmunityMeta = Object.freeze({
     prewarmAware: true,
 
     multiInstanceReady: true,
-    epoch: "v11.3-EVO"
+    epoch: "v15-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -196,7 +209,7 @@ export const ImmunityMeta = Object.freeze({
 });
 
 // ============================================================================
-//  PREWARM — v11.3‑EVO (no time, no randomness)
+//  PREWARM — v15‑IMMORTAL (no time, no randomness)
 // ============================================================================
 export function prewarmAIBinaryImmunity() {
   const payload = {
@@ -217,6 +230,7 @@ export function prewarmAIBinaryImmunity() {
     band: "binary",
     highway: "binary_first_dualband",
     meta: ImmunityMeta,
+    immortalityEpoch: ImmunityMeta.evo.epoch,
     bluetooth: {
       ready: false,
       channel: null
@@ -233,7 +247,7 @@ export function prewarmAIBinaryImmunity() {
 }
 
 // ---------------------------------------------------------
-//  ORGAN IMPLEMENTATION — v11.3‑EVO
+//  ORGAN IMPLEMENTATION — v15‑IMMORTAL
 // ---------------------------------------------------------
 export class AIBinaryImmunity {
   constructor(config = {}) {
@@ -262,13 +276,15 @@ export class AIBinaryImmunity {
       lastBinary: null,
       lastCycle: 0,
       quarantinedCount: 0,
-      snapshot: () => Object.freeze({
-        lastAnomaly: this.immuneArtery.lastAnomaly,
-        lastOrganId: this.immuneArtery.lastOrganId,
-        lastBinary: this.immuneArtery.lastBinary,
-        lastCycle: this.immuneArtery.lastCycle,
-        quarantinedCount: this.quarantined.size
-      })
+      snapshot: () =>
+        Object.freeze({
+          lastAnomaly: this.immuneArtery.lastAnomaly,
+          lastOrganId: this.immuneArtery.lastOrganId,
+          lastBinary: this.immuneArtery.lastBinary,
+          lastCycle: this.immuneArtery.lastCycle,
+          quarantinedCount: this.quarantined.size,
+          epoch: ImmunityMeta.evo.epoch
+        })
     };
   }
 
@@ -321,7 +337,7 @@ export class AIBinaryImmunity {
 
   // ---------------------------------------------------------
   //  IMMUNE RESPONSE GENERATION (binary-first, no timestamps)
-// ---------------------------------------------------------
+  // ---------------------------------------------------------
   _nextCycle() {
     this.cycle += 1;
     return this.cycle;
@@ -358,6 +374,7 @@ export class AIBinaryImmunity {
       band: "binary",
       highway: "binary_first_dualband",
       meta: ImmunityMeta,
+      immortalityEpoch: ImmunityMeta.evo.epoch,
 
       bluetooth: {
         ready: false,
@@ -439,7 +456,7 @@ export class AIBinaryImmunity {
 
   // ---------------------------------------------------------
   //  SIGNATURE DRIFT DETECTION (evolution-aware)
-// ---------------------------------------------------------
+  // ---------------------------------------------------------
   checkOrgan(organId) {
     const record = this.registry.getOrganRecord(organId);
     if (!record) return;
@@ -487,13 +504,12 @@ export function createAIBinaryImmunity(config) {
 // ---------------------------------------------------------
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ---------------------------------------------------------
-
-
 if (typeof module !== "undefined") {
   module.exports = {
     AIBinaryImmunity,
     createAIBinaryImmunity,
     ImmunityMeta,
-    prewarmAIBinaryImmunity
+    prewarmAIBinaryImmunity,
+    PulseRole
   };
 }

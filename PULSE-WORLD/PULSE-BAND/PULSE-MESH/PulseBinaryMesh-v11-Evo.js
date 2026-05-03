@@ -117,20 +117,47 @@ export const BinaryMeshMeta = Object.freeze({
 // ============================================================================
 // IMPORTS — MESH SUBSYSTEMS (SYMBOLIC SIDE)
 // ============================================================================
+
+// 0 — CORE ORGANISM BOOT
 import { createOrganismMesh } from "./OrganismMesh-v1-EVO.js";
+
+// 1 — SPINE (root of mesh nervous system)
+import PulseMeshSpine from "./PulseMeshSpine.js";
+
+// 2 — FLOW (mesh circulation)
 import PulseMeshFlow from "./PulseMeshFlow.js";
+
+// 3 — PRESENCE RELAY (mesh → world presence)
 import PulseMeshPresenceRelay from "./PulseMeshPresenceRelay-v12.4-EVO.js";
+
+// 4 — COGNITION (mesh-level cognition)
 import PulseMeshCognition from "./PulseMeshCognition.js";
+
+// 5 — ENDOCRINE (mesh hormones)
 import PulseMeshEndocrineSystem from "./PulseMeshEndocrineSystem.js";
+
+// 6 — IMMUNE SYSTEM (mesh immune layer)
 import PulseMeshImmuneSystem from "./PulseMeshImmuneSystem.js";
+
+// 7 — ORGANS (mesh organ registry)
 import PulseMeshOrgans from "./PulseMeshOrgans.js";
+
+// 8 — THALAMUS (relay after organs)
 import PulseMeshThalamus from "./PulseMeshThalamus.js";
 
+// ============================================================================
+// WORLD / PRESENCE LAYER
+// ============================================================================
 import PresenceAIView from "./PresenceAIView.js";
 import MentorUpgradeRequest from "./MentorUpgradeRequest.js";
+import { createPulseWorldSocialGraph } from "./PulseWorldSocialGraph.js";
 
+// ============================================================================
+// CORTEX + TENDONS (SHAPING LAYERS — ALWAYS LAST)
+// ============================================================================
 import { applyPulseCortex } from "./PulseMeshCortex.js";
 import { applyPulseMeshTendons } from "./PulseMeshTendons.js";
+
 
 // ============================================================================
 // INTERNAL HELPERS
@@ -151,46 +178,28 @@ function safeLog(fn, fallback) {
   if (typeof console !== "undefined" && typeof fallback === "function") return fallback;
   return () => {};
 }
-
 // ============================================================================
-// BINARY MESH FACTORY — v15-EVO-IMMORTAL
+// BINARY MESH FACTORY — v15-EVO-IMMORTAL (WITH CORTEX + TENDONS APPLIED)
 // ============================================================================
 export function createBinaryMesh({
-  symbolicMesh,           // PulseMesh (symbolic fallback)
+  symbolicMesh,
   trace = false,
   maxBitsLength = 64,
   defaultBand = "binary",
   defaultPresenceTag = "BinaryMesh-v15"
 } = {}) {
 
-  // links[from] = to
   const links = Object.create(null);
 
   const logWarn = safeLog(globalThis?.warn, console?.warn);
   const logInfo = safeLog(globalThis?.log, console?.log);
 
-  // -------------------------------------------------------------------------
-  // LINK REGISTRATION
-  // -------------------------------------------------------------------------
-  //  ROLE:
-  //    • Declares a binary path from one organ to another.
-  //    • Purely topological — no semantics, no routing logic.
-  // -------------------------------------------------------------------------
   function link(from, to) {
     links[from] = to;
   }
 
   // -------------------------------------------------------------------------
-  // SYMBOLIC FALLBACK (binary → symbolic)
-  // -------------------------------------------------------------------------
-  //  TRIGGERS:
-  //    • missing-link        — no binary path for `from`
-  //    • non-binary-input    — bits not pure 0/1 or length invalid
-  //
-  //  BEHAVIOR:
-  //    • Logs (if trace).
-  //    • Wraps bits + metadata into a symbolic packet.
-  //    • Calls symbolicMesh.transmit(from, packet, { band: "symbolic", ... }).
+  // SYMBOLIC FALLBACK (binary → symbolic) WITH CORTEX + TENDONS
   // -------------------------------------------------------------------------
   function fallback(reason, from, bits, {
     band = defaultBand,
@@ -198,9 +207,7 @@ export function createBinaryMesh({
   } = {}) {
 
     if (!symbolicMesh) {
-      throw new Error(
-        `BinaryMesh fallback (${reason}) from:${from} but no symbolicMesh provided`
-      );
+      throw new Error(`BinaryMesh fallback (${reason}) from:${from} but no symbolicMesh provided`);
     }
 
     if (trace) {
@@ -210,37 +217,39 @@ export function createBinaryMesh({
       );
     }
 
-    const packet = {
+    // IMMORTAL: wrap bits into a symbolic impulse
+    const impulse = {
       type: "binaryFallback",
       reason,
       from,
       bits,
       band,
-      presenceTag
+      presenceTag,
+      flags: {
+        binary_fallback: true,
+        binary_reason: reason,
+        binary_presence_tag: presenceTag
+      }
     };
 
-    return symbolicMesh.transmit(from, packet, {
+    // IMMORTAL: apply Cortex → Tendons before symbolic routing
+    applyPulseCortex(impulse, {
+      binaryMode: false,
+      dualMode: false,
+      symbolicMode: true
+    });
+
+    applyPulseMeshTendons(impulse);
+
+    return symbolicMesh.transmit(from, impulse, {
       band: "symbolic",
       presenceTag: "PulseMesh-v15"
     });
   }
 
   // -------------------------------------------------------------------------
-  // PURE BINARY TRANSMISSION (binary-first)
-// -------------------------------------------------------------------------
-//  INPUT:
-//    • from: string
-//    • bits: number[] (0/1 only)
-//    • options: { band?, presenceTag? }
-//
-//  OUTPUT:
-//    • bits (unchanged) OR symbolic fallback result
-//
-//  RULES:
-//    • If no link[from] → fallback("missing-link").
-//    • If bits not pure binary or length invalid → fallback("non-binary-input").
-//    • Otherwise: return bits as-is (pure binary path).
-// -------------------------------------------------------------------------
+  // PURE BINARY TRANSMISSION
+  // -------------------------------------------------------------------------
   function transmit(from, bits, {
     band = defaultBand,
     presenceTag = defaultPresenceTag
@@ -263,13 +272,9 @@ export function createBinaryMesh({
       );
     }
 
-    // Pure binary path — never mutate bits, never interpret them.
-    return bits;
+    return bits; // pure binary path
   }
 
-  // -------------------------------------------------------------------------
-  // PUBLIC API
-  // -------------------------------------------------------------------------
   return Object.freeze({
     meta: BinaryMeshMeta,
     link,
@@ -279,7 +284,7 @@ export function createBinaryMesh({
 }
 
 // ============================================================================
-// LOCAL BINARY SUBSYSTEMS — LIVE ON THIS PAGE
+// LOCAL BINARY SUBSYSTEMS — LIVE ON THIS PAGE (v15-IMMORTAL)
 // ============================================================================
 //
 //  PulseBinaryMeshPresence:
@@ -293,10 +298,11 @@ export function createBinaryMesh({
 const PulseBinaryMeshPresence = {
   create({ context, binaryMesh, log, warn }) {
     function prewarm() {
-      log?.("[BinaryPresence] prewarm");
+      log?.("[BinaryPresence v15] prewarm");
     }
 
     function pulse(from, bits, options) {
+      // pure binary path; Cortex/Tendons are applied only on fallback in binaryMesh
       return binaryMesh.transmit(from, bits, options);
     }
 
@@ -310,11 +316,11 @@ const PulseBinaryMeshPresence = {
 const PulseBinaryMeshPrime = {
   create({ context, binaryMesh, log, warn }) {
     function prewarm() {
-      log?.("[BinaryPrime] prewarm");
+      log?.("[BinaryPrime v15] prewarm");
     }
 
     function process(from, bits, options) {
-      // Extension point for prime binary logic — keep pure, metadata-only.
+      // extension point for prime binary logic — keep pure, metadata-only
       return binaryMesh.transmit(from, bits, options);
     }
 
@@ -329,13 +335,6 @@ const PulseBinaryMeshPrime = {
 // BINARY MESH ENVIRONMENT — v15-EVO-IMMORTAL
 //   BINARY BARREL: BOOT ORGANISM, LOAD SUBSYSTEMS, WIRE, PREWARM
 // ============================================================================
-//
-//  ROLE:
-//    • Boots OrganismMesh (symbolic + binary envs).
-//    • Exposes binaryMesh + local binary subsystems.
-//    • Wires symbolic-adjacent mesh subsystems.
-//    • Provides a single `prewarm` entrypoint for the whole binary environment.
-// ============================================================================
 export function createBinaryMeshEnvironment({
   context = {},
   trace = false,
@@ -349,10 +348,14 @@ export function createBinaryMeshEnvironment({
   const error = context.error || safeLog(globalThis?.error, console?.error);
 
   // -------------------------------------------------------
-  // 0) BOOT THE ORGANISM (ROUTE THROUGH ORGANISMMESH)
+  // 0) BOOT THE ORGANISM (CORTEX + TENDONS INJECTED)
   // -------------------------------------------------------
   const organism = createOrganismMesh({
-    context,
+    context: {
+      ...context,
+      applyPulseCortex,
+      applyPulseMeshTendons
+    },
     symbolicMeshEnv: context.symbolicMeshEnv,
     binaryMeshEnv: context.binaryMeshEnv,
     trace
@@ -360,11 +363,19 @@ export function createBinaryMeshEnvironment({
 
   // organism exposes both meshes via its envs
   const symbolicMesh = organism.symbolicMeshEnv?.symbolicMesh || organism.symbolicMeshEnv;
-  const binaryMesh   = organism.binaryMeshEnv?.binaryMesh   || organism.binaryMeshEnv;
+
+  // IMMORTAL: binaryMesh created here, with Cortex/Tendons-aware fallback
+  const binaryMesh = createBinaryMesh({
+    symbolicMesh,
+    trace,
+    maxBitsLength,
+    defaultBand,
+    defaultPresenceTag
+  });
 
   // -------------------------------------------------------
   // 1) BINARY SUBSYSTEMS (LOCAL)
-  // -------------------------------------------------------
+// -------------------------------------------------------
   const binaryPresence = PulseBinaryMeshPresence?.create
     ? PulseBinaryMeshPresence.create({ context, binaryMesh, log, warn })
     : null;
@@ -406,7 +417,17 @@ export function createBinaryMeshEnvironment({
     : null;
 
   const meshThalamus = PulseMeshThalamus?.create
-    ? PulseMeshThalamus.create({ context, mesh: symbolicMesh, log, warn })
+    ? PulseMeshThalamus.create({
+        log,
+        warn,
+        error,
+        groupCollapsed: context.groupCollapsed || console.groupCollapsed?.bind(console),
+        groupEnd: context.groupEnd || console.groupEnd?.bind(console)
+      })
+    : null;
+
+  const meshSpine = typeof PulseMeshSpine?.create === "function"
+    ? PulseMeshSpine.create({ context, mesh: symbolicMesh, log, warn })
     : null;
 
   const presenceAIView = PresenceAIView?.create
@@ -415,6 +436,15 @@ export function createBinaryMeshEnvironment({
 
   const mentorUpgradeRequest = MentorUpgradeRequest?.create
     ? MentorUpgradeRequest.create({ context, mesh: symbolicMesh, log, warn })
+    : null;
+
+  const socialGraph = typeof createPulseWorldSocialGraph === "function"
+    ? createPulseWorldSocialGraph({
+        PowerUserRanking: context.PowerUserRanking,
+        log,
+        warn,
+        error
+      })
     : null;
 
   // -------------------------------------------------------
@@ -436,8 +466,10 @@ export function createBinaryMeshEnvironment({
     meshImmune,
     meshOrgans,
     meshThalamus,
+    meshSpine,
     presenceAIView,
-    mentorUpgradeRequest
+    mentorUpgradeRequest,
+    socialGraph
   });
 
   // -------------------------------------------------------
@@ -481,13 +513,14 @@ export function createBinaryMeshEnvironment({
     meshImmune,
     meshOrgans,
     meshThalamus,
+    meshSpine,
     presenceAIView,
     mentorUpgradeRequest,
+    socialGraph,
 
     prewarm,
     systems: ALL_SYSTEMS,
 
-    // organism hook
     organism
   });
 }

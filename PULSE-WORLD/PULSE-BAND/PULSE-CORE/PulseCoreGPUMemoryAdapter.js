@@ -1,25 +1,25 @@
 // ============================================================================
-//  PulseGPUOrchestrator.js — v12‑EVO‑PRESENCE‑MAX
+//  PulseGPUOrchestrator.js — v15‑IMMORTAL‑GPU‑SPINE
 //  GPU SPINE / BRAINSTEM • AUTONOMIC NERVOUS SYSTEM
 //  “ROUTE SIGNALS. REGULATE PRESSURE. NEVER TOUCH THE HARDWARE.”
-//  • MetaBlock (v12 identity)
-//  • PulseRol / PresenceRol
-//  • DNA‑aware
-//  • Version‑aware
-//  • Presence‑touch propagation
-//  • Hot‑loop integration
-//  • Pressure metadata
-//  • Mode metadata
-//  • Session metadata
-//  • Deterministic routing (no GPU calls)
+//  • v15 IMMORTAL MetaBlock
+//  • dnaTag + version aware
+//  • presence‑touch propagation (overlay.touch + deterministic epoch)
+//  • hot‑loop integration
+//  • pressure metadata
+//  • mode metadata
+//  • session metadata
+//  • dual‑band metadata
+//  • deterministic routing (no GPU calls)
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseCoreGPUMemoryAdapter",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL-GPU-ORCHESTRATOR",
   layer: "corememory_adapter",
   role: "gpu_memory_adapter",
-  lineage: "PulseCoreMemory-v14",
+  lineage: "PulseCoreMemory-v15-IMMORTAL",
 
   evo: {
     adapter: true,
@@ -40,24 +40,32 @@ AI_EXPERIENCE_META = {
   contract: {
     always: [
       "PulseCoreBrain",
-      "PulseCoreGovernor"
+      "PulseCoreGovernor",
+      "PulseBinaryCoreOverlay"
     ],
     never: [
       "safeRoute",
       "fetchViaCNS"
     ]
   }
-}
+};
 */
 
 import { createPulseBinaryOverlay } from "./PulseBinaryCoreOverlay.js";
+
+// deterministic epoch for GPU orchestrator events
+let GPU_EPOCH = 0;
+function nextGPUEpoch() {
+  GPU_EPOCH += 1;
+  return GPU_EPOCH;
+}
 
 export const GPUOrchestratorRole = {
   type: "Organ",
   subsystem: "GPU",
   layer: "Spine",
   identity: "PulseGPUOrchestrator",
-  version: "12.0-Evo-Presence",
+  version: "15.0-IMMORTAL-GPU-ORCHESTRATOR",
 
   evo: {
     dualMode: true,
@@ -69,24 +77,26 @@ export const GPUOrchestratorRole = {
     dnaAware: true,
     presenceAware: true,
     versionAware: true,
-    pressureAware: true
+    pressureAware: true,
+    bandAware: true,
+    overlayAware: true
   }
 };
 
 // ---------------------------------------------------------------------------
-//  v12 IDENTITY BLOCK (MetaBlock)
+//  v15 IDENTITY BLOCK (MetaBlock)
 // ---------------------------------------------------------------------------
 export const GPUOrchestratorMetaBlock = {
   identity: "PulseGPUOrchestrator",
   subsystem: "GPU",
   layer: "Spine",
   role: "GPU-Orchestrator",
-  version: "12.0-Evo-Presence",
+  version: "15.0-IMMORTAL-GPU-ORCHESTRATOR",
   evo: GPUOrchestratorRole.evo
 };
 
 // ---------------------------------------------------------------------------
-//  SIGNAL DEFINITIONS (unchanged, but now v12 metadata-aware)
+//  SIGNAL DEFINITIONS (unchanged, but now v15 metadata-aware)
 // ---------------------------------------------------------------------------
 export const GPUOrchestratorSignals = {
   SESSION_START: "gpu.session.start",
@@ -106,7 +116,7 @@ export const GPUOrchestratorSignals = {
 };
 
 // ---------------------------------------------------------------------------
-//  ROUTING MAP (v12: now includes metaBlock + dnaTag + version)
+//  ROUTING MAP (v15: includes IMMORTAL metadata + notes)
 // ---------------------------------------------------------------------------
 export const GPUOrchestratorRoutes = {
   [GPUOrchestratorSignals.SESSION_START]: {
@@ -152,22 +162,23 @@ export const GPUOrchestratorRoutes = {
 };
 
 // ---------------------------------------------------------------------------
-//  PURE, DETERMINISTIC DISPATCHER (v12 metadata-aware)
+//  PURE, DETERMINISTIC DISPATCHER (v15 IMMORTAL)
 // ---------------------------------------------------------------------------
 export function createPulseGPUOrchestrator({
   overlay = createPulseBinaryOverlay(),
   dnaTag = "default-dna",
-  version = "12.0-Evo-Presence",
+  version = "15.0-IMMORTAL-GPU-ORCHESTRATOR",
   log = console.log
 } = {}) {
 
   function safeLog(stage, details = {}) {
-    try { log("[PulseGPUOrchestrator]", stage, JSON.stringify(details)); }
+    try { log("[PulseGPUOrchestrator-v15]", stage, JSON.stringify(details)); }
     catch {}
   }
 
   function routeSignal(signal, payload = {}) {
     const route = GPUOrchestratorRoutes[signal];
+    const epoch = nextGPUEpoch();
 
     if (!route) {
       safeLog("UNKNOWN_SIGNAL", { signal });
@@ -179,27 +190,39 @@ export function createPulseGPUOrchestrator({
         metaBlock: GPUOrchestratorMetaBlock,
         dnaTag,
         version,
-        lastTouched: Date.now()
+        epoch,
+        band: "symbolic"
       };
     }
+
+    // Determine band (binary for kernels/graphs, symbolic for session/meta)
+    const band =
+      signal === GPUOrchestratorSignals.LOAD_KERNEL ||
+      signal === GPUOrchestratorSignals.UNLOAD_KERNEL ||
+      signal === GPUOrchestratorSignals.EXECUTE_GRAPH ||
+      signal === GPUOrchestratorSignals.WARM_GRAPH
+        ? "binary"
+        : "symbolic";
 
     const meta = {
       metaBlock: GPUOrchestratorMetaBlock,
       dnaTag,
       version,
-      lastTouched: Date.now(),
+      epoch,
+      band,
       pressure: payload.pressure || null,
       mode: payload.mode || null,
-      session: payload.session || null
+      session: payload.session || null,
+      routeId: payload.routeId || "gpu"
     };
 
-    // Presence‑touch propagation (if overlay provided)
+    // Presence‑touch propagation
     if (overlay && overlay.touch) {
-      try { overlay.touch(payload.routeId || "gpu", meta.lastTouched); }
+      try { overlay.touch(meta.routeId, epoch, meta); }
       catch {}
     }
 
-    safeLog("ROUTE", { signal, targets: route.to });
+    safeLog("ROUTE", { signal, targets: route.to, band });
 
     return {
       signal,
@@ -212,7 +235,8 @@ export function createPulseGPUOrchestrator({
 
   safeLog("INIT", {
     identity: GPUOrchestratorRole.identity,
-    version: GPUOrchestratorRole.version
+    version: GPUOrchestratorRole.version,
+    dnaTag
   });
 
   return {

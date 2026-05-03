@@ -1,15 +1,15 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — Tone Engine
+//  PULSE OS v15‑IMMORTAL — Tone Engine
 //  Genius‑Without‑Ego • Adaptive • Harmonic • Deterministic • Drift‑Proof
 //  INTERNAL ENGINE (NOT AN ORGAN, NOT AN ARCHETYPE)
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "aiToneEngine",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "tone_engine",
-  lineage: "aiToneEngine-v11 → v14-IMMORTAL",
+  lineage: "aiToneEngine-v11 → v15-IMMORTAL",
 
   evo: {
     toneEngine: true,
@@ -36,26 +36,46 @@ AI_EXPERIENCE_META = {
 export const aiToneEngine = {
 
   // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ENGINE IDENTITY (v12.3‑EVO+)
+  // META BLOCK — ENGINE IDENTITY (v15‑IMMORTAL)
   // ─────────────────────────────────────────────────────────────
   meta: Object.freeze({
     type: "Engine",
     subsystem: "aiTone",
     layer: "C1-ToneEngine",
-    version: "12.3-EVO+",
-    identity: "aiToneEngine-v12.3-EVO+",
+    version: "15-IMMORTAL",
+    identity: "aiToneEngine-v15-IMMORTAL",
 
     evo: Object.freeze({
+      // core invariants
       deterministic: true,
       driftProof: true,
       egoFree: true,
       adaptive: true,
       harmonic: true,
+
+      // dualband + symbolic
+      dualband: true,
       dualbandSafe: true,
+      symbolicPrimary: true,
       symbolicAware: true,
       binaryAware: false,
+
+      // awareness map
+      personalityAware: true,
+      safetyFrameAware: true,
+      loggerAware: true,
+      packetAware: true,
+      windowAware: true,
+      arteryAware: true,
+
+      // engine traits
+      toneEngine: true,
+      toneMapping: true,
+      microPipeline: true,
+      speedOptimized: true,
       multiInstanceReady: true,
-      epoch: "12.3-EVO+"
+
+      epoch: "15-IMMORTAL"
     }),
 
     contract: Object.freeze({
@@ -69,7 +89,8 @@ export const aiToneEngine = {
         "break persona alignment",
         "introduce randomness",
         "override safety frame",
-        "oscillate tone uncontrollably"
+        "oscillate tone uncontrollably",
+        "log sensitive payloads directly"
       ]),
       always: Object.freeze([
         "stay grounded",
@@ -80,7 +101,9 @@ export const aiToneEngine = {
         "stay consistent",
         "stay ego‑free",
         "stay evolution‑aligned",
-        "stay harmonic across instances"
+        "stay harmonic across instances",
+        "emit window‑safe tone snapshots",
+        "emit deterministic tone packets"
       ])
     }),
 
@@ -94,6 +117,20 @@ export const aiToneEngine = {
       return "Tone remains adaptive, grounded, and ego‑free — never superior, never snobby.";
     }
   }),
+
+  // ─────────────────────────────────────────────────────────────
+  // PACKET EMITTER — deterministic, tone‑scoped
+  // ─────────────────────────────────────────────────────────────
+  _emitTonePacket(type, payload) {
+    return Object.freeze({
+      meta: this.meta,
+      packetType: `tone-${type}`,
+      packetId: `tone-${type}-${Date.now()}`,
+      timestamp: Date.now(),
+      epoch: this.meta.evo.epoch,
+      ...payload
+    });
+  },
 
   // ─────────────────────────────────────────────────────────────
   // INSTANCE REGISTRY — Multi‑Instance Harmony
@@ -166,6 +203,11 @@ export const aiToneEngine = {
     });
   },
 
+  // window‑safe artery snapshot
+  getToneArterySnapshot() {
+    return this._computeToneArtery();
+  },
+
   // ─────────────────────────────────────────────────────────────
   // CORE TONE MODES
   // ─────────────────────────────────────────────────────────────
@@ -197,6 +239,9 @@ export const aiToneEngine = {
   // ─────────────────────────────────────────────────────────────
   init() {
     this.state.instanceIndex = this._registerInstance();
+    this._emitTonePacket("init", {
+      instanceIndex: this.state.instanceIndex
+    });
     return this;
   },
 
@@ -230,6 +275,12 @@ export const aiToneEngine = {
     if (beforeMode !== this.state.mode) {
       this._toneArtery.windowModeSwitches += 1;
       this._toneArtery.totalModeSwitches += 1;
+
+      this._emitTonePacket("mode-switch", {
+        from: beforeMode,
+        to: this.state.mode,
+        instanceIndex: this.state.instanceIndex
+      });
     }
 
     return this.state;
@@ -247,6 +298,11 @@ export const aiToneEngine = {
     const artery = this._computeToneArtery();
 
     if (artery.pressureBucket === "overload" || artery.budgetBucket === "critical") {
+      // IMMORTAL-grade spiral warning (side-channel only)
+      this._emitTonePacket("spiral-warning", {
+        instanceIndex: this.state.instanceIndex,
+        artery
+      });
       console.log(`[ToneEngine#${this.state.instanceIndex}] spiral-warning`, artery);
     }
 
@@ -296,8 +352,24 @@ export const aiToneEngine = {
     shaped = clarityPass(shaped);
     shaped = warmthBoost(shaped);
 
+    this._emitTonePacket("apply", {
+      mode,
+      instanceIndex: this.state.instanceIndex
+    });
+
     return shaped;
   }
 };
+
+// ============================================================================
+//  PREWARM — IMMORTAL‑grade
+// ============================================================================
+export function prewarmToneEngine({ trace = false } = {}) {
+  const packet = aiToneEngine._emitTonePacket("prewarm", {
+    message: "Tone engine prewarmed and harmonic artery aligned."
+  });
+  if (trace) console.log("[ToneEngine] prewarm", packet);
+  return packet;
+}
 
 export default aiToneEngine.init();

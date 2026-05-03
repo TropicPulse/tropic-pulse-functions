@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO — PERSONAL FRAME ORGAN
+//  PULSE OS v15‑IMMORTAL — PERSONAL FRAME ORGAN
 //  User-Level Preferences • Tone • Abstraction • Context Injection
 //  PURE READ-ONLY TO BINARY. GUARDED WRITES TO PERSONAL MEMORY.
 //  DUALBAND • DETERMINISTIC • SAFETY-AWARE • OVERMIND-PRIME-AWARE
@@ -7,10 +7,10 @@
 /*
 AI_EXPERIENCE_META = {
   identity: "aiPersonalFrame",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "personal_context_frame",
-  lineage: "aiPersonalFrame-v11 → v14-IMMORTAL",
+  lineage: "aiPersonalFrame-v11 → v15-IMMORTAL",
 
   evo: {
     personalContext: true,
@@ -28,7 +28,7 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiIdentityCore", "aiContext", "aiCortex"],
+    always: ["aiIdentityCore", "aiContext", "aiCortex", "aiPermissionsEngine", "aiSafetyFrame"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -37,15 +37,21 @@ AI_EXPERIENCE_META = {
 export const PersonalFrameMeta = Object.freeze({
   layer: "PulseAIPersonalFrame",
   role: "PERSONAL_FRAME_ORGAN",
-  version: "12.3-EVO",
-  identity: "aiPersonalFrame-v12.3-EVO",
+  version: "15-IMMORTAL",
+  identity: "aiPersonalFrame-v15-IMMORTAL",
 
+  // --------------------------------------------------------------------------
+  //  EVO — IMMORTAL-GRADE CAPABILITY MAP
+  // --------------------------------------------------------------------------
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     dualband: true,
+
     safetyAware: true,
+    safetyFrameAware: true,
     overmindAware: true,
+    overmindPrimeAware: true,
     routerAware: true,
     memoryAware: true,
     personaAware: true,
@@ -54,11 +60,23 @@ export const PersonalFrameMeta = Object.freeze({
     lineageAware: true,
     toneAware: true,
     abstractionAware: true,
+
+    governorAware: true,
+    permissionsAware: true,
+    loggerAware: true,
+    genomeAware: true,
+
+    microPipeline: true,
+    speedOptimized: true,
+
     multiInstanceReady: true,
-    readOnly: false,
-    epoch: "12.3-EVO"
+    readOnly: false, // guarded writes to personal memory lanes only
+    epoch: "15-IMMORTAL"
   }),
 
+  // --------------------------------------------------------------------------
+  //  CONTRACT — IMMUTABLE PERSONAL CONTEXT CONTRACT
+  // --------------------------------------------------------------------------
   contract: Object.freeze({
     purpose: [
       "Represent user-level preferences and communication style",
@@ -67,26 +85,31 @@ export const PersonalFrameMeta = Object.freeze({
       "Maintain personal memory lanes when allowed",
       "Shape final output according to user profile",
       "Integrate with dualband safety and persona routing",
-      "Emit window-safe personal-frame snapshots"
+      "Emit window-safe personal-frame snapshots",
+      "emit deterministic personal-frame packets"
     ],
 
-    never: [
+    never: Object.freeze([
       "mutate binary organs",
       "override system-wide safety constraints",
       "expose raw identity anchors",
       "write outside personal lanes",
       "introduce randomness",
-      "simulate personas or identities"
-    ],
+      "simulate personas or identities",
+      "bypass SafetyFrame or PermissionsEngine",
+      "log raw personal payloads directly"
+    ]),
 
-    always: [
+    always: Object.freeze([
       "stay deterministic",
       "respect owner+user gating",
       "strip identity anchors",
       "defer to SafetyFrame for safety decisions",
       "integrate router safetyMode + personaId",
-      "remain read-only relative to binary layers"
-    ]
+      "remain read-only relative to binary layers",
+      "emit window-safe artery snapshots",
+      "respect personal memory boundaries"
+    ])
   }),
 
   boundaryReflex() {
@@ -95,7 +118,33 @@ export const PersonalFrameMeta = Object.freeze({
 });
 
 // ============================================================================
-//  PERSONAL FRAME — v12.3‑EVO
+//  PACKET EMITTER — deterministic, personal-frame-scoped
+// ============================================================================
+function emitPersonalFramePacket(type, payload) {
+  return Object.freeze({
+    meta: PersonalFrameMeta,
+    packetType: `personal-frame-${type}`,
+    packetId: `personal-frame-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: PersonalFrameMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ============================================================================
+//  PREWARM — IMMORTAL-GRADE
+// ============================================================================
+export function prewarmPersonalFrame({ trace = false } = {}) {
+  const packet = emitPersonalFramePacket("prewarm", {
+    message: "PersonalFrame prewarmed and personal artery aligned."
+  });
+
+  if (trace) console.log("[PersonalFrame] prewarm", packet);
+  return packet;
+}
+
+// ============================================================================
+//  PERSONAL FRAME — v15‑IMMORTAL
 // ============================================================================
 
 export class AiPersonalFrame {
@@ -111,16 +160,17 @@ export class AiPersonalFrame {
       ...defaultProfile
     });
 
-    // window-safe snapshot
+    // window-safe artery snapshot
     this.personalArtery = {
       lastTone: this.defaultProfile.tone,
       lastAbstraction: this.defaultProfile.abstraction,
       lastVerbosity: this.defaultProfile.verbosity,
-      snapshot: () => Object.freeze({
-        tone: this.personalArtery.lastTone,
-        abstraction: this.personalArtery.lastAbstraction,
-        verbosity: this.personalArtery.lastVerbosity
-      })
+      snapshot: () =>
+        Object.freeze({
+          tone: this.personalArtery.lastTone,
+          abstraction: this.personalArtery.lastAbstraction,
+          verbosity: this.personalArtery.lastVerbosity
+        })
     };
   }
 
@@ -144,6 +194,13 @@ export class AiPersonalFrame {
     this.personalArtery.lastAbstraction = profile.abstraction;
     this.personalArtery.lastVerbosity = profile.verbosity;
 
+    emitPersonalFramePacket("load-profile", {
+      userId,
+      tone: profile.tone,
+      abstraction: profile.abstraction,
+      verbosity: profile.verbosity
+    });
+
     return profile;
   }
 
@@ -163,6 +220,13 @@ export class AiPersonalFrame {
     this.personalArtery.lastTone = next.tone;
     this.personalArtery.lastAbstraction = next.abstraction;
     this.personalArtery.lastVerbosity = next.verbosity;
+
+    emitPersonalFramePacket("update-profile", {
+      userId,
+      tone: next.tone,
+      abstraction: next.abstraction,
+      verbosity: next.verbosity
+    });
 
     return Object.freeze(next);
   }
@@ -215,10 +279,19 @@ export class AiPersonalFrame {
       result = this._expand(result);
     }
 
-    return {
+    const shaped = {
       text: result,
       profile
     };
+
+    emitPersonalFramePacket("shape-output", {
+      userId: context?.userId || null,
+      tone: profile.tone,
+      abstraction: profile.abstraction,
+      verbosity: profile.verbosity
+    });
+
+    return shaped;
   }
 
   // --------------------------------------------------------------------------
@@ -263,7 +336,18 @@ export function createPersonalFrameOrgan(config = {}) {
     },
 
     arterySnapshot() {
-      return core.personalArtery.snapshot();
+      const snap = core.personalArtery.snapshot();
+      return emitPersonalFramePacket("snapshot", snap);
     }
   });
+}
+
+/* c8 ignore next 10 */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    PersonalFrameMeta,
+    AiPersonalFrame,
+    createPersonalFrameOrgan,
+    prewarmPersonalFrame
+  };
 }

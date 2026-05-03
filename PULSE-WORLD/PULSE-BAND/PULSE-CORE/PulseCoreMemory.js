@@ -1,20 +1,21 @@
 // ============================================================================
-//  PulseCoreMemory.js — v13‑EVO‑PRESENCE‑DUALBAND‑MAX
+//  PulseCoreMemory.js — v15‑IMMORTAL‑DUALBAND‑SPINE
 //  ORGANISM‑WIDE BINARY MEMORY SPINE (DUAL‑BAND + DNA + HEALING + LOOP THEORY)
 //  “LOAD RARELY, SERVE CONSTANTLY, FLUSH INTENTIONALLY, HEAL WHILE SPINNING”
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseCoreMemory",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "corememory",
   role: "corememory_spine",
-  lineage: "PulseCoreMemory-v1 → v11-Evo → v13-DualBand → v14-IMMORTAL",
+  lineage: "PulseCoreMemory-v1 → v11-Evo → v13-DualBand → v14-IMMORTAL → v15-IMMORTAL",
 
   evo: {
-    symbolicPrimary: true,         // symbolic API
-    binaryPrimary: true,           // binary storage
-    dualBand: true,                // symbolic ↔ binary
+    symbolicPrimary: true,
+    binaryPrimary: true,
+    dualBand: true,
 
     memorySpine: true,
     overlayEngine: true,
@@ -42,7 +43,6 @@ AI_EXPERIENCE_META = {
       "PulseCoreEvolution",
       "PulseCoreGovernor",
 
-      // all adapters
       "PulseCoreAIMemoryAdapter",
       "PulseCoreEarnMemoryAdapter",
       "PulseCoreGPUMemoryAdapter",
@@ -56,17 +56,17 @@ AI_EXPERIENCE_META = {
       "fetchViaCNS"
     ]
   }
-}
+};
 */
 
 // Adapters — forward‑only, no barrels
-import { createPulseGPUOrchestrator }         from "./PulseCoreGpuMemoryAdapter.js";
-import { createPulseAIMemoryAdapter } from "./PulseCoreAIMemoryAdapter.js";
+import { createPulseGPUOrchestrator }      from "./PulseCoreGpuMemoryAdapter.js";
+import { createPulseAIMemoryAdapter }      from "./PulseCoreAIMemoryAdapter.js";
 import { createPulseEarnMemoryAdapter }    from "./PulseCoreEarnMemoryAdapter.js";
-import { createPulseMeshMemoryAdapter }       from "./PulseCoreMeshMemoryAdapter.js";
-import { createPulseProxyMemoryAdapter }     from "./PulseCoreProxyMemoryAdapter.js";
-import { createPulseRouterMemoryAdapter }        from "./PulseCoreRouterMemoryAdapter.js";
-import { createPulseSendMemoryAdapter }      from "./PulseCoreSendMemoryAdapter.js";
+import { createPulseMeshMemoryAdapter }    from "./PulseCoreMeshMemoryAdapter.js";
+import { createPulseProxyMemoryAdapter }   from "./PulseCoreProxyMemoryAdapter.js";
+import { createPulseRouterMemoryAdapter }  from "./PulseCoreRouterMemoryAdapter.js";
+import { createPulseSendMemoryAdapter }    from "./PulseCoreSendMemoryAdapter.js";
 
 // ============================================================================
 //  ROLE
@@ -75,24 +75,24 @@ export const CoreMemoryRole = {
   type: "Organ",
   subsystem: "Core",
   layer: "MemorySpine",
-  version: "13.0-Evo-Presence-DualBand-Max",
+  version: "15.0-IMMORTAL",
   identity: "PulseCoreMemory",
 
   evo: {
-    binaryNative: true,      // Binary‑first representation
-    bulkLoad: true,          // Load once, serve many
-    bulkFlush: true,         // Flush intentionally, not constantly
-    cacheFirst: true,        // Prefer in‑process cache
-    routeAware: true,        // Route‑scoped buckets
-    dnaAware: true,          // dnaTag‑aware segments
-    lowHostChurn: true,      // Minimize host storage writes
+    binaryNative: true,
+    bulkLoad: true,
+    bulkFlush: true,
+    cacheFirst: true,
+    routeAware: true,
+    dnaAware: true,
+    lowHostChurn: true,
 
-    dualBand: true,          // PRIMARY + SECONDARY storage bands
-    fallbackable: true,      // If primary fails, use secondary
-    loopTheory: true,        // Keep hot data “spinning” for speed
-    healing: true,           // Band healing + meta repair
-    ttlAware: true,          // Route TTL / expiration
-    versionAware: true       // Version migration / reset
+    dualBand: true,
+    fallbackable: true,
+    loopTheory: true,
+    healing: true,
+    ttlAware: true,
+    versionAware: true
   }
 };
 
@@ -125,16 +125,16 @@ function decodeFromBinary(bits) {
 }
 
 // ============================================================================
-//  STORAGE KEYS + BANDS
+//  STORAGE KEYS + BANDS (v15)
 // ============================================================================
-const CORE_KEY_PRIMARY   = "pulse-core-memory-v13-primary";
-const CORE_KEY_SECONDARY = "pulse-core-memory-v13-secondary";
-const META_KEY_PRIMARY   = "pulse-core-memory-meta-primary";
-const META_KEY_SECONDARY = "pulse-core-memory-meta-secondary";
+const CORE_KEY_PRIMARY   = "pulse-core-memory-v15-primary";
+const CORE_KEY_SECONDARY = "pulse-core-memory-v15-secondary";
+const META_KEY_PRIMARY   = "pulse-core-memory-meta-v15-primary";
+const META_KEY_SECONDARY = "pulse-core-memory-meta-v15-secondary";
 
-// TTL + size guard (can tune later)
+// TTL + size guard
 const ROUTE_TTL_MS         = 7 * 24 * 60 * 60 * 1000; // 7 days
-const MAX_SERIALIZED_BYTES = 512 * 1024;              // 512 KB per band (guard)
+const MAX_SERIALIZED_BYTES = 512 * 1024;              // 512 KB per band
 
 // ============================================================================
 //  FACTORY
@@ -144,17 +144,15 @@ export function createPulseCoreMemory({
   secondaryStorage = window.sessionStorage,
   log              = console.log,
   warn             = console.warn,
-  dnaTag           = "default-dna" // organism / build / persona tag
+  dnaTag           = "default-dna"
 } = {}) {
   const Cache = {
     loaded: false,
     lastLoadEpoch: 0,
-    data: Object.create(null),     // { routeId: { ... } }
+    data: Object.create(null),
 
-    // LOOP THEORY: hot keys that should stay “spinning” in process
-    hotLoop: Object.create(null),  // { routeId:key -> hitCount }
+    hotLoop: Object.create(null),
 
-    // Route meta: { [routeId]: { lastTouched, dnaTag } }
     routeMeta: Object.create(null)
   };
 
@@ -162,7 +160,7 @@ export function createPulseCoreMemory({
     lastFlushEpoch: 0,
     lastLoadEpoch: 0,
     version: CoreMemoryRole.version,
-    lastBandUsed: "primary", // "primary" | "secondary"
+    lastBandUsed: "primary",
     fallbackUsed: false,
     dnaTag
   };
@@ -266,10 +264,11 @@ export function createPulseCoreMemory({
   }
 
   function touchRouteMeta(routeId) {
+    const now = Date.now();
     if (!Cache.routeMeta[routeId]) {
-      Cache.routeMeta[routeId] = { lastTouched: Date.now(), dnaTag };
+      Cache.routeMeta[routeId] = { lastTouched: now, dnaTag };
     } else {
-      Cache.routeMeta[routeId].lastTouched = Date.now();
+      Cache.routeMeta[routeId].lastTouched = now;
       Cache.routeMeta[routeId].dnaTag = dnaTag;
     }
   }
@@ -329,10 +328,10 @@ export function createPulseCoreMemory({
       return;
     }
 
-    Cache.loaded      = true;
+    Cache.loaded        = true;
     Cache.lastLoadEpoch = Date.now();
-    Cache.data        = Object.create(null);
-    Cache.routeMeta   = Object.create(null);
+    Cache.data          = Object.create(null);
+    Cache.routeMeta     = Object.create(null);
 
     Meta.lastLoadEpoch = Cache.lastLoadEpoch;
     Meta.lastBandUsed  = "primary";
@@ -484,24 +483,19 @@ export function createPulseCoreMemory({
   };
 
   // ========================================================================
-  //  ADAPTERS — v13+ MEMORY ORGAN ADAPTER LAYER
+  //  ADAPTERS — v15 IMMORTAL MEMORY ORGAN ADAPTER LAYER
   // ========================================================================
-  // ========================================================================
-//  ADAPTERS — v13+ MEMORY ORGAN ADAPTER LAYER (REAL, NOT PLACEHOLDERS)
-// ========================================================================
-const adapters = {
-  gpu:         createPulseGPUOrchestrator(PulseCoreMemory),
-  ai:          createPulseAIMemoryAdapter(PulseCoreMemory),
-  earn:        createPulseEarnMemoryAdapter(PulseCoreMemory),
-  mesh:        createPulseMeshMemoryAdapter(PulseCoreMemory),
-  proxy:       createPulseProxyMemoryAdapter(PulseCoreMemory),
-  router:      createPulseRouterMemoryAdapter(PulseCoreMemory),
-  send:        createPulseSendMemoryAdapter(PulseCoreMemory)
-};
+  const adapters = {
+    gpu:    createPulseGPUOrchestrator({ dnaTag, version: "15.0-IMMORTAL-GPU-MEMORY", log }),
+    ai:     createPulseAIMemoryAdapter({ dnaTag, version: "15.0-IMMORTAL-AI-MEMORY", log }),
+    earn:   createPulseEarnMemoryAdapter({ dnaTag, version: "15.0-IMMORTAL-EARN-MEMORY", log }),
+    mesh:   createPulseMeshMemoryAdapter({ dnaTag, version: "15.0-IMMORTAL-MESH-MEMORY", log }),
+    proxy:  createPulseProxyMemoryAdapter({ dnaTag, version: "15.0-IMMORTAL-PROXY-MEMORY", log }),
+    router: createPulseRouterMemoryAdapter({ dnaTag, version: "15.0-IMMORTAL-ROUTER-MEMORY", log }),
+    send:   createPulseSendMemoryAdapter({ dnaTag, version: "15.0-IMMORTAL-SEND-MEMORY", log })
+  };
 
-// Attach to the core memory organ
-PulseCoreMemory.adapters = adapters;
-
+  PulseCoreMemory.adapters = adapters;
 
   safeLog("INIT", {
     identity: CoreMemoryRole.identity,

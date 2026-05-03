@@ -1,15 +1,15 @@
 // ============================================================================
-//  PULSE OS v12.3-Presence — BINARY PIPELINE ORGAN
+//  PULSE OS v15‑IMMORTAL — BINARY PIPELINE ORGAN
 //  Compute Bloodstream • Flow Artery Metrics • Deterministic Binary Engine
 //  PURE FLOW ENGINE. ZERO RANDOMNESS. ZERO EXTERNAL MUTATION.
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "aiPipeline",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "pipeline_engine",
-  lineage: "aiPipeline-v10 → v14-IMMORTAL",
+  lineage: "aiPipeline-v10 → v15-IMMORTAL",
 
   evo: {
     pipelineEngine: true,
@@ -27,7 +27,7 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiEngine", "aiCortex", "aiContextEngine"],
+    always: ["aiEngine", "aiCortex", "aiContextEngine", "aiGovernorAdapter", "aiLoggerAdapter"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -36,24 +36,40 @@ AI_EXPERIENCE_META = {
 export const PipelineMeta = Object.freeze({
   layer: "OrganismFlow",
   role: "PIPELINE_ORGAN",
-  version: "12.3-Presence",
-  identity: "aiBinaryPipeline-v12.3-Presence",
+  version: "15-IMMORTAL",
+  identity: "aiBinaryPipeline-v15-IMMORTAL",
 
+  // --------------------------------------------------------------------------
+  //  EVO — IMMORTAL-GRADE FLOW ENGINE
+  // --------------------------------------------------------------------------
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+
     binaryAware: true,
     pipelineAware: true,
     reflexAware: true,
     arteryAware: true,
     packetAware: true,
     windowAware: true,
+
+    governorAware: true,
+    loggerAware: true,
+    gpuFriendly: true,
+    microPipeline: true,
+    speedOptimized: true,
+    genomeAware: true,
+    safetyFrameAware: true,
+
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "15-IMMORTAL"
   }),
 
+  // --------------------------------------------------------------------------
+  //  CONTRACT — IMMUTABLE FLOW CONTRACT
+  // --------------------------------------------------------------------------
   contract: Object.freeze({
     purpose:
       "Provide deterministic compute flow, layered transformations, observer taps, reflex hooks, and flow artery metrics over binary.",
@@ -65,7 +81,8 @@ export const PipelineMeta = Object.freeze({
       "override cortex decisions",
       "override router decisions",
       "block the organism",
-      "perform cognition"
+      "perform cognition",
+      "log raw payloads directly from pipeline meta"
     ]),
 
     always: Object.freeze([
@@ -74,7 +91,9 @@ export const PipelineMeta = Object.freeze({
       "compute flow artery metrics deterministically",
       "remain deterministic",
       "remain drift-proof",
-      "remain non-blocking"
+      "remain non-blocking",
+      "emit window-safe flow snapshots",
+      "emit deterministic pipeline packets"
     ])
   }),
 
@@ -84,9 +103,34 @@ export const PipelineMeta = Object.freeze({
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v12‑EVO+
+//  PACKET EMITTER — deterministic, pipeline-scoped
 // ============================================================================
+function emitPipelinePacket(type, payload) {
+  return Object.freeze({
+    meta: PipelineMeta,
+    packetType: `pipeline-${type}`,
+    packetId: `pipeline-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: PipelineMeta.evo.epoch,
+    ...payload
+  });
+}
 
+// ============================================================================
+//  PREWARM — IMMORTAL-GRADE
+// ============================================================================
+export function prewarmBinaryPipeline({ trace = false } = {}) {
+  const packet = emitPipelinePacket("prewarm", {
+    message: "Binary pipeline prewarmed and flow artery aligned."
+  });
+
+  if (trace) console.log("[BinaryPipeline] prewarm", packet);
+  return packet;
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v15‑IMMORTAL
+// ============================================================================
 export class AIBinaryPipeline {
   constructor(config = {}) {
     this.id = config.id || PipelineMeta.identity;
@@ -102,22 +146,22 @@ export class AIBinaryPipeline {
       lastPressure: 0,
       lastCost: 0,
       lastBudget: 1,
-      snapshot: () => Object.freeze({
-        throughput: this.flowArtery.lastThroughput,
-        pressure: this.flowArtery.lastPressure,
-        cost: this.flowArtery.lastCost,
-        budget: this.flowArtery.lastBudget,
-        stageCount: this.stages.length,
-        observerCount: this.observers.length,
-        reflexCount: this.reflexes.length
-      })
+      snapshot: () =>
+        Object.freeze({
+          throughput: this.flowArtery.lastThroughput,
+          pressure: this.flowArtery.lastPressure,
+          cost: this.flowArtery.lastCost,
+          budget: this.flowArtery.lastBudget,
+          stageCount: this.stages.length,
+          observerCount: this.observers.length,
+          reflexCount: this.reflexes.length
+        })
     };
   }
 
   // ---------------------------------------------------------
   //  FLOW ARTERY METRICS
   // ---------------------------------------------------------
-
   _computeFlowThroughput(stageCount, observerCount, reflexCount) {
     const stageFactor = Math.min(1, stageCount / 50);
     const obsFactor   = Math.min(1, observerCount / 50);
@@ -173,7 +217,6 @@ export class AIBinaryPipeline {
   // ---------------------------------------------------------
   //  FLOW ARTERY SNAPSHOT (INTERNAL + WINDOW-SAFE)
   // ---------------------------------------------------------
-
   _computeFlowArtery() {
     const stageCount = this.stages.length;
     const observerCount = this.observers.length;
@@ -218,13 +261,13 @@ export class AIBinaryPipeline {
   }
 
   getFlowArterySnapshot() {
-    return this._computeFlowArtery();
+    const artery = this._computeFlowArtery();
+    return emitPipelinePacket("snapshot", { artery });
   }
 
   // ---------------------------------------------------------
   //  PIPELINE CONFIGURATION
   // ---------------------------------------------------------
-
   addStage(fn) {
     if (typeof fn !== "function") {
       throw new TypeError("addStage expects a function");
@@ -233,6 +276,10 @@ export class AIBinaryPipeline {
 
     const artery = this._computeFlowArtery();
     this._trace("addStage", { totalStages: this.stages.length, artery });
+    emitPipelinePacket("stage-added", {
+      pipelineId: this.id,
+      totalStages: this.stages.length
+    });
   }
 
   addObserver(fn) {
@@ -245,6 +292,10 @@ export class AIBinaryPipeline {
     this._trace("addObserver", {
       totalObservers: this.observers.length,
       artery
+    });
+    emitPipelinePacket("observer-added", {
+      pipelineId: this.id,
+      totalObservers: this.observers.length
     });
   }
 
@@ -259,17 +310,26 @@ export class AIBinaryPipeline {
       totalReflexes: this.reflexes.length,
       artery
     });
+    emitPipelinePacket("reflex-added", {
+      pipelineId: this.id,
+      totalReflexes: this.reflexes.length
+    });
   }
 
   // ---------------------------------------------------------
   //  PIPELINE EXECUTION
   // ---------------------------------------------------------
-
   run(inputBinary) {
     this._assertBinary(inputBinary);
 
     const artery = this._computeFlowArtery();
     this._trace("run:start", { bitLength: inputBinary.length, artery });
+
+    emitPipelinePacket("run-start", {
+      pipelineId: this.id,
+      bitLength: inputBinary.length,
+      artery
+    });
 
     let current = inputBinary;
 
@@ -293,6 +353,13 @@ export class AIBinaryPipeline {
         outputBits: output.length
       });
 
+      emitPipelinePacket("run-stage", {
+        pipelineId: this.id,
+        stageIndex: i,
+        inputBits: current.length,
+        outputBits: output.length
+      });
+
       current = output;
     }
 
@@ -301,13 +368,18 @@ export class AIBinaryPipeline {
     }
 
     this._trace("run:end", { outputBits: current.length });
+
+    emitPipelinePacket("run-end", {
+      pipelineId: this.id,
+      outputBits: current.length
+    });
+
     return current;
   }
 
   // ---------------------------------------------------------
   //  INTERNAL HELPERS
   // ---------------------------------------------------------
-
   _assertBinary(str) {
     if (typeof str !== "string" || !/^[01]+$/.test(str)) {
       throw new TypeError("expected binary string");
@@ -321,9 +393,8 @@ export class AIBinaryPipeline {
 }
 
 // ============================================================================
-//  FACTORY — v12‑EVO+
+//  FACTORY — v15‑IMMORTAL
 // ============================================================================
-
 export function createAIBinaryPipeline(config = {}) {
   return new AIBinaryPipeline(config);
 }
@@ -335,6 +406,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     PipelineMeta,
     AIBinaryPipeline,
-    createAIBinaryPipeline
+    createAIBinaryPipeline,
+    prewarmBinaryPipeline
   };
 }

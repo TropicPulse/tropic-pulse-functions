@@ -1,6 +1,7 @@
 // ============================================================================
-//  aiMemory.js — Pulse OS v13.0-Presence-ADV Organ
+//  aiMemory.js — Pulse OS v15.0-IMMORTAL-ADV Organ
 //  Pure PulseCoreMemory Adapter • Dualband • Binary‑Only • Zero Local Storage
+//  Memory Artery v4 • Shard-Aware • Windowed Ops Metrics
 // ----------------------------------------------------------------------------
 //  CANONICAL ROLE:
 //    This organ is the **Memory Layer Adapter** of Pulse OS (dualband).
@@ -12,22 +13,24 @@
 //    It ONLY:
 //      • validates binary keys + values
 //      • forwards reads/writes to PulseCoreMemory
-//      • computes memory artery metrics (throughput, pressure, cost, budget)
+//      • computes memory artery metrics v4 (throughput, pressure, cost, budget,
+//        hot-key density, read/write balance, shard pressure)
 //      • exposes window‑safe memory snapshots
-//      • exposes artery snapshots to NodeAdmin/Overmind via registry/reporter
+//      • exposes artery snapshots to NodeAdmin/Overmind via registry/reporters
 //
 //  STORAGE TRUTH:
 //    • All real storage lives in PulseCoreMemory.
 //    • All caching, speed, and power optimizations are handled by PulseCoreMemory
 //      and lower layers — organism‑wide, not per‑organ.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiMemory",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL-ADV",
   layer: "ai_core",
   role: "symbolic_memory_engine",
-  lineage: "aiMemory-v9 → v11 → v14-IMMORTAL",
+  lineage: "aiMemory-v9 → v11 → v13 → v15-IMMORTAL-ADV",
 
   evo: {
     symbolicMemory: true,
@@ -54,14 +57,14 @@ AI_EXPERIENCE_META = {
 
 import { PulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 
-// ---------------------------------------------------------
-//  META BLOCK — v13.0-Presence-ADV
-// ---------------------------------------------------------
+// ============================================================================
+//  META BLOCK — v15.0-IMMORTAL-ADV
+// ============================================================================
 export const MemoryMeta = Object.freeze({
   layer: "OrganismMemory",
   role: "MEMORY_LAYER",
-  version: "13.0-Presence-ADV",
-  identity: "aiMemory-v13.0-Presence-ADV",
+  version: "15.0-IMMORTAL-ADV",
+  identity: "aiMemory-v15.0-IMMORTAL-ADV",
 
   evo: Object.freeze({
     deterministic: true,
@@ -71,21 +74,23 @@ export const MemoryMeta = Object.freeze({
     memoryAware: true,
     packetAware: true,
     windowAware: true,
-    bluetoothReady: true,
-    multiInstanceReady: true,
-    readOnly: false,
+    shardAware: true,
+    hotKeyAware: true,
+    arteryAware: true,
+    nodeAdminAware: true,
+    overmindAware: true,
     microPipeline: true,
     speedOptimized: true,
     prewarmAware: true,
-    arteryAware: true,
-    nodeAdminAware: true,
     cacheAware: true,      // registry-level, not data cache
-    epoch: "v13.0-Presence-ADV"
+    readOnly: false,
+    multiInstanceReady: true,
+    epoch: "v15.0-IMMORTAL-ADV"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic memory access over PulseCoreMemory with artery metrics for throughput, pressure, cost, and budget, and expose those metrics to NodeAdmin/Overmind via registry/reporter.",
+      "Provide deterministic memory access over PulseCoreMemory with artery v4 metrics (throughput, pressure, cost, budget, hot-key density, shard pressure) and expose those metrics to NodeAdmin/Overmind via registry/reporters.",
 
     never: Object.freeze([
       "store non-binary data",
@@ -106,16 +111,16 @@ export const MemoryMeta = Object.freeze({
   })
 });
 
-// ---------------------------------------------------------
+// ============================================================================
 //  GLOBAL MEMORY ARTERY REGISTRY (READ-ONLY, METRICS-ONLY)
-// ---------------------------------------------------------
+// ============================================================================
 
 const _globalMemoryArteryRegistry = new Map();
 /**
- * Registry key: `${id}#${instanceIndex}`
+ * Registry key: `${id}#${instanceIndex}#${shardId || "root"}`
  */
-function _registryKey(id, instanceIndex) {
-  return `${id || MemoryMeta.identity}#${instanceIndex}`;
+function _registryKey(id, instanceIndex, shardId) {
+  return `${id || MemoryMeta.identity}#${instanceIndex}#${shardId || "root"}`;
 }
 
 export function getGlobalMemoryArteries() {
@@ -126,9 +131,9 @@ export function getGlobalMemoryArteries() {
   return out;
 }
 
-// ---------------------------------------------------------
+// ============================================================================
 //  PACKET EMITTER — deterministic, memory-scoped
-// ---------------------------------------------------------
+// ============================================================================
 function emitMemoryPacket(type, payload) {
   return Object.freeze({
     meta: MemoryMeta,
@@ -139,12 +144,12 @@ function emitMemoryPacket(type, payload) {
   });
 }
 
-// ---------------------------------------------------------
-//  PREWARM — v13.0‑ADV
-// ---------------------------------------------------------
+// ============================================================================
+//  PREWARM — v15.0‑IMMORTAL-ADV
+// ============================================================================
 export function prewarmAIMemory({ trace = false } = {}) {
   const packet = emitMemoryPacket("prewarm", {
-    message: "Memory adapter prewarmed and artery metrics aligned."
+    message: "Memory adapter prewarmed, artery v4 metrics aligned, registry ready."
   });
 
   if (trace) console.log("[AIMemory] prewarm", packet);
@@ -152,8 +157,9 @@ export function prewarmAIMemory({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v13.0‑ADV (PulseCoreMemory‑only)
+//  ORGAN IMPLEMENTATION — v15.0‑IMMORTAL-ADV (PulseCoreMemory‑only)
 // ============================================================================
+
 export class AIMemory {
   constructor(config = {}) {
     this.id = config.id || MemoryMeta.identity;
@@ -170,6 +176,16 @@ export class AIMemory {
         ? config.nodeAdminReporter
         : null;
 
+    // optional Overmind reporter hook (metrics-only, read-only)
+    // fn(artery, meta) => void
+    this.overmindReporter =
+      typeof config.overmindReporter === "function"
+        ? config.overmindReporter
+        : null;
+
+    // logical shard id (binary namespace, but adapter-only)
+    this.shardId = typeof config.shardId === "string" ? config.shardId : "root";
+
     // instance index for registry
     this.instanceIndex = AIMemory._registerInstance();
 
@@ -182,6 +198,27 @@ export class AIMemory {
         "AIMemory requires PulseCoreMemory with writeBinary(key, value) and readBinary(key)"
       );
     }
+
+    // windowed ops for artery v4
+    this.windowMs =
+      typeof config.windowMs === "number" && config.windowMs > 0
+        ? config.windowMs
+        : 60000;
+
+    this._windowStart = Date.now();
+    this._windowReads = 0;
+    this._windowWrites = 0;
+    this._windowDeletes = 0;
+    this._windowSnapshots = 0;
+
+    this._totalReads = 0;
+    this._totalWrites = 0;
+    this._totalDeletes = 0;
+    this._totalSnapshots = 0;
+
+    // hot-key tracking (approximate, windowed)
+    this._hotKeyHits = 0;
+    this._windowHotKeyHits = 0;
   }
 
   // --------------------------------------------------------------------------
@@ -203,8 +240,22 @@ export class AIMemory {
   }
 
   // --------------------------------------------------------------------------
-  //  ARTERY METRICS — computed from PulseCoreMemory metadata
+  //  WINDOW ROLLING
   // --------------------------------------------------------------------------
+  _rollWindow(now) {
+    if (now - this._windowStart >= this.windowMs) {
+      this._windowStart = now;
+      this._windowReads = 0;
+      this._windowWrites = 0;
+      this._windowDeletes = 0;
+      this._windowSnapshots = 0;
+      this._windowHotKeyHits = 0;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  //  ARTERY METRICS — v4 (segment + window + shard + hot-key)
+// --------------------------------------------------------------------------
   _computeMemoryThroughput(segmentCount, avgSize) {
     const countFactor = Math.min(1, segmentCount / 100);
     const sizeFactor = Math.min(1, avgSize / this.maxBits);
@@ -252,18 +303,45 @@ export class AIMemory {
   }
 
   _computeMemoryArtery() {
+    const now = Date.now();
+    this._rollWindow(now);
+
     const meta = this.core.getBinaryMeta
-      ? this.core.getBinaryMeta()
-      : { segmentCount: 0, totalBits: 0, avgSize: 0 };
+      ? this.core.getBinaryMeta(this.shardId)
+      : { segmentCount: 0, totalBits: 0, avgSize: 0, hotKeys: 0, shardCount: 1 };
 
     const segmentCount = meta.segmentCount || 0;
     const totalBits = meta.totalBits || 0;
     const avgSize = meta.avgSize || 0;
+    const shardCount = meta.shardCount || 1;
+    const hotKeys = meta.hotKeys || 0;
 
     const throughput = this._computeMemoryThroughput(segmentCount, avgSize);
     const pressure   = this._computeMemoryPressure(totalBits, this.maxBits);
     const cost       = this._computeMemoryCost(pressure, throughput);
     const budget     = this._computeMemoryBudget(throughput, cost);
+
+    const elapsedMs = Math.max(1, now - this._windowStart);
+    const opsInWindow =
+      this._windowReads +
+      this._windowWrites +
+      this._windowDeletes +
+      this._windowSnapshots;
+
+    const opsPerSec = (opsInWindow / elapsedMs) * 1000;
+    const instanceCount = AIMemory.getInstanceCount();
+    const harmonicLoad =
+      instanceCount > 0 ? opsPerSec / instanceCount : opsPerSec;
+
+    const hotKeyRatio =
+      segmentCount > 0 ? Math.min(1, hotKeys / segmentCount) : 0;
+
+    const readWriteRatio =
+      this._windowWrites > 0
+        ? Math.min(4, this._windowReads / this._windowWrites)
+        : this._windowReads > 0
+        ? 4
+        : 0;
 
     const artery = {
       throughput,
@@ -282,14 +360,35 @@ export class AIMemory {
       totalBits,
       avgSize,
 
+      shardId: this.shardId,
+      shardCount,
+
+      hotKeys,
+      hotKeyRatio,
+
+      windowMs: this.windowMs,
+      windowReads: this._windowReads,
+      windowWrites: this._windowWrites,
+      windowDeletes: this._windowDeletes,
+      windowSnapshots: this._windowSnapshots,
+      windowHotKeyHits: this._windowHotKeyHits,
+
+      totalReads: this._totalReads,
+      totalWrites: this._totalWrites,
+      totalDeletes: this._totalDeletes,
+      totalSnapshots: this._totalSnapshots,
+      opsPerSec,
+      harmonicLoad,
+      readWriteRatio,
+
       instanceIndex: this.instanceIndex,
-      instanceCount: AIMemory.getInstanceCount(),
+      instanceCount,
       id: this.id,
-      timestamp: Date.now()
+      timestamp: now
     };
 
     // update global registry
-    const key = _registryKey(this.id, this.instanceIndex);
+    const key = _registryKey(this.id, this.instanceIndex, this.shardId);
     _globalMemoryArteryRegistry.set(key, artery);
 
     // optional NodeAdmin reporter
@@ -301,7 +400,29 @@ export class AIMemory {
       }
     }
 
+    // optional Overmind reporter
+    if (this.overmindReporter) {
+      try {
+        this.overmindReporter(artery, MemoryMeta);
+      } catch (err) {
+        this._trace("overmind:reporter:error", { error: String(err) });
+      }
+    }
+
     return artery;
+  }
+
+  getMemoryArterySnapshot() {
+    return this._computeMemoryArtery();
+  }
+
+  // --------------------------------------------------------------------------
+  //  SHARDED KEY HELPERS (adapter-only, still binary)
+// --------------------------------------------------------------------------
+  _withShard(keyBin) {
+    // shardId is string, but we keep keyBin pure binary.
+    // Shard is a logical namespace passed to PulseCoreMemory when supported.
+    return { shardId: this.shardId, keyBin };
   }
 
   // --------------------------------------------------------------------------
@@ -317,14 +438,26 @@ export class AIMemory {
       toStore = toStore.slice(-this.maxBits);
     }
 
-    this.core.writeBinary(keyBin, toStore);
+    const { shardId, keyBin: k } = this._withShard(keyBin);
+
+    if (this.core.writeBinary.length === 3) {
+      // writeBinary(shardId, key, value)
+      this.core.writeBinary(shardId, k, toStore);
+    } else {
+      // legacy: writeBinary(key, value)
+      this.core.writeBinary(k, toStore);
+    }
+
+    this._totalWrites += 1;
+    this._windowWrites += 1;
 
     const artery = this._computeMemoryArtery();
-    this._trace("write", { keyBin, valueBits: toStore.length, artery });
+    this._trace("write", { keyBin: k, valueBits: toStore.length, shardId, artery });
 
     return emitMemoryPacket("write", {
-      keyBits: keyBin.length,
+      keyBits: k.length,
       valueBits: toStore.length,
+      shardId,
       artery
     });
   }
@@ -335,10 +468,32 @@ export class AIMemory {
   read(keyBin) {
     this._assertBinary(keyBin);
 
-    const value = this.core.readBinary(keyBin);
-    const artery = this._computeMemoryArtery();
+    const { shardId, keyBin: k } = this._withShard(keyBin);
 
-    this._trace("read", { keyBin, valueBits: value ? value.length : 0, artery });
+    let value;
+    if (this.core.readBinary.length === 2) {
+      // readBinary(shardId, key)
+      value = this.core.readBinary(shardId, k);
+    } else {
+      // legacy: readBinary(key)
+      value = this.core.readBinary(k);
+    }
+
+    this._totalReads += 1;
+    this._windowReads += 1;
+
+    if (value && value.length > 0) {
+      this._hotKeyHits += 1;
+      this._windowHotKeyHits += 1;
+    }
+
+    const artery = this._computeMemoryArtery();
+    this._trace("read", {
+      keyBin: k,
+      valueBits: value ? value.length : 0,
+      shardId,
+      artery
+    });
 
     return value;
   }
@@ -349,16 +504,29 @@ export class AIMemory {
   delete(keyBin) {
     this._assertBinary(keyBin);
 
-    const existed = this.core.deleteBinary
-      ? this.core.deleteBinary(keyBin)
-      : false;
+    const { shardId, keyBin: k } = this._withShard(keyBin);
+
+    let existed = false;
+    if (this.core.deleteBinary) {
+      if (this.core.deleteBinary.length === 2) {
+        // deleteBinary(shardId, key)
+        existed = this.core.deleteBinary(shardId, k);
+      } else {
+        // legacy: deleteBinary(key)
+        existed = this.core.deleteBinary(k);
+      }
+    }
+
+    this._totalDeletes += 1;
+    this._windowDeletes += 1;
 
     const artery = this._computeMemoryArtery();
-    this._trace("delete", { keyBin, existed, artery });
+    this._trace("delete", { keyBin: k, shardId, existed, artery });
 
     return emitMemoryPacket("delete", {
-      keyBits: keyBin.length,
+      keyBits: k.length,
       existed,
+      shardId,
       artery
     });
   }
@@ -367,12 +535,24 @@ export class AIMemory {
   //  LIST KEYS — delegated to PulseCoreMemory
   // --------------------------------------------------------------------------
   listKeys() {
-    const keys = this.core.listBinaryKeys
-      ? this.core.listBinaryKeys()
-      : [];
+    let keys = [];
+
+    if (this.core.listBinaryKeys) {
+      if (this.core.listBinaryKeys.length === 1) {
+        // listBinaryKeys(shardId)
+        keys = this.core.listBinaryKeys(this.shardId) || [];
+      } else {
+        // legacy: listBinaryKeys()
+        keys = this.core.listBinaryKeys() || [];
+      }
+    }
 
     const artery = this._computeMemoryArtery();
-    this._trace("listKeys", { keyCount: keys.length, artery });
+    this._trace("listKeys", {
+      keyCount: keys.length,
+      shardId: this.shardId,
+      artery
+    });
 
     return keys;
   }
@@ -384,11 +564,19 @@ export class AIMemory {
     let out = "";
 
     if (this.core.snapshotBinary) {
-      out = this.core.snapshotBinary(this.maxBits);
+      if (this.core.snapshotBinary.length === 2) {
+        // snapshotBinary(shardId, maxBits)
+        out = this.core.snapshotBinary(this.shardId, this.maxBits) || "";
+      } else {
+        // legacy: snapshotBinary(maxBits)
+        out = this.core.snapshotBinary(this.maxBits) || "";
+      }
     } else {
       const keys = this.listKeys().slice().sort();
       for (const key of keys) {
-        const val = this.core.readBinary(key) || "";
+        const val = this.core.readBinary.length === 2
+          ? this.core.readBinary(this.shardId, key) || ""
+          : this.core.readBinary(key) || "";
         out += key + val;
       }
     }
@@ -398,8 +586,15 @@ export class AIMemory {
       out = out.slice(-this.maxBits);
     }
 
+    this._totalSnapshots += 1;
+    this._windowSnapshots += 1;
+
     const artery = this._computeMemoryArtery();
-    this._trace("snapshot", { bits: out.length, artery });
+    this._trace("snapshot", {
+      bits: out.length,
+      shardId: this.shardId,
+      artery
+    });
 
     return out;
   }
@@ -415,7 +610,10 @@ export class AIMemory {
 
   _trace(event, payload) {
     if (!this.trace) return;
-    console.log(`[${this.id}#${this.instanceIndex}] ${event}`, payload);
+    console.log(
+      `[${this.id}#${this.instanceIndex}@${this.shardId}] ${event}`,
+      payload
+    );
   }
 }
 

@@ -36,12 +36,11 @@ AI_EXPERIENCE_META = {
   }
 }
 */
-
 export const GovernorAdapterMeta = Object.freeze({
   layer: "OrganismMembrane",
   role: "GOVERNOR_ADAPTER",
-  version: "12.3-Presence",
-  identity: "aiGovernorAdapter-v12.3-Presence",
+  version: "15-IMMORTAL",
+  identity: "aiGovernorAdapter-v15-IMMORTAL",
 
   evo: Object.freeze({
     deterministic: true,
@@ -65,10 +64,16 @@ export const GovernorAdapterMeta = Object.freeze({
     chunkingAware: true,
     gpuFriendly: true,
 
+    // 15+ IMMORTAL FLAGS
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+
     identitySafe: true,
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "15-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -115,7 +120,7 @@ function emitGovernorAdapterPacket(type, payload) {
 }
 
 // ============================================================================
-//  PREWARM — Presence-grade
+//  PREWARM — 15-IMMORTAL
 // ============================================================================
 export function prewarmGovernorAdapter(dualBand = null, { trace = false } = {}) {
   try {
@@ -137,7 +142,7 @@ export function prewarmGovernorAdapter(dualBand = null, { trace = false } = {}) 
 }
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v12.3‑Presence
+//  ORGAN IMPLEMENTATION — v12.3‑Presence (logic unchanged, meta is 15-IMMORTAL)
 // ============================================================================
 export class AIBinaryGovernorAdapter {
   constructor(config = {}) {
@@ -167,9 +172,6 @@ export class AIBinaryGovernorAdapter {
     };
   }
 
-  // ---------------------------------------------------------------------------
-  //  ARTERY SNAPSHOT + BUCKETS
-  // ---------------------------------------------------------------------------
   _snapshotArtery() {
     const { packetsIn, packetsOut, lastPacketBits } = this.artery;
     const load = Math.min(1, (packetsIn + packetsOut) / 1000);
@@ -202,9 +204,6 @@ export class AIBinaryGovernorAdapter {
     return "none";
   }
 
-  // ---------------------------------------------------------------------------
-  //  FORWARD BINARY → GOVERNOR (pure membrane)
-// ---------------------------------------------------------------------------
   forwardBinaryToGovernor(binaryStr) {
     this._assertBinary(binaryStr);
 
@@ -231,9 +230,6 @@ export class AIBinaryGovernorAdapter {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  //  FORWARD GOVERNOR DECISION → BINARY PIPELINE
-// ---------------------------------------------------------------------------
   forwardGovernorDecision(decisionObj) {
     const json = JSON.stringify(decisionObj);
     const binary = this.encoder.encode(json);
@@ -256,9 +252,6 @@ export class AIBinaryGovernorAdapter {
     return binary;
   }
 
-  // ---------------------------------------------------------------------------
-  //  PIPELINE ATTACHMENT — binary-only observer
-// ---------------------------------------------------------------------------
   attachToPipeline(pipeline) {
     pipeline.addObserver(({ output }) => {
       this.forwardBinaryToGovernor(output);
@@ -267,9 +260,6 @@ export class AIBinaryGovernorAdapter {
     this._trace("attachToPipeline", { pipeline: pipeline.id });
   }
 
-  // ---------------------------------------------------------------------------
-  //  REFLEX ATTACHMENT — binary-only observer
-// ---------------------------------------------------------------------------
   attachToReflex(reflex) {
     const originalRun = reflex.run.bind(reflex);
 
@@ -286,36 +276,24 @@ export class AIBinaryGovernorAdapter {
     this._trace("attachToReflex", { reflex: reflex.id });
   }
 
-  // ---------------------------------------------------------------------------
-  //  WINDOW-SAFE ARTERY SNAPSHOT
-// ---------------------------------------------------------------------------
   snapshotMembrane() {
     return emitGovernorAdapterPacket("snapshot", {
       artery: this._snapshotArtery()
     });
   }
 
-  // ---------------------------------------------------------------------------
-  //  VALIDATION
-// ---------------------------------------------------------------------------
   _assertBinary(str) {
     if (typeof str !== "string" || !/^[01]+$/.test(str)) {
       throw new TypeError("expected binary string");
     }
   }
 
-  // ---------------------------------------------------------------------------
-  //  TRACE
-// ---------------------------------------------------------------------------
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(`[${this.id}] ${event}`, payload);
   }
 }
 
-// ============================================================================
-//  FACTORY
-// ============================================================================
 export function createAIBinaryGovernorAdapter(config) {
   return new AIBinaryGovernorAdapter(config);
 }

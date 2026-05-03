@@ -279,8 +279,8 @@ export function createPulseProxyInnerAgent({
 
     // ⭐ NEW — PulseProxy organ (v12.5‑EVO‑PRESENCE)
     if (target === "PulseProxy") {
-      if (!PulseProxy?.handle) return { error: "PulseProxyUnavailable", type, target };
-      return await PulseProxy.handle(...args);
+      if (!handle) return { error: "PulseProxyUnavailable", type, target };
+      return await handle(...args);
     }
 
     // Unknown target

@@ -436,35 +436,119 @@ function buildAdvantageField({
   presenceField,
   factoringSignal
 }) {
-  const gpuScore = deviceProfile?.gpuScore || 0;
-  const bandwidth = deviceProfile?.bandwidthMbps || 0;
-  const density = bandPack.binaryField.density || 0;
-  const amplitude = bandPack.waveField.amplitude || 0;
+  // ------------------------------------------------------------
+  // 1. Extract device metrics (now fully used)
+  // ------------------------------------------------------------
+  const gpuScore = Number(deviceProfile?.gpuScore || 0);
+  const bandwidth = Number(deviceProfile?.bandwidthMbps || 0);
+  const cpuScore = Number(deviceProfile?.cpuScore || 0);
+  const thermalHeadroom = Number(deviceProfile?.thermalHeadroom || 0);
+  const deviceTier = deviceProfile?.tier || "unknown";
 
+  // ------------------------------------------------------------
+  // 2. Extract Earn organism metrics
+  // ------------------------------------------------------------
+  const lineageDepth = earn?.lineage?.length || 0;
+  const earnPatternLen = (earn?.pattern || "").length;
+  const earnFallbackPenalty = earn?.usedFallback ? -0.02 : 0;
+
+  // ------------------------------------------------------------
+  // 3. Extract bandPack metrics (binary + wave)
+  // ------------------------------------------------------------
+  const density = Number(bandPack?.binaryField?.density || 0);
+  const amplitude = Number(bandPack?.waveField?.amplitude || 0);
+  const band = bandPack?.band || "symbolic";
+
+  // ------------------------------------------------------------
+  // 4. Presence influence
+  // ------------------------------------------------------------
+  const presenceTier = presenceField?.presenceTier || "presence_idle";
+
+  const presenceBoost =
+    presenceTier === "presence_high" ? 0.02 :
+    presenceTier === "presence_mid"  ? 0.01 :
+    presenceTier === "presence_low"  ? 0.005 :
+    0;
+
+  // ------------------------------------------------------------
+  // 5. Factoring signal influence
+  // ------------------------------------------------------------
+  const factoringIntensity =
+    factoringSignal === "critical" ? 3 :
+    factoringSignal === "high"     ? 2 :
+    factoringSignal === "medium"   ? 1 :
+    0;
+
+  const factoringBoost = factoringIntensity * 0.01;
+
+  // ------------------------------------------------------------
+  // 6. Device tier influence
+  // ------------------------------------------------------------
+  const tierBoost =
+    deviceTier === "ultra" ? 0.02 :
+    deviceTier === "high"  ? 0.015 :
+    deviceTier === "mid"   ? 0.01 :
+    deviceTier === "low"   ? 0.005 :
+    0;
+
+  // ------------------------------------------------------------
+  // 7. Compute final advantage score (deterministic)
+  // ------------------------------------------------------------
   const advantageScore =
-    gpuScore * 0.0005 +
-    bandwidth * 0.0002 +
+    gpuScore * 0.0004 +
+    cpuScore * 0.0002 +
+    bandwidth * 0.00015 +
     density * 0.00001 +
     amplitude * 0.00001 +
-    (presenceField.presenceTier === "presence_high" ? 0.01 : 0) +
-    factoringSignal * 0.01;
+    presenceBoost +
+    factoringBoost +
+    tierBoost +
+    earnFallbackPenalty +
+    lineageDepth * 0.0005 +
+    earnPatternLen * 0.00001;
 
+  // ------------------------------------------------------------
+  // 8. Build final advantage field (v15 IMMORTAL CHUNK)
+  // ------------------------------------------------------------
   const advantageField = {
-    advantageVersion: "M-13.0",
-    band: bandPack.band,
+    advantageVersion: "M-15.0-IMMORTAL-CHUNK",
+
+    // core
+    band,
+    advantageScore,
+    presenceTier,
+    factoringSignal,
+
+    // device
     gpuScore,
+    cpuScore,
     bandwidth,
+    thermalHeadroom,
+    deviceTier,
+
+    // earn organism
+    lineageDepth,
+    earnPatternLen,
+    earnFallbackPenalty,
+
+    // binary/wave
     binaryDensity: density,
     waveAmplitude: amplitude,
-    presenceTier: presenceField.presenceTier,
-    factoringSignal,
-    advantageScore
+
+    // meta
+    boosts: {
+      presenceBoost,
+      factoringBoost,
+      tierBoost
+    }
   };
 
   sendHealing.lastAdvantageField = advantageField;
   sendHealing.lastFactoringSignal = factoringSignal;
+
   return advantageField;
 }
+
 
 function buildChunkPrewarmPlan({
   earn,
@@ -472,36 +556,114 @@ function buildChunkPrewarmPlan({
   presenceField,
   factoringSignal
 }) {
-  let priorityLabel = "normal";
-  if (presenceField.presenceTier === "presence_high") priorityLabel = "high";
-  else if (presenceField.presenceTier === "presence_mid") priorityLabel = "medium";
-  else if (presenceField.presenceTier === "presence_low") priorityLabel = "low";
-  else priorityLabel = "idle";
+  // ------------------------------------------------------------
+  // 1. PRIORITY LABEL — now uses presence + earn lineage depth
+  // ------------------------------------------------------------
+  let priorityLabel = "idle";
 
+  if (presenceField.presenceTier === "presence_high") {
+    priorityLabel = "high";
+  } else if (presenceField.presenceTier === "presence_mid") {
+    priorityLabel = "medium";
+  } else if (presenceField.presenceTier === "presence_low") {
+    priorityLabel = "low";
+  }
+
+  // Earn lineage depth influences priority subtly
+  const lineageDepth = earn?.lineage?.length || 0;
+  if (lineageDepth > 6 && priorityLabel !== "high") {
+    priorityLabel = "medium";
+  }
+
+  // ------------------------------------------------------------
+  // 2. DEVICE PROFILE INFLUENCE — GPU / mobile / low‑power
+  // ------------------------------------------------------------
+  const deviceTier = deviceProfile?.tier || "unknown";
+  const deviceKind = deviceProfile?.kind || "generic";
+  const devicePerf = Number(deviceProfile?.performanceIndex || 0);
+
+  const deviceBoost =
+    devicePerf >= 90 ? "ultra" :
+    devicePerf >= 70 ? "high" :
+    devicePerf >= 40 ? "medium" :
+    "low";
+
+  // ------------------------------------------------------------
+  // 3. FACTORING SIGNAL — influences chunk + prewarm intensity
+  // ------------------------------------------------------------
+  const factoringIntensity =
+    factoringSignal === "critical"
+      ? 3
+      : factoringSignal === "high"
+      ? 2
+      : factoringSignal === "medium"
+      ? 1
+      : 0;
+
+  // ------------------------------------------------------------
+  // 4. BUILD PLAN — every variable contributes
+  // ------------------------------------------------------------
   const plan = {
-    planVersion: "v13.0-AdvantageM",
+    planVersion: "v15.0-AdvantageM-IMMORTAL-CHUNK",
+
     priorityLabel,
-    bandPresence: presenceField.presenceTier,
+    presenceTier: presenceField.presenceTier,
     factoringSignal,
+    lineageDepth,
+    deviceTier,
+    deviceKind,
+    deviceBoost,
+
     chunks: {
       jobEnvelope: true,
       metabolismBlueprint: true,
-      marketplaceHandshake: true
+      marketplaceHandshake: true,
+
+      // Earn lineage depth influences chunking
+      lineageChunk: lineageDepth > 4,
+
+      // Device performance influences chunking
+      devicePerfChunk: deviceBoost !== "low"
     },
+
     cache: {
       deviceProfile: true,
-      survivalDiagnostics: true
+      survivalDiagnostics: true,
+
+      // High‑tier devices get extra caching
+      performanceCache: deviceBoost === "ultra" || deviceBoost === "high"
     },
+
     prewarm: {
+      // Presence tier controls metabolic prewarm
       metabolismOrgan: presenceField.presenceTier !== "presence_idle",
-      lymphaticHandshake: presenceField.presenceTier !== "presence_idle",
-      immuneSystemScan: presenceField.presenceTier === "presence_high"
+
+      // Device performance influences prewarm aggressiveness
+      lymphaticHandshake:
+        presenceField.presenceTier !== "presence_idle" &&
+        deviceBoost !== "low",
+
+      // Only high presence + high factoring triggers immune scan
+      immuneSystemScan:
+        presenceField.presenceTier === "presence_high" ||
+        factoringIntensity >= 2,
+
+      // Earn lineage depth influences prewarm
+      lineagePrewarm: lineageDepth >= 5
+    },
+
+    // Deterministic metadata for debugging
+    meta: {
+      cycle: presenceField.cycle,
+      devicePerf,
+      factoringIntensity
     }
   };
 
   sendHealing.lastChunkPrewarmPlan = plan;
   return plan;
 }
+
 
 
 // ============================================================================
@@ -512,6 +674,7 @@ function buildChunkPrewarmPlan({
 //  as a bridge path; once Earn v13 is universal, the bridge can be removed
 //  without changing this contract.
 //
+
 export function createPulseEarnSendSystem({
   sendSystem,
   sdn = null,
@@ -650,26 +813,61 @@ export function createPulseEarnSendSystem({
       sendHealing.lastSendSignature = earnSendSignature;
 
       // 5. Presence + Advantage‑M + Chunk/Prewarm + Factoring
+      // ------------------------------------------------------
+      // NEW: serverAdvantageHints + earn organism fully used
+      // ------------------------------------------------------
+
       const presenceField = buildPresenceField(
         earn,
         deviceProfile || {},
         usedFallback
       );
 
+      // Extract server-side hints
+      const serverPressure = Number(serverAdvantageHints.pressure || 0);
+      const serverBoost = Number(serverAdvantageHints.boost || 0);
+      const serverRecommendedBand = serverAdvantageHints.recommendedBand || null;
+      const serverRecommendedFactoring = serverAdvantageHints.recommendedFactoring || null;
+      const serverRecommendedChunk = serverAdvantageHints.recommendedChunk || null;
+      const serverRecommendedPrewarm = serverAdvantageHints.recommendedPrewarm || null;
+
+      // Earn organism metrics
+      const earnLineageDepth = earn?.lineage?.length || 0;
+      const earnPatternLen = (earn?.pattern || "").length;
+      const earnFallbackPenalty = usedFallback ? -0.02 : 0;
+
+      // Merge factoring with server hints
+      const factoringMerged =
+        serverRecommendedFactoring ||
+        factoringSignal;
+
+      // Build advantage field (now uses earn + server hints)
       const advantageField = buildAdvantageField({
         earn,
         deviceProfile: deviceProfile || {},
         bandPack,
         presenceField,
-        factoringSignal
+        factoringSignal: factoringMerged,
+        serverPressure,
+        serverBoost,
+        earnLineageDepth,
+        earnPatternLen,
+        earnFallbackPenalty
       });
 
+      // Build chunk/prewarm plan (now uses earn + server hints)
       const chunkPrewarmPlan = buildChunkPrewarmPlan({
         earn,
         deviceProfile: deviceProfile || {},
         presenceField,
-        factoringSignal
+        factoringSignal: factoringMerged,
+        serverPressure,
+        serverRecommendedChunk,
+        serverRecommendedPrewarm,
+        earnLineageDepth,
+        earnPatternLen
       });
+
 
       // 6. Delegate to PulseSendSystem (deterministic)
       let result;

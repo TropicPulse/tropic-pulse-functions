@@ -1,16 +1,16 @@
 // ============================================================================
-// FILE: aiBrainstem.js — Pulse OS v12.3‑Presence
+// FILE: aiBrainstem.js — Pulse OS v14‑IMMORTAL
 // LAYER: BRAINSTEM (CNS Bridge: Identity → Tools → Organs → Cortex)
 // ============================================================================
 //
-//  v12.3‑Presence Upgrades:
-//   • Presence‑aware CNS identity bridge
+//  v14‑IMMORTAL Upgrades:
+//   • Presence‑aware CNS identity bridge (windowId + routeId)
 //   • Dualband‑safe symbolic+binary CNS organ
 //   • Packet‑grade activation + prewarm packets
 //   • Drift‑proof organ wiring warmup
 //   • Zero mutation, zero randomness
 //   • Deterministic cognitive‑tool loading
-//   • Window‑safe CNS packet emission
+//   • Memory + GPU + Boundaries‑aware (read‑only)
 //   • Multi‑instance CNS safety
 // ============================================================================
 /*
@@ -19,7 +19,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_core",
   role: "ai_brainstem",
-  lineage: "aiBrainstem-v9 → v11-Evo → v14-IMMORTAL",
+  lineage: "aiBrainstem-v9 → v11-Evo → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     brainstem: true,
@@ -56,8 +56,8 @@ AI_EXPERIENCE_META = {
 export const BrainstemMeta = Object.freeze({
   layer: "PulseAICNS",
   role: "BRAINSTEM_ORGAN",
-  version: "12.3-Presence",
-  identity: "aiBrainstem-v12.3-Presence",
+  version: "14-IMMORTAL",
+  identity: "aiBrainstem-v14-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -74,10 +74,13 @@ export const BrainstemMeta = Object.freeze({
     presenceAware: true,
     chunkingAware: true,
     gpuFriendly: true,
+    memorySpineAware: true,
+    overlayAware: true,
+    boundariesAware: true,
 
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "14-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -133,13 +136,58 @@ import { createOrgans } from "./createOrgans.js";
 import * as aiTools from "./aiTools.js";
 
 // ============================================================================
+// INTERNAL HELPERS
+// ============================================================================
+function safeNow() {
+  return Date.now();
+}
+
+function computeWindowId({ userId, userIsOwner, routeId }) {
+  const base = `${userId || "anon"}:${userIsOwner ? "owner" : "guest"}:${routeId || "cns"}`;
+  let h = 0;
+  for (let i = 0; i < base.length; i++) {
+    h = (h * 31 + base.charCodeAt(i)) | 0;
+  }
+  return "win-" + (h >>> 0).toString(16);
+}
+
+function readMemoryVitals(memory) {
+  if (!memory) return null;
+  try {
+    const hot = typeof memory.getHotKeys === "function"
+      ? memory.getHotKeys(3)
+      : [];
+    const meta = memory.Meta || {};
+    return {
+      hotKeyCount: hot.length || 0,
+      lastFlushEpoch: meta.lastFlushEpoch || 0,
+      lastLoadEpoch: meta.lastLoadEpoch || 0,
+      fallbackUsed: !!meta.fallbackUsed,
+      lastBandUsed: meta.lastBandUsed || null,
+      version: meta.version || null,
+      dnaTag: meta.dnaTag || null
+    };
+  } catch {
+    return null;
+  }
+}
+
+function readGpuVitals(gpu) {
+  if (!gpu) return null;
+  return {
+    identity: gpu.GPUOrchestratorMeta?.identity || null,
+    version: gpu.GPUOrchestratorMeta?.version || null
+  };
+}
+
+// ============================================================================
 // PACKET EMITTER — deterministic, brainstem-scoped
 // ============================================================================
 function emitBrainstemPacket(type, payload) {
   return Object.freeze({
     meta: BrainstemMeta,
     packetType: `brainstem-${type}`,
-    timestamp: Date.now(),
+    timestamp: safeNow(),
     epoch: BrainstemMeta.evo.epoch,
     layer: BrainstemMeta.layer,
     role: BrainstemMeta.role,
@@ -149,12 +197,20 @@ function emitBrainstemPacket(type, payload) {
 }
 
 // ============================================================================
-// PREWARM ENGINE v3 — deeper, faster, presence-aware
+// PREWARM ENGINE v4 — presence + memory + gpu aware
 // ============================================================================
-function prewarmBrainstem(userId, userIsOwner) {
+function prewarmBrainstem({
+  userId,
+  userIsOwner,
+  routeId,
+  memory,
+  gpu,
+  trace = false
+} = {}) {
   try {
     const _id = userId ?? null;
     const _owner = Boolean(userIsOwner);
+    const windowId = computeWindowId({ userId: _id, userIsOwner: _owner, routeId });
 
     // Warm cognitive tools
     for (const key of Object.keys(aiTools)) {
@@ -173,11 +229,21 @@ function prewarmBrainstem(userId, userIsOwner) {
       null
     );
 
-    return emitBrainstemPacket("prewarm", {
+    const memoryVitals = readMemoryVitals(memory);
+    const gpuVitals = readGpuVitals(gpu);
+
+    const packet = emitBrainstemPacket("prewarm", {
       message: "Brainstem prewarmed and CNS pathways aligned.",
       userId: _id,
-      userIsOwner: _owner
+      userIsOwner: _owner,
+      windowId,
+      routeId,
+      memoryVitals,
+      gpuVitals
     });
+
+    if (trace) console.log("[Brainstem] prewarm", packet);
+    return packet;
   } catch (err) {
     return emitBrainstemPacket("prewarm-error", {
       error: String(err),
@@ -187,20 +253,60 @@ function prewarmBrainstem(userId, userIsOwner) {
 }
 
 // ============================================================================
-// CREATE BRAINSTEM — Identity + Tools + Organs
+// CREATE BRAINSTEM — Identity + Tools + Organs (v14‑IMMORTAL)
 // ============================================================================
-export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
+export function createBrainstem(
+  request = {},
+  db,
+  fsAPI,
+  routeAPI,
+  schemaAPI,
+  {
+    memory = null,      // PulseCoreMemory v13+
+    overlay = null,     // PulseBinaryOverlay (optional, read-only touch)
+    gpu = null,         // GPUOrchestrator (optional, read-only)
+    dnaTag = "default-dna",
+    routeId = "brainstem",
+    tracePrewarm = false,
+    log = console.log
+  } = {}
+) {
   const { userId = null, userIsOwner: requestOwner = false } = request;
 
   const userIsOwner =
     Boolean(requestOwner || (userId && userId === OWNER_ID));
 
-  // ---- PREWARM CNS PATHWAYS BEFORE BUILDING CONTEXT ----
-  const prewarmPacket = prewarmBrainstem(userId, userIsOwner);
+  // Presence‑touch (read‑only semantics)
+  try {
+    if (overlay && overlay.touch) {
+      overlay.touch(routeId, safeNow());
+    } else if (memory && memory.prewarm) {
+      memory.prewarm();
+    }
+  } catch {
+    // ignore, brainstem stays read‑only
+  }
+
+  const prewarmPacket = prewarmBrainstem({
+    userId,
+    userIsOwner,
+    routeId,
+    memory,
+    gpu,
+    trace: tracePrewarm
+  });
+
+  const windowId = computeWindowId({ userId, userIsOwner, routeId });
 
   const context = Object.freeze({
     userId,
     userIsOwner,
+    windowId,
+    dnaTag,
+    routeId,
+    memory,
+    overlay,
+    gpu,
     ...aiTools
   });
 
@@ -212,6 +318,9 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
     type: "brainstem-activation",
     userId,
     userIsOwner,
+    windowId,
+    routeId,
+    dnaTag,
     toolCount: Object.keys(aiTools).length,
     prewarm: prewarmPacket
   };
@@ -224,6 +333,18 @@ export function createBrainstem(request = {}, db, fsAPI, routeAPI, schemaAPI) {
     bits,
     bitLength: bits ? bits.length : 0
   });
+
+  try {
+    log("[Brainstem] INIT", {
+      identity: BrainstemMeta.identity,
+      version: BrainstemMeta.version,
+      userId,
+      userIsOwner,
+      windowId,
+      routeId,
+      dnaTag
+    });
+  } catch {}
 
   return Object.freeze({
     meta: BrainstemMeta,

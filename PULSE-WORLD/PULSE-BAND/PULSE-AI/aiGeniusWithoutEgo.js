@@ -1,9 +1,9 @@
 // ============================================================================
-//  aiGeniusWithoutEgo.js — Pulse OS v12.3‑Presence
+//  aiGeniusWithoutEgo.js — Pulse OS v14‑IMMORTAL
 //  Resident Genius • Zero Ego • Ultra‑Fast Tone Refinement
 // ============================================================================
 //
-//  v12.3‑Presence UPGRADES:
+//  v14‑IMMORTAL UPGRADES:
 //    • SPEED ENGINE: micro‑pipeline, zero‑allocation passes
 //    • PACKET‑AWARE: emits refinement packets for UI/organism
 //    • PRESENCE‑AWARE: tone shifts based on user evolution mode
@@ -18,7 +18,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_tools",
   role: "ego_filter",
-  lineage: "aiGeniusWithoutEgo-v11 → v14-IMMORTAL",
+  lineage: "aiGeniusWithoutEgo-v11 → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     egoRemoval: true,
@@ -47,8 +47,8 @@ import { aiHumilityFilter } from "./aiHumilityFilter.js";
 export const GeniusMeta = Object.freeze({
   layer: "PulseAIToneFrame",
   role: "GENIUS_WITHOUT_EGO",
-  version: "12.3-Presence",
-  identity: "aiGeniusWithoutEgo-v12.3-Presence",
+  version: "14-IMMORTAL",
+  identity: "aiGeniusWithoutEgo-v14-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
@@ -65,6 +65,9 @@ export const GeniusMeta = Object.freeze({
     toneAware: true,
     clarityAware: true,
 
+    egoRemoval: true,
+    groundedConfidence: true,
+
     speedOptimized: true,
     microPipeline: true,
     chunkingAware: true,
@@ -72,7 +75,7 @@ export const GeniusMeta = Object.freeze({
 
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "12.3-Presence"
+    epoch: "14-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -106,7 +109,7 @@ export const GeniusMeta = Object.freeze({
 });
 
 // ============================================================================
-//  PACKET EMITTER — deterministic, presence‑grade
+//  PACKET EMITTER — deterministic, IMMORTAL‑grade
 // ============================================================================
 function emitGeniusPacket(type, payload) {
   return Object.freeze({
@@ -142,7 +145,7 @@ export function prewarmGeniusOrgan({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  CORE GENIUS-WITHOUT-EGO REFINEMENT — v12.3‑Presence
+//  CORE GENIUS-WITHOUT-EGO REFINEMENT — v14‑IMMORTAL
 // ============================================================================
 export const aiGeniusWithoutEgo = {
   meta: GeniusMeta,

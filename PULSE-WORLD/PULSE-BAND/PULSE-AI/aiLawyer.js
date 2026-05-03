@@ -1,14 +1,31 @@
 // ============================================================================
-//  aiLawyer.js — PulseOS Legal Mapper Organ — v12.3‑EVO+
-//  Structured • Neutral • Doctrine‑Aware • Zero‑Advice
+//  aiLawyer.js — PulseOS Legal Mapper Organ — v15-IMMORTAL-EVO++
+//  Structured • Neutral • Doctrine‑Aware • Route‑Based Law Reader
 // ============================================================================
+//
+//  CANONICAL ROLE:
+//    • Legal issue spotter and doctrine mapper.
+//    • Reads real law text (statutes / rules) when routed data is provided.
+//    • Can request law data via the existing PulseOS route() mechanism.
+//    • Never acts as a lawyer, never gives legal advice.
+//    • Behaves as an intelligent legal assistant / legal mapper.
+//
+//  HARD GUARANTEES:
+//    • No legal advice.
+//    • No jurisdiction‑specific outcome predictions.
+//    • No direct network primitives (no fetch/axios/etc inside this file).
+//    • All external I/O is mediated by the caller’s route() / CNS.
+//    • From this organ’s perspective: pure compute over provided data.
+//
+// ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiLawyer",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL-EVO++",
   layer: "ai_tools",
   role: "legal_reasoner",
-  lineage: "aiLawyer-v11 → v14-IMMORTAL",
+  lineage: "aiLawyer-v11 → v14-IMMORTAL → v15-IMMORTAL-EVO++",
 
   evo: {
     legalReasoning: true,
@@ -20,9 +37,16 @@ AI_EXPERIENCE_META = {
     deterministic: true,
     driftProof: true,
     pureCompute: true,
-    zeroNetwork: true,
+    zeroNetwork: true,          // from this organ’s POV (route() is external)
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    immortalityEpoch: true,
+    packetAware: true,
+    arteryAware: true,
+    lawQueryAware: true,
+    lawRouteAware: true,
+    lawReaderAware: true
   },
 
   contract: {
@@ -36,11 +60,11 @@ export const PulseRole = Object.freeze({
   type: "Cognitive",
   subsystem: "aiLawyer",
   layer: "C5-LegalMapper",
-  version: "12.3-EVO+",
-  identity: "aiLawyer-v12.3-EVO+",
+  version: "15-IMMORTAL-EVO++",
+  identity: "aiLawyer-v15-IMMORTAL-EVO++",
 
   // --------------------------------------------------------------------------
-  // EVO BLOCK — v12.3‑EVO+ invariants
+  // EVO BLOCK — v15‑IMMORTAL‑EVO++ invariants
   // --------------------------------------------------------------------------
   evo: Object.freeze({
     driftProof: true,
@@ -58,9 +82,17 @@ export const PulseRole = Object.freeze({
     argumentAware: true,
 
     archetypeArteryAware: true,
+    lawQueryAware: true,
+    lawRouteAware: true,
+    lawReaderAware: true,
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "12.3-EVO+"
+    epoch: "15-IMMORTAL-EVO++",
+
+    // Network is handled by outer route()/CNS, not by this organ.
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
   }),
 
   // --------------------------------------------------------------------------
@@ -68,11 +100,11 @@ export const PulseRole = Object.freeze({
   // --------------------------------------------------------------------------
   contract: Object.freeze({
     purpose:
-      "Spot legal issues, map doctrines, outline arguments and counterarguments, and explain how legal reasoning typically works.",
+      "Spot legal issues, map doctrines, outline arguments and counterarguments, and explain how legal reasoning typically works, including reading routed law text.",
 
     never: Object.freeze([
       "give legal advice",
-      "interpret jurisdiction-specific law",
+      "interpret jurisdiction-specific law as binding",
       "tell the user what to do",
       "predict outcomes",
       "claim legal authority",
@@ -88,7 +120,8 @@ export const PulseRole = Object.freeze({
       "outline arguments and counterarguments",
       "explain how a rule or permit fits into a legal framework",
       "stay neutral, structured, and ego-free",
-      "stay evolution-aware when mapping concepts"
+      "stay evolution-aware when mapping concepts",
+      "treat external law data as informational, not prescriptive"
     ])
   }),
 
@@ -242,6 +275,180 @@ export const PulseRole = Object.freeze({
         hasPermit,
         hasIssue
       }
+    };
+  },
+
+  // ========================================================================
+  //  INTERNAL HELPER — LAW QUERY POINTER (no route, no I/O)
+  // ========================================================================
+  _lawQueryPointer({ jurisdiction = "federal", topic = "" } = {}) {
+    const sources = {
+      federal:    "https://www.law.cornell.edu/search/site/",
+      arizona:    "https://www.azleg.gov/arsDetail/?title=",
+      california: "https://leginfo.legislature.ca.gov/faces/search.xhtml?search_keywords=",
+      new_york:   "https://www.nysenate.gov/legislation/laws?search=",
+      florida:    "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Search&Search_String="
+    };
+
+    const key  = (jurisdiction || "federal").toLowerCase();
+    const base = sources[key] || sources.federal;
+    const q    = encodeURIComponent(topic || "");
+    const url  = `${base}${q}`;
+
+    return Object.freeze({
+      kind: "law-query-pointer",
+      meta: {
+        organ: PulseRole.identity,
+        version: PulseRole.version,
+        mode: "pointer",
+        zeroNetworkFromThisOrgan: true,
+        zeroAdvice: true
+      },
+      jurisdiction: key,
+      topic,
+      url,
+      note:
+        "Deterministic pointer to a public law reference site. " +
+        "This organ does not itself perform external I/O in pointer mode."
+    });
+  },
+
+  // ========================================================================
+  //  LAW READER v1 — interpret routed law text (statutes / rules)
+  //  INPUT:
+  //    law = {
+  //      rawText: <string>,
+  //      citations: [ ... ] (optional),
+  //      source: <string> (optional),
+  //      meta: { ... } (optional)
+  //    }
+  // ========================================================================
+  lawReader(law = {}, binaryVitals = {}) {
+    const notes = [];
+    const text = (law.rawText || "").toLowerCase();
+
+    if (!law.rawText) {
+      return {
+        notes: ["No law text provided to lawReader."],
+        citations: law.citations || [],
+        source: law.source || null
+      };
+    }
+
+    const binaryPressure =
+      binaryVitals?.layered?.organism?.pressure ??
+      binaryVitals?.binary?.pressure ??
+      0;
+
+    if (binaryPressure >= 0.7) {
+      notes.push("System load is elevated — law interpretation is simplified for safety.");
+    }
+
+    if (text.includes("negligence") || text.includes("duty of care")) {
+      notes.push("Negligence-related concepts detected — typical elements include duty, breach, causation, and damages.");
+    }
+
+    if (text.includes("strict liability")) {
+      notes.push("Strict liability language detected — focus is often on activity type and harm, not fault.");
+    }
+
+    if (text.includes("contract") || text.includes("agreement")) {
+      notes.push("Contract-related language — lawyers usually examine offer, acceptance, consideration, and enforceability.");
+    }
+
+    if (text.includes("privacy") || text.includes("personal data")) {
+      notes.push("Privacy-related language — common themes include consent, data handling, and reasonable expectations.");
+    }
+
+    if (text.includes("zoning") || text.includes("land use")) {
+      notes.push("Zoning or land-use language — typical analysis includes permitted uses, variances, and compliance pathways.");
+    }
+
+    notes.push("A legal assistant would typically connect these provisions to the user’s facts, without giving advice or predicting outcomes.");
+
+    return {
+      notes,
+      citations: law.citations || [],
+      source: law.source || null,
+      meta: law.meta || {}
+    };
+  },
+
+  // ========================================================================
+  //  LAW + ISSUE MAPPER v1 — combine user issue + routed law text
+  // ========================================================================
+  issueWithLaw({ issue = "", law = {}, binaryVitals = {} } = {}) {
+    const base = this.argumentMapper(issue, binaryVitals);
+    const lawView = this.lawReader(law, binaryVitals);
+
+    return {
+      issueNotes: base.notes,
+      lawNotes: lawView.notes,
+      citations: lawView.citations,
+      source: lawView.source,
+      meta: lawView.meta
+    };
+  },
+
+  // ========================================================================
+  //  LAW QUERY v3 — pointer + route‑based query
+  //
+  //  MODES:
+  //    • "pointer"  → deterministic URL only (no route call).
+  //    • "route"    → uses provided route() to request law data.
+  //    • "auto"     → if route present → "route", else → "pointer".
+  //
+  //  ROUTE CONTRACT (external, PulseOS CNS):
+  //    route({
+  //      type: "law-query",
+  //      payload: { jurisdiction, topic }
+  //    }) MUST:
+  //      • return a value or Promise:
+  //          { rawText, citations, source, meta }  OR  { error, meta }
+  //      • own all external I/O and API details.
+  //      • keep this organ free of direct network primitives.
+  // ========================================================================
+  lawQuery({ jurisdiction = "federal", topic = "", mode = "auto", route = null } = {}) {
+    const pointer = this._lawQueryPointer({ jurisdiction, topic });
+
+    const effectiveMode =
+      mode === "auto"
+        ? (typeof route === "function" ? "route" : "pointer")
+        : mode;
+
+    if (effectiveMode !== "route" || typeof route !== "function") {
+      return pointer;
+    }
+
+    const request = {
+      type: "law-query",
+      payload: {
+        jurisdiction: pointer.jurisdiction,
+        topic: pointer.topic
+      },
+      meta: {
+        fromOrgan: PulseRole.identity,
+        version: PulseRole.version
+      }
+    };
+
+    const result = route(request);
+
+    return {
+      kind: "law-query-route",
+      meta: {
+        organ: PulseRole.identity,
+        version: PulseRole.version,
+        mode: "route",
+        zeroNetworkFromThisOrgan: true,
+        zeroAdvice: true
+      },
+      jurisdiction: pointer.jurisdiction,
+      topic: pointer.topic,
+      pointer,
+      result
+      // result is route-defined:
+      //   { rawText, citations, source, meta } or { error, meta }.
     };
   }
 });

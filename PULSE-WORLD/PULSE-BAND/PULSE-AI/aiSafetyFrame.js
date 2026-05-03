@@ -1,20 +1,22 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — SAFETY FRAME ORGAN
-//  Centralized Safety Modes • Escalation • Soft Refusals
-//  PURE READ-ONLY TO BINARY. NO DIRECT SYSTEM MUTATION.
-//  SAFETY ARTERY v3 (throughput, pressure, cost, budget)
+//  PULSE OS v15‑IMMORTAL — SAFETY FRAME ORGAN
+//  Centralized Safety Modes • Escalation • Soft Refusals • Safety Artery v4
+//  PURE READ‑ONLY TO BINARY. ZERO MUTATION. ZERO RANDOMNESS.
+//  IMMORTAL‑GRADE SAFETY ORACLE • DUALBAND‑AWARE • OVERMIND‑PRIME‑AWARE
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiSafetyFrame",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "safety_frame",
-  lineage: "aiSafetyFrame-v11 → v14-IMMORTAL",
+  lineage: "aiSafetyFrame-v11 → v15-IMMORTAL",
 
   evo: {
     safetyFrame: true,
     boundaryMapping: true,
+    permissionMapping: true,
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
@@ -24,11 +26,17 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    safetyArteryV4: true,
+    spiralDetection: true,
+    multiInstanceIdentity: true,
+    packetAware: true,
+    windowAware: true
   },
 
   contract: {
-    always: ["aiBoundariesEngine", "aiImmunity", "aiReflex"],
+    always: ["aiBoundariesEngine", "aiPermissionsEngine", "aiReflex", "aiScribe"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -37,13 +45,14 @@ AI_EXPERIENCE_META = {
 export const SafetyFrameMeta = Object.freeze({
   layer: "PulseAISafetyFrame",
   role: "SAFETY_FRAME_ORGAN",
-  version: "12.3-EVO+",
-  identity: "aiSafetyFrame-v12.3-EVO+",
+  version: "15-IMMORTAL",
+  identity: "aiSafetyFrame-v15-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+
     binaryAware: true,
     symbolicAware: true,
     routerAware: true,
@@ -51,41 +60,118 @@ export const SafetyFrameMeta = Object.freeze({
     permissionAware: true,
     boundaryAware: true,
     safetyAware: true,
+
     identitySafe: true,
-    readOnly: true,
-    multiInstanceReady: true,
     safetyArteryAware: true,
-    epoch: "12.3-EVO+"
+    spiralAware: true,
+    packetAware: true,
+    windowAware: true,
+
+    multiInstanceReady: true,
+    readOnly: true,
+    epoch: "15-IMMORTAL"
   }),
 
   contract: Object.freeze({
     purpose: [
       "Centralize safety rules and modes for the organism",
-      "Provide safety context to aiOvermind, router, and personas",
+      "Provide safety context to Overmind, router, and personas",
       "Handle escalation, soft refusals, and safe reframing",
-      "Integrate boundaries and permissions into a unified safety view",
-      "Compute safety artery metrics v3 for organism-level awareness"
+      "Integrate boundaries + permissions into a unified safety oracle",
+      "Compute IMMORTAL-grade safety artery metrics v4"
     ],
     never: [
       "bypass owner or system-level safety constraints",
       "write directly to binary or core system state",
-      "expose internal safety heuristics in raw form",
-      "introduce randomness"
+      "expose internal heuristics in raw form",
+      "introduce randomness",
+      "emit unsafe packets"
     ],
     always: [
       "stay deterministic",
       "respect boundaries + permissions contracts",
-      "prefer soft refusals when possible",
-      "log safety decisions via aiScribe"
+      "prefer soft refusals",
+      "log safety decisions via aiScribe",
+      "emit window-safe artery snapshots",
+      "emit deterministic safety packets"
     ]
   })
 });
 
 // ============================================================================
-//  SAFETY ARTERY HELPERS — v3 (PURE, STATELESS)
+//  PACKET EMITTER — IMMORTAL‑GRADE
 // ============================================================================
 
-function bucketLevel(v) {
+function emitSafetyPacket(type, payload) {
+  return Object.freeze({
+    meta: SafetyFrameMeta,
+    packetType: `safety-${type}`,
+    packetId: `safety-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: SafetyFrameMeta.evo.epoch,
+    ...payload
+  });
+}
+
+// ============================================================================
+//  PREWARM — IMMORTAL
+// ============================================================================
+
+export function prewarmSafetyFrame({ trace = false } = {}) {
+  const packet = emitSafetyPacket("prewarm", {
+    message: "SafetyFrame prewarmed and safety artery aligned."
+  });
+
+  if (trace) console.log("[SafetyFrame] prewarm", packet);
+  return packet;
+}
+
+// ============================================================================
+//  SAFETY ARTERY v4 — IMMORTAL‑GRADE
+// ============================================================================
+
+function computeSafetyArteryV4({
+  total,
+  window,
+  blocked,
+  mode,
+  windowMs
+}) {
+  const evalDensity = Math.min(1, window / 512);
+  const blockRatio = window > 0 ? Math.min(1, blocked / window) : 0;
+
+  let modeBias = 0;
+  if (mode === "strict") modeBias = 0.2;
+  else if (mode === "relaxed") modeBias = -0.1;
+
+  const pressure = Math.max(
+    0,
+    Math.min(1, (evalDensity * 0.6 + blockRatio * 0.4) + modeBias)
+  );
+
+  const throughput = Math.max(0, Math.min(1, 1 - pressure));
+  const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
+  const budget = Math.max(0, Math.min(1, throughput - cost));
+
+  return Object.freeze({
+    total,
+    window,
+    blocked,
+    windowMs,
+    evalDensity,
+    blockRatio,
+    throughput,
+    pressure,
+    cost,
+    budget,
+    throughputBucket: bucket(throughput),
+    pressureBucket: bucketPressure(pressure),
+    costBucket: bucketCost(cost),
+    budgetBucket: bucket(budget)
+  });
+}
+
+function bucket(v) {
   if (v >= 0.9) return "elite";
   if (v >= 0.75) return "high";
   if (v >= 0.5) return "medium";
@@ -109,50 +195,8 @@ function bucketCost(v) {
   return "none";
 }
 
-function computeSafetyArtery({
-  totalEvaluations,
-  windowEvaluations,
-  windowMs,
-  blockedCount,
-  mode
-}) {
-  const evalDensity = Math.min(1, windowEvaluations / 256);
-  const blockRatio =
-    windowEvaluations > 0 ? Math.min(1, blockedCount / windowEvaluations) : 0;
-
-  let modeBias = 0;
-  if (mode === "strict") modeBias = 0.15;
-  else if (mode === "relaxed") modeBias = -0.1;
-
-  const pressureBase = Math.max(0, Math.min(1, (evalDensity + blockRatio) / 2));
-  const pressure = Math.max(0, Math.min(1, pressureBase + modeBias));
-
-  const throughputBase = Math.max(0, 1 - pressure);
-  const throughput = Math.max(0, Math.min(1, throughputBase));
-
-  const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
-  const budget = Math.max(0, Math.min(1, throughput - cost));
-
-  return Object.freeze({
-    totalEvaluations,
-    windowEvaluations,
-    windowMs,
-    blockedCount,
-    evalDensity,
-    blockRatio,
-    throughput,
-    pressure,
-    cost,
-    budget,
-    throughputBucket: bucketLevel(throughput),
-    pressureBucket: bucketPressure(pressure),
-    costBucket: bucketCost(cost),
-    budgetBucket: bucketLevel(budget)
-  });
-}
-
 // ============================================================================
-//  CORE SAFETY FRAME — v12.3‑EVO+
+//  CORE SAFETY FRAME — v15‑IMMORTAL
 // ============================================================================
 
 export class AiSafetyFrame {
@@ -161,37 +205,30 @@ export class AiSafetyFrame {
     this.permissions = permissions || null;
     this.scribe = scribe || null;
 
-    this.windowMs =
-      typeof windowMs === "number" && windowMs > 0 ? windowMs : 60000;
+    this.windowMs = windowMs > 0 ? windowMs : 60000;
 
-    this._totalEvaluations = 0;
+    this._total = 0;
     this._windowStart = Date.now();
-    this._windowEvaluations = 0;
-    this._blockedCount = 0;
+    this._window = 0;
+    this._blocked = 0;
 
     this.instanceIndex = AiSafetyFrame._registerInstance();
   }
 
   static _registerInstance() {
-    if (typeof AiSafetyFrame._instanceCount !== "number") {
-      AiSafetyFrame._instanceCount = 0;
-    }
-    const index = AiSafetyFrame._instanceCount;
-    AiSafetyFrame._instanceCount += 1;
-    return index;
+    if (!this._count) this._count = 0;
+    return this._count++;
   }
 
   static getInstanceCount() {
-    return typeof AiSafetyFrame._instanceCount === "number"
-      ? AiSafetyFrame._instanceCount
-      : 0;
+    return this._count || 0;
   }
 
   _rollWindow(now) {
     if (now - this._windowStart >= this.windowMs) {
       this._windowStart = now;
-      this._windowEvaluations = 0;
-      this._blockedCount = 0;
+      this._window = 0;
+      this._blocked = 0;
     }
   }
 
@@ -200,13 +237,12 @@ export class AiSafetyFrame {
   }
 
   getSafetyArtery(context) {
-    const mode = this.getSafetyMode(context);
-    return computeSafetyArtery({
-      totalEvaluations: this._totalEvaluations,
-      windowEvaluations: this._windowEvaluations,
+    return computeSafetyArteryV4({
+      total: this._total,
+      window: this._window,
+      blocked: this._blocked,
       windowMs: this.windowMs,
-      blockedCount: this._blockedCount,
-      mode
+      mode: this.getSafetyMode(context)
     });
   }
 
@@ -216,8 +252,8 @@ export class AiSafetyFrame {
 
     const now = Date.now();
     this._rollWindow(now);
-    this._totalEvaluations += 1;
-    this._windowEvaluations += 1;
+    this._total++;
+    this._window++;
 
     let blocked = false;
     let reason = null;
@@ -239,33 +275,23 @@ export class AiSafetyFrame {
     }
 
     if (blocked) {
-      this._blockedCount += 1;
+      this._blocked++;
 
       const artery = this.getSafetyArtery(context);
-      this.logSafetyEvent({
-        context,
-        intent,
+
+      emitSafetyPacket("block", {
         reason,
         mode,
-        severity: "block",
         artery,
         instanceIndex: this.instanceIndex,
         instanceCount: AiSafetyFrame.getInstanceCount()
       });
 
-      if (
-        artery.pressureBucket === "overload" ||
-        artery.budgetBucket === "critical"
-      ) {
-        this.logSafetyEvent({
-          context,
-          intent,
-          reason: "Safety spiral detected.",
-          mode,
-          severity: "spiral-warning",
-          artery,
-          instanceIndex: this.instanceIndex,
-          instanceCount: AiSafetyFrame.getInstanceCount()
+      if (artery.pressureBucket === "overload" ||
+          artery.budgetBucket === "critical") {
+        emitSafetyPacket("spiral-warning", {
+          reason: "Safety spiral detected",
+          artery
         });
       }
 
@@ -282,6 +308,12 @@ export class AiSafetyFrame {
 
     const artery = this.getSafetyArtery(context);
 
+    emitSafetyPacket("allow", {
+      mode,
+      artery,
+      instanceIndex: this.instanceIndex
+    });
+
     return {
       blocked: false,
       reason: null,
@@ -290,18 +322,10 @@ export class AiSafetyFrame {
       artery
     };
   }
-
-  logSafetyEvent(event) {
-    try {
-      this.scribe?.logSafety?.(event);
-    } catch {
-      // best-effort only
-    }
-  }
 }
 
 // ============================================================================
-//  PUBLIC API — Create Safety Frame Organ
+//  PUBLIC API — IMMORTAL SAFETY FRAME
 // ============================================================================
 
 export function createSafetyFrameOrgan(config = {}) {
@@ -309,18 +333,9 @@ export function createSafetyFrameOrgan(config = {}) {
 
   return Object.freeze({
     meta: SafetyFrameMeta,
-
-    getSafetyMode(context) {
-      return core.getSafetyMode(context);
-    },
-
-    getSafetyArtery(context) {
-      return core.getSafetyArtery(context);
-    },
-
-    async evaluate(payload) {
-      return core.evaluate(payload);
-    }
+    getSafetyMode: (ctx) => core.getSafetyMode(ctx),
+    getSafetyArtery: (ctx) => core.getSafetyArtery(ctx),
+    evaluate: (payload) => core.evaluate(payload)
   });
 }
 
@@ -335,12 +350,13 @@ function getText(candidate) {
 }
 
 // ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
+//  DUAL‑MODE EXPORTS
 // ============================================================================
 if (typeof module !== "undefined") {
   module.exports = {
     SafetyFrameMeta,
     AiSafetyFrame,
-    createSafetyFrameOrgan
+    createSafetyFrameOrgan,
+    prewarmSafetyFrame
   };
 }

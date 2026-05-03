@@ -1,6 +1,6 @@
 // ============================================================================
-//  aiDualBand-v13.0-EVO+++.js
-//  PULSE OS v13.0-EVO+++ — Dual-Band Bridge (Symbolic ↔ Binary)
+//  aiDualBand-v14-IMMORTAL.js
+//  PULSE OS v14-IMMORTAL — Dual-Band Bridge (Symbolic ↔ Binary)
 //  Organism Bridge • Context Engine • Clinical + Structural + ScanFile Aware
 //  PURE BRIDGE. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
@@ -10,7 +10,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_core",
   role: "dualband_bridge",
-  lineage: "aiDualband-v11 → v14-IMMORTAL",
+  lineage: "aiDualband-v11 → v13.0-EVO+++ → v14-IMMORTAL",
 
   evo: {
     dualBand: true,
@@ -38,13 +38,13 @@ AI_EXPERIENCE_META = {
 export const DualBandMeta = Object.freeze({
   layer: "PulseAIDualBandKernel",
   role: "DUAL_BAND_BRIDGE_ORGAN",
-  version: "13.0-EVO+++",
-  identity: "aiDualBandBridge-v13.0-EVO+++",
+  version: "14-IMMORTAL",
+  identity: "aiDualBandBridge-v14-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
-    dualband: true,
+    dualBand: true,
     binaryAware: true,
     symbolicAware: true,
     bridgeAware: true,
@@ -64,7 +64,7 @@ export const DualBandMeta = Object.freeze({
     readOnly: true,
     multiInstanceReady: true,
     dualBandArteryAware: true,
-    epoch: "v13.0-EVO+++"
+    epoch: "14-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -165,8 +165,8 @@ import { createAIOrganism } from "./aiOrganism.js";
 const DUAL_BAND_CONTEXT = Object.freeze({
   layer: "DualBandOrganism",
   role: "DUAL_BAND_BRIDGE",
-  version: "13.0-EVO+++",
-  lineage: "pulse-dual-band-v13.0-evo",
+  version: "14-IMMORTAL",
+  lineage: "pulse-dual-band-v14-IMMORTAL",
   evo: Object.freeze({
     dualBand: true,
     binaryFirst: true,
@@ -228,7 +228,7 @@ function dualBandArtery({ diagnostics = {}, binaryVitals = {} } = {}) {
 }
 
 // ============================================================================
-//  DUAL‑BAND BRIDGE PREWARM ENGINE — v13.0‑EVO+++
+//  DUAL‑BAND BRIDGE PREWARM ENGINE — v14‑IMMORTAL
 // ============================================================================
 export function prewarmDualBandBridge({ trace = false } = {}) {
   try {
@@ -240,10 +240,24 @@ export function prewarmDualBandBridge({ trace = false } = {}) {
       flags: { stable: true }
     });
 
-    // Warm deps packet
-    emitDepsPacket();
+    // Deps + diagnostics + scribe
+    prewarmDepsLayer();
+    prewarmDiagnosticsOrgan();
+    prewarmDiagnosticsWriteOrgan();
+    prewarmScribe();
 
-    // Warm scribe formatting
+    // Emotion + delivery
+    prewarmEmotionEngine();
+    prewarmDeliveryEngine();
+
+    // Context + cognitive + cortex + earn
+    prewarmContextEngine();
+    prewarmCognitiveFrame();
+    prewarmEarnOrgan(null, null, null);
+    prewarmAICortex();
+
+    // Warm deps packet + scribe formatting explicitly
+    emitDepsPacket();
     formatDebugReport({ trace: ["prewarm"] }, null);
     formatDebugString({ trace: ["prewarm"] }, null);
 
@@ -265,6 +279,10 @@ export function prewarmDualBandBridge({ trace = false } = {}) {
       organismSnapshot: { binary: {}, symbolic: {} }
     });
 
+    if (trace) {
+      console.log("[DualBandBridge] prewarm complete");
+    }
+
     return true;
   } catch (err) {
     console.error("[DualBandBridge Prewarm] Failed:", err);
@@ -273,7 +291,7 @@ export function prewarmDualBandBridge({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  createDualBandOrganism() — v13.0‑EVO-AI-DUAL
+//  createDualBandOrganism() — v14‑IMMORTAL
 // ============================================================================
 export function createDualBandOrganism({
   trace = false,
@@ -286,16 +304,6 @@ export function createDualBandOrganism({
 } = {}) {
   // ⭐ PREWARM LAYERS (order matters)
   prewarmDualBandBridge({ trace });
-  prewarmDepsLayer();
-  prewarmDiagnosticsOrgan();
-  prewarmDiagnosticsWriteOrgan();
-  prewarmScribe();
-  prewarmEmotionEngine();
-  prewarmDeliveryEngine();
-  prewarmContextEngine();
-  prewarmCognitiveFrame();
-  prewarmEarnOrgan(db, null, null);
-  prewarmAICortex();
 
   // --------------------------------------------------------------------------
   // ORGANISM CORE
@@ -323,6 +331,28 @@ export function createDualBandOrganism({
       }),
     emitDepsPacket
   });
+
+  // --------------------------------------------------------------------------
+  // DIAGNOSTICS + SCRIBE + DIAGNOSTICS WRITE
+  // --------------------------------------------------------------------------
+  const diagnosticsState = createDiagnosticsState(diagnostics || {});
+  const diagnosticsAPI = createDiagnosticsAPI(diagnosticsState);
+
+  const diagnosticsWriteOrgan = createDiagnosticsWriteOrgan({
+    context,
+    backend: deps.db
+  });
+
+  const diagnosticsOrgan = attachDiagnosticsOrgan(diagnosticsState, {
+    diagnosticsAPI,
+    diagnosticsWriteOrgan
+  });
+
+  const scribe = {
+    meta: SCRIBE_META,
+    formatDebugReport,
+    formatDebugString
+  };
 
   // --------------------------------------------------------------------------
   // PERSONA / BOUNDARIES / PERMISSIONS
@@ -355,6 +385,7 @@ export function createDualBandOrganism({
     permissionsEngine,
     emotionEngine,
     encoder: organism.agent,
+    diagnosticsOrgan,
     trace
   });
 
@@ -362,7 +393,7 @@ export function createDualBandOrganism({
   // CONTEXT ENGINE + COGNITIVE FRAME
   // --------------------------------------------------------------------------
   const contextEngine = createContextEngine({
-    safetyFrame: null,
+    safetyFrame: boundariesEngine,
     experienceFrame: null,
     emotionEngine
   });
@@ -402,28 +433,9 @@ export function createDualBandOrganism({
   });
 
   // --------------------------------------------------------------------------
-  // DIAGNOSTICS + SCRIBE + DIAGNOSTICS WRITE
-  // --------------------------------------------------------------------------
-  const diagnosticsAPI = createDiagnosticsAPI();
-
-  const scribe = {
-    meta: SCRIBE_META,
-    formatDebugReport,
-    formatDebugString
-  };
-
-  const diagnosticsWrite = (ctx, backend) =>
-    createDiagnosticsWriteOrgan({ context: ctx, backend });
-
-  // --------------------------------------------------------------------------
-  // DELIVERY ENGINE
-  // --------------------------------------------------------------------------
-  const delivery = aiDeliveryEngine({
-    context,
-    router,
-    deps,
-    emotionEngine
-  });
+  // DELIVERY ENGINE (v14-IMMORTAL, pure object)
+// --------------------------------------------------------------------------
+  const delivery = aiDeliveryEngine;
 
   // --------------------------------------------------------------------------
   // ARCHITECT + TOURIST
@@ -486,7 +498,12 @@ export function createDualBandOrganism({
   // --------------------------------------------------------------------------
   // DUAL-BAND SURFACE
   // --------------------------------------------------------------------------
-  const artery = dualBandArtery({ diagnostics, binaryVitals });
+  const artery = dualBandArtery({
+    diagnostics: diagnosticsState.snapshot
+      ? diagnosticsState.snapshot()
+      : diagnostics,
+    binaryVitals
+  });
 
   const dualBand = Object.freeze({
     meta: DualBandMeta,
@@ -506,12 +523,16 @@ export function createDualBandOrganism({
       buildCognitiveFrame,
       doctor,
       doctorArchitect,
+      diagnosticsMeta: DiagnosticsMeta,
       diagnosticsAPI,
+      diagnosticsWriteOrgan,
+      diagnosticsOrgan,
+      diagnosticsWriteMeta: DiagnosticsWriteMeta,
       scribe,
-      diagnosticsWrite,
       delivery,
       emotionEngine,
       earn,
+      earnMeta: EarnMeta,
 
       execution: {
         meta: ExecutionEngineMeta,
@@ -543,3 +564,14 @@ export function createDualBandOrganism({
 
   return dualBand;
 }
+
+// ============================================================================
+//  PUBLIC API — v14‑IMMORTAL
+// ============================================================================
+export const DualBandAPI = {
+  DualBandMeta,
+  create: createDualBandOrganism,
+  prewarm: prewarmDualBandBridge
+};
+
+export default DualBandAPI;

@@ -1,5 +1,5 @@
 // ============================================================================
-//  aiIdentityCore.js — PulseOS Identity Organ — v12.3-Presence
+//  aiIdentityCore.js — PulseOS Identity Organ — v14-IMMORTAL
 //  Defines the AI's stable personality, vibe, tone identity, and behavioral constants.
 //  PURE IDENTITY. ZERO DRIFT. ZERO RANDOMNESS.
 // ============================================================================
@@ -9,7 +9,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_core",
   role: "identity_spine",
-  lineage: "aiIdentityCore-v11 → v14-IMMORTAL",
+  lineage: "aiIdentityCore-v11 → v12.3-Presence → v14-IMMORTAL",
 
   evo: {
     identitySpine: true,
@@ -37,35 +37,49 @@ AI_EXPERIENCE_META = {
 export const aiIdentityCore = {
 
   // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ORGAN IDENTITY (v12.3-Presence)
+  // META BLOCK — ORGAN IDENTITY (v14-IMMORTAL)
   // ─────────────────────────────────────────────────────────────
   meta: Object.freeze({
     type: "Core",
     subsystem: "aiIdentity",
     layer: "C0-IdentityCore",
-    version: "12.3",
-    identity: "aiIdentityCore-v12.3-Presence",
+    version: "14-IMMORTAL",
+    identity: "aiIdentityCore-v14-IMMORTAL",
 
     evo: Object.freeze({
-      driftProof: true,
+      // IMMORTAL-GRADE FLAGS
       deterministic: true,
-      dualband: true,
-      packetAware: true,        // ⭐ NEW
-      evolutionAware: true,     // ⭐ NEW
-      windowAware: true,        // ⭐ NEW
-      bluetoothReady: true,     // ⭐ NEW
+      driftProof: true,
+      pureCompute: true,
+      zeroNetwork: true,
+      zeroFilesystem: true,
+      zeroMutationOfInput: true,
+
+      // BAND + AWARENESS
+      dualBand: true,
+      symbolicPrimary: true,
+      binaryAware: true,
+
+      identitySpine: true,
+      personaAnchor: true,
+      ownerAwareness: true,
+
+      packetAware: true,
+      evolutionAware: true,
+      windowAware: true,
+      bluetoothReady: true,
 
       personaAware: true,
       toneAware: true,
       deliveryAware: true,
       boundaryAware: true,
 
-      microPipeline: true,      // ⭐ NEW
-      speedOptimized: true,     // ⭐ NEW
+      microPipeline: true,
+      speedOptimized: true,
 
       multiInstanceReady: true,
       readOnly: true,
-      epoch: "v12.3-Presence"
+      epoch: "14-IMMORTAL"
     }),
 
     contract: Object.freeze({

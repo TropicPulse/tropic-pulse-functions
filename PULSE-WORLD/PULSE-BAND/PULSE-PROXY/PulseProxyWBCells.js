@@ -16,15 +16,16 @@ const G = typeof globalThis !== "undefined"
   ? global
   : {};
 
-const log   = G.log   || console.log;
-const error = G.error || console.error;
 
 const Timestamp = (G.firebaseAdmin && G.firebaseAdmin.firestore.Timestamp) ||
                   G.Timestamp ||
                   null;
 
-const admin = global.db;
-const db    = global.db;
+
+const admin = global.db || G.db;
+const db    = global.db || G.db;
+const log   = global.log || G.log   || console.log;
+const error = global.error || G.error || console.error;
 
 
 // ============================================================================

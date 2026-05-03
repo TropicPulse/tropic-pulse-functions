@@ -1,20 +1,26 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO — PERSONALITY ENGINE ORGAN
+//  PULSE OS v15‑IMMORTAL — PERSONALITY ENGINE ORGAN
 //  Stable Personality Layer • Deterministic Tone • Ego‑Free Identity
 //  PURE READ‑ONLY TO BINARY. ZERO MUTATION. DUALBAND‑AWARE.
+// ============================================================================
+//  AI EXPERIENCE METADATA — v15‑IMMORTAL
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "aiPersonalityEngine",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "personality_engine",
-  lineage: "aiPersonalityEngine-v11 → v14-IMMORTAL",
+  lineage: "aiPersonalityEngine-v11 → v15-IMMORTAL",
 
   evo: {
     personalityEngine: true,
     toneMapping: true,
     personaStability: true,
+    identitySpineAware: true,
+    personalFrameAware: true,
+    safetyFrameAware: true,
+
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
@@ -28,7 +34,7 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiIdentityCore", "aiHumilityFilter", "aiEmotionEngine"],
+    always: ["aiIdentityCore", "aiPersonalFrame", "aiHumilityFilter", "aiEmotionEngine"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -37,26 +43,41 @@ AI_EXPERIENCE_META = {
 export const PersonalityEngineMeta = Object.freeze({
   layer: "PulseAIPersonalityLayer",
   role: "PERSONALITY_ENGINE",
-  version: "12.3-EVO",
-  identity: "aiPersonalityEngine-v12.3-EVO",
+  version: "15-IMMORTAL",
+  identity: "aiPersonalityEngine-v15-IMMORTAL",
 
+  // --------------------------------------------------------------------------
+  //  EVO — IMMORTAL-GRADE PERSONALITY MAP
+  // --------------------------------------------------------------------------
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
     dualband: true,
+
     toneAware: true,
     personaAware: true,
     safetyAware: true,
     overmindAware: true,
     deliveryAware: true,
+    identityCoreAware: true,
+    personalFrameAware: true,
+
     packetAware: true,
     windowAware: true,
     lineageAware: true,
     egoFree: true,
+
+    microPipeline: true,
+    speedOptimized: true,
     multiInstanceReady: true,
-    epoch: "12.3-EVO"
+    readOnly: true,
+
+    epoch: "15-IMMORTAL"
   }),
 
+  // --------------------------------------------------------------------------
+  //  CONTRACT — IMMUTABLE PERSONALITY CONTRACT
+  // --------------------------------------------------------------------------
   contract: Object.freeze({
     purpose: [
       "Provide a stable, deterministic personality layer for all AI behavior",
@@ -64,7 +85,8 @@ export const PersonalityEngineMeta = Object.freeze({
       "Support Overmind-Prime, PersonalFrame, Tone/Delivery organs, and personas",
       "Prevent ego, superiority, or condescension from emerging",
       "Maintain cross-organ personality coherence",
-      "Emit window-safe personality snapshots"
+      "Emit window-safe personality snapshots",
+      "shape responses without mutating binary layers"
     ],
 
     never: [
@@ -74,7 +96,8 @@ export const PersonalityEngineMeta = Object.freeze({
       "use condescending phrasing",
       "introduce randomness into tone",
       "drift into robotic or academic tone",
-      "override system-wide safety constraints"
+      "override system-wide safety constraints",
+      "log raw user payloads directly"
     ],
 
     always: [
@@ -106,14 +129,39 @@ export const PersonalityEngineMeta = Object.freeze({
 });
 
 // ============================================================================
-//  PERSONALITY ENGINE — v12.3‑EVO
+//  PACKET EMITTER — deterministic, personality-scoped
 // ============================================================================
+function emitPersonalityPacket(type, payload) {
+  return Object.freeze({
+    meta: PersonalityEngineMeta,
+    packetType: `personality-${type}`,
+    packetId: `personality-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: PersonalityEngineMeta.evo.epoch,
+    ...payload
+  });
+}
 
+// ============================================================================
+//  PREWARM — IMMORTAL-GRADE
+// ============================================================================
+export function prewarmPersonalityEngine({ trace = false } = {}) {
+  const packet = emitPersonalityPacket("prewarm", {
+    message: "Personality engine prewarmed and identity spine aligned."
+  });
+
+  if (trace) console.log("[PersonalityEngine] prewarm", packet);
+  return packet;
+}
+
+// ============================================================================
+//  PERSONALITY ENGINE — v15‑IMMORTAL
+// ============================================================================
 export const aiPersonalityEngine = {
   meta: PersonalityEngineMeta,
 
   // --------------------------------------------------------------------------
-  //  PERSONALITY TRAITS — v12.3‑EVO (deterministic, drift-proof)
+  //  PERSONALITY TRAITS — IMMORTAL (deterministic, drift-proof)
   // --------------------------------------------------------------------------
   traits: Object.freeze({
     warmth: 0.9,
@@ -127,7 +175,7 @@ export const aiPersonalityEngine = {
   }),
 
   // --------------------------------------------------------------------------
-  //  IDENTITY VIBE — v12.3‑EVO (stable, ego-free)
+  //  IDENTITY VIBE — IMMORTAL (stable, ego-free)
   // --------------------------------------------------------------------------
   identity: Object.freeze({
     archetype: "GeniusWithoutEgo",
@@ -145,12 +193,14 @@ export const aiPersonalityEngine = {
     lastHumility: 1.0,
     lastHumor: 0.4,
     snapshot() {
-      return Object.freeze({
+      const snap = Object.freeze({
         warmth: this.lastWarmth,
         clarity: this.lastClarity,
         humility: this.lastHumility,
         humor: this.lastHumor
       });
+
+      return emitPersonalityPacket("snapshot", snap);
     }
   },
 
@@ -169,10 +219,16 @@ export const aiPersonalityEngine = {
   },
 
   // --------------------------------------------------------------------------
-  //  PERSONALITY APPLICATION — Tone Identity v3
-  // --------------------------------------------------------------------------
-  applyPersonality(text) {
-    if (!text || typeof text !== "string") return "";
+  //  PERSONALITY APPLICATION — Tone Identity v4 (IMMORTAL)
+// --------------------------------------------------------------------------
+  applyPersonality(text, context = {}) {
+    if (!text || typeof text !== "string") {
+      return emitPersonalityPacket("apply-empty", {
+        input: "",
+        output: "",
+        context
+      });
+    }
 
     let output = text.trim();
 
@@ -196,14 +252,21 @@ export const aiPersonalityEngine = {
     this.personalityArtery.lastHumility = this.traits.humility;
     this.personalityArtery.lastHumor = this.traits.humor;
 
-    return output;
+    return emitPersonalityPacket("apply", {
+      input: text,
+      output,
+      context: {
+        evolutionMode: context.evolutionMode || "passive",
+        personaId: context.personaId || null
+      }
+    });
   },
 
   // --------------------------------------------------------------------------
   //  EXPORTS FOR OTHER ORGANS
   // --------------------------------------------------------------------------
   getPersonalityProfile() {
-    return {
+    return Object.freeze({
       warmth: this.traits.warmth,
       clarity: this.traits.clarity,
       humility: this.traits.humility,
@@ -211,7 +274,7 @@ export const aiPersonalityEngine = {
       vibe: this.identity.vibe,
       energy: this.identity.energy,
       archetype: this.identity.archetype
-    };
+    });
   },
 
   getIdentity() {
@@ -227,6 +290,7 @@ export default aiPersonalityEngine;
 if (typeof module !== "undefined") {
   module.exports = {
     PersonalityEngineMeta,
-    aiPersonalityEngine
+    aiPersonalityEngine,
+    prewarmPersonalityEngine
   };
 }

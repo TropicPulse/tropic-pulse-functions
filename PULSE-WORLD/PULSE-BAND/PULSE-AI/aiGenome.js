@@ -1,7 +1,8 @@
 // ============================================================================
-//  aiGenome.js — Pulse OS v11.3‑EVO Organ
+//  aiGenome.js — Pulse OS v14‑IMMORTAL Organ
 //  Binary Genome • Organ Lineage • Fingerprint Engine • Packet‑Ready
 //  HYBRID MODE: Fast by default, deep when drift is detected
+//  PURE BINARY. ZERO NETWORK. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
@@ -9,7 +10,7 @@ AI_EXPERIENCE_META = {
   version: "v14-IMMORTAL",
   layer: "ai_core",
   role: "ai_genome",
-  lineage: "aiGenome-v11 → v14-IMMORTAL",
+  lineage: "aiGenome-v11 → v11.3-EVO → v14-IMMORTAL",
 
   evo: {
     genome: true,
@@ -37,39 +38,49 @@ AI_EXPERIENCE_META = {
 export const GenomeMeta = Object.freeze({
   layer: "BinaryGenetics",
   role: "BINARY_GENOME",
-  version: "11.3-EVO",
-  identity: "aiBinaryGenome-v11.3-EVO",
+  version: "14-IMMORTAL",
+  identity: "aiBinaryGenome-v14-IMMORTAL",
 
   evo: Object.freeze({
+    // Core guarantees
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
 
+    // Dual-band + packet surface
     dualband: true,
     packetAware: true,
+    windowAware: true,
+
+    // Evolution + lineage
     evolutionAware: true,
     lineageAware: true,
     ancestryAware: true,
     memoryAware: true,
     registryAware: true,
 
-    bluetoothReady: true,
-    windowAware: true,
+    // IMMORTAL-grade binary physiology
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
 
-    hybridMode: true,           // ⭐ NEW — fast + deep drift mode
-    genomeCache: true,          // ⭐ NEW
-    deltaAware: true,           // ⭐ NEW
+    // Hybrid genome engine
+    hybridMode: true,           // fast + deep drift mode
+    genomeCache: true,          // cache for fast path
+    deltaAware: true,           // drift-sensitive
     fingerprintAccelerated: true,
 
+    // IO / organism wiring
+    bluetoothReady: true,
+
+    // Organism-level guarantees
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "v11.3-EVO"
+    epoch: "v14-IMMORTAL"
   })
 });
 
-// ============================================================================
-//  PACKET EMITTER — deterministic, window-safe
-// ============================================================================
 function emitGenomePacket(type, payload) {
   return Object.freeze({
     meta: GenomeMeta,
@@ -80,9 +91,6 @@ function emitGenomePacket(type, payload) {
   });
 }
 
-// ============================================================================
-//  PREWARM — warms registry, signatures, encoder, fingerprint engine
-// ============================================================================
 export function prewarmBinaryGenome(dualBand = null, { trace = false } = {}) {
   try {
     const packet = emitGenomePacket("prewarm", {
@@ -100,9 +108,6 @@ export function prewarmBinaryGenome(dualBand = null, { trace = false } = {}) {
   }
 }
 
-// ============================================================================
-//  ORGAN IMPLEMENTATION — v11.3‑EVO (Hybrid Mode)
-// ============================================================================
 export class AIBinaryGenome {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-genome";
@@ -120,7 +125,7 @@ export class AIBinaryGenome {
     if (!this.evolution) throw new Error("AIBinaryGenome requires aiBinaryEvolution");
     if (!this.memory) throw new Error("AIBinaryGenome requires aiBinaryMemory");
 
-    // ⭐ NEW — genome cache (fast path)
+    // IMMORTAL hybrid cache — fast path
     this._cache = {
       organIds: null,
       signatures: null,
@@ -129,9 +134,6 @@ export class AIBinaryGenome {
     };
   }
 
-  // ---------------------------------------------------------------------------
-  //  GENETIC ARTERY METRICS — deterministic, drift-proof
-  // ---------------------------------------------------------------------------
   _computeGeneticThroughput(organCount, driftCount) {
     const driftFactor = Math.min(1, driftCount / Math.max(organCount, 1));
     return Math.max(0, 1 - driftFactor);
@@ -151,9 +153,6 @@ export class AIBinaryGenome {
     return Math.max(0, Math.min(1, throughput - cost));
   }
 
-  // ---------------------------------------------------------------------------
-  //  BUCKETS — stable categorical mapping
-  // ---------------------------------------------------------------------------
   _bucketLevel(v) {
     if (v >= 0.9) return "elite";
     if (v >= 0.75) return "high";
@@ -178,11 +177,6 @@ export class AIBinaryGenome {
     return "none";
   }
 
-  // ---------------------------------------------------------------------------
-  //  GENOME GENERATION — HYBRID MODE
-  //    Fast path: no drift → reuse cache
-  //    Deep path: drift detected → full recompute + delta packet
-  // ---------------------------------------------------------------------------
   generateGenome() {
     const organIds = this.registry.listOrgans?.() || [];
 
@@ -202,7 +196,9 @@ export class AIBinaryGenome {
       }
     }
 
-    const driftDetected = driftCount > 0 || organIds.length !== (this._cache.organIds?.length || 0);
+    const driftDetected =
+      driftCount > 0 ||
+      organIds.length !== (this._cache.organIds?.length || 0);
 
     // FAST PATH — no drift, reuse cached genome
     if (!driftDetected && this._cache.genomeBinary) {
@@ -234,7 +230,7 @@ export class AIBinaryGenome {
 
     const genomeObject = {
       organismId: "pulse-os-binary-organism",
-      version: "v11.3-EVO",
+      version: "v14-IMMORTAL",
       organIds,
       signatures,
       artery,
@@ -263,9 +259,6 @@ export class AIBinaryGenome {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  //  STORE GENOME — immutable binary write
-  // ---------------------------------------------------------------------------
   storeGenome() {
     const packet = this.generateGenome();
     const key = this.encoder.encode("genome:current");
@@ -278,9 +271,6 @@ export class AIBinaryGenome {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  //  LOAD GENOME — binary-only
-  // ---------------------------------------------------------------------------
   loadGenome() {
     const key = this.encoder.encode("genome:current");
     const binary = this.memory.read(key);
@@ -300,9 +290,6 @@ export class AIBinaryGenome {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  //  SNAPSHOT METRICS — window-safe
-  // ---------------------------------------------------------------------------
   snapshotMetrics() {
     const packet = this.loadGenome();
     if (!packet.hasGenome) {
@@ -324,9 +311,6 @@ export class AIBinaryGenome {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  //  FINGERPRINT — deterministic binary-only
-  // ---------------------------------------------------------------------------
   _computeFingerprint(binary) {
     let out = "";
     for (let i = 0; i < binary.length; i++) {
@@ -338,9 +322,6 @@ export class AIBinaryGenome {
   }
 }
 
-// ============================================================================
-//  FACTORY
-// ============================================================================
 export function createAIBinaryGenome(config) {
   return new AIBinaryGenome(config);
 }

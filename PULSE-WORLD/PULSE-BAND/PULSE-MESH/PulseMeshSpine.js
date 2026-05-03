@@ -93,7 +93,7 @@ import { applyPulseMeshTendons } from "./PulseMeshTendons.js";
 import { applyMeshSignalFactoring } from "./PulseMeshSignalFactoring.js";
 import { createGlobalHealerV12 as recordMeshDriftEvent } from "../PULSE-OS/PulseOSImmuneSystem.js";
 
-import "./MeshScanner.js";
+import * as PulseMeshSkinReflex from "./PulseMeshSkinReflex.js";
 
 export const MeshMemory = {
   drift: [],

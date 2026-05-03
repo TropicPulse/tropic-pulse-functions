@@ -51,7 +51,7 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import { createShifterPulse } from "../PULSE-SHIFTER/PulseBinaryShifterEvolutionaryPulse-v11-Evo.js";
+import { createShifterPulse as ShifterPulse } from "../PULSE-SHIFTER/PulseBinaryShifterEvolutionaryPulse-v11-Evo.js";
 
 export const ForwardEngineMeta = Object.freeze({
   lane: "forward",
@@ -152,7 +152,7 @@ export function createForwardEngine({
   const shifter =
     typeof ShifterPulse.create === "function"
       ? ShifterPulse.create({ lane: "forward", instanceId })
-      : (ShifterPulse || createShifterPulse({ lane: "forward", instanceId }));
+      : (ShifterPulse || ShifterPulse({ lane: "forward", instanceId }));
 
   // --------------------------------------------------------------------------
   // Job intake (drift-proof, normalized)

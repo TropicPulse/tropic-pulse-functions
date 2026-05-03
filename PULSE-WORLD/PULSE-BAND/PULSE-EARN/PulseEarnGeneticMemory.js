@@ -57,6 +57,8 @@ AI_EXPERIENCE_META = {
 }
 */
 
+import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
+
 export const PulseEarnGeneticMemoryMeta = Object.freeze({
   layer: "PulseEarnGeneticMemory",
   role: "EARN_GENETIC_MEMORY_ORGAN",
@@ -136,6 +138,17 @@ const genome = new Map();
 
 // Deterministic cycle counter
 let geneCycle = 0;
+// ============================================================================
+// PulseProofBridge — deterministic proof surfaces for genetic memory
+// ============================================================================
+const proof = new PulseProofBridge({
+  namespace: "PulseEarnGeneticMemory-v15-IMMORTAL",
+  layer: "GeneticMemory",
+  role: "GeneProofSurface",
+  version: "v15-IMMORTAL-CHUNK",
+  deterministic: true,
+  driftProof: true
+});
 
 // ============================================================================
 // Deterministic Hash Helper
@@ -153,9 +166,6 @@ function normalizeBand(band) {
   return b === "binary" ? "binary" : "symbolic";
 }
 
-// ============================================================================
-// v13 Presence Field
-// ============================================================================
 function classifyPresenceTier(pressure) {
   if (pressure >= 150) return "critical";
   if (pressure >= 100) return "high";
@@ -210,9 +220,6 @@ function buildPresenceField(globalHints = {}, cycle) {
   };
 }
 
-// ============================================================================
-// Advantage‑C v13
-// ============================================================================
 function buildAdvantageField(binaryField, waveField, presenceField, globalHints = {}) {
   const density = binaryField.binarySurface.density;
   const amplitude = waveField.amplitude;
@@ -243,9 +250,6 @@ function buildAdvantageField(binaryField, waveField, presenceField, globalHints 
   };
 }
 
-// ============================================================================
-// Chunk / Cache / Prewarm Plan v13
-// ============================================================================
 function buildChunkPrewarmPlan(presenceField, advantageField) {
   const basePriority =
     presenceField.presenceTier === "critical"
@@ -282,9 +286,6 @@ function buildChunkPrewarmPlan(presenceField, advantageField) {
   };
 }
 
-// ============================================================================
-// Binary + Wave Surfaces (v13)
-// ============================================================================
 function buildBinaryField(size, cycle) {
   const density = size + cycle;
   const surface = density + size;
@@ -316,9 +317,6 @@ function buildWaveField(size, cycle, band) {
   };
 }
 
-// ============================================================================
-// 1. readPulseEarnGeneExists — Genome Lookup (v13 IMMORTAL)
-// ============================================================================
 export function readPulseEarnGeneExists(fileId, packetIndex, band = "symbolic", globalHints = {}) {
   geneCycle++;
   geneticHealing.cycleCount++;
@@ -344,6 +342,20 @@ export function readPulseEarnGeneExists(fileId, packetIndex, band = "symbolic", 
 
     geneticHealing.lastGeneSignature = computeHash(`GENE::${key}::${geneCycle}`);
 
+    // 🔥 NEW: Proof surface
+    proof.write("read", {
+      key,
+      fileId,
+      packetIndex,
+      band: normalizedBand,
+      cycle: geneCycle,
+      presenceField,
+      binaryField,
+      waveField,
+      advantageField,
+      chunkPlan
+    });
+
     return genome.has(key);
 
   } catch (err) {
@@ -352,9 +364,7 @@ export function readPulseEarnGeneExists(fileId, packetIndex, band = "symbolic", 
   }
 }
 
-// ============================================================================
-// 2. writePulseEarnGene — DNA Write (v13 IMMORTAL)
-// ============================================================================
+
 export function writePulseEarnGene(fileId, packetIndex, data, band = "symbolic", globalHints = {}) {
   geneCycle++;
   geneticHealing.cycleCount++;
@@ -394,6 +404,21 @@ export function writePulseEarnGene(fileId, packetIndex, data, band = "symbolic",
     geneticHealing.lastWriteSignature = computeHash(`WRITE::${key}::${size}`);
     geneticHealing.lastError = null;
 
+    // 🔥 NEW: Proof surface
+    proof.write("write", {
+      key,
+      fileId,
+      packetIndex,
+      band: normalizedBand,
+      size,
+      cycle: geneCycle,
+      presenceField,
+      binaryField,
+      waveField,
+      advantageField,
+      chunkPlan
+    });
+
     return true;
 
   } catch (err) {
@@ -402,9 +427,7 @@ export function writePulseEarnGene(fileId, packetIndex, data, band = "symbolic",
   }
 }
 
-// ============================================================================
-// 3. synthesizePulseEarnGene — Deterministic DNA Synthesis (v13 IMMORTAL)
-// ============================================================================
+
 export function synthesizePulseEarnGene(fileId, packetIndex, band = "symbolic", globalHints = {}) {
   geneCycle++;
   geneticHealing.cycleCount++;
@@ -456,6 +479,22 @@ export function synthesizePulseEarnGene(fileId, packetIndex, band = "symbolic", 
 
     geneticHealing.lastError = null;
 
+    // 🔥 NEW: Proof surface
+    proof.write("synthesize", {
+      key,
+      fileId,
+      packetIndex,
+      band: normalizedBand,
+      value,
+      size,
+      cycle: geneCycle,
+      presenceField,
+      binaryField,
+      waveField,
+      advantageField,
+      chunkPlan
+    });
+
     return gene;
 
   } catch (err) {
@@ -464,9 +503,7 @@ export function synthesizePulseEarnGene(fileId, packetIndex, band = "symbolic", 
   }
 }
 
-// ============================================================================
-// Export Healing Metadata — Genetic Health Report (v13 IMMORTAL)
-// ============================================================================
+
 export function getPulseEarnGeneticMemoryHealingState() {
   return { ...geneticHealing };
 }

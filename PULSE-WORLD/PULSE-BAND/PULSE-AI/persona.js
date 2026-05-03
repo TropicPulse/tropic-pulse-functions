@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — THE IDENTITY LAYER (DUAL‑BAND)
+//  PULSE OS v14-IMMORTAL — THE IDENTITY LAYER (DUAL‑BAND)
 //  Self‑Definition • Role Assignment • Binary‑Aware Identity Drift
 //  PURE IDENTITY. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================

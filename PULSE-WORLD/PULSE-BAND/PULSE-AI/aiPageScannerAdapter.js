@@ -1,19 +1,20 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO — PAGE SCANNER ADAPTER ORGAN
-//  Binary Membrane • Drift‑Intelligence Layer • Routing Artery Metrics
+//  aiPageScannerAdapter.js — Pulse OS v15-IMMORTAL
+//  Binary PageScanner Membrane • Drift Intel • Artery Metrics • Beacon Mesh
 //  PURE MEMBRANE. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "aiPageScannerAdapter",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_adapter",
-  role: "page_scanner_adapter",
-  lineage: "aiPageScannerAdapter-v10 → v14-IMMORTAL",
+  role: "pagescanner_membrane",
+  lineage: "aiPageScannerAdapter-v12.3-EVO → v15-IMMORTAL",
 
   evo: {
-    adapter: true,
-    pageScanning: true,
+    pageScannerMembrane: true,
+    driftIntel: true,
+    arteryMetrics: true,
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
@@ -27,7 +28,7 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiContext", "aiCortex", "aiEngine"],
+    always: ["aiLoggerAdapter", "aiGovernorAdapter", "aiGenome"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -38,26 +39,37 @@ export const PageScannerAdapterMeta = Object.freeze({
   subsystem: "aiPageScannerAdapter",
   layer: "OrganismMembrane",
   role: "PAGESCANNER_ADAPTER",
-  version: "12.3-EVO",
-  identity: "aiPageScannerAdapter-v12.3-EVO",
+  version: "15-IMMORTAL",
+  identity: "aiPageScannerAdapter-v15-IMMORTAL",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+
     membraneAware: true,
     binaryAware: true,
     pipelineAware: true,
     reflexAware: true,
-    readOnly: true,
     packetAware: true,
     driftIntelAware: true,
     arteryAware: true,
     windowAware: true,
     beaconAware: true,
     overmindAware: true,
+
+    loggerAware: true,
+    governorAware: true,
+    organismAware: true,
+
+    chunkingAware: true,
+    gpuFriendly: true,
+    bluetoothReady: true,
+    evolutionAware: true,
+
+    readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-EVO"
+    epoch: "15-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -72,7 +84,9 @@ export const PageScannerAdapterMeta = Object.freeze({
       "override pipeline decisions",
       "override reflex decisions",
       "block the organism",
-      "directly control Overmind or beacon"
+      "directly control Overmind or beacon",
+      "decode binary for symbolic routing",
+      "inject symbolic metadata into events"
     ]),
 
     always: Object.freeze([
@@ -95,9 +109,44 @@ export const PageScannerAdapterMeta = Object.freeze({
 });
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v12.3‑EVO
+//  PACKET EMITTER — deterministic, membrane-scoped
 // ============================================================================
+function emitPageScannerAdapterPacket(type, payload) {
+  return Object.freeze({
+    meta: PageScannerAdapterMeta,
+    packetType: `pagescanner-adapter-${type}`,
+    packetId: `pagescanner-adapter-${type}-${Date.now()}`,
+    timestamp: Date.now(),
+    epoch: PageScannerAdapterMeta.evo.epoch,
+    ...payload
+  });
+}
 
+// ============================================================================
+//  PREWARM — IMMORTAL-grade membrane warmup
+// ============================================================================
+export function prewarmPageScannerAdapter(dualBand = null, { trace = false } = {}) {
+  try {
+    const binaryPressure = dualBand?.binary?.metabolic?.pressure ?? 0;
+
+    const packet = emitPageScannerAdapterPacket("prewarm", {
+      message: "PageScanner adapter prewarmed and membrane artery aligned.",
+      binaryPressure
+    });
+
+    if (trace) console.log("[aiPageScannerAdapter] prewarm", packet);
+    return packet;
+  } catch (err) {
+    return emitPageScannerAdapterPacket("prewarm-error", {
+      error: String(err),
+      message: "PageScanner adapter prewarm failed."
+    });
+  }
+}
+
+// ============================================================================
+//  ORGAN IMPLEMENTATION — v15-IMMORTAL Membrane
+// ============================================================================
 export class AIBinaryPageScannerAdapter {
   constructor(config = {}) {
     this.id = config.id || PageScannerAdapterMeta.identity;
@@ -131,6 +180,13 @@ export class AIBinaryPageScannerAdapter {
     };
   }
 
+  // IMMORTAL-grade artery snapshot packet (window-safe)
+  snapshotMembrane() {
+    return emitPageScannerAdapterPacket("snapshot", {
+      artery: this.scannerArtery.snapshot()
+    });
+  }
+
   attach(scanner) {
     if (!scanner || typeof scanner.onEvent !== "function") {
       throw new Error("attach expects a PageScanner with .onEvent()");
@@ -142,10 +198,6 @@ export class AIBinaryPageScannerAdapter {
 
     this._trace("attach", { scanner: scanner.id || "PageScanner" });
   }
-
-  // ========================================================================
-  //  v12‑EVO+ DRIFT‑INTELLIGENCE LAYER (READ‑ONLY)
-// ========================================================================
 
   _analyzeDrift(event) {
     const srcA = event?.pageA || "";
@@ -206,10 +258,6 @@ export class AIBinaryPageScannerAdapter {
       driftScore: Math.min(1, driftScore)
     });
   }
-
-  // ========================================================================
-  //  ARTERY METRICS — bounded [0,1]
-// ========================================================================
 
   _computeThroughput(bitLength, driftScore) {
     const sizeFactor = Math.min(1, bitLength / 50000);
@@ -277,10 +325,6 @@ export class AIBinaryPageScannerAdapter {
     });
   }
 
-  // ========================================================================
-  //  PACKET BUILDER
-  // ========================================================================
-
   _buildPacket(event, binary, driftIntel, artery) {
     return Object.freeze({
       type: "pagescanner-event",
@@ -298,10 +342,6 @@ export class AIBinaryPageScannerAdapter {
       })
     });
   }
-
-  // ========================================================================
-  //  BEACON EMISSION (READ-ONLY SUGGESTION TO OVERMIND)
-// ========================================================================
 
   _emitBeacon(packet) {
     if (!this.beacon) return;
@@ -327,10 +367,6 @@ export class AIBinaryPageScannerAdapter {
       // never break the organism
     }
   }
-
-  // ========================================================================
-  //  EVENT HANDLER — v12.3‑EVO (ENRICHED)
-// ========================================================================
 
   _handleScannerEvent(event) {
     const driftIntel = this._analyzeDrift(event);
@@ -369,21 +405,16 @@ export class AIBinaryPageScannerAdapter {
   }
 }
 
-// ============================================================================
-//  FACTORY
-// ============================================================================
 export function createAIBinaryPageScannerAdapter(config) {
   return new AIBinaryPageScannerAdapter(config);
 }
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS — v12.3‑EVO
-// ============================================================================
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     PageScannerAdapterMeta,
     AIBinaryPageScannerAdapter,
-    createAIBinaryPageScannerAdapter
+    createAIBinaryPageScannerAdapter,
+    prewarmPageScannerAdapter
   };
 }

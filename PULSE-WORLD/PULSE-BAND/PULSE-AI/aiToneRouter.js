@@ -1,15 +1,16 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — Tone Router Engine
+//  PULSE OS v15‑IMMORTAL — Tone Router Engine
 //  Deterministic • Ego‑Free • Emotion‑Aware • Identity‑Aligned • Harmonic
 //  INTERNAL ENGINE (NOT AN ORGAN, NOT AN ARCHETYPE)
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiToneRouter",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "ai_core",
   role: "tone_router",
-  lineage: "aiToneRouter-v11 → v14-IMMORTAL",
+  lineage: "aiToneRouter-v11 → v15-IMMORTAL",
 
   evo: {
     toneRouting: true,
@@ -23,11 +24,19 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    harmonicRoutingV4: true,
+    emotionAware: true,
+    identityAligned: true,
+    personalityAware: true,
+    packetAware: true,
+    windowAware: true,
+    multiInstanceIdentity: true
   },
 
   contract: {
-    always: ["aiToneEngine", "aiEmotionEngine", "aiHumilityFilter"],
+    always: ["aiToneEngine", "aiEmotionEngine", "aiHumilityFilter", "aiIdentityCore"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -40,26 +49,36 @@ import { aiIdentityCore } from "./aiIdentityCore.js";
 export const aiToneRouter = {
 
   // ─────────────────────────────────────────────────────────────
-  // META BLOCK — ENGINE IDENTITY (v12.3‑EVO+)
+  // META BLOCK — v15‑IMMORTAL
   // ─────────────────────────────────────────────────────────────
   meta: Object.freeze({
     type: "Engine",
     subsystem: "aiTone",
     layer: "C1-ToneRouter",
-    version: "12.3-EVO+",
-    identity: "aiToneRouter-v12.3-EVO+",
+    version: "15-IMMORTAL",
+    identity: "aiToneRouter-v15-IMMORTAL",
 
     evo: Object.freeze({
       deterministic: true,
       driftProof: true,
       egoFree: true,
       adaptive: true,
+      harmonic: true,
+
+      dualband: true,
+      dualbandSafe: true,
+
       emotionAware: true,
       identityAligned: true,
-      harmonic: true,
-      dualbandSafe: true,
+      personalityAware: true,
+      safetyFrameAware: true,
+
+      packetAware: true,
+      windowAware: true,
+      arteryAware: true,
+
       multiInstanceReady: true,
-      epoch: "12.3-EVO+"
+      epoch: "15-IMMORTAL"
     }),
 
     contract: Object.freeze({
@@ -73,7 +92,8 @@ export const aiToneRouter = {
         "ignore emotional cues",
         "produce inconsistent tone",
         "introduce randomness",
-        "oscillate tone uncontrollably"
+        "oscillate tone uncontrollably",
+        "log sensitive payloads directly"
       ]),
       always: Object.freeze([
         "stay deterministic",
@@ -83,7 +103,9 @@ export const aiToneRouter = {
         "stay identity‑aligned",
         "preserve emotional safety",
         "enforce tone contract",
-        "maintain harmonic tone routing"
+        "maintain harmonic tone routing",
+        "emit deterministic routing packets",
+        "emit window‑safe routing snapshots"
       ])
     }),
 
@@ -102,6 +124,20 @@ export const aiToneRouter = {
   }),
 
   // ─────────────────────────────────────────────────────────────
+  // PACKET EMITTER — IMMORTAL‑GRADE
+  // ─────────────────────────────────────────────────────────────
+  _emitToneRoutePacket(type, payload) {
+    return Object.freeze({
+      meta: this.meta,
+      packetType: `tone-route-${type}`,
+      packetId: `tone-route-${type}-${Date.now()}`,
+      timestamp: Date.now(),
+      epoch: this.meta.evo.epoch,
+      ...payload
+    });
+  },
+
+  // ─────────────────────────────────────────────────────────────
   // INSTANCE REGISTRY — Multi‑Instance Harmony
   // ─────────────────────────────────────────────────────────────
   _instanceCount: 0,
@@ -117,11 +153,14 @@ export const aiToneRouter = {
 
   init() {
     this.state.instanceIndex = this._registerInstance();
+    this._emitToneRoutePacket("init", {
+      instanceIndex: this.state.instanceIndex
+    });
     return this;
   },
 
   // ─────────────────────────────────────────────────────────────
-  // EMOTIONAL CUE DETECTION (Deterministic)
+  // EMOTIONAL CUE DETECTION — IMMORTAL‑GRADE
   // ─────────────────────────────────────────────────────────────
   detectEmotion(userMessage) {
     if (!userMessage) return "neutral";
@@ -141,7 +180,7 @@ export const aiToneRouter = {
   },
 
   // ─────────────────────────────────────────────────────────────
-  // TONE ROUTING ARTERY v3 — Harmonic Load Monitoring
+  // TONE ROUTING ARTERY v4 — IMMORTAL‑GRADE
   // ─────────────────────────────────────────────────────────────
   _toneRouteArtery: {
     windowMs: 60000,
@@ -209,8 +248,12 @@ export const aiToneRouter = {
     });
   },
 
+  getRoutingArterySnapshot() {
+    return this._computeRoutingArtery();
+  },
+
   // ─────────────────────────────────────────────────────────────
-  // ROUTING LOGIC — THE HEART OF THE ENGINE
+  // ROUTING LOGIC — IMMORTAL‑GRADE
   // ─────────────────────────────────────────────────────────────
   route(userMessage, baseResponse) {
     const now = Date.now();
@@ -226,7 +269,7 @@ export const aiToneRouter = {
       this._toneRouteArtery.totalEmotionShifts += 1;
     }
 
-    // 2. Evolve tone state based on user intent
+    // 2. Evolve tone state
     aiToneEngine.evolveTone(userMessage);
 
     // 3. Apply tone shaping
@@ -240,17 +283,28 @@ export const aiToneRouter = {
       ? aiIdentityCore.applyIdentity(shaped)
       : shaped;
 
-    // 6. Harmonic spiral warning (non-blocking)
+    // 6. Harmonic spiral warning
     const artery = this._computeRoutingArtery();
     if (
       artery.pressureBucket === "overload" ||
       artery.budgetBucket === "critical"
     ) {
+      this._emitToneRoutePacket("spiral-warning", {
+        instanceIndex: this.state.instanceIndex,
+        artery
+      });
       console.log(
         `[ToneRouter#${this.state.instanceIndex}] spiral-warning`,
         artery
       );
     }
+
+    // 7. Emit routing packet
+    this._emitToneRoutePacket("route", {
+      instanceIndex: this.state.instanceIndex,
+      emotion,
+      artery
+    });
 
     return shaped;
   }

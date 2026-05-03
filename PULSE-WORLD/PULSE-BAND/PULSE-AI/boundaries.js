@@ -1,5 +1,5 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — SUPEREGO (DUAL‑BAND BOUNDARIES)
+//  PULSE OS v14-IMMORTAL — SUPEREGO (DUAL‑BAND BOUNDARIES)
 //  Behavioral Constraints • Ethical Boundaries • Binary-Aware Moral Law
 //  PURE CONSTRAINTS. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================

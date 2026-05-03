@@ -23,9 +23,10 @@ const G = typeof globalThis !== "undefined"
   ? global
   : {};
 
-const db    = G.db;
-const log   = G.log   || console.log;
-const error = G.error || console.error;
+const admin = global.db || G.db;
+const db    = global.db || G.db;
+const log   = global.log || G.log   || console.log;
+const error = global.error || G.error || console.error;
 
 
 // ============================================================================
