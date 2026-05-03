@@ -1,6 +1,6 @@
 // ============================================================================
 // PULSE-NET — Immortal Local Heartbeat + Forward/Backward Engine ignition
-// v15-FAMILY-IMMORTAL (SUPER INSTANCE MODE)
+// v16-FAMILY-NET-IMMORTAL (SUPER INSTANCE MODE)
 //  • Multi-instance safe (family registry)
 //  • Drift-proof
 //  • Dual-lane (forward/backward)
@@ -10,15 +10,17 @@
 //  • Deterministic tick sequencing
 //  • 3-heart mesh (Mom/Dad/Earn) + random nudge
 //  • UIFlow + ErrorSpine + Bridge-aware
-//  • LOCAL ONLY — lives under PULSE-X, NOT a Netlify function
+//  • LOCAL ONLY on device — but is the ONLY internet edge via routed paths
+//  • Expansion/Castle/Server/User/Brain → routed signals → PulseNet → PulseNet server
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseNet",
-  version: "v15-FAMILY-IMMORTAL",
+  version: "v16-FAMILY-NET-IMMORTAL",
   layer: "frontend",
   role: "network_intelligence",
-  lineage: "PulseOS-v12 → v13-EVO-IMMORTAL → v15-FAMILY-IMMORTAL",
+  lineage: "PulseOS-v12 → v13-EVO-IMMORTAL → v15-FAMILY-IMMORTAL → v16-FAMILY-NET-IMMORTAL",
 
   evo: {
     dualBand: true,
@@ -38,7 +40,18 @@ AI_EXPERIENCE_META = {
     uiFlowAware: true,
     errorSpineAware: true,
     routeAware: true,
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // v16: network edge + expansion/castle aware
+    expansionAware: true,
+    castleAware: true,
+    serverAware: true,
+    userAware: true,
+    brainAware: true,
+    soldierAware: true,
+    meshIngressAware: true,
+    pulseNetServerAware: true,
+    singleInternetEdge: true
   },
 
   contract: {
@@ -77,7 +90,8 @@ import { safeRoute as route } from "./PulseProofBridge.js";
 globalThis.__PULSE_MEM__ = globalThis.__PULSE_MEM__ || {};
 
 // Per-instance organism state (family)
-globalThis.__PULSE_ORGANISM_FAMILY__ = globalThis.__PULSE_ORGANISM_FAMILY__ || {};
+globalThis.__PULSE_ORGANISM_FAMILY__ =
+  globalThis.__PULSE_ORGANISM_FAMILY__ || {};
 function getOrganism(instanceId) {
   const fam = globalThis.__PULSE_ORGANISM_FAMILY__;
   if (!fam[instanceId]) {
@@ -108,6 +122,36 @@ function getNetState(instanceId) {
 }
 
 // ============================================================================
+// GLOBAL INGRESS QUEUES — EXPANSION/CASTLE/SERVER/USER/BRAIN/SOLDIER
+//  • No imports from those organs.
+//  • They reach us via routing channels (PulseProofBridge / server).
+//  • This file is the only internet edge: NetworkOrgan uses route(...).
+// ============================================================================
+globalThis.__PULSE_NET_INGRESS__ = globalThis.__PULSE_NET_INGRESS__ || {
+  expansion: [],
+  castle: [],
+  server: [],
+  user: [],
+  brain: [],
+  soldier: [],
+  mesh: []
+};
+
+function getIngress() {
+  return globalThis.__PULSE_NET_INGRESS__;
+}
+
+function enqueueIngress(kind, packet) {
+  const ingress = getIngress();
+  if (!ingress[kind]) ingress[kind] = [];
+  ingress[kind].push({
+    kind,
+    packet,
+    ts: Date.now()
+  });
+}
+
+// ============================================================================
 // ENGINE SINGLETONS (per instance in Earn / PULSE-X)
 // ============================================================================
 const forwardEngines = {};
@@ -130,6 +174,61 @@ const MemoryOrgan = {
 
 const BrainOrgan = {
   evolve: (_event) => {}
+};
+
+// ============================================================================
+// NETWORK ORGAN — THE ONLY INTERNET EDGE
+//  • Everything external goes through here.
+//  • Expansion/Castle/Server/User/Brain/Soldier signals are normalized here.
+//  • Uses route(...) to talk to independent PulseNet server (symbolic).
+// ============================================================================
+const NetworkOrgan = {
+  // symbolic channel names for server-side PulseNet
+  channels: {
+    expansion: "pulseNet.server.expansion",
+    castle: "pulseNet.server.castle",
+    server: "pulseNet.server.server",
+    user: "pulseNet.server.user",
+    brain: "pulseNet.server.brain",
+    soldier: "pulseNet.server.soldier",
+    mesh: "pulseNet.server.mesh",
+    heartbeat: "pulseNet.heartbeat"
+  },
+
+  async send(kind, payload) {
+    const channel = this.channels[kind];
+    if (!channel) return;
+
+    try {
+      await route(channel, {
+        kind,
+        payload,
+        ts: Date.now(),
+        layer: "PulseNet",
+        binaryAware: true,
+        dualBand: true,
+        singleInternetEdge: true
+      }).catch(() => {});
+    } catch {
+      // swallow; ErrorSpine will be handled by caller
+    }
+  },
+
+  async sendHeartbeat(instanceId, organism, result) {
+    try {
+      await route(this.channels.heartbeat, {
+        instanceId,
+        organism,
+        result,
+        layer: "PulseNet",
+        binaryAware: true,
+        dualBand: true,
+        singleInternetEdge: true
+      }).catch(() => {});
+    } catch {
+      // swallow; ErrorSpine will be handled by caller
+    }
+  }
 };
 
 // ============================================================================
@@ -214,6 +313,37 @@ function warmBackwardEngine(instanceId) {
 }
 
 // ============================================================================
+// INGRESS PROCESSOR — SOLDIERS / EXPANSION / CASTLES / MESH
+//  • Drains queues each tick.
+//  • Normalizes and forwards to NetworkOrgan (only internet edge).
+// ============================================================================
+async function processIngress(instanceId) {
+  const ingress = getIngress();
+
+  const batches = {};
+  for (const kind of Object.keys(ingress)) {
+    const queue = ingress[kind];
+    if (!queue || queue.length === 0) continue;
+    batches[kind] = queue.splice(0, queue.length);
+  }
+
+  const promises = [];
+  for (const [kind, items] of Object.entries(batches)) {
+    const payload = {
+      instanceId,
+      kind,
+      count: items.length,
+      items
+    };
+    promises.push(NetworkOrgan.send(kind, payload));
+  }
+
+  if (promises.length > 0) {
+    await Promise.all(promises);
+  }
+}
+
+// ============================================================================
 // 3-HEART MESH (Mom / Dad / Earn) + random nudge
 // ============================================================================
 
@@ -262,6 +392,8 @@ function randomNudge(instanceId, now) {
 
 // ============================================================================
 // LOCAL IMMORTAL LOOP (NO NETLIFY, NO HANDLER)
+//  • Now also processes ingress each tick.
+//  • Heartbeat still pings CNS, but NetworkOrgan is the only internet edge.
 // ============================================================================
 async function tickFamily(instanceId = "core") {
   const now = Date.now();
@@ -272,6 +404,9 @@ async function tickFamily(instanceId = "core") {
   const softStale = delta > 15 * 1000;  // soft fallback threshold
 
   let result = null;
+
+  // 0) Process ingress from Expansion/Castle/Server/User/Brain/Soldier/Mesh
+  await processIngress(instanceId);
 
   // 1) Mom tries first (primary beat)
   if (!stale) {
@@ -302,17 +437,10 @@ async function tickFamily(instanceId = "core") {
     result = { ...(result || {}), ...rnd };
   }
 
-  // 5) UIFlow + CNS + ErrorSpine awareness (local only)
+  // 5) UIFlow + CNS + ErrorSpine awareness (local only) + heartbeat via NetworkOrgan
   try {
-    // Ping CNS with heartbeat (non-fatal if bridge is quiet)
-    route("pulseNet.heartbeat", {
-      instanceId,
-      organism: getOrganism(instanceId),
-      result,
-      layer: "PulseNet",
-      binaryAware: true,
-      dualBand: true
-    }).catch(() => {});
+    // Ping CNS / PulseNet server with heartbeat via NetworkOrgan
+    await NetworkOrgan.sendHeartbeat(instanceId, getOrganism(instanceId), result);
 
     // Light UIFlow ignition on first ticks (idempotent)
     if (typeof window !== "undefined" && !window.__PULSE_UIFLOW_BOOTED__) {
@@ -333,7 +461,9 @@ async function tickFamily(instanceId = "core") {
   return result;
 }
 
-// Start the local immortal loop (idempotent per instance)
+// ============================================================================
+// START LOCAL IMMORTAL LOOP (idempotent per instance)
+// ============================================================================
 export function startPulseNet(options = {}) {
   const {
     instanceId = "core",
@@ -352,7 +482,10 @@ export function startPulseNet(options = {}) {
     tickFamily(instanceId).catch((err) => {
       console.error("[PULSE-NET]", instanceId, "Tick error:", err);
       try {
-        const packet = PulseUIErrors.normalizeError(err, "PulseNet.intervalTick");
+        const packet = PulseUIErrors.normalizeError(
+          err,
+          "PulseNet.intervalTick"
+        );
         PulseUIErrors.broadcast(packet);
       } catch {}
     });
@@ -367,6 +500,41 @@ export function startPulseNet(options = {}) {
     !!superInstance,
     ")"
   );
+}
+
+// ============================================================================
+// PUBLIC INGRESS API — CALLED VIA ROUTING, NOT IMPORTS
+//  • Expansion/Castle/Server/User/Brain/Soldier/Mesh send symbolic packets.
+//  • These are queued and flushed each tick via NetworkOrgan.
+//  • This keeps PulseNet as the single internet edge.
+// ============================================================================
+
+export function pulseNetIngressFromExpansion(packet) {
+  enqueueIngress("expansion", packet);
+}
+
+export function pulseNetIngressFromCastle(packet) {
+  enqueueIngress("castle", packet);
+}
+
+export function pulseNetIngressFromServer(packet) {
+  enqueueIngress("server", packet);
+}
+
+export function pulseNetIngressFromUser(packet) {
+  enqueueIngress("user", packet);
+}
+
+export function pulseNetIngressFromBrain(packet) {
+  enqueueIngress("brain", packet);
+}
+
+export function pulseNetIngressFromSoldier(packet) {
+  enqueueIngress("soldier", packet);
+}
+
+export function pulseNetIngressFromMesh(packet) {
+  enqueueIngress("mesh", packet);
 }
 
 // ============================================================================

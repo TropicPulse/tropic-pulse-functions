@@ -1,8 +1,9 @@
 // ============================================================================
-//  PULSE EXPANSION — v13-PRESENCE-EVO+
-//  B‑Tier Presence Strategist (Region Governor)
-//  Every‑Advantage / Regioning‑Physics‑Aware / Beacon‑Aware / OS‑Aware
+//  PULSE EXPANSION — v14-IMMORTAL
+//  Presence Region Governor / Network Stretcher to PULSE-NET
+//  Every-Advantage / Regioning-Aware / Beacon-Aware / Castle-Aware / PulseNet-Aware
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseExpansion",
@@ -19,6 +20,7 @@ AI_EXPERIENCE_META = {
     castleAware: true,
     serverAware: true,
     userAware: true,
+    pulseNetAware: true,
 
     symbolicPrimary: true,
     binaryAware: true,
@@ -38,11 +40,13 @@ AI_EXPERIENCE_META = {
       "PulseCastle",
       "PulseRouter",
       "PulseServer",
-      "PulseUser"
+      "PulseUser",
+      "PulseNetBridge"
     ],
     never: [
       "safeRoute",
-      "fetchViaCNS"
+      "fetchViaCNS",
+      "directPulseNetImport"
     ]
   }
 }
@@ -52,26 +56,19 @@ import { logger } from "../../PULSE-UI/PULSEProofLogger.js";
 import {
   pulseCastle,
   PulseCastleMeta,
-  summarizeCastlePresence,
-  createCastleServer
-} from "./PulseCastle-v12.3-Presence.js";
+  summarizeCastlePresence
+} from "./PulseCastle-v13-Presence.js";
 
-// ============================================================================
-//  BEACONS (ENGINE + MESH) — v13-PRESENCE-EVO+
-// ============================================================================
 import {
   PulseBeaconMeta as PulseBeaconEngineMeta,
   createPulseBeaconEngine
-} from "./PulseBeaconEngine-v12.3-Presence.js";
+} from "./PulseBeaconEngine-v14-IMMORTAL.js";
+
 import {
   PulseBeaconMeshMeta,
   PulseBeaconMesh
-} from "./PulseBeaconMesh-v12.3-Presence.js";
+} from "./PulseBeaconMesh-v13-PRESENCE-EVO++.js";
 
-// ============================================================================
-//  OS / ROUTER / SERVER / MESH META (READ-ONLY VISIBILITY)
-//  - Expansion never calls into these; it only carries their meta forward.
-// ============================================================================
 import { PulseWorldCoreMeta } from "./PulseUser-v12.3-Presence.js";
 import { PulseRouterMeta } from "./PulseRouter-v12.3-Presence.js";
 import { PulseServerMeta } from "./PulseServer-v12.3-Presence.js";
@@ -79,103 +76,54 @@ import { PulseMeshMeta } from "./PulseMesh-v12.3-PRESENCE.js";
 import { PulseMeshMeta as BinaryMeshMeta } from "./PulseMesh-v12.3-PRESENCE.js";
 
 // ============================================================================
-//  REGIONING PHYSICS BARREL — v13-EVO-PRESENCE-MAX
-//  (NOW ACTUALLY USED)
+//  PULSE-NET BRIDGE CONTRACT (NO IMPORTS, PURELY INJECTED)
+// ============================================================================
+//
+// pulseNetBridge is an injected object (from backend / PULSE-NET server),
+// never imported on device. Expansion only emits symbolic intents:
+//
+//   pulseNetBridge.routeSoldiers(intent)
+//   pulseNetBridge.routeExpansion(intent)
+//   pulseNetBridge.routeMesh(intent)
+//
+// All of these are OPTIONAL. If no bridge is present, Expansion still
+// computes plans but does not perform any network I/O.
 // ============================================================================
 
-// --- DELTA ENGINE -----------------------------------------------------------
-import * as DeltaEngineCosmosMultiverse from "../PULSE-REGIONING/DeltaEngine-CoreMemoryIntegration-v1.js";
-import * as DeltaEngineEvo from "../PULSE-REGIONING/DeltaEngine-v11-Evo.js";
-
-// --- DEPLOYMENT PHYSICS -----------------------------------------------------
-import * as DeploymentPhysicsCoreMemory from "../PULSE-REGIONING/DeploymentPhysics-CoreMemoryIntegration-v1.js";
-import * as DeploymentPhysicsEvo from "../PULSE-REGIONING/DeploymentPhysics-v11-Evo.js";
-
-// --- EXECUTION PHYSICS ------------------------------------------------------
-import * as ExecutionPhysicsCoreMemory from "../PULSE-REGIONING/ExecutionPhysics-CoreMemoryIntegration-v1.js";
-import * as ExecutionPhysicsEvo from "../PULSE-REGIONING/ExecutionPhysics-v11-Evo.js";
-
-// --- LINEAGE ENGINE ---------------------------------------------------------
-import * as LineageEngineCoreMemory from "../PULSE-REGIONING/LineageEngine-CoreMemoryIntegration-v1.js";
-import * as LineageEngineEvo from "../PULSE-REGIONING/LineageEngine-v11-Evo.js";
-
-// --- MULTI-ORGANISM SUPPORT -------------------------------------------------
-import * as MultiOrganismSupportCoreMemory from "../PULSE-REGIONING/MultiOrganismSupport-CoreMemoryIntegration-v1.js";
-import * as MultiOrganismSupportEvo from "../PULSE-REGIONING/MultiOrganismSupport-v11-Evo.js";
-
-// --- REGIONING PHYSICS ------------------------------------------------------
-import * as RegioningPhysicsCoreMemory from "../PULSE-REGIONING/RegioningPhysics-CoreMemoryIntegration-v1.js";
-import * as RegioningPhysicsEvo from "../PULSE-REGIONING/RegioningPhysics-v11-Evo.js";
-
-// --- REGION MESH ROUTING ----------------------------------------------------
-import * as RegionMeshRoutingCoreMemory from "../PULSE-REGIONING/RegionMeshRouting-CoreMemoryIntegration-v1.js";
-import * as RegionMeshRoutingEvo from "../PULSE-REGIONING/RegionMeshRouting-v11-Evo.js";
-
-// --- SNAPSHOT PHYSICS -------------------------------------------------------
-import * as SnapshotPhysicsCoreMemory from "../PULSE-REGIONING/SnapshotPhysics-CoreMemoryIntegration-v1.js";
-import * as SnapshotPhysicsEvo from "../PULSE-REGIONING/SnapshotPhysics-v11-Evo.js";
-
-// ============================================================================
-//  REGIONING PHYSICS INTEGRATION BLOCK (v13)
-// ============================================================================
-function buildRegioningPhysicsSignature() {
-  const keys = [
-    ...Object.keys(DeltaEngineCosmosMultiverse),
-    ...Object.keys(DeltaEngineEvo),
-    ...Object.keys(DeploymentPhysicsCoreMemory),
-    ...Object.keys(DeploymentPhysicsEvo),
-    ...Object.keys(ExecutionPhysicsCoreMemory),
-    ...Object.keys(ExecutionPhysicsEvo),
-    ...Object.keys(LineageEngineCoreMemory),
-    ...Object.keys(LineageEngineEvo),
-    ...Object.keys(MultiOrganismSupportCoreMemory),
-    ...Object.keys(MultiOrganismSupportEvo),
-    ...Object.keys(RegioningPhysicsCoreMemory),
-    ...Object.keys(RegioningPhysicsEvo),
-    ...Object.keys(RegionMeshRoutingCoreMemory),
-    ...Object.keys(RegionMeshRoutingEvo),
-    ...Object.keys(SnapshotPhysicsCoreMemory),
-    ...Object.keys(SnapshotPhysicsEvo)
-  ]
-    .sort()
-    .join("|");
-
-  let h = 0;
-  for (let i = 0; i < keys.length; i++) {
-    h = (h + keys.charCodeAt(i) * (i + 1)) % 100000;
+function safePulseNetCall(pulseNetBridge, method, payload) {
+  if (!pulseNetBridge) return { ok: false, reason: "no_pulse_net_bridge" };
+  const fn = pulseNetBridge[method];
+  if (typeof fn !== "function") {
+    return { ok: false, reason: "method_not_available", method };
   }
-  return `REGIONING_PHYSICS_SIG::${h}`;
+  try {
+    return fn(payload) || { ok: true };
+  } catch (e) {
+    logger?.log?.("expansion", "pulse_net_bridge_error", {
+      method,
+      error: String(e)
+    });
+    return { ok: false, reason: "bridge_error" };
+  }
 }
-
-// ============================================================================
-//  WORLD BOOT / PREWARM — CASTLE + BEACON ENGINE + MESH
-//  (SERVER/USER ARE INSIDE CASTLE; EXPANSION ONLY OBSERVES)
-// ============================================================================
-const Castle = createCastleServer ? createCastleServer() : pulseCastle;
-
-const BeaconEngine = createPulseBeaconEngine
-  ? createPulseBeaconEngine({ castle: Castle })
-  : null;
-
-const BeaconMesh = BeaconEngine ? PulseBeaconMesh({ beacon: BeaconEngine }) : null;
 
 // ============================================================================
 //  META — FULL-ADVANTAGE STRATEGIST VIEW
 // ============================================================================
+
 export const PulseExpansionMeta = Object.freeze({
   layer: "PulseExpansion",
   role: "PRESENCE_STRATEGIST_ORGAN",
-  version: "v13-PRESENCE-EVO+",
-  identity: "PulseExpansion-v13-PRESENCE-EVO+",
+  version: "v14-IMMORTAL",
+  identity: "PulseExpansion-v14-IMMORTAL",
 
   world: Object.freeze({
-    castle: Castle,
     castleMeta: PulseCastleMeta,
     osMeta: PulseWorldCoreMeta
   }),
 
   beacons: Object.freeze({
-    engineMeta: BeaconEngine?.meta ?? PulseBeaconEngineMeta ?? null,
+    engineMeta: PulseBeaconEngineMeta,
     meshMeta: PulseBeaconMeshMeta
   }),
 
@@ -187,25 +135,6 @@ export const PulseExpansionMeta = Object.freeze({
 
   server: Object.freeze({
     pulseServerMeta: PulseServerMeta
-  }),
-
-  physics: Object.freeze({
-    DeltaEngineCosmosMultiverse,
-    DeltaEngineEvo,
-    DeploymentPhysicsCoreMemory,
-    DeploymentPhysicsEvo,
-    ExecutionPhysicsCoreMemory,
-    ExecutionPhysicsEvo,
-    LineageEngineCoreMemory,
-    LineageEngineEvo,
-    MultiOrganismSupportCoreMemory,
-    MultiOrganismSupportEvo,
-    RegioningPhysicsCoreMemory,
-    RegioningPhysicsEvo,
-    RegionMeshRoutingCoreMemory,
-    RegionMeshRoutingEvo,
-    SnapshotPhysicsCoreMemory,
-    SnapshotPhysicsEvo
   }),
 
   guarantees: Object.freeze({
@@ -221,12 +150,12 @@ export const PulseExpansionMeta = Object.freeze({
     treasuryAware: true,
     capacitySignalAware: true,
     stressSignalAware: true,
-    regioningPhysicsAware: true,
     beaconAware: true,
     osBrainAware: true,
     routerAware: true,
     serverExecAware: true,
     binaryMeshAware: true,
+    pulseNetAware: true,
 
     zeroRandomness: true,
     zeroDynamicImports: true,
@@ -241,6 +170,7 @@ export const PulseExpansionMeta = Object.freeze({
 // ============================================================================
 //  TYPES
 // ============================================================================
+
 export class ExpansionAction {
   constructor({
     regionId,
@@ -311,6 +241,7 @@ export class ExpansionPlan {
     bandSignature = null,
     binaryField = null,
     waveField = null,
+    pulseNetIntents = [],
     meta = {}
   }) {
     this.expansions = expansions;
@@ -323,6 +254,7 @@ export class ExpansionPlan {
     this.bandSignature = bandSignature;
     this.binaryField = binaryField;
     this.waveField = waveField;
+    this.pulseNetIntents = pulseNetIntents;
     this.meta = meta;
   }
 }
@@ -330,6 +262,7 @@ export class ExpansionPlan {
 // ============================================================================
 //  INTERNAL HELPERS
 // ============================================================================
+
 function clamp01(x) {
   if (x == null || Number.isNaN(x)) return 0;
   return Math.max(0, Math.min(1, x));
@@ -371,10 +304,9 @@ function buildBandSignature(band) {
   return computeHash(`EXP_BAND::${band}`);
 }
 
-// ============================================================================
-//  REGION PRESENCE / ADVANTAGE / CHUNK PLAN
-// ============================================================================
-function buildRegionPresenceField(regionInfo, cycle, physicsSig) {
+// Region presence / advantage / chunk plan (symbolic only)
+
+function buildRegionPresenceField(regionInfo, cycle) {
   const castleCount = regionInfo.castles.length;
   const totalServers = regionInfo.totalServers;
   const avgPresence =
@@ -394,21 +326,20 @@ function buildRegionPresenceField(regionInfo, cycle, physicsSig) {
       : "presence_low";
 
   return {
-    presenceVersion: "v13",
+    presenceVersion: "v14",
     presenceTier,
     castleCount,
     totalServers,
     avgPresence,
     composite,
     cycle,
-    physicsSig,
     presenceSignature: computeHash(
-      `REGION_PRESENCE::${presenceTier}::${castleCount}::${totalServers}::${avgPresence}::${physicsSig}`
+      `REGION_PRESENCE::${presenceTier}::${castleCount}::${totalServers}::${avgPresence}`
     )
   };
 }
 
-function buildRegionAdvantageField(regionInfo, presenceField, cycle, physicsSig) {
+function buildRegionAdvantageField(regionInfo, presenceField, cycle) {
   const density = regionInfo.castles.length;
   const stress = regionInfo.castles.reduce(
     (a, c) => a + (c.presenceField?.stressIndex || 0),
@@ -421,21 +352,19 @@ function buildRegionAdvantageField(regionInfo, presenceField, cycle, physicsSig)
     (presenceField.presenceTier === "presence_high" ? 0.1 : 0);
 
   return {
-    advantageVersion: "v13-C",
+    advantageVersion: "v14-C",
     density,
     stress,
     presenceTier: presenceField.presenceTier,
     advantageScore,
-    cycle,
-    physicsSig
+    cycle
   };
 }
 
 function buildRegionChunkPrewarmPlan(
   regionInfo,
   presenceField,
-  advantageField,
-  physicsSig
+  advantageField
 ) {
   const basePriority =
     presenceField.presenceTier === "presence_high"
@@ -447,9 +376,8 @@ function buildRegionChunkPrewarmPlan(
   const advantageBoost = advantageField.advantageScore > 0.1 ? 1 : 0;
 
   return {
-    planVersion: "v13-Region-AdvantageC",
+    planVersion: "v14-Region-AdvantageC",
     priority: basePriority + advantageBoost,
-    physicsSig,
     chunks: {
       castleEnvelope: true,
       serverEnvelope: true,
@@ -468,8 +396,21 @@ function buildRegionChunkPrewarmPlan(
 }
 
 // ============================================================================
-//  CORE ORGAN — PulseExpansion
+//  WORLD BOOT / PREWARM — CASTLE + BEACON ENGINE + MESH
 // ============================================================================
+
+const Castle = pulseCastle;
+
+const BeaconEngine = createPulseBeaconEngine
+  ? createPulseBeaconEngine({ boundCastleID: "GLOBAL_CASTLE" })
+  : null;
+
+const BeaconMesh = BeaconEngine ? PulseBeaconMesh({ beacon: BeaconEngine }) : null;
+
+// ============================================================================
+//  CORE ORGAN — PulseExpansion v14-IMMORTAL
+// ============================================================================
+
 export class PulseExpansion {
   constructor(config = {}) {
     this.config = {
@@ -480,8 +421,16 @@ export class PulseExpansion {
       ...config
     };
     this.cycle = 0;
+    this.pulseNetBridge = config.pulseNetBridge || null;
   }
 
+  // Attach / replace PULSE-NET bridge at runtime (backend only)
+  attachPulseNetBridge(bridge) {
+    this.pulseNetBridge = bridge || null;
+    return { ok: true, hasBridge: !!this.pulseNetBridge };
+  }
+
+  // Build expansion plan + emit PULSE-NET routing intents
   buildExpansionPlan({
     globalLoadIndex = 0,
     regionSignals = {},
@@ -489,8 +438,6 @@ export class PulseExpansion {
     minCastlesPerRegion = null
   } = {}) {
     this.cycle++;
-
-    const physicsSig = buildRegioningPhysicsSignature();
 
     const expansions = [];
     const contractions = [];
@@ -515,10 +462,11 @@ export class PulseExpansion {
     const regionAdvantage = {};
     const regionChunkPlan = {};
 
-    // Optional: beacon snapshot (presence/advantage/mesh view)
     const beaconSnapshot = BeaconMesh?.getSnapshot?.() ?? null;
     const beaconPresenceField = beaconSnapshot?.presenceField ?? null;
     const beaconAdvantageField = beaconSnapshot?.advantageField ?? null;
+
+    const pulseNetIntents = [];
 
     // REGION LOOP
     for (const [regionId, regionInfo] of Object.entries(byRegion)) {
@@ -529,20 +477,17 @@ export class PulseExpansion {
 
       const presenceField = buildRegionPresenceField(
         regionInfo,
-        this.cycle,
-        physicsSig
+        this.cycle
       );
       const advantageField = buildRegionAdvantageField(
         regionInfo,
         presenceField,
-        this.cycle,
-        physicsSig
+        this.cycle
       );
       const chunkPlan = buildRegionChunkPrewarmPlan(
         regionInfo,
         presenceField,
-        advantageField,
-        physicsSig
+        advantageField
       );
 
       regionPresence[regionId] = presenceField;
@@ -558,29 +503,45 @@ export class PulseExpansion {
           stressHint >= 0.6) &&
         castleCount < effectiveMaxCastles
       ) {
-        expansions.push(
-          new ExpansionAction({
-            regionId,
-            tier: presenceField.presenceTier,
-            reason: "high_load_or_density",
-            desiredServers: this.config.defaultDesiredServersPerCastle,
-            desiredSoldiers: this.config.defaultDesiredSoldiersPerCastle
-          })
-        );
+        const action = new ExpansionAction({
+          regionId,
+          tier: presenceField.presenceTier,
+          reason: "high_load_or_density",
+          desiredServers: this.config.defaultDesiredServersPerCastle,
+          desiredSoldiers: this.config.defaultDesiredSoldiersPerCastle
+        });
+        expansions.push(action);
+
+        // PULSE-NET intent: request remote castle/server stretch
+        pulseNetIntents.push({
+          kind: "expansion_request",
+          regionId,
+          tier: presenceField.presenceTier,
+          desiredServers: action.desiredServers,
+          desiredSoldiers: action.desiredSoldiers,
+          cycle: this.cycle
+        });
       }
 
       // CONTRACTION
       if (avgLoadIndex <= 0.2 && castleCount > effectiveMinCastles) {
         const candidate = regionInfo.castles[regionInfo.castles.length - 1];
         if (candidate) {
-          contractions.push(
-            new ContractionAction({
-              castleId: candidate.castleId,
-              reason: "low_load",
-              removeServers: 1,
-              removeSoldiers: 1
-            })
-          );
+          const action = new ContractionAction({
+            castleId: candidate.castleId,
+            reason: "low_load",
+            removeServers: 1,
+            removeSoldiers: 1
+          });
+          contractions.push(action);
+
+          pulseNetIntents.push({
+            kind: "contraction_request",
+            castleId: candidate.castleId,
+            regionId,
+            reason: action.reason,
+            cycle: this.cycle
+          });
         }
       }
 
@@ -590,23 +551,41 @@ export class PulseExpansion {
         const stress = c.presenceField?.stressIndex ?? 0;
 
         if (load >= 0.7 || stress >= 0.7) {
-          soldierDelegation.push(
-            new SoldierDelegationAction({
-              castleId: c.castleId,
-              spawn: 2,
-              kill: 0,
-              reason: "high_pressure"
-            })
-          );
+          const action = new SoldierDelegationAction({
+            castleId: c.castleId,
+            spawn: 2,
+            kill: 0,
+            reason: "high_pressure"
+          });
+          soldierDelegation.push(action);
+
+          pulseNetIntents.push({
+            kind: "soldier_route",
+            castleId: c.castleId,
+            regionId,
+            spawn: action.spawn,
+            kill: action.kill,
+            reason: action.reason,
+            cycle: this.cycle
+          });
         } else if (load <= 0.2 && stress <= 0.2) {
-          soldierDelegation.push(
-            new SoldierDelegationAction({
-              castleId: c.castleId,
-              spawn: 0,
-              kill: 1,
-              reason: "low_pressure"
-            })
-          );
+          const action = new SoldierDelegationAction({
+            castleId: c.castleId,
+            spawn: 0,
+            kill: 1,
+            reason: "low_pressure"
+          });
+          soldierDelegation.push(action);
+
+          pulseNetIntents.push({
+            kind: "soldier_route",
+            castleId: c.castleId,
+            regionId,
+            spawn: action.spawn,
+            kill: action.kill,
+            reason: action.reason,
+            cycle: this.cycle
+          });
         }
       }
     }
@@ -621,31 +600,61 @@ export class PulseExpansion {
         const links = meshLinksByCastleId[a.castleId] || new Set();
         if (links.size === 0) {
           const b = castles[(i + 1) % castles.length];
-          rebalanceLinks.push(
-            new MeshRebalanceAction({
-              castleId: a.castleId,
-              targetCastleId: b.castleId,
-              action: "link"
-            })
-          );
+          const action = new MeshRebalanceAction({
+            castleId: a.castleId,
+            targetCastleId: b.castleId,
+            action: "link"
+          });
+          rebalanceLinks.push(action);
+
+          pulseNetIntents.push({
+            kind: "mesh_link",
+            castleId: a.castleId,
+            targetCastleId: b.castleId,
+            regionId: a.regionId || null,
+            cycle: this.cycle
+          });
         }
       }
     }
 
-    // A‑B‑A surfaces
+    // A-B-A surfaces
     const band = "symbolic";
     const binaryField = buildBinaryField(this.cycle);
     const waveField = buildWaveField(this.cycle, band);
     const bandSignature = buildBandSignature(band);
 
-    logger?.log?.("expansion", "plan_built", {
+    // Emit intents to PULSE-NET via bridge (if present)
+    const bridge = this.pulseNetBridge;
+    if (bridge) {
+      safePulseNetCall(bridge, "routeExpansion", {
+        cycle: this.cycle,
+        expansions,
+        contractions,
+        regionPresence,
+        regionAdvantage,
+        regionChunkPlan
+      });
+
+      safePulseNetCall(bridge, "routeSoldiers", {
+        cycle: this.cycle,
+        soldierDelegation
+      });
+
+      safePulseNetCall(bridge, "routeMesh", {
+        cycle: this.cycle,
+        rebalanceLinks
+      });
+    }
+
+    logger?.log?.("expansion", "plan_built_v14", {
       cycle: this.cycle,
       expansions: expansions.length,
       contractions: contractions.length,
       soldierDelegation: soldierDelegation.length,
       rebalanceLinks: rebalanceLinks.length,
-      physicsSig,
-      beaconSnapshotPresent: !!beaconSnapshot
+      beaconSnapshotPresent: !!beaconSnapshot,
+      pulseNetBridgePresent: !!bridge
     });
 
     return new ExpansionPlan({
@@ -659,6 +668,7 @@ export class PulseExpansion {
       bandSignature,
       binaryField,
       waveField,
+      pulseNetIntents,
       meta: {
         expansionMeta: PulseExpansionMeta,
         castleMeta: PulseCastleMeta,
@@ -669,28 +679,9 @@ export class PulseExpansion {
         meshMeta: PulseMeshMeta,
         binaryMeshMeta: BinaryMeshMeta,
         osMeta: PulseWorldCoreMeta,
-        physicsSig,
         beaconSnapshot,
         beaconPresenceField,
-        beaconAdvantageField,
-        regioningPhysics: {
-          DeltaEngineCosmosMultiverse,
-          DeltaEngineEvo,
-          DeploymentPhysicsCoreMemory,
-          DeploymentPhysicsEvo,
-          ExecutionPhysicsCoreMemory,
-          ExecutionPhysicsEvo,
-          LineageEngineCoreMemory,
-          LineageEngineEvo,
-          MultiOrganismSupportCoreMemory,
-          MultiOrganismSupportEvo,
-          RegioningPhysicsCoreMemory,
-          RegioningPhysicsEvo,
-          RegionMeshRoutingCoreMemory,
-          RegionMeshRoutingEvo,
-          SnapshotPhysicsCoreMemory,
-          SnapshotPhysicsEvo
-        }
+        beaconAdvantageField
       }
     });
   }
@@ -699,10 +690,14 @@ export class PulseExpansion {
 // ============================================================================
 //  PUBLIC API
 // ============================================================================
+
 export function createPulseExpansion(config = {}) {
   const core = new PulseExpansion(config);
   return Object.freeze({
     meta: PulseExpansionMeta,
+    attachPulseNetBridge(bridge) {
+      return core.attachPulseNetBridge(bridge);
+    },
     buildExpansionPlan(payload) {
       return core.buildExpansionPlan(payload);
     }

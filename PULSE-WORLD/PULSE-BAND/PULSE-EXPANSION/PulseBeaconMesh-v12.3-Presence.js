@@ -1,14 +1,14 @@
 // ============================================================================
-//  PULSE-WORLD : PulseBeaconMesh-v13-PRESENCE-EVO++
+//  PULSE-WORLD : PulseBeaconMesh-v14-IMMORTAL.js
 //  ROLE: Local membrane simulator + density/mode/advantage debugger
-//  VERSION: v13-PRESENCE-EVO++
+//  VERSION: v14-IMMORTAL
 //  LAYER: BeaconMesh
-//  IDENTITY: PulseBeaconMesh-v13-PRESENCE-EVO++
+//  IDENTITY: PulseBeaconMesh-v14-IMMORTAL
 // ============================================================================
 //
 // PURPOSE:
 //   This organ simulates local world conditions and feeds them into the
-//   PulseBeaconEngine. It does NOT compute signal physics itself.
+//   PulseBeaconEngine-v14-IMMORTAL. It does NOT compute signal physics.
 //
 //   It is the "muscle" of PulseWorld expansion — it lets you:
 //     - simulate density (low/medium/high/peak)
@@ -18,7 +18,7 @@
 //     - inspect broadcast profiles + history
 //     - inspect presence / band / advantage / chunk-prewarm fields
 //     - inspect multi-instance behavior
-//     - inspect regioning / band signatures (if engine exposes them)
+//     - inspect regioning / band signatures
 //
 // CONTRACT:
 //   - Never mutate the Beacon Engine.
@@ -28,54 +28,12 @@
 //   - Always deterministic.
 //   - Pure membrane surface (symbolic composition only).
 // ============================================================================
-/*
-AI_EXPERIENCE_META = {
-  identity: "PulseBeaconMesh",
-  version: "v14-IMMORTAL",
-  layer: "presence_mesh",
-  role: "presence_mesh_simulator",
-  lineage: "PulsePresence-v14",
 
-  evo: {
-    meshSimulation: true,
-    proximityAwareness: true,
-    densityField: true,
-    regionField: true,
-    bluetoothPresence: true,
-
-    symbolicPrimary: true,
-    binaryAware: true,
-    dualBand: true,
-
-    deterministic: true,
-    driftProof: true,
-    zeroMutationOfInput: true,
-    zeroNetwork: true,
-    zeroFilesystem: true
-  },
-
-  contract: {
-    always: [
-      "PulseBeaconEngine",
-      "PulseExpansion",
-      "PulseUser"
-    ],
-    never: [
-      "safeRoute",
-      "fetchViaCNS"
-    ]
-  }
-}
-*/
-
-// ============================================================================
-//  META (v13-PRESENCE-EVO++)
-// ============================================================================
 export const PulseBeaconMeshMeta = Object.freeze({
   layer: "BeaconMesh",
   role: "LOCAL_MEMBRANE_SIMULATOR",
-  version: "v13-PRESENCE-EVO++",
-  identity: "PulseBeaconMesh-v13-PRESENCE-EVO++",
+  version: "v14-IMMORTAL",
+  identity: "PulseBeaconMesh-v14-IMMORTAL",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -89,7 +47,6 @@ export const PulseBeaconMeshMeta = Object.freeze({
     zeroMutation: true,
     zeroExternalMutation: true,
 
-    // Awareness flags
     meshAware: true,
     presenceFieldAware: true,
     bandAware: true,
@@ -108,13 +65,8 @@ export const PulseBeaconMeshMeta = Object.freeze({
 });
 
 // ============================================================================
-//  INTERNAL HELPERS (symbolic only, no physics)
+//  INTERNAL HELPERS (symbolic only)
 // ============================================================================
-function clamp01(x) {
-  if (x == null || Number.isNaN(x)) return 0;
-  return Math.max(0, Math.min(1, x));
-}
-
 function stableHash(str) {
   let h = 0;
   const s = String(str || "");
@@ -129,9 +81,9 @@ function buildScenarioProfile({
   demandHint = "medium",
   regionType = "venue",
   meshStatus = "unknown",
-  presenceTier = "normal",   // low | normal | high
-  advantageBand = "neutral", // neutral | positive | negative
-  fallbackBandLevel = null   // optional numeric/symbolic
+  presenceTier = "normal",
+  advantageBand = "neutral",
+  fallbackBandLevel = null
 } = {}) {
   return Object.freeze({
     densityHint,
@@ -148,26 +100,21 @@ function buildScenarioProfile({
 }
 
 // ============================================================================
-//  ORGAN: PulseBeaconMesh (v13-PRESENCE-EVO++)
+//  ORGAN: PulseBeaconMesh (v14-IMMORTAL)
 // ============================================================================
 export function PulseBeaconMesh({ beacon }) {
   if (!beacon)
     throw new Error("PulseBeaconMesh requires a Beacon Engine instance");
 
-  // --------------------------------------------------------------------------
-  // INTERNAL META SNAPSHOT (non-invasive)
-// --------------------------------------------------------------------------
   const snapshotMeta = Object.freeze({
     engineIdentity: beacon?.meta?.identity ?? null,
     engineVersion: beacon?.meta?.version ?? null,
     engineLayer: beacon?.meta?.layer ?? null,
-    engineRole: beacon?.meta?.role ?? null,
-    engineBandSignature: beacon?.meta?.bandSignature ?? null,
-    engineRegioningSignature: beacon?.meta?.regioningPhysicsSignature ?? null
+    engineRole: beacon?.meta?.role ?? null
   });
 
   // --------------------------------------------------------------------------
-  // SYMBOLIC COMPOSITE FIELDS (no physics, just composition)
+  // COMPOSITE FIELD (symbolic composition of presence/band/advantage/chunk)
 // --------------------------------------------------------------------------
   function buildCompositeField() {
     const presenceField = beacon.buildPresenceField?.() ?? null;
@@ -192,8 +139,8 @@ export function PulseBeaconMesh({ beacon }) {
       "unknown";
 
     const meshPressureIndex =
-      advantageField?.meshPressureIndex ??
       presenceField?.meshPressureIndex ??
+      advantageField?.meshPressureIndex ??
       null;
 
     const chunkPriority =
@@ -217,40 +164,34 @@ export function PulseBeaconMesh({ beacon }) {
     });
   }
 
+  // --------------------------------------------------------------------------
+  // REGIONING SIGNATURE
+  // --------------------------------------------------------------------------
   function getRegioningSignature() {
-    // Prefer explicit engine API if present, otherwise meta hint, otherwise null
     if (typeof beacon.getRegioningSignature === "function") {
       return beacon.getRegioningSignature();
     }
-    return (
-      beacon?.meta?.regioningPhysicsSignature ??
-      beacon?.meta?.physicsSig ??
-      null
-    );
+    return beacon?.meta?.regioningPhysicsSignature ?? null;
   }
 
+  // --------------------------------------------------------------------------
+  // MULTI-INSTANCE VIEW
+  // --------------------------------------------------------------------------
   function getMultiInstanceView() {
     if (typeof beacon.getMultiInstanceSnapshot === "function") {
       return beacon.getMultiInstanceSnapshot();
     }
-    if (typeof beacon.getStateSnapshot === "function") {
-      const snap = beacon.getStateSnapshot();
-      return {
-        snapshot: snap,
-        note: "Engine does not expose explicit multi-instance snapshot; returning generic state snapshot."
-      };
-    }
+    const snap = beacon.getStateSnapshot?.();
     return {
-      snapshot: null,
-      note: "Engine does not expose multi-instance or state snapshot APIs."
+      snapshot: snap,
+      note: "Engine does not expose explicit multi-instance snapshot; returning generic state snapshot."
     };
   }
 
   // --------------------------------------------------------------------------
-  // PRESET SCENARIOS (symbolic, no shaping)
+  // PRESET SCENARIOS (symbolic only)
 // --------------------------------------------------------------------------
   function simulateScenarioPreset(preset = "default") {
-    // presets are symbolic; they only choose hints, engine still does shaping
     switch (preset) {
       case "home_low":
         return simulate({
@@ -280,47 +221,35 @@ export function PulseBeaconMesh({ beacon }) {
           regionType: "city",
           meshStatus: "overloaded"
         });
-      case "metro_mesh_weak":
-        return simulate({
-          densityHint: "medium",
-          demandHint: "medium",
-          regionType: "metro",
-          meshStatus: "weak"
-        });
       default:
         return simulate({});
     }
   }
 
   function simulateBatch(scenarios = []) {
-    if (!Array.isArray(scenarios) || scenarios.length === 0) {
-      return [];
-    }
-    const out = [];
-    for (const s of scenarios) {
-      const profile = buildScenarioProfile(s || {});
-      const result = simulate({
-        densityHint: profile.densityHint,
-        demandHint: profile.demandHint,
-        regionType: profile.regionType,
-        meshStatus: profile.meshStatus
-      });
-      out.push({
-        profile,
-        result
-      });
-    }
-    return Object.freeze(out);
+    if (!Array.isArray(scenarios) || scenarios.length === 0) return [];
+    return Object.freeze(
+      scenarios.map(s => {
+        const profile = buildScenarioProfile(s || {});
+        const result = simulate({
+          densityHint: profile.densityHint,
+          demandHint: profile.demandHint,
+          regionType: profile.regionType,
+          meshStatus: profile.meshStatus
+        });
+        return { profile, result };
+      })
+    );
   }
 
   // --------------------------------------------------------------------------
   // CORE SIMULATION SURFACE (delegates to beacon)
 // --------------------------------------------------------------------------
   function simulate({
-    densityHint = "medium",   // low | medium | high | peak
-    demandHint = "medium",    // low | medium | high | burst
-    regionType = "venue",     // home | venue | campus | city | metro | hub
-    meshStatus = "unknown"    // unknown | weak | stable | strong | overloaded
+    densityHint = "medium",
+    demandHint = "medium",
+    regionType = "venue",
+    meshStatus = "unknown"
   } = {}) {
     return beacon.broadcastOnce({
       densityHint,
@@ -334,51 +263,40 @@ export function PulseBeaconMesh({ beacon }) {
   // PUBLIC ORGAN SURFACE
   // --------------------------------------------------------------------------
   return Object.freeze({
-
-    // META
     meta: PulseBeaconMeshMeta,
     engineMeta: snapshotMeta,
 
-    // SIMULATION (single + presets + batch)
     simulate,
     simulateScenarioPreset,
     simulateBatch,
     buildScenarioProfile,
 
-    // TELEMETRY: Inspect broadcast history + last profile
     getTelemetry() {
       return beacon.getTelemetry();
     },
 
-    // SNAPSHOT: Full membrane / engine state
     getSnapshot() {
       return beacon.getStateSnapshot();
     },
 
-    // PRESENCE FIELD: Local presence field (mesh, castle, region, band)
     getPresenceField() {
       return beacon.buildPresenceField();
     },
 
-    // BAND FIELD (symbolic/binary)
     getBandField() {
       return beacon.buildBandField?.() ?? null;
     },
 
-    // ADVANTAGE FIELD (EVO+)
     getAdvantageField() {
       return beacon.buildAdvantageField?.() ?? null;
     },
 
-    // CHUNK PREWARM FIELD (EVO+)
     getChunkPrewarmField() {
       return beacon.buildChunkPrewarmField?.() ?? null;
     },
 
-    // COMPOSITE FIELD (symbolic composition of presence/band/advantage/chunk)
     getCompositeField: buildCompositeField,
 
-    // REGIONING / BAND SIGNATURES (if engine exposes them)
     getRegioningSignature,
     getMultiInstanceView
   });

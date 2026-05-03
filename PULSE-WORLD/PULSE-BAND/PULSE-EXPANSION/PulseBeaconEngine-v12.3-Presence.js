@@ -1,15 +1,38 @@
 // ============================================================================
-// PULSE-WORLD : PulseBeaconEngine-v13-PRESENCE-EVO++.js
+// PULSE-WORLD : PulseBeaconEngine-v15-IMMORTAL.js
 // ORGAN TYPE: Bluetooth Presence / Membrane Organism
-// VERSION: v13-PRESENCE-EVO++ (Hybrid, Every-Advantage, Every-Prewarm, Mesh-Aware)
+// VERSION: v15-IMMORTAL (Hybrid, Every-Advantage, Every-Prewarm, Mesh-/User-/WorldCore-Aware, Monolithic Membrane)
 // ============================================================================
+//
+// ROLE:
+//   PulseBeaconEngine is the Bluetooth membrane of PulseWorld.
+//   It turns region + mesh + castle + user + worldCore state into deterministic,
+//   SafetyFrame-compliant Bluetooth presence frames AND EMITS THEM over Bluetooth.
+//
+//   v15-IMMORTAL upgrades:
+//     - WorldCore-aware, Mesh-aware, Router-aware, Server-aware
+//     - Explicit userContext attachment (user ↔ membrane)
+//     - Direct consumption of PulseMesh.buildUserMeshSignal() / worldMesh signals
+//     - Chunk-prewarm + cache-hints surfaced as first-class fields
+//     - Deterministic “profile lanes” for discovery/presence/mesh/expand
+//     - Ready for dual-band symbolic/binary presence frames
+//     - INTERNAL Bluetooth emitter: this file is the ONLY place that can emit Bluetooth.
+//
+// CONTRACT:
+//   - Never auto-connect, never bypass SafetyFrame.
+//   - Never perform direct hardware I/O except via internal nativeBluetoothBroadcast.
+//   - Never introduce randomness or async drift.
+//   - Always remain deterministic, synthetic, and drift-proof in its logic.
+//   - This organ is the ONLY Bluetooth membrane in the organism.
+// ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseBeaconEngine",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "presence_engine",
   role: "bluetooth_presence_engine",
-  lineage: "PulsePresence-v14",
+  lineage: "PulsePresence-v15",
 
   evo: {
     presenceEngine: true,
@@ -19,6 +42,11 @@ AI_EXPERIENCE_META = {
     fallbackBand: true,
     chunkPrewarm: true,
     densityAware: true,
+    meshAware: true,
+    worldCoreAware: true,
+    userAware: true,
+    routerAware: true,
+    serverAware: true,
 
     symbolicPrimary: true,
     binaryAware: true,
@@ -35,7 +63,10 @@ AI_EXPERIENCE_META = {
     always: [
       "PulseBeaconMesh",
       "PulseUser",
-      "PulseExpansion"
+      "PulseExpansion",
+      "PulseMesh",
+      "PulseRouter",
+      "PulseServer"
     ],
     never: [
       "safeRoute",
@@ -46,10 +77,10 @@ AI_EXPERIENCE_META = {
 */
 
 export const PulseBeaconMeta = Object.freeze({
-  organId: "PulseBeaconEngine-v13-PRESENCE-EVO++",
+  organId: "PulseBeaconEngine-v15-IMMORTAL",
   role: "BLUETOOTH_MEMBRANE",
-  version: "13-PRESENCE-EVO++",
-  epoch: "v13-PRESENCE-EVO++",
+  version: "v15-IMMORTAL",
+  epoch: "v15-IMMORTAL",
   layer: "Membrane",
   safety: Object.freeze({
     deterministic: true,
@@ -81,7 +112,11 @@ export const PulseBeaconMeta = Object.freeze({
     bandAware: true,
     binaryFieldAware: true,
     waveFieldAware: true,
-    dualbandSafe: true
+    dualbandSafe: true,
+    worldCoreAware: true,
+    userAware: true,
+    routerAware: true,
+    serverAware: true
   }),
   contract: Object.freeze({
     purpose:
@@ -90,7 +125,7 @@ export const PulseBeaconMeta = Object.freeze({
       "auto-connect devices",
       "bypass SafetyFrame",
       "lie about mesh or castle state",
-      "perform direct hardware I/O",
+      "perform direct hardware I/O outside nativeBluetoothBroadcast",
       "introduce randomness",
       "self-modify core contracts"
     ]),
@@ -108,8 +143,45 @@ export const PulseBeaconMeta = Object.freeze({
 });
 
 // ============================================================================
-// FACTORY: createPulseBeaconEngine — v13-PRESENCE-EVO++
-// Hybrid: consumes global hints, produces local presence/advantage/band/chunk fields.
+// INTERNAL BLUETOOTH EMITTER (ONLY HARDWARE EDGE IN THE ORGANISM)
+// ============================================================================
+//
+// This is the ONLY place in the entire codebase that is allowed to touch
+// real Bluetooth APIs. Platform glue (Android/iOS/Web/ESP32/etc.) must be
+// wired here and nowhere else.
+//
+// Implementations should map (payload, profile) → platform BLE advertiser.
+//
+// NOTE: This is "real" in the sense that when wired, it actually emits.
+// If not wired, it throws, making "fake" impossible to silently pass.
+//
+let _nativeBluetoothDriver = null; // platform-specific driver, internal only
+
+export function attachNativeBluetoothDriver(driver) {
+  // driver MUST implement: driver.broadcast(payload, profile)
+  if (!driver || typeof driver.broadcast !== "function") {
+    throw new Error("[PulseBeaconEngine-v15] Invalid native Bluetooth driver");
+  }
+  _nativeBluetoothDriver = driver;
+  return { ok: true };
+}
+
+function nativeBluetoothBroadcast(payload, profile) {
+  if (!_nativeBluetoothDriver) {
+    // No silent fake. If not wired, this is a hard failure.
+    throw new Error(
+      "[PulseBeaconEngine-v15] nativeBluetoothBroadcast called with no attached driver"
+    );
+  }
+  // This is the ONLY real hardware edge.
+  _nativeBluetoothDriver.broadcast(payload, profile);
+}
+
+// ============================================================================
+// FACTORY: createPulseBeaconEngine — v15-IMMORTAL
+// Hybrid: consumes global hints + mesh/user/worldCore snapshots,
+//         produces local presence/advantage/band/chunk fields,
+//         and EMITS via internal nativeBluetoothBroadcast.
 // ============================================================================
 
 export function createPulseBeaconEngine({
@@ -117,33 +189,9 @@ export function createPulseBeaconEngine({
   regionID = null,
   boundCastleID = null,
   trace = false,
-  bluetoothAdapter = null, // { broadcast(payload, profile) }
   safetyPolicy = null,     // fn({ mode, payload, signalProfile }) => { allowed: boolean }
-  globalHints = null       // unified global hints object (hybrid v13)
-//  expected shape (symbolic):
-//  {
-//    presenceContext?,
-//    advantageContext?,
-//    fallbackContext?,
-//    fallbackBandLevel?,
-//    chunkHints?,
-//    cacheHints?,
-//    prewarmHints?,
-//    regionPresence?,
-//    regionAdvantage?,
-//    regionChunkPlan?,
-//    bandSignature?,
-//    binaryField?,
-//    waveField?,
-//    meshPressureIndex?,
-//    meshStrength?,
-//    densityHint?,
-//    demandHint?,
-//    regionType?,
-//    meshStatus?
-//  }
+  globalHints = null       // unified global hints object (hybrid v15)
 } = {}) {
-
   // --------------------------------------------------------------------------
   // INTERNAL STATE
   // --------------------------------------------------------------------------
@@ -191,12 +239,19 @@ export function createPulseBeaconEngine({
     lastBroadcast: null
   };
 
-  // v13+ global → local hybrid hints
+  // v15+ global → local hybrid hints
   let lastGlobalHints = globalHints || null;
 
   // External bridges
   let overmind = null;
   let nodeAdmin = null;
+
+  // Attachments (mesh/user/worldCore/server/router)
+  let meshSnapshotProvider = null;     // () => mesh.getSnapshot()
+  let worldCoreSnapshotProvider = null;// () => worldCore.getSnapshot()
+  let routerSnapshotProvider = null;   // () => router.getSnapshot()
+  let serverSnapshotProvider = null;   // () => pulseServerSnapshot
+  let userContext = null;              // user/session context (symbolic only)
 
   // --------------------------------------------------------------------------
   // BASELINE DEFINITIONS (A)
@@ -284,7 +339,7 @@ export function createPulseBeaconEngine({
   // HELPERS
   // --------------------------------------------------------------------------
   function log(...args) {
-    if (trace) console.log("[PulseBeaconEngine-v13]", ...args);
+    if (trace) console.log("[PulseBeaconEngine-v15]", ...args);
   }
 
   function rememberBroadcast(payload, profile) {
@@ -317,8 +372,58 @@ export function createPulseBeaconEngine({
   }
 
   // --------------------------------------------------------------------------
-  // GLOBAL HINTS (v13 HYBRID)
-// --------------------------------------------------------------------------
+  // ATTACHMENTS (Mesh / WorldCore / Router / Server / User)
+  // --------------------------------------------------------------------------
+  function attachMeshSnapshotProvider(provider) {
+    meshSnapshotProvider = typeof provider === "function" ? provider : null;
+    return { ok: true, hasProvider: !!meshSnapshotProvider };
+  }
+
+  function attachWorldCoreSnapshotProvider(provider) {
+    worldCoreSnapshotProvider = typeof provider === "function" ? provider : null;
+    return { ok: true, hasProvider: !!worldCoreSnapshotProvider };
+  }
+
+  function attachRouterSnapshotProvider(provider) {
+    routerSnapshotProvider = typeof provider === "function" ? provider : null;
+    return { ok: true, hasProvider: !!routerSnapshotProvider };
+  }
+
+  function attachServerSnapshotProvider(provider) {
+    serverSnapshotProvider = typeof provider === "function" ? provider : null;
+    return { ok: true, hasProvider: !!serverSnapshotProvider };
+  }
+
+  function attachUserContext(ctx) {
+    userContext = ctx || null;
+    emitToOvermind("user-context-updated", { userContext });
+    emitToNodeAdmin("user-context-updated", { userContext });
+    return { ok: true, userContext };
+  }
+
+  function readMeshView() {
+    if (!meshSnapshotProvider) return null;
+    try {
+      const snap = meshSnapshotProvider();
+      return snap || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function readWorldCoreView() {
+    if (!worldCoreSnapshotProvider) return null;
+    try {
+      const snap = worldCoreSnapshotProvider();
+      return snap || null;
+    } catch {
+      return null;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // GLOBAL HINTS (v15 HYBRID)
+  // --------------------------------------------------------------------------
   function setGlobalHints(hints) {
     lastGlobalHints = hints || null;
     emitToOvermind("global-hints-updated", { hints: lastGlobalHints });
@@ -359,8 +464,8 @@ export function createPulseBeaconEngine({
   }
 
   // --------------------------------------------------------------------------
-  // PAYLOAD ENGINE (LOCAL + GLOBAL HINTS)
-// --------------------------------------------------------------------------
+  // PAYLOAD ENGINE (LOCAL + GLOBAL HINTS + MESH/WORLDCORE)
+  // --------------------------------------------------------------------------
   function updatePayloadFromContext({
     regionTag = null,
     castlePresence = null,
@@ -384,6 +489,24 @@ export function createPulseBeaconEngine({
     if (fallbackBandLevel !== null) payloadState.fallbackBandLevel = fallbackBandLevel;
     if (coldStartPhase !== null) payloadState.coldStartPhase = coldStartPhase;
 
+    // Mesh + worldCore auto-hydration (symbolic only)
+    const meshView = readMeshView();
+    if (meshView && meshView.densityHealth?.A_metrics) {
+      const dh = meshView.densityHealth.A_metrics;
+      if (typeof dh.meshPressureIndex === "number") {
+        payloadState.meshPressureIndex = dh.meshPressureIndex;
+      }
+      if (typeof dh.meshStrength === "string") {
+        payloadState.meshStrength = dh.meshStrength;
+        payloadState.meshStatus = dh.meshStrength;
+      }
+    }
+
+    const wcView = readWorldCoreView();
+    if (wcView?.advantageContext?.presenceField?.presenceTier && !payloadState.regionTag) {
+      payloadState.regionTag = wcView.advantageContext.presenceField.presenceTier;
+    }
+
     emitToOvermind("payload-updated", { payloadState });
     emitToNodeAdmin("payload-updated", { payloadState });
 
@@ -399,9 +522,13 @@ export function createPulseBeaconEngine({
     const advantageCtx = gh.advantageContext || {};
     const fallbackCtx = gh.fallbackContext || {};
 
+    const meshView = readMeshView();
+    const wcView = readWorldCoreView();
+
     const regionPresence =
       payloadState.regionTag ||
       presenceCtx.regionPresence ||
+      wcView?.advantageContext?.presenceField?.presenceTier ||
       regionID ||
       "unknown";
 
@@ -409,11 +536,13 @@ export function createPulseBeaconEngine({
       gh.meshStrength ||
       payloadState.meshStrength ||
       payloadState.meshStatus ||
+      meshView?.densityHealth?.A_metrics?.meshStrength ||
       "unknown";
 
     const meshPressureIndex =
       gh.meshPressureIndex ??
       payloadState.meshPressureIndex ??
+      meshView?.densityHealth?.A_metrics?.meshPressureIndex ??
       0;
 
     return Object.freeze({
@@ -438,12 +567,13 @@ export function createPulseBeaconEngine({
   function buildAdvantageField() {
     const gh = lastGlobalHints || {};
     const advantageCtx = gh.advantageContext || {};
+    const wcView = readWorldCoreView();
 
     return Object.freeze({
       advantageScore: advantageCtx.score ?? null,
       advantageBand: advantageCtx.band || payloadState.advantageHint || "neutral",
-      regionAdvantage: gh.regionAdvantage || {},
-      regionPresence: gh.regionPresence || {}
+      regionAdvantage: gh.regionAdvantage || wcView?.advantageContext?.advantageField || {},
+      regionPresence: gh.regionPresence || wcView?.advantageContext?.presenceField || {}
     });
   }
 
@@ -484,7 +614,7 @@ export function createPulseBeaconEngine({
     const hintsField = buildHintsField();
 
     return Object.freeze({
-      planVersion: "v13-Beacon-ChunkPrewarm",
+      planVersion: "v15-Beacon-ChunkPrewarm",
       fallbackBandLevel: hintsField.fallbackBandLevel,
       chunkHints: hintsField.chunkHints,
       cacheHints: hintsField.cacheHints,
@@ -525,7 +655,7 @@ export function createPulseBeaconEngine({
       hintsField,
       bandField,
       chunkPrewarmField,
-      // for NodeAdmin / Expansion: beaconSnapshot.globalHints.*
+      userContext: userContext || null,
       globalHints: {
         fallbackBandLevel: hintsField.fallbackBandLevel,
         chunkHints: hintsField.chunkHints,
@@ -540,8 +670,8 @@ export function createPulseBeaconEngine({
   }
 
   // --------------------------------------------------------------------------
-  // SIGNAL SHAPING ENGINE (USES GLOBAL HINTS)
-// --------------------------------------------------------------------------
+  // SIGNAL SHAPING ENGINE (USES GLOBAL HINTS + MESH/WORLDCORE)
+  // --------------------------------------------------------------------------
   function computeSignalProfile({
     densityHint,
     demandHint,
@@ -578,10 +708,21 @@ export function createPulseBeaconEngine({
     const cachePriority = gh.cacheHints?.priority || "normal";
     const prewarmNeeded = gh.prewarmHints?.shouldPrewarm || false;
 
-    const effectiveDensity = densityHint || gh.densityHint || "medium";
+    const meshView = readMeshView();
+
+    const effectiveDensity =
+      densityHint ||
+      gh.densityHint ||
+      (meshView?.densityHealth?.A_metrics?.userCount > 20 ? "high" : "medium");
+
     const effectiveDemand = demandHint || gh.demandHint || "medium";
     const effectiveRegionType = regionType || gh.regionType || "venue";
-    const effectiveMeshStatus = meshStatus || gh.meshStatus || payloadState.meshStatus;
+    const effectiveMeshStatus =
+      meshStatus ||
+      gh.meshStatus ||
+      payloadState.meshStatus ||
+      meshView?.densityHealth?.A_metrics?.meshStrength ||
+      "unknown";
 
     // B-layer: adaptive shaping (local + global).
     if (Modes.adaptive.autoSwitchEnabled) {
@@ -613,18 +754,15 @@ export function createPulseBeaconEngine({
     }
 
     // Global hints influence:
-    // - fallbackBandLevel: higher → more conservative
     if (fallbackBandLevel >= 2) {
       powerProfile = powerProfile === "high" ? "medium" : powerProfile;
       intervalProfile = intervalProfile === "frequent" ? "steady" : intervalProfile;
     }
 
-    // - chunkAggression: higher → shorter bursts
     if (chunkAggression > 0.5) {
       intervalProfile = "frequent";
     }
 
-    // - cachePriority: critical → keep presence strong
     if (cachePriority === "critical") {
       powerProfile = "high";
       intervalProfile = "frequent";
@@ -632,7 +770,6 @@ export function createPulseBeaconEngine({
       intervalProfile = "steady";
     }
 
-    // - prewarmNeeded: if true, keep beacon more active
     if (prewarmNeeded && intervalProfile === "sparse") {
       intervalProfile = "steady";
     }
@@ -674,7 +811,7 @@ export function createPulseBeaconEngine({
   }
 
   // --------------------------------------------------------------------------
-  // BROADCAST ENGINE
+  // BROADCAST ENGINE (REAL BLUETOOTH EMISSION VIA INTERNAL EMITTER)
   // --------------------------------------------------------------------------
   function broadcastOnce({
     densityHint,
@@ -712,9 +849,8 @@ export function createPulseBeaconEngine({
     emitToOvermind("broadcast", { payload, profile });
     emitToNodeAdmin("broadcast", { payload, profile });
 
-    if (bluetoothAdapter && typeof bluetoothAdapter.broadcast === "function") {
-      bluetoothAdapter.broadcast(payload, profile);
-    }
+    // REAL EMISSION: this is the ONLY hardware edge.
+    nativeBluetoothBroadcast(payload, profile);
 
     log("Broadcast:", { payload, profile });
     return { ok: true, payload, profile };
@@ -862,7 +998,7 @@ export function createPulseBeaconEngine({
     return {
       meta: PulseBeaconMeta,
       description:
-        "PulseBeaconEngine-v13 is the Bluetooth membrane organ for PulseWorld, fully presence/advantage/band/chunk-prewarm aware.",
+        "PulseBeaconEngine-v15 is the monolithic Bluetooth membrane organ for PulseWorld, fully presence/advantage/band/chunk-prewarm aware, and the ONLY Bluetooth emitter.",
       usage: {
         setMode:
           "beacon.setMode('discovery' | 'presence' | 'adaptive' | 'pulse-reach' | 'pulse-storm' | 'PULSE-MESH' | 'pulse-expand')",
@@ -870,6 +1006,12 @@ export function createPulseBeaconEngine({
           "beacon.updatePayloadFromContext({ regionTag?, castlePresence?, meshStatus?, meshPressureIndex?, meshStrength?, loadHint?, userProfile?, advantageHint?, fallbackBandLevel?, coldStartPhase? })",
         setGlobalHints:
           "beacon.setGlobalHints({ presenceContext?, advantageContext?, fallbackContext?, fallbackBandLevel?, chunkHints?, cacheHints?, prewarmHints?, regionPresence?, regionAdvantage?, regionChunkPlan?, bandSignature?, binaryField?, waveField?, meshPressureIndex?, meshStrength?, densityHint?, demandHint?, regionType?, meshStatus? })",
+        attachMeshSnapshotProvider:
+          "beacon.attachMeshSnapshotProvider(() => mesh.getSnapshot())",
+        attachWorldCoreSnapshotProvider:
+          "beacon.attachWorldCoreSnapshotProvider(() => worldCore.getSnapshot())",
+        attachUserContext:
+          "beacon.attachUserContext(userContext)",
         buildPresenceField: "beacon.buildPresenceField() → presenceField",
         buildAdvantageField: "beacon.buildAdvantageField() → advantageField",
         buildHintsField: "beacon.buildHintsField() → hintsField",
@@ -889,10 +1031,12 @@ export function createPulseBeaconEngine({
         handleNodeAdminIntent:
           "beacon.handleNodeAdminIntent(intentName, { contextHints? })",
         getStateSnapshot: "beacon.getStateSnapshot()",
-        getTelemetry: "beacon.getTelemetry()"
+        getTelemetry: "beacon.getTelemetry()",
+        attachNativeBluetoothDriver:
+          "attachNativeBluetoothDriver({ broadcast(payload, profile) }) // ONLY hardware edge"
       },
       caveat:
-        "Hardware emission must be implemented via bluetoothAdapter.broadcast(payload, profile). This organ must remain deterministic, synthetic, and SafetyFrame-compliant."
+        "Hardware emission is performed ONLY via nativeBluetoothBroadcast(payload, profile) using the attached native driver. This organ is the sole Bluetooth emitter and must remain deterministic and SafetyFrame-compliant."
     };
   }
 
@@ -913,7 +1057,7 @@ export function createPulseBeaconEngine({
     updatePayloadFromContext,
     buildPayload,
 
-    // global hints (hybrid v13)
+    // global hints (hybrid v15)
     setGlobalHints,
     getGlobalHints,
     buildPresenceField,
@@ -936,9 +1080,18 @@ export function createPulseBeaconEngine({
     attachNodeAdminBridge,
     handleNodeAdminIntent,
 
-    // introspection
+    // attachments
+    attachMeshSnapshotProvider,
+    attachWorldCoreSnapshotProvider,
+    attachRouterSnapshotProvider,
+    attachServerSnapshotProvider,
+    attachUserContext,
+
+    // telemetry
     getStateSnapshot,
     getTelemetry,
+
+    // manual
     getManual
   };
 }

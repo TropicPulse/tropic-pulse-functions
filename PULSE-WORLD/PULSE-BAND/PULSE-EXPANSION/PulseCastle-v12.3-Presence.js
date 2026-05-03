@@ -1,6 +1,6 @@
 // ============================================================================
-//  PULSE OS v13‑PRESENCE‑EVO+ — PULSE CASTLE (PRESENCE / HOST ORGAN)
-//  PulseCastle-v13-Presence.js
+//  PULSE OS v14‑IMMORTAL — PULSE CASTLE (PRESENCE / HOST ORGAN)
+//  PulseCastle-v14-IMMORTAL.js
 //
 //  ROLE:
 //    - Presence + host organ for PulseServer instances.
@@ -8,15 +8,10 @@
 //    - Manages user bindings + world cores per castle (user‑aware).
 //    - Maintains awareness of other castles (mesh awareness).
 //    - Maintains basic treasury + soldier awareness for economic layer.
+//    - Maintains symbolic expansion routes + NodeAdmin loops to servers.
 //    - Pure symbolic registry + mapping. No compute math, no routing, no AI.
-//
-//  GUARANTEES:
-//    - Deterministic.
-//    - No randomness.
-//    - No network fetch.
-//    - No dynamic imports.
-//    - No reinterpretation of PulseServer compute.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseCastle",
@@ -30,6 +25,17 @@ AI_EXPERIENCE_META = {
     regionSecurity: true,
     regionTier: true,
     regionPhysics: true,
+
+    meshAware: true,
+    presenceFieldAware: true,
+    advantageAware: true,
+    chunkPrewarmAware: true,
+    meshPressureAware: true,
+
+    expansionRouteAware: true,
+    nodeAdminLoopAware: true,
+    serverLoopAware: true,
+    routerAware: true,
 
     symbolicPrimary: true,
     binaryAware: true,
@@ -56,7 +62,6 @@ AI_EXPERIENCE_META = {
 }
 */
 
-
 // ============================================================================
 //  IMPORTS (backend-safe)
 // ============================================================================
@@ -73,15 +78,14 @@ import {
   createPulseWorldCore
 } from "./PulseUser-v12.3-Presence.js";
 
-
 // ============================================================================
 //  META — Castle Identity
 // ============================================================================
 export const PulseCastleMeta = Object.freeze({
   layer: "PulseCastle",
   role: "PRESENCE_HOST_ORGAN",
-  version: "v13-PRESENCE-EVO+",
-  identity: "PulseCastle-v13-PRESENCE-EVO+",
+  version: "v14-IMMORTAL",
+  identity: "PulseCastle-v14-IMMORTAL",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -106,6 +110,12 @@ export const PulseCastleMeta = Object.freeze({
     chunkPrewarmAware: true,
     osBrainAware: true,
 
+    // v14+ expansion / routing awareness (symbolic only)
+    routerAware: true,
+    expansionRouteAware: true,
+    nodeAdminLoopAware: true,
+    serverLoopAware: true,
+
     zeroRandomness: true,
     zeroDynamicImports: true,
     zeroEval: true,
@@ -123,7 +133,9 @@ export const PulseCastleMeta = Object.freeze({
       "ServerDetachRequest",
       "CastleMeshQuery",
       "CastleUserRegistrationRequest",
-      "CastleUserBindingRequest"
+      "CastleUserBindingRequest",
+      "CastleExpansionRouteRequest",
+      "CastleNodeAdminLoopRequest"
     ],
     output: [
       "CastleRegistrationResult",
@@ -132,23 +144,25 @@ export const PulseCastleMeta = Object.freeze({
       "ServerDetachResult",
       "CastleMeshState",
       "CastleUserRegistrationResult",
-      "CastleUserBindingState"
+      "CastleUserBindingState",
+      "CastleExpansionRouteState",
+      "CastleNodeAdminLoopState"
     ]
   }),
 
   lineage: Object.freeze({
-    root: "PulseOS-v13-PRESENCE-EVO+",
-    parent: "PulseExpansion-v13-PRESENCE-EVO+",
+    root: "PulseOS-v14-IMMORTAL",
+    parent: "PulseExpansion-v14-IMMORTAL",
     ancestry: [
       "PulseCastle-v9",
       "PulseCastle-v10",
       "PulseCastle-v11",
       "PulseCastle-v12",
-      "PulseCastle-v12.3-PRESENCE-EVO++"
+      "PulseCastle-v12.3-PRESENCE-EVO++",
+      "PulseCastle-v13-PRESENCE-EVO+"
     ]
   })
 });
-
 
 // ============================================================================
 //  TYPES
@@ -238,48 +252,56 @@ export class CastleUserBindingState {
   }
 }
 
+export class CastleExpansionRouteState {
+  constructor({
+    routesById,
+    meta = {}
+  }) {
+    this.routesById = routesById;
+    this.meta = meta;
+  }
+}
+
+export class CastleNodeAdminLoopState {
+  constructor({
+    loopsById,
+    meta = {}
+  }) {
+    this.loopsById = loopsById;
+    this.meta = meta;
+  }
+}
 
 // ============================================================================
 //  INTERNAL STATE (symbolic, deterministic)
 // ============================================================================
 //
-// castlesById: {
-//   [castleId]: {
-//     castleId,
-//     regionId,
-//     hostName,
-//     presenceField: {
-//       regionId,
-//       hostName,
-//       tier,
-//       capacityHint,
-//       tags[],
-//       loadIndex,
-//       stressIndex,
-//       presenceScore
-//     },
-//     serversById: { [serverId]: { serverId, serverMeta, serverInstance } },
-//     soldiersById: { [soldierId]: { soldierId, meta } },
-//     treasury: { balance, lastDelta }
+// castlesById, usersById, userBindingsByServerId, meshLinksByCastleId
+//   — same as v13.
+//
+// expansionRoutesById: {
+//   [routeId]: {
+//     routeId,
+//     fromCastleId,
+//     toServerId,
+//     toServerUrl,
+//     hops: [castleId],
+//     loopHint: { intervalHint, pressureHint },
+//     tags: []
 //   }
 // }
 //
-// usersById: {
-//   [userId]: {
-//     userId,
-//     castleId,
-//     regionId,
-//     hostName,
-//     userMeta,
-//     worldCore,
-//     worldCoreSnapshot,
-//     servers: Set<serverId>
+// nodeAdminLoopsById: {
+//   [loopId]: {
+//     loopId,
+//     routeId,
+//     originCastleId,
+//     targetServerId,
+//     intervalHint,
+//     pressureHint,
+//     active: boolean
 //   }
 // }
-//
-// userBindingsByServerId: { [serverId]: userId }
-//
-// meshLinksByCastleId: { [castleId]: Set<castleId> }
 // ============================================================================
 const castlesById = Object.create(null);
 const meshLinksByCastleId = Object.create(null);
@@ -287,6 +309,8 @@ const meshLinksByCastleId = Object.create(null);
 const usersById = Object.create(null);
 const userBindingsByServerId = Object.create(null);
 
+const expansionRoutesById = Object.create(null);
+const nodeAdminLoopsById = Object.create(null);
 
 // ============================================================================
 //  HELPERS
@@ -311,6 +335,18 @@ function buildCastleId({ regionId, hostName }) {
 
 function buildUserId({ regionId, hostName, userKey }) {
   return stableHash(`USER::${regionId}::${hostName}::${userKey || "default"}`);
+}
+
+function buildRouteId({ fromCastleId, toServerId, toServerUrl, hops }) {
+  return stableHash(
+    `ROUTE::${fromCastleId}::${toServerId || ""}::${toServerUrl || ""}::${JSON.stringify(
+      hops || []
+    )}`
+  );
+}
+
+function buildLoopId({ routeId, originCastleId }) {
+  return stableHash(`LOOP::${routeId}::${originCastleId}`);
 }
 
 export function computeCastlePresence(castle) {
@@ -563,6 +599,97 @@ function snapshotUsersForCastle(castleId) {
   return { users, bindings };
 }
 
+// ---------------------------------------------------------------------------
+// Expansion routes + NodeAdmin loops (symbolic only)
+// ---------------------------------------------------------------------------
+function registerExpansionRouteInternal({
+  fromCastleId,
+  toServerId = null,
+  toServerUrl = null,
+  hops = [],
+  loopHint = {}
+}) {
+  if (!fromCastleId) {
+    return { ok: false, reason: "missing_fromCastleId" };
+  }
+
+  const routeId = buildRouteId({ fromCastleId, toServerId, toServerUrl, hops });
+
+  expansionRoutesById[routeId] = {
+    routeId,
+    fromCastleId,
+    toServerId,
+    toServerUrl,
+    hops: Array.from(hops || []),
+    loopHint: {
+      intervalHint: loopHint.intervalHint || "steady",
+      pressureHint: loopHint.pressureHint || "normal"
+    },
+    tags: loopHint.tags || []
+  };
+
+  logger?.log?.("castle", "register_expansion_route", {
+    routeId,
+    fromCastleId,
+    toServerId,
+    toServerUrl,
+    hops: expansionRoutesById[routeId].hops,
+    loopHint: expansionRoutesById[routeId].loopHint
+  });
+
+  return { ok: true, routeId };
+}
+
+function spawnNodeAdminLoopInternal({
+  routeId,
+  originCastleId,
+  intervalHint = "steady",
+  pressureHint = "normal"
+}) {
+  const route = expansionRoutesById[routeId];
+  if (!route) {
+    return { ok: false, reason: "route_not_found" };
+  }
+
+  const loopId = buildLoopId({ routeId, originCastleId: originCastleId || route.fromCastleId });
+
+  nodeAdminLoopsById[loopId] = {
+    loopId,
+    routeId,
+    originCastleId: originCastleId || route.fromCastleId,
+    targetServerId: route.toServerId || null,
+    intervalHint,
+    pressureHint,
+    active: true
+  };
+
+  logger?.log?.("castle", "spawn_nodeadmin_loop", {
+    loopId,
+    routeId,
+    originCastleId: nodeAdminLoopsById[loopId].originCastleId,
+    targetServerId: nodeAdminLoopsById[loopId].targetServerId,
+    intervalHint,
+    pressureHint
+  });
+
+  return { ok: true, loopId };
+}
+
+function snapshotExpansionRoutes() {
+  const routes = {};
+  for (const [id, r] of Object.entries(expansionRoutesById)) {
+    routes[id] = { ...r };
+  }
+  return routes;
+}
+
+function snapshotNodeAdminLoops() {
+  const loops = {};
+  for (const [id, l] of Object.entries(nodeAdminLoopsById)) {
+    loops[id] = { ...l };
+  }
+  return loops;
+}
 
 // ============================================================================
 //  CORE ORGAN
@@ -577,9 +704,9 @@ export class PulseCastle {
     };
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Register or update a castle presence
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   registerCastle({
     regionId,
     hostName,
@@ -625,9 +752,9 @@ export class PulseCastle {
     });
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Register a user at a castle + optional world core
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   registerUserAtCastle({
     regionId,
     hostName,
@@ -679,9 +806,9 @@ export class PulseCastle {
     });
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Bind an existing server to an existing user
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   bindServerToUser({
     castleId,
     serverId,
@@ -703,9 +830,9 @@ export class PulseCastle {
     });
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Attach a PulseServer instance to a castle (optionally bind to user)
-// --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   attachServerToCastle({
     regionId,
     hostName,
@@ -771,9 +898,9 @@ export class PulseCastle {
     });
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Detach a PulseServer instance from a castle
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   detachServerFromCastle({ castleId, serverId }) {
     const castle = castlesById[castleId];
     if (!castle || !castle.serversById[serverId]) {
@@ -814,9 +941,9 @@ export class PulseCastle {
     });
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Treasury adjustments (symbolic, for future Earn integration)
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   applyTreasuryDelta({ castleId, delta = 0 }) {
     const castle = castlesById[castleId];
     if (!castle) return { ok: false, reason: "castle_not_found" };
@@ -835,9 +962,9 @@ export class PulseCastle {
     return { ok: true, balance: next };
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Soldier registry (symbolic, for NodeAdmin / Expansion)
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   registerSoldier({ castleId, soldierId, meta = {} }) {
     const castle = castlesById[castleId];
     if (!castle) return { ok: false, reason: "castle_not_found" };
@@ -876,9 +1003,9 @@ export class PulseCastle {
     return { ok: true };
   }
 
-  // --------------------------------------------------------------------------
-  // Get presence / mesh state (v13: includes user/binding hints in meta)
-// --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // Get presence / mesh state
+  // ------------------------------------------------------------------------
   getPresenceState() {
     const { castlesSnapshot, meshSnapshot } = snapshotMesh();
 
@@ -903,9 +1030,9 @@ export class PulseCastle {
     });
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Get servers attached to a specific castle
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   getServersForCastle(castleId) {
     const castle = castlesById[castleId];
     if (!castle) return [];
@@ -917,9 +1044,9 @@ export class PulseCastle {
     }));
   }
 
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Get user bindings for a specific castle
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   getUserBindingsForCastle(castleId) {
     const { users, bindings } = snapshotUsersForCastle(castleId);
 
@@ -932,8 +1059,79 @@ export class PulseCastle {
       }
     });
   }
-}
 
+  // ------------------------------------------------------------------------
+  // Expansion routes: define symbolic path from castle → server
+  // ------------------------------------------------------------------------
+  registerExpansionRoute({
+    fromCastleId,
+    toServerId = null,
+    toServerUrl = null,
+    hops = [],
+    loopHint = {}
+  }) {
+    const res = registerExpansionRouteInternal({
+      fromCastleId,
+      toServerId,
+      toServerUrl,
+      hops,
+      loopHint
+    });
+
+    return new CastleExpansionRouteState({
+      routesById: snapshotExpansionRoutes(),
+      meta: {
+        castleMeta: PulseCastleMeta,
+        ok: res.ok,
+        reason: res.reason || null
+      }
+    });
+  }
+
+  getExpansionRoutes() {
+    return new CastleExpansionRouteState({
+      routesById: snapshotExpansionRoutes(),
+      meta: {
+        castleMeta: PulseCastleMeta
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // NodeAdmin loops: symbolic “loop” between castle and server along route
+  // ------------------------------------------------------------------------
+  spawnNodeAdminLoop({
+    routeId,
+    originCastleId = null,
+    intervalHint = "steady",
+    pressureHint = "normal"
+  }) {
+    const res = spawnNodeAdminLoopInternal({
+      routeId,
+      originCastleId,
+      intervalHint,
+      pressureHint
+    });
+
+    return new CastleNodeAdminLoopState({
+      loopsById: snapshotNodeAdminLoops(),
+      meta: {
+        castleMeta: PulseCastleMeta,
+        ok: res.ok,
+        reason: res.reason || null
+      }
+    });
+  }
+
+  getNodeAdminLoops() {
+    return new CastleNodeAdminLoopState({
+      loopsById: snapshotNodeAdminLoops(),
+      meta: {
+        castleMeta: PulseCastleMeta
+      }
+    });
+  }
+}
 
 // ============================================================================
 //  PUBLIC API — Create / Singleton
@@ -991,6 +1189,23 @@ export function createPulseCastle(config = {}) {
 
     unregisterSoldier(payload) {
       return core.unregisterSoldier(payload);
+    },
+
+    // v14-IMMORTAL expansion / NodeAdmin surface
+    registerExpansionRoute(payload) {
+      return core.registerExpansionRoute(payload);
+    },
+
+    getExpansionRoutes() {
+      return core.getExpansionRoutes();
+    },
+
+    spawnNodeAdminLoop(payload) {
+      return core.spawnNodeAdminLoop(payload);
+    },
+
+    getNodeAdminLoops() {
+      return core.getNodeAdminLoops();
     }
   });
 }

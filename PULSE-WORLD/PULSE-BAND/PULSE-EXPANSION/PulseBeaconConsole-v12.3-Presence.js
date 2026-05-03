@@ -1,15 +1,16 @@
 // ============================================================================
-// PULSE-WORLD : PulseBeaconConsole-v13-PRESENCE-EVO++.js
+// PULSE-WORLD : PulseBeaconConsole-v14-IMMORTAL.js
 // ROLE: Global expansion console + Overmind control surface
-// VERSION: v13-PRESENCE-EVO++
+// VERSION: v14-IMMORTAL
 // ============================================================================
 //
 // PURPOSE:
 //   This page is the "brain" of PulseWorld expansion.
 //   It controls global hints, modes, payload shaping, and expansion pulses.
 //
-//   It consumes (Beacon Engine v13+):
+//   It consumes (Beacon Engine v14-IMMORTAL):
 //     - beacon.getStateSnapshot()
+//     - beacon.getTelemetry()
 //     - beacon.getGlobalHints()
 //     - beacon.setGlobalHints()
 //     - beacon.applyDirective()
@@ -18,7 +19,8 @@
 //     - beacon.buildPresenceField()
 //     - beacon.buildAdvantageField()
 //     - beacon.buildHintsField()
-//     - beacon.getTelemetry()
+//     - beacon.buildBandField()
+//     - beacon.buildChunkPrewarmField()
 //
 //   It produces:
 //     - global organism hints (fallback/chunk/cache/prewarm/advantage/presence)
@@ -30,12 +32,13 @@
 //
 // CONTRACT:
 //   - Never compute signal shaping.
-//   - Never compute presence fields.
+//   - Never compute presence/advantage/band/chunk fields itself.
 //   - Never mutate engine internals.
 //   - Only call Beacon Engine APIs.
 //   - Always deterministic.
 //   - Pure symbolic Overmind surface.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseBeaconConsole",
@@ -79,8 +82,8 @@ AI_EXPERIENCE_META = {
 export const PulseBeaconConsoleMeta = Object.freeze({
   layer: "OvermindConsole",
   role: "GLOBAL_EXPANSION_CONSOLE",
-  version: "v13-PRESENCE-EVO++",
-  identity: "PulseBeaconConsole-v13-PRESENCE-EVO++",
+  version: "v14-IMMORTAL",
+  identity: "PulseBeaconConsole-v14-IMMORTAL",
   guarantees: Object.freeze({
     deterministic: true,
     driftProof: true,
@@ -95,6 +98,7 @@ export const PulseBeaconConsoleMeta = Object.freeze({
   contract: Object.freeze({
     consumes: [
       "beacon.getStateSnapshot()",
+      "beacon.getTelemetry()",
       "beacon.getGlobalHints()",
       "beacon.setGlobalHints()",
       "beacon.applyDirective()",
@@ -103,7 +107,8 @@ export const PulseBeaconConsoleMeta = Object.freeze({
       "beacon.buildPresenceField()",
       "beacon.buildAdvantageField()",
       "beacon.buildHintsField()",
-      "beacon.getTelemetry()"
+      "beacon.buildBandField()",
+      "beacon.buildChunkPrewarmField()"
     ],
     produces: [
       "globalHints",
@@ -162,6 +167,14 @@ function mergeGlobalHints(prev = {}, patch = {}) {
       ...(prev.prewarmHints || {}),
       ...(patch.prewarmHints || {})
     },
+    regionChunkPlan: {
+      ...(prev.regionChunkPlan || {}),
+      ...(patch.regionChunkPlan || {})
+    },
+    bandSignature:
+      patch.bandSignature != null
+        ? patch.bandSignature
+        : prev.bandSignature,
     // allow direct fallbackBandLevel override if present
     fallbackBandLevel:
       patch.fallbackBandLevel != null
@@ -171,13 +184,13 @@ function mergeGlobalHints(prev = {}, patch = {}) {
 }
 
 // ============================================================================
-// ORGAN: PulseBeaconConsole (v13)
+// ORGAN: PulseBeaconConsole (v14-IMMORTAL)
 // ============================================================================
 export function PulseBeaconConsole({ beacon }) {
   if (!beacon) throw new Error("PulseBeaconConsole requires a Beacon Engine instance");
 
   const consoleIdentity = Object.freeze({
-    consoleId: stableHash("PULSE_BEACON_CONSOLE_V13"),
+    consoleId: stableHash("PULSE_BEACON_CONSOLE_V14"),
     version: PulseBeaconConsoleMeta.version,
     role: PulseBeaconConsoleMeta.role
   });
@@ -202,8 +215,8 @@ export function PulseBeaconConsole({ beacon }) {
     },
 
     // ------------------------------------------------------------------------
-    // PRESENCE / ADVANTAGE / HINTS FIELDS (delegated, no compute here)
-    // ------------------------------------------------------------------------
+    // PRESENCE / ADVANTAGE / HINTS / BAND / CHUNK FIELDS (delegated)
+// ------------------------------------------------------------------------
     getPresenceField() {
       return beacon.buildPresenceField();
     },
@@ -216,8 +229,16 @@ export function PulseBeaconConsole({ beacon }) {
       return beacon.buildHintsField();
     },
 
+    getBandField() {
+      return beacon.buildBandField();
+    },
+
+    getChunkPrewarmField() {
+      return beacon.buildChunkPrewarmField();
+    },
+
     // ------------------------------------------------------------------------
-    // GLOBAL HINTS: Set organism-level hints (hybrid C / region-aware)
+    // GLOBAL HINTS: Set organism-level hints (hybrid v14 / region-aware)
 // ------------------------------------------------------------------------
     setGlobalHints(globalHints) {
       return beacon.setGlobalHints(globalHints);
@@ -235,7 +256,12 @@ export function PulseBeaconConsole({ beacon }) {
     },
 
     // Region-scoped hints: purely symbolic tagging, no physics here.
-    setRegionScopedHints(regionId, { presenceTier, advantageScore, fallbackBandLevel, chunkPriority } = {}) {
+    setRegionScopedHints(regionId, {
+      presenceTier,
+      advantageScore,
+      fallbackBandLevel,
+      chunkPriority
+    } = {}) {
       const current = beacon.getGlobalHints() || {};
       const regionHints = {
         ...(current.regionHints || {})
@@ -267,12 +293,13 @@ export function PulseBeaconConsole({ beacon }) {
 
     // ------------------------------------------------------------------------
     // MODE CONTROL: discovery | presence | adaptive | pulse-reach | pulse-storm | PULSE-MESH | pulse-expand
-    // ------------------------------------------------------------------------
+    // (delegated via directives or direct setMode if exposed)
+// ------------------------------------------------------------------------
     setMode(mode) {
+      // v14 engine exposes setMode; we just delegate.
       return beacon.setMode(mode);
     },
 
-    // Convenience wrappers for common modes (symbolic only).
     setDiscoveryMode() {
       return beacon.setMode("discovery");
     },
@@ -300,8 +327,14 @@ export function PulseBeaconConsole({ beacon }) {
       return beacon.updatePayloadFromContext(payloadUpdate);
     },
 
-    // Region-scoped payload helper (symbolic).
-    updateRegionPayload(regionId, { meshStatus, loadHint, userProfile, advantageHint, fallbackBandLevel, coldStartPhase } = {}) {
+    updateRegionPayload(regionId, {
+      meshStatus,
+      loadHint,
+      userProfile,
+      advantageHint,
+      fallbackBandLevel,
+      coldStartPhase
+    } = {}) {
       return beacon.updatePayloadFromContext({
         regionTag: regionId,
         meshStatus,
@@ -315,12 +348,12 @@ export function PulseBeaconConsole({ beacon }) {
 
     // ------------------------------------------------------------------------
     // EXPANSION PULSE: Fire a broadcast with optional context hints
-    // ------------------------------------------------------------------------
+    // (Bluetooth emission happens ONLY inside the engine/adapter organ)
+// ------------------------------------------------------------------------
     pulse(contextHints = {}) {
       return beacon.broadcastOnce(contextHints);
     },
 
-    // Convenience pulses for common bands / modes (symbolic only).
     pulseDiscovery(contextHints = {}) {
       beacon.setMode("discovery");
       return beacon.broadcastOnce(contextHints);
@@ -341,14 +374,12 @@ export function PulseBeaconConsole({ beacon }) {
       return beacon.broadcastOnce(contextHints);
     },
 
-    // Region-aware pulse: density/demand/meshStatus hints are passed through only.
     pulseRegion(regionId, {
       densityHint = "medium",
       demandHint = "medium",
       regionType = "venue",
       meshStatus = "unknown"
     } = {}) {
-      // No signal shaping here; just pass hints through.
       return beacon.broadcastOnce({
         densityHint,
         demandHint,
@@ -365,7 +396,6 @@ export function PulseBeaconConsole({ beacon }) {
       return beacon.applyDirective(directive);
     },
 
-    // Region-aware directive helper (symbolic).
     regionDirective(regionId, {
       mode = null,
       payloadUpdate = {},
@@ -378,21 +408,24 @@ export function PulseBeaconConsole({ beacon }) {
         regionTag: regionId
       };
 
+      const currentHints = beacon.getGlobalHints() || {};
+      const mergedHints = Object.keys(globalHintsPatch).length
+        ? mergeGlobalHints(currentHints, {
+            ...(globalHintsPatch || {}),
+            regionHints: {
+              ...(currentHints.regionHints || {}),
+              [regionId]: {
+                ...((currentHints.regionHints || {})[regionId] || {}),
+                ...(globalHintsPatch.regionHints || {})
+              }
+            }
+          })
+        : undefined;
+
       const directive = {
         mode,
         payloadUpdate: patchedPayload,
-        globalHints: Object.keys(globalHintsPatch).length
-          ? mergeGlobalHints(beacon.getGlobalHints() || {}, {
-              ...(globalHintsPatch || {}),
-              regionHints: {
-                ...((beacon.getGlobalHints() || {}).regionHints || {}),
-                [regionId]: {
-                  ...(((beacon.getGlobalHints() || {}).regionHints || {})[regionId] || {}),
-                  ...(globalHintsPatch.regionHints || {})
-                }
-              }
-            })
-          : undefined,
+        globalHints: mergedHints,
         broadcastNow,
         contextHints: {
           ...contextHints,

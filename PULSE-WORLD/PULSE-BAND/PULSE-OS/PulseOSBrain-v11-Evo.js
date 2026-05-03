@@ -1,29 +1,34 @@
 // ============================================================================
-// FILE: /PulseOS/Brain/PulseOSBrain-v13-Spine.js
-// PULSE OS BRAIN — v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE
+// FILE: /PulseOS/Brain/PulseOSBrain-v15-IMMORTAL.js
+// PULSE OS BRAIN — v15-IMMORTAL-DUALBAND-PRESENCE-ADVANTAGE
 // “THE REAL CNS / ORGANISM-WIDE IDENTITY + INTELLIGENCE KERNEL”
 // ============================================================================
 //
-// LAWS (v13+ADV+PULSE-TOPOLOGY):
+// LAWS (v15+IMMORTAL+PULSE-TOPOLOGY):
 //   • Brain may import ONLY:
 //       - PulseIQMap        (design + logging + long-term memory)
 //       - PulseOrganismMap  (organ layout + organs + lineage)
 //       - PulseOSEvolution  (CNS evolution organ, which boots Cortex)
 //   • Brain NEVER executes binary payloads.
+//   • Brain NEVER performs network calls.
+//   • Brain NEVER routes anything.
 //   • Brain is binary-aware, dualband, but symbolic-primary.
 //   • Binary is always post-render, handled by GPU / Send / Binary organs.
 //   • Brain is the CNS identity + contract kernel, not a router, not a GPU.
 //   • No presence/mesh/gpu/heartbeat imports — awareness is metadata-only.
 //   • Brain may hold world-lens / advantage / presence / pulse-topology
 //     summaries, but only emits view-only, non-network-dependent descriptors.
+//   • All internet / network intent must be emitted upward as symbolic intent
+//     and fulfilled by Castle → Expansion → Pulse-Net (server / higher power).
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseOSBrain",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "cns",
   role: "os_brain",
-  lineage: "PulseOS-v14",
+  lineage: "PulseOS-v15-IMMORTAL",
 
   evo: {
     symbolicPrimary: true,
@@ -63,8 +68,8 @@ AI_EXPERIENCE_META = {
 export const PulseOSBrainMeta = Object.freeze({
   layer: "PulseOSBrain",
   role: "CNS_BRAIN_ORGAN",
-  version: "v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE",
-  identity: "PulseOSBrain-v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE",
+  version: "v15-IMMORTAL-DUALBAND-PRESENCE-ADVANTAGE",
+  identity: "PulseOSBrain-v15-IMMORTAL-DUALBAND-PRESENCE-ADVANTAGE",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -129,8 +134,8 @@ export const PulseOSBrainMeta = Object.freeze({
   }),
 
   lineage: Object.freeze({
-    root: "PulseOS-v13-SPINE",
-    parent: "PulseOS-v12.4-SPINE",
+    root: "PulseOS-v15-IMMORTAL",
+    parent: "PulseOS-v13-SPINE",
     ancestry: [
       "PulseOSBrain-v9",
       "PulseOSBrain-v10",
@@ -140,7 +145,8 @@ export const PulseOSBrainMeta = Object.freeze({
       "PulseOSBrain-v12.3-SPINE-DUALBAND-PRESENCE",
       "PulseOSBrain-v12.4-SPINE-DUALBAND-PRESENCE",
       "PulseOSBrain-v13-SPINE-DUALBAND-PRESENCE",
-      "PulseOSBrain-v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE"
+      "PulseOSBrain-v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE",
+      "PulseOSBrain-v15-IMMORTAL-DUALBAND-PRESENCE-ADVANTAGE"
     ]
   }),
 
@@ -172,7 +178,7 @@ import checkIdentity from "../PULSE-PROXY/CheckIdentity-v11-Evo.js";
 import checkRouterMemory from "../PULSE-PROXY/CheckRouterMemory-v11-Evo.js";
 
 // ============================================================================
-//  CNS BRAIN — v13-SPINE-DUALBAND-PRESENCE-ADVANTAGE
+//  CNS BRAIN — v15-IMMORTAL-DUALBAND-PRESENCE-ADVANTAGE
 // ============================================================================
 export const PulseOSBrain = {
   // -------------------------------------------------------------------------
@@ -182,7 +188,7 @@ export const PulseOSBrain = {
     type: "Brain",
     subsystem: "OS",
     layer: "CNS",
-    version: "13-SPINE-ADV",
+    version: "15-IMMORTAL",
     identity: "PulseOSBrain",
     evo: {
       deterministicNeuron: true,
@@ -191,11 +197,11 @@ export const PulseOSBrain = {
       advantageCascadeAware: true,
       unifiedAdvantageField: true,
 
-      routingContract: "PulseRouter-v13",
-      osOrganContract: "PulseOS-v13-SPINE",
-      earnCompatibility: "PulseEarn-v13.0",
-      proxyCompatibility: "PulseProxySpine-v13",
-      gpuCompatibility: "PulseGPU-v13",
+      routingContract: "PulseRouter-v15",
+      osOrganContract: "PulseOS-v15-IMMORTAL",
+      earnCompatibility: "PulseEarn-v15.0",
+      proxyCompatibility: "PulseProxySpine-v15",
+      gpuCompatibility: "PulseGPU-v15",
 
       loopTheoryAware: true,
       continuanceAware: true,
@@ -227,7 +233,7 @@ export const PulseOSBrain = {
 
   intent: {
     mode: "organism-brain",
-    epoch: "13-SPINE",
+    epoch: "15-IMMORTAL",
     dualBand: true,
     symbolicPrimary: true
   },
@@ -248,7 +254,11 @@ export const PulseOSBrain = {
     scanFile: null
   },
 
+  // CNS snapshots (filled by Castle/Expansion/Pulse-Net)
   CNSWorldLensSnapshot: null,
+  CNSAdvantageSnapshot: null,
+  CNSPresenceSnapshot: null,
+  CNSTopologySnapshot: null,
 
   log: (...args) => {
     if (PulseOSBrain.PulseIQMap?.log) return PulseOSBrain.PulseIQMap.log(...args);
@@ -268,6 +278,117 @@ export const PulseOSBrain = {
   firebase: (...args) => {
     if (PulseOSBrain.PulseIQMap?.firebase) return PulseOSBrain.PulseIQMap.firebase(...args);
     return null;
+  },
+
+  // -------------------------------------------------------------------------
+  // UNIFIED NETWORK INTENT SURFACE — v15 IMMORTAL
+  // -------------------------------------------------------------------------
+  //
+  // Brain does NOT perform network. It only emits symbolic intent that
+  // Castle/Expansion/Pulse-Net can interpret and fulfill.
+  //
+  // Example usage:
+  //   const intent = PulseOSBrain.BrainIntent.emitNetworkIntent({
+  //     type: "worldLens.refresh",
+  //     payload: { url: PulseOSBrain.PulseIQMap?.worldLensURL }
+  //   });
+  //
+  BrainIntent: {
+    emitNetworkIntent({ type, payload = {} }) {
+      return {
+        ok: true,
+        intent: "network-request",
+        type,
+        payload,
+        band: "symbolic",
+        source: "PulseOSBrain",
+        timestamp: Date.now()
+      };
+    },
+
+    // Convenience helpers for common intents (still symbolic-only)
+    worldLensRefresh() {
+      const iq = PulseOSBrain.PulseIQMap || {};
+      return PulseOSBrain.BrainIntent.emitNetworkIntent({
+        type: "worldLens.refresh",
+        payload: {
+          url: iq.worldLensURL || null,
+          offlineSafe: true
+        }
+      });
+    },
+
+    advantageRefresh() {
+      return PulseOSBrain.BrainIntent.emitNetworkIntent({
+        type: "advantage.refresh",
+        payload: {}
+      });
+    },
+
+    presenceRefresh() {
+      return PulseOSBrain.BrainIntent.emitNetworkIntent({
+        type: "presence.refresh",
+        payload: {}
+      });
+    },
+
+    topologyRefresh() {
+      return PulseOSBrain.BrainIntent.emitNetworkIntent({
+        type: "topology.refresh",
+        payload: {}
+      });
+    }
+  },
+
+  // -------------------------------------------------------------------------
+  // SNAPSHOT APPLY SURFACES — filled by Castle/Expansion/Pulse-Net
+  // -------------------------------------------------------------------------
+  //
+  // These are the ONLY ways network-derived data enters the Brain.
+  // They are called by higher layers after fulfilling BrainIntent.
+  //
+  applyWorldLensSnapshot(snapshot) {
+    PulseOSBrain.CNSWorldLensSnapshot = {
+      lastUpdated: snapshot?.lastUpdated ?? Date.now(),
+      summary: snapshot?.summary || {},
+      sources: snapshot?.sources || [],
+      offlineSafe: snapshot?.offlineSafe !== false
+    };
+  },
+
+  applyAdvantageSnapshot(snapshot) {
+    const adv = snapshot || {};
+    PulseOSBrain.CNSAdvantageSnapshot = {
+      advantageScore: adv.advantageScore ?? adv.score ?? null,
+      advantageBand: adv.advantageBand || adv.band || "neutral",
+      regionAdvantage: adv.regionAdvantage || {},
+      cascadeHints: adv.cascadeHints || {}
+    };
+  },
+
+  applyPresenceSnapshot(snapshot) {
+    const s = snapshot || {};
+    PulseOSBrain.CNSPresenceSnapshot = {
+      presenceField: s.presenceField || {},
+      meshPresence: s.meshPresence || {},
+      organismSnapshot: s.organismSnapshot || {
+        organs: Object.keys(PulseOSBrain.PulseOrganismMap || {})
+      }
+    };
+  },
+
+  applyTopologySnapshot(snapshot) {
+    const s = snapshot || {};
+    PulseOSBrain.CNSTopologySnapshot = {
+      momHeart: s.momHeart || null,
+      dadHeart: s.dadHeart || null,
+      babyHeart: s.babyHeart || null,
+      fallbackRules: s.fallbackRules || {
+        babyPulseSource: "mom-or-dad",
+        momFallbackToDad: true,
+        dadFallbackToMom: true
+      }
+    };
   },
 
   // -------------------------------------------------------------------------
@@ -320,7 +441,7 @@ export const PulseOSBrain = {
 
         encoding: {
           format: "application/pulse-organism+json",
-          suggestedTransport: "PulseGPU-v13",
+          suggestedTransport: "PulseGPU-v15",
           suggestedCompression: "post-render",
           executable: false
         }
@@ -333,6 +454,11 @@ export const PulseOSBrain = {
     },
 
     getPresenceDescriptors() {
+      // Prefer snapshot if present, otherwise derive from IQ/organism
+      if (PulseOSBrain.CNSPresenceSnapshot) {
+        return PulseOSBrain.CNSPresenceSnapshot;
+      }
+
       const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const organism = PulseOSBrain.PulseOrganismMap || PulseOrganismMap || {};
 
@@ -368,6 +494,10 @@ export const PulseOSBrain = {
     },
 
     getAdvantageField() {
+      if (PulseOSBrain.CNSAdvantageSnapshot) {
+        return PulseOSBrain.CNSAdvantageSnapshot;
+      }
+
       const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const adv = iq.advantageField || {};
 
@@ -390,6 +520,10 @@ export const PulseOSBrain = {
     },
 
     getPulseTopologyDescriptors() {
+      if (PulseOSBrain.CNSTopologySnapshot) {
+        return PulseOSBrain.CNSTopologySnapshot;
+      }
+
       const iq = PulseOSBrain.PulseIQMap || PulseIQMap || {};
       const organism = PulseOSBrain.PulseOrganismMap || PulseOrganismMap || {};
 
@@ -425,7 +559,7 @@ export const PulseOSBrain = {
       return cortex.scanFile(filePath);
     }
 
-    PulseOSBrain.warn("🧠 [PulseOSBrain v13] scanFile called but Cortex has no scanFile surface.", {
+    PulseOSBrain.warn("🧠 [PulseOSBrain v15] scanFile called but Cortex has no scanFile surface.", {
       filePath
     });
 
@@ -434,49 +568,11 @@ export const PulseOSBrain = {
       error: "SCANNER_UNAVAILABLE",
       filePath
     };
-  },
-
-  // -------------------------------------------------------------------------
-  // BRAIN-ONLY INTERNET CONNECTOR (SAFE, ISOLATED, VIEW-ONLY)
-  // -------------------------------------------------------------------------
-  async connectToInternet() {
-    try {
-      const url = PulseOSBrain.PulseIQMap?.worldLensURL;
-      if (!url) {
-        PulseOSBrain.warn("No worldLensURL configured in IQMap.");
-        return null;
-      }
-
-      const response = await fetch(url, {
-        method: "GET",
-        cache: "no-store"
-      });
-
-      const data = await response.json();
-
-      PulseOSBrain.CNSWorldLensSnapshot = {
-        lastUpdated: Date.now(),
-        summary: data.summary || {},
-        sources: data.sources || [],
-        offlineSafe: true
-      };
-
-      return PulseOSBrain.CNSWorldLensSnapshot;
-
-    } catch (err) {
-      PulseOSBrain.warn("Brain internet connection failed:", err);
-      return {
-        lastUpdated: null,
-        summary: {},
-        sources: [],
-        offlineSafe: true
-      };
-    }
   }
 };
 
 // ============================================================================
-//  BRAIN PREWARM ENGINE — v13-SPINE-ADVANTAGE
+//  BRAIN PREWARM ENGINE — v15-IMMORTAL
 // ============================================================================
 function prewarmPulseOSBrain() {
   try {
@@ -497,7 +593,7 @@ function prewarmPulseOSBrain() {
 
     return true;
   } catch (err) {
-    console.error("[PulseOSBrain Prewarm v13] Failed:", err);
+    console.error("[PulseOSBrain Prewarm v15] Failed:", err);
     return false;
   }
 }
@@ -539,7 +635,7 @@ export function structuralError(expected, found, extraContext = {}) {
     ...extraContext
   };
 
-  PulseOSBrain.warn("[STRUCTURAL_ERROR v13]", payload);
+  PulseOSBrain.warn("[STRUCTURAL_ERROR v15]", payload);
   return payload;
 }
 
@@ -563,11 +659,11 @@ export async function loadOrganByDesign(designIdentity, expectedType, expectedSu
 
   if (candidates.length > 0) {
     const chosen = candidates[0];
-    PulseOSBrain.log(`🧠 [PulseOSBrain v13] Attached organ from ${chosen.path}`);
+    PulseOSBrain.log(`🧠 [PulseOSBrain v15] Attached organ from ${chosen.path}`);
     return chosen.module;
   }
 
-  PulseOSBrain.warn("[PulseOSBrain v13] No matching organ found for designIdentity.", {
+  PulseOSBrain.warn("[PulseOSBrain v15] No matching organ found for designIdentity.", {
     designIdentity,
     expected
   });
@@ -630,7 +726,6 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
 
   iqMap = PulseIQMap;
 
-
   if (intent) PulseOSBrain.intent = intent;
   if (organism) PulseOSBrain.PulseOrganismMap = organism;
 
@@ -659,10 +754,10 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
   const cortex = evolutionOrgan.bootCortex(PulseOSBrain, { band: "dual" });
   PulseOSBrain.cortex = cortex;
 
-  evolutionOrgan.recordLineage("brain-cognitive-bootstrap-v13-advantage", { band: "dual" });
+  evolutionOrgan.recordLineage("brain-cognitive-bootstrap-v15-immortal", { band: "dual" });
   evolutionOrgan.scanDrift(PulseOSBrain, { band: "dual" });
 
-  PulseOSBrain.log("🧠 [PulseOSBrain v13] cognitiveBootstrap complete (advantage-integrated).");
+  PulseOSBrain.log("🧠 [PulseOSBrain v15] cognitiveBootstrap complete (advantage-integrated, zero-network).");
 
   // Run healers once at boot, attach CNS state snapshot
   const diagnostics = getCNSDiagnostics();
@@ -673,29 +768,9 @@ export async function cognitiveBootstrap({ intent, organism, iqMap, understandin
 }
 
 // -------------------------------------------------------------------------
-// AUTO-CONNECT: Brain upstream world-lens fetch on load (view-only)
+// NOTE: v13 AUTO-CONNECT + connectToInternet REMOVED
 // -------------------------------------------------------------------------
-(async () => {
-  try {
-    const url = PulseOSBrain.PulseIQMap?.worldLensURL;
-    if (!url) {
-      PulseOSBrain.warn("No worldLensURL configured in IQMap.");
-      return;
-    }
-
-    const response = await fetch(url, { method: "GET", cache: "no-store" });
-    const data = await response.json();
-
-    PulseOSBrain.CNSWorldLensSnapshot = {
-      lastUpdated: Date.now(),
-      summary: data.summary || {},
-      sources: data.sources || [],
-      offlineSafe: true
-    };
-
-    PulseOSBrain.log("🧠 Brain world-lens auto-connected.");
-
-  } catch (err) {
-    PulseOSBrain.warn("Brain auto-connect failed:", err);
-  }
-})();
+// Brain no longer performs any fetch or network calls.
+// All internet-class behavior must be fulfilled by Castle/Expansion/Pulse-Net
+// using BrainIntent.emitNetworkIntent(...) and the apply*Snapshot(...) surfaces.
+// -------------------------------------------------------------------------

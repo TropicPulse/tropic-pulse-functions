@@ -121,7 +121,7 @@ export function createPulseRouter({
 
   // --------------------------------------------------------------------------
   // 2. Inputs (What the Router Can See)
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
   let meshSnapshot = null;        // from PulseMesh.getSnapshot()
   let castleSnapshot = null;      // from PulseCastle presence + state
   let expansionSnapshot = null;   // from PulseExpansion.buildExpansionPlan() + routeField
@@ -242,7 +242,7 @@ export function createPulseRouter({
 
   // --------------------------------------------------------------------------
   // 4. Routing Policy (A → B → A)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   const Policy = {
     A_baseline: {
       preferLocalCastle: true,
@@ -337,7 +337,7 @@ export function createPulseRouter({
 
   // --------------------------------------------------------------------------
   // 6. Decision Engine (Routing Decisions)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function decideRoute(request) {
     const mesh = getMeshSignals();
     const castle = getCastleSignals();
@@ -351,7 +351,8 @@ export function createPulseRouter({
     const castleLoad = castle.loadLevel;
 
     const userStress = userSignals.stressIndex;
-    const fallbackBandLevel = advantageField.fallbackBandLevel ?? userSignals.fallbackBandLevel ?? 0;
+    const fallbackBandLevel =
+      advantageField.fallbackBandLevel ?? userSignals.fallbackBandLevel ?? 0;
     const osBrainStatus = userSignals.osBrainStatus;
 
     // 0. If OS brain is unhealthy or fallback band is high, bias toward cloud
@@ -463,7 +464,7 @@ export function createPulseRouter({
 
   // --------------------------------------------------------------------------
   // 7. Route Suggestion Engine (Every-Advantage)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function suggestBetterRoutes() {
     if (!meshSnapshot || !castleSnapshot || !expansionSnapshot) {
       return { ok: false, reason: "missing-inputs" };

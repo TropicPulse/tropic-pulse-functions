@@ -1,19 +1,16 @@
 // ============================================================================
-// PULSE-WORLD : PulseUser-v12.3-Presence.js
+// PULSE-WORLD : PulseUser-v15-IMMORTAL-Presence.js
 // ORGAN TYPE: Local OS / Experience Orchestrator
-// VERSION: v13-PRESENCE-EVO+ (Hybrid, Every-Advantage, Context-Aware, Brain-Aware)
+// VERSION: v15-IMMORTAL-PRESENCE-EVO+ (Hybrid, Every-Advantage, Brain-Aware, Server-Attachable)
 // ============================================================================
 
-// PRIMARY OS / BINARY OS PULLER
-// This is the thing that actually knows how to boot brains / runtimes.
-// Swap this line to PulseOS-v11-Evo.js if that's your primary.
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseUser",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "presence_user",
   role: "presence_user_core",
-  lineage: "PulsePresence-v14",
+  lineage: "PulsePresence-v15-IMMORTAL",
 
   evo: {
     userCore: true,
@@ -49,16 +46,15 @@ AI_EXPERIENCE_META = {
 }
 */
 
-
 import * as PulseBinaryOS from "../PULSE-OS/PulseBinaryOS-v11-Evo-Max.js";
 
 // ============================================================================
 
 export const PulseWorldCoreMeta = Object.freeze({
-  organId: "PulseWorldCore-v13-PRESENCE-EVO+",
+  organId: "PulseWorldCore-v15-IMMORTAL-PRESENCE-EVO+",
   role: "LOCAL_OS",
-  version: "13-PRESENCE-EVO+",
-  epoch: "v13-PRESENCE-EVO+",
+  version: "15-IMMORTAL-PRESENCE-EVO+",
+  epoch: "v15-IMMORTAL-PRESENCE-EVO+",
   layer: "Experience",
   safety: Object.freeze({
     deterministic: true,
@@ -79,14 +75,14 @@ export const PulseWorldCoreMeta = Object.freeze({
     expansionAware: true,
     dualbandSafe: true,
     runtimeAware: true,
-    osBrainAware: true, // still true: we see brain via primary OS / binary OS puller
+    osBrainAware: true,      // we see brain via primary OS / binary OS puller
     userAttachedToBrain: true,
-    serverAttachedToUser: true
+    serverAttachedToUser: true // explicit: server attaches above user
   })
 });
 
 // ============================================================================
-// FACTORY: createPulseWorldCore — v13-PRESENCE-EVO+
+// FACTORY: createPulseWorldCore — v15-IMMORTAL-PRESENCE-EVO+
 // ============================================================================
 
 export function createPulseWorldCore({
@@ -98,7 +94,7 @@ export function createPulseWorldCore({
   // 1. Identity
   const Identity = Object.freeze({
     coreID: "PulseWorldCore",
-    version: "v13-PRESENCE-EVO+",
+    version: "v15-IMMORTAL-PRESENCE-EVO+",
     createdBy: "PulseOS",
     regionID,
     serverMode
@@ -111,7 +107,10 @@ export function createPulseWorldCore({
   let meshSnapshot = null;
   let expansionSnapshot = null;
 
-  // This is now the "primary OS / binary OS puller" attachment.
+  // Optional: explicit server bridge snapshot (PulseNetServerBridge / similar)
+  let serverBridgeSnapshot = null;
+
+  // This is the "primary OS / binary OS puller" attachment.
   // It may internally own OSBrain + runtimes.
   let primaryOSSnapshot = null; // PulseBinaryOS / PulseOS
   let runtimeSnapshot = null;   // Runtime / Brainstem (if you still attach it separately)
@@ -124,10 +123,12 @@ export function createPulseWorldCore({
     trace
   });
 
+  // ---------------------------------------------------------------------------
+  // Attachments
+  // ---------------------------------------------------------------------------
   function attachBeacon(snapshot) {
     beaconSnapshot = snapshot;
 
-    // allow beacon to see world core if it wants
     if (snapshot && typeof snapshot.attachWorldCore === "function") {
       snapshot.attachWorldCore({
         identity: Identity,
@@ -160,7 +161,8 @@ export function createPulseWorldCore({
       snapshot.attachWorldCore({
         identity: Identity,
         buildAdvantageContext,
-        getSnapshot
+        getSnapshot,
+        handleBrainNetworkIntent // allow castle to see brain intent path if needed
       });
     }
 
@@ -170,7 +172,6 @@ export function createPulseWorldCore({
   function attachMesh(snapshot) {
     meshSnapshot = snapshot;
 
-    // Mesh gets explicit user/world attachment
     if (snapshot && typeof snapshot.attachUser === "function") {
       snapshot.attachUser(userContext);
     }
@@ -192,6 +193,21 @@ export function createPulseWorldCore({
       snapshot.attachWorldCore({
         identity: Identity,
         buildAdvantageContext,
+        getSnapshot,
+        handleBrainNetworkIntent // expansion is primary handler for brain network intent
+      });
+    }
+
+    return { ok: true };
+  }
+
+  function attachServerBridge(snapshot) {
+    serverBridgeSnapshot = snapshot;
+
+    if (snapshot && typeof snapshot.attachWorldCore === "function") {
+      snapshot.attachWorldCore({
+        identity: Identity,
+        userContext,
         getSnapshot
       });
     }
@@ -203,13 +219,13 @@ export function createPulseWorldCore({
   function attachPrimaryOS(snapshot) {
     primaryOSSnapshot = snapshot;
 
-    // let OS see user/world context if it supports it
     if (snapshot && typeof snapshot.attachWorldCore === "function") {
       snapshot.attachWorldCore({
         identity: Identity,
         getSnapshot,
         buildAdvantageContext,
-        computeAdaptiveUI
+        computeAdaptiveUI,
+        handleBrainNetworkIntent // primary OS can forward BrainIntent up through user
       });
     }
 
@@ -220,7 +236,6 @@ export function createPulseWorldCore({
   function attachRuntime(snapshot) {
     runtimeSnapshot = snapshot;
 
-    // explicit user → brain attachment
     if (snapshot && typeof snapshot.attachUserContext === "function") {
       snapshot.attachUserContext(userContext);
     }
@@ -229,7 +244,8 @@ export function createPulseWorldCore({
         identity: Identity,
         getSnapshot,
         buildAdvantageContext,
-        computeAdaptiveUI
+        computeAdaptiveUI,
+        handleBrainNetworkIntent
       });
     }
 
@@ -237,7 +253,6 @@ export function createPulseWorldCore({
   }
 
   // If running under server, auto‑attach the primary OS module we imported.
-  // No brain boot here — primary OS handles that internally.
   if (serverMode === true) {
     attachPrimaryOS(PulseBinaryOS);
   }
@@ -279,7 +294,7 @@ export function createPulseWorldCore({
       fallbackBandIndicators: true,
       routeHealthIndicators: true,
       runtimeHealthIndicators: true,
-      osBrainHealthIndicators: true // via primary OS view
+      osBrainHealthIndicators: true
     },
     A_tools: {
       defaultTools: ["MyDay", "MyTools", "Evolution", "LocalPulse"],
@@ -317,7 +332,6 @@ export function createPulseWorldCore({
   }
 
   // 8. Primary OS / OSBrain View (read-only, via primary OS)
-  // Expect primaryOSSnapshot to expose something like getOSState / getBrainState.
   function getPrimaryOSView() {
     if (primaryOSSnapshot?.getOSState) {
       return primaryOSSnapshot.getOSState();
@@ -329,9 +343,6 @@ export function createPulseWorldCore({
   }
 
   // 9. Ask primary OS to spin a brain/runtime (delegated)
-  // This is the “server spins something that spins brains” hook,
-  // now correctly routed through the primary OS / binary OS puller,
-  // and enriched with user attachment.
   function requestBrainInstance(spawnRequest = {}) {
     if (!primaryOSSnapshot?.spawnRuntimeInstance &&
         !primaryOSSnapshot?.spawnBrainInstance) {
@@ -350,7 +361,46 @@ export function createPulseWorldCore({
     return primaryOSSnapshot.spawnBrainInstance(enriched);
   }
 
-  // 10. Adaptive UI Logic
+  // 10. Brain Network Intent Handling (Brain → User → Castle/Expansion/Server)
+  function handleBrainNetworkIntent(intent) {
+    // intent is what BrainIntent.emitNetworkIntent(...) produced
+    if (!intent || intent.intent !== "network-request") {
+      return { ok: false, reason: "invalid-intent" };
+    }
+
+    // Prefer Expansion as the main bridge to server / Pulse-Net
+    if (expansionSnapshot?.handleBrainNetworkIntent) {
+      return expansionSnapshot.handleBrainNetworkIntent({
+        intent,
+        userContext,
+        worldCoreIdentity: Identity,
+        serverBridge: serverBridgeSnapshot || null
+      });
+    }
+
+    // Fallback: Castle can also handle / forward
+    if (castleSnapshot?.handleBrainNetworkIntent) {
+      return castleSnapshot.handleBrainNetworkIntent({
+        intent,
+        userContext,
+        worldCoreIdentity: Identity,
+        serverBridge: serverBridgeSnapshot || null
+      });
+    }
+
+    // Last resort: direct server bridge, if attached
+    if (serverBridgeSnapshot?.handleBrainNetworkIntent) {
+      return serverBridgeSnapshot.handleBrainNetworkIntent({
+        intent,
+        userContext,
+        worldCoreIdentity: Identity
+      });
+    }
+
+    return { ok: false, reason: "no-brain-network-handler" };
+  }
+
+  // 11. Adaptive UI Logic
   function computeAdaptiveUI() {
     const ctx = buildAdvantageContext();
     const brain = getBrainView();
@@ -378,7 +428,7 @@ export function createPulseWorldCore({
     });
   }
 
-  // 11. Telemetry
+  // 12. Telemetry
   const Telemetry = {
     metrics: {
       sessionsStarted: 0,
@@ -387,7 +437,7 @@ export function createPulseWorldCore({
     }
   };
 
-  // 12. Snapshot
+  // 13. Snapshot
   function getSnapshot() {
     return Object.freeze({
       organId: PulseWorldCoreMeta.organId,
@@ -400,8 +450,9 @@ export function createPulseWorldCore({
         castle: castleSnapshot,
         mesh: meshSnapshot,
         expansion: expansionSnapshot,
-        primaryOS: primaryOSSnapshot, // primary OS / binary OS puller
-        runtime: runtimeSnapshot
+        primaryOS: primaryOSSnapshot,
+        runtime: runtimeSnapshot,
+        serverBridge: serverBridgeSnapshot
       },
       advantageContext: buildAdvantageContext(),
       brainView: getBrainView(),
@@ -411,7 +462,7 @@ export function createPulseWorldCore({
     });
   }
 
-  // 13. Public API
+  // 14. Public API
   return Object.freeze({
     meta: PulseWorldCoreMeta,
     identity: Identity,
@@ -424,6 +475,7 @@ export function createPulseWorldCore({
     attachExpansion,
     attachPrimaryOS,
     attachRuntime,
+    attachServerBridge,
 
     // routing
     requestRoute,
@@ -436,6 +488,9 @@ export function createPulseWorldCore({
     getBrainView,
     getPrimaryOSView,
     requestBrainInstance,
+
+    // brain network intent
+    handleBrainNetworkIntent,
 
     // introspection
     getSnapshot

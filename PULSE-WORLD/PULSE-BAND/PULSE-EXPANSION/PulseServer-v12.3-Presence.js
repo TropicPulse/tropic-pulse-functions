@@ -1,6 +1,6 @@
 // ============================================================================
-//  PULSE OS v13‑PRESENCE‑EVO+ — PULSE SERVER (EXEC ENGINE / ADVANTAGE HUB)
-//  PulseServer-v13-Presence
+//  PULSE OS v15‑IMMORTAL‑PRESENCE‑EVO+ — PULSE SERVER (EXEC ENGINE / ADVANTAGE HUB)
+//  PulseServer-v15-IMMORTAL-Presence
 //
 //  ROLE:
 //    - Deterministic compute / exec engine for the organism.
@@ -8,16 +8,17 @@
 //      reinterpreting organ math.
 //    - Binds: AdrenalSystem + Scheduler + Runtime v2 (+ Router/Overmind via Scheduler).
 //    - Single entrypoint for “server-as-compute” and “server-as-earn/flow”.
-//    - Now worldCore-aware, user-aware, mesh-aware, brain-aware.
+//    - WorldCore-aware, user-aware, mesh-aware, brain-aware, PulseNet-bridge-aware.
+//    - NO direct network fetch: all network is via higher PulseNet bridge / expansion.
 // ============================================================================
 
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseServer",
-  version: "v14-IMMORTAL",
+  version: "v15-IMMORTAL",
   layer: "presence_server",
   role: "presence_region_server",
-  lineage: "PulsePresence-v14",
+  lineage: "PulsePresence-v15-IMMORTAL",
 
   evo: {
     regionServer: true,
@@ -82,8 +83,8 @@ const {
 export const PulseServerMeta = Object.freeze({
   layer: "PulseServer",
   role: "PRESENCE_EXEC_ENGINE",
-  version: "v13-PRESENCE-EVO+",
-  identity: "PulseServer-v13-PRESENCE-EXEC-EVO+",
+  version: "v15-IMMORTAL-PRESENCE-EVO+",
+  identity: "PulseServer-v15-IMMORTAL-PRESENCE-EXEC",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -126,11 +127,12 @@ export const PulseServerMeta = Object.freeze({
     usesSchedulerOrgan: true,
     usesRuntimeV2: true,
 
-    // NEW v13+ integration
+    // Integration
     worldCoreAware: true,
     userContextAware: true,
     meshAware: true,
-    brainAware: true
+    brainAware: true,
+    pulseNetBridgeAware: true
   }),
 
   contract: Object.freeze({
@@ -163,15 +165,16 @@ export const PulseServerMeta = Object.freeze({
   }),
 
   lineage: Object.freeze({
-    root: "PulseOS-v13-PRESENCE-EVO+",
-    parent: "PulseProxy-v13-PRESENCE-EVO+",
+    root: "PulseOS-v15-IMMORTAL-PRESENCE-EVO+",
+    parent: "PulseProxy-v15-IMMORTAL-PRESENCE-EVO+",
     ancestry: [
       "PulseServer-v9",
       "PulseServer-v10",
       "PulseServer-v11",
       "PulseServer-v11-Evo",
       "PulseServer-v12-Evo",
-      "PulseServer-v12.3-PRESENCE-EVO+"
+      "PulseServer-v12.3-PRESENCE-EVO+",
+      "PulseServer-v13-PRESENCE-EVO+"
     ]
   })
 });
@@ -210,7 +213,6 @@ export class PulseServerJobResult {
 const jobResultCache = new Map();
 
 // Hot multi‑instance batch memory (symbolic only).
-// Example: we can reuse instanceContexts / currentStatesById across jobs.
 const hotInstanceBatches = new Map();
 
 function stableStringify(obj) {
@@ -231,7 +233,7 @@ function buildBatchKey(instances, currentStatesById, globalContinuancePolicy) {
 
 
 // ============================================================================
-//  CORE SERVER ENGINE — now worldCore/user/mesh aware
+//  CORE SERVER ENGINE — worldCore/user/mesh/PulseNet-bridge aware
 // ============================================================================
 export class PulseServerPresenceExec {
   constructor(config = {}) {
@@ -245,10 +247,12 @@ export class PulseServerPresenceExec {
       defaultMaxTicks: 3,
       defaultStopOnWorldLens: ["unsafe"],
 
-      // NEW: integration points
-      worldCore: null,   // PulseWorldCore instance (user orchestrator)
-      mesh: null,        // mesh environment / snapshot
-      userContext: null, // user / session context
+      // Integration points
+      worldCore: null,        // PulseWorldCore instance (user orchestrator)
+      mesh: null,             // mesh environment / snapshot
+      userContext: null,      // user / session context
+      pulseNetBridge: null,   // PulseNet bridge / expansion-level sender
+      brainNetworkMode: true, // allow brain-intent-shaped jobs
 
       ...config
     };
@@ -256,6 +260,7 @@ export class PulseServerPresenceExec {
     this.worldCore = this.config.worldCore || null;
     this.mesh = this.config.mesh || null;
     this.userContext = this.config.userContext || null;
+    this.pulseNetBridge = this.config.pulseNetBridge || null;
 
     this.scheduler = createPulseScheduler({
       defaultGlobalPolicy: this.config.defaultGlobalPolicy,
@@ -283,7 +288,9 @@ export class PulseServerPresenceExec {
     }
   }
 
-  // Allow late binding of worldCore / mesh / userContext
+  // --------------------------------------------------------------------------
+  // Integration hooks
+  // --------------------------------------------------------------------------
   attachWorldCore(worldCore) {
     this.worldCore = worldCore;
     if (worldCore && typeof worldCore.attachRuntime === "function") {
@@ -309,6 +316,16 @@ export class PulseServerPresenceExec {
     if (this.mesh && typeof this.mesh.attachUser === "function") {
       try {
         this.mesh.attachUser(userContext);
+      } catch {}
+    }
+    return { ok: true };
+  }
+
+  attachPulseNetBridge(pulseNetBridge) {
+    this.pulseNetBridge = pulseNetBridge;
+    if (pulseNetBridge && typeof pulseNetBridge.attachServer === "function") {
+      try {
+        pulseNetBridge.attachServer({ serverMeta: PulseServerMeta });
       } catch {}
     }
     return { ok: true };
@@ -383,7 +400,7 @@ export class PulseServerPresenceExec {
 
   // --------------------------------------------------------------------------
   // 2) Scheduler pipeline — Router + Overmind + Runtime (v1-style)
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   async runSchedulerPipeline({
     instances = [],
     currentStatesById = {},
@@ -417,7 +434,6 @@ export class PulseServerPresenceExec {
       dualBand,
       maxTicks: maxTicks ?? this.config.defaultMaxTicks,
       stopOnWorldLens: stopOnWorldLens ?? this.config.defaultStopOnWorldLens,
-      // pass advantage + user context into scheduler if it knows how to use it
       advantageContext,
       userContext: this.userContext || null
     });
@@ -461,8 +477,56 @@ export class PulseServerPresenceExec {
   }
 
   // --------------------------------------------------------------------------
-  // MAIN ENTRYPOINT — PulseServer job (now worldCore/user/mesh aware)
-// --------------------------------------------------------------------------
+  // 5) Brain-network-shaped helper — compute miner for BrainIntent
+  // --------------------------------------------------------------------------
+  async runBrainNetworkJob({
+    brainIntent,
+    instances = [],
+    currentStatesById = {},
+    globalContinuancePolicy = null,
+    dualBand = null,
+    maxTicks = null,
+    stopOnWorldLens = null,
+    adrenalPulse = null,
+    cacheKey = null
+  } = {}) {
+    if (!this.config.brainNetworkMode || !brainIntent) {
+      return this.runServerJob({
+        instances,
+        currentStatesById,
+        globalContinuancePolicy,
+        dualBand,
+        maxTicks,
+        stopOnWorldLens,
+        adrenalPulse,
+        cacheKey
+      });
+    }
+
+    const userRequest = {
+      source: "BrainIntent",
+      intent: brainIntent.intent,
+      payload: brainIntent.payload || null,
+      band: brainIntent.band || "symbolic",
+      userContext: this.userContext || null
+    };
+
+    return this.runServerJob({
+      instances,
+      currentStatesById,
+      globalContinuancePolicy,
+      userRequest,
+      dualBand,
+      maxTicks,
+      stopOnWorldLens,
+      adrenalPulse,
+      cacheKey
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // MAIN ENTRYPOINT — PulseServer job
+  // --------------------------------------------------------------------------
   async runServerJob({
     instances = [],
     currentStatesById = {},
@@ -476,7 +540,7 @@ export class PulseServerPresenceExec {
   } = {}) {
     const notes = [];
 
-    notes.push("PulseServer-v13-PRESENCE-EXEC-EVO+: starting job.");
+    notes.push("PulseServer-v15-IMMORTAL-PRESENCE-EXEC: starting job.");
 
     // 0) Job cache check
     const cached = this.maybeGetCachedJob(cacheKey);
@@ -510,7 +574,7 @@ export class PulseServerPresenceExec {
         : "New batch stored as hot for future reuse."
     );
 
-    // 1) Adrenal tick (compute starter / circulation)
+    // 1) Adrenal tick
     const {
       adrenalTickAccepted,
       adrenalMeta
@@ -522,7 +586,7 @@ export class PulseServerPresenceExec {
         : "Adrenal tick skipped (disabled)."
     );
 
-    // 2) Scheduler pipeline (Router + Overmind + Runtime v1)
+    // 2) Scheduler pipeline
     const {
       schedulerPipeline,
       schedulerMeta
@@ -542,7 +606,7 @@ export class PulseServerPresenceExec {
         : "Scheduler pipeline skipped (disabled)."
     );
 
-    // 3) Optional direct Runtime v2 tick (same instances/states, same policy)
+    // 3) Optional direct Runtime v2 tick
     let runtimeV2TickResult = null;
     if (this.config.enableRuntimeV2DirectTick) {
       runtimeV2TickResult = this.runRuntimeV2IfEnabled({
@@ -556,7 +620,7 @@ export class PulseServerPresenceExec {
       notes.push("Runtime v2 direct tick skipped (disabled).");
     }
 
-    // 4) Runtime v2 introspection snapshot (hot-state + frames)
+    // 4) Runtime v2 introspection snapshot
     const runtimeStateV2 = getRuntimeStateV2();
     notes.push("Runtime v2 state snapshot captured (hot-state + binary frames).");
 
@@ -584,6 +648,7 @@ export class PulseServerPresenceExec {
       worldCoreSnapshot,
       meshSnapshot,
       userContext: this.userContext || null,
+      pulseNetBridgeAttached: !!this.pulseNetBridge,
       notes
     });
 
@@ -620,7 +685,10 @@ export function createPulseServer(config = {}) {
       return core.runServerJob(payload);
     },
 
-    // expose integration hooks if caller wants to wire after creation
+    async runBrainNetworkJob(payload) {
+      return core.runBrainNetworkJob(payload);
+    },
+
     attachWorldCore(worldCore) {
       return core.attachWorldCore(worldCore);
     },
@@ -629,9 +697,12 @@ export function createPulseServer(config = {}) {
     },
     attachUserContext(userContext) {
       return core.attachUserContext(userContext);
+    },
+    attachPulseNetBridge(pulseNetBridge) {
+      return core.attachPulseNetBridge(pulseNetBridge);
     }
   });
 }
 
-// Default singleton-style instance (no worldCore/mesh until attached)
+// Default singleton-style instance (no worldCore/mesh/bridge until attached)
 export const pulseServer = createPulseServer();
