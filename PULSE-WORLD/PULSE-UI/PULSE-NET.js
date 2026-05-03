@@ -80,8 +80,8 @@ AI_EXPERIENCE_META = {
 
 import { createForwardEngine } from "./ForwardEngine.js";
 import { createBackwardEngine } from "./BackwardEngine.js";
-import PulseUIErrors from "./PulseUIErrors-v13-EVO-PRIME.js";
-import { initUIFlow } from "./PulseUIFlow-v13-EVO-PRIME.js";
+import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
+import { initUIFlow } from "./PulseUIFlow-v12-Evo.js";
 import { safeRoute as route } from "./PulseProofBridge.js";
 
 // ============================================================================

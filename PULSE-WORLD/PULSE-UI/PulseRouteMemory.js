@@ -67,7 +67,7 @@ EXPORT_META = {
 
 */
 
-import PulseUIErrors from "./PulseUIErrors-v13-EVO-PRIME.js";
+import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
 import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 
 export const RouteMemoryRole = {
