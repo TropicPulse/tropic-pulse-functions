@@ -77,12 +77,18 @@ AI_EXPERIENCE_META = {
   }
 }
 */
+// ============================================================================
+// PULSE-NET v14-IMMORTAL — Backend Gateway + Crown Throne Room
+//  • Single internet edge (via NetworkOrgan → route(...))
+//  • Hybrid crown model: OvermindPrime sees heartbeats + AI requests
+// ============================================================================
 
+import { aiOvermindPrime } from "../PULSE-AI/aiOvermindPrime.js";
 import { createForwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/ForwardEngine.js";
 import { createBackwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/BackwardEngine.js";
-import PulseUIErrors from "../PulseUIErrors-v12-Evo.js";
-import { initUIFlow } from "../PulseUIFlow-v12-Evo.js";
-import { safeRoute as route } from "../PulseProofBridge.js";
+import PulseUIErrors from "../_CONNECTORS/PulseUIErrors-v12-Evo.js";
+import { initUIFlow } from "../_CONNECTORS/PulseUIFlow-v12-Evo.js";
+import { safeRoute as route } from "./PulseProofBridge.js";
 
 // ============================================================================
 // GLOBAL ORGANISM MEMORY (shared across all imports)
@@ -122,10 +128,7 @@ function getNetState(instanceId) {
 }
 
 // ============================================================================
-// GLOBAL INGRESS QUEUES — EXPANSION/CASTLE/SERVER/USER/BRAIN/SOLDIER
-//  • No imports from those organs.
-//  • They reach us via routing channels (PulseProofBridge / server).
-//  • This file is the only internet edge: NetworkOrgan uses route(...).
+// GLOBAL INGRESS QUEUES — EXPANSION/CASTLE/SERVER/USER/BRAIN/SOLDIER/MESH
 // ============================================================================
 globalThis.__PULSE_NET_INGRESS__ = globalThis.__PULSE_NET_INGRESS__ || {
   expansion: [],
@@ -178,12 +181,8 @@ const BrainOrgan = {
 
 // ============================================================================
 // NETWORK ORGAN — THE ONLY INTERNET EDGE
-//  • Everything external goes through here.
-//  • Expansion/Castle/Server/User/Brain/Soldier signals are normalized here.
-//  • Uses route(...) to talk to independent PulseNet server (symbolic).
 // ============================================================================
 const NetworkOrgan = {
-  // symbolic channel names for server-side PulseNet
   channels: {
     expansion: "pulseNet.server.expansion",
     castle: "pulseNet.server.castle",
@@ -313,9 +312,92 @@ function warmBackwardEngine(instanceId) {
 }
 
 // ============================================================================
+// OVERMIND INTEGRATION HELPERS
+//  • Hybrid C: Overmind sees heartbeats + explicit AI requests
+// ============================================================================
+
+// Crown call for runtime learning (heartbeat/meta only; output ignored)
+async function overmindHeartbeatSample(instanceId, tickResult) {
+  try {
+    const organism = getOrganism(instanceId);
+
+    const intent = {
+      type: "heartbeat",
+      source: "PulseNet",
+      instanceId
+    };
+
+    const context = {
+      domain: "system",
+      scope: "heartbeat",
+      safetyMode: "strict",
+      instanceId,
+      timestamp: Date.now(),
+      deltaSinceLastBeat: Date.now() - (organism.lastHeartbeat || 0),
+      organismSnapshot: {
+        id: organism.id,
+        forwardTicks: organism.forwardTicks,
+        backwardTicks: organism.backwardTicks,
+        lastHeartbeat: organism.lastHeartbeat,
+        lastAIHeartbeat: organism.lastAIHeartbeat,
+        lastBeatSource: organism.lastBeatSource
+      },
+      tickResult
+    };
+
+    const candidates = [
+      {
+        text: JSON.stringify({
+          instanceId,
+          organism: context.organismSnapshot,
+          tickResult
+        })
+      }
+    ];
+
+    // We don't care about finalOutput here; we want memory/experience/evoWindow updates
+    await aiOvermindPrime.process({ intent, context, candidates });
+  } catch {
+    // crown learning is non-fatal for runtime
+  }
+}
+
+// Public AI gateway: frontend archetypes → PulseNet → OvermindPrime
+export async function pulseNetAI({ intent, context, candidates }) {
+  try {
+    const safeIntent = intent || { type: "generic", source: "frontend" };
+    const safeContext = {
+      ...(context || {}),
+      domain: context?.domain || "user",
+      scope: context?.scope || "conversation"
+    };
+
+    const safeCandidates = Array.isArray(candidates) ? candidates : [];
+    const result = await aiOvermindPrime.process({
+      intent: safeIntent,
+      context: safeContext,
+      candidates: safeCandidates
+    });
+
+    return result;
+  } catch (err) {
+    try {
+      const packet = PulseUIErrors.normalizeError(err, "PulseNet.pulseNetAI");
+      PulseUIErrors.broadcast(packet);
+    } catch {}
+    return {
+      finalOutput:
+        "PulseNet encountered an issue while processing this AI request.",
+      meta: {
+        error: true,
+        source: "PulseNet.pulseNetAI"
+      }
+    };
+  }
+}
+
+// ============================================================================
 // INGRESS PROCESSOR — SOLDIERS / EXPANSION / CASTLES / MESH
-//  • Drains queues each tick.
-//  • Normalizes and forwards to NetworkOrgan (only internet edge).
 // ============================================================================
 async function processIngress(instanceId) {
   const ingress = getIngress();
@@ -346,22 +428,28 @@ async function processIngress(instanceId) {
 // ============================================================================
 // 3-HEART MESH (Mom / Dad / Earn) + random nudge
 // ============================================================================
-
-// Mom Heart — primary beat: forward engine + organism heartbeat
 function momHeart(instanceId, now) {
   runOrganismHeartbeat(instanceId, "mom");
   const forwardMetrics = warmForwardEngine(instanceId);
-  return { source: "mom", forward: forwardMetrics };
+  return {
+  source: "mom",
+  forward: forwardMetrics,
+  ts: now
+};
+
 }
 
-// Dad Heart — fallback beat: backward engine + AI heartbeat
 function dadHeart(instanceId, now) {
   runAIHeartbeat(instanceId, "dad");
   const backwardMetrics = warmBackwardEngine(instanceId);
-  return { source: "dad", backward: backwardMetrics };
+  return {
+  source: "dad",
+  forward: backwardMetrics,
+  ts: now
+};
+
 }
 
-// Earn Heart — tertiary beat: both engines if stale, light touch if not
 function earnHeart(instanceId, now, stale) {
   if (stale) {
     runOrganismHeartbeat(instanceId, "earn-stale");
@@ -371,16 +459,15 @@ function earnHeart(instanceId, now, stale) {
     return {
       source: "earn-stale",
       forward: forwardMetrics,
-      backward: backwardMetrics
+      backward: backwardMetrics,
+      ts: now
     };
   } else {
-    // light nudge: just ensure organism time moves
     runOrganismHeartbeat(instanceId, "earn-soft");
     return { source: "earn-soft" };
   }
 }
 
-// Random nudge — probabilistic extra push
 function randomNudge(instanceId, now) {
   if (Math.random() > 0.97) {
     runOrganismHeartbeat(instanceId, "random");
@@ -393,56 +480,58 @@ function randomNudge(instanceId, now) {
 // ============================================================================
 // LOCAL IMMORTAL LOOP (NO NETLIFY, NO HANDLER)
 //  • Now also processes ingress each tick.
-//  • Heartbeat still pings CNS, but NetworkOrgan is the only internet edge.
+//  • OvermindPrime samples organism state each tick (hybrid C).
 // ============================================================================
 async function tickFamily(instanceId = "core") {
   const now = Date.now();
   const { last } = getHeartbeatState(instanceId);
   const delta = now - (last || 0);
-
-  const stale = delta > 90 * 1000;      // organism stale
-  const softStale = delta > 15 * 1000;  // soft fallback threshold
+  
+  const stale = delta > 90 * 1000;
+  const softStale = delta > 15 * 1000;
+  const temporalDrift = delta > 300000; // 5 minutes without a beat
 
   let result = null;
 
-  // 0) Process ingress from Expansion/Castle/Server/User/Brain/Soldier/Mesh
+  // 0) Process ingress
   await processIngress(instanceId);
 
-  // 1) Mom tries first (primary beat)
+  // 1) Mom tries first
   if (!stale) {
     result = momHeart(instanceId, now);
   } else {
     console.log("[PULSE-NET]", instanceId, "Mom stale, escalating to Dad/Earn");
   }
 
-  // 2) If Mom is stale or soft-stale, let Dad step in
+  // 2) Dad fallback / soft-stale
   if (!result || softStale) {
     const dadResult = dadHeart(instanceId, now);
     result = { ...(result || {}), ...dadResult };
   }
 
-  // 3) If fully stale, Earn does a heavy rescue beat
+  // 3) Earn heavy/soft beat
   if (stale) {
     const earnResult = earnHeart(instanceId, now, true);
     result = { ...(result || {}), ...earnResult };
   } else {
-    // non-stale: Earn does a soft continuity beat
     const earnResult = earnHeart(instanceId, now, false);
     result = { ...(result || {}), ...earnResult };
   }
 
-  // 4) Random nudge as extra beat source
+  // 4) Random nudge
   const rnd = randomNudge(instanceId, now);
   if (rnd) {
     result = { ...(result || {}), ...rnd };
   }
 
-  // 5) UIFlow + CNS + ErrorSpine awareness (local only) + heartbeat via NetworkOrgan
+  // 4.5) OvermindPrime heartbeat sampling (learning only)
+  await overmindHeartbeatSample(instanceId, { ...result, temporalDrift });
+
+
+  // 5) UIFlow + CNS + ErrorSpine awareness + heartbeat via NetworkOrgan
   try {
-    // Ping CNS / PulseNet server with heartbeat via NetworkOrgan
     await NetworkOrgan.sendHeartbeat(instanceId, getOrganism(instanceId), result);
 
-    // Light UIFlow ignition on first ticks (idempotent)
     if (typeof window !== "undefined" && !window.__PULSE_UIFLOW_BOOTED__) {
       window.__PULSE_UIFLOW_BOOTED__ = true;
       initUIFlow().catch(() => {
@@ -467,8 +556,8 @@ async function tickFamily(instanceId = "core") {
 export function startPulseNet(options = {}) {
   const {
     instanceId = "core",
-    intervalMs = 750,      // slightly faster in dev; can be raised in prod
-    superInstance = true   // reserved flag for future tuning
+    intervalMs = 750,
+    superInstance = true
   } = options;
 
   const state = getNetState(instanceId);
@@ -504,11 +593,7 @@ export function startPulseNet(options = {}) {
 
 // ============================================================================
 // PUBLIC INGRESS API — CALLED VIA ROUTING, NOT IMPORTS
-//  • Expansion/Castle/Server/User/Brain/Soldier/Mesh send symbolic packets.
-//  • These are queued and flushed each tick via NetworkOrgan.
-//  • This keeps PulseNet as the single internet edge.
 // ============================================================================
-
 export function pulseNetIngressFromExpansion(packet) {
   enqueueIngress("expansion", packet);
 }

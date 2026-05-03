@@ -59,7 +59,7 @@ AI_EXPERIENCE_META = {
 */
 
 console.log("Monitor");
-import { log, warn, error } from "./PulseProofLogger.js";
+import { log, warn, error } from "../_BACKEND/PulseProofLogger.js";
 
 const g =
   typeof global !== "undefined"

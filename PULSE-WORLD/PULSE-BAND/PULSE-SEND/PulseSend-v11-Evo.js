@@ -197,6 +197,61 @@ function buildReturnSurface(result) {
   };
 }
 
+// ============================================================================
+// ⭐ Pulse Intelligence (logic-only, IMMORTAL-safe)
+// ============================================================================
+function computePulseIntelligence({ advantageField, presenceField, factoringSignal, band }) {
+  const advantageScore = advantageField.advantageScore || 0;
+  const advantageTier  = advantageField.advantageTier  || 0;
+
+  const presenceTier = presenceField.presenceTier || "idle";
+  const presenceWeight =
+    presenceTier === "critical" ? 1.0 :
+    presenceTier === "high"     ? 0.8 :
+    presenceTier === "elevated" ? 0.6 :
+    presenceTier === "soft"     ? 0.4 :
+    0.2;
+
+  const factoring = factoringSignal ? 1 : 0;
+  const bandIsBinary = band === "binary" ? 1 : 0;
+
+  const solvednessScore = Math.max(
+    0,
+    Math.min(
+      advantageScore * 10 * 0.5 +
+      presenceWeight * 0.3 +
+      factoring * 0.2,
+      1
+    )
+  );
+
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "highValue"    :
+    solvednessScore >= 0.4 ? "normal"       :
+    solvednessScore >= 0.2 ? "lowPriority"  :
+    "avoidCompute";
+
+  const readinessScore = Math.max(
+    0,
+    Math.min(
+      solvednessScore * 0.6 +
+      (bandIsBinary ? 0.2 : 0) +
+      (advantageTier >= 2 ? 0.2 : advantageTier === 1 ? 0.1 : 0),
+      1
+    )
+  );
+
+  return {
+    solvednessScore,
+    factoringSignal: factoring ? "high" : "low",
+    computeTier,
+    readinessScore,
+    band,
+    advantageTier
+  };
+}
+
 
 // ============================================================================
 //  12.3+ surfaces — cacheChunk / prewarm / presence
@@ -313,9 +368,8 @@ function buildTechSurface({ jobId, pattern, payload, priority, returnTo, mode })
   };
 }
 
-
 // ============================================================================
-//  FACTORY — Build the Full PulseSend v12.3 Organism (Symbolic Edition)
+//  FACTORY — Build the Full PulseSend v14.4 IMMORTAL-INTEL Organism
 // ============================================================================
 export function createPulseSend({
   createPulseV3,
@@ -338,7 +392,7 @@ export function createPulseSend({
     try {
       sdn.emitImpulse(source, payload);
     } catch (e) {
-      log && log("[PulseSend-v12.3] SDN emit failed (non-fatal)", { source, error: e });
+      log && log("[PulseSend-v14.4] SDN emit failed (non-fatal)", { source, error: e });
     }
   }
 
@@ -474,6 +528,14 @@ export function createPulseSend({
       mode
     });
 
+    // ⭐ INTELLIGENCE (v14.4 IMMORTAL-INTEL)
+    const pulseIntelligence = computePulseIntelligence({
+      advantageField: pulse.advantageField || {},
+      presenceField: pulse.presenceField || {},
+      factoringSignal: pulse.factoringSignal || null,
+      band: pulse.band || "symbolic"
+    });
+
     // ⭐ Return full telemetry
     return {
       PulseRole,
@@ -481,6 +543,9 @@ export function createPulseSend({
       result,
       mode,
       pulseType,
+
+      // ⭐ top-level intelligence
+      pulseIntelligence,
 
       fallbackSurface,
       routeSurface,
@@ -494,12 +559,18 @@ export function createPulseSend({
 
       techSurface,
 
-      diagnostics: buildSendDiagnostics({
-        jobId,
-        pattern,
-        mode,
-        pulseType
-      })
+      diagnostics: {
+        ...buildSendDiagnostics({
+          jobId,
+          pattern,
+          mode,
+          pulseType
+        }),
+
+        // ⭐ mirrored intelligence + signature
+        pulseIntelligence,
+        pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence))
+      }
     };
   }
 
@@ -511,14 +582,14 @@ export function createPulseSend({
 
 
 // ============================================================================
-//  ORGAN EXPORT — ⭐ PulseSend (v12.3)
+//  ORGAN EXPORT — ⭐ PulseSend (v14.4 IMMORTAL-INTEL)
 // ============================================================================
 export const PulseSend = {
   PulseRole,
 
   send(...args) {
     throw new Error(
-      "[PulseSend-v12.3] PulseSend.send() was called before initialization. " +
+      "[PulseSend-v14.4] PulseSend.send() was called before initialization. " +
       "Use createPulseSend(...) to wire dependencies."
     );
   }

@@ -49,14 +49,14 @@ export const OrganismMeta = Object.freeze({
     pipelineAware: true,
     reflexAware: true,
     memoryAware: true,
-    metabolismAware: true,     // ⭐ NEW
-    hormonesAware: true,       // ⭐ NEW
-    immunityAware: true,       // ⭐ NEW
-    nervousSystemAware: true,  // ⭐ NEW
-    conductorAware: true,      // ⭐ NEW
-    windowAware: true,         // ⭐ NEW
-    packetAware: true,         // ⭐ NEW
-    prewarmAware: true,        // ⭐ NEW
+    metabolismAware: true,
+    hormonesAware: true,
+    immunityAware: true,
+    nervousSystemAware: true,
+    conductorAware: true,
+    windowAware: true,
+    packetAware: true,
+    prewarmAware: true,
     multiInstanceReady: true,
     epoch: "12.3-Presence"
   }),
@@ -103,7 +103,96 @@ import { createAIBinaryImmunity } from "./aiImmunity.js";
 import { createAIBinaryNervousSystem } from "./aiNervousSystem.js";
 
 // ============================================================================
-//  ORGANISM IMPLEMENTATION — v11.3‑EVO
+//  COMMANDMENTS / SUPEREGO LAYER
+// ============================================================================
+import { createPersonaEngine } from "../PULSE-AI/persona.js";
+import { createBoundariesEngine } from "../PULSE-AI/boundaries.js";
+import { createPermissionsEngine } from "../PULSE-AI/permissions.js";
+
+// ============================================================================
+//  COGNITIVE FRAME / CONTEXT / CORTEX
+// ============================================================================
+import createCognitiveFrame, {
+  COGNITIVE_FRAME_META,
+  prewarmCognitiveFrame
+} from "../PULSE-AI/aiContext.js";
+
+import {
+  createContextEngine,
+  prewarmContextEngine
+} from "../PULSE-AI/aiContextEngine.js";
+
+import {
+  createCortex,
+  prewarmAICortex
+} from "../PULSE-AI/aiCortex-v11-Evo.js";
+
+// ============================================================================
+//  EMOTION / EXPERIENCE / PERSONALITY
+// ============================================================================
+import aiEmotionEngine, {
+  prewarmEmotionEngine
+} from "../PULSE-AI/aiEmotionEngine.js";
+
+import createExperienceEngine from "../PULSE-AI/aiExperience.js";
+
+import { createPersonalityEngine } from "../PULSE-AI/aiPersonalityEngine.js";
+
+import { createPersonalFrame } from "../PULSE-AI/aiPersonalFrame.js";
+
+// ============================================================================
+//  DELIVERY / EVOLUTION / DUALBAND
+// ============================================================================
+import aiDeliveryEngine, {
+  prewarmDeliveryEngine
+} from "../PULSE-AI/aiDeliveryEngine.js";
+
+import { aiEvolutionEngine } from "../PULSE-AI/aiEvolutionEngine.js";
+
+import { aiDualBand } from "../PULSE-AI/aiDualBand-v11-Evo.js";
+
+// ============================================================================
+//  SCRIBE / DIAGNOSTICS / DEPS
+// ============================================================================
+import {
+  SCRIBE_META,
+  formatDebugReport,
+  formatDebugString,
+  prewarmScribe
+} from "../PULSE-AI/aiDebug.js";
+
+import {
+  DiagnosticsMeta,
+  createDiagnosticsState,
+  attachDiagnosticsOrgan,
+  createDiagnosticsAPI,
+  prewarmDiagnosticsOrgan
+} from "../PULSE-AI/aiDiagnostics.js";
+
+import {
+  DiagnosticsWriteMeta,
+  createDiagnosticsWriteOrgan,
+  prewarmDiagnosticsWriteOrgan
+} from "../PULSE-AI/aiDiagnosticsWrite.js";
+
+import depsSurface, {
+  DepsMeta,
+  getDb,
+  getFsAPI,
+  getRouteAPI,
+  getSchemaAPI,
+  getOrganismSnapshot,
+  emitDepsPacket,
+  prewarmDepsLayer
+} from "../PULSE-AI/aiDeps.js";
+
+// ============================================================================
+//  AI ENGINE / ORGANISM LOADER
+// ============================================================================
+import { runAI, ExecutionEngineMeta } from "../PULSE-AI/aiEngine.js";
+
+// ============================================================================
+//  ORGANISM IMPLEMENTATION — v14 IMMORTAL‑INTEL (A‑B‑A UPGRADE)
 // ============================================================================
 export class AIOrganism {
   constructor(config = {}) {
@@ -111,7 +200,7 @@ export class AIOrganism {
     this.trace = !!config.trace;
 
     // ---------------------------------------------------------
-    //  CREATE ORGANS — v11.3‑EVO canonical IDs
+    //  CREATE ORGANS — v11.3‑EVO canonical IDs (A: binary layer)
     // ---------------------------------------------------------
     this.agent = createAIBinaryAgent({ id: "agent", trace: this.trace });
 
@@ -121,7 +210,11 @@ export class AIOrganism {
       trace: this.trace
     });
 
-    this.pipeline = createAIBinaryPipeline({ id: "pipeline", trace: this.trace });
+    this.pipeline = createAIBinaryPipeline({
+      id: "pipeline",
+      trace: this.trace
+    });
+
     this.reflex = createAIBinaryReflex({ id: "reflex", trace: this.trace });
 
     this.metabolism = createAIBinaryMetabolism({
@@ -159,7 +252,7 @@ export class AIOrganism {
       encoder: this.agent,
       anatomy: config.anatomy,
       immunity: this.immunity,
-      registry: config.registry,
+      registry: this.registry,
       logger: config.logger,
       trace: this.trace
     });
@@ -207,9 +300,137 @@ export class AIOrganism {
     });
 
     // ---------------------------------------------------------
+    //  SUPEREGO / COMMANDMENTS LAYER (B: symbolic layer)
+    // ---------------------------------------------------------
+    this.persona = createPersonaEngine({
+      id: "persona",
+      trace: this.trace
+    });
+
+    this.boundaries = createBoundariesEngine({
+      id: "boundaries",
+      trace: this.trace
+    });
+
+    this.permissions = createPermissionsEngine({
+      id: "permissions",
+      trace: this.trace
+    });
+
+    // ---------------------------------------------------------
+    //  COGNITIVE FRAME / CONTEXT / CORTEX
+    // ---------------------------------------------------------
+    this.cognitiveFrame = createCognitiveFrame({
+      id: "cognitive-frame",
+      trace: this.trace
+    });
+
+    this.contextEngine = createContextEngine({
+      id: "context-engine",
+      trace: this.trace
+    });
+
+    this.cortex = createCortex({
+      id: "cortex",
+      trace: this.trace
+    });
+
+    // ---------------------------------------------------------
+    //  EMOTION / EXPERIENCE / PERSONALITY
+    // ---------------------------------------------------------
+    this.emotion = aiEmotionEngine({
+      id: "emotion",
+      trace: this.trace
+    });
+
+    this.experience = createExperienceEngine({
+      id: "experience",
+      trace: this.trace
+    });
+
+    this.personality = createPersonalityEngine({
+      id: "personality",
+      trace: this.trace
+    });
+
+    this.personalFrame = createPersonalFrame({
+      id: "personal-frame",
+      trace: this.trace
+    });
+
+    // ---------------------------------------------------------
+    //  SYMBOLIC EVOLUTION / DELIVERY / DUALBAND
+    // ---------------------------------------------------------
+    this.symbolicEvolution = aiEvolutionEngine({
+      id: "symbolic-evolution",
+      trace: this.trace
+    });
+
+    this.delivery = aiDeliveryEngine({
+      id: "delivery",
+      trace: this.trace
+    });
+
+    this.dualband = aiDualBand({
+      id: "dualband",
+      trace: this.trace
+    });
+
+    // ---------------------------------------------------------
+    //  SCRIBE / DIAGNOSTICS / DEPS
+    // ---------------------------------------------------------
+    this.scribe = prewarmScribe({
+      id: "scribe",
+      trace: this.trace
+    });
+
+    const diagnosticsState = createDiagnosticsState();
+
+    this.diagnostics = createDiagnosticsAPI({
+      id: "diagnostics",
+      state: diagnosticsState,
+      trace: this.trace
+    });
+
+    attachDiagnosticsOrgan(this.diagnostics, diagnosticsState);
+
+    this.diagnosticsWrite = createDiagnosticsWriteOrgan({
+      id: "diagnostics-write",
+      trace: this.trace
+    });
+
+    this.deps = depsSurface({
+      id: "deps",
+      trace: this.trace
+    });
+
+    // ---------------------------------------------------------
+    //  META SURFACES / ENGINE HANDLE
+    // ---------------------------------------------------------
+    this.meta = {
+      organism: OrganismMeta,
+      contextFrame: COGNITIVE_FRAME_META,
+      scribe: SCRIBE_META,
+      diagnostics: DiagnosticsMeta,
+      diagnosticsWrite: DiagnosticsWriteMeta,
+      deps: DepsMeta,
+      engine: ExecutionEngineMeta
+    };
+
+    this.engine = {
+      run: (payload) =>
+        runAI({
+          ...payload,
+          organism: this,
+          meta: this.meta
+        })
+    };
+
+    // ---------------------------------------------------------
     //  REGISTER ORGANS WITH CONDUCTOR
     // ---------------------------------------------------------
     const organs = [
+      // binary
       this.agent,
       this.memory,
       this.pipeline,
@@ -224,7 +445,34 @@ export class AIOrganism {
       this.logger,
       this.pageScannerAdapter,
       this.governorAdapter,
-      this.conductor
+      this.conductor,
+
+      // superego / commandments
+      this.persona,
+      this.boundaries,
+      this.permissions,
+
+      // cognitive
+      this.cognitiveFrame,
+      this.contextEngine,
+      this.cortex,
+
+      // emotional / identity
+      this.emotion,
+      this.experience,
+      this.personality,
+      this.personalFrame,
+
+      // symbolic evolution / delivery / dualband
+      this.symbolicEvolution,
+      this.delivery,
+      this.dualband,
+
+      // diagnostics / deps / engine
+      this.scribe,
+      this.diagnostics,
+      this.diagnosticsWrite,
+      this.deps
     ];
 
     for (const organ of organs) {
@@ -232,7 +480,7 @@ export class AIOrganism {
     }
 
     // ---------------------------------------------------------
-    //  WIRING — v11.3‑EVO canonical wiring
+    //  WIRING — v11.3‑EVO canonical wiring (A: binary)
     // ---------------------------------------------------------
     this.conductor.wireBinaryPipeline({
       pipeline: this.pipeline,
@@ -258,7 +506,68 @@ export class AIOrganism {
     });
 
     // ---------------------------------------------------------
-    //  INITIALIZE ORGANISM
+    //  SYMBOLIC WIRING (B: symbolic)
+    // ---------------------------------------------------------
+    if (this.conductor.wireSymbolicCognition) {
+      this.conductor.wireSymbolicCognition({
+        persona: this.persona,
+        boundaries: this.boundaries,
+        permissions: this.permissions,
+        cognitiveFrame: this.cognitiveFrame,
+        contextEngine: this.contextEngine,
+        cortex: this.cortex
+      });
+    }
+
+    if (this.conductor.wireSymbolicIdentity) {
+      this.conductor.wireSymbolicIdentity({
+        emotion: this.emotion,
+        experience: this.experience,
+        personality: this.personality,
+        personalFrame: this.personalFrame
+      });
+    }
+
+    if (this.conductor.wireSymbolicEvolution) {
+      this.conductor.wireSymbolicEvolution({
+        symbolicEvolution: this.symbolicEvolution,
+        delivery: this.delivery,
+        dualband: this.dualband
+      });
+    }
+
+    if (this.conductor.wireDiagnostics) {
+      this.conductor.wireDiagnostics({
+        scribe: this.scribe,
+        diagnostics: this.diagnostics,
+        diagnosticsWrite: this.diagnosticsWrite,
+        deps: this.deps
+      });
+    }
+
+    // ---------------------------------------------------------
+    //  PREWARM — symbolic + cognitive + diagnostics (B)
+    // ---------------------------------------------------------
+    prewarmCognitiveFrame(this.cognitiveFrame);
+    prewarmContextEngine(this.contextEngine);
+    prewarmAICortex(this.cortex);
+
+    prewarmEmotionEngine(this.emotion);
+    prewarmDeliveryEngine(this.delivery);
+
+    prewarmDiagnosticsOrgan(this.diagnostics);
+    prewarmDiagnosticsWriteOrgan(this.diagnosticsWrite);
+    prewarmDepsLayer(this.deps);
+
+    // ---------------------------------------------------------
+    //  OPTIONAL SELF-RUNNING ENGINE (Mode 3)
+    // ---------------------------------------------------------
+    if (config.autoRunEngine) {
+      this.startEngine();
+    }
+
+    // ---------------------------------------------------------
+    //  INITIALIZE ORGANISM (A: unified boot)
     // ---------------------------------------------------------
     this.conductor.initialize(this.registry, this.evolution);
 
@@ -269,8 +578,8 @@ export class AIOrganism {
   }
 
   // ---------------------------------------------------------
-  //  PUBLIC API
-  // ---------------------------------------------------------
+  //  PUBLIC API (A: unchanged external surface)
+// ---------------------------------------------------------
   sense(event) {
     this.pageScannerAdapter._handleScannerEvent(event);
   }
@@ -287,7 +596,63 @@ export class AIOrganism {
   }
 
   organismSnapshot() {
-    return this.memory.snapshot();
+    // use deps snapshot if available, fall back to memory
+    try {
+      return getOrganismSnapshot(this.deps) || this.memory.snapshot();
+    } catch {
+      return this.memory.snapshot();
+    }
+  }
+
+  // ---------------------------------------------------------
+  //  ENGINE CONTROL / SELF-RUNNING LOOP
+  // ---------------------------------------------------------
+  startEngine(task = { mode: "heartbeat" }) {
+    this._trace("engine:start", { task });
+    return this.engine.run(task);
+  }
+
+  // ---------------------------------------------------------
+  //  DEBUG / META SURFACES
+  // ---------------------------------------------------------
+  debugReport(extra = {}) {
+    const snapshot = this.organismSnapshot();
+    const base = {
+      id: this.id,
+      epoch: OrganismMeta.evo.epoch,
+      meta: this.meta
+    };
+
+    const report = formatDebugReport({
+      base,
+      snapshot,
+      extra
+    });
+
+    return formatDebugString(report);
+  }
+
+  // ---------------------------------------------------------
+  //  DEPS HELPERS
+  // ---------------------------------------------------------
+  getDb() {
+    return getDb(this.deps);
+  }
+
+  getFs() {
+    return getFsAPI(this.deps);
+  }
+
+  getRoutes() {
+    return getRouteAPI(this.deps);
+  }
+
+  getSchemas() {
+    return getSchemaAPI(this.deps);
+  }
+
+  emitDepsPacket(packet) {
+    return emitDepsPacket(this.deps, packet);
   }
 
   _trace(event, payload) {

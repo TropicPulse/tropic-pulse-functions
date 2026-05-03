@@ -281,6 +281,61 @@ function buildWaveField(jobType, band) {
 }
 
 // ============================================================================
+// ⭐ Pulse Intelligence (logic-only, IMMORTAL-safe)
+// ============================================================================
+function computePulseIntelligence({ advantageField, presenceField, factoringSignal, band }) {
+  const advantageScore = advantageField.advantageScore || 0;
+  const advantageTier  = advantageField.advantageTier  || 0;
+
+  const presenceTier = presenceField.presenceTier || "idle";
+  const presenceWeight =
+    presenceTier === "critical" ? 1.0 :
+    presenceTier === "high"     ? 0.8 :
+    presenceTier === "elevated" ? 0.6 :
+    presenceTier === "soft"     ? 0.4 :
+    0.2;
+
+  const factoring = factoringSignal ? 1 : 0;
+  const bandIsBinary = band === "binary" ? 1 : 0;
+
+  const solvednessScore = Math.max(
+    0,
+    Math.min(
+      advantageScore * 10 * 0.5 +
+      presenceWeight * 0.3 +
+      factoring * 0.2,
+      1
+    )
+  );
+
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "highValue"    :
+    solvednessScore >= 0.4 ? "normal"       :
+    solvednessScore >= 0.2 ? "lowPriority"  :
+    "avoidCompute";
+
+  const readinessScore = Math.max(
+    0,
+    Math.min(
+      solvednessScore * 0.6 +
+      (bandIsBinary ? 0.2 : 0) +
+      (advantageTier >= 2 ? 0.2 : advantageTier === 1 ? 0.1 : 0),
+      1
+    )
+  );
+
+  return {
+    solvednessScore,
+    factoringSignal: factoring ? "high" : "low",
+    computeTier,
+    readinessScore,
+    band,
+    advantageTier
+  };
+}
+
+// ============================================================================
 // Presence / Advantage / Hints / Compute Profile from globalHints/context
 // ============================================================================
 function cwClamp01(x) {
@@ -444,9 +499,8 @@ function jsonTransform({ json, pick }) {
   }
   return out;
 }
-
 // ============================================================================
-// computeWork — v13 IMMORTAL Cell Execution
+// computeWork — v14.4 IMMORTAL-INTEL Cell Execution
 // ============================================================================
 export function computeWork(job, context = {}) {
   healingState.cycleCount++;
@@ -473,6 +527,13 @@ export function computeWork(job, context = {}) {
       const diagnostics = buildDiagnostics("invalid", band, healthScore, tier);
       const loopField = buildLoopField(healingState.cycleCount, band);
       const waveField = buildWaveField("invalid", band);
+
+      const pulseIntelligence = computePulseIntelligence({
+        advantageField,
+        presenceField,
+        factoringSignal: null,
+        band
+      });
 
       healingState.lastHealthScore = healthScore;
       healingState.lastTier = tier;
@@ -503,6 +564,10 @@ export function computeWork(job, context = {}) {
         presenceAdvantageField,
         hintsField,
         computeProfile,
+
+        pulseIntelligence,
+        pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
+
         ...EARN_CELL_CONTEXT
       };
     }
@@ -545,6 +610,13 @@ export function computeWork(job, context = {}) {
         const uLoopField = buildLoopField(healingState.cycleCount, band);
         const uWaveField = buildWaveField(type, band);
 
+        const uPulseIntelligence = computePulseIntelligence({
+          advantageField: uAdvantageField,
+          presenceField,
+          factoringSignal: null,
+          band
+        });
+
         healingState.lastHealthScore = uHealthScore;
         healingState.lastTier = uTier;
         healingState.lastAdvantageField = uAdvantageField;
@@ -574,6 +646,10 @@ export function computeWork(job, context = {}) {
           presenceAdvantageField,
           hintsField,
           computeProfile,
+
+          pulseIntelligence: uPulseIntelligence,
+          pulseIntelligenceSignature: computeHash(JSON.stringify(uPulseIntelligence)),
+
           ...EARN_CELL_CONTEXT
         };
     }
@@ -589,6 +665,13 @@ export function computeWork(job, context = {}) {
     const diagnostics = buildDiagnostics(type, band, healthScore, tier);
     const loopField = buildLoopField(healingState.cycleCount, band);
     const waveField = buildWaveField(type, band);
+
+    const pulseIntelligence = computePulseIntelligence({
+      advantageField,
+      presenceField,
+      factoringSignal: null,
+      band
+    });
 
     healingState.lastHealthScore = healthScore;
     healingState.lastTier = tier;
@@ -619,6 +702,10 @@ export function computeWork(job, context = {}) {
       presenceAdvantageField,
       hintsField,
       computeProfile,
+
+      pulseIntelligence,
+      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
+
       ...EARN_CELL_CONTEXT
     };
 
@@ -643,6 +730,13 @@ export function computeWork(job, context = {}) {
     );
     const loopField = buildLoopField(healingState.cycleCount, band);
     const waveField = buildWaveField(healingState.lastJobType || "error", band);
+
+    const pulseIntelligence = computePulseIntelligence({
+      advantageField,
+      presenceField,
+      factoringSignal: null,
+      band
+    });
 
     healingState.lastHealthScore = healthScore;
     healingState.lastTier = tier;
@@ -673,6 +767,10 @@ export function computeWork(job, context = {}) {
       presenceAdvantageField,
       hintsField,
       computeProfile,
+
+      pulseIntelligence,
+      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
+
       ...EARN_CELL_CONTEXT
     };
   }
@@ -684,3 +782,4 @@ export function computeWork(job, context = {}) {
 export function getPulseEarnCellHealingState() {
   return { ...healingState };
 }
+

@@ -98,7 +98,7 @@ export const AIRouterMeta = Object.freeze({
 });
 
 import { Personas, getPersona } from "./persona.js";
-import Overmind from "./aiOvermind.js";
+import Overmind from "./aiOvermindPrime.js";
 import NodeAdmin from "../PULSE-TOOLS/PulseNodeAdmin-v11-Evo.js";
 
 // ============================================================================

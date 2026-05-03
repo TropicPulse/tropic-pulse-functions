@@ -192,55 +192,61 @@ function normalizeBand(band) {
 }
 
 // ============================================================================
-//  EarnRole — identifies this as the Earn v13 IMMORTAL Organism
+//  EarnRole — identifies this as the Earn v14.4 IMMORTAL‑INTEL Organism
 // ============================================================================
 export const EarnRole = {
   type: "Earn",
   subsystem: "Earn",
   layer: "Organ",
-  version: "13.0-PRESENCE-IMMORTAL",
-  identity: "Earn-v13.0-PRESENCE-IMMORTAL",
+  version: "14.4-IMMORTAL-INTEL",
+  identity: "Earn-v14.4-IMMORTAL-INTEL",
 
   evo: {
+    // Core evolution awareness
     driftProof: true,
+    deterministic: true,
     patternAware: true,
     lineageAware: true,
     shapeAware: true,
     evolutionEngineReady: true,
+
+    // Compute surfaces
     gpuAwareReady: true,
     minerAwareReady: true,
     airAwareReady: true,
     offlineAwareReady: true,
     futureEvolutionReady: true,
 
+    // Unified advantage + tier + diagnostics
     unifiedAdvantageField: true,
-    earnV3Ready: true,
-
-    ancestryAware: true,
-    loopTheoryAware: true,
-    tierAware: true,
     advantageFieldAware: true,
-
-    continuanceAware: true,
-    legacyBridgeCapable: true,
-
+    tierAware: true,
     diagnosticsReady: true,
     signatureReady: true,
     evolutionSurfaceReady: true,
 
-    // v11+Binary
+    // Intelligence (v14.4‑INTEL)
+    pulseIntelligenceReady: true,
+    solvednessAware: true,
+    factoringAware: true,
+    computeTierAware: true,
+    readinessAware: true,
+
+    // Binary / dual-band / wave / cohort
     bandAware: true,
     dualBandReady: true,
     binaryCompressionReady: true,
     gpuBinaryFieldReady: true,
-
-    // Multi-instance / wave / loop theory
-    cohortAware: true,
     waveFieldAware: true,
+    cohortAware: true,
     evolutionSurfaceCohortReady: true,
-    memorySurfaceReady: true,
 
-    // Presence-IMMORTAL
+    // Memory + ancestry
+    ancestryAware: true,
+    memorySurfaceReady: true,
+    loopTheoryAware: true,
+
+    // Presence‑IMMORTAL surfaces
     presenceAware: true,
     meshAware: true,
     castleAware: true,
@@ -249,20 +255,25 @@ export const EarnRole = {
     routerAware: true,
     beaconAware: true,
 
+    // Chunking / caching / prewarm / hot state
     chunkAware: true,
     cacheAware: true,
     prewarmAware: true,
     hotStateAware: true,
-    factoringAware: true
+
+    // Continuance + legacy bridge
+    continuanceAware: true,
+    legacyBridgeCapable: true
   },
 
-  routingContract: "PulseRouter-v13.0-PRESENCE-IMMORTAL",
-  meshContract: "PulseMesh-v13.0-PRESENCE-IMMORTAL",
-  sendContract: "PulseSend-v13.0-PRESENCE-IMMORTAL",
-  gpuOrganContract: "PulseGPU-v13.0-PRESENCE-IMMORTAL",
-  minerContract: "PulseMiner-v13.0-PRESENCE-IMMORTAL",
+  routingContract: "PulseRouter-v14.4-IMMORTAL-INTEL",
+  meshContract: "PulseMesh-v14.4-IMMORTAL-INTEL",
+  sendContract: "PulseSend-v14.4-IMMORTAL-INTEL",
+  gpuOrganContract: "PulseGPU-v14.4-IMMORTAL-INTEL",
+  minerContract: "PulseMiner-v14.4-IMMORTAL-INTEL",
   pulseCompatibility: "Pulse-v1/v2/v3"
 };
+
 
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
@@ -437,7 +448,60 @@ function buildWaveField(pattern, lineage, band) {
     mode: b === ROUTE_BANDS.BINARY ? "compression-wave" : "symbolic-wave"
   };
 }
+// ============================================================================
+// ⭐ Pulse Intelligence (logic-only, IMMORTAL-safe)
+// ============================================================================
+function computePulseIntelligence({ advantageField, presenceField, factoringSignal, band }) {
+  const advantageScore = advantageField.advantageScore || 0;
+  const advantageTier  = advantageField.advantageTier  || 0;
 
+  const presenceTier = presenceField.presenceTier || "idle";
+  const presenceWeight =
+    presenceTier === "critical" ? 1.0 :
+    presenceTier === "high"     ? 0.8 :
+    presenceTier === "elevated" ? 0.6 :
+    presenceTier === "soft"     ? 0.4 :
+    0.2;
+
+  const factoring = factoringSignal ? 1 : 0;
+  const bandIsBinary = band === "binary" ? 1 : 0;
+
+  const solvednessScore = Math.max(
+    0,
+    Math.min(
+      advantageScore * 10 * 0.5 +
+      presenceWeight * 0.3 +
+      factoring * 0.2,
+      1
+    )
+  );
+
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "highValue"    :
+    solvednessScore >= 0.4 ? "normal"       :
+    solvednessScore >= 0.2 ? "lowPriority"  :
+    "avoidCompute";
+
+  const readinessScore = Math.max(
+    0,
+    Math.min(
+      solvednessScore * 0.6 +
+      (bandIsBinary ? 0.2 : 0) +
+      (advantageTier >= 2 ? 0.2 : advantageTier === 1 ? 0.1 : 0),
+      1
+    )
+  );
+
+  return {
+    solvednessScore,
+    factoringSignal: factoring ? "high" : "low",
+    computeTier,
+    readinessScore,
+    band,
+    advantageTier
+  };
+}
 function buildMemorySurface(pattern, lineage, pageId, band) {
   const ancestry = buildPatternAncestry(pattern);
   const lineageSig = buildLineageSignature(lineage);
@@ -603,7 +667,7 @@ function buildAdvantageField({
 }
 
 // ============================================================================
-//  FACTORY — Create an Earn v13 Presence-IMMORTAL Organism (dual-band)
+//  FACTORY — Create an Earn v14.4 IMMORTAL-INTEL Organism (dual-band)
 // ============================================================================
 export function createEarn({
   jobId,
@@ -730,6 +794,14 @@ export function createEarn({
     serverBinaryReuse: serverHints.binaryReuse ?? true
   });
 
+  // ⭐ Intelligence surface (v14.4 IMMORTAL-INTEL)
+  const pulseIntelligence = computePulseIntelligence({
+    advantageField: earnAdvantageField,
+    presenceField: earnPresenceField,
+    factoringSignal,
+    band: normalizedBand
+  });
+
   const earnObject = {
     EarnRole,
     jobId,
@@ -748,6 +820,9 @@ export function createEarn({
       ...advantageFieldCore,
       ...earnAdvantageField
     },
+
+    // ⭐ top-level intelligence
+    pulseIntelligence,
 
     netField,          // PULSE-NET organism snapshot
     coreMemoryField,   // CoreMemory full spine field
@@ -774,6 +849,10 @@ export function createEarn({
       netField,
       coreMemoryField,
       priorCoreMemory,
+
+      // ⭐ mirrored intelligence + signature
+      pulseIntelligence,
+      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
 
       // v11/v12/v13 signatures
       earnSignature: computeHash(
@@ -808,6 +887,7 @@ export function createEarn({
 
   return earnObject;
 }
+
 
 // ============================================================================
 //  EVOLUTION ENGINE — evolve an existing Earn deterministically (dual-band)
@@ -901,6 +981,14 @@ export function evolveEarn(earn, context = {}) {
     serverBinaryReuse: serverHints?.binaryReuse ?? adv.serverBinaryReuse ?? true
   });
 
+  // ⭐ Intelligence surface (v14.4 IMMORTAL-INTEL)
+  const pulseIntelligence = computePulseIntelligence({
+    advantageField: nextAdvantageField,
+    presenceField: nextPresenceField,
+    factoringSignal: nextFactoringSignal,
+    band: normalizedBand
+  });
+
   // CoreMemory full spine field for evolved Earn
   const coreMemoryField = buildCoreMemoryField({
     pattern: nextPattern,
@@ -951,6 +1039,9 @@ export function evolveEarn(earn, context = {}) {
       ...nextAdvantageField
     },
 
+    // ⭐ top-level intelligence
+    pulseIntelligence,
+
     netField,
     coreMemoryField,
     priorCoreMemory,
@@ -976,6 +1067,10 @@ export function evolveEarn(earn, context = {}) {
       netField,
       coreMemoryField,
       priorCoreMemory,
+
+      // ⭐ mirrored intelligence + signature
+      pulseIntelligence,
+      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
 
       earnSignature: computeHash(
         nextPattern + "::" + lineageSignature + "::" + normalizedBand
@@ -1010,62 +1105,3 @@ export function evolveEarn(earn, context = {}) {
   return evolved;
 }
 
-// ============================================================================
-//  COHORT / WAVE EVOLUTION — multi-instance evolution surfaces (presence-aware)
-// ============================================================================
-export function createEarnCohort(specs = [], sharedContext = {}) {
-  return specs.map((spec, index) =>
-    createEarn({
-      ...spec,
-      jobId: spec.jobId ?? `earn-job-${index + 1}`,
-      presenceField: sharedContext.presenceField,
-      meshSignals: sharedContext.meshSignals,
-      castleSignals: sharedContext.castleSignals,
-      expansionSignals: sharedContext.expansionSignals,
-      serverAdvantageHints: sharedContext.serverAdvantageHints,
-      globalHints: sharedContext.globalHints
-    })
-  );
-}
-
-export function evolveEarnCohort(earns = [], context = {}) {
-  return earns.map((earn) => evolveEarn(earn, context));
-}
-
-export function projectEvolutionSurface(earns = []) {
-  const count = earns.length;
-
-  const bands = earns.reduce(
-    (acc, e) => {
-      const b = normalizeBand(e.band || e.meta?.band);
-      if (b === ROUTE_BANDS.BINARY) acc.binary++;
-      else acc.symbolic++;
-      return acc;
-    },
-    { symbolic: 0, binary: 0 }
-  );
-
-  const tiers = earns.reduce(
-    (acc, e) => {
-      const t = e.meta?.tier || "unknown";
-      acc[t] = (acc[t] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
-
-  const avgHealth =
-    count === 0
-      ? 0
-      : earns.reduce((sum, e) => sum + (e.meta?.healthScore || 0), 0) / count;
-
-  return {
-    count,
-    bands,
-    tiers,
-    avgHealth,
-    surfaceSignature: computeHash(
-      JSON.stringify({ count, bands, tiers, avgHealth })
-    )
-  };
-}

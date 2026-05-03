@@ -50,8 +50,6 @@ AI_EXPERIENCE_META = {
   }
 }
 */
-
-
 // ============================================================================
 // ⭐ PulseRole — identifies this as the Pulse v2 evolution engine (v14.4)
 // ============================================================================
@@ -60,7 +58,7 @@ export const PulseRole = {
   subsystem: "Pulse",
   layer: "Organ",
   version: "14.4",
-  identity: "Pulse-v2-EvolutionEngine-v14.4-IMMORTAL",
+  identity: "Pulse-v2-EvolutionEngine-v14.4-IMMORTAL-INTEL",
 
   evo: {
     driftProof: true,
@@ -81,9 +79,15 @@ export const PulseRole = {
     signatureReady: true,
     evolutionSurfaceReady: true,
 
+    // Intelligence surface
+    pulseIntelligenceReady: true,
+    solvednessAware: true,
+    factoringAware: true,
+    computeTierAware: true,
+
     // Binary integration
     binaryBackEndReady: true,
-    binaryFrontEndContract: "PulseBinaryV2EvolutionEngine-v14.4-IMMORTAL",
+    binaryFrontEndContract: "PulseBinaryV2EvolutionEngine-v14.4-IMMORTAL-INTEL",
 
     // IMMORTAL META
     immortalMetaAware: true,
@@ -201,6 +205,73 @@ function extractImmortalMeta(payload) {
 
 
 // ============================================================================
+//  PULSE INTELLIGENCE SURFACE (v14.4-INTEL)
+// ============================================================================
+function computePulseIntelligence({ pattern, lineage, payload, healthScore, binarySurface }) {
+  const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
+  const payloadSize = payload && typeof payload === "object"
+    ? Object.keys(payload).length
+    : 0;
+
+  const patternLen = typeof pattern === "string" ? pattern.length : 0;
+
+  const maxPattern = 128;
+  const maxPayload = 64;
+
+  const patternComplexity = Math.min(patternLen / maxPattern, 1);
+  const payloadComplexity = Math.min(payloadSize / maxPayload, 1);
+
+  const binaryStrength = typeof binarySurface.binaryStrength === "number"
+    ? Math.min(Math.max(binarySurface.binaryStrength, 0), 1)
+    : 0;
+
+  const solvednessScore = Math.max(
+    0,
+    Math.min(
+      healthScore * 0.6 +
+      (1 - patternComplexity) * 0.15 +
+      (1 - payloadComplexity) * 0.15 +
+      binaryStrength * 0.10,
+      1
+    )
+  );
+
+  const factoringSignal =
+    lineageDepth >= 4 || payloadSize >= 12
+      ? "high"
+      : lineageDepth >= 2 || payloadSize >= 4
+        ? "medium"
+        : "low";
+
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "highValue"    :
+    solvednessScore >= 0.4 ? "normal"       :
+    solvednessScore >= 0.2 ? "lowPriority"  :
+    "avoidCompute";
+
+  const readinessScore = Math.max(
+    0,
+    Math.min(
+      solvednessScore * 0.6 +
+      healthScore * 0.3 +
+      (factoringSignal === "high" ? 0.1 : factoringSignal === "medium" ? 0.05 : 0),
+      1
+    )
+  );
+
+  return {
+    solvednessScore,
+    factoringSignal,
+    computeTier,
+    payloadComplexity,
+    evolutionDepth: lineageDepth,
+    readinessScore
+  };
+}
+
+
+// ============================================================================
 //  INTERNAL: Deterministic evolution compute loop (v14.4)
 // ============================================================================
 function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
@@ -218,6 +289,30 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
     ? binarySurface.binaryStrength
     : 0;
 
+  const maxPattern = 64;
+  const maxLineage = 16;
+  const maxPayload = 32;
+
+  const patternScore = Math.min(patternLen / maxPattern, 1);
+  const lineageScore = Math.min(lineageDepth / maxLineage, 1);
+  const payloadScore = Math.min(payloadSize / maxPayload, 1);
+  const binaryScore  = Math.min(Math.max(binaryStrength, 0), 1);
+
+  const healthScore = (
+    patternScore * 0.45 +
+    lineageScore * 0.25 +
+    payloadScore * 0.20 +
+    binaryScore  * 0.10
+  );
+
+  const pulseIntelligence = computePulseIntelligence({
+    pattern,
+    lineage,
+    payload,
+    healthScore,
+    binarySurface
+  });
+
   const advantageField = {
     patternStrength: patternLen,
     lineageDepth,
@@ -229,7 +324,7 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
       mode === "recovery" ? 2 :
       1,
 
-    experimentalTier: "v2-evolution-engine-v14.4-IMMORTAL",
+    experimentalTier: "v2-evolution-engine-v14.4-IMMORTAL-INTEL",
 
     // Binary-aware advantage surface
     binaryAware: binarySurface.hasBinary,
@@ -242,31 +337,22 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
     harmonicDrift: immortalMeta.harmonicDrift,
     coherenceScore: immortalMeta.coherenceScore,
     dualBandMode: immortalMeta.dualBandMode,
-    shifterBand: immortalMeta.shifterBand
+    shifterBand: immortalMeta.shifterBand,
+
+    // Intelligence surfaced for routing / Earn / GPU organs
+    solvednessScore: pulseIntelligence.solvednessScore,
+    factoringSignal: pulseIntelligence.factoringSignal,
+    computeTier: pulseIntelligence.computeTier,
+    payloadComplexity: pulseIntelligence.payloadComplexity,
+    readinessScore: pulseIntelligence.readinessScore
   };
-
-  const maxPattern = 64;
-  const maxLineage = 16;
-  const maxPayload = 32;
-
-  const patternScore = Math.min(patternLen / maxPattern, 1);
-  const lineageScore = Math.min(lineageDepth / maxLineage, 1);
-  const payloadScore = Math.min(payloadSize / maxPayload, 1);
-  const binaryScore  = Math.min(Math.max(binaryStrength, 0), 1);
-
-  // v14.4: binaryScore participates but never dominates.
-  const healthScore = (
-    patternScore * 0.45 +
-    lineageScore * 0.25 +
-    payloadScore * 0.20 +
-    binaryScore  * 0.10
-  );
 
   return {
     advantageField,
     healthScore,
     binarySurface,
-    immortalMeta
+    immortalMeta,
+    pulseIntelligence
   };
 }
 
@@ -274,7 +360,7 @@ function runEvolutionComputeLoopV2({ pattern, lineage, payload, mode }) {
 // ============================================================================
 //  DIAGNOSTICS (14.4)
 // ============================================================================
-function buildDiagnostics(pattern, lineage, healthScore, tier, binarySurface, immortalMeta) {
+function buildDiagnostics(pattern, lineage, healthScore, tier, binarySurface, immortalMeta, pulseIntelligence) {
   return {
     patternLength: pattern.length,
     lineageDepth: lineage.length,
@@ -298,13 +384,16 @@ function buildDiagnostics(pattern, lineage, healthScore, tier, binarySurface, im
       ? computeHash(binarySurface.binaryMode)
       : null,
 
-    immortalSignature: computeHash(JSON.stringify(immortalMeta))
+    immortalSignature: computeHash(JSON.stringify(immortalMeta)),
+
+    intelligence: pulseIntelligence,
+    intelligenceSignature: computeHash(JSON.stringify(pulseIntelligence))
   };
 }
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v14.4-IMMORTAL)
+//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v14.4-IMMORTAL-INTEL)
 // ============================================================================
 export function createPulseV2({
   jobId,
@@ -331,7 +420,8 @@ export function createPulseV2({
     advantageField,
     healthScore,
     binarySurface,
-    immortalMeta
+    immortalMeta,
+    pulseIntelligence
   } = runEvolutionComputeLoopV2({
     pattern,
     lineage,
@@ -339,7 +429,6 @@ export function createPulseV2({
     mode
   });
 
-  // v14.4 degradation tier
   const tier =
     healthScore >= 0.97 ? "microDegrade" :
     healthScore >= 0.90 ? "softDegrade" :
@@ -353,7 +442,8 @@ export function createPulseV2({
     healthScore,
     tier,
     binarySurface,
-    immortalMeta
+    immortalMeta,
+    pulseIntelligence
   );
 
   return {
@@ -368,13 +458,16 @@ export function createPulseV2({
     mode,
     pageId,
 
-    pulseType: "Pulse-v2-EvolutionEngine-v14.4-IMMORTAL",
+    pulseType: "Pulse-v2-EvolutionEngine-v14.4-IMMORTAL-INTEL",
 
     advantageField,
     healthScore,
     tier,
 
     immortalMeta,
+
+    // Intelligence surfaced at organism level
+    pulseIntelligence,
 
     meta: {
       shapeSignature,
@@ -391,7 +484,8 @@ export function createPulseV2({
       lineageSurface: computeHash(String(lineage.length)),
       advantageSignature: computeHash(JSON.stringify(advantageField)),
       healthSignature: computeHash(String(healthScore)),
-      tierSignature: computeHash(tier)
+      tierSignature: computeHash(tier),
+      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence))
     }
   };
 }

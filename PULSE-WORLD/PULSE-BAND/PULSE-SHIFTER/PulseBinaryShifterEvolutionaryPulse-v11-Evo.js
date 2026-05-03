@@ -1,15 +1,16 @@
 // ============================================================================
-//  FILE: PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL.js
-//  Pulse v2 • Binary Shifter Evolutionary Pulse Front-End (v14.0-PRESENCE-IMMORTAL)
+//  FILE: PulseBinaryShifterEvolutionaryPulse-v14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL.js
+//  Pulse v2 • Binary Shifter Evolutionary Pulse Front-End (v14.1-PULSE-COMPUTE)
 //  IMMORTAL: BinaryStrength + BitsSummary + Hints Surface + Band/DNA + Presence
 //  • Dual-band aware (symbolic/binary, non-executable binary)
 //  • Drift-proof contract, no randomness, no external mutation
 //  • Presence/harmonics/immortal-band surfaced as metadata only
+//  • Now surfaces pulse-level compute/factoring/evolution hints from Shifter
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseBinaryShifterEvolutionaryPulse",
-  version: "v14.0-EVO-IMMORTAL",
+  version: "v14.1-PULSE-COMPUTE-IMMORTAL",
   layer: "frontend",
   role: "binary_evolution_engine",
   lineage: "PulseOS-v12",
@@ -22,7 +23,8 @@ AI_EXPERIENCE_META = {
     presenceAware: true,
     safeRouteFree: true,
     advantageV2: true,
-    deterministic: true
+    deterministic: true,
+    pulseComputeSurface: true
   },
 
   contract: {
@@ -59,12 +61,12 @@ export const PulseBinaryRole = {
   type: "Pulse",
   subsystem: "Pulse",
   layer: "BinaryFrontEnd",
-  version: "14.0-PRESENCE-IMMORTAL",
-  identity: "PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL",
+  version: "14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL",
+  identity: "PulseBinaryShifterEvolutionaryPulse-v14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL",
 
   evo: {
     binaryFrontEnd: true,
-    evolutionBackEnd: "PulseShifterEvolutionaryPulse-v11-Evo",
+    evolutionBackEnd: EvolutionPulseRole.identity,
 
     // Mirror back-end guarantees, IMMORTAL surface.
     driftProof: EvolutionPulseRole.evo.driftProof,
@@ -76,6 +78,9 @@ export const PulseBinaryRole = {
     binaryStrengthAware: true,
     binaryHintsSurfaceReady: true,
     bitsSummaryReady: true,
+
+    // Pulse-compute surfaced from back-end
+    pulseComputeSurfaceReady: true,
 
     // IMMORTAL band / presence surfaces (descriptive-only)
     dualBandAware: true,
@@ -223,6 +228,7 @@ function buildBitsSummary(bits, { band, dnaTag } = {}) {
   };
 }
 
+
 // ============================================================================
 //  BINARY → EVOLUTION CREATION (IMMORTAL SURFACE)
 // ============================================================================
@@ -287,8 +293,14 @@ export function createBinaryEvolutionPulse({
     returnTo,
     parentLineage,
     mode,
-    pageId
+    pageId,
+    bandMode: band,
+    presenceBandState,
+    harmonicDrift,
+    coherenceScore
   });
+
+  const pulseCompute = pulse.pulseCompute || null;
 
   return {
     PulseBinaryRole,
@@ -302,7 +314,13 @@ export function createBinaryEvolutionPulse({
       advantageField: pulse.advantageField,
       evolutionStage: pulse.meta.evolutionStage,
       shapeSignature: pulse.meta.shapeSignature,
-      bitsSummary
+      bitsSummary,
+
+      // Pulse-compute surfaced for binary world
+      pulseCompute,
+      factoringSignal: pulseCompute ? pulseCompute.factoringSignal : null,
+      computeTier: pulseCompute ? pulseCompute.computeTier : null,
+      solvednessScore: pulseCompute ? pulseCompute.solvednessScore : null
     }
   };
 }
@@ -346,12 +364,13 @@ export function evolveBinaryEvolutionPulse({
 
   const nextPulse = evolvePulseV2(evolutionPulse, {
     ...hints,
-    __band: band,
-    __dnaTag: dnaTag,
+    bandMode: band,
     presenceBandState,
     harmonicDrift,
     coherenceScore
   });
+
+  const pulseCompute = nextPulse.pulseCompute || null;
 
   return {
     PulseBinaryRole,
@@ -365,13 +384,19 @@ export function evolveBinaryEvolutionPulse({
       advantageField: nextPulse.advantageField,
       evolutionStage: nextPulse.meta.evolutionStage,
       shapeSignature: nextPulse.meta.shapeSignature,
-      bitsSummary
+      bitsSummary,
+
+      // Pulse-compute surfaced for binary world
+      pulseCompute,
+      factoringSignal: pulseCompute ? pulseCompute.factoringSignal : null,
+      computeTier: pulseCompute ? pulseCompute.computeTier : null,
+      solvednessScore: pulseCompute ? pulseCompute.solvednessScore : null
     }
   };
 }
 
 // ============================================================================
-//  PUBLIC API — BINARY EVOLUTION FRONT-END (v14.0-PRESENCE-IMMORTAL)
+//  PUBLIC API — BINARY EVOLUTION FRONT-END (v14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL)
 // ============================================================================
 
 export function createPulseBinaryShifterEvolutionaryPulse({ trace = false } = {}) {

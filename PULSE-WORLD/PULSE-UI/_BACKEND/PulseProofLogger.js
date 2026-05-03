@@ -45,7 +45,7 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import { safeRoute as route } from "../_BACKEND/PulseProofBridge.js";
+import { safeRoute as route } from "./PulseProofBridge.js";
 
 // Capture original console to avoid recursion
 const _c = { ...console };

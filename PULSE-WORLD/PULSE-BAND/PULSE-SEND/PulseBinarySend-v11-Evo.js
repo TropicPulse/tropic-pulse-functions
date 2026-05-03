@@ -71,6 +71,61 @@ import {createPulseSendReturn as PulseSendReturn }         from "./PulseSendRetu
 // --- System Layer (Final Conductor) ----------------------------------------
 import {createPulseSendSystem as PulseSendSystem }         from "./PulseSendSystem.js";
 
+// ============================================================================
+// ⭐ Pulse Intelligence (logic-only, IMMORTAL-safe)
+// ============================================================================
+function computePulseIntelligence({ advantageField, presenceField, factoringSignal, band }) {
+  const advantageScore = advantageField.advantageScore || 0;
+  const advantageTier  = advantageField.advantageTier  || 0;
+
+  const presenceTier = presenceField.presenceTier || "idle";
+  const presenceWeight =
+    presenceTier === "critical" ? 1.0 :
+    presenceTier === "high"     ? 0.8 :
+    presenceTier === "elevated" ? 0.6 :
+    presenceTier === "soft"     ? 0.4 :
+    0.2;
+
+  const factoring = factoringSignal ? 1 : 0;
+  const bandIsBinary = band === "binary" ? 1 : 0;
+
+  const solvednessScore = Math.max(
+    0,
+    Math.min(
+      advantageScore * 10 * 0.5 +
+      presenceWeight * 0.3 +
+      factoring * 0.2,
+      1
+    )
+  );
+
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "highValue"    :
+    solvednessScore >= 0.4 ? "normal"       :
+    solvednessScore >= 0.2 ? "lowPriority"  :
+    "avoidCompute";
+
+  const readinessScore = Math.max(
+    0,
+    Math.min(
+      solvednessScore * 0.6 +
+      (bandIsBinary ? 0.2 : 0) +
+      (advantageTier >= 2 ? 0.2 : advantageTier === 1 ? 0.1 : 0),
+      1
+    )
+  );
+
+  return {
+    solvednessScore,
+    factoringSignal: factoring ? "high" : "low",
+    computeTier,
+    readinessScore,
+    band,
+    advantageTier
+  };
+}
+
 export function createBinarySend({
   fallbackProxy,
   trace = false
@@ -130,6 +185,50 @@ export function createBinarySend({
   }
 
   // ---------------------------------------------------------------------------
+  // ⭐ v14.4 IMMORTAL-INTEL — binary-safe intelligence
+  // ---------------------------------------------------------------------------
+  function computeBinaryIntelligence(bits) {
+    const len = bits.length;
+
+    const ones = bits.reduce((a, b) => a + b, 0);
+    const density = len > 0 ? ones / len : 0;
+
+    const parity = ones % 2 === 0 ? "even" : "odd";
+
+    const shiftDepth = len > 0 ? (bits[0] === 1 ? 1 : 0) : 0;
+
+    const cacheChunk = computeCacheChunk(bits);
+    const prewarm = computePrewarm(bits);
+    const presence = computePresence(bits);
+    const signature = computeSignature(bits);
+
+    const solvednessScore = Math.min(1, density * 0.6 + (shiftDepth ? 0.2 : 0) + (len > 256 ? 0.2 : 0));
+
+    const computeTier =
+      solvednessScore >= 0.9 ? "nearSolution" :
+      solvednessScore >= 0.7 ? "highValue"    :
+      solvednessScore >= 0.4 ? "normal"       :
+      solvednessScore >= 0.2 ? "lowPriority"  :
+      "avoidCompute";
+
+    const readinessScore = Math.min(1, solvednessScore * 0.7 + (parity === "even" ? 0.1 : 0));
+
+    return {
+      solvednessScore,
+      computeTier,
+      readinessScore,
+      parity,
+      density,
+      shiftDepth,
+      cacheChunk,
+      prewarm,
+      presence,
+      signature,
+      length: len
+    };
+  }
+
+  // ---------------------------------------------------------------------------
   //  INTERNAL: ensure pure binary or fallback
   // ---------------------------------------------------------------------------
   function ensurePureBinaryOrFallback(op, bits, reason) {
@@ -144,42 +243,34 @@ export function createBinarySend({
   // ---------------------------------------------------------------------------
   function runTechSurfaces(bits) {
 
-    // v2 evolution engine (symbolic-free binary metadata)
     const v2 = PulseV2EvolutionEngine?.createPulseV2
       ? PulseV2EvolutionEngine.createPulseV2({ bits })
       : null;
 
-    // v3 unified organism engine (binary-only mode)
     const v3 = PulseV3UnifiedOrganism?.createPulseV3
       ? PulseV3UnifiedOrganism.createPulseV3({ bits })
       : null;
 
-    // impulse layer (binary impulse shaping)
     const impulse = PulseSendImpulse?.createImpulse
       ? PulseSendImpulse.createImpulse(bits)
       : null;
 
-    // legacy pulse (binary legacy surface)
     const legacy = PulseSendLegacyPulse?.createLegacyPulse
       ? PulseSendLegacyPulse.createLegacyPulse(bits)
       : null;
 
-    // adapter layer (binary adapter envelope)
     const adapter = PulseSendAdapter?.adapt
       ? PulseSendAdapter.adapt(bits)
       : null;
 
-    // engine layer (binary engine envelope)
     const engine = PulseSendEngine?.engine
       ? PulseSendEngine.engine(bits)
       : null;
 
-    // return layer (binary return envelope)
     const ret = PulseSendReturn?.ret
       ? PulseSendReturn.ret(bits)
       : null;
 
-    // system layer (binary system conductor)
     const system = PulseSendSystem?.conduct
       ? PulseSendSystem.conduct(bits)
       : null;
@@ -207,16 +298,19 @@ export function createBinarySend({
     const prewarm     = computePrewarm(pure);
     const presence    = computePresence(pure);
 
-    // USE ALL IMPORTS HERE
     const tech = runTechSurfaces(pure);
 
+    // ⭐ v14.4 intelligence
+    const pulseIntelligence = computeBinaryIntelligence(pure);
+
     if (trace) {
-      console.log("[BinarySend-v12.3] OUT:", pure, {
+      console.log("[BinarySend-v14.4] OUT:", pure, {
         signature,
         cacheChunk,
         prewarm,
         presence,
-        tech
+        tech,
+        pulseIntelligence
       });
     }
 
@@ -228,6 +322,8 @@ export function createBinarySend({
       prewarm,
       presence,
       tech,
+      pulseIntelligence,
+      pulseIntelligenceSignature: computeSignature(pure),
       length: pure.length
     };
   }
@@ -243,7 +339,7 @@ export function createBinarySend({
     }
 
     if (trace) {
-      console.warn(`[BinarySend-v12.3] FALLBACK (${op}):`, reason, bits);
+      console.warn(`[BinarySend-v14.4] FALLBACK (${op}):`, reason, bits);
     }
 
     const result = fallbackProxy.exchange
@@ -253,6 +349,8 @@ export function createBinarySend({
     const safe = Array.isArray(result) ? result : [];
 
     const tech = runTechSurfaces(safe);
+
+    const pulseIntelligence = computeBinaryIntelligence(safe);
 
     return {
       ok: false,
@@ -264,6 +362,8 @@ export function createBinarySend({
       prewarm: computePrewarm(safe),
       presence: computePresence(safe),
       tech,
+      pulseIntelligence,
+      pulseIntelligenceSignature: computeSignature(safe),
       length: safe.length
     };
   }

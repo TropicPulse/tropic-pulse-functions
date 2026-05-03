@@ -1,12 +1,13 @@
 // ============================================================================
 //  FILE: PulseShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL.js
-//  Pulse v2 Organism • Evolution Engine • Pattern + Lineage + Shape
+//  Pulse v2 Organism • Evolution Engine • Pattern + Lineage + Shape + Pulse-Compute
 //  v14.0-PRESENCE-IMMORTAL: Dual-band aware (symbolic/binary) + Presence/Band Surface
+//  v14.1-PULSE-COMPUTE: Deterministic pulse-level compute/factoring/evolution hints
 // ============================================================================
 //
 //  ROLE:
 //  -----
-//  This organ is the *pure evolution core* for Pulse v2.
+//  This organ is the *pure evolution + pulse-compute core* for Pulse v2.
 //
 //  It does NOT know about bits, GPUs, or network.
 //  It only knows about:
@@ -18,6 +19,7 @@
 //    - tier: a coarse degradation tier based on healthScore
 //    - bandMode: "symbolic" or "binary" (SHIFTER dual-band surface)
 //    - presenceBandState / harmonicDrift / coherenceScore: passive metadata
+//    - pulseCompute: deterministic, bounded "compute-on-pulse" factoring/evolution hints
 //
 //  This engine is designed to sit BEHIND a binary front-end such as
 //  PulseBinaryShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL, which will:
@@ -26,8 +28,8 @@
 //    - call createPulseV2 / evolvePulseV2
 //    - emit compact, binary-friendly summaries
 //
-//  SAFETY CONTRACT (v14.0-PRESENCE-IMMORTAL):
-//  ------------------------------------------
+//  SAFETY CONTRACT (v14.0-PRESENCE-IMMORTAL + v14.1-PULSE-COMPUTE):
+//  ---------------------------------------------------------------
 //  • No imports.
 //  • No network.
 //  • No randomness.
@@ -35,11 +37,17 @@
 //  • No external mutation.
 //  • Deterministic compute loop only.
 //  • Band/presence fields are metadata-only (no non-deterministic routing).
+//  • Pulse-Compute is:
+//      - deterministic
+//      - bounded
+//      - payload/shape/advantage-derived only
+//      - no side effects
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseShifterEvolutionaryPulse",
-  version: "v14.0-EVO",
+  version: "v14.1-PULSE-COMPUTE",
   layer: "frontend",
   role: "symbolic_evolution_engine",
   lineage: "PulseOS-v12",
@@ -50,7 +58,8 @@ AI_EXPERIENCE_META = {
     presenceAware: true,
     chunkAligned: true,
     safeRouteFree: true,
-    deterministic: true
+    deterministic: true,
+    pulseCompute: true
   },
 
   contract: {
@@ -74,14 +83,14 @@ AI_EXPERIENCE_META = {
 
 
 // ============================================================================
-// ⭐ PulseRole — Pulse v2 evolution engine (v14.0-PRESENCE-IMMORTAL)
+// ⭐ PulseRole — Pulse v2 evolution engine (v14.1-PULSE-COMPUTE)
 // ============================================================================
 export const PulseRole = {
   type: "Pulse",
   subsystem: "Pulse",
   layer: "Organ",
-  version: "14.0-PRESENCE-IMMORTAL",
-  identity: "PulseShifterEvolutionaryPulse-v14.0-PRESENCE-IMMORTAL",
+  version: "14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL",
+  identity: "PulseShifterEvolutionaryPulse-v14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL",
 
   evo: {
     // Core evolution capabilities
@@ -115,6 +124,10 @@ export const PulseRole = {
     diagnosticsReady: true,
     signatureReady: true,
     evolutionSurfaceReady: true,
+
+    // Pulse-level compute / factoring / evolution hints
+    pulseComputeReady: true,
+    pulseFactoringReady: true,
 
     // Binary integration flags:
     //   - This file is the *back-end* evolution engine.
@@ -282,7 +295,73 @@ function runEvolutionComputeLoopV2({
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v14.0-PRESENCE-IMMORTAL)
+//  INTERNAL: Pulse-level compute / factoring / evolution hints (v2)
+// ============================================================================
+//  This is the "compute-on-pulse" layer:
+//    - deterministic
+//    - bounded
+//    - derived only from pattern/lineage/payload/advantage/health
+//    - no side effects, no external calls
+// ============================================================================
+
+function runPulseComputeV2({
+  pattern,
+  lineage,
+  payload,
+  advantageField,
+  healthScore
+}) {
+  const payloadKeys = payload && typeof payload === "object"
+    ? Object.keys(payload)
+    : [];
+
+  const payloadSize = payloadKeys.length;
+  const payloadComplexity = Math.min(payloadSize / 32, 1);
+
+  // A deterministic factoring signal that "tags" this pulse's factored state.
+  const factoringSignal = computeHash(
+    `${pattern}::${lineage.length}::${payloadKeys.join("|")}`
+  );
+
+  // "Solvedness" is: high health + low complexity → closer to solution.
+  const solvednessScore = Math.min(
+    (healthScore * 0.6) + ((1 - payloadComplexity) * 0.4),
+    1
+  );
+
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "refined" :
+    solvednessScore >= 0.4 ? "factored" :
+    "raw";
+
+  // Simple, deterministic hints for downstream organs (router/mesh/send/binary).
+  const computeHints = {
+    // If payload is large/complex, downstream can choose to simplify/segment.
+    payloadComplexity,
+    payloadSize,
+
+    // If solvedness is high, downstream can treat this as "closer to done".
+    solvednessScore,
+    computeTier,
+
+    // Advantage-derived quick view.
+    patternStrength: advantageField.patternStrength,
+    lineageDepth: advantageField.lineageDepth,
+    modeBias: advantageField.modeBias
+  };
+
+  return {
+    factoringSignal,
+    solvednessScore,
+    computeTier,
+    computeHints
+  };
+}
+
+
+// ============================================================================
+//  FACTORY — Create a Pulse v2 Evolution Engine Organism (v14.1-PULSE-COMPUTE)
 // ============================================================================
 //  Front-ends (symbolic or binary SHIFTER) typically provide:
 //    - pattern
@@ -331,6 +410,15 @@ export function createPulseV2({
     coherenceScore
   });
 
+  // NEW: pulse-level compute / factoring / evolution hints
+  const pulseCompute = runPulseComputeV2({
+    pattern,
+    lineage,
+    payload,
+    advantageField,
+    healthScore
+  });
+
   const tier =
     healthScore >= 0.95 ? "microDegrade" :
     healthScore >= 0.85 ? "softDegrade" :
@@ -361,12 +449,15 @@ export function createPulseV2({
     coherenceScore: coherenceScore ?? null,
 
     // Evolution engine type
-    pulseType: "Pulse-v2-EvolutionEngine-v14.0-PRESENCE-IMMORTAL",
+    pulseType: "Pulse-v2-EvolutionEngine-v14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL",
 
     // Advantage + health
     advantageField,
     healthScore,
     tier,
+
+    // Pulse-level compute / factoring / evolution hints
+    pulseCompute,
 
     // Meta: signatures + diagnostics
     meta: {
@@ -384,7 +475,10 @@ export function createPulseV2({
       lineageSurface: computeHash(String(lineage.length)),
       advantageSignature: computeHash(JSON.stringify(advantageField)),
       healthSignature: computeHash(String(healthScore)),
-      tierSignature: computeHash(tier)
+      tierSignature: computeHash(tier),
+
+      // NEW: pulse-compute signature
+      pulseComputeSignature: computeHash(JSON.stringify(pulseCompute))
     }
   };
 }
@@ -398,6 +492,7 @@ export function createPulseV2({
 //    - provide context hints (routerHint, meshHint, organHint)
 //    - optionally override band/presence metadata
 //    - get back a new pulse with updated pattern/lineage/advantage/health
+//      + pulse-level compute/factoring/evolution hints
 // ============================================================================
 
 export function evolvePulseV2(
@@ -446,6 +541,15 @@ export function evolvePulseV2(
     coherenceScore
   });
 
+  // NEW: pulse-level compute / factoring / evolution hints on evolved pulse
+  const pulseCompute = runPulseComputeV2({
+    pattern: nextPattern,
+    lineage: nextLineage,
+    payload: pulse.payload,
+    advantageField,
+    healthScore
+  });
+
   const tier =
     healthScore >= 0.95 ? "microDegrade" :
     healthScore >= 0.85 ? "softDegrade" :
@@ -476,12 +580,15 @@ export function evolvePulseV2(
     coherenceScore: coherenceScore ?? null,
 
     // Evolution engine type
-    pulseType: "Pulse-v2-EvolutionEngine-v14.0-PRESENCE-IMMORTAL",
+    pulseType: "Pulse-v2-EvolutionEngine-v14.1-PULSE-COMPUTE-PRESENCE-IMMORTAL",
 
     // Advantage + health
     advantageField,
     healthScore,
     tier,
+
+    // Pulse-level compute / factoring / evolution hints
+    pulseCompute,
 
     // Meta: signatures + diagnostics
     meta: {
@@ -499,7 +606,10 @@ export function evolvePulseV2(
       lineageSurface: computeHash(String(nextLineage.length)),
       advantageSignature: computeHash(JSON.stringify(advantageField)),
       healthSignature: computeHash(String(healthScore)),
-      tierSignature: computeHash(tier)
+      tierSignature: computeHash(tier),
+
+      // NEW: pulse-compute signature
+      pulseComputeSignature: computeHash(JSON.stringify(pulseCompute))
     }
   };
 }

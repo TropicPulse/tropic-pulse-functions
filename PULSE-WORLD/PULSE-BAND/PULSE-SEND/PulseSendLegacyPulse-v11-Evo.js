@@ -48,9 +48,8 @@ AI_EXPERIENCE_META = {
 }
 */
 
-
 // ============================================================================
-// ⭐ PulseRole — identifies this as the Pulse v1 stable organism (v14.4)
+// ⭐ PulseRole — identifies this as the Pulse v1 Stable Organism (v14.4 IMMORTAL)
 // ============================================================================
 export const PulseRole = {
   type: "Pulse",
@@ -60,35 +59,51 @@ export const PulseRole = {
   identity: "Pulse-v1-EvoStable-v14.4-IMMORTAL",
 
   evo: {
+    // v1 is stable, non-evolving, deterministic
     driftProof: true,
     patternAware: true,
     lineageAware: true,
     shapeAware: true,
     modeAware: true,
+
+    // v1 participates in routing/mesh/send but does NOT evolve
     routerAwareReady: true,
     meshAwareReady: true,
+    sendAwareReady: true,
 
-    evolutionEngineReady: false,   // ⭐ v1 NEVER evolves
-    unifiedAdvantageField: true,
+    // v1 does NOT run evolution compute loops
+    evolutionEngineReady: false,
     pulseV1Ready: true,
-    futureEvolutionReady: false,   // ⭐ v1 stays stable forever
+    pulseV2Ready: false,
+    pulseV3Ready: false,
 
+    // v1 surfaces only metadata (cache, prewarm, presence, immortal)
     diagnosticsReady: true,
     signatureReady: true,
-    stabilitySurfaceReady: true,
+    evolutionSurfaceReady: false,
 
-    // Binary-aware but non-evolving
-    binaryAwareStableReady: true,
+    // IMMORTAL META
+    immortalMetaAware: true,
+    dualBandAware: true,
+    harmonicAware: true,
+    coherenceAware: true,
 
-    // ⭐ 12.3 surfaces (surfaced only, never used for evolution)
-    cacheChunkAware: true,
-    prewarmAware: true,
-    multiPresenceAware: true,
-
-    // ⭐ 14.4 surfaces (metadata only, never used for evolution)
+    // v1 degradation surfaces (metadata only)
     degradationAware: true,
-    immortalMetaAware: true
-  }
+
+    // v1 does NOT support intelligence compute
+    pulseIntelligenceReady: false,
+    solvednessAware: false,
+    factoringAware: false,
+    computeTierAware: false
+  },
+
+  // Contracts for compatibility with the rest of the organism
+  routingContract: "PulseRouter-v11",
+  meshContract: "PulseMesh-v11",
+  sendContract: "PulseSend-v11",
+  gpuOrganContract: "PulseGPU-v11",
+  earnCompatibility: "PulseEarn-v11"
 };
 
 

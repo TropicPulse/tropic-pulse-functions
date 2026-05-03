@@ -117,7 +117,7 @@ export const PulseSchedulerMeta = Object.freeze({
 // ============================================================================
 
 import { routeAIRequest } from "../PULSE-AI/aiRouter-v11-EVO.js";
-import { createOvermindOrgan } from "../PULSE-AI/aiOvermind.js";
+import { createOvermindOrgan } from "../PULSE-AI/aiOvermindPrime.js";
 
 // UPGRADED RUNTIME
 import PulseRuntimeAPI from "../PULSE-X/PulseRuntime-v2-Evo.js";

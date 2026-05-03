@@ -3,6 +3,7 @@
 //  Pulse v3 • Unified Organism • Evolution-Aware • Deterministic Compute Loop
 //  v14.4: Unified Advantage Surface + Degradation Tier + Rich Diagnostics
 //         + Signature Surface + Binary-Front-End Ready + ImmortalMeta Surface
+//         + PulseIntelligence Surface (solvedness + factoring + computeTier)
 // ============================================================================
 //
 //  ROLE (v3 vs v2):
@@ -18,6 +19,8 @@
 //      binary layers can read without understanding all symbolic details.
 //    - v14.4: also surfaces immortalMeta (presenceBandState, harmonicDrift,
 //      coherenceScore, dualBandMode, shifterBand).
+//    - v14.4-INTEL: adds pulseIntelligence (solvedness, factoring, computeTier,
+//      payloadComplexity, readinessScore, evolutionDepth).
 //
 //  SAFETY CONTRACT (v14.4-IMMORTAL):
 //  ---------------------------------
@@ -27,10 +30,11 @@
 //  • No external mutation.
 //  • Deterministic compute loop only.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseV3UnifiedOrganism",
-  version: "v14.4-EVO",
+  version: "v14.4-EVO-INTEL",
   layer: "frontend",
   role: "unified_pulse_organism",
   lineage: "PulseOS-v12",
@@ -41,7 +45,8 @@ AI_EXPERIENCE_META = {
     dualBand: true,
     presenceAware: true,
     chunkAligned: true,
-    safeRouteFree: true
+    safeRouteFree: true,
+    pulseIntelligenceReady: true
   },
 
   contract: {
@@ -68,7 +73,7 @@ export const PulseRole = {
   subsystem: "Pulse",
   layer: "Organ",
   version: "14.4",
-  identity: "Pulse-v3-Unified-v14.4-IMMORTAL",
+  identity: "Pulse-v3-Unified-v14.4-IMMORTAL-INTEL",
 
   evo: {
     // Core evolution awareness
@@ -97,9 +102,15 @@ export const PulseRole = {
     patternSurfaceReady: true,
     lineageSurfaceReady: true,
 
+    // Intelligence surface
+    pulseIntelligenceReady: true,
+    solvednessAware: true,
+    factoringAware: true,
+    computeTierAware: true,
+
     // Binary integration flags:
     binaryBackEndReady: true,
-    binaryFrontEndContract: "PulseBinaryUnifiedOrganism-v14.4-IMMORTAL",
+    binaryFrontEndContract: "PulseBinaryUnifiedOrganism-v14.4-IMMORTAL-INTEL",
 
     // Immortal meta awareness
     immortalMetaAware: true,
@@ -195,9 +206,81 @@ function extractImmortalMeta(payload) {
 
 
 // ============================================================================
-//  DIAGNOSTICS (unified organism view + immortalMeta)
+//  PULSE INTELLIGENCE SURFACE (v14.4-INTEL)
+//  Deterministic, symbolic "compute" surface: no device load, pure logic.
+//  - solvednessScore: how close this pulse feels to "ready / solved"
+//  - factoringSignal: how much structure / reuse potential exists
+//  - computeTier: how much real compute this pulse *deserves* if any
+//  - payloadComplexity: structural richness of payload
+//  - evolutionDepth: lineage depth as an intelligence proxy
+//  - readinessScore: combined readiness for heavy work
 // ============================================================================
-function buildDiagnostics({ pattern, lineage, healthScore, tier, immortalMeta }) {
+function computePulseIntelligence({ pattern, lineage, payload, healthScore }) {
+  const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
+  const payloadSize = payload && typeof payload === "object"
+    ? Object.keys(payload).length
+    : 0;
+
+  const patternLen = typeof pattern === "string" ? pattern.length : 0;
+
+  // Normalized structural complexity
+  const maxPattern = 128;
+  const maxPayload = 64;
+
+  const patternComplexity = Math.min(patternLen / maxPattern, 1);
+  const payloadComplexity = Math.min(payloadSize / maxPayload, 1);
+
+  // More health + less complexity → higher solvedness
+  const solvednessScore = Math.max(
+    0,
+    Math.min(
+      healthScore * 0.7 + (1 - patternComplexity) * 0.15 + (1 - payloadComplexity) * 0.15,
+      1
+    )
+  );
+
+  // Factoring signal: how much structure is available to reuse
+  const factoringSignal =
+    lineageDepth >= 4 || payloadSize >= 12
+      ? "high"
+      : lineageDepth >= 2 || payloadSize >= 4
+        ? "medium"
+        : "low";
+
+  // Compute tier: how much heavy compute this pulse deserves
+  const computeTier =
+    solvednessScore >= 0.9 ? "nearSolution" :
+    solvednessScore >= 0.7 ? "highValue"    :
+    solvednessScore >= 0.4 ? "normal"       :
+    solvednessScore >= 0.2 ? "lowPriority"  :
+    "avoidCompute";
+
+  // Readiness: how "ready" this pulse is to be handed to a miner/GPU
+  const readinessScore = Math.max(
+    0,
+    Math.min(
+      solvednessScore * 0.6 +
+      healthScore * 0.3 +
+      (factoringSignal === "high" ? 0.1 : factoringSignal === "medium" ? 0.05 : 0),
+      1
+    )
+  );
+
+  return {
+    solvednessScore,
+    factoringSignal,
+    computeTier,
+    payloadComplexity,
+    evolutionDepth: lineageDepth,
+    readinessScore
+  };
+}
+
+
+// ============================================================================
+//  DIAGNOSTICS (unified organism view + immortalMeta + intelligence)
+// ============================================================================
+function buildDiagnostics({ pattern, lineage, healthScore, tier, immortalMeta, pulseIntelligence }) {
   return {
     patternLength: pattern.length,
     lineageDepth: lineage.length,
@@ -209,7 +292,10 @@ function buildDiagnostics({ pattern, lineage, healthScore, tier, immortalMeta })
     lineageDensity: lineage.length === 0 ? 0 : pattern.length / lineage.length,
 
     immortal: immortalMeta,
-    immortalSignature: computeHash(JSON.stringify(immortalMeta))
+    immortalSignature: computeHash(JSON.stringify(immortalMeta)),
+
+    intelligence: pulseIntelligence,
+    intelligenceSignature: computeHash(JSON.stringify(pulseIntelligence))
   };
 }
 
@@ -226,6 +312,8 @@ function buildDiagnostics({ pattern, lineage, healthScore, tier, immortalMeta })
 //
 //  v14.4: immortalMeta is surfaced into advantageField but does not
 //         change the core scoring behavior (non-breaking).
+//  v14.4-INTEL: pulseIntelligence is computed alongside healthScore and
+//               surfaced for higher layers (Shifter, Mesh, Earn, etc.).
 // ============================================================================
 function runEvolutionComputeLoop({ pattern, lineage, payload, mode }) {
   const lineageDepth = Array.isArray(lineage) ? lineage.length : 0;
@@ -243,6 +331,19 @@ function runEvolutionComputeLoop({ pattern, lineage, payload, mode }) {
 
   const immortalMeta = extractImmortalMeta(payload);
 
+  const healthScore = (
+    patternScore * 0.4 +
+    lineageScore * 0.3 +
+    payloadScore * 0.3
+  );
+
+  const pulseIntelligence = computePulseIntelligence({
+    pattern,
+    lineage,
+    payload,
+    healthScore
+  });
+
   const advantageField = {
     patternStrength: pattern.length,
     lineageDepth,
@@ -253,32 +354,34 @@ function runEvolutionComputeLoop({ pattern, lineage, payload, mode }) {
       mode === "recovery" ? 2 :
       1,
 
-    unifiedTier: "v3-unified-v14.4-IMMORTAL",
+    unifiedTier: "v3-unified-v14.4-IMMORTAL-INTEL",
 
     // Immortal meta surfaced for higher layers
     presenceBandState: immortalMeta.presenceBandState,
     harmonicDrift: immortalMeta.harmonicDrift,
     coherenceScore: immortalMeta.coherenceScore,
     dualBandMode: immortalMeta.dualBandMode,
-    shifterBand: immortalMeta.shifterBand
-  };
+    shifterBand: immortalMeta.shifterBand,
 
-  const healthScore = (
-    patternScore * 0.4 +
-    lineageScore * 0.3 +
-    payloadScore * 0.3
-  );
+    // Intelligence surfaced for routing / Earn / GPU organs
+    solvednessScore: pulseIntelligence.solvednessScore,
+    factoringSignal: pulseIntelligence.factoringSignal,
+    computeTier: pulseIntelligence.computeTier,
+    payloadComplexity: pulseIntelligence.payloadComplexity,
+    readinessScore: pulseIntelligence.readinessScore
+  };
 
   return {
     advantageField,
     healthScore,
-    immortalMeta
+    immortalMeta,
+    pulseIntelligence
   };
 }
 
 
 // ============================================================================
-//  FACTORY — Create a Pulse v3 Unified Organism (v14.4-IMMORTAL)
+//  FACTORY — Create a Pulse v3 Unified Organism (v14.4-IMMORTAL-INTEL)
 // ============================================================================
 export function createPulseV3({
   jobId,
@@ -305,7 +408,8 @@ export function createPulseV3({
   const {
     advantageField,
     healthScore,
-    immortalMeta
+    immortalMeta,
+    pulseIntelligence
   } = runEvolutionComputeLoop({
     pattern,
     lineage,
@@ -319,7 +423,8 @@ export function createPulseV3({
     lineage,
     healthScore,
     tier,
-    immortalMeta
+    immortalMeta,
+    pulseIntelligence
   });
 
   return {
@@ -337,7 +442,7 @@ export function createPulseV3({
     pageId,
 
     // Unified organism type
-    pulseType: "Pulse-v3-Unified-v14.4-IMMORTAL",
+    pulseType: "Pulse-v3-Unified-v14.4-IMMORTAL-INTEL",
 
     // Advantage + health
     advantageField,
@@ -346,6 +451,9 @@ export function createPulseV3({
 
     // Immortal meta surfaced at organism level
     immortalMeta,
+
+    // Intelligence surfaced at organism level
+    pulseIntelligence,
 
     // Meta: signatures + diagnostics
     meta: {
@@ -363,7 +471,8 @@ export function createPulseV3({
       lineageSurface: computeHash(String(lineage.length)),
       advantageSignature: computeHash(JSON.stringify(advantageField)),
       healthSignature: computeHash(String(healthScore)),
-      tierSignature: computeHash(tier)
+      tierSignature: computeHash(tier),
+      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence))
     }
   };
 }
