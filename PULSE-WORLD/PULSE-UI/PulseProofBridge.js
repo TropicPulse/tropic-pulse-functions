@@ -266,6 +266,40 @@ export function safeRoute(path, payload = {}, timeoutMs = 10000) {
   });
 }
 
+// ============================================================================
+// CORE MEMORY BRIDGE LAYER (v1)
+//  - Allows PulseRouteMemory, PulseRouter, PulseExpansion, etc
+//    to access PulseCoreMemory WITHOUT importing it.
+//  - Keeps membrane intact.
+// ============================================================================
+
+export const coreMemoryBridge = {
+  read(key) {
+    try {
+      return route("coreMemory.read", { key });
+    } catch (err) {
+      return null;
+    }
+  },
+
+  write(key, value) {
+    try {
+      return route("coreMemory.write", { key, value });
+    } catch (err) {
+      return false;
+    }
+  },
+
+  start() {
+    try {
+      return route("coreMemory.start", { ts: Date.now() });
+    } catch (err) {
+      return false;
+    }
+  }
+};
+
+
 // -----------------------------------------------------------------------------
 // FIRE-AND-FORGET ROUTE
 // -----------------------------------------------------------------------------
@@ -414,6 +448,11 @@ if (channel) {
 export const route = safeRoute;
 export const PulseBinaryOrganismBoot = startDualBandAI;
 export const PulseUnderstandingBoot = startUnderstanding;
+
+export const PulseProofBridge = {
+  route,
+  coreMemory: coreMemoryBridge
+};
 
 // -----------------------------------------------------------------------------
 // GLOBAL EXPOSURE OF IMMORTAL STORE

@@ -68,7 +68,8 @@ EXPORT_META = {
 */
 
 import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
-import { createPulseCoreMemory } from "../PULSE-BAND/PULSE-CORE/PulseCoreMemory.js";
+import { PulseProofBridge } from "./PulseProofBridge.js";
+
 
 export const RouteMemoryRole = {
   type: "Organ",
@@ -180,7 +181,7 @@ export function createPulseRouteMemory({
   warn = console.warn
 } = {}) {
 
-  const Core = createPulseCoreMemory({ log, warn });
+  const Core = PulseProofBridge.coreMemory;
 
   let seq = 0;
 
@@ -377,6 +378,8 @@ export function createPulseRouteMemory({
 
   return PulseRouteMemory;
 }
+
+
 
 export default createPulseRouteMemory;
 
