@@ -60,11 +60,6 @@ AI_EXPERIENCE_META = {
 */
 
 console.log("Understanding");
-// ============================================================================
-//  UNIVERSAL ERROR SPINE (PulseUIErrors-v12-EVO)
-//  - Understanding integrates error packets from Window + Flow + Reflex.
-// ============================================================================
-import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
 
 
 // ============================================================================
@@ -72,15 +67,8 @@ import PulseUIErrors from "./PulseUIErrors-v12-EVO.js";
 // ============================================================================
 import { PulseIntentMap } from "../PULSE-BAND/PULSE-OS/PulseIntentMap.js";
 import { PulseOrganismMap } from "../PULSE-BAND/PULSE-OS/PulseOrganismMap.js";
-import { PulseIQMap } from "../PULSE-BAND/PULSE-OS/PulseIQMap.js";
-
-
-// ============================================================================
-//  IMPORTS — USER / LOCAL OS ORCHESTRATOR (v13+)
-//  - User pulls OS; OS pulls everything else.
-//  - Understanding depends on User, not directly on OS barrels.
-// ============================================================================
 import createPulseWorldCore from "../PULSE-BAND/PULSE-EXPANSION/PulseUser-v12.3-Presence.js";
+
 
 
 // ============================================================================
@@ -510,7 +498,7 @@ async function buildPulseKernel() {
     UIFlow,
     SkinReflex,
 
-    Errors: PulseUIErrors,
+    Errors: window.PulseUIErrors,
 
     Governed: {
       run: runThroughGovernor
@@ -586,9 +574,9 @@ export const PulseUnderstanding = {
   Environment: PulseEnvironment,
   IntentMap: PulseIntentMap,
   OrganismMap: PulseOrganismMap,
-  IQMap: PulseIQMap,
+  IQMap: window.PulseIQMap,
   Kernel: PulseKernelPromise,
-  Errors: PulseUIErrors,
+  Errors: window.PulseUIErrors,
   Identity: () =>
     typeof window !== "undefined" ? window?.Pulse?.Identity ?? null : null,
   IdentityKind: () =>

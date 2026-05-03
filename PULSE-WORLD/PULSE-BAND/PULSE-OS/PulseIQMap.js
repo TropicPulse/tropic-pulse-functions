@@ -289,3 +289,14 @@ async function buildPulseIQMapPrime() {
 // EXPORT — PRIME IQ MAP (PROMISE)
 // -----------------------------------------------------------------------------
 export const PulseIQMap = await buildPulseIQMapPrime();
+
+try {
+  if (typeof window !== "undefined") {
+    window.PulseIQMap = PulseIQMap;
+  }
+  if (typeof globalThis !== "undefined") {
+    globalThis.PulseIQMap = PulseIQMap;
+  }
+} catch {
+  // never throw
+}
