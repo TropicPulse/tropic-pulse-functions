@@ -9,17 +9,17 @@
                minimum-scale=1,
                user-scalable=no">
   <title>Welcome to Tropic Pulse!</title>
-<script src="./_FRONTEND/PULSE-TOUCH.js"></script>
+<script src="../_FRONTEND/PULSE-TOUCH.js"></script>
 <script type="module">
-import { VitalsLogger as PulseLogger }        from "./_BACKEND/PulseProofLogger.js";
-import { VitalsMonitor as PulseVitalsMonitor } from "./_CONNECTORS/PulseProofMonitor.js";
-import PulseUIErrors from "./_CONNECTORS/PulseUIErrors-v12-EVO.js";
-import { initUIFlow as PulseUIFlow } from "./_CONNECTORS/PulseUIFlow-v12-EVO.js";
+import { VitalsLogger as PulseLogger }        from "../_BACKEND/PulseProofLogger.js";
+import { VitalsMonitor as PulseVitalsMonitor } from "../_BACKEND/PulseProofMonitor.js";
+import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v12-EVO.js";
+import { initUIFlow as PulseUIFlow } from "../_FRONTEND/PulseUIFlow-v12-EVO.js";
 /* 1. SKIN REFLEX — SIDE‑EFFECT IMPORT, AUTO‑ATTACHES */
-import * as PulseSkinReflex from "./_CONNECTORS/PulseSkinReflex.js"; // PageScannerV12 auto hooks window here
-import PulseChunks from "./PulsePresence-v2.js";
+import * as PulseSkinReflex from "../_BACKEND/PulseSkinReflex.js"; // PageScannerV12 auto hooks window here
+import PulseChunks from "../PulsePresence-v2.js";
 /* 0. BOOT MEMBRANE — MUST BE FIRST */
-import * as PulseWindow from "./PulseNetEvolutionaryWindow.js";
+import * as PulseWindow from "../PulseNetEvolutionaryWindow.js";
 
 // Expose PulseChunks
     window.PulseChunks = window.PulseChunks || PulseChunks;
@@ -37,7 +37,7 @@ import * as PulseWindow from "./PulseNetEvolutionaryWindow.js";
   justify-content: center;
 
   background: #000;
-  background-image: url('./_PICTURES/Mysterious.png');
+  background-image: url('../_PICTURES/Mysterious.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -621,7 +621,7 @@ text-align: center;
 
 <body>
   <div id="t-loading">
-    <img src="./_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
+    <img src="../_PICTURES/ToucanLogo-Mini.png" id="t-loading-logo"></img>
   </div>
   <div id="pulseband-overlay">
     <div id="pulseband-badge">
@@ -634,7 +634,7 @@ text-align: center;
 
       <div class="pb-header">
       <img id="pb-mini-badge" class="pb-mini-badge"
-          src="./_PICTURES/PulseBand.png"
+          src="../_PICTURES/PulseBand.png"
           alt="PulseBand Badge">
     </div>
 
@@ -701,7 +701,7 @@ text-align: center;
   </div>
   <div class="auth-wrapper">
     <div class="auth-container">
-      <img src="./_PICTURES/ToucanLogo-Mini.png" class="auth-logo"></img>
+      <img src="../_PICTURES/ToucanLogo-Mini.png" class="auth-logo"></img>
 
       <h1 class="auth-title">Secure Login</h1>
       <div id="authMsg" class="auth-msg"></div>

@@ -111,7 +111,7 @@ import { createBackwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/BackwardEngi
 import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v12-Evo.js";
 import { initUIFlow } from "../_FRONTEND/PulseUIFlow-v12-Evo.js";
 import { safeRoute as route } from "./PulseProofBridge.js";
-
+import { PulseUnderstanding } from "../../PULSE-UI/_BACKEND/PulseNetUnderstanding.js";
 // ============================================================================
 // GLOBAL ORGANISM MEMORY (shared across all imports)
 // ============================================================================
