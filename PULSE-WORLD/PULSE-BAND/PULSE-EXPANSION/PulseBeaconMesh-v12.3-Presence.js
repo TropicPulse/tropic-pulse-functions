@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  PULSE-WORLD : PulseBeaconMesh-v16-IMMORTAL-ORGANISM.js
+ *  PULSE-WORLD : PulseBeaconMesh-v12.3-Presence.js
  *  ROLE: Local membrane simulator + density/mode/advantage debugger
  *  VERSION: v16-IMMORTAL-ORGANISM
  *  LAYER: BeaconMesh

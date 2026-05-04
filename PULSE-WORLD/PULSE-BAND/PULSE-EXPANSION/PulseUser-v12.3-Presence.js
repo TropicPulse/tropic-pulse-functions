@@ -1,5 +1,5 @@
 // ============================================================================
-// PULSE-WORLD : PulseUser-v16-IMMORTAL-ORGANISM.js
+// PULSE-WORLD : PulseUser-v12.3-Presence.js
 // ORGAN TYPE: Local OS / Experience Orchestrator
 // VERSION: v16-IMMORTAL-ORGANISM (Hybrid, Every-Advantage, Brain-Aware, Server-Attachable)
 // ============================================================================

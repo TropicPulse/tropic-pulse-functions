@@ -111,7 +111,7 @@ import {
 import {
   PulseWorldCoreMeta,
   createPulseWorldCore
-} from "../PULSE-EXPANSION/PulseUser-v16-IMMORTAL-ORGANISM.js";
+} from "../PULSE-EXPANSION/PulseUser-v12.3-Presence.js";
 
 // Mesh organism (symbolic + binary)
 import createPulseMesh, {
@@ -125,7 +125,7 @@ import createBinaryMesh, {
 import PulseBeaconEngine from "./PulseBeaconEngine-v12.3-Presence.js";
 import PulseBeaconMesh, {
   PulseBeaconMeshMeta
-} from "./PulseBeaconMesh-v16-IMMORTAL-ORGANISM.js";
+} from "./PulseBeaconMesh-v12.3-Presence.js";
 
 // Touch / presence
 import { getPulseTouchContext } from "../../PULSE-UI/PULSE-TOUCH.js";
