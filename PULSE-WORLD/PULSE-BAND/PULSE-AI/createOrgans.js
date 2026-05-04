@@ -113,7 +113,7 @@ import { createCortex } from "./aiCortex-v11-Evo.js";
 import { createDualBandOrganism } from "./aiDualBand-v11-Evo.js";
 
 // Non-binary symbolic organs
-import { createDoctorAPI } from "./aiDoctor.js";
+import { createDoctorAPI } from "./aiDoctorAssistant.js";
 import { createSurgeonAPI } from "./aiSurgeon.js";
 import { createLawyerAPI } from "./aiLawAssistant.js";
 import { createEntrepreneurAPI } from "./aiEntrepreneur.js";

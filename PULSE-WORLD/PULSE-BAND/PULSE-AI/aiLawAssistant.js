@@ -105,6 +105,7 @@ export const PulseRole = Object.freeze({
     zeroMutationOfInput: true
   }),
 
+
   // --------------------------------------------------------------------------
   // CONTRACT — what this organ MUST and MUST NOT do
   // --------------------------------------------------------------------------

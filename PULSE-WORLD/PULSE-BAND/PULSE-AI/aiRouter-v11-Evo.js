@@ -112,7 +112,7 @@ const ArchetypePages = Object.freeze({
   DEBUG: "aiDebug.js",
   DIAGNOSTICS: "aiDiagnostics.js",
   DIAGNOSTICS_WRITE: "aiDiagnosticsWrite.js",
-  DOCTOR: "aiDoctor.js",
+  DOCTOR: "aiDoctorAssistant.js",
   DOCTOR_ARCHITECT: "aiDoctorArchitect.js",
   EARN: "aiEarn.js",
   ENTREPRENEUR: "aiEntrepreneur.js",

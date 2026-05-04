@@ -57,7 +57,7 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
+import { PulseProofBridge } from "../../PULSE-UI/_BACKEND/PulseProofBridge.js";
 
 export const PulseEarnGeneticMemoryMeta = Object.freeze({
   layer: "PulseEarnGeneticMemory",

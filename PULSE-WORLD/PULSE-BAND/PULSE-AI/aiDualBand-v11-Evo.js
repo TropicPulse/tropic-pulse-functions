@@ -154,7 +154,7 @@ import createEarnAPI, { EarnMeta, prewarmEarnOrgan } from "./aiEarn.js";
 
 import { createTouristAPI } from "./aiTourist.js";
 import { createArchitectAPI } from "./aiArchitect.js";
-import { createDoctorOrgan } from "./aiDoctor.js";
+import { createDoctorOrgan } from "./aiDoctorAssistant.js";
 import { createDoctorArchitectOrgan } from "./aiDoctorArchitect.js";
 
 import { createAIOrganism } from "./aiOrganism.js";

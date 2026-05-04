@@ -62,15 +62,37 @@ console.log("Monitor");
 import { log, warn, error } from "./PulseProofLogger.js";
 
 const g =
-  typeof global !== "undefined"
-    ? global
-    : typeof globalThis !== "undefined"
+  typeof globalThis !== "undefined"
     ? globalThis
+    : typeof global !== "undefined"
+    ? global
     : typeof window !== "undefined"
     ? window
+    : typeof g !== "undefined"
+    ? g
     : {};
 
-const db = g.db || null;
+const db = global.db || window.db || g.db || null;
+// ============================================================================
+//  ONLINE FLAG — OFFLINE-FIRST
+// ============================================================================
+
+function isOnline() {
+  if (typeof window !== "undefined" && typeof window.PULSE_ONLINE === "boolean") {
+    return window.PULSE_ONLINE === true;
+  }
+  if (typeof global.PULSE_ONLINE === "boolean") {
+    return global.PULSE_ONLINE === true;
+  }
+  if (typeof globalThis.PULSE_ONLINE === "boolean") {
+    return globalThis.PULSE_ONLINE === true;
+  }
+  if (typeof g.PULSE_ONLINE === "boolean") {
+    return g.PULSE_ONLINE === true;
+  }
+  return false;
+}
+
 
 // ============================================================================
 //  ORGAN IDENTITY — v14‑IMMORTAL‑OFFLINE‑FIRST
@@ -193,6 +215,7 @@ function hasLocalStorage() {
 }
 
 function loadVitalsBuffer() {
+  if (!isOnline()) return;
   if (!hasLocalStorage()) return [];
   try {
     const raw = window.localStorage.getItem(VITALS_LS_KEY);
@@ -205,6 +228,7 @@ function loadVitalsBuffer() {
 }
 
 function saveVitalsBuffer(buffer) {
+  if (!isOnline()) return;
   if (!hasLocalStorage()) return;
   try {
     const trimmed =
@@ -218,6 +242,7 @@ function saveVitalsBuffer(buffer) {
 }
 
 function appendVitalsEntry(kind, payload) {
+  if (!isOnline()) return;
   const entry = {
     ts: Date.now(),
     kind,
@@ -299,24 +324,11 @@ export const ENABLE_PERFORMANCE_LOGGING = true;
 export const PERFORMANCE_LOG_COLLECTION = "UserPerformanceLogs";
 
 // ============================================================================
-//  ONLINE FLAG — OFFLINE-FIRST
-// ============================================================================
-
-function isOnline() {
-  if (typeof window !== "undefined") {
-    return window.PULSE_ONLINE === true;
-  }
-  if (typeof g.PULSE_ONLINE === "boolean") {
-    return g.PULSE_ONLINE === true;
-  }
-  return false;
-}
-
-// ============================================================================
 //  BACKEND METRICS — ONLY WHEN ONLINE, OTHERWISE LOCAL-ONLY
 // ============================================================================
 
 export async function updateUserMetrics(userId, data = {}) {
+  if (!isOnline()) return;
   const uid = userId || "anonymous";
 
   // ALWAYS log locally (offline-first)
@@ -511,6 +523,7 @@ export function allocateInstances(
   earnMode,
   testEarnActive
 ) {
+  if (!isOnline()) return;
   let base = phase >= 2 ? 2 : 1;
 
   if (hubFlag) base *= 2;
@@ -778,13 +791,21 @@ export const VitalsMonitor = {
 // ============================================================================
 
 try {
-  if (typeof window !== "undefined") {
-    window.PulseVitalsStore = PulseVitalsStore;
-    window.VitalsMonitor = VitalsMonitor;
+  if (typeof global !== "undefined") {
+    global.PulseVitalsStore = PulseVitalsStore;
+    global.VitalsMonitor = VitalsMonitor;
   }
   if (typeof globalThis !== "undefined") {
     globalThis.PulseVitalsStore = PulseVitalsStore;
     globalThis.VitalsMonitor = VitalsMonitor;
+  }
+  if (typeof window !== "undefined") {
+    window.PulseVitalsStore = PulseVitalsStore;
+    window.VitalsMonitor = VitalsMonitor;
+  }
+  if (typeof g !== "undefined") {
+    g.PulseVitalsStore = PulseVitalsStore;
+    g.VitalsMonitor = VitalsMonitor;
   }
 } catch {
   // never throw

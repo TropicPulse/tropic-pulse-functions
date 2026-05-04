@@ -1,58 +1,52 @@
 // ============================================================================
-//  PulseProofLogger.js — v14-IMMORTAL-LOGGER
+//  PulseProofLogger.js — v15-IMMORTAL-LOGGER • US/THEM • META-IMMORTAL
 //  PROOF LOGGER • AI CONSOLE EXTENSION • OFFLINE-FIRST TELEMETRY + LOCALSTORE
 // ============================================================================
-/*
-AI_EXPERIENCE_META = {
-  identity: "PulseProofLogger",
-  version: "v14-IMMORTAL-LOGGER",
-  layer: "frontend",
-  role: "observer_logger",
-  lineage: "PulseOS-v14",
+//  THIS LOGGER IS NOW THE SUPREME MEMBRANE ABOVE ALL LAYERS.
+//  IT SEES EVERYTHING. IT TAGS EVERYTHING. IT STORES EVERYTHING.
+//
+//  🔥 ROUTING PRINCIPLE
+//  ---------------------------------------------------------------------------
+//  • Routing is conceptually for PULSES.
+//  • This logger does NOT depend on routing for access to Firebase.
+//  • It writes directly to Firebase when `db` is available on this page.
+//  • It can STILL mirror via route("firebaseLog"/"telemetryIngest") for
+//    remote ingestion — but that is additive, not required.
+//
+//  🔥 US vs THEM PRINCIPLE
+//  ---------------------------------------------------------------------------
+//  • NO FLAGS. NO ENV VARS. PURELY DERIVED FROM LAYER NAME.
+//  • If layer string (case-insensitive) contains "PULSENET" → US.
+//  • Otherwise → THEM.
+//  • This works across all layers, all subsystems, all organs.
+//
+//  🔥 META PRINCIPLE
+//  ---------------------------------------------------------------------------
+//  Every log/warn/error/critical now carries:
+//    • layer (string, e.g. "PULSENET", "WINDOW", "PULSECORE", etc.)
+//    • us_vs_them ("US" | "THEM")
+//    • system (optional)
+//    • subsystem (auto-detected or provided)
+//    • organ (optional)
+//    • page (auto-detected in browser)
+//    • func (optional / auto from function reference)
+//    • extra (arbitrary metadata)
+//    • ts, level, message, rest
+//
+//  All of this is:
+//    • stored offline (localStorage ring buffer)
+//    • mirrored to console with rich prefixes
+//    • written directly to Firebase when `db` is present
+//    • optionally mirrored via route("firebaseLog") when online
+// ============================================================================
 
-  evo: {
-    passive: true,
-    alwaysOn: true,
-    safeRouteFree: true,
-    dualBandAware: true,
-    chunkAligned: true,
-    presenceAware: true,
-    cnsAligned: true,
-    offlineFirst: true,
-    localStoreMirrored: true,
-    replayAware: true
-  },
-
-  contract: {
-    always: [
-      "PulseWindow",
-      "PulsePresence",
-      "PulseChunks",
-      "PulseUIFlow",
-      "PulseUIErrors",
-      "PulseOfflineLogs"
-    ],
-    never: [
-      "legacyLogger",
-      "legacyObserver",
-      "safeRoute",
-      "fetchViaCNS",
-      "legacyPresence",
-      "legacyChunker",
-      "legacyFlow"
-    ]
-  }
-}
-*/
-
+console.log("Logger");
 import { safeRoute as route } from "./PulseProofBridge.js";
 
 // Capture original console to avoid recursion
 const _c = { ...console };
 
-// -----------------------------------------------------------------------------
-// Environment + online flag (offline-first)
-// -----------------------------------------------------------------------------
+// Global handle
 const g =
   typeof globalThis !== "undefined"
     ? globalThis
@@ -60,11 +54,29 @@ const g =
     ? global
     : typeof window !== "undefined"
     ? window
+    : typeof g !== "undefined"
+    ? g
     : {};
 
+// Prefer global db if present (logger page / server)
+const db =
+  (g && g.db) ||
+  (typeof global !== "undefined" && global.db) ||
+  (typeof window !== "undefined" && window.db) ||
+  null;
+
+// -----------------------------------------------------------------------------
+// Environment + online flag (offline-first)
+// -----------------------------------------------------------------------------
 function isOnline() {
   if (typeof window !== "undefined" && typeof window.PULSE_ONLINE === "boolean") {
     return window.PULSE_ONLINE === true;
+  }
+  if (typeof global !== "undefined" && typeof global.PULSE_ONLINE === "boolean") {
+    return global.PULSE_ONLINE === true;
+  }
+  if (typeof globalThis !== "undefined" && typeof globalThis.PULSE_ONLINE === "boolean") {
+    return globalThis.PULSE_ONLINE === true;
   }
   if (typeof g.PULSE_ONLINE === "boolean") {
     return g.PULSE_ONLINE === true;
@@ -77,11 +89,37 @@ function hasRoute() {
 }
 
 // -----------------------------------------------------------------------------
-// LocalStorage OFFLINE LOG STORE — v14 IMMORTAL
-//  - Every log/warn/error/critical is mirrored here
-//  - Any page / any mode can read the same log history
+// Layer + US/THEM detection (NO FLAGS, PURELY BY NAME)
 // -----------------------------------------------------------------------------
-const LS_KEY_LOGS = "PulseProofLogger.v14.logs";
+function normalizeLayerName(layer) {
+  if (!layer) return null;
+  return String(layer).trim();
+}
+
+function detectLayer(metaLayer = null) {
+  const explicit = normalizeLayerName(metaLayer);
+  if (explicit) return explicit;
+
+  if (typeof window !== "undefined") return "WINDOW";
+  return "UNKNOWN";
+}
+
+function detectUsVsThem(layer) {
+  const upper = String(layer || "").toUpperCase();
+  return upper.includes("PULSENET") ? "US" : "THEM";
+}
+
+function detectPage() {
+  if (typeof window !== "undefined" && window.location) {
+    return window.location.pathname || null;
+  }
+  return null;
+}
+
+// -----------------------------------------------------------------------------
+// LocalStorage OFFLINE LOG STORE — v15 IMMORTAL
+// -----------------------------------------------------------------------------
+const LS_KEY_LOGS = "PulseProofLogger.v15.logs";
 const LS_MAX_ENTRIES = 5000; // ring-ish cap to avoid unbounded growth
 
 function hasLocalStorage() {
@@ -168,6 +206,13 @@ async function flushLocalLogsToFirebase() {
         rest: entry.rest || [],
         ts: entry.ts,
         subsystem: entry.subsystem,
+        layer: entry.layer,
+        us_vs_them: entry.us_vs_them,
+        system: entry.system,
+        organ: entry.organ,
+        page: entry.page,
+        func: entry.func,
+        extra: entry.extra,
         offline: true
       });
       sentIds.push(entry.id);
@@ -184,9 +229,7 @@ async function flushLocalLogsToFirebase() {
 
 // Try to flush on load and whenever we detect online
 if (typeof window !== "undefined") {
-  // initial attempt
   flushLocalLogsToFirebase().catch(() => {});
-  // listen to browser online event
   window.addEventListener("online", () => {
     flushLocalLogsToFirebase().catch(() => {});
   });
@@ -292,7 +335,7 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
     data,
     meta: {
       layer: "PulseProofLogger",
-      version: "13.1-EVO-ALWAYS-ON-OFFLINE-FIRST",
+      version: "15.0-EVO-ALWAYS-ON-OFFLINE-FIRST",
       subsystem,
       event,
       band,
@@ -304,26 +347,53 @@ export function makeTelemetryPacket(subsystem, event, data = {}) {
 }
 
 // -----------------------------------------------------------------------------
-// Firebase / telemetry bridge — OFFLINE-FIRST, FAILURE-PROOF + LOCALSTORE
+// Firebase / telemetry bridge — OFFLINE-FIRST, META-IMMORTAL
 // -----------------------------------------------------------------------------
 let logIdCounter = Date.now();
 
-function makeLocalLogEntry(level, subsystem, message, rest) {
+function makeLocalLogEntry(level, subsystem, message, rest, meta = {}) {
+  const layer = detectLayer(meta.layer);
+  const us_vs_them = detectUsVsThem(layer);
+  const page = meta.page || detectPage();
+  const func = meta.func || null;
+  const system = meta.system || null;
+  const subsystemName = meta.subsystem || subsystem || null;
+  const organ = meta.organ || null;
+  const extra = meta.extra || {};
+
   return {
     id: `L${++logIdCounter}`,
     ts: Date.now(),
     level,
-    subsystem,
+    subsystem: subsystemName,
     message,
-    rest
+    rest,
+    layer,
+    us_vs_them,
+    system,
+    organ,
+    page,
+    func,
+    extra
   };
 }
 
-async function sendToFirebase(level, message, rest, subsystem = "legacy") {
-  // Always mirror to localStorage first — offline beast
-  const entry = makeLocalLogEntry(level, subsystem, message, rest);
+async function sendToFirebase(level, message, rest, subsystem = "legacy", meta = {}) {
+  // Build enriched entry (offline-first)
+  const entry = makeLocalLogEntry(level, subsystem, message, rest, meta);
   appendLocalLog(entry);
 
+  // Direct Firebase write when db is present (instant, no routing needed)
+  if (db && typeof db.collection === "function") {
+    try {
+      await db.collection("GLOBAL_LOGS").add(entry);
+      markLocalLogsSynced([entry.id]);
+    } catch (e) {
+      _c.warn("PulseProofLogger: direct Firebase write failed:", e);
+    }
+  }
+
+  // Optional remote ingestion via route (kept, not required)
   if (!hasRoute() || !isOnline()) {
     return;
   }
@@ -334,13 +404,19 @@ async function sendToFirebase(level, message, rest, subsystem = "legacy") {
       message,
       rest,
       ts: entry.ts,
-      subsystem,
+      subsystem: entry.subsystem,
+      layer: entry.layer,
+      us_vs_them: entry.us_vs_them,
+      system: entry.system,
+      organ: entry.organ,
+      page: entry.page,
+      func: entry.func,
+      extra: entry.extra,
       offline: false
     });
-    // mark this entry as synced
     markLocalLogsSynced([entry.id]);
   } catch (e) {
-    _c.warn("PulseProofLogger: Firebase logging failed:", e);
+    _c.warn("PulseProofLogger: Firebase logging via route failed:", e);
   }
 }
 
@@ -391,7 +467,53 @@ function handlePulseCommand(cmd) {
 }
 
 // -----------------------------------------------------------------------------
-// Core logging functions — offline-first, CNS-optional, LOCALSTORE MIRRORED
+// GLOBAL PULSE LOGGER → Firebase + Console + Meta
+// -----------------------------------------------------------------------------
+export function pulseLog({
+  layer = null,
+  system = null,
+  subsystem = null,
+  organ = null,
+  page = null,
+  func = null,
+  message = "",
+  extra = {},
+  level = "log",
+  rest = []
+} = {}) {
+  const detectedLayer = detectLayer(layer);
+  const us_vs_them = detectUsVsThem(detectedLayer);
+  const detectedPage = page || detectPage();
+
+  if (typeof func === "function") func = func.name || "anonymous";
+
+  const meta = {
+    layer: detectedLayer,
+    system,
+    subsystem,
+    organ,
+    page: detectedPage,
+    func,
+    extra
+  };
+
+  // Send to Firebase / offline store
+  sendToFirebase(level, message, rest, subsystem || "legacy", meta);
+
+  // Mirror to console with rich prefix
+  const prefix =
+    `[${us_vs_them}][${String(detectedLayer).toUpperCase()}]` +
+    (system ? `[${system}]` : "") +
+    (subsystem ? `[${subsystem}]` : "") +
+    (organ ? `[${organ}]` : "") +
+    (detectedPage ? `[${detectedPage}]` : "") +
+    (func ? `[${func}]` : "");
+
+  _c.log(`${prefix} ${message}`, ...rest);
+}
+
+// -----------------------------------------------------------------------------
+// Core logging functions — offline-first, META-IMMORTAL
 // -----------------------------------------------------------------------------
 function mark404(message) {
   if (typeof message === "string" && message.trim() === "404") {
@@ -422,7 +544,13 @@ export function log(...args) {
     );
   }
 
-  sendToFirebase("log", safeMessage, rest, subsystem);
+  // Enriched global pulse log
+  pulseLog({
+    level: "log",
+    subsystem,
+    message: safeMessage,
+    rest
+  });
 }
 
 export function warn(...args) {
@@ -436,7 +564,12 @@ export function warn(...args) {
     ...rest
   );
 
-  sendToFirebase("warn", safeMessage, rest, subsystem);
+  pulseLog({
+    level: "warn",
+    subsystem,
+    message: safeMessage,
+    rest
+  });
 }
 
 export function error(...args) {
@@ -450,7 +583,12 @@ export function error(...args) {
     ...rest
   );
 
-  sendToFirebase("error", safeMessage, rest, subsystem);
+  pulseLog({
+    level: "error",
+    subsystem,
+    message: safeMessage,
+    rest
+  });
 }
 
 export function critical(...args) {
@@ -465,7 +603,12 @@ export function critical(...args) {
   _c.error(`%c${safeMessage}`, "color:#D32F2F; font-weight:bold;", ...rest);
   _c.groupEnd();
 
-  sendToFirebase("critical", safeMessage, rest, subsystem);
+  pulseLog({
+    level: "critical",
+    subsystem,
+    message: safeMessage,
+    rest
+  });
 }
 
 // -----------------------------------------------------------------------------
@@ -655,13 +798,14 @@ export const VitalsLogger = {
   restoreAIPrompts,
   getLocalLogs,
   flushLocalLogsToFirebase,
-  meta: { layer: "PulseProofLogger", version: "14.0-IMMORTAL-OFFLINE-LOCALSTORE" }
+  pulseLog,
+  meta: { layer: "PulseProofLogger", version: "15.0-IMMORTAL-META-US-THEM" }
 };
 
 export const logger = { ...VitalsLogger };
 
 // ============================================================================
-// GLOBAL LOGGER BINDINGS — v14 IMMORTAL + OFFLINE LOG SURFACE
+// GLOBAL LOGGER BINDINGS — v15 IMMORTAL + OFFLINE LOG SURFACE
 // ============================================================================
 (function bindLogger() {
   try {
@@ -682,7 +826,6 @@ export const logger = { ...VitalsLogger };
       window.closeAIPrompt = closeAIPrompt;
       window.listAIPrompts = listAIPrompts;
 
-      // Offline beast visibility: global log surface
       window.PulseOfflineLogs = {
         getAll: () => getLocalLogs(),
         getByLevel: (level) => getLocalLogs({ level }),
@@ -704,7 +847,6 @@ export const logger = { ...VitalsLogger };
     globalThis.closeAIPrompt = closeAIPrompt;
     globalThis.listAIPrompts = listAIPrompts;
 
-    // Also expose offline logs on globalThis
     globalThis.PulseOfflineLogs = {
       getAll: () => getLocalLogs(),
       getByLevel: (level) => getLocalLogs({ level }),
@@ -716,3 +858,17 @@ export const logger = { ...VitalsLogger };
     _c.error("Logger binding failed:", err);
   }
 })();
+
+try {
+  if (typeof global !== "undefined") {
+    global.PulseOfflineLogs = g.PulseOfflineLogs || globalThis.PulseOfflineLogs;
+  }
+  if (typeof globalThis !== "undefined") {
+    globalThis.PulseOfflineLogs = g.PulseOfflineLogs || globalThis.PulseOfflineLogs;
+  }
+  if (typeof g !== "undefined") {
+    g.PulseOfflineLogs = g.PulseOfflineLogs || globalThis.PulseOfflineLogs;
+  }
+} catch {
+  // never throw
+}
