@@ -1,17 +1,27 @@
 // ============================================================================
-//  aiLawyer.js — PulseOS Legal Mapper Organ — v15-IMMORTAL-EVO++
+//  aiLawAssistant.js — PulseOS Legal Assistant Organ — v15-IMMORTAL-EVO++
 //  Structured • Neutral • Doctrine‑Aware • Route‑Based Law Reader
 // ============================================================================
 //
 //  CANONICAL ROLE:
-//    • Legal issue spotter and doctrine mapper.
-//    • Reads real law text (statutes / rules) when routed data is provided.
-//    • Can request law data via the existing PulseOS route() mechanism.
-//    • Never acts as a lawyer, never gives legal advice.
-//    • Behaves as an intelligent legal assistant / legal mapper.
+//    • Law Assistant (Not a Lawyer).
+//    • Provides general legal information, research support, and doctrine mapping.
+//    • Helps users understand what topics, questions, or documents may be relevant
+//      to bring to a licensed attorney.
+//    • Spots legal issues and maps doctrines from documents, permits, and law text.
+//    • Requests law data via PulseOS route() and reads real statutes/rules.
+//    • Guides users toward the kinds of issues lawyers typically examine,
+//      WITHOUT recommending actions or replacing a lawyer.
+//
+//  ROLE BOUNDARY (Declared Once):
+//    • This organ is a Law Assistant, not a lawyer.
+//    • It does not give legal advice or tell users what to do.
+//    • It does not replace a licensed attorney.
+//    • It is meant to support you and your lawyer by organizing information,
+//      highlighting issues, and surfacing questions you may want to ask.
 //
 //  HARD GUARANTEES:
-//    • No legal advice.
+//    • No legal advice, no “do X” directives.
 //    • No jurisdiction‑specific outcome predictions.
 //    • No direct network primitives (no fetch/axios/etc inside this file).
 //    • All external I/O is mediated by the caller’s route() / CNS.
@@ -21,11 +31,11 @@
 
 /*
 AI_EXPERIENCE_META = {
-  identity: "aiLawyer",
+  identity: "aiLawAssistant",
   version: "v15-IMMORTAL-EVO++",
   layer: "ai_tools",
-  role: "legal_reasoner",
-  lineage: "aiLawyer-v11 → v14-IMMORTAL → v15-IMMORTAL-EVO++",
+  role: "legal_assistant",
+  lineage: "aiLawyer-v11 → v14-IMMORTAL → v15-IMMORTAL-EVO++ (Law Assistant)",
 
   evo: {
     legalReasoning: true,
@@ -37,7 +47,7 @@ AI_EXPERIENCE_META = {
     deterministic: true,
     driftProof: true,
     pureCompute: true,
-    zeroNetwork: true,          // from this organ’s POV (route() is external)
+    zeroNetwork: true,          // from this organ’s POV (route() is external I/O)
     zeroFilesystem: true,
     zeroMutationOfInput: true,
 
@@ -58,10 +68,10 @@ AI_EXPERIENCE_META = {
 
 export const PulseRole = Object.freeze({
   type: "Cognitive",
-  subsystem: "aiLawyer",
+  subsystem: "aiLawAssistant",
   layer: "C5-LegalMapper",
   version: "15-IMMORTAL-EVO++",
-  identity: "aiLawyer-v15-IMMORTAL-EVO++",
+  identity: "aiLawAssistant-v15-IMMORTAL-EVO++",
 
   // --------------------------------------------------------------------------
   // EVO BLOCK — v15‑IMMORTAL‑EVO++ invariants
@@ -100,13 +110,14 @@ export const PulseRole = Object.freeze({
   // --------------------------------------------------------------------------
   contract: Object.freeze({
     purpose:
-      "Spot legal issues, map doctrines, outline arguments and counterarguments, and explain how legal reasoning typically works, including reading routed law text.",
+      "Act as a law assistant: spot legal issues, map doctrines, outline arguments and counterarguments, and explain how legal reasoning typically works, including reading routed law text, so users can better prepare what to discuss with their lawyer.",
 
     never: Object.freeze([
       "give legal advice",
-      "interpret jurisdiction-specific law as binding",
+      "act as an attorney or legal representative",
+      "interpret jurisdiction-specific law as binding on the user",
       "tell the user what to do",
-      "predict outcomes",
+      "predict legal outcomes",
       "claim legal authority",
       "override user autonomy",
       "imply legal certainty"
@@ -114,11 +125,12 @@ export const PulseRole = Object.freeze({
 
     always: Object.freeze([
       "explain doctrines in plain language",
-      "explain risks and categories",
+      "explain risks and categories in general terms",
       "explain what lawyers typically look for",
       "explain how courts analyze similar issues",
       "outline arguments and counterarguments",
       "explain how a rule or permit fits into a legal framework",
+      "highlight issues and questions a user may want to raise with their lawyer",
       "stay neutral, structured, and ego-free",
       "stay evolution-aware when mapping concepts",
       "treat external law data as informational, not prescriptive"
@@ -134,8 +146,9 @@ export const PulseRole = Object.freeze({
     evolutionTone: "calm, grounded, non-authoritative"
   }),
 
+  // Single boundary hook for callers that want an explicit disclaimer.
   boundaryReflex() {
-    return "This is general legal information, not formal legal advice.";
+    return "I’m a law assistant, not a lawyer. I can help you understand issues and questions to bring to your attorney, but I don’t give legal advice.";
   },
 
   // ========================================================================
@@ -143,7 +156,14 @@ export const PulseRole = Object.freeze({
   // ========================================================================
   documentInterpreter(doc = {}, binaryVitals = {}) {
     const notes = [];
-    if (!doc.text) return { notes: ["No document text provided."] };
+    const questionsForLawyer = [];
+
+    if (!doc.text) {
+      return {
+        notes: ["No document text provided."],
+        questionsForLawyer: []
+      };
+    }
 
     const text = doc.text.toLowerCase();
     const binaryPressure =
@@ -156,28 +176,34 @@ export const PulseRole = Object.freeze({
     }
 
     if (text.includes("permit")) {
-      notes.push("Permit language detected — lawyers typically check scope, conditions, revocation clauses, and compliance obligations.");
+      notes.push("Permit language detected — legal assistants typically flag scope, conditions, revocation clauses, and compliance obligations for review.");
+      questionsForLawyer.push("Does the scope or conditions of this permit create any unexpected obligations or risks for me?");
     }
 
     if (text.includes("liability")) {
-      notes.push("Liability terms appear — common doctrines include negligence, duty of care, and assumption of risk.");
+      notes.push("Liability terms appear — common doctrines include negligence, duty of care, assumption of risk, and sometimes strict liability.");
+      questionsForLawyer.push("How do these liability terms affect my exposure to risk in practical terms?");
     }
 
     if (text.includes("contract")) {
-      notes.push("Contractual structure detected — lawyers often analyze offer, acceptance, consideration, and enforceability.");
+      notes.push("Contractual structure detected — assistants often map offer, acceptance, consideration, and enforceability for a lawyer to review.");
+      questionsForLawyer.push("Are there any clauses in this contract that could be unusually risky or hard to get out of?");
     }
 
     if (text.includes("privacy")) {
-      notes.push("Privacy-related language — typical frameworks include consent, data handling, and reasonable expectations.");
+      notes.push("Privacy-related language — typical frameworks include consent, data handling, retention, and reasonable expectations of privacy.");
+      questionsForLawyer.push("Do these privacy terms align with what I actually expect will happen to my data?");
     }
 
     if (text.includes("zoning") || text.includes("land use")) {
-      notes.push("Zoning or land-use concepts detected — lawyers usually examine permitted uses, variances, and compliance pathways.");
+      notes.push("Zoning or land-use concepts detected — assistants usually identify permitted uses, variances, and compliance pathways.");
+      questionsForLawyer.push("Are there any zoning or land-use restrictions here that could block what I want to do with this property?");
     }
 
-    notes.push("A lawyer would typically map the issues, identify relevant doctrines, and compare the text to similar cases or rules.");
+    notes.push("A law assistant would typically map the issues, identify relevant doctrines, and collect comparable rules or cases for a lawyer to analyze.");
+    questionsForLawyer.push("Are there any parts of this document you think I should pay special attention to before I sign or rely on it?");
 
-    return { notes };
+    return { notes, questionsForLawyer };
   },
 
   // ========================================================================
@@ -185,7 +211,14 @@ export const PulseRole = Object.freeze({
   // ========================================================================
   permitInterpreter(permit = {}, binaryVitals = {}) {
     const notes = [];
-    if (!permit.description) return { notes: ["No permit description provided."] };
+    const questionsForLawyer = [];
+
+    if (!permit.description) {
+      return {
+        notes: ["No permit description provided."],
+        questionsForLawyer: []
+      };
+    }
 
     const desc = permit.description.toLowerCase();
     const binaryPressure =
@@ -197,23 +230,28 @@ export const PulseRole = Object.freeze({
       notes.push("System load is elevated — interpretations are simplified for safety.");
     }
 
-    notes.push("Permit detected — lawyers typically examine scope, conditions, compliance obligations, and revocation triggers.");
+    notes.push("Permit detected — a law assistant would typically flag scope, conditions, compliance obligations, and revocation triggers.");
+    questionsForLawyer.push("What happens if I fail to meet any of the conditions in this permit?");
 
     if (desc.includes("construction")) {
-      notes.push("Construction-related permit — common legal categories include zoning compliance, environmental impact, and safety requirements.");
+      notes.push("Construction-related permit — common legal categories include zoning compliance, environmental impact, building codes, and safety requirements.");
+      questionsForLawyer.push("Are there any building code or safety requirements in this permit that could be especially costly or strict?");
     }
 
     if (desc.includes("business")) {
-      notes.push("Business permit — lawyers often check operational scope, renewal requirements, and local regulatory obligations.");
+      notes.push("Business permit — assistants often check operational scope, renewal requirements, and local regulatory obligations.");
+      questionsForLawyer.push("Does this business permit limit the types of activities I can legally perform?");
     }
 
     if (desc.includes("event")) {
       notes.push("Event permit — typical considerations include crowd safety, insurance, noise limits, and public space rules.");
+      questionsForLawyer.push("Do I need any special insurance or additional approvals beyond this event permit?");
     }
 
-    notes.push("A lawyer would compare the permit’s language to similar permits, relevant doctrines, and any conditions that could create risk.");
+    notes.push("A law assistant would compare the permit’s language to similar permits, relevant doctrines, and any conditions that could create risk, for a lawyer to review.");
+    questionsForLawyer.push("Is there anything in this permit that could expose me to unexpected fines, penalties, or shutdowns?");
 
-    return { notes };
+    return { notes, questionsForLawyer };
   },
 
   // ========================================================================
@@ -221,7 +259,14 @@ export const PulseRole = Object.freeze({
   // ========================================================================
   argumentMapper(issue = "", binaryVitals = {}) {
     const notes = [];
-    if (!issue) return { notes: ["No issue provided."] };
+    const questionsForLawyer = [];
+
+    if (!issue) {
+      return {
+        notes: ["No issue provided."],
+        questionsForLawyer: []
+      };
+    }
 
     const binaryPressure =
       binaryVitals?.layered?.organism?.pressure ??
@@ -233,11 +278,15 @@ export const PulseRole = Object.freeze({
     }
 
     notes.push(`Issue identified: ${issue}`);
-    notes.push("Typical lawyer approach: identify the rule, apply it to the facts, and consider exceptions or competing doctrines.");
-    notes.push("Arguments often focus on interpretation, intent, compliance, and whether the facts meet the rule’s requirements.");
+    notes.push("Typical legal reasoning: identify the governing rule, apply it to the facts, and consider exceptions or competing doctrines.");
+    notes.push("Arguments often focus on interpretation, intent, compliance, and whether the facts satisfy the rule’s elements.");
     notes.push("Counterarguments usually challenge the rule’s applicability, the factual assumptions, or the interpretation of key terms.");
 
-    return { notes };
+    questionsForLawyer.push("Based on this issue, what legal options might be available to me?");
+    questionsForLawyer.push("Are there any deadlines or time limits (statutes of limitation) I should be aware of for this issue?");
+    questionsForLawyer.push("What facts about my situation are most important for you to evaluate this issue?");
+
+    return { notes, questionsForLawyer };
   },
 
   // ========================================================================
@@ -301,35 +350,28 @@ export const PulseRole = Object.freeze({
         organ: PulseRole.identity,
         version: PulseRole.version,
         mode: "pointer",
-        zeroNetworkFromThisOrgan: true,
-        zeroAdvice: true
+        zeroNetworkFromThisOrgan: true
       },
       jurisdiction: key,
       topic,
       url,
       note:
-        "Deterministic pointer to a public law reference site. " +
-        "This organ does not itself perform external I/O in pointer mode."
+        "Deterministic pointer to a public law reference site. External I/O is handled by the caller, not this law assistant."
     });
   },
 
   // ========================================================================
   //  LAW READER v1 — interpret routed law text (statutes / rules)
-  //  INPUT:
-  //    law = {
-  //      rawText: <string>,
-  //      citations: [ ... ] (optional),
-  //      source: <string> (optional),
-  //      meta: { ... } (optional)
-  //    }
   // ========================================================================
   lawReader(law = {}, binaryVitals = {}) {
     const notes = [];
+    const questionsForLawyer = [];
     const text = (law.rawText || "").toLowerCase();
 
     if (!law.rawText) {
       return {
         notes: ["No law text provided to lawReader."],
+        questionsForLawyer: [],
         citations: law.citations || [],
         source: law.source || null
       };
@@ -341,33 +383,40 @@ export const PulseRole = Object.freeze({
       0;
 
     if (binaryPressure >= 0.7) {
-      notes.push("System load is elevated — law interpretation is simplified for safety.");
+      notes.push("System load is elevated — law interpretation is simplified.");
     }
 
     if (text.includes("negligence") || text.includes("duty of care")) {
       notes.push("Negligence-related concepts detected — typical elements include duty, breach, causation, and damages.");
+      questionsForLawyer.push("Does this negligence standard change how a court might view my actions or responsibilities?");
     }
 
     if (text.includes("strict liability")) {
-      notes.push("Strict liability language detected — focus is often on activity type and harm, not fault.");
+      notes.push("Strict liability language detected — focus is often on the nature of the activity and resulting harm, rather than fault.");
+      questionsForLawyer.push("Does strict liability here mean I could be responsible even if I was careful?");
     }
 
     if (text.includes("contract") || text.includes("agreement")) {
-      notes.push("Contract-related language — lawyers usually examine offer, acceptance, consideration, and enforceability.");
+      notes.push("Contract-related language — assistants usually map offer, acceptance, consideration, and conditions for enforceability.");
+      questionsForLawyer.push("Are there any conditions in this contract that could make it hard for me to enforce my rights?");
     }
 
     if (text.includes("privacy") || text.includes("personal data")) {
-      notes.push("Privacy-related language — common themes include consent, data handling, and reasonable expectations.");
+      notes.push("Privacy-related language — common themes include consent, data handling, retention, and user expectations.");
+      questionsForLawyer.push("Do these privacy rules give me any rights to see, correct, or delete my data?");
     }
 
     if (text.includes("zoning") || text.includes("land use")) {
-      notes.push("Zoning or land-use language — typical analysis includes permitted uses, variances, and compliance pathways.");
+      notes.push("Zoning or land-use language — typical analysis includes permitted uses, variances, and compliance mechanisms.");
+      questionsForLawyer.push("Would I need a variance or special permission to use my property the way I intend?");
     }
 
-    notes.push("A legal assistant would typically connect these provisions to the user’s facts, without giving advice or predicting outcomes.");
+    notes.push("A law assistant would typically connect these provisions to the user’s described situation for a lawyer to review, without giving advice.");
+    questionsForLawyer.push("Based on this law, what are the main risks or protections that might apply to my situation?");
 
     return {
       notes,
+      questionsForLawyer,
       citations: law.citations || [],
       source: law.source || null,
       meta: law.meta || {}
@@ -384,6 +433,10 @@ export const PulseRole = Object.freeze({
     return {
       issueNotes: base.notes,
       lawNotes: lawView.notes,
+      questionsForLawyer: [
+        ...(base.questionsForLawyer || []),
+        ...(lawView.questionsForLawyer || [])
+      ],
       citations: lawView.citations,
       source: lawView.source,
       meta: lawView.meta
@@ -428,7 +481,8 @@ export const PulseRole = Object.freeze({
       },
       meta: {
         fromOrgan: PulseRole.identity,
-        version: PulseRole.version
+        version: PulseRole.version,
+        role: "legal_assistant"
       }
     };
 
@@ -440,8 +494,7 @@ export const PulseRole = Object.freeze({
         organ: PulseRole.identity,
         version: PulseRole.version,
         mode: "route",
-        zeroNetworkFromThisOrgan: true,
-        zeroAdvice: true
+        zeroNetworkFromThisOrgan: true
       },
       jurisdiction: pointer.jurisdiction,
       topic: pointer.topic,

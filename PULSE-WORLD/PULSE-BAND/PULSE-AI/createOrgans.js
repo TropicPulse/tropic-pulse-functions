@@ -115,7 +115,7 @@ import { createDualBandOrganism } from "./aiDualBand-v11-Evo.js";
 // Non-binary symbolic organs
 import { createDoctorAPI } from "./aiDoctor.js";
 import { createSurgeonAPI } from "./aiSurgeon.js";
-import { createLawyerAPI } from "./aiLawyer.js";
+import { createLawyerAPI } from "./aiLawAssistant.js";
 import { createEntrepreneurAPI } from "./aiEntrepreneur.js";
 import { createVeterinarianAPI } from "./aiVeterinarian.js";
 import { createClinicianAPI } from "./aiClinician.js";

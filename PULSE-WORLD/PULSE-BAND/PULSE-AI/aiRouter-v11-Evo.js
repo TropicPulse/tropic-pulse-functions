@@ -119,7 +119,7 @@ const ArchetypePages = Object.freeze({
   ENVIRONMENT: "aiEnvironment.js",
   EVOLUTION: "aiEvolution.js",
   EVOLUTIONARY: "aiEvolutionary.js",
-  LAWYER: "aiLawyer.js",
+  LAWYER: "aiLawAssistant.js",
   POWER: "aiPower.js",
   SURGEON: "aiSurgeon.js",
   TOURIST: "aiTourist.js",
