@@ -43,22 +43,28 @@ AI_EXPERIENCE_META = {
 }
 */
 
+const g =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof global !== "undefined"
+    ? global
+    : typeof window !== "undefined"
+    ? window
+    : typeof g !== "undefined"
+    ? g
+    : {};
+
+// Prefer global db if present (logger page / server)
+const db =
+  (g && g.db) ||
+  (typeof global !== "undefined" && global.db) ||
+  (typeof globalThis !== "undefined" && globalThis.db) ||
+  (typeof window !== "undefined" && window.db) ||
+  null;
+
 console.log("Window");
 import { route, startUnderstanding as PulseUnderstanding, PulseBinaryOrganismBoot } from "./_BACKEND/PulseProofBridge.js";
 
-
-
-
-
-
-const g =
-  typeof global !== "undefined"
-    ? global
-    : typeof globalThis !== "undefined"
-    ? globalThis
-    : typeof window !== "undefined"
-    ? window
-    : {};
 
 function isBrowser() {
   return (
@@ -709,3 +715,33 @@ export default Object.freeze({
     context: pulseLoreContext
   }
 });
+
+try {
+  if (typeof global !== "undefined") {
+    global.PulseBand = window.PulseBand;
+    global.PulseBandStart = window.PulseBandStart;
+    global.VitalsMonitor = window.VitalsMonitor;
+    global.PulseLogger = window.PulseLogger;
+    global.PulseUIFlow = window.PulseUIFlow;
+    global.PulseUIErrors = window.PulseUIErrors;
+  }
+  if (typeof globalThis !== "undefined") {
+    globalThis.PulseBand = window.PulseBand;
+    globalThis.PulseBandStart = window.PulseBandStart;
+    globalThis.VitalsMonitor = window.VitalsMonitor;
+    globalThis.PulseLogger = window.PulseLogger;
+    globalThis.PulseUIFlow = window.PulseUIFlow;
+    globalThis.PulseUIErrors = window.PulseUIErrors;
+  }
+  
+  if (typeof g !== "undefined") {
+    g.PulseBand = window.PulseBand;
+    g.PulseBandStart = window.PulseBandStart;
+    g.VitalsMonitor = window.VitalsMonitor;
+    g.PulseLogger = window.PulseLogger;
+    g.PulseUIFlow = window.PulseUIFlow;
+    g.PulseUIErrors = window.PulseUIErrors;
+  }
+} catch {
+  // never throw
+}
