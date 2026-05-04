@@ -110,6 +110,15 @@ import aiToneRouter from "./aiToneRouter.js";
 // ———————————————————————————————
 import createJuryFrame from "./JuryFrame.js";
 import createAIBinaryGovernorAdapter from "./aiGovernorAdapter.js";
+import {
+  PulseTrustMeta,
+  buildJuryFeed,
+  createPulseTrustJuryFrame,
+  createJuryBoxCamera,
+  createJuryCouncil,
+  fuseCreatorFlags,
+  createExpansionCompliance
+} from "../PULSE-TRUST/PulseTrust-v16.js";
 
 // ———————————————————————————————
 // 5. MEMORY + EXPERIENCE (META ONLY)
@@ -326,13 +335,45 @@ export class AiOvermindPrime {
       aiToneRouter ||
       null;
 
-    // Jury + governor adapter
-    this.juryFrame =
-      config.juryFrame ||
-      createJuryFrame?.({
-        identity: OvermindPrimeMeta.identity
-      }) ||
-      null;
+    // ----------------------------------------------------------------------
+    //  TRUST FABRIC (Pulse-Trust v16)
+    // ----------------------------------------------------------------------
+    this.trust = {
+      meta: PulseTrustMeta,
+
+      juryFeedBuilder:
+        config.juryFeedBuilder ||
+        buildJuryFeed,
+
+      juryFrame:
+        config.trustJuryFrame ||
+        createPulseTrustJuryFrame?.({
+          safetyAPI: this.safetyFrame
+        }) ||
+        null,
+
+      juryBoxCamera:
+        config.juryBoxCamera ||
+        createJuryBoxCamera?.() ||
+        null,
+
+      juryCouncil:
+        config.juryCouncil ||
+        createJuryCouncil?.() ||
+        null,
+
+      creatorFlags:
+        config.creatorFlagsFusion ||
+        fuseCreatorFlags,
+
+      expansionCompliance:
+        config.expansionCompliance ||
+        createExpansionCompliance?.() ||
+        null
+    };
+
+    // Backwards-compat alias so old code using this.juryFrame still works
+    this.juryFrame = this.trust.juryFrame;
 
     this.governorAdapter =
       config.governorAdapter ||
@@ -513,10 +554,64 @@ export class AiOvermindPrime {
   }
 
   // ========================================================================
+//  TRUST SNAPSHOT (Pulse-Trust v16)
+// ========================================================================
+buildTrustContext({
+  citizenWitness = {},
+  advantageContext = {},
+  juryEvents = [],
+  juryDecisions = [],
+  expansionActions = [],
+  juryResult = null
+} = {}) {
+  const juryFeed = this.trust.juryFeedBuilder({
+    citizenWitness,
+    advantageContext
+  });
+
+  const boxCameraSnapshot =
+    this.trust.juryBoxCamera?.analyzeSession?.({
+      events: juryEvents,
+      verdicts: juryDecisions
+    }) || null;
+
+  const councilSnapshot =
+    this.trust.juryCouncil?.reviewJuryHistory?.({
+      juryDecisions
+    }) || null;
+
+  const expansionSnapshot =
+    this.trust.expansionCompliance?.evaluateExpansionBehavior?.({
+      expansionActions
+    }) || null;
+
+  const creatorFlagsSnapshot = this.trust.creatorFlags({
+    juryResult,
+    boxCameraSnapshot,
+    councilSnapshot
+  });
+
+  return Object.freeze({
+    juryFeed,
+    boxCameraSnapshot,
+    councilSnapshot,
+    expansionSnapshot,
+    creatorFlagsSnapshot
+  });
+}
+
+
+  // ========================================================================
   //  MAIN ENTRY POINT (v14 IMMORTAL SUPEREGO)
 // ========================================================================
   async process({ intent, context, candidates }) {
     const tick = this.clock.next();
+      // Trust / witness placeholders (can be wired to real sources later)
+    const citizenWitness = context?.citizenWitness || {};
+    const advantageContext = context?.advantageContext || {};
+    const expansionActions = context?.expansionActions || [];
+    const juryEvents = context?.juryEvents || [];
+    const juryDecisionsHistory = context?.juryDecisionsHistory || [];
 
     // 0. watchdog + vitals pre-snapshot
     this._safeCall(this.aiVitals, "beforeCycle", { tick, intent, context });
@@ -587,7 +682,7 @@ export class AiOvermindPrime {
       return safety;
     }
 
-    // 5. world-lens v3 (with jury frame if present)
+    // 5. world-lens v3 (with lenses if present)
     const lensResults = await this.runLenses(primary, intent, enrichedContext);
 
     // 6. fuse with organism state
@@ -597,31 +692,64 @@ export class AiOvermindPrime {
     const drift = this.computeDrift(primary, intent, enrichedContext);
     const breakthrough = this.computeBreakthrough(lensResults);
 
-    const worldLens = this.classifyWorldLens(lensResults, drift, breakthrough);
+    const baseWorldLens = this.classifyWorldLens(lensResults, drift, breakthrough);
 
-    // 8. optional: jury second-opinion
-    const juryDecision = this._evaluateJury({
-      intent,
-      context: enrichedContext,
-      candidate: primary,
-      worldLens,
-      drift,
-      breakthrough,
-      lenses: lensResults
-    });
+    // 8. TRUST FABRIC — build trust context + conditional jury
+    let trustSnapshot = null;
+    let juryDecision = null;
+    let effectiveWorldLens = baseWorldLens;
 
-    if (juryDecision?.override) {
-      this._log("overmind:jury-override", {
-        tick,
+    // Only invoke full jury when signal strength justifies it
+    const shouldInvokeJury =
+      baseWorldLens === "risky" ||
+      baseWorldLens === "ambiguous" ||
+      drift?.score >= this.config.driftSensitivity ||
+      breakthrough?.score >= this.config.breakthroughSensitivity;
+
+    if (this.trust?.juryFrame && shouldInvokeJury) {
+      // Build trust context (juryFeed, boxCamera, council, creatorFlags, expansion)
+      trustSnapshot = this.buildTrustContext({
+        citizenWitness,
+        advantageContext,
+        juryEvents,
+        juryDecisions: juryDecisionsHistory,
+        expansionActions,
+        juryResult: null // filled after juryDecision if you want to persist
+      });
+
+      juryDecision = this.trust.juryFrame.evaluate({
         intent,
         context: enrichedContext,
-        worldLens,
-        drift,
-        breakthrough
+        candidate: primary,
+        juryFeed: trustSnapshot.juryFeed,
+        binaryVitals: organismState?.vitals || {},
+        boundaryArtery: organismState?.nervous || {}
+      });
+
+      if (juryDecision?.override) {
+        this._log("overmind:jury-override", {
+          tick,
+          intent,
+          context: enrichedContext,
+          baseWorldLens,
+          drift,
+          breakthrough
+        });
+      }
+
+      effectiveWorldLens = juryDecision?.worldLens || baseWorldLens;
+
+      // Optionally recompute trustSnapshot with juryResult included
+      trustSnapshot = this.buildTrustContext({
+        citizenWitness,
+        advantageContext,
+        juryEvents,
+        juryDecisions: juryDecisionsHistory,
+        expansionActions,
+        juryResult: juryDecision
       });
     }
 
-    const effectiveWorldLens = juryDecision?.worldLens || worldLens;
 
     // 9. optional: nudge organism engine (self-running crown supervision)
     if (this.organism?.startEngine) {
@@ -747,9 +875,12 @@ export class AiOvermindPrime {
         lenses: lensResults,
         organismState,
         overmind: OvermindPrimeMeta,
-        organismDebug
+        organismDebug,
+        trust: trustSnapshot || null,
+        juryDecision: juryDecision || null
       }
     };
+
   }
 
   // ========================================================================
@@ -825,10 +956,26 @@ export class AiOvermindPrime {
   //  JURY
   // ========================================================================
   _evaluateJury(payload) {
-    if (!this.juryFrame?.evaluate) return null;
+    // If trust fabric not present → fallback to old behavior
+    if (!this.trust?.juryFrame?.evaluate) {
+      if (!this.juryFrame?.evaluate) return null;
+      return this._safeCall(this.juryFrame, "evaluate", payload);
+    }
 
-    return this._safeCall(this.juryFrame, "evaluate", payload);
+    // Trust-aware conditional jury invocation
+    const { worldLens, drift, breakthrough } = payload;
+
+    const shouldInvoke =
+      worldLens === "risky" ||
+      worldLens === "ambiguous" ||
+      drift?.status === "drift" ||
+      breakthrough?.status === "breakthrough";
+
+    if (!shouldInvoke) return null;
+
+    return this._safeCall(this.trust.juryFrame, "evaluate", payload);
   }
+
 
   // ========================================================================
   //  TRIVIALITY
