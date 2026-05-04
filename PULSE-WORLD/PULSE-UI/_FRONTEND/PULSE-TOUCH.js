@@ -122,6 +122,8 @@ AI_EXPERIENCE_META = {
 }
 */
 import { startPulseNet } from "../_BACKEND/PULSE-NET.js";
+import { route } from "../_BACKEND/PulseProofBridge.js";
+import * as PulseWindow from "./PulseNetEvolutionaryWindow.js";
 
 startPulseNet({
   instanceId: "core",
