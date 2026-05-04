@@ -67,11 +67,12 @@
 //   Log errors clearly but do not leak sensitive details
 //   This endpoint is critical — changes affect all vendor payments
 
-import admin from "firebase-admin";
+import { admin, db } from "./helpers.js";
 import { getStripe } from "./stripe.js";
 
-if (!admin.apps.length) admin.initializeApp();
-const db = admin.firestore();
+// ---------------------------------------------------------------------------
+//  INITIALIZE ADMIN SDK (ONE TIME PER COLD START)
+// ---------------------------------------------------------------------------
 
 export async function handler(event, context) {
   try {

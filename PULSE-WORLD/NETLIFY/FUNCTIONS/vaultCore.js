@@ -65,16 +65,23 @@
 
 // Shared Vault utilities for TPSecurity patching + logging
 
-import admin from "firebase-admin";
-import Stripe from "stripe";
-import emailTemplates from "./emailTemplates.js";
-import { VAULT_PATCH_TWILIGHT } from "./vault-patches.js";
+import { admin, db } from "./helpers.js";
+import { getStripe as Stripe } from "./stripe.js";
+import emailTemplates from "../../PULSE-BAND/PULSE-OS/PulseOSLongTermMemory.js";
 
-const db = admin.firestore();
 
-/* ------------------------------------------------------
-   EMAIL + STRIPE UTILITIES (ADDED)
------------------------------------------------------- */
+
+export const VAULT_PATCH_TWILIGHT = {
+  signature: "Twilight",
+  invoked: "2026-04-11T01:00:00-02:00",
+  version: 4,
+  type: "security-data-integrity-chunking",
+  glyph: "🌒",
+  description:
+    "The first protective veil cast by the Vault Spirit during a 4 AM development session.",
+  note: "Named 'Twilight' because it was created in the quiet hours before dawn."
+};
+
 
 /**
  * Render an email template by type.

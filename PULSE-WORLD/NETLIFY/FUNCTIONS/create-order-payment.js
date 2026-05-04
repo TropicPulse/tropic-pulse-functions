@@ -70,13 +70,10 @@
 //   Never expose secrets in responses
 //   Log errors clearly but do not leak sensitive details
 //   This endpoint is critical — changes affect all order payments
-
-import admin from "firebase-admin";
+import { admin, db } from "./helpers.js";
 import { getStripe } from "./stripe.js";
-import { determinePayoutCurrency } from "./utils.js";
+import { determinePayoutCurrency } from "./payout.js";
 
-if (!admin.apps.length) admin.initializeApp();
-const db = admin.firestore();
 
 export async function handler(event, context) {
   log("🔵 [/create-order-payment] START");

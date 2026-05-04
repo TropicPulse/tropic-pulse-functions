@@ -62,9 +62,7 @@
 //   Never expose secrets or stack traces
 //   This endpoint is critical for system‑Earn monitoring
 //   Payloads may contain sensitive failure data — handle carefully
-import admin from "firebase-admin";
-
-if (!admin.apps.length) admin.initializeApp();
+import { admin, db } from "./helpers.js";
 
 export async function handler(event, context) {
   try {

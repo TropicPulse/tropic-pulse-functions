@@ -52,12 +52,12 @@
 // ------------------------------------------------------
 // massEmailWebhook — Backend Mass Email Engine (A Layer)
 // ------------------------------------------------------
-import { db, admin } from "./helpers.js";
+import { admin, db } from "./helpers.js";
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import Stripe from "stripe";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
+import { getStripe } from "./stripe.js";
 
 const EMAIL_PASSWORD = defineSecret("EMAIL_PASSWORD");
 const STRIPE_PASSWORD = defineSecret("STRIPE_SECRET_KEY");
@@ -95,7 +95,7 @@ function pulseCors(req, res, next) {
 
 export async function createMassEmailPaymentLink(eventID, eventImageUrl) {
   const STRIPE_PASSWORD_VALUE = STRIPE_PASSWORD.value();
-  const stripe = new Stripe(STRIPE_PASSWORD_VALUE);
+  const stripe = new getStripe(STRIPE_PASSWORD_VALUE);
 
   // 1. Update the product image dynamically
   await stripe.products.update("prod_TzIC2PMixkP2qf", {

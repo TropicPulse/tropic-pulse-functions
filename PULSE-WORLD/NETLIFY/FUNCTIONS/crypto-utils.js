@@ -57,8 +57,7 @@
 //   Do NOT add new crypto libraries without explicit approval
 //   This module should remain minimal and safe
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 
-export { jwt, crypto, bcrypt, uuidv4 };
+export { jwt, bcrypt, uuidv4 };

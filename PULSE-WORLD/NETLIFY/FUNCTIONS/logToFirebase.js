@@ -1,4 +1,4 @@
-import { db } from "./helpers.js";
+import { admin, db } from "./firebase.js";
 
 export async function handler(event) {
   try {

@@ -144,24 +144,6 @@ AI_EXPERIENCE_META = {
 }
 */
 
-import { onRequest, onCall } from "firebase-functions/v2/https";
-import { onDocumentWritten, onDocumentWrittenWithAuthContext } from "firebase-functions/v2/firestore";
-import nodemailer from "nodemailer";
-import { defineSecret } from "firebase-functions/params";
-import admin from "firebase-admin";
-import Stripe from "stripe";
-import * as logger from "firebase-functions/logger";
-import fetch from "node-fetch";
-//import { Readable } from "node:stream";
-import express from "express";
-import twilio from "twilio";
-import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
-import sharp from "sharp";
-import { fileURLToPath } from "url";
-
 
 // // ============================================================================
 // // CREATE PULSE BAND SESSION — NOW ROUTE-AWARE
@@ -694,6 +676,24 @@ import { fileURLToPath } from "url";
 
 // loadMarketplaceReputation();
 
+import { onRequest, onCall } from "firebase-functions/v2/https";
+import { onDocumentWritten, onDocumentWrittenWithAuthContext } from "firebase-functions/v2/firestore";
+import nodemailer from "nodemailer";
+import { defineSecret } from "firebase-functions/params";
+import admin from "firebase-admin";
+import Stripe from "stripe";
+import * as logger from "firebase-functions/logger";
+import fetch from "node-fetch";
+//import { Readable } from "node:stream";
+import express from "express";
+import twilio from "twilio";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import sharp from "sharp";
+import { fileURLToPath } from "url";
+
 export const VAULT_PATCH_TWILIGHT = {
   signature: "Twilight",
   invoked: "2026-04-07T04:00:00-07:00", // 4 AM MST
@@ -715,6 +715,7 @@ function pulseCors(req, res, next) {
 
   next();
 }
+
 const EMAIL_PASSWORD = defineSecret("EMAIL_PASSWORD");
 const STRIPE_PASSWORD = defineSecret("STRIPE_SECRET_KEY");
 const JWT_SECRET = defineSecret("JWT_SECRET");
@@ -748,8 +749,6 @@ window.nowMs = function() {
 };
 
 
-// Initialize Firebase ONCE
-admin.initializeApp();
 const db = admin.firestore();
 const storage = admin.storage().bucket();
 const app = express();
@@ -7759,7 +7758,7 @@ export async function createMassEmailPaymentLink(eventID, eventImageUrl) {
 // Each template receives a payload object and returns HTML.
 // You can expand these with your full branded HTML later.
 
-const emailTemplates = {
+export const emailTemplates = {
 newUser: {
   subject: () => "Welcome to Tropic Pulse!",
   important: true,

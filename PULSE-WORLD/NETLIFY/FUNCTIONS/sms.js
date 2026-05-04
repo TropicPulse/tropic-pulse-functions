@@ -78,3 +78,4 @@ export function getTwilioClient() {
 }
 
 export const MESSAGING_SERVICE_SID = window.MESSAGING_SERVICE_SID;
+export default getTwilioClient;

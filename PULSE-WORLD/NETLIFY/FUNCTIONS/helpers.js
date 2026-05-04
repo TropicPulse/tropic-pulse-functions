@@ -79,8 +79,7 @@
 /* ----------------------------------------------------
    SAFE FETCH JSON (with timeout + UA header)
 ---------------------------------------------------- */
-import { db, admin } from "./firebase.js";
-import crypto from "crypto";
+import { admin, db } from "./firebase.js";
 /* ----------------------------------------------------
    ROUTED JSON FETCH — v12.6‑EVO (NO RAW FETCH)
 ---------------------------------------------------- */
@@ -778,7 +777,8 @@ export async function computeSha256Hex(buffer) {
     return null;
   }
 }
-export default db;
+
+export { admin, db };
 // ============================================================================
 // 📘 PAGE INDEX — END OF FILE
 //

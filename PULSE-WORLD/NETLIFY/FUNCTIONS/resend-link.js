@@ -72,14 +72,60 @@
 //   • Stripe onboarding links must use approved refresh_url + return_url
 //   • This endpoint is critical — changes affect all vendor onboarding flows
 
-import admin from "firebase-admin";
-import crypto from "crypto";
+import { admin, db } from "./helpers.js";
 import { getStripe } from "./stripe.js";
-import { normalizePhone } from "./utils.js";
-import { getTwilioClient, MESSAGING_SERVICE_SID } from "./twilio.js";
+import { getTwilioClient } from "./sms.js";
 
-if (!admin.apps.length) admin.initializeApp();
-const db = admin.firestore();
+function normalizePhone(raw, row, coords = {}) {
+  if (!raw) return null;
+
+  // Clean weird whitespace + NBSP
+  let v = String(raw)
+    .replace(/\u00A0/g, " ")
+    .trim();
+
+  // Strip everything except digits and +
+  v = v.replace(/[^\d+]/g, "");
+
+  // Already valid E.164
+  if (v.startsWith("+") && v.length >= 8 && v.length <= 15) {
+    return v;
+  }
+
+  // Remove leading +
+  if (v.startsWith("+")) v = v.slice(1);
+
+  // Pure digits
+  const digits = v.replace(/\D/g, "");
+
+  // --- BELIZE LOGIC ---
+  // 7‑digit local numbers → +501
+  if (digits.length === 7) {
+    return "+501" + digits;
+  }
+
+  // 501 + 7 digits → +501xxxxxxx
+  if (digits.startsWith("501") && digits.length === 10) {
+    return "+501" + digits.slice(3);
+  }
+
+  // --- US / CANADA ---
+  if (digits.length === 10) {
+    return "+1" + digits;
+  }
+
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return "+1" + digits.slice(1);
+  }
+
+  // --- INTERNATIONAL FALLBACK ---
+  if (digits.length >= 8 && digits.length <= 15) {
+    return "+" + digits;
+  }
+
+  // Reject everything else
+  return null;
+}
 
 export async function handler(event, context) {
   try {

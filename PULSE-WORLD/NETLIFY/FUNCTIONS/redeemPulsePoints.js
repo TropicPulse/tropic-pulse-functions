@@ -70,12 +70,12 @@
 // ------------------------------------------------------
 // redeemPulsePoints — Backend Pulse Points Redemption Engine (A Layer)
 // ------------------------------------------------------
-import { db, admin } from "./helpers.js";
+import { admin, db } from "./helpers.js";
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import Stripe from "stripe";
+import { getStripe } from "./stripe.js";
 import nodemailer from "nodemailer";
-import twilio from "twilio";
+import { getTwilioClient as twilio } from "./sms.js";
 
 
 const EMAIL_PASSWORD = defineSecret("EMAIL_PASSWORD");

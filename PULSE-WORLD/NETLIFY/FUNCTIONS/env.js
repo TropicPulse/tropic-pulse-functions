@@ -1,22 +1,13 @@
-import { onRequest, onCall } from "firebase-functions/v2/https";
-import { onDocumentWritten, onDocumentWrittenWithAuthContext } from "firebase-functions/v2/firestore";
-import nodemailer from "nodemailer";
+
 import { defineSecret } from "firebase-functions/params";
-import admin from "firebase-admin";
-import Stripe from "stripe";
+
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import fetch from "node-fetch";
 //import { Readable } from "node:stream";
 import express from "express";
 
-import twilio from "twilio";
-import jwt from "jsonwebtoken";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
-import sharp from "sharp";
+
 import { fileURLToPath } from "url";
 // Marketplace adapters (inside /PULSE-EARN/marketplaces/)
 // import { marketplaceA } from "../PULSE-EARN/marketplaces/marketplaceA.js";
@@ -61,6 +52,8 @@ import { fileURLToPath } from "url";
 // schedulerTick();
 
 // loadMarketplaceReputation();
+import { admin, db } from "./helpers.js";
+import { getStripe as Stripe } from "./stripe.js";
 
 export const VAULT_PATCH_TWILIGHT = {
   signature: "Twilight",
@@ -115,10 +108,9 @@ window.nowMs = function() {
   return Date.now() + window.__serverTimeOffset;
 };
 
-
-// Initialize Firebase ONCE
-admin.initializeApp();
-const db = admin.firestore();
+// ---------------------------------------------------------------------------
+//  INITIALIZE ADMIN SDK (ONE TIME PER COLD START)
+// ---------------------------------------------------------------------------
 const storage = admin.storage().bucket();
 const app = express();
 
