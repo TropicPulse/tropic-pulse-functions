@@ -2,105 +2,112 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tropic Pulse – Privacy Policy</title>
-  <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               maximum-scale=1,
-               minimum-scale=1,
-               user-scalable=no">
+<title>Tropic Pulse & Pulse‑World – Privacy Policy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- End Meta Pixel Code -->
 <style>
     body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
-        background: #f7f9fc;
+        background: #eef3f7;
         color: #222;
-        line-height: 1.6;
+        line-height: 1.65;
     }
 
+    /* HEADER */
     .header {
-        background: linear-gradient(135deg, #00c6ff, #f5dd00);
-        padding: 60px 20px;
+        background: linear-gradient(135deg, #00c6ff, #00e6a8, #f5dd00);
+        padding: 70px 20px;
         text-align: center;
         color: #fff;
         position: relative;
         overflow: hidden;
-    }
-
-    
-    /* Utility */
-    .page-container {
-      width: 100%;
-      max-width: var(--tp-max-width);
-      display: flex;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.1);
-      margin: 1px auto 6px auto;
-      padding: 4px 0px;
+        border-bottom-left-radius: 40px;
+        border-bottom-right-radius: 40px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
     }
 
     .header h1 {
-        font-size: 36px;
+        font-size: 40px;
         margin: 0;
-        font-weight: 700;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-shadow: 0 3px 8px rgba(0,0,0,0.25);
     }
 
     .toucan {
         position: absolute;
-        width: 90px;
+        width: 110px;
         opacity: 0.22;
-        top: 15px;
+        top: 18px;
     }
 
-    .toucan.left {
-        left: 20px;
-        transform: scaleX(-1);
-    }
+    .toucan.left { left: 20px; transform: scaleX(-1); }
+    .toucan.right { right: 20px; }
 
-    .toucan.right {
-        right: 20px;
-    }
-
+    /* CONTENT CARD */
     .content {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 40px auto;
         background: #fff;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 45px;
+        border-radius: 18px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
     }
 
     h2 {
-        margin-top: 40px;
-        color: #0072ff;
+        margin-top: 45px;
+        color: #008f5c;
+        font-size: 26px;
+        border-left: 6px solid #00c6ff;
+        padding-left: 12px;
     }
 
     h3 {
-        margin-top: 25px;
+        margin-top: 28px;
         color: #005fcc;
+        font-size: 20px;
     }
 
-    ul {
-        margin-left: 20px;
+    .section-label {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #00c6ff;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 10px;
     }
 
-    a {
-        color: #0072ff;
-        text-decoration: none;
+    .section-label.tropicpulse { background: #00b86b; }
+    .section-label.pulseworld { background: #ff7b00; }
+    .section-label.identity { background: #0090ff; }
+    .section-label.earn { background: #7b3dff; }
+
+    ul { margin-left: 20px; }
+
+    a { color: #0072ff; text-decoration: none; }
+
+    .divider {
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, #00c6ff, #00e6a8, #f5dd00);
+        border-radius: 4px;
+        margin: 45px 0;
     }
 
     .footer {
         text-align: center;
-        padding: 20px;
+        padding: 25px;
         font-size: 14px;
-        color: #444;
+        color: #555;
         margin-top: 40px;
         position: relative;
     }
 
     .footer .toucan-footer {
-        width: 70px;
+        width: 80px;
         opacity: 0.25;
         position: absolute;
         right: 20px;
@@ -110,213 +117,351 @@
 </head>
 
 <body>
-<div class="page-container">
-    <div class="header">
-        <img src="./_PICTURES/ToucanLeft.png" class="toucan left">
-        <img src="./_PICTURES/ToucanRight.png" class="toucan right">
-        <h1>Tropic Pulse – Privacy Policy</h1>
-    </div>
-    <div style="text-align:center;margin-bottom:20px;">
-        <img src="./_PICTURES/ToucanLogo-Mini.png" style="width:150px;border-radius:12px;">
-        <h1 style="color:#008f5c;font-size:30px;margin-top:10px;">Email Admin Panel</h1>
-    </div>
-    <div class="content">
 
-    <h2>Effective Date</h2>
-    <p>February 2026</p>
+<div class="header">
+    <img src="./_PICTURES/ToucanLeft.png" class="toucan left">
+    <img src="./_PICTURES/ToucanRight.png" class="toucan right">
+    <h1>Tropic Pulse & Pulse‑World – Privacy Policy</h1>
+</div>
 
-    <h2>1. Introduction</h2>
-    <p>
-    This Privacy Policy explains how <strong>Ford Family Distribution – Belize (operating as Tropic Pulse)</strong>
-    (“Tropic Pulse”, “we”, “our”, “us”) collects, uses, and protects your information when you use our
-    Platform, mobile app, and related services (“Service”).
-    </p>
+<div style="text-align:center;margin-top:20px;">
+    <img src="./_PICTURES/ToucanLogo-Mini.png" style="width:160px;border-radius:14px;">
+    <h1 style="color:#008f5c;font-size:30px;margin-top:10px;">Private by Design</h1>
+</div>
 
-    <p>
-    By using the Service, you agree to the practices described in this Privacy Policy.
-    Our <a href="/termsofuse.html">Terms of Use</a> also apply to your use of the Platform and contain additional rules and responsibilities.
-    </p>
+<div class="content">
 
-    <h2>2. Information We Collect</h2>
-    <p>We may collect the following information:</p>
+<h2>Effective Date</h2>
+<p>February 2026</p>
 
-    <ul>
-        <li>Name and contact details</li>
-        <li>Email address and phone number</li>
-        <li>Delivery address and location information</li>
-        <li>Order history and transaction details</li>
-        <li>Device information, IP address, and usage data</li>
-        <li>Preferences, feedback, and support messages</li>
-        <li>Cookies and tracking data</li>
-    </ul>
+<h2>1. Introduction</h2>
+<p>
+This Privacy Policy explains how <strong>Ford Family Distribution – Belize (operating as Tropic Pulse)</strong>
+(“Tropic Pulse”, “we”, “our”, “us”) collects, uses, and protects your information when you use:
+</p>
 
-    <h2>3. User Responsibilities (Account & Accuracy)</h2>
-    <p>
-    Users are responsible for ensuring that all information provided to Tropic Pulse is accurate and up to date.
-    Users are also responsible for maintaining the confidentiality of their account credentials.
-    </p>
+<p><span class="section-label tropicpulse">TROPIC‑PULSE</span>  
+Belize delivery, events, and vendor marketplace.</p>
 
-    <h2>4. Public Content (Reviews, Comments, and Posts)</h2>
-    <p>
-    Any content you submit publicly on the Platform—such as reviews, comments, or ratings—is not considered private information.
-    Such content may be visible to other users and may be retained even after account deletion.
-    </p>
+<p><span class="section-label pulseworld">PULSE‑WORLD</span>  
+Global social identity, presence, badges, systemAge, and cross‑app profile layer.</p>
 
-    <h2>5. How We Use Your Information</h2>
-    <p>We use your information to:</p>
+<p>
+We are privacy‑minimal by design. We only collect what we need to operate the services and never sell your data.
+By using the Platform, you agree to this Policy and our <a href="/termsofuse.html">Terms of Use</a>.
+</p>
 
-    <ul>
-        <li>Provide and maintain the Service</li>
-        <li>Process orders and coordinate deliveries</li>
-        <li>Send order confirmations and delivery updates</li>
-        <li>Verify accounts and ensure security</li>
-        <li>Improve user experience and platform performance</li>
-        <li>Send promotional messages (only with separate opt‑in)</li>
-        <li>Comply with legal obligations</li>
-    </ul>
+<div class="divider"></div>
 
-    <h2>6. Cookies & Tracking Technologies</h2>
-    <p>We use cookies and similar technologies to improve functionality, enhance performance, and analyze usage across the Platform.</p>
+<h2>2. Information we collect</h2>
 
-    <p>Our <a href="/cookies.html">Cookie Policy</a> provides additional details about the types of cookies we use and how they operate.</p>
+<h3>2.1 Account & identity information</h3>
+<ul>
+    <li>Name or display name</li>
+    <li>Email address</li>
+    <li>Phone number</li>
+    <li>Profile image or avatar (optional)</li>
+</ul>
 
-    <ul>
-        <li>Session Cookies – operate the Service</li>
-        <li>Preference Cookies – remember settings</li>
-        <li>Security Cookies – protect your account</li>
-        <li>Advertising Cookies – show relevant ads</li>
-    </ul>
+<h3>2.2 Service & usage information</h3>
+<ul>
+    <li>Delivery addresses (Tropic‑Pulse)</li>
+    <li>Order and transaction history</li>
+    <li>Event participation details</li>
+    <li>Presence and activity signals (online status, last active)</li>
+    <li>Device type, basic technical logs, and IP address for security</li>
+</ul>
 
-    <h2>7. Legal Basis for Processing (GDPR)</h2>
-    <ul>
-        <li>Performance of a contract</li>
-        <li>Your consent</li>
-        <li>Legitimate interests</li>
-        <li>Legal compliance</li>
-    </ul>
+<h3>2.3 Location & Bluetooth</h3>
+<ul>
+    <li><strong>Location</strong> – Required for Tropic‑Pulse delivery and events; optional for Pulse‑World relevance.</li>
+    <li><strong>Bluetooth</strong> – Optional; used only for Pulse‑World proximity presence when you enable it.</li>
+</ul>
+<p>
+We do not collect background location, contact lists, microphone audio, or camera access except when you explicitly upload a photo.
+</p>
 
-    <h2>8. Retention of Data</h2>
-    <p>
-    We retain Personal Data only as long as necessary for operational, legal, and security purposes.
-    </p>
+<h3>2.4 Communications</h3>
+<ul>
+    <li>SMS verification codes and delivery updates</li>
+    <li>Transactional emails (receipts, confirmations, security alerts)</li>
+    <li>Support messages and feedback</li>
+</ul>
 
-    <h2>9. Transfer of Data</h2>
-    <p>
-    Your data may be transferred to servers outside Belize. By using the Service, you consent to this transfer.
-    </p>
+<h3>2.5 Earn & workloads (Pulse‑Earn)</h3>
+<ul>
+    <li>Workload participation records (e.g., completed compute tasks)</li>
+    <li>Payout history and related identifiers required by payment partners</li>
+</ul>
 
-    <h2>10. Disclosure of Data</h2>
+<div class="divider"></div>
 
-    <h3>Business Transactions</h3>
-    <p>Your data may be transferred if Tropic Pulse is involved in a merger or acquisition.</p>
+<h2>3. How we use your information</h2>
 
-    <h3>Legal Requirements</h3>
-    <p>We may disclose data to comply with legal obligations or protect user safety.</p>
+<h3>3.1 Core purposes</h3>
+<ul>
+    <li>Provide, operate, and maintain Tropic‑Pulse and Pulse‑World</li>
+    <li>Process orders, deliveries, events, and payouts</li>
+    <li>Verify accounts, send PINs, and protect against fraud</li>
+    <li>Maintain identity, presence, and profile across the ecosystem</li>
+    <li>Provide support and respond to your requests</li>
+</ul>
 
-    <h2>11. Communications, SMS Messaging & Email Notifications</h2>
-    <p>
-    By providing your phone number and email address, you consent to receive communications from Tropic Pulse.
-    These communications may include:
-    </p>
+<h3>3.2 Improvements</h3>
+<ul>
+    <li>Improve reliability, performance, and user experience</li>
+    <li>Monitor system health and prevent abuse</li>
+</ul>
 
-    <ul>
-        <li>Order confirmations and delivery updates</li>
-        <li>Driver arrival notifications</li>
-        <li>Account verification and security alerts</li>
-        <li>Payment confirmations and receipts</li>
-        <li>Service announcements</li>
-    </ul>
+<h3>3.3 Marketing (only with consent)</h3>
+<ul>
+    <li>Send marketing SMS or email only if you separately opt in</li>
+    <li>You can opt out at any time</li>
+</ul>
 
-    <h3>11.1 SMS Text Messaging (Transactional)</h3>
-    <p>
-    We use Twilio to send SMS messages for essential service functions. Message frequency varies.
-    Standard message and data rates may apply.
-    </p>
+<p>
+We do not build advertising profiles, do not sell your data, and do not use your presence or location for targeted advertising.
+</p>
 
-    <p>
-    Reply <strong>STOP</strong> to unsubscribe from non‑essential messages.<br>
-    Reply <strong>HELP</strong> for help.
-    </p>
+<div class="divider"></div>
 
-    <p>
-    Essential messages (delivery updates, security alerts) cannot be opted out of without affecting your ability to use the Service.
-    </p>
+<h2>4. Device permissions & what we do <em>not</em> collect</h2>
 
-    <h3>11.2 Marketing SMS Messaging (Separate Opt‑In)</h3>
-    <p>
-    Marketing or promotional SMS messages require a <strong>separate, explicit opt‑in</strong>.
-    This consent must be provided through an unchecked checkbox or similar one‑click mechanism.
-    </p>
+<h3>4.1 Permissions we use</h3>
+<ul>
+    <li><strong>Location</strong> – For deliveries, nearby events, and optional relevance in Pulse‑World.</li>
+    <li><strong>Bluetooth</strong> – Optional; for proximity presence when enabled.</li>
+</ul>
 
-    <p>
-    You may opt out of marketing messages at any time by replying <strong>STOP</strong>.
-    </p>
+<h3>4.2 Permissions we do not use</h3>
+<ul>
+    <li>No access to your contacts</li>
+    <li>No background location tracking</li>
+    <li>No microphone recording</li>
+    <li>No camera access except when you choose to upload a photo</li>
+    <li>No access to SMS inbox, call logs, or device files</li>
+    <li>No health, biometric, or sensitive category data</li>
+</ul>
 
-    <h3>11.3 Required Mobile Data Privacy Statement</h3>
-    <p>
-    <strong>No mobile information (phone numbers, SMS opt‑in data, or message metadata)
-    will be shared, sold, rented, or disclosed to third parties or affiliates for
-    marketing or promotional purposes.</strong>
-    </p>
+<div class="divider"></div>
 
-    <p>
-    Information sharing with subcontractors strictly for the purpose of providing the Service
-    (e.g., Twilio for SMS delivery) is permitted.
-    </p>
+<h2>5. Cookies & minimal analytics</h2>
+<p>
+We use only essential and minimal functional cookies to keep you signed in, secure your session, and remember basic preferences.
+We do not run invasive ad‑tracking or third‑party advertising cookies.
+</p>
 
-    <h3>11.4 Email Notifications</h3>
-    <p>
-    Transactional emails cannot be unsubscribed from. Marketing emails may be opted out of using the unsubscribe link.
-    </p>
+<ul>
+    <li>Session cookies – keep you logged in and secure</li>
+    <li>Preference cookies – remember language or basic settings</li>
+    <li>Security tokens – protect against fraud and abuse</li>
+</ul>
 
-    <h2>12. Your Data Protection Rights</h2>
-    <p>If you are located in the EEA, you have the right to:</p>
+<p>
+If we add analytics in the future, it will be privacy‑respecting and documented here.
+</p>
 
-    <ul>
-        <li>Access, update, or delete your data</li>
-        <li>Rectify inaccurate information</li>
-        <li>Object to processing</li>
-        <li>Restrict processing</li>
-        <li>Data portability</li>
-        <li>Withdraw consent</li>
-    </ul>
+<div class="divider"></div>
 
-    <h2>13. Service Providers</h2>
-    <p>We may use third‑party providers for analytics, advertising, payments, and delivery support.</p>
+<h2>6. Legal basis for processing (GDPR‑style)</h2>
+<ul>
+    <li><strong>Contract</strong> – To provide deliveries, events, identity, presence, and Earn workloads.</li>
+    <li><strong>Consent</strong> – For marketing messages, optional Bluetooth, and optional location relevance.</li>
+    <li><strong>Legitimate interests</strong> – To secure the platform, prevent fraud, and improve reliability.</li>
+    <li><strong>Legal obligations</strong> – To comply with tax, accounting, and regulatory requirements.</li>
+</ul>
 
-    <h3>Analytics</h3>
-    <p>We use Google Analytics to monitor usage.</p>
+<div class="divider"></div>
 
-    <h3>Advertising</h3>
-    <p>We may use Google AdMob and DoubleClick for advertising.</p>
+<h2>7. Data retention</h2>
+<p>
+We keep your data only as long as necessary to operate the services, comply with law, resolve disputes, and maintain security.
+When data is no longer needed, we delete or anonymize it.
+</p>
 
-    <h3>Payments</h3>
-    <p>
-    We use Apple, Google, PayPal, and Braintree for payment processing.
-    We do not store payment card details.
-    </p>
+<ul>
+    <li>Account and profile data – kept while your account is active.</li>
+    <li>Order and payout records – kept as required by tax and financial regulations.</li>
+    <li>Logs and security data – kept for a limited time for fraud prevention and diagnostics.</li>
+</ul>
 
-    <h2>14. Children’s Privacy</h2>
-    <p>We do not knowingly collect data from individuals under 18.</p>
+<div class="divider"></div>
 
-    <h2>15. Changes to This Policy</h2>
-    <p>
-    We may update this Privacy Policy periodically. Changes take effect when posted.
-    </p>
+<h2>8. Data transfers</h2>
+<p>
+Our infrastructure may be hosted outside Belize, including in other countries.
+Where required, we use reasonable safeguards (such as standard contractual clauses or equivalent mechanisms) to protect your data.
+By using the Service, you consent to these transfers.
+</p>
 
-    <h2>16. Contact Us</h2>
-    <p>
-    <strong>Ford Family Distribution – Belize (operating as Tropic Pulse)</strong><br>
-    Email: <a href="mailto:Sales@TropicPulse.bz">Sales@TropicPulse.bz</a><br>
-    Website: <a href="https://www.tropicpulse.bz">https://www.tropicpulse.bz</a>
-    </p>
+<div class="divider"></div>
 
-    </div>
+<h2>9. Disclosure of data</h2>
 
-    <div class="footer">
-        <p>© 2026 Ford Family Distribution – Belize (operating as Tropic Pulse)</p>
-        <img src="./_PICTURES/ToucanRight.png" class="toucan-footer">
-    </div>
+<h3>9.1 Business operations</h3>
+<ul>
+    <li>Service providers (e.g., hosting, SMS, payments) who process data on our behalf under strict contracts.</li>
+    <li>Delivery partners and vendors who need limited information to fulfill your orders or events.</li>
+</ul>
+
+<h3>9.2 Business transactions</h3>
+<p>
+If Tropic Pulse is involved in a merger, acquisition, or asset sale, your data may be transferred as part of that transaction, subject to this Policy.
+</p>
+
+<h3>9.3 Legal requirements</h3>
+<p>
+We may disclose data if required by law, court order, or to protect the rights, safety, or security of users, vendors, or the platform.
+</p>
+
+<div class="divider"></div>
+
+<h2>10. Communications, SMS & email</h2>
+
+<h3>10.1 Transactional communications</h3>
+<p>
+By providing your phone number and email, you consent to receive essential communications, including:
+</p>
+<ul>
+    <li>Account verification and security alerts</li>
+    <li>Order confirmations and delivery updates</li>
+    <li>Driver arrival notifications</li>
+    <li>Event confirmations and reminders</li>
+    <li>Payment confirmations and receipts</li>
+</ul>
+
+<h3>10.2 SMS messaging (Twilio)</h3>
+<p>
+We use Twilio to send SMS messages for essential service functions. Message frequency varies.
+Standard message and data rates may apply.
+</p>
+<p>
+Reply <strong>STOP</strong> to unsubscribe from non‑essential messages.<br>
+Reply <strong>HELP</strong> for help.
+</p>
+<p>
+Essential messages (such as security alerts and critical delivery updates) may be required to use the Service.
+</p>
+
+<h3>10.3 Marketing SMS (separate opt‑in)</h3>
+<p>
+Marketing or promotional SMS messages require a <strong>separate, explicit opt‑in</strong> via an unchecked checkbox or similar one‑click mechanism.
+You may opt out at any time by replying <strong>STOP</strong>.
+</p>
+
+<h3>10.4 Required mobile data privacy statement</h3>
+<p>
+<strong>No mobile information (phone numbers, SMS opt‑in data, or message metadata) will be shared, sold, rented, or disclosed to third parties or affiliates for marketing or promotional purposes.</strong>
+</p>
+<p>
+Information sharing with subcontractors strictly for the purpose of providing the Service (for example, Twilio for SMS delivery or hosting providers) is permitted.
+</p>
+
+<h3>10.5 Email notifications</h3>
+<p>
+Transactional emails (such as receipts, security alerts, and order confirmations) are part of the Service and cannot be fully unsubscribed from.
+Marketing emails, if any, will always include an unsubscribe link.
+</p>
+
+<div class="divider"></div>
+
+<h2>11. Pulse‑World, identity & presence</h2>
+
+<p><span class="section-label identity">PULSE‑IDENTITY & PRESENCE</span></p>
+
+<h3>11.1 Unified identity</h3>
+<ul>
+    <li>Your Pulse‑Identity may be used across Tropic‑Pulse, Pulse‑World, and related services.</li>
+    <li>Core fields include email, phone number, display name, and profile image.</li>
+    <li>This keeps your account consistent across the ecosystem.</li>
+</ul>
+
+<h3>11.2 Presence signals</h3>
+<ul>
+    <li>Presence may show when you are online, recently active, or participating in an event.</li>
+    <li>Optional proximity presence may use Bluetooth when you enable it.</li>
+    <li>Presence is not used for advertising and is not sold to third parties.</li>
+</ul>
+
+<h3>11.3 Social content</h3>
+<ul>
+    <li>Public posts, reviews, or visible profile elements may be seen by other users.</li>
+    <li>We may retain some public content even if you delete your account, where necessary for safety or legal reasons.</li>
+</ul>
+
+<div class="divider"></div>
+
+<h2>12. Pulse‑Earn & workloads</h2>
+
+<p><span class="section-label earn">PULSE‑EARN</span></p>
+
+<h3>12.1 Nature of processing</h3>
+<ul>
+    <li>Pulse‑Earn allows eligible users to participate in optional digital workloads (e.g., compute tasks, AI processing, or similar lawful activities).</li>
+    <li>We record participation, performance, and payout history to operate the service and comply with financial rules.</li>
+</ul>
+
+<h3>12.2 No employment relationship</h3>
+<p>
+Pulse‑Earn does not create an employer‑employee relationship. We do not process data as an employer; we process it to operate a contribution‑based platform and to comply with payment and tax obligations.
+</p>
+
+<h3>12.3 Data sharing for payouts</h3>
+<ul>
+    <li>We may share limited information with payment partners (such as Stripe) to verify identity and process payouts.</li>
+    <li>We do not sell or broker your Earn data.</li>
+</ul>
+
+<div class="divider"></div>
+
+<h2>13. Your rights</h2>
+<p>
+Depending on your location, you may have rights similar to GDPR/CCPA, including:
+</p>
+<ul>
+    <li>Access – request a copy of your personal data.</li>
+    <li>Correction – ask us to fix inaccurate information.</li>
+    <li>Deletion – request deletion of your account and certain data, subject to legal retention requirements.</li>
+    <li>Restriction – request limited processing in certain cases.</li>
+    <li>Objection – object to certain types of processing.</li>
+    <li>Portability – request a copy of your data in a portable format where applicable.</li>
+    <li>Withdraw consent – for any processing based on consent (e.g., marketing).</li>
+</ul>
+<p>
+To exercise these rights, contact us using the details below. We may need to verify your identity before responding.
+</p>
+
+<div class="divider"></div>
+
+<h2>14. Children’s privacy</h2>
+<p>
+Our services are intended for adults (18+). We do not knowingly collect personal data from children under 18.
+If you believe a child has provided us data, please contact us and we will take appropriate steps to remove it.
+</p>
+
+<div class="divider"></div>
+
+<h2>15. Changes to this policy</h2>
+<p>
+We may update this Privacy Policy from time to time. When we do, we will update the “Effective Date” at the top.
+If changes are significant, we may provide additional notice within the app or by email.
+Continued use of the Service after changes take effect means you accept the updated Policy.
+</p>
+
+<div class="divider"></div>
+
+<h2>16. Contact us</h2>
+<p>
+<strong>Ford Family Distribution – Belize (operating as Tropic Pulse)</strong><br>
+Email: <a href="mailto:Sales@TropicPulse.bz">Sales@TropicPulse.bz</a><br>
+Website: <a href="https://www.tropicpulse.bz">https://www.tropicpulse.bz</a>
+</p>
+
+</div>
+
+<div class="footer">
+    <p>© 2026 Ford Family Distribution – Belize (operating as Tropic Pulse)</p>
+    <img src="./_PICTURES/ToucanRight.png" class="toucan-footer">
 </div>
 
 </body>

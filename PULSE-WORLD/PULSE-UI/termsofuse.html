@@ -2,88 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tropic Pulse – Terms of Use</title>
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               maximum-scale=1,
-               minimum-scale=1,
-               user-scalable=no">
+<title>Tropic Pulse & Pulse‑World – Terms of Use</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-
-<!-- End Meta Pixel Code -->
 <style>
     body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
-        background: #f7f9fc;
+        background: #eef3f7;
         color: #222;
-        line-height: 1.6;
+        line-height: 1.65;
     }
 
+    /* HEADER */
     .header {
-        background: linear-gradient(135deg, #00c6ff, #f5dd00);
-        padding: 60px 20px;
+        background: linear-gradient(135deg, #00c6ff, #00e6a8, #f5dd00);
+        padding: 70px 20px;
         text-align: center;
         color: #fff;
         position: relative;
         overflow: hidden;
+        border-bottom-left-radius: 40px;
+        border-bottom-right-radius: 40px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
     }
 
     .header h1 {
-        font-size: 40px;
+        font-size: 42px;
         margin: 0;
-        font-weight: 700;
+        font-weight: 800;
         letter-spacing: 0.5px;
+        text-shadow: 0 3px 8px rgba(0,0,0,0.25);
     }
 
     .toucan {
         position: absolute;
-        width: 110px;
-        opacity: 0.18;
-        top: 15px;
+        width: 130px;
+        opacity: 0.22;
+        top: 20px;
     }
 
-    .toucan.left {
-        left: 20px;
-        transform: scaleX(-1);
-    }
+    .toucan.left { left: 20px; transform: scaleX(-1); }
+    .toucan.right { right: 20px; }
 
-    .toucan.right {
-        right: 20px;
-    }
-
+    /* CONTENT CARD */
     .content {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 40px auto;
         background: #fff;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 45px;
+        border-radius: 18px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
     }
 
     h2 {
-        margin-top: 40px;
-        color: #0072ff;
+        margin-top: 50px;
+        color: #008f5c;
+        font-size: 28px;
+        border-left: 6px solid #00c6ff;
+        padding-left: 12px;
     }
 
     h3 {
-        margin-top: 25px;
+        margin-top: 30px;
         color: #005fcc;
+        font-size: 22px;
     }
 
-    ul {
-        margin-left: 20px;
+    .section-label {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #00c6ff;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
     }
 
-    a {
-        color: #0072ff;
-        text-decoration: none;
+    .section-label.pulseworld { background: #ff7b00; }
+    .section-label.tropicpulse { background: #00b86b; }
+    .section-label.earn { background: #7b3dff; }
+    .section-label.identity { background: #0090ff; }
+
+    ul { margin-left: 20px; }
+
+    a { color: #0072ff; text-decoration: none; }
+
+    /* DIVIDERS */
+    .divider {
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, #00c6ff, #00e6a8, #f5dd00);
+        border-radius: 4px;
+        margin: 50px 0;
     }
 
+    /* FOOTER */
     .footer {
         text-align: center;
-        padding: 20px;
+        padding: 25px;
         font-size: 14px;
         color: #555;
         margin-top: 40px;
@@ -91,7 +109,7 @@
     }
 
     .footer .toucan-footer {
-        width: 70px;
+        width: 80px;
         opacity: 0.25;
         position: absolute;
         right: 20px;
@@ -102,15 +120,19 @@
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
     <img src="./_PICTURES/ToucanLeft.png" class="toucan left">
     <img src="./_PICTURES/ToucanRight.png" class="toucan right">
-    <h1>Tropic Pulse – Terms of Use</h1>
+    <h1>Tropic Pulse & Pulse‑World – Terms of Use</h1>
 </div>
-<div style="text-align:center;margin-bottom:20px;">
-    <img src="./_PICTURES/ToucanLogo-Mini.png" style="width:150px;border-radius:12px;">
-    <h1 style="color:#008f5c;font-size:30px;margin-top:10px;">Email Admin Panel</h1>
-  </div>
+
+<div style="text-align:center;margin-top:20px;">
+    <img src="./_PICTURES/ToucanLogo-Mini.png" style="width:160px;border-radius:14px;">
+    <h1 style="color:#008f5c;font-size:32px;margin-top:12px;">Unified Platform Terms</h1>
+</div>
+
+<!-- CONTENT -->
 <div class="content">
 
 <h2>Effective Date</h2>
@@ -118,178 +140,268 @@
 
 <h2>1. Introduction</h2>
 <p>
-These Terms of Use (“Terms”) govern your access to and use of the Tropic Pulse
-platform (“Platform”), operated by <strong>Ford Family Distribution – Belize (operating as Tropic Pulse)</strong>.
-By creating an account, placing an order, or using the Platform, you agree to these Terms.
+These Terms of Use (“Terms”) govern your access to and use of the Tropic Pulse ecosystem, which includes:
 </p>
 
+<p><span class="section-label tropicpulse">TROPIC‑PULSE</span>  
+Belize delivery, events, and vendor marketplace.</p>
+
+<p><span class="section-label pulseworld">PULSE‑WORLD</span>  
+Global social identity, presence, badges, systemAge, and cross‑app profile layer.</p>
+
 <p>
+By creating an account or using either service, you agree to these Terms.  
 Our <a href="/privacy.html">Privacy Policy</a> explains how we collect and use your information.
-Both documents work together and should be read carefully.
 </p>
 
-<h2>2. Conditions of Use</h2>
-<p>
-Every time you visit this app, use its services, or make a purchase, you accept these Terms.
-Please read them carefully.
-</p>
+<div class="divider"></div>
 
-<h2>3. Copyright</h2>
-<p>
-Content published on this app (digital downloads, images, texts, graphics, logos)
-is the property of Tropic Pulse and/or its content creators and protected by international copyright laws.
-</p>
+<!-- GENERAL TERMS -->
+<h2>SECTION A — General Terms (Applies to Both Services)</h2>
 
-<h2>4. Communications</h2>
-<p>
-By using the Platform, you consent to receive communications from us electronically,
-including emails, SMS messages, and in‑app notifications.
-All electronic communications satisfy legal requirements for written communication.
-</p>
-
-<h2>5. Applicable Law</h2>
-<p>
-By visiting this app, you agree that the laws of Belize, without regard to conflict‑of‑law principles,
-will govern these Terms and any dispute between Tropic Pulse and you.
-</p>
-
-<h2>6. Disputes</h2>
-<p>
-Any dispute related to your use of the Platform shall be resolved in the courts of Belize.
-You consent to their exclusive jurisdiction.
-</p>
-
-<h2>7. Comments, Reviews, and User Content</h2>
-<p>
-Users may post content as long as it is not obscene, illegal, defamatory, threatening,
-invasive of privacy, or harmful. Content must be free of viruses, political messaging,
-or commercial solicitation.
-</p>
-
-<p>
-By posting content, you grant Tropic Pulse a non‑exclusive, royalty‑free, irrevocable
-right to use, reproduce, publish, and modify such content worldwide.
-</p>
-
-<h2>8. License and Access</h2>
-<p>
-We grant you a limited license to access and use the Platform for personal use.
-You may not misuse the Platform or attempt to disrupt its functionality.
-</p>
-
-<h2>9. User Account</h2>
-<p>
-If you create an account, you are responsible for maintaining the confidentiality
-of your login credentials and for all activity under your account.
-We reserve the right to terminate accounts or remove content at our discretion.
-</p>
-
-<hr>
-
-<h2>10. Eligibility (Belize)</h2>
+<h3>1. Eligibility</h3>
 <ul>
-    <li>You must be at least 18 years old to use the Platform.</li>
-    <li>You confirm that all registration information is accurate and current.</li>
+    <li>You must be at least 18 years old.</li>
+    <li>You must provide accurate registration information.</li>
+    <li>You are responsible for maintaining account security.</li>
 </ul>
 
-<h2>11. Use of the Platform</h2>
+<h3>2. Acceptable Use</h3>
 <ul>
-    <li>You agree to use the Platform only for lawful purposes within Belize.</li>
-    <li>You may not impersonate others or interfere with delivery operations.</li>
+    <li>No illegal, abusive, or harmful behavior.</li>
+    <li>No impersonation or unauthorized access.</li>
+    <li>No disruption of platform operations.</li>
 </ul>
 
-<h2>12. Orders and Payments</h2>
+<h3>3. Communications Consent</h3>
+<p>By providing your phone number or email, you consent to receive:</p>
 <ul>
-    <li>Orders are subject to vendor availability and acceptance.</li>
-    <li>Prices include applicable Belizean taxes and service fees.</li>
-    <li>Payments must be made via approved digital methods.</li>
+    <li>Account alerts</li>
+    <li>Security notifications</li>
+    <li>Verification codes</li>
+    <li>Transactional updates</li>
+</ul>
+<p>Marketing messages require a separate explicit opt‑in.</p>
+
+<h3>4. Required Device Permissions</h3>
+<ul>
+    <li><strong>Location</strong> – Required for Tropic‑Pulse delivery & events; optional for Pulse‑World relevance.</li>
+    <li><strong>Bluetooth</strong> – Optional; used only for Pulse‑World proximity presence.</li>
+</ul>
+<p>No access to contacts, background location, microphone, camera (unless uploading a photo), or sensors.</p>
+
+<h3>5. Intellectual Property</h3>
+<p>All branding, content, and platform assets belong to Tropic Pulse or its licensors.</p>
+
+<h3>6. Modifications</h3>
+<p>We may update these Terms at any time. Continued use means acceptance.</p>
+
+<h3>7. Governing Law</h3>
+<p>These Terms are governed by the laws of Belize.</p>
+
+<div class="divider"></div>
+
+<!-- TROPIC-PULSE SECTION -->
+<h2><span class="section-label tropicpulse">SECTION B — Tropic‑Pulse (Belize Delivery & Events)</span></h2>
+
+<h3>1. Orders & Payments</h3>
+<ul>
+    <li>Orders depend on vendor acceptance and availability.</li>
+    <li>Prices include Belizean taxes and fees.</li>
+    <li>Payments must be digital.</li>
     <li>Refunds apply only to undelivered or canceled orders.</li>
 </ul>
 
-<h2>13. Delivery and Timing</h2>
+<h3>2. Delivery</h3>
 <ul>
-    <li>Delivery times may vary due to traffic, weather, or vendor delays.</li>
-    <li>Tropic Pulse is not liable for delays caused by third parties.</li>
+    <li>Times vary due to traffic, weather, or vendor delays.</li>
+    <li>Tropic Pulse is not liable for third‑party delays.</li>
+    <li>Users must provide safe delivery locations.</li>
 </ul>
 
-<h2>14. Promotions and Credits</h2>
+<h3>3. Vendor Responsibilities</h3>
 <ul>
-    <li>Promotions may be modified or revoked at any time.</li>
-    <li>Credits are non‑transferable and expire after 30 days.</li>
+    <li>Maintain accurate menus and pricing.</li>
+    <li>Ensure product quality.</li>
+    <li>Comply with Belizean regulations.</li>
 </ul>
 
-<h2>15. Vendor Responsibilities</h2>
+<h3>4. Promotions & Credits</h3>
 <ul>
-    <li>Vendors must maintain accurate menus and pricing.</li>
-    <li>We may suspend vendors who violate policies.</li>
+    <li>Promotions may change or be revoked.</li>
+    <li>Credits expire after 30 days.</li>
 </ul>
 
-<h2>16. User Conduct</h2>
+<h3>5. Limitation of Liability</h3>
+<p>We are not responsible for food quality, vendor errors, or health issues.</p>
+
+<h3>6. Gratuity</h3>
+<p>A default 5% gratuity supports delivery partners.</p>
+
+<div class="divider"></div>
+
+<!-- PULSE-WORLD SECTION -->
+<h2><span class="section-label pulseworld">SECTION C — Pulse‑World (Global Social Layer)</span></h2>
+
+<h3>1. Profile & Identity</h3>
 <ul>
-    <li>Fraud, harassment, or abusive behavior may result in account suspension.</li>
-    <li>Users must ensure safe delivery locations.</li>
+    <li>Includes display name, avatar, systemAge, badges, and presence.</li>
+    <li>You may edit or delete your profile at any time.</li>
 </ul>
 
-<h2>17. Privacy and Data</h2>
-<p>
-Your data is handled according to our <a href="/privacy.html">Privacy Policy</a>.
-We do not sell or share mobile numbers or SMS opt‑in data with third parties
-for marketing or promotional purposes.
-</p>
-
-<h2>18. Limitation of Liability</h2>
-<p>
-Tropic Pulse is not responsible for food quality, vendor errors, or health issues.
-Liability is limited to the value of the affected order.
-</p>
-
-<h2>19. Gratuity Policy</h2>
-<p>
-A default 5% gratuity supports delivery partners. Additional tips are optional.
-</p>
-
-<h2>20. Communications & SMS Consent</h2>
-<p>By providing your phone number, you consent to receive:</p>
-
+<h3>2. Presence & Activity</h3>
 <ul>
-    <li>Order confirmations</li>
-    <li>Delivery updates</li>
-    <li>Driver arrival notifications</li>
-    <li>Security alerts</li>
-    <li>Payment confirmations</li>
+    <li>Shows online status and recent activity.</li>
+    <li>Optional Bluetooth proximity presence.</li>
+    <li>Never used for advertising or background tracking.</li>
 </ul>
 
-<p>Message frequency varies. Standard message and data rates may apply.</p>
+<h3>3. Content & Conduct</h3>
+<ul>
+    <li>No illegal, harmful, or abusive content.</li>
+    <li>No impersonation or spam.</li>
+    <li>We may remove content or suspend accounts.</li>
+</ul>
 
+<h3>4. Social Interactions</h3>
+<ul>
+    <li>May include following, messaging, mentorship tiers, and contribution history.</li>
+    <li>You are responsible for your interactions.</li>
+</ul>
+
+<div class="divider"></div>
+
+<!-- PRIVACY -->
+<h2>SECTION D — Privacy & Data</h2>
+
+<h3>1. Data Handling</h3>
+<p>Your data is handled according to our <a href="/privacy.html">Privacy Policy</a>.</p>
+<p>We do <strong>not</strong> sell or share phone numbers or SMS opt‑in data.</p>
+
+<h3>2. Data Storage</h3>
+<ul>
+    <li>Account information</li>
+    <li>Transactional history</li>
+    <li>Profile data</li>
+    <li>Opt‑in preferences</li>
+</ul>
+
+<h3>3. Data Removal</h3>
+<p>You may request account deletion or data export, subject to legal retention requirements.</p>
+
+<div class="divider"></div>
+
+<!-- IDENTITY & PRESENCE -->
+<h2><span class="section-label identity">SECTION F — Pulse‑Identity & Presence</span></h2>
+
+<h3>1. Unified Identity</h3>
+<ul>
+    <li>Your Pulse‑Identity may be used across Tropic‑Pulse, Pulse‑World, and related services.</li>
+    <li>Core fields include email, phone number, display name, and profile image.</li>
+    <li>Identity is used to keep your account consistent across the ecosystem.</li>
+</ul>
+
+<h3>2. Presence Signals</h3>
+<ul>
+    <li>Presence may show when you are online, recently active, or participating in an event.</li>
+    <li>Optional proximity presence may use Bluetooth when enabled by you.</li>
+    <li>Presence is not used for advertising or sold to third parties.</li>
+</ul>
+
+<h3>3. Security</h3>
+<ul>
+    <li>We may use identity and presence data to detect fraud, abuse, or unauthorized access.</li>
+    <li>We may temporarily limit or suspend accounts to protect the platform.</li>
+</ul>
+
+<div class="divider"></div>
+
+<!-- EVENTS -->
+<h2><span class="section-label tropicpulse">SECTION G — Pulse‑Events</span></h2>
+
+<h3>1. Event Creation & Participation</h3>
+<ul>
+    <li>Users may create, list, or join events through the platform.</li>
+    <li>Event organizers are responsible for the accuracy of event details.</li>
+    <li>We do not guarantee attendance, safety, or outcomes of any event.</li>
+</ul>
+
+<h3>2. Event Content</h3>
+<ul>
+    <li>Event descriptions must comply with these Terms and applicable law.</li>
+    <li>We may remove events that are misleading, unsafe, or illegal.</li>
+</ul>
+
+<h3>3. Liability</h3>
 <p>
-Reply <strong>STOP</strong> to unsubscribe from non‑essential messages.<br>
-Reply <strong>HELP</strong> for help.
+Tropic Pulse and Pulse‑World are not responsible for any injury, loss, or dispute arising from event attendance or organization. Participation is at your own risk.
 </p>
 
+<div class="divider"></div>
+
+<!-- EARN / GPU / WORKLOADS -->
+<h2><span class="section-label earn">SECTION H — Pulse‑Earn & Creator Workloads</span></h2>
+
+<h3>1. Nature of Pulse‑Earn</h3>
+<ul>
+    <li>Pulse‑Earn allows eligible users to participate in optional digital workloads, such as compute tasks, AI processing, or other contribution‑based activities.</li>
+    <li>Pulse‑Earn is not an employment program and does not create an employer‑employee relationship.</li>
+    <li>Participation is voluntary and may be subject to additional terms or eligibility checks.</li>
+</ul>
+
+<h3>2. Workloads & Compute</h3>
+<ul>
+    <li>Workloads may include GPU or CPU‑based processing, rendering, or similar lawful digital tasks.</li>
+    <li>All workloads are intended for legal, policy‑compliant purposes only.</li>
+    <li>We reserve the right to reject, pause, or terminate workloads that appear abusive, illegal, or unsafe.</li>
+</ul>
+
+<h3>3. Rewards & Payouts</h3>
+<ul>
+    <li>Any rewards, credits, or payouts are based on completed and validated workloads.</li>
+    <li>There is no guarantee of availability of workloads or any minimum earnings.</li>
+    <li>You are responsible for complying with your local tax and reporting obligations.</li>
+</ul>
+
+<h3>4. Marketplace & Matching</h3>
+<ul>
+    <li>Pulse‑Earn may include a marketplace or matching system that connects available workloads with eligible participants.</li>
+    <li>We do not guarantee that any specific workload will be offered, accepted, or completed.</li>
+    <li>We may prioritize workloads based on performance, reliability, or policy requirements.</li>
+</ul>
+
+<h3>5. Compliance</h3>
+<ul>
+    <li>You may not use Pulse‑Earn for any illegal, harmful, or prohibited activity.</li>
+    <li>We may suspend or terminate access to Pulse‑Earn for suspected abuse or policy violations.</li>
+</ul>
+
+<div class="divider"></div>
+
+<!-- PAYMENTS & PAYOUTS -->
+<h2>SECTION I — Payments & Payouts</h2>
+
+<h3>1. Payment Processing</h3>
+<ul>
+    <li>We use third‑party payment processors (such as Stripe) for payments and payouts.</li>
+    <li>We do not store full payment card numbers on our own servers.</li>
+</ul>
+
+<h3>2. Payouts to Users</h3>
+<ul>
+    <li>Payouts (for example, from Pulse‑Earn or vendor balances) may require identity verification as required by payment partners or law.</li>
+    <li>Payout timing and availability may depend on third‑party processors and banking systems.</li>
+</ul>
+
+<h3>3. No Financial Advice</h3>
 <p>
-Essential messages cannot be opted out of without affecting your ability to use the Platform.
+Nothing in the platform constitutes financial, investment, or legal advice. You are responsible for your own decisions and compliance with local regulations.
 </p>
 
-<h3>20.1 Marketing SMS (Separate Opt‑In)</h3>
-<p>
-Marketing SMS messages require a separate, explicit opt‑in via an unchecked checkbox
-or similar one‑click consent. You may opt out at any time by replying STOP.
-</p>
+<div class="divider"></div>
 
-<h2>21. Consent Requirements</h2>
-<p>
-Where applicable, users must provide one‑click consent via an unchecked checkbox
-acknowledging agreement to receive SMS messages. Consent language will clearly
-state the types of messages sent and link to the Privacy Policy.
-</p>
-
-<h2>22. Modifications</h2>
-<p>
-We may update these Terms at any time. Continued use of the Platform
-constitutes acceptance of the updated Terms.
-</p>
-
-<h2>23. Contact Information</h2>
+<!-- CONTACT -->
+<h2>SECTION J — Contact Information</h2>
 <p>
 <strong>Ford Family Distribution – Belize (operating as Tropic Pulse)</strong><br>
 WhatsApp: <a href="http://wa.me/15096077261">+1 509 607‑7261</a><br>
@@ -299,6 +411,7 @@ Website: <a href="https://www.tropicpulse.bz">https://www.tropicpulse.bz</a>
 
 </div>
 
+<!-- FOOTER -->
 <div class="footer">
     <p>© 2026 Ford Family Distribution – Belize (operating as Tropic Pulse)</p>
     <img src="./_PICTURES/ToucanRight.png" class="toucan-footer">

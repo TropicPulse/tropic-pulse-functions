@@ -1,156 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Tropic Pulse – Data Deletion Request</title>
-  <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               maximum-scale=1,
-               minimum-scale=1,
-               user-scalable=no">  
+<meta charset="UTF-8">
+<title>Tropic Pulse & Pulse‑World – Data Deletion Request</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  
-<!-- End Meta Pixel Code -->
-  <style>
+<style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #ffff99;
-      color: #222;
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #eef3f7;
+        color: #222;
+        line-height: 1.65;
     }
-    .page {
-      width: 100%;
-      padding: 48px 40px 40px; /* more breathing room */
-      position: relative;
-      margin: 1px auto 6px auto;
-    }
+
+    /* HEADER */
     .header {
-      text-align: center;
-      position: relative;
-      padding: 20px 0 10px;
+        background: linear-gradient(135deg, #00c6ff, #00e6a8, #f5dd00);
+        padding: 70px 20px;
+        text-align: center;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        border-bottom-left-radius: 40px;
+        border-bottom-right-radius: 40px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
     }
+
     .header h1 {
-      margin: 0;
-      font-size: 26px;
+        font-size: 40px;
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-shadow: 0 3px 8px rgba(0,0,0,0.25);
     }
-    .toucan-left,
-    .toucan-right {
-      position: absolute;
-      top: 10px;
-      width: 60px;
-      opacity: 0.7;
+
+    .toucan {
+        position: absolute;
+        width: 110px;
+        opacity: 0.22;
+        top: 18px;
     }
-    .toucan-left {
-      left: 0;
+
+    .toucan.left { left: 20px; transform: scaleX(-1); }
+    .toucan.right { right: 20px; }
+
+    /* CONTENT CARD */
+    .content {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 45px;
+        border-radius: 18px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
     }
-    .toucan-right {
-      right: 0;
-      transform: scaleX(-1);
+
+    h2 {
+        margin-top: 45px;
+        color: #008f5c;
+        font-size: 26px;
+        border-left: 6px solid #00c6ff;
+        padding-left: 12px;
     }
-    .content h2 {
-      margin-top: 24px;
-      font-size: 20px;
+
+    h3 {
+        margin-top: 28px;
+        color: #005fcc;
+        font-size: 20px;
     }
-    .content h3 {
-      margin-top: 18px;
-      font-size: 18px;
+
+    ul { margin-left: 20px; }
+
+    a { color: #0072ff; text-decoration: none; }
+
+    .divider {
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, #00c6ff, #00e6a8, #f5dd00);
+        border-radius: 4px;
+        margin: 45px 0;
     }
-    .content p {
-      line-height: 1.5;
-      margin: 8px 0;
+
+    .footer {
+        text-align: center;
+        padding: 25px;
+        font-size: 14px;
+        color: #555;
+        margin-top: 40px;
+        position: relative;
     }
-    .content ul {
-      margin: 8px 0 16px 20px;
+
+    .footer .toucan-footer {
+        width: 80px;
+        opacity: 0.25;
+        position: absolute;
+        right: 20px;
+        bottom: 10px;
     }
-  </style>
+
+    .section-label {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #00c6ff;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .section-label.tropicpulse { background: #00b86b; }
+    .section-label.pulseworld { background: #ff7b00; }
+    .section-label.identity { background: #0090ff; }
+    .section-label.earn { background: #7b3dff; }
+
+</style>
 </head>
+
 <body>
-  <div class="page">
-    <div class="header">
-      <img src="./_PICTURES/ToucanLeft.png" class="toucan-left" alt="Toucan">
-      <img src="./_PICTURES/ToucanRight.png" class="toucan-right" alt="Toucan">
-      <h1>Tropic Pulse – Data Deletion Request</h1>
-    </div>
-    <div style="text-align:center;margin-bottom:20px;">
-    <img src="./_PICTURES/ToucanLogo-Mini.png" style="width:150px;border-radius:12px;">
-    <h1 style="color:#008f5c;font-size:30px;margin-top:10px;">Email Admin Panel</h1>
-  </div>
-    <div class="content">
-      <h2>Data Deletion</h2>
-      <p>At Tropic Pulse, we respect your privacy and your right to control your data. This page explains how you can request deletion of your personal information associated with the Tropic Pulse app and services.</p>
 
-      <h2>What data can be deleted</h2>
-      <p>We can delete:</p>
-      <h3>Account information</h3>
-      <p>Your name, email, phone number, profile details, and login identifiers.</p>
+<div class="header">
+    <img src="./_PICTURES/ToucanLeft.png" class="toucan left">
+    <img src="./_PICTURES/ToucanRight.png" class="toucan right">
+    <h1>Tropic Pulse & Pulse‑World – Data Deletion Request</h1>
+</div>
 
-      <h3>App usage data</h3>
-      <p>Favorites, saved places, reviews, ratings, and preferences tied to your account.</p>
+<div style="text-align:center;margin-top:20px;">
+    <img src="./_PICTURES/ToucanLogo-Mini.png" style="width:160px;border-radius:14px;">
+    <h1 style="color:#008f5c;font-size:30px;margin-top:10px;">Your Data. Your Control.</h1>
+</div>
 
-      <h3>Communication history</h3>
-      <p>Support messages and non-essential communication logs, where not required for legal or security reasons.</p>
+<div class="content">
 
-      <p>Some data may be retained where we are legally required or have a legitimate business need (for example, fraud prevention, accounting, or dispute resolution). In those cases, we minimize what is kept and how long it is stored.</p>
+<h2>1. Overview</h2>
+<p>
+At Tropic Pulse and Pulse‑World, we believe privacy is a fundamental right.  
+You can request deletion of your personal data at any time.  
+This page explains what can be deleted, what must be retained, and how to submit a request.
+</p>
 
-      <h2>How to request data deletion</h2>
+<div class="divider"></div>
 
-      <h3>From within the app (preferred)</h3>
-      <ul>
-        <li>Open the Tropic Pulse app</li>
-        <li>Go to Profile / Settings</li>
-        <li>Tap <strong>Privacy &amp; Data</strong></li>
-        <li>Select <strong>Delete My Account &amp; Data</strong></li>
-        <li>Follow the on-screen confirmation steps</li>
-      </ul>
+<h2>2. What data can be deleted</h2>
 
-      <h3>By email</h3>
-      <p>Send an email with the subject line <strong>“Data Deletion Request”</strong> to:<br>
-        <a href="mailto:Sales@TropicPulse.bz">Sales@TropicPulse.bz</a>
-      </p>
-      <p>Include:</p>
-      <ul>
-        <li>Full name</li>
-        <li>Email address used in the app</li>
-        <li>Phone number (if linked to your account)</li>
-        <li>A short statement:<br>
-          “I am requesting deletion of my Tropic Pulse account and all associated personal data.”</li>
-      </ul>
-      <p>We may ask you to verify your identity to protect your account from unauthorized deletion.</p>
+<h3>2.1 Account information</h3>
+<ul>
+    <li>Name, email, phone number</li>
+    <li>Profile image and display name</li>
+    <li>Login identifiers and authentication tokens</li>
+</ul>
 
-      <h2>What happens after you request deletion</h2>
+<h3>2.2 Pulse‑World identity & presence</h3>
+<ul>
+    <li>Your Pulse‑Identity profile</li>
+    <li>Presence signals (online status, last active)</li>
+    <li>Badges, systemAge, and social metadata</li>
+</ul>
 
-      <h3>Acknowledgment</h3>
-      <p>We’ll confirm we received your request.</p>
+<h3>2.3 Tropic‑Pulse usage data</h3>
+<ul>
+    <li>Favorites, saved places, delivery addresses</li>
+    <li>Order history (where legally allowed)</li>
+    <li>Reviews, ratings, and public posts</li>
+</ul>
 
-      <h3>Processing time</h3>
-      <p>We aim to complete deletion within 30 days, unless a longer period is required by law or for security review.</p>
+<h3>2.4 Pulse‑Events</h3>
+<ul>
+    <li>Event participation history</li>
+    <li>Event hosting data (where allowed)</li>
+</ul>
 
-      <h3>Effect of deletion</h3>
-      <ul>
-        <li>You will lose access to your Tropic Pulse account.</li>
-        <li>Your profile, favorites, and other personal content will be removed or anonymized.</li>
-        <li>Some aggregated or de-identified data (for analytics and service improvement) may be retained, but it will no longer be linked to you.</li>
-      </ul>
+<h3>2.5 Pulse‑Earn (optional workloads)</h3>
+<ul>
+    <li>Workload participation logs</li>
+    <li>Performance metrics</li>
+    <li>Non‑financial Earn metadata</li>
+</ul>
 
-      <h2>Business and partner data</h2>
-      <p>If you manage a business listing on Tropic Pulse:</p>
-      <ul>
-        <li>Personal owner/PULSEAdmin data can be deleted as above.</li>
-        <li>Business listing data (name, location, public details) may remain visible if it is considered public business information, but we can:
-          <ul>
-            <li>Remove your personal contact details, and</li>
-            <li>Transfer or reassign listing ownership where appropriate.</li>
-          </ul>
-        </li>
-      </ul>
-      <p>If you need deletion or transfer related to a business listing, mention this clearly in your request.</p>
+<h3>2.6 Communications</h3>
+<ul>
+    <li>Support messages</li>
+    <li>Non‑essential communication logs</li>
+</ul>
 
-      <h2>Questions about your privacy</h2>
-      <p>If you have questions before requesting deletion, or want to understand what data we hold about you, contact us at:</p>
-      <p>Email: <a href="mailto:Sales@tropicpulse.bz">Sales@TropicPulse.bz</a><br>
-      Subject line: <strong>“Privacy Question – Tropic Pulse”</strong></p>
-    </div>
-  </div>
+<p>
+Some data must be retained where required by law (e.g., financial records, fraud prevention, tax compliance).
+</p>
+
+<div class="divider"></div>
+
+<h2>3. What cannot be deleted immediately</h2>
+
+<h3>3.1 Financial & payout records</h3>
+<p>
+If you used Tropic‑Pulse for purchases or Pulse‑Earn for payouts, we must retain certain financial records for legal and tax compliance.
+</p>
+
+<h3>3.2 Fraud prevention & security logs</h3>
+<p>
+We may retain limited logs to protect the platform and prevent abuse.
+</p>
+
+<h3>3.3 Public business listings</h3>
+<p>
+If you manage a business listing:
+</p>
+<ul>
+    <li>We can delete your personal owner/admin data</li>
+    <li>But the public business listing may remain visible</li>
+    <li>We can transfer ownership to another authorized person</li>
+</ul>
+
+<div class="divider"></div>
+
+<h2>4. How to request deletion</h2>
+
+<h3>4.1 From within the app (recommended)</h3>
+<ul>
+    <li>Open the Tropic Pulse app</li>
+    <li>Go to <strong>Profile → Settings</strong></li>
+    <li>Select <strong>Privacy & Data</strong></li>
+    <li>Tap <strong>Delete My Account & Data</strong></li>
+    <li>Follow the confirmation steps</li>
+</ul>
+
+<h3>4.2 By email</h3>
+<p>
+Send an email with the subject line <strong>“Data Deletion Request”</strong> to:<br>
+<a href="mailto:Sales@TropicPulse.bz">Sales@TropicPulse.bz</a>
+</p>
+
+<p>Include:</p>
+<ul>
+    <li>Your full name</li>
+    <li>Email used in the app</li>
+    <li>Phone number (if linked)</li>
+    <li>A statement: “I am requesting deletion of my Tropic Pulse account and all associated personal data.”</li>
+</ul>
+
+<p>We may ask you to verify your identity to protect your account.</p>
+
+<div class="divider"></div>
+
+<h2>5. What happens after you request deletion</h2>
+
+<h3>5.1 Acknowledgment</h3>
+<p>You will receive confirmation that your request was received.</p>
+
+<h3>5.2 Processing time</h3>
+<p>We aim to complete deletion within <strong>30 days</strong>, unless additional time is required for legal or security review.</p>
+
+<h3>5.3 Effects of deletion</h3>
+<ul>
+    <li>Your account will be permanently closed</li>
+    <li>Your Pulse‑Identity will be removed or anonymized</li>
+    <liYour presence, badges, and systemAge will be deleted</li>
+    <li>Your Tropic‑Pulse data (favorites, addresses, preferences) will be removed</li>
+    <li>Your Pulse‑Earn participation data will be deleted (except legally required financial records)</li>
+    <li>Some aggregated or anonymized data may be retained for analytics</li>
+</ul>
+
+<div class="divider"></div>
+
+<h2>6. Questions or concerns</h2>
+<p>
+If you have questions before requesting deletion, or want to understand what data we hold, contact us:
+</p>
+
+<p>
+Email: <a href="mailto:Sales@TropicPulse.bz">Sales@TropicPulse.bz</a><br>
+Subject line: <strong>“Privacy Question – Tropic Pulse”</strong>
+</p>
+
+</div>
+
+<div class="footer">
+    <p>© 2026 Ford Family Distribution – Belize (operating as Tropic Pulse)</p>
+    <img src="./_PICTURES/ToucanRight.png" class="toucan-footer">
+</div>
+
 </body>
 </html>

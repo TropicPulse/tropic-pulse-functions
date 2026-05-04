@@ -1315,19 +1315,22 @@ const DefaultSkinReflex = createPulseSkinReflex();
 DefaultSkinReflex.init();
 
 export default DefaultSkinReflex;
-
 try {
   if (typeof global !== "undefined") {
     global.PulseSkinReflex = DefaultSkinReflex;
+    global.sessionCheck = sessionCheck;
   }
   if (typeof globalThis !== "undefined") {
     globalThis.PulseSkinReflex = DefaultSkinReflex;
+    globalThis.sessionCheck = sessionCheck;
   }
   if (typeof window !== "undefined") {
     window.PulseSkinReflex = DefaultSkinReflex;
+    window.sessionCheck = sessionCheck;
   }
   if (typeof g !== "undefined") {
     g.PulseSkinReflex = DefaultSkinReflex;
+    g.sessionCheck = sessionCheck;
   }
 } catch {
   // never throw
