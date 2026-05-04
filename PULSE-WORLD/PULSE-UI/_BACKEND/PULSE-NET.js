@@ -237,10 +237,13 @@ const NetworkOrgan = {
 
   async sendHeartbeat(instanceId, organism, result) {
     try {
+      const pulseTouch = PulseTouchOrgan.snapshot();
+
       await route(this.channels.heartbeat, {
         instanceId,
         organism,
         result,
+        pulseTouch,              // <<<<< NEW
         layer: "PulseNet",
         binaryAware: true,
         dualBand: true,
@@ -250,6 +253,7 @@ const NetworkOrgan = {
       // swallow; ErrorSpine will be handled by caller
     }
   }
+
 };
 
 // ============================================================================
@@ -342,6 +346,7 @@ function warmBackwardEngine(instanceId) {
 async function overmindHeartbeatSample(instanceId, tickResult) {
   try {
     const organism = getOrganism(instanceId);
+    const pulseTouch = PulseTouchOrgan.snapshot();
 
     const intent = {
       type: "heartbeat",
@@ -364,6 +369,7 @@ async function overmindHeartbeatSample(instanceId, tickResult) {
         lastAIHeartbeat: organism.lastAIHeartbeat,
         lastBeatSource: organism.lastBeatSource
       },
+      pulseTouch,          // <<<<< NEW
       tickResult
     };
 
@@ -372,17 +378,18 @@ async function overmindHeartbeatSample(instanceId, tickResult) {
         text: JSON.stringify({
           instanceId,
           organism: context.organismSnapshot,
+          pulseTouch,      // <<<<< NEW
           tickResult
         })
       }
     ];
 
-    // We don't care about finalOutput here; we want memory/experience/evoWindow updates
     await aiOvermindPrime.process({ intent, context, candidates });
   } catch {
     // crown learning is non-fatal for runtime
   }
 }
+
 
 // Public AI gateway: frontend archetypes → PulseNet → OvermindPrime
 export async function pulseNetAI({ intent, context, candidates }) {
@@ -665,6 +672,29 @@ export function PulseNetInstances() {
     nets: globalThis.__PULSE_NET_FAMILY__
   };
 }
+
+const PulseTouchOrgan = {
+  snapshot() {
+    try {
+      if (typeof window === "undefined") return null;
+
+      const touch = window.__PULSE_TOUCH__ || null; // or decode cookie here
+      if (!touch) return null;
+
+      return {
+        ts: Date.now(),
+        region: touch.region || null,
+        mode: touch.mode || null,
+        presence: touch.presence || null,
+        pageHint: touch.pageHint || null,
+        chunkProfile: touch.chunkProfile || null
+      };
+    } catch {
+      return null;
+    }
+  }
+};
+
 
 try {
   if (typeof window !== "undefined") {

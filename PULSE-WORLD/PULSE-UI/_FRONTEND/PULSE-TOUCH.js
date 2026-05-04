@@ -121,6 +121,13 @@ AI_EXPERIENCE_META = {
   }
 }
 */
+import { startPulseNet } from "../_BACKEND/PULSE-NET.js";
+
+startPulseNet({
+  instanceId: "core",
+  intervalMs: 750,
+  superInstance: true
+});
 
 const PULSE_TOUCH_COOKIE_NAME = "pulse_touch";
 const PULSE_TOUCH_MAX_AGE = 86400; // 1 day
