@@ -82,7 +82,7 @@ AI_EXPERIENCE_META = {
 //  • Single internet edge (via NetworkOrgan → route(...))
 //  • Hybrid crown model: OvermindPrime sees heartbeats + AI requests
 // ============================================================================
-
+import VitalsLogger from "../_BACKEND/PulseProofLogger.js";
 import { aiOvermindPrime } from "../../PULSE-BAND/PULSE-AI/aiOvermindPrime.js";
 import { createForwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/ForwardEngine.js";
 import { createBackwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/BackwardEngine.js";

@@ -62,6 +62,7 @@ const g =
 const db =
   (g && g.db) ||
   (typeof global !== "undefined" && global.db) ||
+  (typeof globalThis !== "undefined" && globalThis.db) ||
   (typeof window !== "undefined" && window.db) ||
   null;
 
@@ -610,7 +611,23 @@ export function critical(...args) {
     rest
   });
 }
+export const PulseLoggerStore = {
+  getAll() {
+    return getLocalLogs(); // returns full enriched log buffer
+  },
 
+  clear() {
+    // wipe local log buffer
+    localLogBuffer = [];
+    saveLocalLogs(localLogBuffer);
+  },
+
+  tail(n = 200) {
+    const buf = getLocalLogs();
+    if (n <= 0) return [];
+    return buf.slice(Math.max(0, buf.length - n));
+  }
+};
 // -----------------------------------------------------------------------------
 // Grouping helpers
 // -----------------------------------------------------------------------------
@@ -858,16 +875,26 @@ export const logger = { ...VitalsLogger };
     _c.error("Logger binding failed:", err);
   }
 })();
-
 try {
   if (typeof global !== "undefined") {
-    global.PulseOfflineLogs = g.PulseOfflineLogs || globalThis.PulseOfflineLogs;
+    global.VitalsLogger = VitalsLogger;
+    global.PulseLoggerStore = PulseLoggerStore;
+    global.PulseOfflineLogs = window.PulseOfflineLogs || globalThis.PulseOfflineLogs;
   }
   if (typeof globalThis !== "undefined") {
-    globalThis.PulseOfflineLogs = g.PulseOfflineLogs || globalThis.PulseOfflineLogs;
+    globalThis.VitalsLogger = VitalsLogger;
+    globalThis.PulseLoggerStore = PulseLoggerStore;
+    globalThis.PulseOfflineLogs = window.PulseOfflineLogs || global.PulseOfflineLogs;
+  }
+  if (typeof window !== "undefined") {
+    window.VitalsLogger = VitalsLogger;
+    window.PulseLoggerStore = PulseLoggerStore;
+    window.PulseOfflineLogs = globalThis.PulseOfflineLogs || global.PulseOfflineLogs;
   }
   if (typeof g !== "undefined") {
-    g.PulseOfflineLogs = g.PulseOfflineLogs || globalThis.PulseOfflineLogs;
+    g.VitalsLogger = VitalsLogger;
+    g.PulseLoggerStore = PulseLoggerStore;
+    g.PulseOfflineLogs = window.PulseOfflineLogs || globalThis.PulseOfflineLogs;
   }
 } catch {
   // never throw

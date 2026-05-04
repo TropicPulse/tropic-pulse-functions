@@ -72,7 +72,13 @@ const g =
     ? g
     : {};
 
-const db = global.db || window.db || g.db || null;
+// Prefer global db if present (logger page / server)
+const db =
+  (g && g.db) ||
+  (typeof global !== "undefined" && global.db) ||
+  (typeof globalThis !== "undefined" && globalThis.db) ||
+  (typeof window !== "undefined" && window.db) ||
+  null;
 // ============================================================================
 //  ONLINE FLAG — OFFLINE-FIRST
 // ============================================================================

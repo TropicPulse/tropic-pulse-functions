@@ -74,11 +74,47 @@ EXPORT_META = {
 
 */
 
+const g =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof global !== "undefined"
+    ? global
+    : typeof window !== "undefined"
+    ? window
+    : typeof g !== "undefined"
+    ? g
+    : {};
+
+// Prefer global db if present (logger page / server)
+const db =
+  (g && g.db) ||
+  (typeof global !== "undefined" && global.db) ||
+  (typeof globalThis !== "undefined" && globalThis.db) ||
+  (typeof window !== "undefined" && window.db) ||
+  null;
+
 import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v12-Evo.js";
 import PulsePageScanner from "../_FRONTEND/PulsePageScanner.js";
 import createPulseRouteMemory from "../_FRONTEND/PulseRouteMemory.js";
 import { safeRoute as route } from "./PulseProofBridge.js";
 import { getUIFlowSnapshot } from "../_FRONTEND/PulseUIFlow-v12-Evo.js";
+
+
+function isOnline() {
+  if (typeof window !== "undefined" && typeof window.PULSE_ONLINE === "boolean") {
+    return window.PULSE_ONLINE === true;
+  }
+  if (typeof global.PULSE_ONLINE === "boolean") {
+    return global.PULSE_ONLINE === true;
+  }
+  if (typeof globalThis.PULSE_ONLINE === "boolean") {
+    return globalThis.PULSE_ONLINE === true;
+  }
+  if (typeof g.PULSE_ONLINE === "boolean") {
+    return g.PULSE_ONLINE === true;
+  }
+  return false;
+}
 
 // ---------------------------------------------------------------------------
 // ROLE
@@ -1278,9 +1314,21 @@ const DefaultSkinReflex = createPulseSkinReflex();
 // Auto‑attach on import
 DefaultSkinReflex.init();
 
-// Expose to Window membrane
-if (typeof window !== "undefined") {
-  window.PulseSkinReflex = DefaultSkinReflex;
-}
-
 export default DefaultSkinReflex;
+
+try {
+  if (typeof global !== "undefined") {
+    global.PulseSkinReflex = DefaultSkinReflex;
+  }
+  if (typeof globalThis !== "undefined") {
+    globalThis.PulseSkinReflex = DefaultSkinReflex;
+  }
+  if (typeof window !== "undefined") {
+    window.PulseSkinReflex = DefaultSkinReflex;
+  }
+  if (typeof g !== "undefined") {
+    g.PulseSkinReflex = DefaultSkinReflex;
+  }
+} catch {
+  // never throw
+}

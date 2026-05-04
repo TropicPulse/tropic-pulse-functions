@@ -51,6 +51,25 @@ AI_EXPERIENCE_META = {
 }
 */
 
+// Global handle
+const g =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof global !== "undefined"
+    ? global
+    : typeof window !== "undefined"
+    ? window
+    : typeof g !== "undefined"
+    ? g
+    : {};
+
+// Prefer global db if present (logger page / server)
+const db =
+  (g && g.db) ||
+  (typeof global !== "undefined" && global.db) ||
+  (typeof globalThis !== "undefined" && globalThis.db) ||
+  (typeof window !== "undefined" && window.db) ||
+  null;
 // -----------------------------------------------------------------------------
 // IMMORTAL LOCALSTORAGE MIRROR — PulseBridgeStore
 // -----------------------------------------------------------------------------
@@ -480,8 +499,18 @@ export const PulseProofBridge = {
 try {
   if (typeof window !== "undefined") {
     window.PulseBridgeStore = PulseBridgeStore;
+    window.PulseProofBridge = PulseProofBridge;
+  }
+  if (typeof global !== "undefined") {
+    global.PulseBridgeStore = PulseBridgeStore;
+    global.PulseProofBridge = PulseProofBridge;
   }
   if (typeof globalThis !== "undefined") {
     globalThis.PulseBridgeStore = PulseBridgeStore;
+    globalThis.PulseProofBridge = PulseProofBridge;
+  }
+  if (typeof g !== "undefined") {
+    g.PulseBridgeStore = PulseBridgeStore;
+    g.PulseProofBridge = PulseProofBridge;
   }
 } catch {}
