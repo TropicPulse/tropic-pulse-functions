@@ -90,36 +90,28 @@ import NodeAdmin from "../PULSE-TOOLS/PulseNodeAdmin-v11-Evo.js";
 // ============================================================================
 
 // WorldCore / User
-import {
-  PulseWorldCoreMeta,
-  createPulseWorldCore
-} from "../PULSE-WORLD/PulseUser-v16-IMMORTAL-ORGANISM.js";
+import { PulseWorldCoreMeta, createPulseWorldCore} from "../PULSE-EXPANSION/PulseUser-v12.3-Presence.js";
 
 // Castle / Mesh / BeaconMesh / Expansion / Server / Router
-import { PulseCastleMeta } from "../PULSE-CASTLE/PulseCastle-v16-IMMORTAL-ORGANISM.js";
-import createPulseMesh, {
-  PulseMeshMeta
-} from "../PULSE-MESH/PulseMesh-v11-Evo.js";
-import PulseBeaconMesh, {
-  PulseBeaconMeshMeta
-} from "../PULSE-CASTLE/PulseBeaconMesh-v12.3-Presence.js";
-import PulseBeaconEngine from "../PULSE-CASTLE/PulseBeaconEngine-v12.3-Presence.js";
-import { PulseExpansionMeta } from "../PULSE-CASTLE/PulseExpansion-v16-IMMORTAL-ORGANISM.js";
-import { PulseServerMeta } from "../PULSE-CASTLE/PulseServer-v16-IMMORTAL-ORGANISM.js";
-import { PulseRouterMeta } from "../PULSE-ROUTER/PulseRouter-v13-PRESENCE-EVO+.js";
+import { PulseCastleMeta } from "../PULSE-EXPANSION/PulseCastle-v12.3-Presence.js";
+import createPulseMesh, { PulseMeshMeta} from "../PULSE-MESH/PulseMesh-v11-Evo.js";
+import PulseBeaconMesh, { PulseBeaconMeshMeta} from "../PULSE-EXPANSION/PulseBeaconMesh-v12.3-Presence.js";
+import PulseBeaconEngine from "../PULSE-EXPANSION/PulseBeaconEngine-v12.3-Presence.js";
+import { PulseExpansionMeta } from "../PULSE-EXPANSION/PulseExpansion-v12.3-Presence.js";
+import { PulseServerMeta } from "../PULSE-EXPANSION/PulseServer-v12.3-Presence.js";
+import { PulseRouterMeta } from "../PULSE-EXPANSION/PulseRouter-v12.3-Presence.js";
 
 // Earn / Band / Send
 import { getEarnContext } from "../PULSE-EARN/PulseEarn-v12.3-Presence.js";
-import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-BAND/PULSE-AI/aiDualBand-v11-Evo.js";
-import { createBinarySend as PulseSendBin } from "../PULSE-BAND/PULSE-SEND/PulseBinarySend-v11-EVO.js";
-
+import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-AI/aiDualBand-v11-Evo.js";
+import { createBinarySend as PulseSendBin } from "../PULSE-SEND/PulseBinarySend-v11-EVO.js";
+import createBinaryRouter           from "../PULSE-ROUTER/PulseBinaryRouter-v11-Evo.js";
+import PulseRouter           from "../PULSE-ROUTER/PulseRouter-v11-Evo.js";
 // Runtime / Scheduler (symbolic context only)
 import PulseRuntimeV2 from "../PULSE-X/PulseRuntime-v2-Evo.js";
 import { createPulseScheduler } from "../PULSE-X/PulseScheduler-v2.js";
 
-const {
-  getRuntimeStateV2: getRuntimeStateV2Context
-} = PulseRuntimeV2;
+const { getRuntimeStateV2: getRuntimeStateV2Context} = PulseRuntimeV2;
 
 // ============================================================================
 //  META — AI Router Identity
