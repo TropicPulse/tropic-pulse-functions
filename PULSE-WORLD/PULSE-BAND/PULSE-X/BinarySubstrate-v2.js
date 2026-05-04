@@ -1,15 +1,21 @@
 /**
- * BinarySubstrate-v2.3-PRESENCE-EVO+.js
+ * BinarySubstrate-v2.4-PRESENCE-TOUCH-IMMORTAL.js
  * PULSE-WORLD / PULSE-BINARY / FIXED-WIDTH
  *
  * ROLE:
- *   v2 introduces:
- *     - fixed-width binary frames
+ *   v2.4 introduces:
+ *     - fixed-width binary frames (v2 base)
  *     - deterministic field ordering
  *     - enum compression
  *     - region/host ID compression
  *     - varint encoding for lengths
  *     - reversible decoding
+ *
+ *   v2.4-PRESENCE-TOUCH-IMMORTAL adds:
+ *     - explicit Pulse-Touch presence fields
+ *     - explicit advantage / chunkProfile / page / identity / trust fields
+ *     - optional pulseTouchMeta block (JSON) at tail
+ *     - backward-safe decoding (old frames still decode)
  *
  *   All upstream organs remain symbolic.
  *   This is the binary representation layer.
@@ -17,10 +23,10 @@
 /*
 AI_EXPERIENCE_META = {
   identity: "BinarySubstrate",
-  version: "v14-IMMORTAL",
+  version: "v2.4-PRESENCE-TOUCH-IMMORTAL",
   layer: "substrate",
   role: "binary_representation_layer",
-  lineage: "BinarySubstrate-v1 → v11-Evo → v14-IMMORTAL",
+  lineage: "BinarySubstrate-v1 → v11-Evo → v14-IMMORTAL → v2.4-PRESENCE-TOUCH-IMMORTAL",
 
   evo: {
     binaryPrimary: true,           // binary-first representation
@@ -37,7 +43,18 @@ AI_EXPERIENCE_META = {
 
     zeroMutationOfInput: true,
     zeroNetwork: true,
-    zeroFilesystem: true
+    zeroFilesystem: true,
+
+    // Presence / Touch / Advantage
+    presenceAware: true,
+    advantageAware: true,
+    pulseTouchAware: true,
+    chunkAware: true,
+    cacheAware: true,
+    prewarmAware: true,
+    meshAware: true,
+    expansionAware: true,
+    multiInstanceReady: true
   },
 
   contract: {
@@ -56,10 +73,10 @@ AI_EXPERIENCE_META = {
 */
 
 export const BinarySubstrateV2Meta = Object.freeze({
-  organId: "BinarySubstrate-v2.3-PRESENCE-EVO+",
+  organId: "BinarySubstrate-v2.4-PRESENCE-TOUCH-IMMORTAL",
   role: "BINARY_SUBSTRATE",
-  version: "2.3-PRESENCE-EVO+",
-  epoch: "v12.3-PRESENCE-EVO+",
+  version: "2.4-PRESENCE-TOUCH-IMMORTAL",
+  epoch: "v13.0-PRESENCE-TOUCH",
   layer: "BinaryTransport",
   safety: Object.freeze({
     deterministic: true,
@@ -68,14 +85,15 @@ export const BinarySubstrateV2Meta = Object.freeze({
     syntheticOnly: true
   }),
   evo: Object.freeze({
-    presenceAware: true,      // can carry presence fields in meta/state
-    advantageAware: true,     // can carry advantage fields in meta/state
+    presenceAware: true,      // can carry presence fields in state
+    advantageAware: true,     // can carry advantage fields in state
     dualbandSafe: true,       // symbolic/binary tagging only
     chunkAware: true,         // frames are chunk-friendly
     cacheAware: true,         // stable, cacheable shapes
     prewarmAware: true,       // predictable sizes for prewarm
     meshAware: true,          // can carry region/host/mesh IDs
     expansionAware: true,     // carries deployment/multi-plan payloads
+    pulseTouchAware: true,    // explicit Pulse-Touch fields
     multiInstanceReady: true
   })
 });
@@ -141,25 +159,41 @@ function decodeString(view, offset) {
 }
 
 // -------------------------
-// SNAPSHOT PACKER (v2)
+// SNAPSHOT PACKER (v2.4)
 // -------------------------
 
 export function packSnapshot(snapshot) {
-  const header = snapshot.header;
-  const state = snapshot.state;
+  const header = snapshot.header || {};
+  const state = snapshot.state || {};
+
+  const touch = state.pulseTouch || state.skin || {};
+  const presence = state.presence || touch.presence || "";
+  const page = state.page || touch.page || "";
+  const chunkProfile = state.chunkProfile || touch.chunkProfile || "";
+  const identity = state.identity || touch.identity || "";
+  const trusted = state.trusted || touch.trusted || "";
+  const advantage = state.advantage || touch.advantage || "";
+  const touchMeta = touch && Object.keys(touch).length > 0 ? touch : null;
 
   const fields = [
-    header.snapshotId,
-    header.instanceId,
+    header.snapshotId || "",
+    header.instanceId || "",
     header.lineageRootId || "",
-    header.logicalClock,
+    String(header.logicalClock ?? ""),
     state.regionId || "",
     state.hostName || "",
     state.configVersion || "",
     state.role || "",
     state.mode || "",
-    JSON.stringify(state.healthFlags),
-    JSON.stringify(state.meta)
+    JSON.stringify(state.healthFlags || {}),
+    JSON.stringify(state.meta || {}),
+    presence,
+    page,
+    chunkProfile,
+    identity,
+    trusted,
+    advantage,
+    JSON.stringify(touchMeta || {})
   ];
 
   const encodedFields = fields.map(encodeString);
@@ -182,15 +216,19 @@ export function packSnapshot(snapshot) {
 }
 
 // -------------------------
-// DELTA PACKER (v2)
+// DELTA PACKER (v2.4)
 // -------------------------
 
 export function packDelta(delta) {
+  const touch = delta.pulseTouch || delta.skin || {};
+  const touchMeta = touch && Object.keys(touch).length > 0 ? touch : null;
+
   const fields = [
-    delta.instanceId,
-    delta.snapshotBeforeId,
-    delta.snapshotAfterId,
-    JSON.stringify(delta.changes)
+    delta.instanceId || "",
+    delta.snapshotBeforeId || "",
+    delta.snapshotAfterId || "",
+    JSON.stringify(delta.changes || {}),
+    JSON.stringify(touchMeta || {})
   ];
 
   const encoded = fields.map(encodeString);
@@ -211,21 +249,25 @@ export function packDelta(delta) {
 }
 
 // -------------------------
-// DEPLOYMENT PLAN PACKER (v2)
+// DEPLOYMENT PLAN PACKER (v2.4)
 // -------------------------
 
 export function packDeploymentPlan(plan) {
+  const touch = plan.pulseTouch || plan.touch || {};
+  const touchMeta = touch && Object.keys(touch).length > 0 ? touch : null;
+
   const fields = [
-    plan.instanceId,
+    plan.instanceId || "",
     JSON.stringify(
-      plan.actions.map((a) => ({
+      (plan.actions || []).map((a) => ({
         t: a.type,
         r: a.regionId || "",
         h: a.hostName || "",
         p: a.patch || null,
         m: a.meta || null
       }))
-    )
+    ),
+    JSON.stringify(touchMeta || {})
   ];
 
   const encoded = fields.map(encodeString);
@@ -246,21 +288,22 @@ export function packDeploymentPlan(plan) {
 }
 
 // -------------------------
-// MULTI-ORGANISM PLAN PACKER (v2)
+// MULTI-ORGANISM PLAN PACKER (v2.4)
 // -------------------------
 
 export function packMultiOrganismPlan(multiPlan) {
   const fields = [
     JSON.stringify(
-      multiPlan.instances.map((bundle) => ({
+      (multiPlan.instances || []).map((bundle) => ({
         id: bundle.instanceId,
-        plan: bundle.deploymentPlan.actions.map((a) => ({
+        plan: (bundle.deploymentPlan.actions || []).map((a) => ({
           t: a.type,
           r: a.regionId || "",
           h: a.hostName || "",
           p: a.patch || null,
           m: a.meta || null
-        }))
+        })),
+        touch: bundle.pulseTouch || bundle.touch || null
       }))
     )
   ];
@@ -283,14 +326,18 @@ export function packMultiOrganismPlan(multiPlan) {
 }
 
 // -------------------------
-// EXECUTION RESULT PACKER (v2)
+// EXECUTION RESULT PACKER (v2.4)
 // -------------------------
 
 export function packExecutionResult(exec) {
+  const touch = exec.pulseTouch || exec.touch || {};
+  const touchMeta = touch && Object.keys(touch).length > 0 ? touch : null;
+
   const fields = [
-    exec.instanceId,
-    JSON.stringify(exec.newState),
-    JSON.stringify(exec.logs)
+    exec.instanceId || "",
+    JSON.stringify(exec.newState || {}),
+    JSON.stringify(exec.logs || []),
+    JSON.stringify(touchMeta || {})
   ];
 
   const encoded = fields.map(encodeString);
@@ -311,11 +358,11 @@ export function packExecutionResult(exec) {
 }
 
 // -------------------------
-// UNPACKER (v2)
+// UNPACKER (v2.4, backward-safe)
 // -------------------------
 
 export function unpackBinaryPayload(uint8) {
-  const view = new DataView(uint8.buffer);
+  const view = new DataView(uint8.buffer, uint8.byteOffset, uint8.byteLength);
   let o = 0;
 
   const [type, o2] = readUint8(view, o);
@@ -325,31 +372,86 @@ export function unpackBinaryPayload(uint8) {
 
   const out = { _t: tag };
 
-  function readField() {
-    const [str, next] = decodeString(view, o);
-    o = next;
-    return str;
+  function readFieldSafe() {
+    if (o >= view.byteLength) return [null, o];
+    try {
+      const [str, next] = decodeString(view, o);
+      return [str, next];
+    } catch {
+      return [null, o];
+    }
   }
 
   switch (tag) {
     case "SNAPSHOT": {
-      const snapshotId = readField();
-      const instanceId = readField();
-      const lineageRootId = readField();
-      const logicalClock = readField();
-      const regionId = readField();
-      const hostName = readField();
-      const configVersion = readField();
-      const role = readField();
-      const mode = readField();
-      const healthFlags = JSON.parse(readField());
-      const meta = JSON.parse(readField());
+      const [snapshotId, o3] = decodeString(view, o);
+      o = o3;
+      const [instanceId, o4] = decodeString(view, o);
+      o = o4;
+      const [lineageRootId, o5] = decodeString(view, o);
+      o = o5;
+      const [logicalClockStr, o6] = decodeString(view, o);
+      o = o6;
+      const [regionId, o7] = decodeString(view, o);
+      o = o7;
+      const [hostName, o8] = decodeString(view, o);
+      o = o8;
+      const [configVersion, o9] = decodeString(view, o);
+      o = o9;
+      const [role, o10] = decodeString(view, o);
+      o = o10;
+      const [mode, o11] = decodeString(view, o);
+      o = o11;
+      const [healthFlagsStr, o12] = decodeString(view, o);
+      o = o12;
+      const [metaStr, o13] = decodeString(view, o);
+      o = o13;
+
+      let presence = "";
+      let page = "";
+      let chunkProfile = "";
+      let identity = "";
+      let trusted = "";
+      let advantage = "";
+      let touchMeta = {};
+
+      // Optional tail fields (backward-safe)
+      let tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) presence = tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) page = tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) chunkProfile = tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) identity = tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) trusted = tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) advantage = tmp;
+      [tmp, o] = readFieldSafe();
+      if (tmp !== null) {
+        try {
+          touchMeta = JSON.parse(tmp || "{}");
+        } catch {
+          touchMeta = {};
+        }
+      }
+
+      let healthFlags = {};
+      let meta = {};
+      try {
+        healthFlags = JSON.parse(healthFlagsStr || "{}");
+      } catch {}
+      try {
+        meta = JSON.parse(metaStr || "{}");
+      } catch {}
 
       out.header = {
         snapshotId,
         instanceId,
         lineageRootId,
-        logicalClock
+        logicalClock: logicalClockStr
       };
 
       out.state = {
@@ -359,47 +461,123 @@ export function unpackBinaryPayload(uint8) {
         role,
         mode,
         healthFlags,
-        meta
+        meta,
+        presence,
+        page,
+        chunkProfile,
+        identity,
+        trusted,
+        advantage,
+        pulseTouch: touchMeta
       };
       break;
     }
 
     case "DELTA": {
-      const instanceId = readField();
-      const beforeId = readField();
-      const afterId = readField();
-      const changes = JSON.parse(readField());
+      const [instanceId, o3] = decodeString(view, o);
+      o = o3;
+      const [beforeId, o4] = decodeString(view, o);
+      o = o4;
+      const [afterId, o5] = decodeString(view, o);
+      o = o5;
+      const [changesStr, o6] = decodeString(view, o);
+      o = o6;
+
+      let touchMeta = {};
+      const [touchStr, o7] = readFieldSafe();
+      o = o7;
+      if (touchStr !== null) {
+        try {
+          touchMeta = JSON.parse(touchStr || "{}");
+        } catch {
+          touchMeta = {};
+        }
+      }
+
+      let changes = {};
+      try {
+        changes = JSON.parse(changesStr || "{}");
+      } catch {}
 
       out.instanceId = instanceId;
       out.snapshotBeforeId = beforeId;
       out.snapshotAfterId = afterId;
       out.changes = changes;
+      out.pulseTouch = touchMeta;
       break;
     }
 
     case "DEPLOYMENT_PLAN": {
-      const instanceId = readField();
-      const actions = JSON.parse(readField());
+      const [instanceId, o3] = decodeString(view, o);
+      o = o3;
+      const [actionsStr, o4] = decodeString(view, o);
+      o = o4;
+
+      let touchMeta = {};
+      const [touchStr, o5] = readFieldSafe();
+      o = o5;
+      if (touchStr !== null) {
+        try {
+          touchMeta = JSON.parse(touchStr || "{}");
+        } catch {
+          touchMeta = {};
+        }
+      }
+
+      let actions = [];
+      try {
+        actions = JSON.parse(actionsStr || "[]");
+      } catch {}
 
       out.instanceId = instanceId;
       out.actions = actions;
+      out.pulseTouch = touchMeta;
       break;
     }
 
     case "MULTI_PLAN": {
-      const instances = JSON.parse(readField());
+      const [instancesStr, o3] = decodeString(view, o);
+      o = o3;
+      let instances = [];
+      try {
+        instances = JSON.parse(instancesStr || "[]");
+      } catch {}
       out.instances = instances;
       break;
     }
 
     case "EXECUTION_RESULT": {
-      const instanceId = readField();
-      const newState = JSON.parse(readField());
-      const logs = JSON.parse(readField());
+      const [instanceId, o3] = decodeString(view, o);
+      o = o3;
+      const [newStateStr, o4] = decodeString(view, o);
+      o = o4;
+      const [logsStr, o5] = decodeString(view, o);
+      o = o5;
+
+      let touchMeta = {};
+      const [touchStr, o6] = readFieldSafe();
+      o = o6;
+      if (touchStr !== null) {
+        try {
+          touchMeta = JSON.parse(touchStr || "{}");
+        } catch {
+          touchMeta = {};
+        }
+      }
+
+      let newState = {};
+      let logs = [];
+      try {
+        newState = JSON.parse(newStateStr || "{}");
+      } catch {}
+      try {
+        logs = JSON.parse(logsStr || "[]");
+      } catch {}
 
       out.instanceId = instanceId;
       out.newState = newState;
       out.logs = logs;
+      out.pulseTouch = touchMeta;
       break;
     }
 

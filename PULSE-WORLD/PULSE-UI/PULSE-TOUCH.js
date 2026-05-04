@@ -2,7 +2,7 @@
  * ============================================================
  *  FILE: PULSE-TOUCH.js
  *  ORGAN: Pulse‑Touch (Sensory Skin / Pre‑Pulse Ignition Organ)
- *  VERSION: v3.0.0-IMMORTAL
+ *  VERSION: v4.0.0-IMMORTAL
  *  AUTHOR: Pulse‑OS (Aldwyn’s Organism Architecture)
  * ============================================================
  *
@@ -19,71 +19,32 @@
  *        - reading skin state
  *        - updating skin state
  *        - registering preflight checks
+ *    ✔ Integrates with:
+ *        - PulseTouchDetector   (normalize skin state)
+ *        - PulseTouchWarmup     (prewarm chunks/pages/mode)
+ *        - PulseTouchSecurity   (risk/trust evaluation)
+ *        - PulseTouchGate       (boot path decision)
+ *        - PulseNet             (local immortal heartbeat)
+ *        - PulseNet ingress     (Touch → Net signals)
  *    ✔ Lets the organism:
  *        - prewarm pages
  *        - prewarm chunks
  *        - prewarm subsystems
  *        - sanity‑check chunks before UI boot
+ *        - start the local Pulse‑Net family loop
  *
  *  This is the organism’s FIRST NERVE SIGNAL.
  *  The moment the user touches the organism — the organism
  *  touches back.
- *
- * ============================================================
- *  COOKIE FORMAT (safe, tiny, non‑PII)
- *  -----------------------------------
- *  pulse_touch =
- *    region=BZ-01|
- *    trusted=1|
- *    mode=fast|
- *    presence=active|
- *    identity=has|
- *    page=index|
- *    chunkProfile=default|
- *    v=3
- *
- *  All values are:
- *    - Hints only
- *    - Non‑PII
- *    - Non‑tracking
- *    - Local to your domain
- *
- *  ADVANTAGE HINTS:
- *    - region        → route to nearest cluster / CDN
- *    - mode          → choose fast / secure / low_power UI paths
- *    - presence      → pre‑decide animation / polling intensity
- *    - identity      → decide whether to pre‑mount auth UI
- *    - page          → hint which page is “intended” next
- *    - chunkProfile  → hint which chunk set to pre‑verify/pre‑warm
- *
- * ============================================================
- *  EXPORT:
- *  -------
- *  createPulseTouch()
- *    → initializes + updates the Pulse‑Touch cookie
- *
- *  PulseTouch API:
- *    - api.read()          → read current skin state
- *    - api.update(key,val) → update one field + rewrite cookie
- *    - api.registerPreflight(fn) → register a pre‑UI check
- *
- *  Preflight functions:
- *    - run as soon as this file executes
- *    - receive the current skin state
- *    - can be used to:
- *        • sanity‑check chunks
- *        • pre‑validate local caches
- *        • decide to hard‑refresh if something is corrupt
- *
  * ============================================================
  */
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseTouch",
-  version: "v14-IMMORTAL",
+  version: "v4.0.0-IMMORTAL",
   layer: "skin",
   role: "first_contact_sensor",
-  lineage: "PulseOS-v13",
+  lineage: "PulseOS-v13 → v14-IMMORTAL → v4.0.0-IMMORTAL",
 
   evo: {
     prePulse: true,
@@ -103,54 +64,74 @@ AI_EXPERIENCE_META = {
     prewarmSignal: true,
     preflightAware: true,
     chunkProfileAware: true,
-    pageHintAware: true
+    pageHintAware: true,
+
+    // v4.0.0-IMMORTAL: PulseNet integration
+    pulseNetAware: true,
+    pulseNetIgnition: true,
+    pulseNetIngressAware: true,
+    heartbeatAware: true,
+    overmindAware: true
   },
 
   contract: {
     always: [
       "PulseTouchDetector",
       "PulseTouchWarmup",
-      "PulseTouchGate"
+      "PulseTouchSecurity",
+      "PulseTouchGate",
+      "PulseNet",
+      "PulseNetIngress"
     ],
     never: [
       "identityInference",
       "tracking",
       "PII",
-      "legacyCookies"
+      "legacyCookies",
+      "legacyPulseNet",
+      "legacyNetworkLayer"
     ]
   }
 }
 */
-import { startPulseNet } from "../_BACKEND/PULSE-NET.js";
-import { route } from "../_BACKEND/PulseProofBridge.js";
 
+// ============================================================
+// IMPORTS — PULSE-NET + TOUCH ORGANS
+// ============================================================
+import { startPulseNet, pulseNetIngressFromUser } from "./_BACKEND/PULSE-NET.js";
+import { route } from "./_BACKEND/PulseProofBridge.js";
 
-startPulseNet({
-  instanceId: "core",
-  intervalMs: 750,
-  superInstance: true
-});
+import { PulseTouchDetector } from "./_FRONTEND/PULSE-TOUCH-DETECTOR.js";
+import { PulseTouchWarmup } from "./_FRONTEND/PULSE-TOUCH-WARMUP.js";
+import { PulseTouchSecurity } from "./_FRONTEND/PULSE-TOUCH-SECURITY.js";
+import { PulseTouchGate } from "./_FRONTEND/PULSE-TOUCH-GATE.js";
 
+// ============================================================
+// CONSTANTS — COOKIE + VERSION
+// ============================================================
 const PULSE_TOUCH_COOKIE_NAME = "pulse_touch";
 const PULSE_TOUCH_MAX_AGE = 86400; // 1 day
-const PULSE_TOUCH_VERSION = "3";
+const PULSE_TOUCH_VERSION = "4";
 
 // in‑memory preflight registry (per page load)
 const pulseTouchPreflights = [];
 
+// expose current skin snapshot globally for PulseNet / others
+if (typeof window !== "undefined") {
+  window.__PULSE_TOUCH__ = window.__PULSE_TOUCH__ || null;
+}
+
 /**
  * Create or update the Pulse‑Touch skin cookie and expose
  * a small API for the organism to interact with it.
+ *
+ * This is the FIRST organ to fire in the browser.
  */
 export function createPulseTouch(options = {}) {
   /**
    * ------------------------------------------------------------
    * 1. DEFAULT METADATA (Organism‑Safe, Non‑PII)
    * ------------------------------------------------------------
-   *
-   *  These values represent the organism’s FIRST GUESS about
-   *  the device and intent. They are NOT sensitive. They are
-   *  NOT identity. They are NOT tracking. They are simply HINTS.
    */
   const defaults = {
     region: options.region || "unknown",
@@ -163,11 +144,75 @@ export function createPulseTouch(options = {}) {
     version: PULSE_TOUCH_VERSION
   };
 
-  // write cookie immediately on first call
+  // 1) Seed cookie immediately
   writePulseTouchCookie(defaults);
 
-  // run any pre‑registered preflight checks as early as possible
-  runPreflights(defaults);
+  // 2) Read + normalize via Detector (IMMORTAL contract)
+  const detected = PulseTouchDetector.normalize(
+    readPulseTouchInternal(defaults)
+  );
+
+  // 3) Expose snapshot globally for PulseNet / Overmind / UI
+  if (typeof window !== "undefined") {
+    window.__PULSE_TOUCH__ = detected;
+  }
+
+  // 4) Run pre‑registered preflight checks as early as possible
+  runPreflights(detected);
+
+  // 5) Warmup: chunks/pages/mode/presence hints
+  try {
+    PulseTouchWarmup.prewarm(detected);
+  } catch {
+    // warmup is non‑fatal
+  }
+
+  // 6) Security: compute trust/risk profile
+  let security = null;
+  try {
+    security = PulseTouchSecurity.evaluate(detected);
+  } catch {
+    security = { risk: "unknown", trust: "unknown", action: "allow" };
+  }
+
+  // 7) Gate: decide boot path (fast/safe/slow/refresh/fallback)
+  let gateDecision = null;
+  try {
+    gateDecision = PulseTouchGate.decide({
+      skin: detected,
+      security
+    });
+  } catch {
+    gateDecision = { mode: "fast", refresh: false, fallback: false };
+  }
+
+  // 8) Optionally act on gate decision (e.g., hard refresh)
+  applyGateDecision(gateDecision, detected);
+
+  // 9) Ignite PulseNet (local immortal loop) — idempotent
+  try {
+    startPulseNet({
+      instanceId: "core",
+      intervalMs: 750,
+      superInstance: true
+    });
+  } catch {
+    // PulseNet ignition is best-effort; organism must still boot
+  }
+
+  // 10) Send initial Touch → PulseNet ingress packet
+  try {
+    pulseNetIngressFromUser({
+      source: "pulse-touch",
+      event: "initial-touch",
+      skin: detected,
+      security,
+      gate: gateDecision,
+      ts: Date.now()
+    });
+  } catch {
+    // ingress is non-fatal
+  }
 
   /**
    * ------------------------------------------------------------
@@ -178,16 +223,36 @@ export function createPulseTouch(options = {}) {
     const current = readPulseTouchInternal(defaults);
     current[key] = value;
     writePulseTouchCookie(current);
-    return current;
+
+    const detectedUpdated = PulseTouchDetector.normalize(current);
+
+    if (typeof window !== "undefined") {
+      window.__PULSE_TOUCH__ = detectedUpdated;
+    }
+
+    // send incremental update into PulseNet as ingress
+    try {
+      pulseNetIngressFromUser({
+        source: "pulse-touch",
+        event: "update",
+        key,
+        value,
+        skin: detectedUpdated,
+        ts: Date.now()
+      });
+    } catch {}
+
+    return detectedUpdated;
   }
 
   /**
    * ------------------------------------------------------------
-   *  API: read current skin state
+   *  API: read current skin state (normalized)
    * ------------------------------------------------------------
    */
   function read() {
-    return readPulseTouchInternal(defaults);
+    const current = readPulseTouchInternal(defaults);
+    return PulseTouchDetector.normalize(current);
   }
 
   /**
@@ -196,11 +261,6 @@ export function createPulseTouch(options = {}) {
    * ------------------------------------------------------------
    *
    *  fn(skinState) → void | boolean | Promise<void|boolean>
-   *
-   *  Example uses:
-   *    - verify required chunks exist in localStorage
-   *    - verify a known “chunkProfile” is compatible
-   *    - decide to hard‑reload if something is corrupt
    */
   function registerPreflight(fn) {
     if (typeof fn === "function") {
@@ -241,13 +301,13 @@ function writePulseTouchCookie(state) {
 
 /**
  * ------------------------------------------------------------
- * INTERNAL: read + normalize cookie
+ * INTERNAL: read + normalize cookie (raw → base state)
  * ------------------------------------------------------------
  */
 function readPulseTouchInternal(defaults) {
   const raw = document.cookie
     .split("; ")
-    .find(c => c.startsWith(`${PULSE_TOUCH_COOKIE_NAME}=`));
+    .find((c) => c.startsWith(`${PULSE_TOUCH_COOKIE_NAME}=`));
 
   if (!raw) return { ...defaults };
 
@@ -276,17 +336,6 @@ function readPulseTouchInternal(defaults) {
  * ------------------------------------------------------------
  * INTERNAL: run preflight checks
  * ------------------------------------------------------------
- *
- *  Each preflight gets the current skin state.
- *  If a preflight decides something is fatally wrong
- *  (e.g., corrupted chunks), it can:
- *
- *    - call location.reload()
- *    - clear localStorage
- *    - adjust mode/page/chunkProfile via createPulseTouch().update()
- *
- *  This is where you get your “we can parse the chunks and
- *  refresh the pages before we get there” advantage.
  */
 function runPreflights(skinState) {
   if (!pulseTouchPreflights.length) return;
@@ -305,7 +354,38 @@ function runPreflights(skinState) {
 }
 
 /**
+ * ------------------------------------------------------------
+ * INTERNAL: apply gate decision (refresh / fallback / mode)
+ * ------------------------------------------------------------
+ */
+function applyGateDecision(gateDecision, skin) {
+  if (!gateDecision) return;
+
+  // Example behaviors; you can tune these:
+  if (gateDecision.refresh === true) {
+    try {
+      // mark intent before reload
+      if (typeof window !== "undefined") {
+        window.__PULSE_TOUCH_LAST_GATE__ = {
+          ts: Date.now(),
+          decision: gateDecision,
+          skin
+        };
+      }
+      location.reload();
+    } catch {}
+  }
+
+  // Fallback could route to a static page, safe mode, etc.
+  if (gateDecision.fallback === true && gateDecision.fallbackUrl) {
+    try {
+      location.href = gateDecision.fallbackUrl;
+    } catch {}
+  }
+}
+
+/**
  * ============================================================
- *  END OF FILE: PULSE-TOUCH.js (IMMORTAL)
+ *  END OF FILE: PULSE-TOUCH.js (v4.0.0-IMMORTAL)
  * ============================================================
  */

@@ -4,12 +4,13 @@
  *  ROOT:  PULSE-X
  *  MODE:  runtime
  *  TARGET: multi-tick-orchestration
- *  VERSION: v2.3-PRESENCE-EVO+
+ *  VERSION: v2.4-PRESENCE-TOUCH-IMMORTAL
  *
  *  ROLE:
  *    - Deterministic orchestrator over Router + Overmind + Runtime.
  *    - Runs multi-tick pipelines (sequence of macro ticks).
- *    - Uses Overmind world-lens + dual-band hints to shape tick flow.
+ *    - Uses Overmind world-lens + dual-band + Pulse-Touch hints.
+ *    - Shapes tick flow using presence/mode/page/chunkProfile/trust.
  *
  *  GUARANTEES:
  *    - No real-time dependence.
@@ -21,16 +22,16 @@
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseScheduler",
-  version: "v14-IMMORTAL",
+  version: "v2.4-PRESENCE-TOUCH-IMMORTAL",
   layer: "scheduler",
   role: "macro_orchestrator",
-  lineage: "PulseScheduler-v1 → v11-Evo → v12.3 → v14-IMMORTAL",
+  lineage: "PulseScheduler-v1 → v11-Evo → v12.3 → v14-IMMORTAL → v2.4-PRESENCE-TOUCH-IMMORTAL",
 
   evo: {
-    macroScheduler: true,          // top-level orchestrator
-    runtimeAware: true,            // PulseRuntime integration
-    substrateAware: true,          // BinarySubstrate integration
-    dualBand: true,                // symbolic + binary
+    macroScheduler: true,
+    runtimeAware: true,
+    substrateAware: true,
+    dualBand: true,
     deterministicScheduling: true,
 
     deterministic: true,
@@ -39,7 +40,18 @@ AI_EXPERIENCE_META = {
 
     zeroMutationOfInput: true,
     zeroNetwork: true,
-    zeroFilesystem: true
+    zeroFilesystem: true,
+
+    // IMMORTAL TOUCH UPGRADE
+    pulseTouchAware: true,
+    presenceAware: true,
+    advantageAware: true,
+    chunkAware: true,
+    pageAware: true,
+    trustAware: true,
+    identityAware: true,
+    regionAware: true,
+    modeAware: true
   },
 
   contract: {
@@ -65,9 +77,9 @@ AI_EXPERIENCE_META = {
 export const PulseSchedulerMeta = Object.freeze({
   layer: "PulseXScheduler",
   role: "SCHEDULER_ORGAN",
-  version: "v2.3-PRESENCE-EVO+",
-  identity: "PulseScheduler-v2.3-PRESENCE-EVO+",
-  epoch: "v12.3-PRESENCE-EVO+",
+  version: "v2.4-PRESENCE-TOUCH-IMMORTAL",
+  identity: "PulseScheduler-v2.4-PRESENCE-TOUCH-IMMORTAL",
+  epoch: "v13.5-PRESENCE-TOUCH",
 
   guarantees: Object.freeze({
     deterministic: true,
@@ -79,7 +91,8 @@ export const PulseSchedulerMeta = Object.freeze({
     overmindAware: true,
     routerAware: true,
     runtimeAware: true,
-    multiTickAware: true
+    multiTickAware: true,
+    pulseTouchAware: true
   }),
 
   evo: Object.freeze({
@@ -92,7 +105,12 @@ export const PulseSchedulerMeta = Object.freeze({
     meshAware: true,
     expansionAware: true,
     multiInstanceReady: true,
-    schedulerAware: true
+    schedulerAware: true,
+    pulseTouchAware: true,
+    pageAware: true,
+    modeAware: true,
+    trustAware: true,
+    identityAware: true
   }),
 
   contract: Object.freeze({
@@ -102,6 +120,7 @@ export const PulseSchedulerMeta = Object.freeze({
       "GlobalContinuancePolicy",
       "AIRouterRequestShape",
       "DualBandSnapshotAPI",
+      "PulseTouchSnapshot",
       "maxTicks",
       "stopOnWorldLens[]"
     ],
@@ -119,7 +138,7 @@ export const PulseSchedulerMeta = Object.freeze({
 import { routeAIRequest } from "../PULSE-AI/aiRouter-v11-EVO.js";
 import { createOvermindOrgan } from "../PULSE-AI/aiOvermindPrime.js";
 
-// UPGRADED RUNTIME
+// UPGRADED RUNTIME (Touch-aware)
 import PulseRuntimeAPI from "../PULSE-X/PulseRuntime-v2-Evo.js";
 
 const {
@@ -163,7 +182,7 @@ export class SchedulerPipelineResult {
   }
 }
 
-function buildScheduleId(seed = "pulse-scheduler-v2.3-presence-evo") {
+function buildScheduleId(seed = "pulse-scheduler-v2.4-presence-touch") {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     const chr = seed.charCodeAt(i);
@@ -199,7 +218,7 @@ export class PulseScheduler {
   }
 
   // --------------------------------------------------------------------------
-  // v1-style macro tick (kept for compatibility)
+  // v2.4 macro tick (Touch-aware)
   // --------------------------------------------------------------------------
   async runMacroTick({
     instances = [],
@@ -207,6 +226,7 @@ export class PulseScheduler {
     globalContinuancePolicy = null,
     userRequest = null,
     dualBand = null,
+    pulseTouch = null,
     scheduleId = null,
     tickIndex = 0
   }) {
@@ -214,20 +234,23 @@ export class PulseScheduler {
     const effectiveScheduleId = scheduleId || buildScheduleId();
 
     reasoning.push(
-      `PulseScheduler-v2.3-PRESENCE-EVO+: macro tick #${tickIndex} (schedule=${effectiveScheduleId}).`
+      `PulseScheduler-v2.4-PRESENCE-TOUCH-IMMORTAL: macro tick #${tickIndex} (schedule=${effectiveScheduleId}).`
     );
 
     const policy =
       globalContinuancePolicy || this.config.defaultGlobalPolicy || {};
 
-    // 1) ROUTING
+    // 1) ROUTING (Touch-aware)
     let routing = null;
 
     if (this.config.enableRouting && userRequest) {
-      routing = routeAIRequest(userRequest, dualBand || null);
+      routing = routeAIRequest(userRequest, {
+        ...dualBand,
+        pulseTouch
+      });
     }
 
-    // 2) OVERMIND
+    // 2) OVERMIND (Touch-aware)
     let overmindDecision = null;
 
     if (this.config.enableOvermind && routing) {
@@ -236,7 +259,8 @@ export class PulseScheduler {
         domain: userRequest?.domain || null,
         scope: userRequest?.scope || null,
         safetyMode: routing?.personaSafety?.safetyMode || "standard",
-        keywords: userRequest?.keywords || []
+        keywords: userRequest?.keywords || [],
+        pulseTouch
       };
 
       const context = {
@@ -245,7 +269,8 @@ export class PulseScheduler {
         safetyMode: routing?.personaSafety?.safetyMode || "standard",
         personaId: routing.personaId,
         archetypePrimaryPage: routing.archetypes?.primaryPage || null,
-        dualBand: routing.dualBand || null
+        dualBand: routing.dualBand || null,
+        pulseTouch
       };
 
       const candidates = [
@@ -254,7 +279,8 @@ export class PulseScheduler {
             userRequest?.rawText ||
             userRequest?.prompt ||
             "No explicit user text provided.",
-          routing
+          routing,
+          pulseTouch
         }
       ];
 
@@ -264,20 +290,17 @@ export class PulseScheduler {
         candidates,
         options: { mode: "normal" }
       });
-
-      if (globalThis.nodeAdmin?.handleOvermindMeta) {
-        globalThis.nodeAdmin.handleOvermindMeta(overmindDecision.meta);
-      }
     }
 
-    // 3) RUNTIME TICK
+    // 3) RUNTIME TICK (Touch-aware)
     let runtimeTickResult = null;
 
     if (this.config.enableRuntimeTick) {
       const runtimeResult = runPulseTick({
         instanceContexts: instances,
         currentStatesById,
-        globalContinuancePolicy: policy
+        globalContinuancePolicy: policy,
+        pulseTouch
       });
 
       runtimeTickResult = runtimeResult;
@@ -295,6 +318,7 @@ export class PulseScheduler {
       overmindSafetyStatus: overmindDecision?.meta?.safetyStatus || null,
       runtimePlanSummary:
         runtimeTickResult?.multiPlanSummary || null,
+      pulseTouch,
       notes: reasoning
     });
 
@@ -309,7 +333,7 @@ export class PulseScheduler {
   }
 
   // --------------------------------------------------------------------------
-  // v2: Multi-tick pipeline
+  // v2.4: Multi-tick pipeline (Touch-aware)
   // --------------------------------------------------------------------------
   async runPipeline({
     instances = [],
@@ -317,6 +341,7 @@ export class PulseScheduler {
     globalContinuancePolicy = null,
     userRequest = null,
     dualBand = null,
+    pulseTouch = null,
     maxTicks = null,
     stopOnWorldLens = null
   }) {
@@ -343,6 +368,7 @@ export class PulseScheduler {
         globalContinuancePolicy,
         userRequest,
         dualBand,
+        pulseTouch,
         scheduleId,
         tickIndex
       });
@@ -373,6 +399,7 @@ export class PulseScheduler {
       scheduleId,
       totalTicks: ticks.length,
       stopOnWorldLens: effectiveStopOnWorldLens,
+      pulseTouch,
       notes: reasoning
     });
 

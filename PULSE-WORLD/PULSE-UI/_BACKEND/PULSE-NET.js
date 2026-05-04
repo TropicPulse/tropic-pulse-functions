@@ -673,6 +673,14 @@ export function PulseNetInstances() {
   };
 }
 
+export function pulseNetIngressFromTouch(packet) {
+  enqueueIngress("user", {
+    source: "pulse-touch",
+    ...packet
+  });
+}
+
+
 const PulseTouchOrgan = {
   snapshot() {
     try {

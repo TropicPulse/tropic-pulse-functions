@@ -1,6 +1,6 @@
 /**
- * PulseRuntime-v2.3-PRESENCE-EVO+.js
- * PULSE-X / RUNTIME / v2.3
+ * PulseRuntime-v2.4-PRESENCE-TOUCH-IMMORTAL.js
+ * PULSE-X / RUNTIME / v2.4
  *
  * ROLE:
  *   v2 Runtime introduces:
@@ -13,6 +13,11 @@
  *     - world-adjustment hooks
  *     - unified introspection API
  *
+ *   v2.4-PRESENCE-TOUCH-IMMORTAL adds:
+ *     - Pulse-Touch–aware hot maps (presence/mode/page/chunkProfile/trust)
+ *     - explicit Pulse-Touch propagation into binary frames (via BinarySubstrate v2.4)
+ *     - upgraded meta/lineage to match Presence/Touch epoch
+ *
  *   Symbolic-first.
  *   Binary-backed.
  *   Memory-spined.
@@ -21,10 +26,10 @@
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseRuntime",
-  version: "v14-IMMORTAL",
+  version: "v2.4-PRESENCE-TOUCH-IMMORTAL",
   layer: "runtime",
   role: "organism_execution_conductor",
-  lineage: "PulseRuntime-v1 → v11-Evo → v13-PRESENCE-EVO+ → v14-IMMORTAL",
+  lineage: "PulseRuntime-v1 → v11-Evo → v13-PRESENCE-EVO+ → v14-IMMORTAL → v2.4-PRESENCE-TOUCH-IMMORTAL",
 
   evo: {
     runtimeConductor: true,        // orchestrates organs
@@ -39,7 +44,19 @@ AI_EXPERIENCE_META = {
 
     zeroMutationOfInput: true,
     zeroNetwork: true,
-    zeroFilesystem: true
+    zeroFilesystem: true,
+
+    // Presence / Touch / Advantage
+    presenceAware: true,
+    advantageAware: true,
+    pulseTouchAware: true,
+    chunkAware: true,
+    cacheAware: true,
+    prewarmAware: true,
+    meshAware: true,
+    expansionAware: true,
+    multiInstanceReady: true,
+    runtimeAware: true
   },
 
   contract: {
@@ -63,10 +80,10 @@ AI_EXPERIENCE_META = {
 // -------------------------
 
 export const PulseRuntimeV2Meta = Object.freeze({
-  organId: "PulseRuntime-v2.3-PRESENCE-EVO+",
+  organId: "PulseRuntime-v2.4-PRESENCE-TOUCH-IMMORTAL",
   role: "RUNTIME_SPINE",
-  version: "2.3-PRESENCE-EVO+",
-  epoch: "v13-PRESENCE-EVO+",
+  version: "2.4-PRESENCE-TOUCH-IMMORTAL",
+  epoch: "v13.5-PRESENCE-TOUCH",
   layer: "RuntimeCore",
   safety: Object.freeze({
     deterministic: true,
@@ -84,7 +101,8 @@ export const PulseRuntimeV2Meta = Object.freeze({
     meshAware: true,
     expansionAware: true,
     multiInstanceReady: true,
-    runtimeAware: true
+    runtimeAware: true,
+    pulseTouchAware: true
   })
 });
 
@@ -103,7 +121,7 @@ import * as PulseSchema from "../PULSE-FINALITY/PULSE-SCHEMA/PulseSchema-CoreMem
 // Core Memory
 import { createPulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 
-// Binary substrate
+// Binary substrate (Touch-aware v2.4)
 import BinarySubstrateV2 from "./BinarySubstrate-v2.js";
 const { packMultiOrganismPlan, packExecutionResult } = BinarySubstrateV2;
 
@@ -155,6 +173,12 @@ const KEY_HOT_REGIONS = "hot-regions";
 const KEY_HOT_HOSTS = "hot-hosts";
 const KEY_HOT_FRAME_SIZES = "hot-frame-sizes";
 
+const KEY_HOT_PRESENCE = "hot-presence";
+const KEY_HOT_MODES = "hot-modes";
+const KEY_HOT_PAGES = "hot-pages";
+const KEY_HOT_CHUNK_PROFILES = "hot-chunk-profiles";
+const KEY_HOT_TRUST = "hot-trust";
+
 // -------------------------
 // Helpers
 // -------------------------
@@ -172,7 +196,7 @@ function trackInstance(id) {
   CoreMemory.set(ROUTE, KEY_HOT_INSTANCES, hot);
 }
 
-function trackRegionHost(state) {
+function trackRegionHostAndTouch(state) {
   if (!state) return;
 
   const regions = CoreMemory.get(ROUTE, KEY_HOT_REGIONS) || {};
@@ -189,6 +213,40 @@ function trackRegionHost(state) {
 
   CoreMemory.set(ROUTE, KEY_HOT_REGIONS, regions);
   CoreMemory.set(ROUTE, KEY_HOT_HOSTS, hosts);
+
+  const presenceMap = CoreMemory.get(ROUTE, KEY_HOT_PRESENCE) || {};
+  const modesMap = CoreMemory.get(ROUTE, KEY_HOT_MODES) || {};
+  const pagesMap = CoreMemory.get(ROUTE, KEY_HOT_PAGES) || {};
+  const chunksMap = CoreMemory.get(ROUTE, KEY_HOT_CHUNK_PROFILES) || {};
+  const trustMap = CoreMemory.get(ROUTE, KEY_HOT_TRUST) || {};
+
+  const presence = state.presence || state.pulseTouch?.presence;
+  const mode = state.mode || state.pulseTouch?.mode;
+  const page = state.page || state.pulseTouch?.page;
+  const chunkProfile = state.chunkProfile || state.pulseTouch?.chunkProfile;
+  const trusted = state.trusted || state.pulseTouch?.trusted;
+
+  if (presence) {
+    presenceMap[presence] = (presenceMap[presence] || 0) + 1;
+  }
+  if (mode) {
+    modesMap[mode] = (modesMap[mode] || 0) + 1;
+  }
+  if (page) {
+    pagesMap[page] = (pagesMap[page] || 0) + 1;
+  }
+  if (chunkProfile) {
+    chunksMap[chunkProfile] = (chunksMap[chunkProfile] || 0) + 1;
+  }
+  if (trusted) {
+    trustMap[trusted] = (trustMap[trusted] || 0) + 1;
+  }
+
+  CoreMemory.set(ROUTE, KEY_HOT_PRESENCE, presenceMap);
+  CoreMemory.set(ROUTE, KEY_HOT_MODES, modesMap);
+  CoreMemory.set(ROUTE, KEY_HOT_PAGES, pagesMap);
+  CoreMemory.set(ROUTE, KEY_HOT_CHUNK_PROFILES, chunksMap);
+  CoreMemory.set(ROUTE, KEY_HOT_TRUST, trustMap);
 }
 
 function trackFrameSize(uint8) {
@@ -226,7 +284,7 @@ export class PulseRuntimeTickResult {
 }
 
 // -------------------------
-// Runtime Tick (v2)
+// Runtime Tick (v2.4)
 // -------------------------
 
 export function runPulseTickV2({
@@ -260,7 +318,7 @@ export function runPulseTickV2({
 
   for (const [id, state] of Object.entries(currentStatesById)) {
     trackInstance(id);
-    trackRegionHost(state);
+    trackRegionHostAndTouch(state);
   }
 
   const multiPlanFrame = packMultiOrganismPlan(multiPlan);
@@ -279,8 +337,6 @@ export function runPulseTickV2({
   });
 
   CoreMemory.set(ROUTE, KEY_LAST_FRAMES, binaryFrames);
-
-  // v13+: no fake finality callback; runtime is pure and returns its result.
 
   return new PulseRuntimeTickResult({
     tick,
@@ -308,7 +364,12 @@ export function getRuntimeStateV2() {
     hotInstances: CoreMemory.get(ROUTE, KEY_HOT_INSTANCES),
     hotRegions: CoreMemory.get(ROUTE, KEY_HOT_REGIONS),
     hotHosts: CoreMemory.get(ROUTE, KEY_HOT_HOSTS),
-    hotFrameSizes: CoreMemory.get(ROUTE, KEY_HOT_FRAME_SIZES)
+    hotFrameSizes: CoreMemory.get(ROUTE, KEY_HOT_FRAME_SIZES),
+    hotPresence: CoreMemory.get(ROUTE, KEY_HOT_PRESENCE),
+    hotModes: CoreMemory.get(ROUTE, KEY_HOT_MODES),
+    hotPages: CoreMemory.get(ROUTE, KEY_HOT_PAGES),
+    hotChunkProfiles: CoreMemory.get(ROUTE, KEY_HOT_CHUNK_PROFILES),
+    hotTrust: CoreMemory.get(ROUTE, KEY_HOT_TRUST)
   };
 }
 
