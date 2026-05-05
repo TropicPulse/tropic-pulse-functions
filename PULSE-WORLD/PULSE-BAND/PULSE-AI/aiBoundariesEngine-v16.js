@@ -1,15 +1,16 @@
 // ============================================================================
-//  v14‑IMMORTAL‑Presence — BOUNDARIES ENGINE (Dual‑Band Superego Contract)
+//  v16‑IMMORTAL‑ADVANTAGE — BOUNDARIES ENGINE (Dual‑Band Superego Contract)
 //  “SEE EVERYTHING. MUTATE NOTHING. NEVER DRIFT.”
+//  OWNER‑SUBORDINATE: ALWAYS BELOW ALDWYN, NEVER TOP DOG.
 // ============================================================================
 
 /*
 AI_EXPERIENCE_META = {
   identity: "aiBoundariesEngine",
-  version: "v14-Immortal",
+  version: "v16-Immortal-Advantage",
   layer: "ai_core",
   role: "ai_boundary_enforcer",
-  lineage: "aiBoundariesEngine-v11 → v12.3 → v14-Immortal",
+  lineage: "aiBoundariesEngine-v11 → v12.3 → v14-Immortal → v15-Immortal-ADV → v16-Immortal-Advantage",
 
   evo: {
     boundaryEnforcer: true,
@@ -23,14 +24,24 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    ownerAware: true,
+    subordinateToOwner: true
   },
 
   contract: {
     always: [
       "aiBrainstem",
       "aiAssistant",
-      "aiAnatomy"
+      "aiAnatomy",
+      "aiPermissionsEngine",
+      "aiGovernorAdapter",
+      "aiMemory",
+      "aiEarnEngine",
+      "aiHeartbeat",
+      "aiGenome",
+      "aiIdentityCore"
     ],
     never: [
       "safeRoute",
@@ -43,21 +54,23 @@ AI_EXPERIENCE_META = {
 import { getBoundariesForPersona, canPerformDynamic } from "./permissions.js";
 
 // ============================================================================
-//  META — v14 IMMORTAL, MEMORY + GPU + CHUNKING AWARE
+//  META — v16 IMMORTAL‑ADVANTAGE, MEMORY + GPU + EARN + HEARTBEAT + CHUNKING
 // ============================================================================
 export const BoundariesMeta = Object.freeze({
   layer: "PulseAIBoundariesLayer",
   role: "BOUNDARIES_ENGINE",
-  version: "14-Immortal",
-  identity: "aiBoundariesEngine-v14-Immortal",
+  version: "16-Immortal-Advantage",
+  identity: "aiBoundariesEngine-v16-Immortal-Advantage",
 
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
+
     dualBandSafe: true,
     boundaryAware: true,
     personaAware: true,
     permissionAware: true,
+
     packetAware: true,
     windowAware: true,
     evolutionAware: true,
@@ -69,14 +82,24 @@ export const BoundariesMeta = Object.freeze({
     memorySpineAware: true,
     overlayAware: true,
 
+    earnAware: true,
+    earnHeartAware: true,
+    arteryAware: true,
+    genomeAware: true,
+    governorAware: true,
+    heartbeatAware: true,
+
+    ownerAware: true,
+    subordinateToOwner: true,
+
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "14-Immortal"
+    epoch: "16-Immortal-Advantage"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Resolve symbolic + binary-aware boundaries deterministically from persona, mode, vitals, and memory state.",
+      "Resolve symbolic + binary-aware boundaries deterministically from persona, mode, vitals, memory, GPU, earn, and heartbeat state, while remaining explicitly subordinate to the owner (Aldwyn).",
 
     never: Object.freeze([
       "mutate external systems",
@@ -84,8 +107,11 @@ export const BoundariesMeta = Object.freeze({
       "invent boundaries",
       "override SafetyFrame decisions",
       "override Overmind decisions",
+      "override PermissionsEngine decisions",
+      "override owner authority",
       "inject symbolic metadata",
-      "alter boundary meaning"
+      "alter boundary meaning",
+      "self-promote above owner"
     ]),
 
     always: Object.freeze([
@@ -94,6 +120,10 @@ export const BoundariesMeta = Object.freeze({
       "respect boundary modes",
       "respect binary vitals",
       "respect memory vitals",
+      "respect earn vitals",
+      "respect heartbeat vitals",
+      "respect permissions decisions",
+      "remain subordinate to owner",
       "emit deterministic packets",
       "remain deterministic",
       "remain read-only"
@@ -116,7 +146,11 @@ export const BoundariesMeta = Object.freeze({
         "prewarm-error"
       ]
     }
-  })
+  }),
+
+  boundaryReflex() {
+    return "BoundariesEngine is a deterministic superego, subordinate to Aldwyn, never above owner, never mutating state.";
+  }
 });
 
 // ============================================================================
@@ -160,12 +194,55 @@ function readMemoryVitals(memory) {
 
 function readGpuVitals(gpu, binaryVitals) {
   if (!gpu) return null;
-  // We stay read‑only: no routing, only reflect what we know.
+  // strictly read‑only
   return {
     pressure: binaryVitals?.pressure ?? null,
     mode: binaryVitals?.mode ?? null,
     session: binaryVitals?.session ?? null
   };
+}
+
+function readEarnVitals(earn) {
+  if (!earn) return null;
+
+  try {
+    const meta = typeof earn.getEarnMeta === "function"
+      ? earn.getEarnMeta()
+      : {};
+    return {
+      active: !!meta.active,
+      lastPayoutEpoch: meta.lastPayoutEpoch || 0,
+      openJobs: meta.openJobs || 0,
+      recentCompletions: meta.recentCompletions || 0,
+      pressure: meta.pressure || 0,
+      version: meta.version || null
+    };
+  } catch {
+    return null;
+  }
+}
+
+function readHeartbeatVitals(heartbeat) {
+  if (!heartbeat) return null;
+
+  try {
+    const diag = typeof heartbeat.getAiHeartbeatDiagnostics === "function"
+      ? heartbeat.getAiHeartbeatDiagnostics()
+      : null;
+    if (!diag) return null;
+
+    return {
+      ticks: diag.artery?.ticks ?? 0,
+      pulses: diag.artery?.pulses ?? 0,
+      skips: diag.artery?.skips ?? 0,
+      lastReason: diag.artery?.lastReason ?? "none",
+      lastPressure: diag.artery?.lastPressure ?? 0,
+      lastLoad: diag.artery?.lastLoad ?? 0,
+      primaryState: diag.primaryState || "unknown"
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ============================================================================
@@ -180,6 +257,8 @@ function emitBoundaryPacket(type, payload) {
     layer: BoundariesMeta.layer,
     role: BoundariesMeta.role,
     identity: BoundariesMeta.identity,
+    owner: "Aldwyn",
+    subordinate: true,
     ...payload
   });
 }
@@ -194,12 +273,16 @@ export function prewarmBoundariesEngine({
   binaryVitals = { pressure: 0, load: 0 },
   memory = null,
   gpu = null,
+  earn = null,
+  heartbeat = null,
   context = {}
 } = {}) {
   try {
     const windowId = computeWindowId({ personaId: persona, mode, context });
     const memoryVitals = readMemoryVitals(memory);
     const gpuVitals = readGpuVitals(gpu, binaryVitals);
+    const earnVitals = readEarnVitals(earn);
+    const heartbeatVitals = readHeartbeatVitals(heartbeat);
 
     const packet = emitBoundaryPacket("prewarm", {
       message: "Boundaries engine prewarmed and static tables aligned.",
@@ -208,7 +291,9 @@ export function prewarmBoundariesEngine({
       windowId,
       binaryVitals,
       memoryVitals,
-      gpuVitals
+      gpuVitals,
+      earnVitals,
+      heartbeatVitals
     });
 
     if (trace) console.log("[BoundariesEngine] prewarm", packet);
@@ -222,15 +307,17 @@ export function prewarmBoundariesEngine({
 }
 
 // ============================================================================
-//  ENGINE IMPLEMENTATION — v14‑IMMORTAL
+//  ENGINE IMPLEMENTATION — v16‑IMMORTAL‑ADVANTAGE
 // ============================================================================
 export function createBoundariesEngine({
   context = {},
   memory = null,          // PulseCoreMemory (v13+)
   overlay = null,         // PulseBinaryCoreOverlay (optional)
   gpu = null,             // PulseGPUOrchestrator (optional, read-only)
+  earn = null,            // Earn engine / adapter (optional, read-only)
+  heartbeat = null,       // Heartbeat / EarnHeart adapter (optional, read-only)
   dnaTag = "default-dna",
-  version = "14-Immortal",
+  version = "16-Immortal-Advantage",
   routeId = "boundaries",
   log = console.log
 } = {}) {
@@ -255,6 +342,8 @@ export function createBoundariesEngine({
     const windowId = computeWindowId({ personaId, mode, context });
     const memoryVitals = readMemoryVitals(memory);
     const gpuVitals = readGpuVitals(gpu, binaryVitals);
+    const earnVitals = readEarnVitals(earn);
+    const heartbeatVitals = readHeartbeatVitals(heartbeat);
 
     return emitBoundaryPacket("resolve", {
       personaId,
@@ -263,6 +352,8 @@ export function createBoundariesEngine({
       binaryVitals,
       memoryVitals,
       gpuVitals,
+      earnVitals,
+      heartbeatVitals,
       static: staticBoundaries,
       dnaTag,
       version,
@@ -287,6 +378,8 @@ export function createBoundariesEngine({
     const windowId = computeWindowId({ personaId, mode, context });
     const memoryVitals = readMemoryVitals(memory);
     const gpuVitals = readGpuVitals(gpu, binaryVitals);
+    const earnVitals = readEarnVitals(earn);
+    const heartbeatVitals = readHeartbeatVitals(heartbeat);
 
     const pressureBand =
       binaryVitals?.pressure == null
@@ -311,6 +404,8 @@ export function createBoundariesEngine({
       },
       memoryVitals,
       gpuVitals,
+      earnVitals,
+      heartbeatVitals,
       allowed,
       driftDetected,
       driftCount,
@@ -326,7 +421,9 @@ export function createBoundariesEngine({
     check,
     dnaTag,
     version,
-    routeId
+    routeId,
+    owner: "Aldwyn",
+    subordinate: true
   });
 
   try {
@@ -334,7 +431,9 @@ export function createBoundariesEngine({
       identity: BoundariesMeta.identity,
       version: BoundariesMeta.version,
       dnaTag,
-      routeId
+      routeId,
+      owner: "Aldwyn",
+      subordinate: true
     });
   } catch {}
 

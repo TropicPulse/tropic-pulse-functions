@@ -87,7 +87,7 @@ import { PulseBinaryTech } from "../PULSE-TECH/PulseBinaryTech-v16.js";
 // ———————————————————————————————
 // 1. CORE CROWN CONTRACTS
 // ———————————————————————————————
-import createBoundariesEngine from "./aiBoundariesEngine-v11-Evo.js";
+import createBoundariesEngine from "./aiBoundariesEngine-v16.js";
 import createPermissionsEngine from "./aiPermissionsEngine-v16.js";
 import aiIdentityCore from "./aiIdentityCore.js";
 import aiPersonalityEngine from "./aiPersonalityEngine.js";
@@ -123,7 +123,7 @@ import {
 // ———————————————————————————————
 // 5. MEMORY + EXPERIENCE (META ONLY)
 // ———————————————————————————————
-import createAIMemory from "./aiMemory-v11-Evo.js";
+import createAIMemory from "./aiMemory-v16.js";
 import createAIExperience from "./aiExperience.js";
 
 // ———————————————————————————————

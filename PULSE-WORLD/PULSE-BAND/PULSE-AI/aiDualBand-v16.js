@@ -148,7 +148,7 @@ import {
 } from "./aiDebug.js";
 
 import { createPermissionsEngine } from "./aiPermissionsEngine-v16.js";
-import { createBoundariesEngine } from "./aiBoundariesEngine-v11-Evo.js";
+import { createBoundariesEngine } from "./aiBoundariesEngine-v16.js";
 import { createPersonaEngine } from "./persona.js";
 
 import {

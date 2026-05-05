@@ -1,16 +1,17 @@
 // ============================================================================
-//  aiGenome.js — Pulse OS v14‑IMMORTAL Organ
-//  Binary Genome • Organ Lineage • Fingerprint Engine • Packet‑Ready
-//  HYBRID MODE: Fast by default, deep when drift is detected
+//  aiGenome.js — Pulse OS v16‑IMMORTAL++
+//  Binary Genome • Organ Lineage • Fingerprint Engine • Trust‑Aware
+//  HYBRID MODE: Fast path + Deep path (drift‑aware)
 //  PURE BINARY. ZERO NETWORK. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiGenome",
-  version: "v14-Immortal",
+  version: "v16-Immortal++",
   layer: "ai_core",
   role: "ai_genome",
-  lineage: "aiGenome-v11 → v11.3-Evo → v14-Immortal",
+  lineage: "aiGenome-v11 → v11.3-Evo → v14-Immortal → v16-Immortal++",
 
   evo: {
     genome: true,
@@ -25,11 +26,26 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    trustFabricAware: true,
+    juryAware: true,
+    arteryAware: true,
+    packetAware: true,
+    windowAware: true,
+
+    hybridMode: true,
+    genomeCache: true,
+    deltaAware: true,
+    fingerprintAccelerated: true,
+
+    bluetoothReady: true,
+    multiInstanceReady: true,
+    readOnly: true
   },
 
   contract: {
-    always: ["aiEvolution", "aiEvolutionEngine", "aiEvolutionary"],
+    always: ["aiEvolution", "aiEvolutionEngine", "aiEvolutionary", "aiTrustFabric", "aiJuryFrame"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -38,76 +54,91 @@ AI_EXPERIENCE_META = {
 export const GenomeMeta = Object.freeze({
   layer: "BinaryGenetics",
   role: "BINARY_GENOME",
-  version: "14-Immortal",
-  identity: "aiBinaryGenome-v14-Immortal",
+  version: "16-Immortal++",
+  identity: "aiBinaryGenome-v16-Immortal++",
 
   evo: Object.freeze({
-    // Core guarantees
     deterministic: true,
     driftProof: true,
     binaryOnly: true,
 
-    // Dual-band + packet surface
     dualband: true,
     packetAware: true,
     windowAware: true,
+    arteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
 
-    // Evolution + lineage
     evolutionAware: true,
     lineageAware: true,
     ancestryAware: true,
     memoryAware: true,
     registryAware: true,
 
-    // IMMORTAL-grade binary physiology
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
     zeroMutationOfInput: true,
 
-    // Hybrid genome engine
-    hybridMode: true,           // fast + deep drift mode
-    genomeCache: true,          // cache for fast path
-    deltaAware: true,           // drift-sensitive
+    hybridMode: true,
+    genomeCache: true,
+    deltaAware: true,
     fingerprintAccelerated: true,
 
-    // IO / organism wiring
     bluetoothReady: true,
-
-    // Organism-level guarantees
     multiInstanceReady: true,
     readOnly: true,
-    epoch: "v14-Immortal"
+    epoch: "16-Immortal++"
   })
 });
 
+// ============================================================================
+// PACKET EMITTER
+// ============================================================================
 function emitGenomePacket(type, payload) {
   return Object.freeze({
-    meta: GenomeMeta,
+    meta: {
+      version: GenomeMeta.version,
+      epoch: GenomeMeta.evo.epoch,
+      identity: GenomeMeta.identity,
+      layer: GenomeMeta.layer,
+      role: GenomeMeta.role
+    },
     packetType: `genome-${type}`,
     timestamp: Date.now(),
-    epoch: GenomeMeta.evo.epoch,
     ...payload
   });
 }
 
-export function prewarmBinaryGenome(dualBand = null, { trace = false } = {}) {
+// ============================================================================
+// PREWARM
+// ============================================================================
+export function prewarmBinaryGenome(dualBand = null, { trace = false, trustFabric = null, juryFrame = null } = {}) {
   try {
     const packet = emitGenomePacket("prewarm", {
       message: "Binary genome prewarmed and lineage metrics aligned.",
       binaryPressure: dualBand?.binary?.metabolic?.pressure ?? 0
     });
 
+    trustFabric?.recordGenomePrewarm?.({ pressure: dualBand?.binary?.metabolic?.pressure ?? 0 });
+    juryFrame?.recordEvidence?.("genome-prewarm", packet);
+
     if (trace) console.log("[aiBinaryGenome] prewarm", packet);
     return packet;
   } catch (err) {
-    return emitGenomePacket("prewarm-error", {
+    const packet = emitGenomePacket("prewarm-error", {
       error: String(err),
       message: "Binary genome prewarm failed."
     });
+
+    juryFrame?.recordEvidence?.("genome-prewarm-error", packet);
+    return packet;
   }
 }
 
+// ============================================================================
+// BINARY GENOME ORGAN — v16 IMMORTAL++
+// ============================================================================
 export class AIBinaryGenome {
   constructor(config = {}) {
     this.id = config.id || "ai-binary-genome";
@@ -118,6 +149,9 @@ export class AIBinaryGenome {
     this.memory = config.memory;
 
     this.dualBand = config.dualBand || null;
+    this.trustFabric = config.trustFabric || null;
+    this.juryFrame = config.juryFrame || null;
+
     this.trace = !!config.trace;
 
     if (!this.encoder) throw new Error("AIBinaryGenome requires aiBinaryAgent encoder");
@@ -125,7 +159,6 @@ export class AIBinaryGenome {
     if (!this.evolution) throw new Error("AIBinaryGenome requires aiBinaryEvolution");
     if (!this.memory) throw new Error("AIBinaryGenome requires aiBinaryMemory");
 
-    // IMMORTAL hybrid cache — fast path
     this._cache = {
       organIds: null,
       signatures: null,
@@ -134,6 +167,9 @@ export class AIBinaryGenome {
     };
   }
 
+  // ========================================================================
+  // GENETIC METRICS
+  // ========================================================================
   _computeGeneticThroughput(organCount, driftCount) {
     const driftFactor = Math.min(1, driftCount / Math.max(organCount, 1));
     return Math.max(0, 1 - driftFactor);
@@ -177,10 +213,12 @@ export class AIBinaryGenome {
     return "none";
   }
 
+  // ========================================================================
+  // GENOME GENERATION (FAST + DEEP)
+// ========================================================================
   generateGenome() {
     const organIds = this.registry.listOrgans?.() || [];
 
-    // Load signatures
     const signatures = {};
     let driftCount = 0;
     let signatureBits = 0;
@@ -190,7 +228,6 @@ export class AIBinaryGenome {
       signatures[id] = stored;
       signatureBits += stored.length;
 
-      // Drift detection (hybrid mode)
       if (this._cache.signatures && this._cache.signatures[id] !== stored) {
         driftCount++;
       }
@@ -200,18 +237,23 @@ export class AIBinaryGenome {
       driftCount > 0 ||
       organIds.length !== (this._cache.organIds?.length || 0);
 
-    // FAST PATH — no drift, reuse cached genome
+    // FAST PATH
     if (!driftDetected && this._cache.genomeBinary) {
-      return emitGenomePacket("genome-fast", {
+      const packet = emitGenomePacket("genome-fast", {
         drift: false,
         genomeBinary: this._cache.genomeBinary,
         fingerprint: this._cache.fingerprint,
         organIds,
         signatures
       });
+
+      this.trustFabric?.recordGenomeFastPath?.({ organCount: organIds.length });
+      this.juryFrame?.recordEvidence?.("genome-fast", packet);
+
+      return packet;
     }
 
-    // DEEP PATH — drift detected, recompute everything
+    // DEEP PATH
     const throughput = this._computeGeneticThroughput(organIds.length, driftCount);
     const pressure   = this._computeGeneticPressure(organIds.length, signatureBits);
     const cost       = this._computeGeneticCost(pressure, throughput);
@@ -230,7 +272,7 @@ export class AIBinaryGenome {
 
     const genomeObject = {
       organismId: "pulse-os-binary-organism",
-      version: "v14-Immortal",
+      version: GenomeMeta.version,
       organIds,
       signatures,
       artery,
@@ -242,13 +284,12 @@ export class AIBinaryGenome {
     const binary = this.encoder.encode(json);
     const fingerprint = this._computeFingerprint(binary);
 
-    // Update cache
     this._cache.organIds = organIds;
     this._cache.signatures = signatures;
     this._cache.fingerprint = fingerprint;
     this._cache.genomeBinary = binary;
 
-    return emitGenomePacket("genome-deep", {
+    const packet = emitGenomePacket("genome-deep", {
       drift: true,
       driftCount,
       genomeBinary: binary,
@@ -257,18 +298,29 @@ export class AIBinaryGenome {
       signatures,
       artery
     });
+
+    this.trustFabric?.recordGenomeDeepPath?.({ driftCount, organCount: organIds.length });
+    this.juryFrame?.recordEvidence?.("genome-deep", packet);
+
+    return packet;
   }
 
+  // ========================================================================
+  // STORE / LOAD / SNAPSHOT
+  // ========================================================================
   storeGenome() {
     const packet = this.generateGenome();
     const key = this.encoder.encode("genome:current");
 
     this.memory.write(key, packet.genomeBinary);
 
-    return emitGenomePacket("store", {
+    const out = emitGenomePacket("store", {
       bits: packet.genomeBinary.length,
       fingerprint: packet.fingerprint
     });
+
+    this.juryFrame?.recordEvidence?.("genome-store", out);
+    return out;
   }
 
   loadGenome() {
@@ -311,6 +363,9 @@ export class AIBinaryGenome {
     });
   }
 
+  // ========================================================================
+  // FINGERPRINT ENGINE
+  // ========================================================================
   _computeFingerprint(binary) {
     let out = "";
     for (let i = 0; i < binary.length; i++) {
@@ -322,6 +377,9 @@ export class AIBinaryGenome {
   }
 }
 
+// ============================================================================
+// FACTORY
+// ============================================================================
 export function createAIBinaryGenome(config) {
   return new AIBinaryGenome(config);
 }

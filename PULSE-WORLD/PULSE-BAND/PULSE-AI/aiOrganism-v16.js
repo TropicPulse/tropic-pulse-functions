@@ -140,7 +140,7 @@ export const OrganismMeta = Object.freeze({
 //  IMPORTS — binary organs (v11.3‑EVO lineage)
 // ============================================================================
 import { createAIBinaryAgent } from "./aiBinaryAgent.js";
-import { createAIMemory } from "./aiMemory-v11-Evo.js";
+import { createAIMemory } from "./aiMemory-v16.js";
 import { createAIBinaryPipeline } from "./aiPipeline.js";
 import { createAIBinaryReflex } from "./aiReflex.js";
 import { createAIBinaryLoggerAdapter } from "./aiLoggerAdapter.js";

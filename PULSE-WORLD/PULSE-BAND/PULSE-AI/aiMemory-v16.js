@@ -1,7 +1,7 @@
 // ============================================================================
-//  aiMemory.js — Pulse OS v15.0-Immortal-ADV Organ
+//  aiMemory.js — Pulse OS v16.0-Immortal-ADV++ Organ
 //  Pure PulseCoreMemory Adapter • Dualband • Binary‑Only • Zero Local Storage
-//  Memory Artery v4 • Shard-Aware • Windowed Ops Metrics
+//  Memory Artery v5 • Shard-Aware • Windowed Ops Metrics • Trust/Earn/Heartbeat-Aware
 // ----------------------------------------------------------------------------
 //  CANONICAL ROLE:
 //    This organ is the **Memory Layer Adapter** of Pulse OS (dualband).
@@ -13,10 +13,10 @@
 //    It ONLY:
 //      • validates binary keys + values
 //      • forwards reads/writes to PulseCoreMemory
-//      • computes memory artery metrics v4 (throughput, pressure, cost, budget,
-//        hot-key density, read/write balance, shard pressure)
+//      • computes memory artery metrics v5 (throughput, pressure, cost, budget,
+//        hot-key density, read/write balance, shard pressure, bias buckets)
 //      • exposes window‑safe memory snapshots
-//      • exposes artery snapshots to NodeAdmin/Overmind via registry/reporters
+//      • exposes artery snapshots to NodeAdmin/Overmind/Trust/Earn/Heartbeat via reporters
 //
 //  STORAGE TRUTH:
 //    • All real storage lives in PulseCoreMemory.
@@ -27,10 +27,10 @@
 /*
 AI_EXPERIENCE_META = {
   identity: "aiMemory",
-  version: "v15-Immortal-ADV",
+  version: "v16-Immortal-ADV++",
   layer: "ai_core",
   role: "symbolic_memory_engine",
-  lineage: "aiMemory-v9 → v11 → v13 → v15-Immortal-ADV",
+  lineage: "aiMemory-v9 → v11 → v13 → v15-Immortal-ADV → v16-Immortal-ADV++",
 
   evo: {
     symbolicMemory: true,
@@ -45,11 +45,17 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    trustFabricAware: true,
+    earnAware: true,
+    heartbeatAware: true,
+    governorAware: true,
+    genomeAware: true
   },
 
   contract: {
-    always: ["aiContextEngine", "aiCortex", "aiBrainstem"],
+    always: ["aiContextEngine", "aiCortex", "aiBrainstem", "aiTrustFabric", "aiPermissionsEngine"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -58,13 +64,13 @@ AI_EXPERIENCE_META = {
 import { PulseCoreMemory } from "../PULSE-CORE/PulseCoreMemory.js";
 
 // ============================================================================
-//  META BLOCK — v15.0-Immortal-ADV
+//  META BLOCK — v16.0-Immortal-ADV++
 // ============================================================================
 export const MemoryMeta = Object.freeze({
   layer: "OrganismMemory",
   role: "MEMORY_LAYER",
-  version: "15.0-Immortal-ADV",
-  identity: "aiMemory-v15.0-Immortal-ADV",
+  version: "16.0-Immortal-ADV++",
+  identity: "aiMemory-v16.0-Immortal-ADV++",
 
   evo: Object.freeze({
     deterministic: true,
@@ -79,18 +85,24 @@ export const MemoryMeta = Object.freeze({
     arteryAware: true,
     nodeAdminAware: true,
     overmindAware: true,
+    trustFabricAware: true,
+    earnAware: true,
+    heartbeatAware: true,
+    governorAware: true,
+    genomeAware: true,
+
     microPipeline: true,
     speedOptimized: true,
     prewarmAware: true,
     cacheAware: true,      // registry-level, not data cache
     readOnly: false,
     multiInstanceReady: true,
-    epoch: "v15.0-Immortal-ADV"
+    epoch: "16.0-Immortal-ADV++"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic memory access over PulseCoreMemory with artery v4 metrics (throughput, pressure, cost, budget, hot-key density, shard pressure) and expose those metrics to NodeAdmin/Overmind via registry/reporters.",
+      "Provide deterministic memory access over PulseCoreMemory with artery v5 metrics (throughput, pressure, cost, budget, hot-key density, shard pressure, read/write bias) and expose those metrics to NodeAdmin/Overmind/Trust/Earn/Heartbeat via reporters.",
 
     never: Object.freeze([
       "store non-binary data",
@@ -145,11 +157,11 @@ function emitMemoryPacket(type, payload) {
 }
 
 // ============================================================================
-//  PREWARM — v15.0‑IMMORTAL-ADV
+//  PREWARM — v16.0‑IMMORTAL-ADV++
 // ============================================================================
 export function prewarmAIMemory({ trace = false } = {}) {
   const packet = emitMemoryPacket("prewarm", {
-    message: "Memory adapter prewarmed, artery v4 metrics aligned, registry ready."
+    message: "Memory adapter prewarmed, artery v5 metrics aligned, registry ready."
   });
 
   if (trace) console.log("[AIMemory] prewarm", packet);
@@ -157,7 +169,7 @@ export function prewarmAIMemory({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v15.0‑IMMORTAL-ADV (PulseCoreMemory‑only)
+//  ORGAN IMPLEMENTATION — v16.0‑IMMORTAL-ADV++ (PulseCoreMemory‑only)
 // ============================================================================
 
 export class AIMemory {
@@ -183,6 +195,24 @@ export class AIMemory {
         ? config.overmindReporter
         : null;
 
+    // optional TrustFabric reporter hook (metrics-only, read-only)
+    this.trustReporter =
+      typeof config.trustReporter === "function"
+        ? config.trustReporter
+        : null;
+
+    // optional Earn reporter hook (metrics-only, read-only)
+    this.earnReporter =
+      typeof config.earnReporter === "function"
+        ? config.earnReporter
+        : null;
+
+    // optional Heartbeat reporter hook (metrics-only, read-only)
+    this.heartbeatReporter =
+      typeof config.heartbeatReporter === "function"
+        ? config.heartbeatReporter
+        : null;
+
     // logical shard id (binary namespace, but adapter-only)
     this.shardId = typeof config.shardId === "string" ? config.shardId : "root";
 
@@ -199,7 +229,7 @@ export class AIMemory {
       );
     }
 
-    // windowed ops for artery v4
+    // windowed ops for artery v5
     this.windowMs =
       typeof config.windowMs === "number" && config.windowMs > 0
         ? config.windowMs
@@ -254,7 +284,7 @@ export class AIMemory {
   }
 
   // --------------------------------------------------------------------------
-  //  ARTERY METRICS — v4 (segment + window + shard + hot-key)
+  //  ARTERY METRICS — v5 (segment + window + shard + hot-key + bias)
 // --------------------------------------------------------------------------
   _computeMemoryThroughput(segmentCount, avgSize) {
     const countFactor = Math.min(1, segmentCount / 100);
@@ -302,6 +332,20 @@ export class AIMemory {
     return "none";
   }
 
+  _bucketBias(ratio) {
+    if (ratio === 0) return "idle";
+    if (ratio < 0.5) return "write-heavy";
+    if (ratio > 2.0) return "read-heavy";
+    return "balanced";
+  }
+
+  _bucketHotKeyRatio(r) {
+    if (r >= 0.8) return "hot-concentrated";
+    if (r >= 0.4) return "hot-mixed";
+    if (r > 0)    return "hot-sparse";
+    return "no-hot-keys";
+  }
+
   _computeMemoryArtery() {
     const now = Date.now();
     this._rollWindow(now);
@@ -343,6 +387,16 @@ export class AIMemory {
         ? 4
         : 0;
 
+    const biasBucket = this._bucketBias(
+      this._windowWrites > 0
+        ? this._windowReads / this._windowWrites
+        : this._windowReads > 0
+        ? 4
+        : 0
+    );
+
+    const hotKeyBucket = this._bucketHotKeyRatio(hotKeyRatio);
+
     const artery = {
       throughput,
       throughputBucket: this._bucketLevel(throughput),
@@ -365,6 +419,7 @@ export class AIMemory {
 
       hotKeys,
       hotKeyRatio,
+      hotKeyBucket,
 
       windowMs: this.windowMs,
       windowReads: this._windowReads,
@@ -380,6 +435,7 @@ export class AIMemory {
       opsPerSec,
       harmonicLoad,
       readWriteRatio,
+      readWriteBiasBucket: biasBucket,
 
       instanceIndex: this.instanceIndex,
       instanceCount,
@@ -406,6 +462,33 @@ export class AIMemory {
         this.overmindReporter(artery, MemoryMeta);
       } catch (err) {
         this._trace("overmind:reporter:error", { error: String(err) });
+      }
+    }
+
+    // optional TrustFabric reporter
+    if (this.trustReporter) {
+      try {
+        this.trustReporter(artery, MemoryMeta);
+      } catch (err) {
+        this._trace("trust:reporter:error", { error: String(err) });
+      }
+    }
+
+    // optional Earn reporter
+    if (this.earnReporter) {
+      try {
+        this.earnReporter(artery, MemoryMeta);
+      } catch (err) {
+        this._trace("earn:reporter:error", { error: String(err) });
+      }
+    }
+
+    // optional Heartbeat reporter
+    if (this.heartbeatReporter) {
+      try {
+        this.heartbeatReporter(artery, MemoryMeta);
+      } catch (err) {
+        this._trace("heartbeat:reporter:error", { error: String(err) });
       }
     }
 
@@ -597,6 +680,17 @@ export class AIMemory {
     });
 
     return out;
+  }
+
+  // --------------------------------------------------------------------------
+  //  WINDOW-SAFE ARTERY PACKET SNAPSHOT
+  // --------------------------------------------------------------------------
+  snapshotArteryPacket() {
+    const artery = this._computeMemoryArtery();
+    return emitMemoryPacket("artery-snapshot", {
+      shardId: this.shardId,
+      artery
+    });
   }
 
   // --------------------------------------------------------------------------
