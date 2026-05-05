@@ -6,10 +6,10 @@ LAYER: A2 DRIFT INTELLIGENCE
 ===============================================================================
 AI_EXPERIENCE_META = {
   identity: "PulseUI.PageScanner",
-  version: "v14-Immortal",
+  version: "v16-Immortal",
   layer: "pulse_ui",
   role: "a2_drift_intelligence",
-  lineage: "PageScannerV12 → v14-Immortal",
+  lineage: "PageScannerV12 → v14-Immortal → v16-Immortal",
 
   evo: {
     driftEngine: true,
@@ -34,7 +34,18 @@ AI_EXPERIENCE_META = {
     offlineFirst: true,
     localStoreMirrored: true,
     replayAware: true,
-    modeAgnostic: true
+    modeAgnostic: true,
+
+    // v16 IMMORTAL EXT
+    schemaVersioned: true,
+    envelopeAware: true,
+    tierAware: true,
+    channelAware: true,
+    signatureAware: true,
+    integrityAware: true,
+    driftTierAware: true,
+    lowEntropyPacket: true,
+    replayDeterministic: true
   },
 
   contract: {
@@ -102,13 +113,15 @@ const db =
   (typeof window !== "undefined" && window.db) ||
   null;
 
-import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
+import PulseUIErrors from "./PulseUIErrors-v16.js";
+
+const PAGESCANNER_SCHEMA_VERSION = "v3";
 
 // ============================================================================
 // IMMORTAL LOCALSTORAGE MIRROR — PulsePageScannerStore
 // ============================================================================
 
-const PAGESCANNER_LS_KEY = "PulsePageScanner.v14.buffer";
+const PAGESCANNER_LS_KEY = "PulsePageScanner.v16.buffer";
 const PAGESCANNER_LS_MAX = 2000;
 
 function psHasLocalStorage() {
@@ -149,6 +162,7 @@ function psSaveBuffer(buf) {
 function appendPageScannerRecord(kind, payload) {
   const entry = {
     ts: Date.now(),
+    schemaVersion: PAGESCANNER_SCHEMA_VERSION,
     kind,
     payload
   };
@@ -178,7 +192,7 @@ export const PageScannerRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageScanner",
-  version: "14.0-Immortal",
+  version: "16.0-Immortal",
   identity: "PulsePageScanner",
 
   evo: {
@@ -196,6 +210,40 @@ export const PageScannerRole = {
     futureEvolutionReady: true
   }
 };
+
+// ============================================================================
+// DRIFT TIERS + CHANNELS
+// ============================================================================
+
+const DriftTiers = Object.freeze({
+  none: "none",
+  low: "low",
+  medium: "medium",
+  high: "high",
+  critical: "critical",
+  immortal: "immortal"
+});
+
+const DriftChannels = Object.freeze({
+  ui: "ui",
+  system: "system",
+  evolution: "evolution",
+  memory: "memory",
+  devtools: "devtools",
+  earn: "earn"
+});
+
+// ============================================================================
+// INTERNAL: deterministic signature generator
+// ============================================================================
+function deterministicSignature(obj) {
+  const json = JSON.stringify(obj || {});
+  let hash = 0;
+  for (let i = 0; i < json.length; i++) {
+    hash = (hash * 31 + json.charCodeAt(i)) >>> 0;
+  }
+  return "PSIG_" + hash.toString(16).padStart(8, "0");
+}
 
 function safeNormalizeError(err, origin) {
   try {
@@ -268,7 +316,7 @@ function detectLineage(varsA = [], varsB = []) {
 }
 
 // ---------------------------------------------------------------------------
-// Detect and rewrite illegal admin imports (frontend-safe)
+/* Detect and rewrite illegal admin imports (frontend-safe) */
 // ---------------------------------------------------------------------------
 function rewriteIllegalImports(source = "") {
   appendPageScannerRecord("rewriteIllegalImports_in", {
@@ -492,6 +540,18 @@ function detectPathDrift(importLine = "") {
 }
 
 // ---------------------------------------------------------------------------
+// INTERNAL: map severity → drift tier
+// ---------------------------------------------------------------------------
+function mapSeverityToTier(severity) {
+  if (severity <= 0) return DriftTiers.none;
+  if (severity === 1) return DriftTiers.low;
+  if (severity === 2) return DriftTiers.medium;
+  if (severity <= 4) return DriftTiers.high;
+  if (severity <= 8) return DriftTiers.critical;
+  return DriftTiers.immortal;
+}
+
+// ---------------------------------------------------------------------------
 // Build drift intelligence packet (adapter-ready)
 // ---------------------------------------------------------------------------
 function buildDriftPacket(context = {}) {
@@ -504,12 +564,21 @@ function buildDriftPacket(context = {}) {
       : 0;
 
     const tooFar = severity >= 3;
+    const tier = mapSeverityToTier(severity);
+    const channel = context.channel || DriftChannels.devtools;
+    const modeKind = context.binarySource ? "dual" : "symbolic";
 
-    const out = Object.freeze({
+    const base = {
+      schemaVersion: PAGESCANNER_SCHEMA_VERSION,
+      role: PageScannerRole.identity,
+      version: PageScannerRole.version,
       type: "pagescanner-drift-intel",
       timestamp: Date.now(),
       severity,
       tooFar,
+      tier,
+      channel,
+      modeKind,
       structural: {
         shapeA: structural.shapeA || [],
         shapeB: structural.shapeB || [],
@@ -518,16 +587,29 @@ function buildDriftPacket(context = {}) {
         substructureMismatch: !!structural.substructureMismatch
       },
       ...context
+    };
+
+    const signature = deterministicSignature(base);
+    const out = Object.freeze({
+      ...base,
+      signature
     });
 
     appendPageScannerRecord("buildDriftPacket_out", out);
     return out;
   } catch (err) {
     safeNormalizeError(err, "pagescanner.buildDriftPacket");
-    const out = Object.freeze({
+    const base = {
+      schemaVersion: PAGESCANNER_SCHEMA_VERSION,
+      role: PageScannerRole.identity,
+      version: PageScannerRole.version,
       type: "pagescanner-drift-intel",
       timestamp: Date.now(),
       error: true
+    };
+    const out = Object.freeze({
+      ...base,
+      signature: deterministicSignature(base)
     });
     appendPageScannerRecord("buildDriftPacket_out_error", out);
     return out;
@@ -549,7 +631,11 @@ export const PulsePageScanner = Object.freeze({
   detectStructural,
   detectContract,
   detectPathDrift,
-  buildDriftPacket
+  buildDriftPacket,
+
+  DriftTiers,
+  DriftChannels,
+  schemaVersion: PAGESCANNER_SCHEMA_VERSION
 });
 
 export default PulsePageScanner;

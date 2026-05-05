@@ -93,11 +93,11 @@ const db =
   (typeof window !== "undefined" && window.db) ||
   null;
 
-import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v12-Evo.js";
-import PulsePageScanner from "../_FRONTEND/PulsePageScanner.js";
-import createPulseRouteMemory from "../_FRONTEND/PulseRouteMemory.js";
+import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v16.js";
+import PulsePageScanner from "../_FRONTEND/PulsePageScanner-v16.js";
+import createPulseRouteMemory from "../_FRONTEND/PulseRouteMemory-v16.js";
 import { safeRoute as route } from "./PulseProofBridge.js";
-import { getUIFlowSnapshot } from "../_FRONTEND/PulseUIFlow-v12-Evo.js";
+import { getUIFlowSnapshot } from "../_FRONTEND/PulseUIFlow-v16.js";
 
 
 function isOnline() {

@@ -6,10 +6,10 @@ LAYER: REFLEX MEMORY ORGAN
 ===============================================================================
 AI_EXPERIENCE_META = {
   identity: "PulseUI.RouteMemory",
-  version: "v14-Immortal",
+  version: "v16-Immortal",
   layer: "pulse_ui",
   role: "reflex_route_memory",
-  lineage: "SkinReflex.RouteMemory-v12 → v14-Immortal",
+  lineage: "SkinReflex.RouteMemory-v12 → v14-Immortal → v16-Immortal",
 
   evo: {
     reflexMemory: true,
@@ -17,19 +17,37 @@ AI_EXPERIENCE_META = {
     binaryShadowAware: true,
     routeTraceAware: true,
     coreMemoryAware: true,
+    routeAware: true,
+    lineageAware: true,
+    unifiedAdvantageField: true,
+    tierAware: true,
+    channelAware: true,
 
     deterministic: true,
     driftProof: true,
     pureCompute: true,
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
 
-    futureEvolutionReady: true
+    futureEvolutionReady: true,
+
+    // v15+ / v16 IMMORTAL SURFACE
+    schemaVersioned: true,
+    envelopeAware: true,
+    integrityAware: true,
+    bulkFlushAware: true,
+    offlineFirst: true,
+    localStoreMirrored: true,
+    replayAware: true
   },
 
   contract: {
     always: [
       "PulseUI.SkinReflex",
       "PulseCoreMemory",
-      "PulseUIErrors"
+      "PulseUIErrors",
+      "PulseProofBridge"
     ],
     never: [
       "eval",
@@ -57,14 +75,14 @@ EXPORT_META = {
   produces: [
     "RouteMemoryEntry",
     "RouteTrace",
-    "DegradationTier"
+    "DegradationTier",
+    "RouteMemoryEnvelope"
   ],
 
   sideEffects: "core_memory_write_only",
   network: "none",
   filesystem: "none"
 }
-
 */
 
 // Global handle
@@ -87,15 +105,14 @@ const db =
   (typeof window !== "undefined" && window.db) ||
   null;
 
-import PulseUIErrors from "./PulseUIErrors-v12-Evo.js";
+import PulseUIErrors from "./PulseUIErrors-v16.js";
 import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
-
 
 export const RouteMemoryRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "RouteMemory",
-  version: "14.0-Immortal",
+  version: "16.0-Immortal",
   identity: "PulseRouteMemory",
 
   evo: {
@@ -106,26 +123,46 @@ export const RouteMemoryRole = {
     binaryShadowAware: true,
     routeTraceAware: true,
     coreMemoryAware: true,
+    routeAware: true,
+    lineageAware: true,
+    unifiedAdvantageField: true,
+    tierAware: true,
+    channelAware: true,
     futureEvolutionReady: true,
+
+    dualBand: true,
+    binaryAware: true,
+    symbolicAware: true,
 
     // IMMORTAL OFFLINE SURFACE
     offlineFirst: true,
     localStoreMirrored: true,
-    replayAware: true
+    replayAware: true,
+
+    // v16 IMMORTAL ENVELOPE
+    schemaVersioned: true,
+    envelopeAware: true,
+    integrityAware: true,
+    bulkFlushAware: true
   }
 };
 
+const ROUTE_MEMORY_SCHEMA_VERSION = "v3";
+
+// ---------------------------------------------------------------------------
+// ERROR NORMALIZATION
+// ---------------------------------------------------------------------------
 function safeNormalizeError(err, origin) {
   try {
-    PulseUIErrors.broadcast(PulseUIErrors.normalizeError(err, origin));
+    const packet = PulseUIErrors.normalizeError(err, origin);
+    PulseUIErrors.broadcast(packet);
   } catch {}
 }
 
-// ============================================================================
-// LOCAL OFFLINE MEMORY SURFACE — ROUTE MEMORY STORE (LocalStorage)
-// ============================================================================
-
-const ROUTE_MEMORY_LS_KEY = "PulseUI.RouteMemory.v14.buffer";
+// ---------------------------------------------------------------------------
+// LOCALSTORAGE MIRROR
+// ---------------------------------------------------------------------------
+const ROUTE_MEMORY_LS_KEY = "PulseUI.RouteMemory.v16.buffer";
 const ROUTE_MEMORY_LS_MAX_ENTRIES = 2000;
 
 function hasLocalStorage() {
@@ -165,12 +202,12 @@ function saveRouteMemoryBuffer(buffer) {
   }
 }
 
-function appendRouteMemoryEntry(kind, key, entrySnapshot) {
+function appendRouteMemoryEntry(kind, key, envelopeSnapshot) {
   const record = {
     ts: Date.now(),
     kind,
     key,
-    entry: entrySnapshot
+    envelope: envelopeSnapshot
   };
 
   const buffer = loadRouteMemoryBuffer();
@@ -192,26 +229,34 @@ export const PulseRouteMemoryStore = {
   }
 };
 
-// ============================================================================
-// FACTORY — creates the RouteMemory organ
-// ============================================================================
+// ---------------------------------------------------------------------------
+// FACTORY — v16 IMMORTAL REFLEX ROUTE MEMORY (CoreMemory via PulseProofBridge)
+// ---------------------------------------------------------------------------
 export function createPulseRouteMemory({
   bucketId = "skinreflex-route-memory",
   log = console.log,
   warn = console.warn
 } = {}) {
-
+  // CoreMemory is accessed exclusively through the bridge
   const Core = PulseProofBridge.coreMemory;
-
-  let seq = 0;
 
   const RouteMemoryState = {
     bucketId,
     lastKey: null,
-    lastEntry: null
+    lastEntry: null,
+    lastEnvelope: null,
+    lastTier: null,
+    lastChannel: "ui",
+    lastError: null,
+    eventSeq: 0
   };
 
-  function logProtector(stage, details = {}) {
+  function nextSeq() {
+    RouteMemoryState.eventSeq += 1;
+    return RouteMemoryState.eventSeq;
+  }
+
+  function safeLog(stage, details = {}) {
     try {
       log(
         JSON.stringify({
@@ -219,7 +264,9 @@ export function createPulseRouteMemory({
           pulseName: "SkinReflex Route Memory",
           pulseRole: "Reflex degradation + trace memory",
           pulseVer: RouteMemoryRole.version,
-          stage,
+          schemaVersion: ROUTE_MEMORY_SCHEMA_VERSION,
+          seq: RouteMemoryState.eventSeq,
+          bucketId,
           ...details
         })
       );
@@ -236,29 +283,66 @@ export function createPulseRouteMemory({
     }
   }
 
+  const DegradationTiers = Object.freeze({
+    microDegrade: "microDegrade",
+    softDegrade: "softDegrade",
+    midDegrade: "midDegrade",
+    hardDegrade: "hardDegrade",
+    criticalDegrade: "criticalDegrade"
+  });
+
   function classifyTier(healthScore) {
     try {
       const h = typeof healthScore === "number" ? healthScore : 1.0;
 
-      if (h >= 0.95) return "microDegrade";
-      if (h >= 0.85) return "softDegrade";
-      if (h >= 0.50) return "midDegrade";
-      if (h >= 0.15) return "hardDegrade";
-      return "criticalDegrade";
+      if (h >= 0.95) return DegradationTiers.microDegrade;
+      if (h >= 0.85) return DegradationTiers.softDegrade;
+      if (h >= 0.50) return DegradationTiers.midDegrade;
+      if (h >= 0.15) return DegradationTiers.hardDegrade;
+      return DegradationTiers.criticalDegrade;
     } catch (err) {
       safeNormalizeError(err, "routememory.classifyTier");
-      return "microDegrade";
+      return DegradationTiers.microDegrade;
     }
   }
 
+  function buildEnvelope(key, entry, channel = "ui") {
+    return {
+      schemaVersion: ROUTE_MEMORY_SCHEMA_VERSION,
+      role: RouteMemoryRole.identity,
+      version: RouteMemoryRole.version,
+      bucketId,
+      key,
+      channel,
+      tier: entry.tier,
+      degraded: entry.degraded,
+      healthScore: entry.healthScore,
+      dnaTag: entry.dnaTag,
+      entry,
+      timestamp: "NO_TIMESTAMP_v16"
+    };
+  }
+
+  function unwrapEnvelope(raw) {
+    if (!raw) return { envelope: null, entry: null };
+    if (raw && typeof raw === "object" && raw.schemaVersion) {
+      return { envelope: raw, entry: raw.entry || null };
+    }
+    return {
+      envelope: null,
+      entry: raw
+    };
+  }
+
   function remember(message, frames, routeTrace, overrides = {}) {
+    nextSeq();
     try {
       const key = makeKey(message, frames);
       const baseHealth = overrides.healthScore ?? 1.0;
       const tier = classifyTier(baseHealth);
 
       const entry = {
-        seq: ++seq,
+        seq: RouteMemoryState.eventSeq,
         message,
         frames,
         routeTrace,
@@ -271,127 +355,193 @@ export function createPulseRouteMemory({
         ...overrides
       };
 
+      const channel = overrides.channel || "ui";
+      const envelope = buildEnvelope(key, entry, channel);
+
       RouteMemoryState.lastKey = key;
       RouteMemoryState.lastEntry = entry;
+      RouteMemoryState.lastEnvelope = envelope;
+      RouteMemoryState.lastTier = tier;
+      RouteMemoryState.lastChannel = channel;
 
-      // Persist into CoreMemory bucket
       try {
         const bucket = Core.getBucket(bucketId) || {};
-        bucket[key] = entry;
+        bucket[key] = envelope;
         Core.setBucket(bucketId, bucket);
       } catch (err) {
+        RouteMemoryState.lastError = String(err);
         safeNormalizeError(err, "routememory.corePersist");
       }
 
-      // Mirror into LocalStorage route memory store
-      appendRouteMemoryEntry("remember", key, entry);
+      appendRouteMemoryEntry("remember", key, envelope);
 
-      logProtector("ROUTE_MEMORY_SAVED", {
+      safeLog("ROUTE_MEMORY_SAVED", {
         key,
-        frames: frames.length,
+        frames: Array.isArray(frames) ? frames.length : 0,
         degraded: entry.degraded,
         healthScore: entry.healthScore,
         tier: entry.tier,
-        dnaTag: entry.dnaTag
+        dnaTag: entry.dnaTag,
+        channel
       });
     } catch (err) {
+      RouteMemoryState.lastError = String(err);
       safeNormalizeError(err, "routememory.remember");
     }
   }
 
-  function markDegraded(message, frames, healthScore = 0.85, binaryAware = false) {
+  function markDegraded(
+    message,
+    frames,
+    healthScore = 0.85,
+    binaryAware = false,
+    channel = "ui"
+  ) {
+    nextSeq();
     try {
       const key = makeKey(message, frames);
 
       let bucket = Core.getBucket(bucketId) || {};
-      const entry = bucket[key];
-      if (!entry) return;
+      const raw = bucket[key];
+      if (!raw) return;
 
-      entry.degraded = true;
-      entry.healthScore = healthScore;
-      entry.tier = classifyTier(healthScore);
-      entry.dnaTag = binaryAware
-        ? "A1_BINARY_SHADOW_DEGRADED"
-        : "A1_SURFACE_DEGRADED";
+      const { envelope: existingEnvelope, entry: existingEntry } = unwrapEnvelope(
+        raw
+      );
+      if (!existingEntry) return;
 
-      bucket[key] = entry;
+      const entry = {
+        ...existingEntry,
+        degraded: true,
+        healthScore,
+        tier: classifyTier(healthScore),
+        dnaTag: binaryAware
+          ? "A1_BINARY_SHADOW_DEGRADED"
+          : "A1_SURFACE_DEGRADED"
+      };
+
+      const envelope = buildEnvelope(key, entry, channel);
+
+      bucket[key] = envelope;
       Core.setBucket(bucketId, bucket);
 
       RouteMemoryState.lastKey = key;
       RouteMemoryState.lastEntry = entry;
+      RouteMemoryState.lastEnvelope = envelope;
+      RouteMemoryState.lastTier = entry.tier;
+      RouteMemoryState.lastChannel = channel;
 
-      // Mirror into LocalStorage route memory store
-      appendRouteMemoryEntry("markDegraded", key, entry);
+      appendRouteMemoryEntry("markDegraded", key, envelope);
 
-      logProtector("ROUTE_MEMORY_DEGRADED", {
+      safeLog("ROUTE_MEMORY_DEGRADED", {
         key,
         healthScore,
         tier: entry.tier,
-        dnaTag: entry.dnaTag
+        dnaTag: entry.dnaTag,
+        channel
       });
     } catch (err) {
+      RouteMemoryState.lastError = String(err);
       safeNormalizeError(err, "routememory.markDegraded");
     }
   }
 
   function recall(message, frames) {
+    nextSeq();
     try {
       const key = makeKey(message, frames);
       const bucket = Core.getBucket(bucketId) || {};
-      const entry = bucket[key];
+      const raw = bucket[key];
+      if (!raw) return null;
+
+      const { envelope, entry } = unwrapEnvelope(raw);
       if (!entry) return null;
 
       RouteMemoryState.lastKey = key;
       RouteMemoryState.lastEntry = entry;
+      RouteMemoryState.lastEnvelope = envelope || buildEnvelope(key, entry);
+      RouteMemoryState.lastTier = entry.tier;
+      RouteMemoryState.lastChannel =
+        (envelope && envelope.channel) || RouteMemoryState.lastChannel || "ui";
 
-      logProtector("ROUTE_MEMORY_HIT", {
+      safeLog("ROUTE_MEMORY_HIT", {
         key,
-        frames: entry.frames.length,
+        frames: Array.isArray(entry.frames) ? entry.frames.length : 0,
         degraded: entry.degraded,
         healthScore: entry.healthScore,
         tier: entry.tier,
-        dnaTag: entry.dnaTag
+        dnaTag: entry.dnaTag,
+        channel: RouteMemoryState.lastChannel
       });
 
-      // Optional mirror of recall hits (lightweight)
-      appendRouteMemoryEntry("recall", key, {
-        seq: entry.seq,
-        degraded: entry.degraded,
-        healthScore: entry.healthScore,
-        tier: entry.tier,
-        dnaTag: entry.dnaTag
-      });
+      appendRouteMemoryEntry("recall", key, RouteMemoryState.lastEnvelope);
 
       return entry.routeTrace;
     } catch (err) {
+      RouteMemoryState.lastError = String(err);
       safeNormalizeError(err, "routememory.recall");
       return null;
     }
   }
 
   function getEntry(message, frames) {
+    nextSeq();
     try {
       const key = makeKey(message, frames);
       const bucket = Core.getBucket(bucketId) || {};
-      return bucket[key] || null;
+      const raw = bucket[key];
+      if (!raw) return null;
+
+      const { envelope, entry } = unwrapEnvelope(raw);
+      const out = {
+        key,
+        envelope: envelope || buildEnvelope(key, entry || {}),
+        entry: entry || null
+      };
+
+      appendRouteMemoryEntry("getEntry", key, out.envelope);
+
+      return out;
     } catch (err) {
+      RouteMemoryState.lastError = String(err);
       safeNormalizeError(err, "routememory.getEntry");
       return null;
+    }
+  }
+
+  function flushBucket() {
+    nextSeq();
+    try {
+      Core.setBucket(bucketId, {});
+      appendRouteMemoryEntry("flushBucket", bucketId, {
+        schemaVersion: ROUTE_MEMORY_SCHEMA_VERSION,
+        bucketId,
+        cleared: true
+      });
+      safeLog("ROUTE_MEMORY_FLUSH_OK", { bucketId });
+      return { ok: true };
+    } catch (err) {
+      RouteMemoryState.lastError = String(err);
+      safeNormalizeError(err, "routememory.flushBucket");
+      safeLog("ROUTE_MEMORY_FLUSH_ERROR", { bucketId, error: String(err) });
+      return { ok: false, error: "FlushError" };
     }
   }
 
   const PulseRouteMemory = {
     RouteMemoryRole,
     RouteMemoryState,
+    DegradationTiers,
     remember,
     markDegraded,
     recall,
     getEntry,
+    flushBucket,
     core: Core,
     store: PulseRouteMemoryStore
   };
 
-  logProtector("INIT", {
+  safeLog("INIT", {
     bucketId,
     version: RouteMemoryRole.version
   });
@@ -399,13 +549,7 @@ export function createPulseRouteMemory({
   return PulseRouteMemory;
 }
 
-
-
 export default createPulseRouteMemory;
-
-// ============================================================================
-// GLOBAL BINDING FOR ROUTE MEMORY STORE (MODE-AGNOSTIC UI HOOK)
-// ============================================================================
 
 try {
   if (typeof window !== "undefined") {

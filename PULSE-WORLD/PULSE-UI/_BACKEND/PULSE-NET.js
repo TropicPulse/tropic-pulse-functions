@@ -107,8 +107,8 @@ import VitalsLogger from "../_BACKEND/PulseProofLogger.js";
 import { aiOvermindPrime } from "../../PULSE-BAND/PULSE-AI/aiOvermindPrime.js";
 import { createForwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/ForwardEngine.js";
 import { createBackwardEngine } from "../../PULSE-BAND/PULSE-ENGINE/BackwardEngine.js";
-import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v12-Evo.js";
-import { initUIFlow } from "../_FRONTEND/PulseUIFlow-v12-Evo.js";
+import PulseUIErrors from "../_FRONTEND/PulseUIErrors-v16.js";
+import { initUIFlow } from "../_FRONTEND/PulseUIFlow-v16.js";
 import { safeRoute as route } from "./PulseProofBridge.js";
 import { PulseUnderstanding } from "../../PULSE-UI/_BACKEND/PulseNetUnderstanding.js";
 

@@ -62,7 +62,7 @@ const db =
   (typeof window !== "undefined" && window.db) ||
   null;
 
-console.log("Window");
+console.log("Evolutionary Window");
 import { route, startUnderstanding as PulseUnderstanding, PulseBinaryOrganismBoot } from "./_BACKEND/PulseProofBridge.js";
 
 

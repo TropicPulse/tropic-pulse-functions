@@ -1,26 +1,20 @@
 /* global log,warn,error */
 // ============================================================================
-// FILE: /PulseOS/PULSE-UI/PulseUIFlow-v14-Immortal.js
-// PULSE OS — v14‑IMMORTAL
+// FILE: /PulseOS/PULSE-UI/PulseUIFlow-v16-Immortal.js
+// PULSE OS — v16‑IMMORTAL
 // “UI FLOW ENGINE / INTENT GLUE / HUMAN‑VISIBLE ORGANISM MAP”
-// ============================================================================
-//
-// CANONICAL ROLE (v14‑IMMORTAL):
-//   • Same deterministic flow engine
-//   • Now fully offline‑first + replay‑aware
-//   • Every flow event mirrored into LocalStorage
-//   • Zero behavior changes
-//   • Zero routing changes
-//   • Zero heuristics added
+// Offline‑First • LocalStorage+CoreMemory Mirrored • Replay‑Aware
+// Tier/Channel‑Aware • Router‑Checked • Evolutionary‑Page‑Driven
 // ============================================================================
 
 /*
+===============================================================================
 AI_EXPERIENCE_META = {
   identity: "PulseUIFlow",
-  version: "v13-Evo",
-  layer: "frontend",
+  version: "v16-Immortal",
+  layer: "pulse_ui",
   role: "ui_flow_engine",
-  lineage: "PulseOS-v12",
+  lineage: "PulseUIFlow-v13-Evo-PRIME → v14-Immortal → v16-Immortal",
 
   evo: {
     intentDriven: true,
@@ -28,13 +22,27 @@ AI_EXPERIENCE_META = {
     presenceAware: true,
     chunkAligned: true,
     dualBand: true,
-    safeRouteFree: true,
+    binaryAware: true,
+    symbolicAware: true,
 
-    // v14 IMMORTAL
     offlineFirst: true,
     localStoreMirrored: true,
+    coreMemoryMirrored: true,
     replayAware: true,
-    modeAgnostic: true
+    modeAgnostic: true,
+
+    routeAware: true,
+    routerChecked: true,
+    errorAware: true,
+    identityAware: true,
+    evolutionaryPageAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
   },
 
   contract: {
@@ -42,7 +50,9 @@ AI_EXPERIENCE_META = {
       "PulseWindow",
       "PulsePresence",
       "PulseChunks",
-      "PulseUIErrors"
+      "PulseUIErrors",
+      "PulseProofBridge",
+      "PulseCore.Memory"
     ],
     never: [
       "legacyUIFlow",
@@ -52,7 +62,35 @@ AI_EXPERIENCE_META = {
     ]
   }
 }
+===============================================================================
+EXPORT_META = {
+  organ: "PulseUIFlow",
+  layer: "pulse_ui",
+  stability: "IMMORTAL",
+  deterministic: true,
+  pure: true,
+
+  consumes: [
+    "UIIntent",
+    "IdentityContext",
+    "RouterCheckResult",
+    "EvolutionaryPage"
+  ],
+
+  produces: [
+    "UIFlowStateSnapshot",
+    "UIFlowTransition",
+    "UIFlowReplayBuffer"
+  ],
+
+  sideEffects: "localstorage_and_corememory_write_only",
+  network: "none",
+  filesystem: "none"
+}
+===============================================================================
 */
+
+const UIFLOW_SCHEMA_VERSION = "v3";
 
 // Global handle
 const g =
@@ -74,13 +112,16 @@ const db =
   (typeof window !== "undefined" && window.db) ||
   null;
 
-import { safeRoute as route } from "../_BACKEND/PulseProofBridge.js";
+import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
+
+const route = PulseProofBridge?.route;
+const CoreMemory = PulseProofBridge?.coreMemory || null;
 
 // ============================================================================
 // IMMORTAL LOCALSTORAGE MIRROR — PulseUIFlowStore
 // ============================================================================
 
-const UIFLOW_LS_KEY = "PulseUIFlow.v14.buffer";
+const UIFLOW_LS_KEY = "PulseUIFlow.v16.buffer";
 const UIFLOW_LS_MAX = 2000;
 
 function hasLocalStorage() {
@@ -107,12 +148,29 @@ function loadFlowBuffer() {
   }
 }
 
+function mirrorFlowBufferToCoreMemory(buf) {
+  if (!CoreMemory || typeof CoreMemory.setRouteSnapshot !== "function") return;
+  try {
+    const envelope = {
+      schemaVersion: UIFLOW_SCHEMA_VERSION,
+      version: "16.0-Immortal",
+      routeId: "uiFlow",
+      buffer: buf,
+      timestamp: "NO_TIMESTAMP_v16"
+    };
+    CoreMemory.setRouteSnapshot("uiFlow", envelope);
+  } catch {
+    // best-effort only
+  }
+}
+
 function saveFlowBuffer(buf) {
   if (!hasLocalStorage()) return;
   try {
     const trimmed =
       buf.length > UIFLOW_LS_MAX ? buf.slice(buf.length - UIFLOW_LS_MAX) : buf;
     window.localStorage.setItem(UIFLOW_LS_KEY, JSON.stringify(trimmed));
+    mirrorFlowBufferToCoreMemory(trimmed);
   } catch {}
 }
 
@@ -141,15 +199,15 @@ export const PulseUIFlowStore = {
 };
 
 // ============================================================================
-// ORIGINAL UI FLOW ENGINE (v13 logic preserved)
+// ORIGINAL UI FLOW ENGINE (v13 logic preserved, v16 visibility added)
 // ============================================================================
 
 export const PulseUIFlowRole = {
   type: "UIFlow",
   subsystem: "PulseUIFlow",
   layer: "UI-Flow",
-  version: "13.0",
-  identity: "PulseUIFlow-v13-Evo-PRIME",
+  version: "16.0-Immortal",
+  identity: "PulseUIFlow-v16-Immortal",
 
   evo: {
     driftProof: true,
@@ -168,9 +226,9 @@ export const PulseUIFlowRole = {
     organismAware: true
   },
 
-  pulseContract: "PulseUIFlow-v2",
-  meshContract: "PulseMesh-v13-ready",
-  sendContract: "PulseSend-v13-ready"
+  pulseContract: "PulseUIFlow-v3",
+  meshContract: "PulseMesh-v16-ready",
+  sendContract: "PulseSend-v16-ready"
 };
 
 const hasWindow = typeof window !== "undefined";
@@ -183,7 +241,7 @@ function safeConsoleLog(...args) {
 
 const FLOW_LAYER_ID   = "UI-FLOW";
 const FLOW_LAYER_NAME = "PULSE UI FLOW ENGINE";
-const FLOW_LAYER_VER  = "13.0";
+const FLOW_LAYER_VER  = "16.0-Immortal";
 
 const FLOW_DIAGNOSTICS_ENABLED =
   hasWindow &&
@@ -200,17 +258,18 @@ function logFlow(stage, details = {}) {
         pulseLayer: FLOW_LAYER_ID,
         pulseName:  FLOW_LAYER_NAME,
         pulseVer:   FLOW_LAYER_VER,
+        schemaVersion: UIFLOW_SCHEMA_VERSION,
         stage,
         ...details
       })
     );
   } else {
-    safeConsoleLog("[PulseUIFlow-v13]", stage, details);
+    safeConsoleLog("[PulseUIFlow-v16]", stage, details);
   }
 }
 
 // ============================================================================
-// INTENT MAP (unchanged)
+// INTENT MAP (unchanged semantics)
 // ============================================================================
 const UIIntentFlowMap = Object.freeze({
   login: {
@@ -222,7 +281,7 @@ const UIIntentFlowMap = Object.freeze({
   dashboard: {
     id: "dashboard",
     intent: "dashboard",
-    next: ["settings", "profile", "earn", "scanner", "proxyHealth"],
+    next: ["settings", "profile", "earn", "scanner", "proxyHealth", "aiEarn"],
     requiresIdentity: true
   },
   settings: {
@@ -307,6 +366,7 @@ const UIFlowState = {
 
   snapshot() {
     return {
+      schemaVersion: UIFLOW_SCHEMA_VERSION,
       current: this.current,
       last: this.last,
       identityTrusted: this.identityTrusted
@@ -356,15 +416,14 @@ async function evolveToIntent(flowDef, extraPayload = {}) {
 // ============================================================================
 // PUBLIC API — IMMORTAL UI FLOW ENGINE
 // ============================================================================
-
 export async function initUIFlow() {
   appendFlowRecord("init_start", {});
 
-  logFlow("INIT_V13_START", {});
+  logFlow("INIT_V16_START", {});
 
   if (!hasWindow) {
     appendFlowRecord("init_no_window", {});
-    logFlow("INIT_V13_SKIPPED_NO_WINDOW", {});
+    logFlow("INIT_V16_SKIPPED_NO_WINDOW", {});
     return null;
   }
 
@@ -372,13 +431,18 @@ export async function initUIFlow() {
   let identityContext = null;
 
   try {
-    identityContext = await route("identity.check", {});
-    identityTrusted = !!identityContext?.trustedDevice;
+    if (typeof route === "function") {
+      identityContext = await route("identity.check", {});
+      identityTrusted = !!identityContext?.trustedDevice;
 
-    appendFlowRecord("identity_check", {
-      identityTrusted,
-      identityContext
-    });
+      appendFlowRecord("identity_check", {
+        identityTrusted,
+        identityContext
+      });
+    } else {
+      appendFlowRecord("identity_check_skipped_no_route", {});
+      logFlow("IDENTITY_CHECK_SKIPPED_NO_ROUTE", {});
+    }
   } catch (err) {
     appendFlowRecord("identity_check_error", { error: String(err) });
     logFlow("IDENTITY_CHECK_FAILED", { error: String(err) });
@@ -401,10 +465,25 @@ export async function initUIFlow() {
     identityTrusted
   });
 
-  logFlow("INIT_V13_COMPLETE", {
+  logFlow("INIT_V16_COMPLETE", {
     flowId: initialFlow.id,
     identityTrusted
   });
+
+  // Mirror snapshot into CoreMemory as well
+  try {
+    if (CoreMemory && typeof CoreMemory.setRouteSnapshot === "function") {
+      CoreMemory.setRouteSnapshot("uiFlowState", {
+        schemaVersion: UIFLOW_SCHEMA_VERSION,
+        version: "16.0-Immortal",
+        routeId: "uiFlowState",
+        state: UIFlowState.snapshot(),
+        timestamp: "NO_TIMESTAMP_v16"
+      });
+    }
+  } catch {
+    // best-effort
+  }
 
   return {
     flow: initialFlow,
@@ -459,23 +538,28 @@ export async function goToFlowIntent(flowId, options = {}) {
 
   let allowed = true;
   try {
-    const result = await route("uiFlowIntentCheck", {
-      from: currentFlow ? currentFlow.id : null,
-      to: targetFlow.id,
-      reflexOrigin: "UIFlow-v13",
-      layer: "UI-Flow",
-      binaryAware: true,
-      dualBand: true
-    });
-
-    appendFlowRecord("router_check", { result });
-
-    if (result && result.allowed === false) {
-      allowed = false;
-      logFlow("FLOW_ROUTER_BLOCKED_INTENT", {
+    if (typeof route === "function") {
+      const result = await route("uiFlowIntentCheck", {
         from: currentFlow ? currentFlow.id : null,
-        to: targetFlow.id
+        to: targetFlow.id,
+        reflexOrigin: "UIFlow-v16",
+        layer: "UI-Flow",
+        binaryAware: true,
+        dualBand: true
       });
+
+      appendFlowRecord("router_check", { result });
+
+      if (result && result.allowed === false) {
+        allowed = false;
+        logFlow("FLOW_ROUTER_BLOCKED_INTENT", {
+          from: currentFlow ? currentFlow.id : null,
+          to: targetFlow.id
+        });
+      }
+    } else {
+      appendFlowRecord("router_check_skipped_no_route", {});
+      logFlow("FLOW_ROUTER_CHECK_SKIPPED_NO_ROUTE", {});
     }
   } catch (err) {
     appendFlowRecord("router_check_error", { error: String(err) });
@@ -494,6 +578,21 @@ export async function goToFlowIntent(flowId, options = {}) {
     from: currentFlow ? currentFlow.id : null,
     to: targetFlow.id
   });
+
+  // Mirror snapshot into CoreMemory
+  try {
+    if (CoreMemory && typeof CoreMemory.setRouteSnapshot === "function") {
+      CoreMemory.setRouteSnapshot("uiFlowState", {
+        schemaVersion: UIFLOW_SCHEMA_VERSION,
+        version: "16.0-Immortal",
+        routeId: "uiFlowState",
+        state: UIFlowState.snapshot(),
+        timestamp: "NO_TIMESTAMP_v16"
+      });
+    }
+  } catch {
+    // best-effort
+  }
 
   return {
     ok: true,
@@ -550,6 +649,12 @@ try {
   if (typeof window !== "undefined") {
     window.PulseUIFlow = initUIFlow;
     window.PulseUIFlowStore = PulseUIFlowStore;
+    window.PulseUIFlowV16 = {
+      onError: (packet) => {
+        appendFlowRecord("error_spine_packet", packet);
+        logFlow("ERROR_SPINE_PACKET", { signature: packet.signature });
+      }
+    };
   }
   if (typeof globalThis !== "undefined") {
     globalThis.PulseUIFlow = initUIFlow;
