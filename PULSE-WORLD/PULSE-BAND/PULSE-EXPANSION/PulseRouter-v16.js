@@ -89,10 +89,10 @@ import { getPulseUserContext, createPulseWorldCore, pulseUser, PulseUserMeta } f
 // Mesh (symbolic + binary)
 import createBinaryMesh, {
   BinaryMeshMeta
-} from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js";
+} from "../PULSE-MESH/PulseBinaryMesh-v16.js";
 import createPulseMesh, {
   PulseMeshMeta
-} from "../PULSE-MESH/PulseMesh-v11-Evo.js";
+} from "../PULSE-MESH/PulseMesh-v16.js";
 
 // Beacon engine (optional, for presence / region signals)
 import PulseBeaconEngine from "./PulseBeaconEngine-v16.js";

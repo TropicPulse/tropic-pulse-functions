@@ -328,7 +328,7 @@ export async function prewarmEvolutionOrgan(fsAPI, routeAPI, schemaAPI, dualBand
   function detectPulseEarnDrift(files) {
     if (!Array.isArray(files)) return null;
 
-    const earn = files.find(f => f.name === "PulseEarn-v11-Evo.js");
+    const earn = files.find(f => f.name === "PulseEarn-v16.js");
     if (!earn) return null;
 
     return {
@@ -593,7 +593,7 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
   function detectPulseEarnDrift(files) {
     if (!Array.isArray(files)) return null;
 
-    const earn = files.find(f => f.name === "PulseEarn-v11-Evo.js");
+    const earn = files.find(f => f.name === "PulseEarn-v16.js");
     if (!earn) return null;
 
     return {
@@ -718,7 +718,7 @@ export function createEvolutionAPI(fsAPI, routeAPI, schemaAPI, dualBand = null) 
       recs.push({
         type: "earn-drift",
         message:
-          "PulseEarn drift detected. Consider reviewing exports, imports, and dead paths in PulseEarn-v11-Evo.js.",
+          "PulseEarn drift detected. Consider reviewing exports, imports, and dead paths in PulseEarn-v16.js.",
         details: {
           missingExports: pulseEarnDrift.missingExports.length,
           unusedExports: pulseEarnDrift.unusedExports.length,

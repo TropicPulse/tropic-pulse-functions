@@ -90,6 +90,8 @@ import createPulseWorldCore from "../../PULSE-BAND/PULSE-EXPANSION/PulseUser-v16
 
 
 
+import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../../PULSE-BAND/PULSE-AI/aiDualBand-v16.js";
+
 // ============================================================================
 //  IMPORTS — SYMBOLIC / BINARY ORGANS (UNCHANGED)
 //  - These are still the organ-level pieces we unify under the kernel.
@@ -106,8 +108,6 @@ import { createEarn as PulseEarnSym } from "../../PULSE-BAND/PULSE-EARN/PulseEar
 //  IMPORTS — BINARY SHADOW (NO BOOT HERE)
 //  Window already booted ai-v11-Evo and exposed window.PulseBinary.
 // ============================================================================
-import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../../PULSE-BAND/PULSE-AI/aiDualBand-v16.js";
-
 import { createBinaryProxy } from "../../PULSE-BAND/PULSE-PROXY/PulseBinaryProxy-v16.js";
 import { createBinaryRouter as PulseRouterBin } from "../../PULSE-BAND/PULSE-ROUTER/PulseBinaryRouter-v16.js";
 import { PulseBinaryGPU as PulseGPUBin } from "../../PULSE-BAND/PULSE-GPU/PulseBinaryGPU-v16.js";

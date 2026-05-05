@@ -131,8 +131,8 @@ const BinaryProxyRole = Object.freeze({
   version: "v16-Immortal-ABA-ADVANTAGE",
   role: "BINARY_PROXY_BRIDGE",
   lineage: {
-    spine: "PulseProxySpine-v11-Evo",
-    pns: "PulseProxyPNSNervousSystem-v11-Evo",
+    spine: "PulseProxySpine-v16",
+    pns: "PulseProxyPNSNervousSystem-v16",
     synapse: "PulseProxySynapse",
     limbic: PULSE_LIMBIC_SHADOW_META?.identity || "LimbicShadow",
     client: "PulseClient",

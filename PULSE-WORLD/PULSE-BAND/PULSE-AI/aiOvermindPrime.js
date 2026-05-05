@@ -45,7 +45,7 @@ import { aiOrganism } from "./aiOrganism-v16.js";
 // ============================================================================
 //  CORE ORGANISM LAYERS
 // ============================================================================
-import { NodeAdmin } from "../PULSE-TOOLS/PulseNodeAdmin-v11-Evo.js";
+import { NodeAdmin } from "../PULSE-TOOLS/PulseNodeAdmin-v16.js";
 import { BeaconEngine } from "../PULSE-EXPANSION/PulseBeaconEngine-v16.js";
 
 // ============================================================================

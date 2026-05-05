@@ -58,17 +58,17 @@ AI_EXPERIENCE_META = {
 import * as PulseBinaryOS from "../PULSE-OS/PulseBinaryOS-v16.js";
 
 // Mesh + BeaconMesh meta
-import { PulseMeshMeta, createPulseMesh } from "../PULSE-MESH/PulseMesh-v11-Evo.js";
+import { PulseMeshMeta, createPulseMesh } from "../PULSE-MESH/PulseMesh-v16.js";
 import { PulseBeaconMeshMeta, PulseBeaconMesh } from "./PulseBeaconMesh-v16.js";
 
 import { PulseCastleMeta, createPulseCastle } from "../PulseCastle-v16.js";
 import { PulseServerMeta, createPulseServer } from "./PulseServer-v16.js";
 import { PulseRouterMeta, createPulseRouter } from "./PulseRouter-v16.js";
 import { PulseExpansionMeta, createPulseExpansion } from "./PulseExpansion-v16.js";
-
+import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-AI/aiDualBand-v16.js";
 // Earn / Band / BinarySend
 import { getEarnContext, evolveEarn, createEarn } from "../PULSE-EARN/PulseEarn-v16.js";
-import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../PULSE-AI/aiDualBand-v16.js";
+
 import { createBinarySend as PulseSendBin } from "../PULSE-SEND/PulseBinarySend-v16.js";
 
 // PROXY CONTEXT — v16 IMMORTAL ORGANISM

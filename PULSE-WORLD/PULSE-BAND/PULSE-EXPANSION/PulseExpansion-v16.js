@@ -91,8 +91,8 @@ import {
 } from "./PulseBeaconMesh-v16.js";
 
 // v11 mesh + binary mesh metas
-import { PulseMeshMeta } from "../PULSE-MESH/PulseMesh-v11-Evo.js";
-import { BinaryMeshMeta } from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js";
+import { PulseMeshMeta } from "../PULSE-MESH/PulseMesh-v16.js";
+import { BinaryMeshMeta } from "../PULSE-MESH/PulseBinaryMesh-v16.js";
 
 // Beacon engine (physics) v12.3
 import {

@@ -178,8 +178,8 @@ export const AI_EXPERIENCE_META = Object.freeze({
   layer: "inner_agent",
   role: "organism_bridge_dual_band",
   lineage: Object.freeze({
-    root: "PulseProxy-v11",
-    parent: "PulseProxyInnerAgent-v12.3-Evo-Presence",
+    root: "PulseProxy-v16",
+    parent: "PulseProxyInnerAgent-v16",
     organismIntegration: "v16-Immortal"
   }),
   evo: Object.freeze(PulseRole.evo),

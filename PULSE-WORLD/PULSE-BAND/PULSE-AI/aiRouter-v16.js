@@ -82,7 +82,7 @@ AI_EXPERIENCE_META = {
 
 import { Personas, getPersona } from "./persona.js";
 import Overmind from "./aiOvermindPrime.js";
-import NodeAdmin from "../PULSE-TOOLS/PulseNodeAdmin-v11-Evo.js";
+import NodeAdmin from "../PULSE-TOOLS/PulseNodeAdmin-v16.js";
 
 // ============================================================================
 //  IMPORTS — Organism Context (HYBRID: attach OR pull)
@@ -93,8 +93,8 @@ import NodeAdmin from "../PULSE-TOOLS/PulseNodeAdmin-v11-Evo.js";
 import { PulseWorldCoreMeta, createPulseWorldCore} from "../PULSE-EXPANSION/PulseUser-v16.js";
 
 // Castle / Mesh / BeaconMesh / Expansion / Server / Router
-import { PulseCastleMeta } from "../PULSE-EXPANSION/PulseCastle-v12.3-Presence.js";
-import createPulseMesh, { PulseMeshMeta } from "../PULSE-MESH/PulseMesh-v11-Evo.js";
+import { PulseCastleMeta } from "../PULSE-EXPANSION/PulseCastle-v16.js";
+import createPulseMesh, { PulseMeshMeta } from "../PULSE-MESH/PulseMesh-v16.js";
 import PulseBeaconMesh, {
   PulseBeaconMeshMeta
 } from "../PULSE-EXPANSION/PulseBeaconMesh-v16.js";

@@ -219,7 +219,7 @@ import * as PulseOSPresence from "./PulseOSPresence-v16.js";         // OS Prese
 // Binary + symbolic mesh environment (IMMORTAL v15)
 import {
   createBinaryMeshEnvironment as createBinaryMeshEnv
-} from "../PULSE-MESH/BinaryMesh-v15-Evo.js";
+} from "../PULSE-MESH/PulseBinaryMesh-v16.js";
 
 // PULSE OS v16-IMMORTAL — WORLD BARREL (Expansion v16)
 import {

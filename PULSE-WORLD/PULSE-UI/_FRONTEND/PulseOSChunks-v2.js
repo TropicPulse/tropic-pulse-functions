@@ -70,7 +70,7 @@ const db =
 console.log("Presence");
 console.log("[PulseChunks-v2.2-MULTILANE-Immortal] Membrane chunker loading...");
 
-import { safeRoute as route, fireAndForgetRoute } from "./_BACKEND/PulseProofBridge.js";
+import { safeRoute as route, fireAndForgetRoute } from "../_BACKEND/PulseProofBridge.js";
 import PulseChunkNormalizer from "./PulseOSChunksNormalizer.js";
 
 // ============================================================================

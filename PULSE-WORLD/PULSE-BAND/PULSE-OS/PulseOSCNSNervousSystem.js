@@ -175,11 +175,11 @@ import { PulseOSShortTermMemory } from "./PulseOSShortTermMemory.js";
 // PageScannerV12: A1/A2 intelligence pack, used here as CNS-level passive/active scanner
 import { PageScannerV12 } from "../../PULSE-UI/_BACKEND/PulseSkinReflex.js";
 
-import checkBand from "../PULSE-PROXY/CheckBand-v11-Evo.js";
-import checkIdentity from "../PULSE-PROXY/CheckIdentity-v11-Evo.js";
-import checkRouterMemory from "../PULSE-PROXY/CheckRouterMemory-v11-Evo.js";
+import checkBand from "../PULSE-PROXY/PulseBand-v16.js";
+import checkIdentity from "../PULSE-PROXY/PulseIdentity-v16.js";
+import checkRouterMemory from "../PULSE-PROXY/PulseMemoryRouter-v16.js";
 
-import { createDualBandOrganism } from "../PULSE-AI/aiDualBand-v11-Evo.js";
+import { createDualBandOrganism } from "../PULSE-AI/aiDualBand-v16.js";
 
 
 // ============================================================================

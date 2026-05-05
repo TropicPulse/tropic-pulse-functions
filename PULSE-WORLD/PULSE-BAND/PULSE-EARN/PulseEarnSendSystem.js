@@ -283,7 +283,7 @@ function isEarnReentryImpulse(impulse) {
   const earn = impulse.payload.earn;
   if (!earn) return false;
 
-  if (earn.role?.identity === "PulseEarn-v11-Evo") return true;
+  if (earn.role?.identity === "PulseEarn-v16") return true;
   if (earn.__earnEnvelope === true) return true;
 
   return false;

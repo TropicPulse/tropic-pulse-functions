@@ -146,10 +146,10 @@ import {
 // Mesh organism (symbolic + binary)
 import createPulseMesh, {
   PulseMeshMeta
-} from "../PULSE-MESH/PulseMesh-v11-Evo.js";
+} from "../PULSE-MESH/PulseMesh-v16.js";
 import createBinaryMesh, {
   BinaryMeshMeta
-} from "../PULSE-MESH/PulseBinaryMesh-v11-Evo.js";
+} from "../PULSE-MESH/PulseBinaryMesh-v16.js";
 
 // Touch / presence
 import { getPulseTouchContext } from "../../PULSE-UI/PULSE-TOUCH.js";

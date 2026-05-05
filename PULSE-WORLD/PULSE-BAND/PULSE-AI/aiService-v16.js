@@ -136,7 +136,7 @@ export const ServiceGatewayMeta = Object.freeze({
 //  IMPORTS — Binary Engine + Tools
 // ============================================================================
 
-import { runAI } from "./aiEngine-v11-Evo.js";
+import { runAI } from "./aiEngine-v16.js";
 import {
   analyzeFirestoreDoc,
   analyzeSQLSchema,
