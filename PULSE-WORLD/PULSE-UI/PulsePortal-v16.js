@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: /PulseOS/Surface/PulseEvolutionaryWindow-v13.js
-// PULSE EVOLUTIONARY WINDOW — v13-Evo-ALWAYS-ON-OFFLINE-FIRST
+// PULSE PORTAL — v13-Evo-ALWAYS-ON-OFFLINE-FIRST
 // PORTAL-MEMBRANE • ONE-WAY GLASS • ZERO-TRUST SURFACE • NO ORGANS BEYOND GLASS
 // ============================================================================
 /* 
@@ -62,7 +62,7 @@ const db =
   (typeof window !== "undefined" && window.db) ||
   null;
 
-console.log("Evolutionary Window");
+console.log("Pulse Portal");
 import { route, startUnderstanding as PulseUnderstanding, PulseBinaryOrganismBoot } from "./_BACKEND/PulseProofBridge.js";
 
 
