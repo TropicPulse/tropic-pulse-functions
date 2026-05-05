@@ -185,7 +185,7 @@ import {
   getProxyLineage
 } from "../PULSE-PROXY/PulseProxyContext-v16.js";
 
-import { createPulseAIChunker } from "./PulseAIChunker.js";
+import { createPulseAIChunker } from "./PulseAIChunker-v16.js";
 
 // ============================================================================
 //  DUAL-BAND CONTEXT

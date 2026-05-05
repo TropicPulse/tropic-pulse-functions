@@ -1,21 +1,23 @@
 // ============================================================================
-//  PULSE OS v14-Immortal — EXPERIENCE FRAME ORGAN
-//  Conversational Repair • Misalignment Handling • UX Harmonization
+//  PULSE OS v16-IMMORTAL-TRI-HEART — EXPERIENCE FRAME ORGAN
+//  Conversational Repair • Misalignment Handling • UX + Organism Harmonization
 //  PURE FUNCTIONAL ON INPUT/OUTPUT. NO BINARY MUTATION.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "Experience",
-  version: "v14-Immortal",
+  version: "v16-Immortal-TRI-HEART",
   layer: "ai_tools",
   role: "experience_surface",
-  lineage: "Experience-v10 → v14-Immortal",
+  lineage: "Experience-v10 → v14-Immortal → v16-Immortal-TRI-HEART",
 
   evo: {
     experienceSurface: true,
     toneMapping: true,
     symbolicPrimary: true,
     binaryAware: true,
+    waveAware: true,
     dualBand: true,
 
     deterministic: true,
@@ -23,12 +25,32 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    // v16+ organism awareness
+    organismAware: true,
+    triHeartAware: true,
+    momHeartAware: true,
+    dadHeartAware: true,
+    babyHeartAware: true,
+    triHeartAdvantageAware: true,
+    triHeartSpeedAware: true,
+    triHeartPresenceAware: true,
+    triHeartHealingAware: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true
   },
 
   contract: {
-    always: ["aiExperience", "aiEmotionEngine", "aiDeliveryEngine"],
-    never: ["safeRoute", "fetchViaCNS"]
+    always: [
+      "aiExperience",
+      "aiEmotionEngine",
+      "aiDeliveryEngine"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS"
+    ]
   }
 }
 */
@@ -38,8 +60,8 @@ export const ExperienceFrameMeta = Object.freeze({
   subsystem: "aiExperienceFrame",
   layer: "PulseAIExperienceFrame",
   role: "EXPERIENCE_FRAME_ORGAN",
-  version: "12.3-Evo+",
-  identity: "aiExperienceFrame-v12.3-Evo+",
+  version: "v16-Immortal-TRI-HEART",
+  identity: "aiExperienceFrame-v16-Immortal-TRI-HEART",
 
   evo: Object.freeze({
     driftProof: true,
@@ -55,7 +77,20 @@ export const ExperienceFrameMeta = Object.freeze({
     nonBlocking: true,
     multiInstanceReady: true,
     uxArteryAware: true,
-    epoch: "12.3-Evo+"
+    epoch: "v16-IMMORTAL",
+
+    // v16+ organism + tri-heart
+    organismAware: true,
+    triHeartAware: true,
+    momHeartAware: true,
+    dadHeartAware: true,
+    babyHeartAware: true,
+    triHeartAdvantageAware: true,
+    triHeartSpeedAware: true,
+    triHeartPresenceAware: true,
+    triHeartHealingAware: true,
+    unifiedAdvantageField: true,
+    pulseEfficiencyAware: true
   }),
 
   contract: Object.freeze({
@@ -65,7 +100,7 @@ export const ExperienceFrameMeta = Object.freeze({
       "Harmonize tone with user-level preferences (PersonalFrame)",
       "Expose safe, clear explanations of refusals and constraints",
       "Stabilize conversational experience across personas and organs",
-      "Emit a layered UX-artery snapshot for organism-level UX health"
+      "Emit a layered UX-artery + tri-heart snapshot for organism-level UX health"
     ]),
 
     never: Object.freeze([
@@ -84,12 +119,12 @@ export const ExperienceFrameMeta = Object.freeze({
       "defer to SafetyFrame on safety conflicts",
       "defer to PersonalFrame for tone shaping when available",
       "prefer clarity and repair over blame or confusion",
-      "emit UX health in a read-only layered artery"
+      "emit UX + tri-heart health in a read-only layered artery"
     ])
   }),
 
   boundaryReflex() {
-    return "ExperienceFrame only reshapes UX text and emits UX health — it never changes safety, permissions, or binary state.";
+    return "ExperienceFrame only reshapes UX text and emits UX + tri-heart health — it never changes safety, permissions, or binary state.";
   }
 });
 
@@ -141,6 +176,76 @@ function extractBoundaryPressure(boundaryArtery = {}) {
 }
 
 // ============================================================================
+//  TRI-HEART SNAPSHOT (MOM / DAD / BABY)
+// ============================================================================
+
+function readGlobalTriHeart() {
+  const mom = globalThis?.PulseProxyHeartTriHeart || null;
+  const dad = globalThis?.PulseAiHeartTriHeart || null;
+  const baby = globalThis?.PulseEarnTriHeart || null;
+
+  return {
+    mom,
+    dad,
+    baby
+  };
+}
+
+function buildTriHeartSnapshot(metaTriHeart = {}) {
+  const globalTri = readGlobalTriHeart();
+
+  const liveness =
+    metaTriHeart.liveness ||
+    globalTri.dad?.triHeartLiveness ||
+    globalTri.mom?.triHeartLiveness ||
+    globalTri.baby?.triHeartLiveness ||
+    null;
+
+  const speed =
+    metaTriHeart.speed ||
+    globalTri.dad?.triHeartSpeed ||
+    globalTri.mom?.triHeartSpeed ||
+    globalTri.baby?.triHeartSpeed ||
+    null;
+
+  const advantage =
+    metaTriHeart.advantage ||
+    globalTri.dad?.triHeartAdvantage ||
+    globalTri.mom?.triHeartAdvantage ||
+    globalTri.baby?.triHeartAdvantage ||
+    null;
+
+  const presence =
+    metaTriHeart.presence ||
+    globalTri.dad?.triHeartPresence ||
+    globalTri.mom?.triHeartPresence ||
+    globalTri.baby?.triHeartPresence ||
+    null;
+
+  const healthScore = (() => {
+    const adv = advantage?.combinedAdvantage ?? 0.5;
+    const spd = speed?.combinedSpeed ?? 0.5;
+    const liveCount =
+      (liveness?.momAlive ? 1 : 0) +
+      (liveness?.dadAlive ? 1 : 0) +
+      (liveness?.babyAlive ? 1 : 0);
+    const liveRatio = liveCount / 3;
+    return Math.max(0, Math.min(1, 0.4 * adv + 0.3 * spd + 0.3 * liveRatio));
+  })();
+
+  const healthBucket = bucketLevel(healthScore);
+
+  return {
+    liveness,
+    speed,
+    advantage,
+    presence,
+    healthScore,
+    healthBucket
+  };
+}
+
+// ============================================================================
 //  EXPERIENCE CORE
 // ============================================================================
 
@@ -160,10 +265,9 @@ export class AiExperienceFrame {
 
   // ---------------------------------------------------------------------------
   // PREWARM (NO-OP BUT EXPLICIT FOR CONSISTENCY)
-// ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
   prewarm() {
-    // nothing heavy; just establish structures
     this._totalInteractions = this._totalInteractions || 0;
   }
 
@@ -172,28 +276,30 @@ export class AiExperienceFrame {
    * @param {Object} payload
    * @param {Object} payload.context   Full context (user, persona, safetyMode, etc.)
    * @param {String} payload.text      Final text from Overmind (already safe)
-   * @param {Object} payload.meta      Overmind meta: { safetyStatus, worldLens, notes, lenses, binaryVitals, boundaryArtery, personaId, toneMode, ... }
+   * @param {Object} payload.meta      Overmind meta: { safetyStatus, worldLens, notes, lenses, binaryVitals, boundaryArtery, personaId, toneMode, triHeartContext, ... }
    */
   async shapeExperience({ context = {}, text = "", meta = {} }) {
     const base = String(text || "");
     const safetyStatus = meta?.safetyStatus || "ok";
     const worldLens = meta?.worldLens || "consensus";
 
-    const state = this.buildExperienceState({ context, base, meta });
+    const triHeart = buildTriHeartSnapshot(meta?.triHeartContext || {});
+    const state = this.buildExperienceState({ context, base, meta, triHeart });
 
-    const cacheKey = this._buildCacheKey(base, state, meta);
+    const cacheKey = this._buildCacheKey(base, state, meta, triHeart);
     const cached = this._decisionCache[cacheKey];
     if (cached) {
       return cached;
     }
 
-    let repaired = this.applyRepairLogic({ base, state });
+    let repaired = this.applyRepairLogic({ base, state, triHeart });
 
     if (this.personalFrame?.shapeOutput) {
       try {
         const shaped = await this.personalFrame.shapeOutput({
           context,
-          text: repaired
+          text: repaired,
+          triHeart
         });
         if (shaped?.text) {
           repaired = shaped.text;
@@ -205,7 +311,7 @@ export class AiExperienceFrame {
 
     this._updateStats(state);
 
-    const uxArtery = this._computeUxArtery({ state, meta });
+    const uxArtery = this._computeUxArtery({ state, meta, triHeart });
 
     const result = Object.freeze({
       text: repaired,
@@ -213,6 +319,7 @@ export class AiExperienceFrame {
         safetyStatus,
         worldLens,
         state,
+        triHeart,
         uxArtery
       })
     });
@@ -225,7 +332,7 @@ export class AiExperienceFrame {
   // EXPERIENCE STATE CONSTRUCTION
   // ---------------------------------------------------------------------------
 
-  buildExperienceState({ context, base, meta }) {
+  buildExperienceState({ context, base, meta, triHeart }) {
     const safetyStatus = meta?.safetyStatus || "ok";
     const worldLens = meta?.worldLens || "consensus";
     const notes = meta?.notes || [];
@@ -246,6 +353,9 @@ export class AiExperienceFrame {
     const personaId = meta?.personaId || context?.personaId || "neutral";
     const toneMode = meta?.toneMode || "default";
 
+    const triHeartHealth = triHeart?.healthScore ?? 0.5;
+    const triHeartBucket = triHeart?.healthBucket || bucketLevel(triHeartHealth);
+
     return {
       safetyStatus,
       worldLens,
@@ -253,7 +363,9 @@ export class AiExperienceFrame {
       hasAmbiguity: ambiguitySignal,
       hasRefusal: refusalSignal,
       personaId,
-      toneMode
+      toneMode,
+      triHeartHealth,
+      triHeartBucket
     };
   }
 
@@ -284,10 +396,10 @@ export class AiExperienceFrame {
   }
 
   // ---------------------------------------------------------------------------
-  // REPAIR LOGIC
-  // ---------------------------------------------------------------------------
+  // REPAIR LOGIC (TRI-HEART AWARE)
+// ---------------------------------------------------------------------------
 
-  applyRepairLogic({ base, state }) {
+  applyRepairLogic({ base, state, triHeart }) {
     let text = base;
 
     if (state.hasRefusal) {
@@ -302,10 +414,19 @@ export class AiExperienceFrame {
     }
 
     if (state.hasFrustration) {
-      text = this.prependAcknowledgement(
-        text,
-        "It seems my earlier response may not have matched what you needed. Let me ground this more directly."
-      );
+      const triHint =
+        triHeart?.healthBucket === "critical"
+          ? "I’m also running under higher internal load, so I’m keeping things extra direct."
+          : triHeart?.healthBucket === "low"
+          ? "I’m balancing some internal load, but I can still ground this clearly."
+          : null;
+
+      const baseAck =
+        "It seems my earlier response may not have matched what you needed. Let me ground this more directly.";
+
+      const ack = triHint ? `${baseAck} ${triHint}` : baseAck;
+
+      text = this.prependAcknowledgement(text, ack);
     }
 
     return text;
@@ -339,8 +460,8 @@ export class AiExperienceFrame {
   }
 
   // ---------------------------------------------------------------------------
-  // UX STATS + ARTERY
-  // ---------------------------------------------------------------------------
+  // UX STATS + ARTERY (TRI-HEART + ADVANTAGE AWARE)
+// ---------------------------------------------------------------------------
 
   _updateStats(state) {
     this._totalInteractions += 1;
@@ -349,7 +470,7 @@ export class AiExperienceFrame {
     if (state.hasRefusal) this._refusalCount += 1;
   }
 
-  _computeUxArtery({ state, meta }) {
+  _computeUxArtery({ state, meta, triHeart }) {
     const total = this._totalInteractions || 1;
 
     const frustrationRate = this._frustrationCount / total;
@@ -369,14 +490,18 @@ export class AiExperienceFrame {
     const binaryPressure = extractBinaryPressure(meta?.binaryVitals || {});
     const boundaryPressure = extractBoundaryPressure(meta?.boundaryArtery || {});
 
+    const triHeartHealth = triHeart?.healthScore ?? 0.5;
+    const triHeartPenalty = Math.max(0, 1 - triHeartHealth); // worse health → more pressure
+
     const uxPressureLocal = uxLoad;
     const fusedPressure = Math.max(
       0,
       Math.min(
         1,
-        0.5 * uxPressureLocal +
-          0.3 * binaryPressure +
-          0.2 * boundaryPressure
+        0.4 * uxPressureLocal +
+          0.25 * binaryPressure +
+          0.2 * boundaryPressure +
+          0.15 * triHeartPenalty
       )
     );
 
@@ -418,12 +543,22 @@ export class AiExperienceFrame {
       toneMode: state.toneMode
     };
 
+    const triHeartArtery = {
+      healthScore: triHeart?.healthScore ?? 0.5,
+      healthBucket: triHeart?.healthBucket || bucketLevel(triHeart?.healthScore ?? 0.5),
+      liveness: triHeart?.liveness || null,
+      speed: triHeart?.speed || null,
+      advantage: triHeart?.advantage || null,
+      presence: triHeart?.presence || null
+    };
+
     return {
       organism,
       ux,
       boundaries,
       binary,
-      persona
+      persona,
+      triHeart: triHeartArtery
     };
   }
 
@@ -431,7 +566,7 @@ export class AiExperienceFrame {
   // CACHE KEY
   // ---------------------------------------------------------------------------
 
-  _buildCacheKey(base, state, meta) {
+  _buildCacheKey(base, state, meta, triHeart) {
     const safetyStatus = state.safetyStatus;
     const worldLens = state.worldLens;
     const flags =
@@ -448,6 +583,8 @@ export class AiExperienceFrame {
         extractBinaryPressure(meta?.binaryVitals || {})
       );
 
+    const triHeartBucket = triHeart?.healthBucket || "medium";
+
     return [
       base,
       safetyStatus,
@@ -456,7 +593,8 @@ export class AiExperienceFrame {
       personaId,
       toneMode,
       boundaryModeId,
-      pressureBucket
+      pressureBucket,
+      triHeartBucket
     ].join("|");
   }
 }
@@ -483,14 +621,20 @@ export function createExperienceFrameOrgan(config = {}) {
 
     // optional UX-artery accessor for external organs
     getUxArterySnapshot(meta = {}, context = {}, text = "") {
-      const state = core.buildExperienceState({ context, base: String(text || ""), meta });
-      return core._computeUxArtery({ state, meta });
+      const triHeart = buildTriHeartSnapshot(meta?.triHeartContext || {});
+      const state = core.buildExperienceState({
+        context,
+        base: String(text || ""),
+        meta,
+        triHeart
+      });
+      return core._computeUxArtery({ state, meta, triHeart });
     }
   });
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v16-IMMORTAL dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {

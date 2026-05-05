@@ -131,7 +131,8 @@ import createAIExperience from "./aiExperience.js";
 // ———————————————————————————————
 import createAIBinaryPipeline from "./aiPipeline.js";
 import runAI from "./aiEngine-v16.js";
-
+import pulseAIChunker from "./PulseAIChunker-v16.js";
+import createPulseFileScanner from "./PulseFileScanner-v16.js";
 // ———————————————————————————————
 // 7. WATCHDOG + VITALS + LOGGING
 // ———————————————————————————————
@@ -145,7 +146,7 @@ import createAIBinaryLoggerAdapter from "./aiLoggerAdapter.js";
 import createPersonalFrameOrgan from "./aiPersonalFrame.js";
 import getBoundariesForPersona from "./boundaries.js";
 import getPermissionsForPersona from "./permissions.js";
-import createExperienceFrameOrgan from "./Experience-v11-Evo.js";
+import createExperienceFrameOrgan from "./Experience-v16.js";
 
 // ============================================================================
 //  META

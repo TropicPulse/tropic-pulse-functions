@@ -133,7 +133,7 @@ import { AIBinaryScheduler } from "./aiScheduler.js";
 import { AIBinaryOrganRegistry } from "./aiBinaryOrganRegistry.js";
 import { AIBinaryEvolution } from "./aiBinaryEvolution.js";
 
-import { createPulseAIChunker } from "./PulseAIChunker.js";
+import { createPulseAIChunker } from "./PulseAIChunker-v16.js";
 
 // ============================================================================
 //  GLOBAL ORGANISM ARTERY REGISTRY (READ-ONLY, METRICS-ONLY)
