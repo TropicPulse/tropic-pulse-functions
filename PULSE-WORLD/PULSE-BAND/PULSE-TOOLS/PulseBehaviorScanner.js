@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PulseOS/Scanner/PulseBinaryBehaviorScanner-v16-Immortal.js
+// FILE: /PulseOS/Scanner/PulseBinaryBehaviorScanner-v16.js
 // PULSE OS — v16‑IMMORTAL
 // BINARY BEHAVIOR ORGAN — DUAL-BAND, PRESENCE/HARMONICS/GPU-AWARE, NODEADMIN‑EVO
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: OrganismMesh-v16-IMMORTAL.js
+// FILE: OrganismMesh-v16.js
 // PULSE ORGANISM MESH — OVERMIND-PRIME ORGANISM BRAIN + GLOBAL MESH COORDINATOR
 // “One page. One route. Whole organism. One mesh that knows everything.”
 // ============================================================================

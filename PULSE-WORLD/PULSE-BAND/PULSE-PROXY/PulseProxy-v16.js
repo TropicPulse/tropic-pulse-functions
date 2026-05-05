@@ -1,5 +1,5 @@
 // ============================================================================
-//  PulseProxy-v16-Immortal.js — Proxy Organism v16 IMMORTAL (SYMBOLIC EDITION)
+//  PulseProxy-v16.js — Proxy Organism v16 IMMORTAL (SYMBOLIC EDITION)
 //  Evolutionary Proxy Organ • Pattern + Lineage + Shape • Route-Assist
 //  v16: Dual-band organism snapshot + unified advantage field +
 //       presence/harmonics + cache/chunk/prewarm/memory envelopes +

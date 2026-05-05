@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: BinaryMesh-v16-Immortal.js
+// FILE: BinaryMesh-v16.js
 // BINARY MESH — v16-Immortal
 // “PURE BINARY CONNECTIVE TISSUE / BINARY-FIRST / SYMBOLIC FALLBACK”
 // ============================================================================

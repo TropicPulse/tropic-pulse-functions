@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PulseOS/Brain/PulseOSBrain-v16-Immortal.js
+// FILE: /PulseOS/Brain/PulseOSBrain-v16.js
 // PULSE OS BRAIN — v16-Immortal-DUALBAND-Presence-ADVANTAGE-ARTERY
 // “REAL CNS / ORGANISM-WIDE IDENTITY + INTELLIGENCE + ARTERY KERNEL”
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: PulseMesh-v16-IMMORTAL.js
+// FILE: PulseMesh-v16.js
 // PULSE SYMBOLIC MESH — v16-IMMORTAL
 // “PURE SYMBOLIC CONNECTIVE TISSUE / SEMANTIC PATH / BINARY-AWARE / CHUNK-AWARE”
 // ============================================================================

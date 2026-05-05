@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/DeploymentPhysics-v16-Immortal.js
+FILE: /PULSE-WORLD/DeploymentPhysics-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — SYMBOLIC DEPLOYMENT PHYSICS
 ===============================================================================
 AI_EXPERIENCE_META = {

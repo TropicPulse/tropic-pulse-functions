@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: PulseMeshPresenceRelay-v16-IMMORTAL.js
+// FILE: PulseMeshPresenceRelay-v16.js
 // PULSE MESH PRESENCE RELAY — v16-IMMORTAL
 // Mesh-Level Presence • Nearby Scan • Advantage/Band/Region Aware
 // Metadata-Only • Membrane-Safe • NodeAdmin-Ready

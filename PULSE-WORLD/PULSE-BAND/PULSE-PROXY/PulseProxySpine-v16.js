@@ -68,7 +68,7 @@ import {
   getProxyFallback,
   getProxyMode,
   getProxyLineage
-} from "./PulseProxyContext-v16-Immortal.js";
+} from "./PulseProxyContext-v16.js";
 
 // Nervous system symbolic band (for dual-band awareness)
 import {

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PULSE-UI/PulseEvolutionaryBinary-v16-Immortal.js
+// FILE: /PULSE-UI/PulseEvolutionaryBinary-v16.js
 // PULSE OS — v16-IMMORTAL
 // UI BINARY EVOLUTION ORGAN — GPU‑Friendly, Route/Lineage/Artery + Advantage View
 // ============================================================================

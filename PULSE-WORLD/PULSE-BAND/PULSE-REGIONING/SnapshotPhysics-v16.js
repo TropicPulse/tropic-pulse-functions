@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/SnapshotPhysics-v16-Immortal.js
+FILE: /PULSE-WORLD/SnapshotPhysics-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — SYMBOLIC SNAPSHOT PHYSICS
 ===============================================================================
 AI_EXPERIENCE_META = {

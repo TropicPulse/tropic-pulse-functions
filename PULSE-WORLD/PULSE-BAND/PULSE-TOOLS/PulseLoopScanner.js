@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PulseOS/PULSE-TOOLS/PulseBinaryLoopScanner-v16-IMMORTAL.js
+// FILE: /PulseOS/PULSE-TOOLS/PulseBinaryLoopScanner-v16.js
 // PULSE OS — v16-IMMORTAL
 // MAIN LOOP ORGAN — PURE BINARY, DUAL-BAND, ARTERY-AWARE, ZERO-DRIFT
 // ============================================================================

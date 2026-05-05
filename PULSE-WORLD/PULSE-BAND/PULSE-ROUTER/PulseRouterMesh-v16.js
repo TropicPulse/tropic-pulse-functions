@@ -54,8 +54,8 @@ import * as PulseRouterEvolutionaryDesign     from "./PulseRouterEvolutionaryDes
 import * as PulseRouterEvolutionaryInstincts  from "./PulseRouterEvolutionaryInstincts.js";
 import * as PulseRouterEvolutionaryThought    from "./PulseRouterEvolutionaryThought.js";
 
-import { PulseRouter }                        from "./PulseRouter-v16-IMMORTAL.js";
-import { createBinaryRouter }                 from "./PulseBinaryRouter-v16-IMMORTAL.js";
+import { PulseRouter }                        from "./PulseRouter-v16.js";
+import { createBinaryRouter }                 from "./PulseBinaryRouter-v16.js";
 import { PulseRouterCommandments }            from "./PulseRouterCommandmentsStore-v16-IMMORTAL-DualHash.js";
 import { PulseEarnRouter }                    from "./PulseRouterEarn-v16-IMMORTAL-INTEL-DualHash.js";
 

@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-UI/PulseUIErrors-v16-Immortal.js
+FILE: /PULSE-UI/PulseUIErrors-v16.js
 UNIVERSAL ERROR SPINE — v16-Immortal
 Membrane-Safe • Drift-Safe • Organism-Wide Error Unifier
 Offline-First • CoreMemory-Mirrored via PulseProofBridge • Replay-Aware

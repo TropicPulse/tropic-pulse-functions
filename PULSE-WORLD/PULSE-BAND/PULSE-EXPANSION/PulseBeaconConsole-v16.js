@@ -1,5 +1,5 @@
 // ============================================================================
-// PULSE-WORLD : PulseBeaconConsole-v14-Immortal.js
+// PULSE-WORLD : PulseBeaconConsole-v16.js
 // ROLE: Global expansion console + Overmind control surface
 // VERSION: v14-Immortal
 // ============================================================================

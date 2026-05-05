@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/RegioningPhysics-v16-Immortal.js
+FILE: /PULSE-WORLD/RegioningPhysics-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — REGIONING PHYSICS
 ===============================================================================
 AI_EXPERIENCE_META = {

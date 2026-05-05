@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/LineageEngine-v16-Immortal.js
+FILE: /PULSE-WORLD/LineageEngine-v16.js
 LAYER: PULSE-WORLD / PULSE-LINEAGE + CORE MEMORY + MULTIVERSE COSMOS
 ===============================================================================
 AI_EXPERIENCE_META = {

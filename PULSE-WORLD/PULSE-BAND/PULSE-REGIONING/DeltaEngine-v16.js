@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/DeltaEngine-v16-Immortal.js
+FILE: /PULSE-WORLD/DeltaEngine-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — SYMBOLIC DELTA ENGINE
 ===============================================================================
 AI_EXPERIENCE_META = {

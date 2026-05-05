@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/ExecutionPhysics-v16-Immortal.js
+FILE: /PULSE-WORLD/ExecutionPhysics-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — SYMBOLIC EXECUTION PHYSICS
 ===============================================================================
 AI_EXPERIENCE_META = {

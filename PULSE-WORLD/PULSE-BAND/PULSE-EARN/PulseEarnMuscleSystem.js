@@ -1,5 +1,5 @@
 // ============================================================================
-//  PulseEarnMuscleSystem-v16-IMMORTAL.js
+//  PulseEarnMuscleSystem-v16.js
 //  THE MUSCLE SYSTEM (v16-IMMORTAL + Advantage‑M + Triple Presence + Dual-Hash)
 //  Deterministic Worker Supervisor + Profit Orchestrator
 //  Zero async, zero compute mutation, zero routing mutation

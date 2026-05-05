@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PulseOS/Scanner/PulseScannerCortex-v16-Immortal.js
+// FILE: /PulseOS/Scanner/PulseScannerCortex-v16.js
 // PULSE OS — v16‑IMMORTAL
 // SCANNER CORTEX ORGAN — DUAL-BAND, PRESENCE/HARMONICS, ADVANTAGE/ARTERY-AWARE
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PulseOS/PULSE-TOOLS/PulseBinaryWaveScanner-v16-IMMORTAL.js
+// FILE: /PulseOS/PULSE-TOOLS/PulseBinaryWaveScanner-v16.js
 // PULSE OS — v16‑IMMORTAL
 // PURE BINARY WAVE ORGAN — ZERO DRIFT, MULTI-SPIN, GPU-AWARE, PRESENCE/HARMONICS
 // ============================================================================

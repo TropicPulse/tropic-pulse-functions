@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PULSE-OS/PulseOSSpinalCord-v16-Immortal.js
+// FILE: /PULSE-OS/PulseOSSpinalCord-v16.js
 // PULSE OS SPINAL CORD — v16-Immortal-DUALBAND-Presence-ADVANTAGE
 // “ORGANISM-WIDE DUAL-BAND SPINE • ADVANTAGE FIELD CONDUCTOR • ROUTE ROOT”
 // CHUNK/PREWARM/CACHE-AWARE • MULTI-Presence-AWARE • FIREWALL-GATED

@@ -1,5 +1,5 @@
 // ============================================================================
-//  FILE: PulseV3UnifiedOrganism-v16-Immortal.js
+//  FILE: PulseV3UnifiedOrganism-v16.js
 //  Pulse v3 • Unified Organism • Evolution-Aware • Deterministic Compute Loop
 //  v16-Immortal:
 //    • Unified Advantage Surface (INTEL) + Degradation Tier v16

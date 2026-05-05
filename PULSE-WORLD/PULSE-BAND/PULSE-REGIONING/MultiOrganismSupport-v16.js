@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/MultiOrganismSupport-v16-Immortal.js
+FILE: /PULSE-WORLD/MultiOrganismSupport-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — MULTI-ORGANISM COORDINATION
 ===============================================================================
 AI_EXPERIENCE_META = {
@@ -100,10 +100,10 @@ const MULTI_ORG_SCHEMA_VERSION = "v3";
 // Imports (v16 IMMORTAL)
 // -------------------------
 
-import SnapshotPhysicsAPI from "./SnapshotPhysics-v16-Immortal.js";
-import DeltaEngineAPI from "./DeltaEngine-v16-Immortal.js";
-import DeploymentPhysicsAPI from "./DeploymentPhysics-v16-Immortal.js";
-import RegionMeshRoutingAPI from "./RegionMeshRouting-v16-Immortal.js";
+import SnapshotPhysicsAPI from "./SnapshotPhysics-v16.js";
+import DeltaEngineAPI from "./DeltaEngine-v16.js";
+import DeploymentPhysicsAPI from "./DeploymentPhysics-v16.js";
+import RegionMeshRoutingAPI from "./RegionMeshRouting-v16.js";
 import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
 
 const { projectSnapshotForDelta } = SnapshotPhysicsAPI;

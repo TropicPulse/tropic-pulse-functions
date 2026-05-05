@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: /PulseOS/Scanner/PulseHeatMap-v16-Immortal.js
+// FILE: /PulseOS/Scanner/PulseHeatMap-v16.js
 // PULSE OS — v16-IMMORTAL
 // UNIVERSAL HEATMAP ORGAN — ROLE-COLOR, PRESENCE, HARMONICS, MULTI-SPIN, DUAL-BAND
 // ============================================================================
@@ -55,7 +55,7 @@ AI_EXPERIENCE_META = {
 }
 */
 // ============================================================================
-// FILE: /PulseOS/Scanner/PulseHeatMap-v16-Immortal.js
+// FILE: /PulseOS/Scanner/PulseHeatMap-v16.js
 // PULSE OS — v16-IMMORTAL
 // UNIVERSAL HEATMAP ORGAN — ROLE-COLOR + DIAGNOSTICS + WARNINGS
 // ============================================================================

@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-WORLD/RegionMeshRouting-v16-Immortal.js
+FILE: /PULSE-WORLD/RegionMeshRouting-v16.js
 LAYER: PULSE-WORLD SUBSTRATE — REGION MESH ROUTING PHYSICS
 ===============================================================================
 AI_EXPERIENCE_META = {
@@ -95,7 +95,7 @@ const REGION_MESH_SCHEMA_VERSION = "v3";
 // Imports — Regioning + CoreMemory bridge
 // ---------------------------------------------------------------------------
 
-import RegioningPhysicsAPI from "./RegioningPhysics-v16-Immortal.js";
+import RegioningPhysicsAPI from "./RegioningPhysics-v16.js";
 import { PulseProofBridge } from "../_BACKEND/PulseProofBridge.js";
 
 const {

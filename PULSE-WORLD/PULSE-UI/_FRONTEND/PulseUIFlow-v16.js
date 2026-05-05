@@ -1,6 +1,6 @@
 /* global log,warn,error */
 // ============================================================================
-// FILE: /PulseOS/PULSE-UI/PulseUIFlow-v16-Immortal.js
+// FILE: /PulseOS/PULSE-UI/PulseUIFlow-v16.js
 // PULSE OS — v16‑IMMORTAL
 // “UI FLOW ENGINE / INTENT GLUE / HUMAN‑VISIBLE ORGANISM MAP”
 // Offline‑First • LocalStorage+CoreMemory Mirrored • Replay‑Aware

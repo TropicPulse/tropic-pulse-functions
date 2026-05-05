@@ -1,5 +1,5 @@
 // ============================================================================
-// PULSE-WORLD : PulseBeaconEngine-v15-Immortal.js
+// PULSE-WORLD : PulseBeaconEngine-v16.js
 // ORGAN TYPE: Bluetooth Presence / Membrane Organism
 // VERSION: v15-Immortal (Hybrid, Every-Advantage, Every-Prewarm, Mesh-/User-/WorldCore-Aware, Monolithic Membrane)
 // ============================================================================

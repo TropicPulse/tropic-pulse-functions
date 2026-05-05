@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-FILE: /PULSE-UI/PulseEvolutionaryImpulse-v16-Immortal.js
+FILE: /PULSE-UI/PulseEvolutionaryImpulse-v16.js
 LAYER: UI → CNS SIGNAL ORGAN
 ===============================================================================
 AI_EXPERIENCE_META = {

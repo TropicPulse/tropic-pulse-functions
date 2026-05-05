@@ -64,10 +64,10 @@ import { createPulseV2 as createPulseV2Shifter } from "../PULSE-SHIFTER/PulseShi
 import { createPulseBinaryShifterEvolutionaryPulse } from "../PULSE-SHIFTER/PulseBinaryShifterEvolutionaryPulse-v16-Immortal-INTEL.js";
 
 // v1 Legacy Pulse surface (PULSE-SEND)
-import { createLegacyPulse as createPulseV1Legacy } from "../PULSE-SEND/PulseSendLegacyPulse-v16-Immortal.js";
+import { createLegacyPulse as createPulseV1Legacy } from "../PULSE-SEND/PulseSendLegacyPulse-v16.js";
 
 // v3 Continuance Pulse surface (earn/continuance)
-import { PulseEarnContinuancePulse as createPulseV3Continuance } from "../PULSE-EARN/PulseEarnContinuancePulse-v16-Immortal.js";
+import { PulseEarnContinuancePulse as createPulseV3Continuance } from "../PULSE-EARN/PulseEarnContinuancePulse-v16.js";
 
 // v2 Evolution Engine (earn-side v2)
 import { createPulseV2 as createPulseV2Earn } from "../PULSE-SEND/PulseV2EvolutionEngine-v16-Immortal-INTEL.js";

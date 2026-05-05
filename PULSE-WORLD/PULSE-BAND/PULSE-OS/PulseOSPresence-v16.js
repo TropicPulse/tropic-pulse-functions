@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: PulseOSPresence-v16-Immortal.js
+// FILE: PulseOSPresence-v16.js
 // PULSE OS PRESENCE ORGAN — v16-Immortal
 // OS-Level Presence • Deterministic • Metadata-Only • Membrane-Safe
 // No Organs Exposed • No Identity Leaks • No Routing • Dualband-Aware
