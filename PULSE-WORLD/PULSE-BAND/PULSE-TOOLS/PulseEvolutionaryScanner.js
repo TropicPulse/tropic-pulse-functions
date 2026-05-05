@@ -1,15 +1,63 @@
 // ============================================================================
-// FILE: /PulseOS/Scanner/PulseScannerCortex-v12.3-Evo.js
-// PULSE OS — v12.3‑EVO
-// SCANNER CORTEX ORGAN — PRESENCE + HARMONICS + DUAL-BAND + ADAPTIVE LAYERS
+// FILE: /PulseOS/Scanner/PulseScannerCortex-v16-Immortal.js
+// PULSE OS — v16‑IMMORTAL
+// SCANNER CORTEX ORGAN — DUAL-BAND, PRESENCE/HARMONICS, ADVANTAGE/ARTERY-AWARE
 // ============================================================================
-// ROLE (12.3‑EVO):
-//   - The organism’s visual cortex.
-//   - Dynamically creates/destroys layers based on presence + harmonics.
-//   - Fuses binary, pulse, presence, and harmonic signals.
-//   - Produces adaptive layer sets for PageEvo‑12.3.
+// ROLE (v16‑IMMORTAL):
+//   - Organism’s visual cortex for binary-first, dual-band scanning.
+//   - Dynamically shapes layers based on presence + harmonics + admin flags.
+//   - Fuses binary, pulse, presence, harmonic, and anomaly signals.
+//   - Produces adaptive layer sets for PageEvo‑IMMORTAL.
 //   - Balanced adaptive mode: stable unless meaningful change detected.
+//   - Advantage/artery-aware: can surface “where to look” without IO.
 // ============================================================================
+
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseScannerCortex",
+  version: "v16-Immortal",
+  layer: "scanner_cortex",
+  role: "visual_cortex_organ",
+  lineage: "PulseScannerCortex-v12.3-Evo → v16-Immortal",
+
+  evo: {
+    cortexOrgan: true,
+    dualBand: true,
+    presenceAware: true,
+    harmonicAware: true,
+    arteryAware: true,
+    advantageView: true,
+    windowSafe: true,
+
+    adminInspectorAware: true,
+    pageEvoAware: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureComputeCore: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+    zeroRandomness: true
+  },
+
+  contract: {
+    always: [
+      "BinaryPulse",
+      "BinaryWaveScanner",
+      "PulseBinaryLoopScanner",
+      "PulseAdminInspector",
+      "PageEvo"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyScannerCortex"
+    ]
+  }
+}
+*/
 
 import { createBinaryPulse } from "../PULSE-TECH/PulseBinaryTech-v16.js";
 import { createBinaryWaveScanner } from "../PULSE-TOOLS/PulseBinaryWaveScanner.js";
@@ -36,7 +84,7 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-function avg(grid, key) {
+function avgGridScalar(grid, key) {
   let sum = 0, count = 0;
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[0].length; x++) {
@@ -60,7 +108,7 @@ function snapshot(grid) {
 }
 
 // ============================================================================
-// MAIN FACTORY — PULSE SCANNER CORTEX (DYNAMIC ADAPTIVE)
+// MAIN FACTORY — PULSE SCANNER CORTEX (v16‑IMMORTAL)
 // ============================================================================
 export function createPulseScannerCortex({
   trace = false,
@@ -68,15 +116,16 @@ export function createPulseScannerCortex({
 } = {}) {
 
   // -------------------------------------------------------------------------
-  // CORE ORGANS (12.3‑EVO)
+  // CORE ORGANS (v16‑IMMORTAL)
   // -------------------------------------------------------------------------
   const pulse    = createBinaryPulse({ trace });
   const waveScan = createBinaryWaveScanner({ trace });
   const loopScan = createBinaryLoopScanner({ trace });
   const admin    = createPulseAdminInspector({ trace });
+  const pageEvo  = PageEvo({ trace });
 
   // -------------------------------------------------------------------------
-  // BASE GRIDS (v11 → v12.3 presence-aware)
+  // BASE GRIDS
   // -------------------------------------------------------------------------
   const bodyGrid = createGrid(32, 32);
   const homeGrid = createGrid(24, 24);
@@ -85,7 +134,7 @@ export function createPulseScannerCortex({
 
   // -------------------------------------------------------------------------
   // SPIN ENGINES (multi-sentinel, multi-presence)
-  // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
   const spinEngines = Array.from({ length: spins }, (_, i) => ({
     id: i,
     phaseOffset: (Math.PI * 2 * i) / spins,
@@ -94,31 +143,59 @@ export function createPulseScannerCortex({
   }));
 
   // -------------------------------------------------------------------------
-  // PRESENCE + HARMONICS STATE
-  // -------------------------------------------------------------------------
-  let presenceHistory = [];
-  let harmonics = [];
+  // PRESENCE + HARMONICS STATE (v16‑IMMORTAL)
+// -------------------------------------------------------------------------
+  let presenceHistory = [];   // store scalar presence averages
+  let harmonics = [];         // [{ phaseDrift, cohesionScore, amplitude }]
 
   function updatePresence(grid) {
-    const p = avg(grid, "presence");
+    const p = avgGridScalar(grid, "presence");
     presenceHistory.push(p);
-    if (presenceHistory.length > 32) presenceHistory.shift();
+    if (presenceHistory.length > 64) presenceHistory.shift();
     return p;
   }
 
   function updateHarmonics(bits) {
     const ones = bits.reduce((a,b)=>a+b,0);
-    const ratio = ones / bits.length;
+    const ratio = bits.length ? ones / bits.length : 0;
 
-    const drift = Math.abs(Math.sin(ratio * Math.PI * 2));
-    const coherence = 1 - drift;
+    const phaseDrift = Math.abs(Math.sin(ratio * Math.PI * 2));
+    const cohesionScore = clamp(1 - phaseDrift, 0, 1);
+    const amplitude = clamp(ratio, 0, 1);
 
-    harmonics = [{ phaseDrift: drift, coherenceScore: coherence }];
-    return { drift, coherence };
+    harmonics = [{
+      phaseDrift,
+      cohesionScore,
+      amplitude
+    }];
+
+    return { phaseDrift, cohesionScore, amplitude };
+  }
+
+  function deriveNodeEnergyView() {
+    if (!harmonics.length) {
+      return { energy: 0.5, mood: "steady" };
+    }
+    const h = harmonics[0];
+    const energy = clamp(
+      h.cohesionScore * 0.6 +
+      (1 - Math.abs(h.phaseDrift)) * 0.25 +
+      (h.amplitude ?? 0.5) * 0.15,
+      0,
+      1
+    );
+    const mood =
+      energy > 0.85 ? "surge"   :
+      energy > 0.65 ? "charged" :
+      energy > 0.45 ? "active"  :
+      energy > 0.25 ? "steady"  :
+                      "calm";
+
+    return { energy, mood };
   }
 
   // -------------------------------------------------------------------------
-  // ADAPTIVE LAYER ENGINE (BALANCED MODE)
+  // ADAPTIVE LAYER ENGINE (BALANCED MODE, v16‑IMMORTAL)
 // -------------------------------------------------------------------------
   function buildAdaptiveLayers({
     bodySnap,
@@ -132,14 +209,27 @@ export function createPulseScannerCortex({
   }) {
     const layers = [];
 
+    const bodyDensityAvg   = avgGridScalar(bodySnap, "density");
+    const bodyContrastAvg  = avgGridScalar(bodySnap, "contrast");
+    const bodyWaveAvg      = avgGridScalar(bodySnap, "wave");
+    const nodeDensityAvg   = avgGridScalar(nodeSnap, "density");
+    const nodeContrastAvg  = avgGridScalar(nodeSnap, "contrast");
+    const nodeWaveAvg      = avgGridScalar(nodeSnap, "wave");
+    const homeDensityAvg   = avgGridScalar(homeSnap, "density");
+    const homeContrastAvg  = avgGridScalar(homeSnap, "contrast");
+    const homeWaveAvg      = avgGridScalar(homeSnap, "wave");
+    const townDensityAvg   = avgGridScalar(townSnap, "density");
+    const townContrastAvg  = avgGridScalar(townSnap, "contrast");
+    const townWaveAvg      = avgGridScalar(townSnap, "wave");
+
     // Always include body + node layers
     layers.push({
       id: "bodyPresence",
       type: "bodyPresence",
       summary: {
-        densityAvg: avg(bodySnap, "density"),
-        contrastAvg: avg(bodySnap, "contrast"),
-        waveAvg: avg(bodySnap, "wave"),
+        densityAvg: bodyDensityAvg,
+        contrastAvg: bodyContrastAvg,
+        waveAvg: bodyWaveAvg,
         presenceAvg
       },
       presence: presenceAvg,
@@ -153,9 +243,9 @@ export function createPulseScannerCortex({
       id: "nodeHarmonics",
       type: "nodeHarmonics",
       summary: {
-        densityAvg: avg(nodeSnap, "density"),
-        contrastAvg: avg(nodeSnap, "contrast"),
-        waveAvg: avg(nodeSnap, "wave")
+        densityAvg: nodeDensityAvg,
+        contrastAvg: nodeContrastAvg,
+        waveAvg: nodeWaveAvg
       },
       presence: presenceAvg,
       harmonics: coherenceScore,
@@ -170,9 +260,9 @@ export function createPulseScannerCortex({
         id: "homePresence",
         type: "homePresence",
         summary: {
-          densityAvg: avg(homeSnap, "density"),
-          contrastAvg: avg(homeSnap, "contrast"),
-          waveAvg: avg(homeSnap, "wave")
+          densityAvg: homeDensityAvg,
+          contrastAvg: homeContrastAvg,
+          waveAvg: homeWaveAvg
         },
         presence: presenceAvg,
         harmonics: coherenceScore,
@@ -187,9 +277,9 @@ export function createPulseScannerCortex({
         id: "townPresence",
         type: "townPresence",
         summary: {
-          densityAvg: avg(townSnap, "density"),
-          contrastAvg: avg(townSnap, "contrast"),
-          waveAvg: avg(townSnap, "wave")
+          densityAvg: townDensityAvg,
+          contrastAvg: townContrastAvg,
+          waveAvg: townWaveAvg
         },
         presence: presenceAvg,
         harmonics: coherenceScore,
@@ -203,21 +293,40 @@ export function createPulseScannerCortex({
   }
 
   // -------------------------------------------------------------------------
-  // MAIN FRAME STEP
+  // MAIN FRAME STEP (PURE CORE + external scheduler)
   // -------------------------------------------------------------------------
-  function nextFrame() {
+    function nextFrame({ gpuStats } = {}) {
     const bits = pulse.nextPulseSlow();
-    const { drift: harmonicDrift, coherence: coherenceScore } = updateHarmonics(bits);
+    const { phaseDrift, cohesionScore, amplitude } = updateHarmonics(bits);
+    const nodeEnergyView = deriveNodeEnergyView();
 
     const baseNumber = bits.reduce((a,b)=>a+b,0);
+    const harmonicBias = phaseDrift;
+    const presenceBiasBody = avgGridScalar(bodyGrid, "presence");
 
     for (const engine of spinEngines) {
       const spinPhase = baseNumber * engine.speed + engine.phaseOffset;
 
-      stepLayer(bodyGrid, bits, spinPhase, engine.weight);
-      stepLayer(homeGrid, bits, spinPhase, engine.weight);
-      stepLayer(townGrid, bits, spinPhase, engine.weight);
-      stepLayer(nodeGrid, bits, spinPhase, engine.weight);
+      stepLayer(bodyGrid, bits, spinPhase, engine.weight, {
+        presenceBias: presenceBiasBody,
+        harmonicBias,
+        gpuStats
+      });
+      stepLayer(homeGrid, bits, spinPhase, engine.weight, {
+        presenceBias: avgGridScalar(homeGrid, "presence"),
+        harmonicBias,
+        gpuStats
+      });
+      stepLayer(townGrid, bits, spinPhase, engine.weight, {
+        presenceBias: avgGridScalar(townGrid, "presence"),
+        harmonicBias,
+        gpuStats
+      });
+      stepLayer(nodeGrid, bits, spinPhase, engine.weight, {
+        presenceBias: avgGridScalar(nodeGrid, "presence"),
+        harmonicBias,
+        gpuStats
+      });
     }
 
     const bodySnap = snapshot(bodyGrid);
@@ -236,7 +345,7 @@ export function createPulseScannerCortex({
       spins: [],
       loopHistory: [],
       waveHistory: [],
-      nodeEnergy: coherenceScore,
+      nodeEnergy: nodeEnergyView.energy,
       harmonics,
       presenceHistory
     });
@@ -247,43 +356,100 @@ export function createPulseScannerCortex({
       townSnap,
       nodeSnap,
       presenceAvg,
-      harmonicDrift,
-      coherenceScore,
+      harmonicDrift: phaseDrift,
+      coherenceScore: cohesionScore,   // ✅ fixed
       adminFlags
     });
 
-    PageEvo.evolve({
+    pageEvo.evolve({
       blocks: layers,
       loopIndex: baseNumber,
-      wave: { phase: harmonicDrift * Math.PI * 2, amplitude: coherenceScore },
+      wave: { phase: phaseDrift * Math.PI * 2, amplitude },
       flags: adminFlags,
-      energy: coherenceScore,
+      energy: nodeEnergyView.energy,
       presence: presenceAvg
     });
+
+    if (trace) {
+      console.log("[PulseScannerCortex‑v16-IMMORTAL] frame", {
+        presenceAvg,
+        phaseDrift,
+        cohesionScore,
+        nodeEnergyView,
+        layersCount: layers.length,
+        flagsCount: adminFlags.length
+      });
+    }
+
+    return {
+      bits,
+      presenceAvg,
+      harmonics,
+      nodeEnergyView,
+      layers,
+      adminFlags
+    };
   }
 
+
   // -------------------------------------------------------------------------
-  // LAYER STEP (presence-aware, dual-band)
-  // -------------------------------------------------------------------------
-  function stepLayer(grid, bits, spinPhase, weight) {
+  // LAYER STEP (dual-band + harmonics + GPU-aware, symbolic only)
+// -------------------------------------------------------------------------
+  function stepLayer(grid, bits, spinPhase, weight, {
+    presenceBias = 0,
+    harmonicBias = 0,
+    gpuStats = null
+  } = {}) {
     const H = grid.length;
     const W = grid[0].length;
 
-    const loopIndex = loopScan.nextIndex(bits, H, spinPhase, avg(grid,"presence"), harmonics[0]?.phaseDrift);
+    const gpuInfluence = gpuStats?.loadFactor ?? 0;
 
-    const wave = waveScan.nextWave(bits, avg(grid,"presence"), harmonics[0]?.phaseDrift);
+    const loopIndex = loopScan.nextIndex(
+      bits,
+      Math.max(H, W),
+      spinPhase,
+      presenceBias,
+      harmonicBias
+    );
+
+    const wave = waveScan.nextWave(
+      bits,
+      presenceBias,
+      harmonicBias
+    );
+
+    const baseDensityDelta = 0.03 * weight;
+    const baseContrastBlend = 0.3 * weight;
+
+    const dualBandScale =
+      0.5 +
+      presenceBias * 0.3 +
+      harmonicBias * 0.2 +
+      gpuInfluence * 0.1;
+
+    const densityDelta = baseDensityDelta * clamp(dualBandScale, 0.4, 1.4);
+    const contrastBlend = baseContrastBlend * clamp(dualBandScale, 0.4, 1.4);
 
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const cell = grid[y][x];
 
-        const phaseTerm = wave.phase + spinPhase + (x + y) * 0.045;
+        const phaseTerm = (wave.phase ?? 0) + spinPhase + (x + y) * 0.045;
         const baseContrast = Math.abs(Math.sin(phaseTerm));
 
-        cell.density = clamp(cell.density * 0.9 + 0.03 * weight, 0, 1);
-        cell.contrast = clamp(cell.contrast * 0.7 + baseContrast * 0.3 * weight, 0, 1);
-        cell.wave = wave.amplitude;
-        cell.presence = clamp(cell.presence * 0.85 + wave.amplitude * 0.15, 0, 1);
+        cell.density = clamp(cell.density * 0.9 + densityDelta, 0, 1);
+        cell.contrast = clamp(
+          cell.contrast * (1 - contrastBlend) + baseContrast * contrastBlend,
+          0,
+          1
+        );
+        cell.wave = wave.amplitude ?? wave.depth ?? 0;
+        cell.presence = clamp(
+          cell.presence * 0.85 + (wave.amplitude ?? 0) * 0.15,
+          0,
+          1
+        );
       }
     }
   }
@@ -292,21 +458,20 @@ export function createPulseScannerCortex({
   // PUBLIC API
   // -------------------------------------------------------------------------
   return {
+    // external scheduler drives this; core stays pure
+    nextFrame,
     start(interval = 200) {
-      setInterval(nextFrame, interval);
+      setInterval(() => nextFrame(), interval);
     },
     snapshot() {
       return {
         body: snapshot(bodyGrid),
         home: snapshot(homeGrid),
         town: snapshot(townGrid),
-        node: snapshot(nodeGrid)
+        node: snapshot(nodeGrid),
+        presenceHistory: [...presenceHistory],
+        harmonics: [...harmonics]
       };
     }
   };
 }
-
-// ============================================================================
-// END OF FILE — PulseScannerCortex-v12.3-Evo
-// Dynamic Adaptive Presence Cortex / Harmonics Cortex / Dual-Band Visual Cortex
-// ============================================================================

@@ -1,15 +1,14 @@
 /*
 ===============================================================================
-FILE: /PULSE-UI/PulseEvolutionaryImpulse.js
+FILE: /PULSE-UI/PulseEvolutionaryImpulse-v16-Immortal.js
 LAYER: UI → CNS SIGNAL ORGAN
-===============================================================================
 ===============================================================================
 AI_EXPERIENCE_META = {
   identity: "PulseUI.EvolutionaryImpulse",
-  version: "v15-Immortal",
+  version: "v16-Immortal",
   layer: "pulse_ui",
   role: "ui_to_cns_signal_layer",
-  lineage: "PulseEvolutionaryImpulse-v11.3-Evo-Prime → v14-Immortal → v15-Immortal",
+  lineage: "PulseEvolutionaryImpulse-v11.3-Evo-Prime → v14-Immortal → v15-Immortal → v16-Immortal",
 
   evo: {
     impulseOrgan: true,
@@ -23,6 +22,11 @@ AI_EXPERIENCE_META = {
     tierAware: true,
     channelAware: true,
     signatureAware: true,
+    envelopeAware: true,
+    schemaVersioned: true,
+    errorAware: true,
+    bandMetricsAware: true,
+    contextAware: true,
     futureEvolutionReady: true,
 
     deterministic: true,
@@ -31,12 +35,7 @@ AI_EXPERIENCE_META = {
 
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true,
-
-    // v15 upgrades
-    schemaVersioned: true,
-    envelopeAware: true,
-    errorAware: true
+    zeroMutationOfInput: true
   },
 
   contract: {
@@ -75,14 +74,14 @@ EXPORT_META = {
     "ImpulseEnvelope",
     "ImpulseSignature",
     "ImpulseTier",
-    "ImpulseChannel"
+    "ImpulseChannel",
+    "ImpulseAdvantage"
   ],
 
   sideEffects: "cns_emit_only",
   network: "none",
   filesystem: "none"
 }
-
 */
 
 // Global handle
@@ -109,7 +108,7 @@ export const ImpulseRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "Impulse",
-  version: "15.0-Immortal",
+  version: "16.0-Immortal",
   identity: "PulseEvolutionaryImpulse",
 
   evo: {
@@ -125,11 +124,16 @@ export const ImpulseRole = {
     tierAware: true,
     channelAware: true,
     signatureAware: true,
+    envelopeAware: true,
+    schemaVersioned: true,
+    errorAware: true,
+    bandMetricsAware: true,
+    contextAware: true,
     futureEvolutionReady: true
   }
 };
 
-const IMPULSE_SCHEMA_VERSION = "v2";
+const IMPULSE_SCHEMA_VERSION = "v3";
 
 // ============================================================================
 // INTERNAL: deterministic signature generator (no randomness)
@@ -167,6 +171,67 @@ const ImpulseChannels = Object.freeze({
 });
 
 // ============================================================================
+// INTERNAL: band metrics + advantage (deterministic)
+// ============================================================================
+function computeBandMetrics(payload, binaryPayload) {
+  const symJson = JSON.stringify(payload || {});
+  const symSize = symJson.length;
+
+  const binSize = Array.isArray(binaryPayload) ? binaryPayload.length : 0;
+
+  const total = symSize + binSize || 1;
+  const symbolicWeight = symSize / total;
+  const binaryWeight = binSize / total;
+
+  const advantage =
+    0.4 * symbolicWeight +
+    0.6 * binaryWeight;
+
+  return {
+    symbolicSize: symSize,
+    binarySize: binSize,
+    symbolicWeight,
+    binaryWeight,
+    advantage
+  };
+}
+
+// deterministic tier classifier from context + payload
+function classifyTier({ payload, context }) {
+  const p = payload || {};
+  const c = context || {};
+
+  const severity =
+    (c.severity === "critical" && 1.0) ||
+    (c.severity === "warning" && 0.7) ||
+    (c.severity === "action" && 0.5) ||
+    (c.severity === "info" && 0.2) ||
+    0.2;
+
+  if (severity >= 0.95) return ImpulseTiers.immortal;
+  if (severity >= 0.75) return ImpulseTiers.critical;
+  if (severity >= 0.55) return ImpulseTiers.warning;
+  if (severity >= 0.35) return ImpulseTiers.action;
+  return ImpulseTiers.info;
+}
+
+// deterministic channel classifier from context + route
+function classifyChannel({ context, route }) {
+  const c = context || {};
+  const r = route || "";
+
+  if (c.channel && ImpulseChannels[c.channel]) return c.channel;
+
+  if (r.startsWith("/earn")) return ImpulseChannels.earn;
+  if (r.startsWith("/router")) return ImpulseChannels.router;
+  if (r.startsWith("/evo")) return ImpulseChannels.evolution;
+  if (r.startsWith("/mem")) return ImpulseChannels.memory;
+  if (r.startsWith("/sys")) return ImpulseChannels.system;
+
+  return ImpulseChannels.ui;
+}
+
+// ============================================================================
 // FACTORY — creates the impulse organ
 // ============================================================================
 export function createPulseEvolutionaryImpulse({
@@ -184,6 +249,7 @@ export function createPulseEvolutionaryImpulse({
     lastSignature: null,
     lastTier: null,
     lastChannel: null,
+    lastAdvantage: null,
     lastError: null,
     eventSeq: 0
   };
@@ -215,29 +281,39 @@ export function createPulseEvolutionaryImpulse({
     payload,
     binaryPayload,
     context,
-    tier = ImpulseTiers.info,
-    channel = ImpulseChannels.ui
+    tier,
+    channel
   }) {
     const modeKind = binaryPayload ? "dual" : "symbolic";
     const lineage = Evolution?.getPageLineage?.() || {};
     const route = RouteOrgan?.RouterState?.currentRoute || "unknown";
+    const bootPath = Evolution?.getBootPath?.() || "unknown";
+
+    const bandMetrics = computeBandMetrics(payload, binaryPayload);
+    const autoTier = tier || classifyTier({ payload, context });
+    const autoChannel = channel || classifyChannel({ context, route });
 
     const envelope = {
       schemaVersion: IMPULSE_SCHEMA_VERSION,
       source,
       modeKind,
       route,
+      bootPath,
       lineage,
-      tier,
-      channel,
+      tier: autoTier,
+      channel: autoChannel,
       payload: payload || {},
       binary: binaryPayload || null,
       context: context || {},
+      bandMetrics,
+      advantage: bandMetrics.advantage,
       version: ImpulseRole.version,
-      timestamp: "NO_TIMESTAMP_v15"
+      timestamp: "NO_TIMESTAMP_v16"
     };
 
     envelope.signature = deterministicSignature(envelope);
+    envelope.impulseId = "IMP_" + envelope.signature.slice(4);
+
     return envelope;
   }
 
@@ -249,8 +325,8 @@ export function createPulseEvolutionaryImpulse({
     payload = {},
     binaryPayload = null,
     context = {},
-    tier = ImpulseTiers.info,
-    channel = ImpulseChannels.ui
+    tier = null,
+    channel = null
   } = {}) {
     nextSeq();
 
@@ -267,18 +343,27 @@ export function createPulseEvolutionaryImpulse({
     ImpulseState.lastModeKind = envelope.modeKind;
     ImpulseState.lastRoute = envelope.route;
     ImpulseState.lastSignature = envelope.signature;
-    ImpulseState.lastTier = tier;
-    ImpulseState.lastChannel = channel;
+    ImpulseState.lastTier = envelope.tier;
+    ImpulseState.lastChannel = envelope.channel;
+    ImpulseState.lastAdvantage = envelope.advantage;
 
     try {
       CNS?.emitImpulse?.("PulseEvolutionaryImpulse", envelope);
       safeLog("IMPULSE_OK", {
         modeKind: envelope.modeKind,
         route: envelope.route,
-        tier,
-        channel
+        tier: envelope.tier,
+        channel: envelope.channel,
+        advantage: envelope.advantage
       });
-      return { ok: true, signature: envelope.signature };
+      return {
+        ok: true,
+        signature: envelope.signature,
+        impulseId: envelope.impulseId,
+        tier: envelope.tier,
+        channel: envelope.channel,
+        advantage: envelope.advantage
+      };
     } catch (err) {
       const msg = String(err);
       ImpulseState.lastError = msg;
@@ -298,11 +383,13 @@ export function createPulseEvolutionaryImpulse({
 
   safeLog("INIT", {
     identity: ImpulseRole.identity,
-    version: ImpulseRole.version
+    version: ImpulseRole.version,
+    schemaVersion: IMPULSE_SCHEMA_VERSION
   });
 
   return PulseEvolutionaryImpulse;
 }
+
 try {
   if (typeof window !== "undefined") {
     window.PulseEvolutionaryImpulse = createPulseEvolutionaryImpulse;

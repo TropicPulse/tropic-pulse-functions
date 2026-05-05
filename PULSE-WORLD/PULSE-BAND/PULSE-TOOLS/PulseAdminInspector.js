@@ -1,20 +1,667 @@
 // ============================================================================
-// FILE: /OS/Scanner/PulseAdminInspector.js
-// PULSE OS — v12.3‑EVO
-// ADMIN INSPECTOR ORGAN — QUAD‑MODE (BINARY | ENVIRONMENT | PRESENCE | HYBRID)
+// FILE: /OS/Scanner/PulseAdminInspector-v16-Immortal-GPU+-CI-Delta.js
+// PULSE OS — v16‑IMMORTAL‑GPU+‑CI‑DELTA
+// ADMIN INSPECTOR ORGAN — MULTI‑MODE (BINARY | ENV | PRESENCE | GPU | CI | DELTA | HYBRID)
 // ============================================================================
-// ROLE (12.3‑EVO):
+// ROLE (v16‑IMMORTAL):
 //   - Inspect ALL layers (body/home/town/node/kitchen/crab/etc).
-//   - Mode "binary": strict binary anomaly detection.
+//   - Mode "binary": strict binary anomaly detection (symbolic only).
 //   - Mode "environment": physical/environmental anomaly detection.
-//   - Mode "presence": detect presence‑voids, spikes, shadows, echoes.
+//   - Mode "presence": detect presence‑voids, spikes, shadows, echoes, fractals.
+//   - Mode "gpu": symbolic GPU pressure/warp/thermal anomaly detection (NO heavy compute).
+//   - Mode "ci": CI‑surface instability, persona collapse, flakiness fields.
+//   - Mode "delta": binary‑delta anomaly scoring (symbolic only).
 //   - Mode "hybrid": combine all modes with dual‑band weighting.
-//   - Detect anomalies in density/contrast/wave/energy/loop/spin/presence.
+//   - Detect anomalies in density/contrast/wave/energy/loop/spin/presence/gpu/ci/delta.
 //   - Multi‑spin + multi‑sentinel interference analysis.
-//   - NodeAdmin‑EVO harmonic drift detection.
-//   - Presence‑wave coupling collapse detection.
-//   - Provide attention scores + repair hints.
+//   - NodeAdmin‑IMMORTAL harmonic lattice drift detection.
+//   - Presence‑wave coupling collapse + fractal collapse detection.
+//   - Provide attention scores + repair hints + escalation vectors.
 //   - Tier‑aware escalation (Proxy → Mesh → NodeAdmin‑EVO → PresenceCore).
+//   - ZERO randomness. ZERO mutation of inputs. PURE symbolic inspection.
+// ============================================================================
+
+/*
+AI_EXPERIENCE_META = {
+  identity: "PulseAdminInspector",
+  version: "v16-Immortal-GPU+-CI-Delta",
+  layer: "scanner",
+  role: "admin_inspector_organ",
+  lineage: "PulseAdminInspector-v11-Evo → v12.3-Evo → v16-Immortal-GPU+-CI-Delta",
+
+  evo: {
+    inspectorOrgan: true,
+    presenceInspector: true,
+    gpuInspector: true,
+    ciInspector: true,
+    deltaInspector: true,
+    harmonicInspector: true,
+    waveInspector: true,
+    loopInspector: true,
+    spinInspector: true,
+    energyInspector: true,
+
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    dualbandSafe: true,
+    gpuAware: true,
+    ciAware: true,
+    binaryDeltaAware: true,
+    continuanceAware: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true
+  },
+
+  contract: {
+    always: [
+      "PulseContinuanceCoreMemory",
+      "PulseOmniHostingCoreMemory",
+      "PulseSchemaCoreMemory",
+      "PulseGPUWisdomCortex"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "legacyAdminInspector"
+    ]
+  }
+}
+*/
+
+// ============================================================================
+// META
+// ============================================================================
+
+export const PulseAdminInspectorMeta = Object.freeze({
+  layer: "PulseAdminInspector",
+  role: "ADMIN_INSPECTOR_ORGAN",
+  version: "16-Immortal-GPU+-CI-Delta",
+  identity: "PulseAdminInspector-v16-Immortal-GPU+-CI-Delta",
+  evo: Object.freeze({
+    deterministic: true,
+    driftProof: true,
+    pureCompute: true,
+
+    quadMode: true,
+    multiMode: true,
+    dualbandSafe: true,
+
+    presenceAware: true,
+    gpuAware: true,
+    ciAware: true,
+    binaryDeltaAware: true,
+    continuanceAware: true,
+
+    arteryAware: true,
+    escalationAware: true,
+    repairHintAware: true,
+
+    zeroNetwork: true,
+    zeroFilesystem: true,
+    zeroMutationOfInput: true,
+    epoch: "16-Immortal-GPU+-CI-Delta"
+  })
+});
+
+// ============================================================================
+// INTERNAL HELPERS
+// ============================================================================
+
+function clamp01(v) {
+  if (v < 0) return 0;
+  if (v > 1) return 1;
+  return v;
+}
+
+const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+
+const flattenGrid = (grid) => {
+  if (!Array.isArray(grid) || !grid.length || !Array.isArray(grid[0])) return [];
+  const out = [];
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[0].length; x++) {
+      out.push(grid[y][x]);
+    }
+  }
+  return out;
+};
+
+// ============================================================================
+// ARTERY METRICS (symbolic, window‑safe)
+// ============================================================================
+
+const inspectorArtery = {
+  inspections: 0,
+  lastMode: null,
+  lastFlagCount: 0,
+  presenceOps: 0,
+  gpuOps: 0,
+  ciOps: 0,
+  deltaOps: 0,
+  harmonicOps: 0,
+  waveOps: 0,
+  binaryOps: 0,
+  environmentOps: 0
+};
+
+function bumpArtery(kind, flagsCount) {
+  inspectorArtery.inspections += 1;
+  inspectorArtery.lastMode = kind;
+  inspectorArtery.lastFlagCount = flagsCount;
+
+  if (kind === "presence") inspectorArtery.presenceOps += 1;
+  if (kind === "gpu") inspectorArtery.gpuOps += 1;
+  if (kind === "ci") inspectorArtery.ciOps += 1;
+  if (kind === "delta") inspectorArtery.deltaOps += 1;
+  if (kind === "harmonic") inspectorArtery.harmonicOps += 1;
+  if (kind === "wave") inspectorArtery.waveOps += 1;
+  if (kind === "binary") inspectorArtery.binaryOps += 1;
+  if (kind === "environment") inspectorArtery.environmentOps += 1;
+}
+
+export function snapshotAdminInspectorArtery() {
+  const load = clamp01(inspectorArtery.inspections / 8192);
+  const pressure = clamp01(inspectorArtery.lastFlagCount / 256);
+
+  const loadBucket =
+    load >= 0.9
+      ? "saturated"
+      : load >= 0.7
+      ? "high"
+      : load >= 0.4
+      ? "medium"
+      : load > 0
+      ? "low"
+      : "idle";
+
+  const pressureBucket =
+    pressure >= 0.9
+      ? "overload"
+      : pressure >= 0.7
+      ? "high"
+      : pressure >= 0.4
+      ? "medium"
+      : pressure > 0
+      ? "low"
+      : "none";
+
+  return Object.freeze({
+    ...inspectorArtery,
+    load,
+    loadBucket,
+    pressure,
+    pressureBucket
+  });
+}
+
+// ============================================================================
+// PRESENCE ANOMALIES (v16)
+// ============================================================================
+
+function detectPresence(grid, layer, mode) {
+  if (mode !== "presence" && mode !== "hybrid") return [];
+
+  const flags = [];
+  const flat = flattenGrid(grid);
+  if (!flat.length) return flags;
+
+  const presences = flat.map((c) => c?.presence ?? 0);
+  const p = avg(presences);
+
+  if (p < 0.05) {
+    flags.push({
+      type: "presence-void",
+      layer,
+      severity: "high",
+      hint: "increase-presence-density"
+    });
+  }
+
+  if (p > 0.92) {
+    flags.push({
+      type: "presence-spike",
+      layer,
+      severity: "medium",
+      hint: "redistribute-presence"
+    });
+  }
+
+  const variance = avg(presences.map((v) => Math.abs(v - p)));
+  if (variance > 0.35) {
+    flags.push({
+      type: "presence-shadow",
+      layer,
+      severity: "medium",
+      hint: "smooth-presence-field"
+    });
+  }
+
+  if (flat.some((c) => c?.tags?.includes("presence-echo"))) {
+    flags.push({
+      type: "presence-echo",
+      layer,
+      severity: "low",
+      hint: "monitor-echo-patterns"
+    });
+  }
+
+  // v16: presence fractal collapse (multi‑scale instability)
+  const highCells = presences.filter((v) => v > 0.8).length;
+  const lowCells = presences.filter((v) => v < 0.1).length;
+  const ratio = flat.length ? (highCells + lowCells) / flat.length : 0;
+  if (ratio > 0.85) {
+    flags.push({
+      type: "presence-fractal-collapse",
+      layer,
+      severity: "high",
+      hint: "reseed-midrange-presence"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// NODEADMIN‑IMMORTAL HARMONIC LATTICE DRIFT (v16)
+// ============================================================================
+
+function detectHarmonics(harmonics, mode) {
+  if (!harmonics || !harmonics.length) return [];
+  if (mode !== "environment" && mode !== "hybrid" && mode !== "presence") return [];
+
+  const drift = avg(harmonics.map((h) => Math.abs(h.phaseDrift ?? 0)));
+  const lattice = avg(harmonics.map((h) => Math.abs(h.latticeDrift ?? 0)));
+
+  const flags = [];
+
+  if (drift > 0.18) {
+    flags.push({
+      type: "harmonic-drift",
+      severity: "medium",
+      hint: "re-align-nodeadmin-phase"
+    });
+  }
+
+  if (lattice > 0.22) {
+    flags.push({
+      type: "harmonic-lattice-drift",
+      severity: "high",
+      hint: "rebuild-harmonic-lattice"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// PRESENCE‑WAVE COUPLING + COLLAPSE (v16)
+// ============================================================================
+
+function detectPresenceWaveCoupling(history, mode) {
+  if (!Array.isArray(history) || history.length < 6) return [];
+  if (mode !== "presence" && mode !== "hybrid") return [];
+
+  const last = history.slice(-6);
+  const weak = last.every((h) => (h.wave ?? 0) < 0.05 && (h.presence ?? 0) < 0.05);
+
+  const flags = [];
+
+  if (weak) {
+    flags.push({
+      type: "presence-wave-collapse",
+      severity: "high",
+      hint: "inject-wave-or-presence"
+    });
+  }
+
+  const oscillation = last.map((h) => (h.wave ?? 0) - (h.presence ?? 0));
+  const oscVar = avg(oscillation.map((v) => Math.abs(v - avg(oscillation))));
+  if (oscVar > 0.4) {
+    flags.push({
+      type: "presence-wave-desync",
+      severity: "medium",
+      hint: "re-sync-presence-wave-coupling"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// GPU ANOMALIES (symbolic, NO heavy compute)
+// ============================================================================
+
+function detectGPU(gpuStats, mode) {
+  if (mode !== "gpu" && mode !== "hybrid") return [];
+  if (!gpuStats) return [];
+
+  const {
+    utilization = 0, // 0–1
+    memoryPressure = 0, // 0–1
+    temperature = 0, // C
+    warpDivergence = 0 // 0–1
+  } = gpuStats;
+
+  const flags = [];
+
+  if (utilization > 0.95 && memoryPressure > 0.85) {
+    flags.push({
+      type: "gpu-saturation",
+      severity: "high",
+      hint: "offload-noncritical-work-to-cpu-or-idle"
+    });
+  }
+
+  if (warpDivergence > 0.6) {
+    flags.push({
+      type: "gpu-warp-divergence",
+      severity: "medium",
+      hint: "simplify-kernels-or-rebalance-workloads"
+    });
+  }
+
+  if (temperature > 85) {
+    flags.push({
+      type: "gpu-thermal-risk",
+      severity: "medium",
+      hint: "reduce-gpu-duty-cycle-or-improve-cooling"
+    });
+  }
+
+  if (utilization < 0.05 && memoryPressure < 0.05) {
+    flags.push({
+      type: "gpu-underutilized",
+      severity: "low",
+      hint: "consider-prewarm-or-advantage-mapping"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// CI SURFACE ANOMALIES (symbolic)
+// ============================================================================
+
+function detectCI(ciSurface, mode) {
+  if (mode !== "ci" && mode !== "hybrid") return [];
+  if (!ciSurface) return [];
+
+  const {
+    flakinessScore = 0, // 0–1
+    failureRate = 0, // 0–1
+    mode: ciMode = "unknown",
+    personaStable = true
+  } = ciSurface;
+
+  const flags = [];
+
+  if (flakinessScore > 0.6 || failureRate > 0.4) {
+    flags.push({
+      type: "ci-instability",
+      severity: "medium",
+      ciMode,
+      hint: "stabilize-tests-or-reduce-scope"
+    });
+  }
+
+  if (!personaStable) {
+    flags.push({
+      type: "ci-persona-collapse",
+      severity: "high",
+      ciMode,
+      hint: "lock-ci-persona-and-freeze-config"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// BINARY‑DELTA ANOMALIES (symbolic only)
+// ============================================================================
+
+function detectBinaryDelta(deltaPacket, mode) {
+  if (mode !== "delta" && mode !== "hybrid" && mode !== "binary") return [];
+  if (!deltaPacket || !deltaPacket.delta) return [];
+
+  const { addedCount = 0, removedCount = 0, unchangedCount = 0 } =
+    deltaPacket.delta;
+
+  const total = addedCount + removedCount + unchangedCount || 1;
+  const changeRatio = (addedCount + removedCount) / total;
+
+  const flags = [];
+
+  if (changeRatio > 0.9 && total > 1024) {
+    flags.push({
+      type: "binary-delta-overwrite",
+      severity: "high",
+      hint: "verify-delta-source-and-rollback-if-unexpected"
+    });
+  } else if (changeRatio > 0.6) {
+    flags.push({
+      type: "binary-delta-heavy-change",
+      severity: "medium",
+      hint: "run-shadow-logger-and-compare-snapshots"
+    });
+  }
+
+  if (unchangedCount === 0 && total > 0) {
+    flags.push({
+      type: "binary-delta-no-stable-core",
+      severity: "medium",
+      hint: "ensure-core-binary-surfaces-remain-stable"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// BINARY / ENVIRONMENT / WAVE / LOOP / SPIN / ENERGY (symbolic stubs, v16)
+// ============================================================================
+
+function detectBinary(bits, mode) {
+  if (mode !== "binary" && mode !== "hybrid" && mode !== "delta") return [];
+  if (!bits || typeof bits !== "string") return [];
+
+  const len = bits.length;
+  if (!len) return [];
+
+  const ones = [...bits].filter((b) => b === "1").length;
+  const ratio = ones / len;
+
+  const flags = [];
+
+  if (ratio < 0.05 || ratio > 0.95) {
+    flags.push({
+      type: "binary-imbalance",
+      severity: "low",
+      hint: "check-entropy-or-source"
+    });
+  }
+
+  return flags;
+}
+
+function detectEnvironment(env, mode) {
+  if (mode !== "environment" && mode !== "hybrid") return [];
+  if (!env) return [];
+
+  const { temperature = 0, humidity = 0, noise = 0 } = env;
+  const flags = [];
+
+  if (temperature > 40) {
+    flags.push({
+      type: "env-overheat",
+      severity: "medium",
+      hint: "cool-environment"
+    });
+  }
+
+  if (humidity > 0.9) {
+    flags.push({
+      type: "env-humidity-risk",
+      severity: "low",
+      hint: "dehumidify-environment"
+    });
+  }
+
+  if (noise > 0.8) {
+    flags.push({
+      type: "env-noise-interference",
+      severity: "low",
+      hint: "reduce-noise-or-shield-signals"
+    });
+  }
+
+  return flags;
+}
+
+function detectWaveCollapse(waveHistory, mode) {
+  if (!Array.isArray(waveHistory) || !waveHistory.length) return [];
+  if (mode !== "environment" && mode !== "hybrid" && mode !== "presence") return [];
+
+  const last = waveHistory.slice(-8);
+  const avgWave = avg(last.map((w) => w?.amplitude ?? 0));
+
+  const flags = [];
+  if (avgWave < 0.03) {
+    flags.push({
+      type: "wave-collapse",
+      severity: "medium",
+      hint: "reintroduce-wave-sources"
+    });
+  }
+
+  return flags;
+}
+
+// (loop/spin/energy can be extended similarly; kept symbolic/light)
+function detectLoop(loopHistory, mode) {
+  if (!Array.isArray(loopHistory) || !loopHistory.length) return [];
+  if (mode !== "environment" && mode !== "hybrid") return [];
+
+  const last = loopHistory.slice(-10);
+  const stuck = last.every((l) => l?.state === "same");
+
+  return stuck
+    ? [
+        {
+          type: "loop-stuck",
+          severity: "medium",
+          hint: "introduce-perturbation-or-break-loop"
+        }
+      ]
+    : [];
+}
+
+function detectSpin(spins, mode) {
+  if (!Array.isArray(spins) || !spins.length) return [];
+  if (mode !== "environment" && mode !== "hybrid") return [];
+
+  const imbalance = avg(spins.map((s) => Math.abs(s?.spin ?? 0)));
+  if (imbalance > 0.8) {
+    return [
+      {
+        type: "spin-imbalance",
+        severity: "low",
+        hint: "rebalance-spin-vectors"
+      }
+    ];
+  }
+  return [];
+}
+
+function detectEnergy(nodeEnergy, mode) {
+  if (!nodeEnergy) return [];
+  if (mode !== "environment" && mode !== "hybrid") return [];
+
+  const { level = 0, volatility = 0 } = nodeEnergy;
+  const flags = [];
+
+  if (level < 0.1) {
+    flags.push({
+      type: "energy-low",
+      severity: "medium",
+      hint: "increase-energy-input"
+    });
+  }
+
+  if (volatility > 0.7) {
+    flags.push({
+      type: "energy-volatility",
+      severity: "medium",
+      hint: "stabilize-energy-sources"
+    });
+  }
+
+  return flags;
+}
+
+// ============================================================================
+// MULTI‑SENTINEL INTERFERENCE (v16)
+// ============================================================================
+
+function detectMultiSentinelInterference(spins, harmonics, mode) {
+  if (mode !== "environment" && mode !== "hybrid" && mode !== "presence") return [];
+  if (!Array.isArray(spins) || !Array.isArray(harmonics)) return [];
+
+  const spinCount = spins.length;
+  const harmonicCount = harmonics.length;
+
+  if (spinCount < 2 || harmonicCount < 2) return [];
+
+  const avgSpin = avg(spins.map((s) => Math.abs(s?.spin ?? 0)));
+  const avgPhase = avg(harmonics.map((h) => Math.abs(h?.phaseDrift ?? 0)));
+
+  if (avgSpin > 0.6 && avgPhase > 0.15) {
+    return [
+      {
+        type: "multi-sentinel-interference",
+        severity: "medium",
+        hint: "reduce-sentinel-density-or-desync-phases"
+      }
+    ];
+  }
+
+  return [];
+}
+
+// ============================================================================
+// TIER ESCALATION (v16)
+// ============================================================================
+
+function escalate(flags, { fallbackProxy, fallbackMesh, fallbackNode, fallbackPresenceCore }) {
+  if (!flags.length) return;
+
+  const high = flags.some((f) => f.severity === "high");
+  const med = flags.some((f) => f.severity === "medium");
+
+  if (high && fallbackPresenceCore?.exchange) {
+    return fallbackPresenceCore.exchange(flags);
+  }
+
+  if (high && fallbackNode?.exchange) {
+    return fallbackNode.exchange(flags);
+  }
+
+  if (med && fallbackMesh?.exchange) {
+    return fallbackMesh.exchange(flags);
+  }
+
+  if (fallbackProxy?.exchange) {
+    return fallbackProxy.exchange(flags);
+  }
+}
+
+// ============================================================================
+// PUBLIC FACTORY — v16‑IMMORTAL‑GPU+‑CI‑DELTA
 // ============================================================================
 
 export function createPulseAdminInspector({
@@ -24,119 +671,23 @@ export function createPulseAdminInspector({
   fallbackPresenceCore,
   trace = false
 } = {}) {
-
-  // ---------------------------------------------------------------------------
-  // MODE (12.3‑EVO)
-  // ---------------------------------------------------------------------------
-  let mode = "environment"; 
-  // modes: "binary" | "environment" | "presence" | "hybrid"
+  // modes: "binary" | "environment" | "presence" | "gpu" | "ci" | "delta" | "hybrid"
+  let mode = "environment";
 
   function setMode(m) {
-    const allowed = ["binary","environment","presence","hybrid"];
+    const allowed = [
+      "binary",
+      "environment",
+      "presence",
+      "gpu",
+      "ci",
+      "delta",
+      "hybrid"
+    ];
     mode = allowed.includes(m) ? m : "environment";
-    if (trace) console.log("[AdminInspector‑12.3] mode:", mode);
+    if (trace) console.log("[AdminInspector‑v16] mode:", mode);
   }
 
-  // ---------------------------------------------------------------------------
-  // HELPERS
-  // ---------------------------------------------------------------------------
-  const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0) / arr.length : 0;
-
-  const flatten = grid => {
-    const out = [];
-    for (let y = 0; y < grid.length; y++)
-      for (let x = 0; x < grid[0].length; x++)
-        out.push(grid[y][x]);
-    return out;
-  };
-
-  // ---------------------------------------------------------------------------
-  // PRESENCE ANOMALIES (12.3‑EVO)
-  // ---------------------------------------------------------------------------
-  function detectPresence(grid, layer) {
-    if (mode !== "presence" && mode !== "hybrid") return [];
-
-    const flags = [];
-    const flat = flatten(grid);
-
-    const p = avg(flat.map(c => c.presence ?? 0));
-
-    if (p < 0.05)
-      flags.push({ type:"presence-void", layer, severity:"high" });
-
-    if (p > 0.92)
-      flags.push({ type:"presence-spike", layer, severity:"medium" });
-
-    // presence shadow = uneven distribution
-    const variance = avg(flat.map(c => Math.abs((c.presence ?? 0) - p)));
-    if (variance > 0.35)
-      flags.push({ type:"presence-shadow", layer, severity:"medium" });
-
-    // presence echo = oscillation in history
-    if (flat.some(c => c.tags?.includes("presence-echo")))
-      flags.push({ type:"presence-echo", layer, severity:"low" });
-
-    return flags;
-  }
-
-  // ---------------------------------------------------------------------------
-  // NODEADMIN‑EVO HARMONIC DRIFT (12.3‑EVO)
-  // ---------------------------------------------------------------------------
-  function detectHarmonics(harmonics) {
-    if (!harmonics || !harmonics.length) return [];
-
-    const drift = avg(harmonics.map(h => Math.abs(h.phaseDrift)));
-    if (drift > 0.18)
-      return [{ type:"harmonic-drift", severity:"medium" }];
-
-    return [];
-  }
-
-  // ---------------------------------------------------------------------------
-  // PRESENCE‑WAVE COUPLING (12.3‑EVO)
-  // ---------------------------------------------------------------------------
-  function detectPresenceWaveCoupling(history) {
-    if (!Array.isArray(history) || history.length < 6) return [];
-
-    const last = history.slice(-6);
-    const weak = last.every(h => h.wave < 0.05 && h.presence < 0.05);
-
-    return weak
-      ? [{ type:"presence-wave-collapse", severity:"high" }]
-      : [];
-  }
-
-  // ---------------------------------------------------------------------------
-  // EXISTING DETECTORS (binary, grid, environment, spin, loop, wave, energy)
-  // ---------------------------------------------------------------------------
-  // (unchanged from your v11‑EVO version — omitted here for brevity)
-  // ---------------------------------------------------------------------------
-
-  // ---------------------------------------------------------------------------
-  // TIER ESCALATION (12.3‑EVO)
-  // ---------------------------------------------------------------------------
-  function escalate(flags) {
-    if (!flags.length) return;
-
-    const high = flags.some(f => f.severity === "high");
-    const med  = flags.some(f => f.severity === "medium");
-
-    if (high && fallbackPresenceCore?.exchange)
-      return fallbackPresenceCore.exchange(flags);
-
-    if (high && fallbackNode?.exchange)
-      return fallbackNode.exchange(flags);
-
-    if (med && fallbackMesh?.exchange)
-      return fallbackMesh.exchange(flags);
-
-    if (fallbackProxy?.exchange)
-      return fallbackProxy.exchange(flags);
-  }
-
-  // ---------------------------------------------------------------------------
-  // PUBLIC: INSPECT EVERYTHING (12.3‑EVO)
-  // ---------------------------------------------------------------------------
   function inspectAll({
     body,
     home,
@@ -148,40 +699,67 @@ export function createPulseAdminInspector({
     waveHistory,
     nodeEnergy,
     harmonics,
-    presenceHistory
+    presenceHistory,
+    environment,
+    gpuStats,
+    ciSurface,
+    binaryDeltaPacket
   }) {
     let flags = [];
 
     // presence anomalies
-    flags.push(...detectPresence(body, "body"));
-    flags.push(...detectPresence(home, "home"));
-    flags.push(...detectPresence(town, "town"));
-    flags.push(...detectPresence(node, "node"));
+    flags.push(...detectPresence(body, "body", mode));
+    flags.push(...detectPresence(home, "home", mode));
+    flags.push(...detectPresence(town, "town", mode));
+    flags.push(...detectPresence(node, "node", mode));
 
-    // harmonic drift
-    flags.push(...detectHarmonics(harmonics));
+    // harmonic drift / lattice
+    flags.push(...detectHarmonics(harmonics, mode));
 
     // presence-wave coupling
-    flags.push(...detectPresenceWaveCoupling(presenceHistory));
+    flags.push(...detectPresenceWaveCoupling(presenceHistory, mode));
 
-    // (existing detectors from v11‑EVO)
-    // flags.push(...detectBinary(bits));
-    // flags.push(...detectGrid(...));
-    // flags.push(...detectEnvironment(...));
-    // flags.push(...detectSpin(...));
-    // flags.push(...detectLoop(...));
-    // flags.push(...detectWaveCollapse(...));
-    // flags.push(...detectEnergy(...));
+    // gpu symbolic anomalies
+    flags.push(...detectGPU(gpuStats, mode));
 
-    escalate(flags);
+    // ci surface anomalies
+    flags.push(...detectCI(ciSurface, mode));
 
-    if (trace) console.log("[AdminInspector‑12.3] flags:", flags);
+    // binary-delta anomalies
+    flags.push(...detectBinaryDelta(binaryDeltaPacket, mode));
+
+    // binary / environment / wave / loop / spin / energy
+    flags.push(...detectBinary(bits, mode));
+    flags.push(...detectEnvironment(environment, mode));
+    flags.push(...detectWaveCollapse(waveHistory, mode));
+    flags.push(...detectLoop(loopHistory, mode));
+    flags.push(...detectSpin(spins, mode));
+    flags.push(...detectEnergy(nodeEnergy, mode));
+
+    // multi-sentinel interference
+    flags.push(...detectMultiSentinelInterference(spins, harmonics, mode));
+
+    // artery bump
+    bumpArtery(mode, flags.length);
+
+    // escalation
+    escalate(flags, { fallbackProxy, fallbackMesh, fallbackNode, fallbackPresenceCore });
+
+    if (trace) console.log("[AdminInspector‑v16] flags:", flags);
 
     return flags;
   }
 
   return {
+    meta: PulseAdminInspectorMeta,
     setMode,
-    inspectAll
+    inspectAll,
+    snapshotArtery: snapshotAdminInspectorArtery
   };
 }
+
+export default {
+  Meta: PulseAdminInspectorMeta,
+  createPulseAdminInspector,
+  snapshotAdminInspectorArtery
+};

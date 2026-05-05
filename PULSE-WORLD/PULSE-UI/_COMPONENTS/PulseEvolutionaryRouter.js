@@ -1,15 +1,14 @@
 /*
 ===============================================================================
-FILE: /PULSE-UI/PulseEvolutionaryRouter.js
-LAYER: UI PAGE ROUTER ORGAN
-===============================================================================
+FILE: /PULSE-UI/PulseEvolutionaryRouter-v16-Immortal.js
+LAYER: UI PAGE ROUTER ORGAN — IMMORTAL v16+
 ===============================================================================
 AI_EXPERIENCE_META = {
   identity: "PulseUI.EvolutionaryRouter",
-  version: "v15-Immortal",
+  version: "v16-Immortal",
   layer: "pulse_ui",
   role: "ui_page_router",
-  lineage: "PulseEvolutionaryRouter-v11.3-Evo-Prime → v14-Immortal → v15-Immortal",
+  lineage: "PulseEvolutionaryRouter-v11.3-Evo-Prime → v14-Immortal → v15-Immortal → v16-Immortal",
 
   evo: {
     uiRouting: true,
@@ -32,11 +31,13 @@ AI_EXPERIENCE_META = {
     zeroFilesystem: true,
     zeroMutationOfInput: true,
 
-    // v15 upgrades
+    // v16+ upgrades
     schemaVersioned: true,
     envelopeAware: true,
     historyAware: true,
-    integrityAware: true
+    integrityAware: true,
+    degradationAware: true,
+    experienceBlocksAware: true
   },
 
   contract: {
@@ -44,6 +45,7 @@ AI_EXPERIENCE_META = {
       "PulseUI.EvolutionaryCode",
       "PulseUI.EvolutionaryBrain",
       "PulseUI.EvolutionaryImpulse",
+      "PulseUI.EvolutionaryMemory",
       "PulseCore.Memory",
       "PulseCore.CNS",
       "PulseDesign.Manifest"
@@ -72,28 +74,52 @@ EXPORT_META = {
     "RouteContext",
     "CNS",
     "Evolution",
-    "MemoryOrgan"
+    "MemoryOrgan",
+    "ImpulseOrgan",
+    "CodeOrgan",
+    "BrainOrgan"
   ],
 
   produces: [
     "RouteTransition",
     "TransitionSignature",
     "TransitionTier",
-    "TransitionChannel"
+    "TransitionChannel",
+    "TransitionExperience"
   ],
 
   sideEffects: "cns_emit_only",
   network: "none",
   filesystem: "none"
 }
-
+===============================================================================
 */
 
+// Global handle
+const g =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof global !== "undefined"
+    ? global
+    : typeof window !== "undefined"
+    ? window
+    : typeof g !== "undefined"
+    ? g
+    : {};
+
+// Prefer global db if present (logger page / server)
+const db =
+  (g && g.db) ||
+  (typeof global !== "undefined" && global.db) ||
+  (typeof globalThis !== "undefined" && globalThis.db) ||
+  (typeof window !== "undefined" && window.db) ||
+  null;
+  
 export const RouterRole = {
   type: "Organ",
   subsystem: "UI",
   layer: "PageRouter",
-  version: "15.0-Immortal",
+  version: "16.0-Immortal",
   identity: "PulseEvolutionaryRouter",
 
   evo: {
@@ -113,22 +139,27 @@ export const RouterRole = {
   }
 };
 
-const ROUTER_SCHEMA_VERSION = "v2";
+const ROUTER_SCHEMA_VERSION = "v3";
 
 // ============================================================================
-// INTERNAL: deterministic signature generator
+// INTERNAL: deterministic signature + hash
 // ============================================================================
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return h >>> 0;
+}
+
 function deterministicSignature(obj) {
   const json = JSON.stringify(obj || {});
-  let hash = 0;
-  for (let i = 0; i < json.length; i++) {
-    hash = (hash * 31 + json.charCodeAt(i)) >>> 0;
-  }
-  return "ROUTE_SIG_" + hash.toString(16).padStart(8, "0");
+  const h = hashString(json);
+  return "ROUTE_SIG_" + h.toString(16).padStart(8, "0");
 }
 
 // ============================================================================
-// INTERNAL: transition tiers
+// INTERNAL: transition tiers + channels
 // ============================================================================
 const TransitionTiers = Object.freeze({
   normal: "normal",
@@ -137,9 +168,6 @@ const TransitionTiers = Object.freeze({
   immortal: "immortal"
 });
 
-// ============================================================================
-// INTERNAL: transition channels
-// ============================================================================
 const TransitionChannels = Object.freeze({
   ui: "ui",
   system: "system",
@@ -147,6 +175,109 @@ const TransitionChannels = Object.freeze({
   memory: "memory",
   earn: "earn"
 });
+
+// ============================================================================
+// INTERNAL: advantage + integrity + experience blocks
+// ============================================================================
+function computeTransitionAdvantage({ payload, binaryPayload }) {
+  const payloadJson = JSON.stringify(payload || {});
+  const payloadSize = payloadJson.length;
+
+  const binary = binaryPayload;
+  const binarySize = Array.isArray(binary) ? binary.length : 0;
+
+  const total = payloadSize + binarySize || 1;
+  const symbolicWeight = payloadSize / total;
+  const binaryWeight = binarySize / total;
+
+  const density = binaryWeight;
+  const entropyHint = 1 - Math.abs(0.5 - density) * 2;
+
+  const advantage =
+    0.4 * symbolicWeight +
+    0.6 * binaryWeight;
+
+  return {
+    payloadSize,
+    binarySize,
+    totalSize: total,
+    symbolicWeight,
+    binaryWeight,
+    density,
+    entropyHint,
+    advantage
+  };
+}
+
+function computeTransitionIntegrity({ fromRoute, toRoute, advantage }) {
+  const base =
+    (fromRoute ? 0.25 : 0) +
+    (toRoute ? 0.25 : 0) +
+    0.25 * (advantage.entropyHint ?? 0.5) +
+    0.25 * (advantage.advantage ?? 0.5);
+
+  const score = Math.max(0, Math.min(1, base));
+
+  const status =
+    score >= 0.95 ? "immortal" :
+    score >= 0.85 ? "excellent" :
+    score >= 0.70 ? "good" :
+    score >= 0.55 ? "fair" :
+    score >= 0.40 ? "degraded" :
+                    "critical";
+
+  const degraded = status === "degraded" || status === "critical";
+
+  return { score, status, degraded };
+}
+
+function buildExperienceBlocks({
+  fromRoute,
+  toRoute,
+  tier,
+  channel,
+  advantage,
+  integrity
+}) {
+  return {
+    schemaVersion: ROUTER_SCHEMA_VERSION,
+    blocks: [
+      {
+        id: "router.transition",
+        kind: "transition",
+        fromRoute,
+        toRoute,
+        tier,
+        channel
+      },
+      {
+        id: "router.advantage",
+        kind: "advantage",
+        payloadSize: advantage.payloadSize,
+        binarySize: advantage.binarySize,
+        totalSize: advantage.totalSize,
+        symbolicWeight: advantage.symbolicWeight,
+        binaryWeight: advantage.binaryWeight,
+        density: advantage.density,
+        entropyHint: advantage.entropyHint,
+        advantage: advantage.advantage
+      },
+      {
+        id: "router.integrity",
+        kind: "integrity",
+        score: integrity.score,
+        status: integrity.status,
+        degraded: integrity.degraded
+      }
+    ]
+  };
+}
+
+function buildEnvelopeId({ fromRoute, toRoute, signature }) {
+  const base = `${fromRoute}:${toRoute}:${signature}`;
+  const h = hashString(base);
+  return `ROUTE-${ROUTER_SCHEMA_VERSION}-${h.toString(16).padStart(8, "0")}`;
+}
 
 // ============================================================================
 // FACTORY — creates the router organ
@@ -168,6 +299,7 @@ export function createPulseEvolutionaryRouter({
     lastSignature: null,
     lastTier: null,
     lastChannel: null,
+    lastExperience: null,
     routeHistory: [],
     eventSeq: 0
   };
@@ -180,7 +312,7 @@ export function createPulseEvolutionaryRouter({
   function safeLog(stage, details = {}) {
     try {
       log(
-        "[PulseEvolutionaryRouter]",
+        "[PulseEvolutionaryRouter-v16]",
         stage,
         JSON.stringify({
           schemaVersion: ROUTER_SCHEMA_VERSION,
@@ -217,15 +349,12 @@ export function createPulseEvolutionaryRouter({
     }
   };
 
-  // --------------------------------------------------------------------------
-  // VALIDATE ROUTE
-  // --------------------------------------------------------------------------
   function isValidRoute(route) {
     return typeof route === "string" && Object.prototype.hasOwnProperty.call(ROUTES, route);
   }
 
   // --------------------------------------------------------------------------
-  // BUILD TRANSITION ENVELOPE — deterministic, binary-native
+  // BUILD TRANSITION ENVELOPE — deterministic, dual-band, experience-aware
   // --------------------------------------------------------------------------
   function buildTransitionEnvelope({
     fromRoute,
@@ -237,8 +366,9 @@ export function createPulseEvolutionaryRouter({
     channel = TransitionChannels.ui
   }) {
     const lineage = Evolution?.getPageLineage?.() || {};
-
-    const envelope = {
+    const advantage = computeTransitionAdvantage({ payload, binaryPayload });
+    const integrity = computeTransitionIntegrity({ fromRoute, toRoute, advantage });
+    const baseEnvelope = {
       schemaVersion: ROUTER_SCHEMA_VERSION,
       fromRoute,
       toRoute,
@@ -249,15 +379,32 @@ export function createPulseEvolutionaryRouter({
       binary: binaryPayload || null,
       context: context || {},
       version: RouterRole.version,
-      timestamp: "NO_TIMESTAMP_v15"
+      timestamp: "NO_TIMESTAMP_v16"
     };
 
-    envelope.signature = deterministicSignature(envelope);
-    return envelope;
+    const signature = deterministicSignature(baseEnvelope);
+    const id = buildEnvelopeId({ fromRoute, toRoute, signature });
+    const experience = buildExperienceBlocks({
+      fromRoute,
+      toRoute,
+      tier,
+      channel,
+      advantage,
+      integrity
+    });
+
+    return {
+      ...baseEnvelope,
+      id,
+      signature,
+      advantage,
+      integrity,
+      experience
+    };
   }
 
   // --------------------------------------------------------------------------
-  // TRANSITION — deterministic, CNS-aware, memory-aware
+  // TRANSITION — deterministic, CNS-aware, MemoryOrgan/CoreMemory-aware
   // --------------------------------------------------------------------------
   async function transition(
     toRoute,
@@ -273,7 +420,7 @@ export function createPulseEvolutionaryRouter({
 
     if (!isValidRoute(toRoute)) {
       const err = "InvalidRoute";
-      warn("[PulseEvolutionaryRouter] INVALID_ROUTE", toRoute);
+      warn("[PulseEvolutionaryRouter-v16] INVALID_ROUTE", toRoute);
       safeLog("INVALID_ROUTE", { toRoute, error: err });
       return { ok: false, error: err };
     }
@@ -283,7 +430,7 @@ export function createPulseEvolutionaryRouter({
 
     if (!allowed.includes(toRoute)) {
       const err = "RouteNotAllowed";
-      warn("[PulseEvolutionaryRouter] ROUTE_NOT_ALLOWED", { fromRoute, toRoute });
+      warn("[PulseEvolutionaryRouter-v16] ROUTE_NOT_ALLOWED", { fromRoute, toRoute });
       safeLog("ROUTE_NOT_ALLOWED", { fromRoute, toRoute, error: err });
       return { ok: false, error: err };
     }
@@ -303,35 +450,49 @@ export function createPulseEvolutionaryRouter({
     RouterState.lastSignature = envelope.signature;
     RouterState.lastTier = tier;
     RouterState.lastChannel = channel;
+    RouterState.lastExperience = envelope.experience;
     RouterState.routeHistory.push({ from: fromRoute, to: toRoute });
 
-    safeLog("TRANSITION", { fromRoute, toRoute, signature: envelope.signature });
+    safeLog("TRANSITION", {
+      fromRoute,
+      toRoute,
+      signature: envelope.signature,
+      integrityStatus: envelope.integrity.status,
+      degraded: envelope.integrity.degraded
+    });
 
-    // Emit impulse to CNS
+    // Emit impulse to CNS via ImpulseOrgan
     try {
       ImpulseOrgan?.emit({
         source: "PulseEvolutionaryRouter",
-        payload: { fromRoute, toRoute },
+        payload: {
+          fromRoute,
+          toRoute,
+          integrityStatus: envelope.integrity.status,
+          degraded: envelope.integrity.degraded
+        },
         binaryPayload: null,
         context,
         tier,
         channel
       });
     } catch (err) {
-      warn("[PulseEvolutionaryRouter] IMPULSE_EMIT_ERROR", String(err));
+      warn("[PulseEvolutionaryRouter-v16] IMPULSE_EMIT_ERROR", String(err));
       safeLog("IMPULSE_EMIT_ERROR", { error: String(err) });
     }
 
-    // Persist route to CoreMemory via EvolutionaryMemory
+    // Persist router state via MemoryOrgan → CoreMemory (through bridge)
     try {
       MemoryOrgan?.core?.setRouteSnapshot?.("router", {
         schemaVersion: ROUTER_SCHEMA_VERSION,
+        version: RouterRole.version,
         currentRoute: toRoute,
-        lastTransition: envelope
+        lastTransition: envelope,
+        routeHistory: RouterState.routeHistory.slice(-64)
       });
       safeLog("MEMORY_WRITE_OK", { toRoute });
     } catch (err) {
-      warn("[PulseEvolutionaryRouter] MEMORY_WRITE_ERROR", String(err));
+      warn("[PulseEvolutionaryRouter-v16] MEMORY_WRITE_ERROR", String(err));
       safeLog("MEMORY_WRITE_ERROR", { error: String(err) });
     }
 
@@ -339,15 +500,23 @@ export function createPulseEvolutionaryRouter({
     const handler = ROUTES[toRoute]?.handler;
     if (typeof handler === "function") {
       const res = await handler({ payload, binaryPayload, context });
-      return { ok: true, route: toRoute, result: res, signature: envelope.signature };
+      return {
+        ok: true,
+        route: toRoute,
+        result: res,
+        signature: envelope.signature,
+        experience: envelope.experience
+      };
     }
 
-    return { ok: true, route: toRoute, signature: envelope.signature };
+    return {
+      ok: true,
+      route: toRoute,
+      signature: envelope.signature,
+      experience: envelope.experience
+    };
   }
 
-  // --------------------------------------------------------------------------
-  // PUBLIC ENTRY — go to a route
-  // --------------------------------------------------------------------------
   async function go(route, opts = {}) {
     return transition(route, opts);
   }
@@ -363,8 +532,24 @@ export function createPulseEvolutionaryRouter({
 
   safeLog("INIT", {
     identity: RouterRole.identity,
-    version: RouterRole.version
+    version: RouterRole.version,
+    schemaVersion: ROUTER_SCHEMA_VERSION
   });
 
   return PulseEvolutionaryRouter;
 }
+
+try {
+  if (typeof window !== "undefined") {
+    window.PulseEvolutionaryRouter = createPulseEvolutionaryRouter;
+  }
+  if (typeof globalThis !== "undefined") {
+    globalThis.PulseEvolutionaryRouter = createPulseEvolutionaryRouter;
+  }
+  if (typeof global !== "undefined") {
+    global.PulseEvolutionaryRouter = createPulseEvolutionaryRouter;
+  }
+  if (typeof g !== "undefined") {
+    g.PulseEvolutionaryRouter = createPulseEvolutionaryRouter;
+  }
+} catch {}
