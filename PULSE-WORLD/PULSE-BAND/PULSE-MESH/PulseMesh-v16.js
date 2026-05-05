@@ -180,7 +180,7 @@ import PulseMeshThalamus from "./PulseMeshThalamus.js";
 // WORLD / PRESENCE LAYER
 // ============================================================================
 import PresenceAIView from "./PresenceAIView.js";
-import MentorUpgradeRequest from "./MentorUpgradeRequest.js";
+import MentorUpgradeRequest from "./PulseMeshMentorUpgradeRequest.js";
 import { createPulseWorldSocialGraph } from "./PulseWorldSocialGraph.js";
 
 // ============================================================================

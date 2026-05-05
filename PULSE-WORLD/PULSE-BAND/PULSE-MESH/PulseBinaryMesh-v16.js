@@ -132,7 +132,7 @@ export const BinaryMeshMeta = Object.freeze({
 // ============================================================================
 
 // 0 — CORE ORGANISM BOOT
-import { createOrganismMesh } from "./OrganismMesh-v16.js";
+import { createOrganismMesh } from "./PulseMeshOrganism-v16.js";
 
 // 1 — SPINE (root of mesh nervous system)
 import PulseMeshSpine from "./PulseMeshSpine.js";
@@ -161,8 +161,8 @@ import PulseMeshThalamus from "./PulseMeshThalamus.js";
 // ============================================================================
 // WORLD / PRESENCE LAYER
 // ============================================================================
-import PresenceAIView from "./PresenceAIView.js";
-import MentorUpgradeRequest from "./MentorUpgradeRequest.js";
+import PresenceAIView from "./PulseMeshPresenceAIView.js";
+import MentorUpgradeRequest from "./PulseMeshMentorUpgradeRequest.js";
 import { createPulseWorldSocialGraph } from "./PulseWorldSocialGraph.js";
 
 // ============================================================================
