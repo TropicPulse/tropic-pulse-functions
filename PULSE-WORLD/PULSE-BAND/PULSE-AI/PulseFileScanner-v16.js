@@ -1,16 +1,17 @@
 // ============================================================================
-// FILE: /PULSE-AI/PulseFileScanner-v15-Immortal.js
-// PULSE OS v15‑IMMORTAL — FILE SCANNER ORGAN
-// Symbolic Cognition • Structural Analysis • Drift + Lineage Aware
-// PURE SYMBOLIC ENGINE. ZERO EXECUTION. ZERO MUTATION. DUALBAND-SAFE.
+// FILE: /PULSE-AI/PulseFileScanner-v16-ImmortalPlus.js
+// PULSE OS v16‑IMMORTAL++ — FILE SCANNER ORGAN
+// Symbolic Cognition • Structural Analysis • Drift + Lineage + Trust Aware
+// PURE SYMBOLIC ENGINE. ZERO EXECUTION. ZERO MUTATION. DUALBAND + PULSE-NET SAFE.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseFileScanner",
-  version: "v15-Immortal",
+  version: "v16-Immortal++",
   layer: "ai_adapter",
   role: "file_scanner_adapter",
-  lineage: "PulseFileScanner-v11 → v14-Immortal → v15-Immortal",
+  lineage: "PulseFileScanner-v11 → v14-Immortal → v15-Immortal → v16-Immortal++",
 
   evo: {
     adapter: true,
@@ -19,17 +20,26 @@ AI_EXPERIENCE_META = {
     binaryAware: true,
     dualBand: true,
 
+    scannerArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    organismUserSegregation: true,
+
     deterministic: true,
     driftProof: true,
     pureCompute: true,
-    zeroNetwork: true,
-    zeroFilesystem: true,
+    zeroNetwork: true,          // no raw internet; Pulse / Pulse‑Net only
+    zeroFilesystem: false,      // backendMode uses local fs, never remote
     zeroMutationOfInput: true
   },
 
   contract: {
-    always: ["aiContext", "aiCortex", "aiEngine"],
-    never: ["safeRoute", "fetchViaCNS"]
+    always: ["aiContext", "aiCortex", "aiEngine", "PulseDualBandOrganism"],
+    never: ["safeRoute", "fetchViaCNS", "directInternetAccess"]
   }
 }
 */
@@ -39,11 +49,11 @@ export const PulseFileScannerMeta = Object.freeze({
   subsystem: "aiFileScanner",
   layer: "PulseAICognition",
   role: "FILE_SCANNER_ORGAN",
-  version: "15-Immortal",
-  identity: "PulseFileScanner-v15-Immortal",
+  version: "16-Immortal++",
+  identity: "PulseFileScanner-v16-ImmortalPlus",
 
   // --------------------------------------------------------------------------
-  // EVO — IMMORTAL-GRADE SCANNER CAPABILITIES
+  // EVO — IMMORTAL++ SCANNER CAPABILITIES
   // --------------------------------------------------------------------------
   evo: Object.freeze({
     deterministic: true,
@@ -65,8 +75,16 @@ export const PulseFileScannerMeta = Object.freeze({
     packetAware: true,
     windowAware: true,
 
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    organismUserSegregation: true,
+
     futureEvolutionReady: true,
-    epoch: "15-Immortal"
+    epoch: "16-Immortal++"
   }),
 
   // --------------------------------------------------------------------------
@@ -77,35 +95,39 @@ export const PulseFileScannerMeta = Object.freeze({
       "Provide symbolic-only file cognition",
       "Analyze file structure without execution",
       "Detect drift, ESM/CJS conflicts, and import surfaces",
-      "Emit symbolic-only FileScanner-Artery v3",
-      "Remain Cortex-safe and Evolution-aware",
-      "Surface lineage + drift signals to Evolution organs"
+      "Emit symbolic-only FileScanner-Artery v4 (trust-aware)",
+      "Remain Cortex-safe, Evolution-aware, and DualBand-safe",
+      "Surface lineage + drift + trust signals to Evolution / Jury / Trust organs"
     ],
     never: [
       "execute code",
       "mutate files",
-      "modify filesystem",
+      "modify filesystem structure",
       "introduce randomness",
       "block organism execution",
       "emit raw file contents to external windows",
-      "bypass SafetyFrame or Permissions contracts"
+      "bypass SafetyFrame or Permissions contracts",
+      "open network sockets",
+      "perform HTTP(S) requests",
+      "bypass Pulse / Pulse‑Net routing"
     ],
     always: [
       "remain deterministic",
       "remain symbolic-only",
       "respect backendMode",
-      "emit drift + lineage signals when Evolution organ is present",
-      "emit window-safe scanner artery snapshots"
+      "emit drift + lineage + trust signals when Evolution / Trust organs are present",
+      "emit window-safe scanner artery snapshots",
+      "segregate organism state from user identity"
     ]
   }),
 
   boundaryReflex() {
-    return "PulseFileScanner is symbolic-only — it never executes or mutates code, and only emits window-safe structure.";
+    return "PulseFileScanner is symbolic-only — it never executes or mutates code, and only emits window-safe, trust-aware structure.";
   }
 });
 
 // ============================================================================
-// HELPERS — BUCKETS + PRESSURE
+// HELPERS — BUCKETS + PRESSURE + TRUST / COMPLEXITY
 // ============================================================================
 function bucketPressure(v) {
   if (v >= 0.9) return "overload";
@@ -123,13 +145,75 @@ function extractBinaryPressure(binaryVitals = {}) {
   return 0;
 }
 
+function computeHash(str) {
+  let h = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 1000003;
+  }
+  return `h${h}`;
+}
+
+function computeComplexityMetrics(content) {
+  const length = content.length;
+  const lines = content.split(/\r?\n/).length;
+  const importCount = (content.match(/import\s+/g) || []).length;
+  const requireCount = (content.match(/require\(/g) || []).length;
+  const exportCount = (content.match(/export\s+/g) || []).length;
+  const functionCount = (content.match(/function\s+|=>/g) || []).length;
+
+  const complexityScore = Math.min(
+    1,
+    (importCount + requireCount + exportCount + functionCount) / 200
+  );
+
+  return {
+    length,
+    lines,
+    importCount,
+    requireCount,
+    exportCount,
+    functionCount,
+    complexityScore
+  };
+}
+
+function computeTrustSignals(report, complexity) {
+  const driftCount = report?.drift?.length || 0;
+  const hasMixedModule = report?.drift?.includes("MIXED_MODULE_SYSTEM");
+  const hasCjsOnly = report?.drift?.includes("CJS_ONLY_ORGAN");
+  const heavyImports = complexity.importCount + complexity.requireCount > 20;
+
+  const honeypotRisk =
+    hasMixedModule || heavyImports ? Math.min(1, 0.4 + complexity.complexityScore) : 0.1;
+
+  const dominanceRisk =
+    driftCount > 0 ? Math.min(1, 0.5 + complexity.complexityScore) : 0.05;
+
+  const anomalyScore =
+    driftCount * 0.2 +
+    (hasMixedModule ? 0.3 : 0) +
+    (heavyImports ? 0.2 : 0) +
+    complexity.complexityScore * 0.3;
+
+  return {
+    honeypotRisk: Math.min(1, honeypotRisk),
+    dominanceRisk: Math.min(1, dominanceRisk),
+    anomalyScore: Math.min(1, anomalyScore),
+    driftCount
+  };
+}
+
 // ============================================================================
-// FILE SCANNER FACTORY — v15‑IMMORTAL
+// FILE SCANNER FACTORY — v16‑IMMORTAL++
 // ============================================================================
 export function createPulseFileScanner({
   backendMode = false,
   Evolution = null,
-  binaryVitals = {}
+  TrustFabric = null,
+  JuryFrame = null,
+  binaryVitals = {},
+  dualBand = null
 } = {}) {
   let fs = null;
   let path = null;
@@ -139,7 +223,7 @@ export function createPulseFileScanner({
     path = require("path");
   }
 
-  // IMMORTAL: symbolic-only prewarm
+  // IMMORTAL++: symbolic-only prewarm
   function prewarm() {
     return {
       ok: true,
@@ -149,8 +233,8 @@ export function createPulseFileScanner({
   }
 
   // -------------------------------------------------------------------------
-  // FILE SCAN (symbolic-only, lineage-aware)
-  // -------------------------------------------------------------------------
+  // FILE SCAN (symbolic-only, lineage + trust-aware)
+// -------------------------------------------------------------------------
   function scanFile(filePath) {
     if (!backendMode) {
       return {
@@ -158,7 +242,14 @@ export function createPulseFileScanner({
         error: "BACKEND_DISABLED",
         message: "File scanning requires backendMode=true",
         filePath,
-        artery: getScannerArterySnapshot({ ok: false, filePath, binaryVitals })
+        artery: getScannerArterySnapshot({
+          ok: false,
+          filePath,
+          binaryVitals,
+          report: null,
+          dualBand,
+          trust: null
+        })
       };
     }
 
@@ -169,32 +260,66 @@ export function createPulseFileScanner({
         filePath,
         epoch: PulseFileScannerMeta.evo.epoch
       });
+      TrustFabric?.recordEvidence?.("scanner-file-not-found", {
+        filePath,
+        epoch: PulseFileScannerMeta.evo.epoch
+      });
+
       return {
         ok: false,
         error: "FILE_NOT_FOUND",
         filePath,
         fullPath,
-        artery: getScannerArterySnapshot({ ok: false, filePath, binaryVitals })
+        artery: getScannerArterySnapshot({
+          ok: false,
+          filePath,
+          binaryVitals,
+          report: null,
+          dualBand,
+          trust: null
+        })
       };
     }
 
     const content = fs.readFileSync(fullPath, "utf8");
     const report = analyzeContent(filePath, content);
+    const complexity = computeComplexityMetrics(content);
+    const trustSignals = computeTrustSignals(report, complexity);
 
     Evolution?.recordLineage?.("scanner-file-analyzed", {
       filePath,
       epoch: PulseFileScannerMeta.evo.epoch,
-      drift: report.drift
+      drift: report.drift,
+      complexity
     });
     Evolution?.scanDrift?.({ scannerReport: report });
 
+    TrustFabric?.recordEvidence?.("scanner-file-analyzed", {
+      filePath,
+      epoch: PulseFileScannerMeta.evo.epoch,
+      trustSignals,
+      complexity
+    });
+
+    JuryFrame?.submitScannerEvidence?.({
+      filePath,
+      report,
+      complexity,
+      trustSignals,
+      epoch: PulseFileScannerMeta.evo.epoch
+    });
+
     return {
       ...report,
+      complexity,
+      trustSignals,
       artery: getScannerArterySnapshot({
         ok: true,
         filePath,
         report,
-        binaryVitals
+        binaryVitals,
+        dualBand,
+        trust: { complexity, trustSignals }
       })
     };
   }
@@ -208,15 +333,17 @@ export function createPulseFileScanner({
 }
 
 // ============================================================================
-// FILE SCANNER ARTERY v3 — Symbolic-only, deterministic, window-safe
+// FILE SCANNER ARTERY v4 — Symbolic-only, deterministic, trust-aware
 // ============================================================================
 export function getScannerArterySnapshot({
   ok = false,
   filePath = "",
   report = null,
-  binaryVitals = {}
+  binaryVitals = {},
+  dualBand = null,
+  trust = null
 } = {}) {
-  const pressure = extractBinaryPressure(binaryVitals);
+  const basePressure = extractBinaryPressure(binaryVitals);
 
   const driftCount = report?.drift?.length || 0;
   const importCount = report?.imports?.length || 0;
@@ -231,8 +358,32 @@ export function getScannerArterySnapshot({
 
   const fusedPressure = Math.max(
     0,
-    Math.min(1, 0.7 * localPressure + 0.3 * pressure)
+    Math.min(1, 0.7 * localPressure + 0.3 * basePressure)
   );
+
+  const complexity = trust?.complexity || null;
+  const trustSignals = trust?.trustSignals || null;
+
+  const honeypotRisk = trustSignals?.honeypotRisk ?? 0;
+  const dominanceRisk = trustSignals?.dominanceRisk ?? 0;
+  const anomalyScore = trustSignals?.anomalyScore ?? 0;
+
+  const arterySignature = computeHash(
+    [
+      "SCANNER_ARTERY_V4",
+      filePath,
+      fusedPressure.toFixed(3),
+      driftCount,
+      importCount,
+      esmCount,
+      cjsCount,
+      honeypotRisk.toFixed(3),
+      dominanceRisk.toFixed(3),
+      anomalyScore.toFixed(3)
+    ].join("::")
+  );
+
+  const dualBandContext = dualBand?.artery || null;
 
   return Object.freeze({
     organism: {
@@ -245,16 +396,26 @@ export function getScannerArterySnapshot({
       driftCount,
       esmCount,
       cjsCount,
-      importCount
+      importCount,
+      complexity
     },
     binary: {
-      pressure,
-      pressureBucket: bucketPressure(pressure)
+      pressure: basePressure,
+      pressureBucket: bucketPressure(basePressure)
+    },
+    trust: {
+      honeypotRisk,
+      dominanceRisk,
+      anomalyScore
+    },
+    dualBand: {
+      artery: dualBandContext
     },
     meta: {
       version: PulseFileScannerMeta.version,
       epoch: PulseFileScannerMeta.evo.epoch,
-      identity: PulseFileScannerMeta.identity
+      identity: PulseFileScannerMeta.identity,
+      arterySignature
     }
   });
 }
@@ -341,7 +502,7 @@ ${r.imports.map(i => " - " + i).join("\n") || " none"}
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v15‑IMMORTAL dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v16‑IMMORTAL++ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {

@@ -1,55 +1,73 @@
 // ============================================================================
-//  ai-v13.0-Evo+++.js
-//  DUALBAND ORGANISM BOOTLOADER — v13.0-Evo+++
+//  ai-v16.2-IMMORTAL.js
+//  DUALBAND ORGANISM BOOTLOADER — v16.2 IMMORTAL + CHUNKER
 // ============================================================================
+
 /*
-AI_EXPERIENCE_META = {
-  identity: "ai-v11-evo",
-  version: "v14-Immortal",
-  layer: "ai_core",
-  role: "ai_evolution_kernel",
-  lineage: "ai-v9 → ai-v10.4 → ai-v11-evo → v14-Immortal",
+AI_EXPERIENCE_META:
+  organ: OrganismKernel
+  version: 16.2.0
+  tier: IMMORTAL
+  layer: ai_core
+  role: ai_evolution_kernel
 
-  evo: {
-    evolutionKernel: true,
-    dualBand: true,
-    symbolicPrimary: true,
-    binaryAware: true,
-    hotLoopPromotion: true,
-    healingLogic: true,
-    dnaTagging: true,
+  description:
+    "Dualband organism kernel and bootloader. Assembles all binary organs,
+     wires anatomy and registry, computes organism artery, and exposes a
+     stable, deterministic organism surface to NodeAdmin and Overmind.
 
-    deterministic: true,
-    driftProof: true,
-    pureCompute: true,
-    zeroNetwork: true,
-    zeroFilesystem: true,
+     Does not perform cognition. Does not override organ contracts.
+     Does not mutate organ internals. Pure structural boot and artery."
+
+  evo:
+    evolutionKernel: true
+    dualBand: true
+    symbolicPrimary: true
+    binaryAware: true
+    hotLoopPromotion: true
+    healingLogic: true
+    dnaTagging: true
+
+    chunkAware: true
+    cacheAware: true
+    prewarmAware: true
+    arteryAware: true
+
+    deterministic: true
+    driftProof: true
+    pureCompute: true
+    zeroNetwork: true
+    zeroFilesystem: true
     zeroMutationOfInput: true
-  },
 
-  contract: {
-    always: [
-      "aiBrainstem",
-      "aiAnatomy",
-      "aiBinaryEvolution",
-      "aiBinaryOrganRegistry"
-    ],
-    never: [
-      "safeRoute",
-      "fetchViaCNS"
-    ]
-  }
-}
+  contract:
+    always:
+      - "aiBinaryAgent"
+      - "aiAnatomy"
+      - "aiBinaryEvolution"
+      - "aiBinaryOrganRegistry"
+      - "aiVitals"
+      - "aiMetabolism"
+      - "aiHormones"
+      - "aiSentience"
+      - "aiConsciousness"
+      - "aiScheduler"
+      - "aiPipeline"
+    never:
+      - "safeRoute"
+      - "fetchViaCNS"
+      - "externalNetworkIO"
+      - "organMutation"
 */
 
 // ============================================================================
-//  META BLOCK — v13.0‑EVO+++ (ORGANISM KERNEL)
+//  META BLOCK — v16.2 IMMORTAL (ORGANISM KERNEL)
 // ============================================================================
 export const OrganismKernelMeta = Object.freeze({
   layer: "OrganismKernel",
   role: "DUALBAND_BOOTLOADER",
-  version: "13.0-Evo+++",
-  identity: "pulse-organism-kernel-v13.0-Evo+++",
+  version: "16.2.0-IMMORTAL",
+  identity: "pulse-organism-kernel-v16.2-IMMORTAL",
 
   evo: Object.freeze({
     deterministic: true,
@@ -63,7 +81,10 @@ export const OrganismKernelMeta = Object.freeze({
     overmindAware: true,
     registryAware: true,
     prewarmAware: true,
-    epoch: "13.0-Evo+++"
+    chunkAware: true,
+    cacheAware: true,
+    arteryAware: true,
+    epoch: "16.2-IMMORTAL"
   }),
 
   contract: Object.freeze({
@@ -93,10 +114,10 @@ export const OrganismKernelMeta = Object.freeze({
 });
 
 // ============================================================================
-//  IMPORT ALL BINARY ORGANS
+//  IMPORT ALL BINARY ORGANS + CHUNKER
 // ============================================================================
 import { AIBinaryAgent } from "./aiBinaryAgent.js";
-import { AIMemory } from "./aiMemory-v13.0-ADV.js";   // upgraded memory
+import { AIMemory } from "./aiMemory-v13.0-ADV.js";
 
 import { AIAnatomy as AIBinaryAnatomy } from "./aiAnatomy.js";
 import { AIBinaryGenome } from "./aiGenome.js";
@@ -111,6 +132,8 @@ import { AIBinaryReflex } from "./aiReflex.js";
 import { AIBinaryScheduler } from "./aiScheduler.js";
 import { AIBinaryOrganRegistry } from "./aiBinaryOrganRegistry.js";
 import { AIBinaryEvolution } from "./aiBinaryEvolution.js";
+
+import { createPulseAIChunker } from "./PulseAIChunker.js";
 
 // ============================================================================
 //  GLOBAL ORGANISM ARTERY REGISTRY (READ-ONLY, METRICS-ONLY)
@@ -132,16 +155,39 @@ function _registryKey(id) {
 // ============================================================================
 //  ORGANISM CONTEXT — IDENTITY OF THE DUALBAND ORGANISM
 // ============================================================================
-const ORGANISM_CONTEXT = {
+const ORGANISM_CONTEXT = Object.freeze({
   layer: OrganismKernelMeta.layer,
   role: OrganismKernelMeta.role,
   version: OrganismKernelMeta.version,
-  lineage: "pulse-organism-v13.0-evo",
+  lineage: "pulse-organism-v16.2-IMMORTAL",
   evo: OrganismKernelMeta.evo
-};
+});
 
 // ============================================================================
-//  BINARY ORGANISM PREWARM ENGINE — v13.0-Evo+++
+//  KERNEL-LEVEL CHUNKER (32-LANE, NON-MIND)
+// ============================================================================
+const kernelChunker = createPulseAIChunker({
+  id: "PulseAIChunker-OrganismKernel",
+  defaultChunkSize: 4096,
+  maxChunkSize: 65536,
+  trace: false
+});
+
+// Prewarm common patterns for organism structures
+kernelChunker.prewarmPattern("genome", {
+  defaultChunkSize: 4096,
+  maxChunkSize: 32768,
+  band: "binary"
+});
+
+kernelChunker.prewarmPattern("artery", {
+  defaultChunkSize: 2048,
+  maxChunkSize: 16384,
+  band: "symbolic"
+});
+
+// ============================================================================
+//  BINARY ORGANISM PREWARM ENGINE — v16.2 IMMORTAL
 // ============================================================================
 export function prewarmBinaryOrganism(config = {}) {
   try {
@@ -277,6 +323,15 @@ export function prewarmBinaryOrganism(config = {}) {
 
     warmConsciousness.generateConsciousnessPacket?.();
 
+    // Optional: prewarm chunker lanes structurally
+    kernelChunker.chunkJSON(
+      {
+        id: "prewarm-organism",
+        registryCount: warmRegistry?.count?.() ?? 0
+      },
+      { label: "artery", band: "symbolic" }
+    );
+
     return true;
   } catch (err) {
     console.error("[BinaryOrganism Prewarm] Failed:", err);
@@ -285,19 +340,34 @@ export function prewarmBinaryOrganism(config = {}) {
 }
 
 // ============================================================================
-//  ORGANISM ARTERY SNAPSHOT (v13.0)
+//  ORGANISM ARTERY SNAPSHOT — v16.2 IMMORTAL
 // ============================================================================
-function computeOrganismArtery({ registry, anatomy, genome, memory, scheduler }) {
+function computeOrganismArtery({ registry, anatomy, genome, memory, scheduler, consciousness }) {
   const artery = Object.freeze({
     timestamp: Date.now(),
-    registryCount: registry?.count?.() ?? 0,
-    anatomyCount: anatomy?.count?.() ?? 0,
-    genomeHash: genome?.hash?.() ?? null,
-    memoryFootprint: memory?.size?.() ?? null,
-    schedulerState: scheduler?.state?.() ?? null,
+    kernel: {
+      id: OrganismKernelMeta.identity,
+      version: OrganismKernelMeta.version,
+      layer: OrganismKernelMeta.layer,
+      role: OrganismKernelMeta.role
+    },
+    counts: {
+      registry: registry?.count?.() ?? 0,
+      anatomy: anatomy?.count?.() ?? 0
+    },
+    hashes: {
+      genome: genome?.hash?.() ?? null,
+      consciousness: consciousness?.hash?.() ?? null
+    },
+    memory: {
+      footprint: memory?.size?.() ?? null,
+      bucket: (memory?.size?.() ?? 0) > 8192 ? "high" : "medium"
+    },
+    scheduler: {
+      state: scheduler?.state?.() ?? null
+    },
     buckets: {
-      registry: registry?.count?.() > 32 ? "high" : "medium",
-      memory: memory?.size?.() > 8192 ? "high" : "medium"
+      registry: (registry?.count?.() ?? 0) > 32 ? "high" : "medium"
     }
   });
 
@@ -308,9 +378,13 @@ function computeOrganismArtery({ registry, anatomy, genome, memory, scheduler })
 }
 
 // ============================================================================
-//  createBinaryOrganism() — v13.0‑EVO+++
+//  createBinaryOrganism() — v16.2 IMMORTAL
 // ============================================================================
-export function createBinaryOrganism({ trace = false, nodeAdminReporter = null, overmindReporter = null } = {}) {
+export function createBinaryOrganism({
+  trace = false,
+  nodeAdminReporter = null,
+  overmindReporter = null
+} = {}) {
   prewarmBinaryOrganism({ trace });
 
   const encoder = new AIBinaryAgent({
@@ -469,7 +543,14 @@ export function createBinaryOrganism({ trace = false, nodeAdminReporter = null, 
     anatomy,
     genome,
     memory,
-    scheduler
+    scheduler,
+    consciousness
+  });
+
+  // Chunk artery for hot symbolic access (optional, non-mutating)
+  const arteryChunks = kernelChunker.chunkJSON(artery, {
+    label: "artery",
+    band: "symbolic"
   });
 
   if (nodeAdminReporter) {
@@ -488,7 +569,7 @@ export function createBinaryOrganism({ trace = false, nodeAdminReporter = null, 
     meta: {
       layer: "BinaryOrganismReadiness",
       role: "READINESS_SURFACE",
-      version: "13.0-Evo+++",
+      version: "16.2-IMMORTAL",
       evo: {
         deterministic: true,
         driftProof: true,
@@ -505,6 +586,7 @@ export function createBinaryOrganism({ trace = false, nodeAdminReporter = null, 
     schedulerState: scheduler?.state?.() ?? null,
 
     artery,
+    arteryChunks,
     prewarmed: true
   });
 
@@ -512,12 +594,14 @@ export function createBinaryOrganism({ trace = false, nodeAdminReporter = null, 
     context: ORGANISM_CONTEXT,
     ...organs,
     artery,
-    readiness
+    arteryChunks,
+    readiness,
+    chunker: kernelChunker
   };
 }
 
 // ============================================================================
-//  bootBinaryOrganism() — v13.0‑EVO+++
+//  bootBinaryOrganism() — v16.2 IMMORTAL
 // ============================================================================
 export async function bootBinaryOrganism(options = {}) {
   const organism = createBinaryOrganism(options);
@@ -541,7 +625,8 @@ const PulseOrganismBoot = {
   meta: OrganismKernelMeta,
   create: createBinaryOrganism,
   boot: bootBinaryOrganism,
-  getGlobalOrganismArteries
+  getGlobalOrganismArteries,
+  chunker: kernelChunker
 };
 
 export default PulseOrganismBoot;

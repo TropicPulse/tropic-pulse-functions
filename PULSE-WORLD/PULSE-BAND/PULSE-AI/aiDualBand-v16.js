@@ -1,9 +1,10 @@
 // ============================================================================
 //  aiDualBand-v16-Immortal-ORGANISM.js
-//  PULSE OS v16-Immortal — Dual-Band Bridge (Symbolic ↔ Binary)
+//  PULSE OS v16-Immortal — Dual-Band Organism (Symbolic ↔ Binary)
 //  Organism Bridge • Context Engine • Clinical + Structural + ScanFile Aware
 //  PURE BRIDGE. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiDualband",
@@ -19,6 +20,11 @@ AI_EXPERIENCE_META = {
     bandSwitching: true,
     hydrationAware: true,
     dehydrationAware: true,
+
+    chunkAware: true,
+    cacheAware: true,
+    arteryAware: true,
+    prewarmAware: true,
 
     deterministic: true,
     driftProof: true,
@@ -71,6 +77,10 @@ export const DualBandMeta = Object.freeze({
     proxyAware: true,
     proxyPressureAware: true,
     proxyFallbackAware: true,
+    chunkAware: true,
+    cacheAware: true,
+    arteryAware: true,
+    prewarmAware: true,
     epoch: "v16-Immortal-ORGANISM"
   }),
 
@@ -137,7 +147,7 @@ import {
   prewarmScribe
 } from "./aiDebug.js";
 
-import { createPermissionsEngine } from "./aiPermissionsEngine-v11-Evo.js";
+import { createPermissionsEngine } from "./aiPermissionsEngine-v16.js";
 import { createBoundariesEngine } from "./aiBoundariesEngine-v11-Evo.js";
 import { createPersonaEngine } from "./persona.js";
 
@@ -152,19 +162,19 @@ import createCognitiveFrame, {
 } from "./aiContext.js";
 
 import { createCortex, prewarmAICortex } from "./aiCortex-v11-Evo.js";
-import { createRouterEngine } from "./aiRouter-v11-Evo.js";
-import { runAI, ExecutionEngineMeta } from "./aiEngine.js";
+import { createRouterEngine } from "./aiRouter-v16.js";
+import { runAI, ExecutionEngineMeta } from "./aiEngine-v16.js";
 
 import aiDeliveryEngine, { prewarmDeliveryEngine } from "./aiDeliveryEngine.js";
 import aiEmotionEngine, { prewarmEmotionEngine } from "./aiEmotionEngine.js";
-import createEarnAPI, { EarnMeta, prewarmEarnOrgan } from "./aiEarn.js";
+import createEarnAPI, { EarnMeta, prewarmEarnOrgan } from "./aiEarn-v16.js";
 
 import { createTouristAPI } from "./aiTourist.js";
 import { createArchitectAPI } from "./aiArchitect.js";
 import { createDoctorOrgan } from "./aiDoctorAssistant.js";
 import { createDoctorArchitectOrgan } from "./aiDoctorArchitect.js";
 
-import { createAIOrganism } from "./aiOrganism.js";
+import { createAIOrganism } from "./aiOrganism-v16.js";
 
 import {
   getProxyContext,
@@ -174,6 +184,8 @@ import {
   getProxyMode,
   getProxyLineage
 } from "../PULSE-PROXY/PulseProxyContext-v16.js";
+
+import { createPulseAIChunker } from "./PulseAIChunker.js";
 
 // ============================================================================
 //  DUAL-BAND CONTEXT
@@ -188,8 +200,39 @@ const DUAL_BAND_CONTEXT = Object.freeze({
     binaryFirst: true,
     deterministic: true,
     organism: true,
-    proxyAware: true
+    proxyAware: true,
+    chunkAware: true,
+    cacheAware: true,
+    arteryAware: true
   })
+});
+
+// ============================================================================
+//  DUALBAND CHUNKER (32-LANE, NON-MIND)
+// ============================================================================
+const dualBandChunker = createPulseAIChunker({
+  id: "PulseAIChunker-DualBandOrganism",
+  defaultChunkSize: 4096,
+  maxChunkSize: 65536,
+  trace: false
+});
+
+dualBandChunker.prewarmPattern("dualband_artery", {
+  defaultChunkSize: 2048,
+  maxChunkSize: 16384,
+  band: "symbolic"
+});
+
+dualBandChunker.prewarmPattern("cognitive_frame", {
+  defaultChunkSize: 4096,
+  maxChunkSize: 32768,
+  band: "symbolic"
+});
+
+dualBandChunker.prewarmPattern("diagnostics", {
+  defaultChunkSize: 2048,
+  maxChunkSize: 16384,
+  band: "symbolic"
 });
 
 // ============================================================================
@@ -219,7 +262,6 @@ function buildProxyOverlay() {
   const proxyMode = getProxyMode?.() || "standard";
   const proxyLineage = getProxyLineage?.() || null;
 
-  // Symbolic overlay only; no mutation of external state.
   const pressureDelta = proxyPressure * 0.3;
   const fallbackPenalty = proxyFallback ? 0.15 : 0;
 
@@ -257,7 +299,7 @@ function dualBandArtery({ diagnostics = {}, binaryVitals = {} } = {}) {
 
   pressure = Math.max(0, Math.min(1, pressure));
 
-  return Object.freeze({
+  const artery = Object.freeze({
     organism: {
       pressure,
       pressureBucket: bucketPressure(pressure)
@@ -276,6 +318,13 @@ function dualBandArtery({ diagnostics = {}, binaryVitals = {} } = {}) {
       lineage: proxyOverlay.proxyLineage
     }
   });
+
+  const arteryChunks = dualBandChunker.chunkJSON(artery, {
+    label: "dualband_artery",
+    band: "symbolic"
+  });
+
+  return { artery, arteryChunks };
 }
 
 // ============================================================================
@@ -308,7 +357,7 @@ export function prewarmDualBandBridge({ trace = false } = {}) {
     formatDebugString({ trace: ["prewarm"] }, null);
 
     const warmContextEngine = createContextEngine({});
-    warmContextEngine.buildContextFrame({
+    const warmFrame = warmContextEngine.buildContextFrame({
       brainstem: { context: { userId: "prewarm" } },
       request: { intent: "prewarm" },
       routerPacket: { personaId: "ARCHITECT", reasoning: ["prewarm"] },
@@ -322,6 +371,19 @@ export function prewarmDualBandBridge({ trace = false } = {}) {
       routing: { personaId: "ARCHITECT", reasoning: ["prewarm"] },
       organismSnapshot: { binary: {}, symbolic: {} }
     });
+
+    dualBandChunker.chunkJSON(warmFrame || {}, {
+      label: "cognitive_frame",
+      band: "symbolic"
+    });
+
+    dualBandChunker.chunkJSON(
+      {
+        diagnostics: { mismatches: [], missingFields: [], slowdownCauses: [] },
+        binaryVitals: { throughput: 1 }
+      },
+      { label: "diagnostics", band: "symbolic" }
+    );
 
     if (trace) {
       console.log("[DualBandBridge v16] prewarm complete");
@@ -425,7 +487,7 @@ export function createDualBandOrganism({
     const routerPacket = router?.getLastPacket?.() || {};
     const persona = personaEngine?.getActivePersona?.() || {};
 
-    return createCognitiveFrame({
+    const frame = createCognitiveFrame({
       request,
       routing: {
         personaId: routerPacket.personaId || persona.id || null,
@@ -441,6 +503,13 @@ export function createDualBandOrganism({
       },
       emotionEngine
     });
+
+    const frameChunks = dualBandChunker.chunkJSON(frame || {}, {
+      label: "cognitive_frame",
+      band: "symbolic"
+    });
+
+    return { frame, frameChunks };
   }
 
   const doctor = createDoctorOrgan({
@@ -502,18 +571,54 @@ export function createDualBandOrganism({
     return organism.organismSnapshot();
   }
 
-  const artery = dualBandArtery({
-    diagnostics: diagnosticsState.snapshot
-      ? diagnosticsState.snapshot()
-      : diagnostics,
+  const diagnosticsSnapshot = diagnosticsState.snapshot
+    ? diagnosticsState.snapshot()
+    : diagnostics;
+
+  const { artery, arteryChunks } = dualBandArtery({
+    diagnostics: diagnosticsSnapshot,
     binaryVitals
   });
+
+  // SIDE DESIGN: dualband scan surface for this organism instance
+  function dualBandScanSurface() {
+    const { frame } = buildCognitiveFrame({});
+    const diagChunks = dualBandChunker.chunkJSON(
+      diagnosticsSnapshot || {},
+      { label: "diagnostics", band: "symbolic" }
+    );
+
+    const contextChunks = dualBandChunker.chunkJSON(
+      frame || {},
+      { label: "cognitive_frame", band: "symbolic" }
+    );
+
+    return Object.freeze({
+      meta: {
+        layer: "DualBandScanSurface",
+        role: "SCAN_SURFACE",
+        version: "v16-Immortal-ORGANISM",
+        evo: {
+          deterministic: true,
+          driftProof: true,
+          readOnly: true,
+          chunkAware: true,
+          arteryAware: true
+        }
+      },
+      artery,
+      arteryChunks,
+      contextChunks,
+      diagnosticsChunks: diagChunks
+    });
+  }
 
   const dualBand = Object.freeze({
     meta: DualBandMeta,
     context,
     deps,
     artery,
+    arteryChunks,
 
     symbolic: Object.freeze({
       cortex,
@@ -563,7 +668,10 @@ export function createDualBandOrganism({
       symbolicReflexToBinary,
       syncSymbolicVitalsToBinary,
       syncBinaryVitalsToSymbolic
-    })
+    }),
+
+    chunker: dualBandChunker,
+    scanSurface: dualBandScanSurface
   });
 
   return dualBand;
@@ -575,7 +683,8 @@ export function createDualBandOrganism({
 export const DualBandAPI = {
   DualBandMeta,
   create: createDualBandOrganism,
-  prewarm: prewarmDualBandBridge
+  prewarm: prewarmDualBandBridge,
+  chunker: dualBandChunker
 };
 
 export default DualBandAPI;

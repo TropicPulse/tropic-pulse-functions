@@ -109,7 +109,7 @@ function emitHeartbeatPacket(type, payload) {
 // ============================================================================
 //  DEPENDENCIES
 // ============================================================================
-import { createBrainstem } from "./aiBrainstem.js";
+import { createBrainstem } from "./aiBrainstem-v16.js";
 import {
   getDb,
   getFsAPI,

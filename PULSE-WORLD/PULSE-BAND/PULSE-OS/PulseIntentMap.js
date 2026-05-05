@@ -1,68 +1,151 @@
 // ============================================================================
-//  PULSE INTENT MAP — FOUNDER CONTRACT (v12.3‑PRESENCE‑EVO‑MAX‑PRIME)
+//  PULSE INTENT MAP — FOUNDER CONTRACT (v16‑IMMORTAL‑FOUNDER‑INTENT)
 //  Deterministic. Static. Non‑evolvable. Loaded FIRST.
-//  This file defines WHAT THE ORGANISM IS ALLOWED TO BE.
-//  It defines the organism’s identity, boundaries, laws, and philosophy.
+//  Defines WHAT THE ORGANISM IS ALLOWED TO BE.
+//  Defines the organism’s identity, boundaries, laws, and philosophy.
 //  It is the highest authority in the entire system.
 //  NOTHING overrides this map. NOTHING evolves above it.
+//  NOTHING may mutate, rewrite, reinterpret, or bypass this map.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseIntentMap",
-  version: "v14.9-Immortal-FOUNDER-INTENT",
+  version: "v16-Immortal-FOUNDER-INTENT",
   layer: "founder_intent",
   role: "pre_brain_pre_organism_law_map",
-  lineage: "PulseOS-v14",
+  lineage: "PulseOS-v14 → PulseOS-v16-IMMORTAL",
 
   evo: {
-    founderIntent: true,            // This IS the founder's law
-    preOrganism: true,              // Loaded BEFORE OrganismMap
-    preBrain: true,                 // Loaded BEFORE OSBrain
-    preConsciousness: true,         // Loaded BEFORE IQMap
-    preChunker: true,               // Loaded BEFORE chunker
-    prePresence: true,              // Loaded BEFORE presence field
-    preMesh: true,                  // Loaded BEFORE mesh relay
-    preBand: true,                  // Loaded BEFORE PulseBand
-    preRouter: true,                // Loaded BEFORE routers
-    immutable: true,                // Cannot be mutated at runtime
-    driftProof: true,               // Prevents organism drift
-    deterministic: true,            // No randomness allowed
-    antiMutation: true,             // Cannot be rewritten by organism
-    antiOverride: true,             // Cannot be overridden by organs
-    antiEvolution: true,            // Evolution cannot modify intent
-    safeRouteFree: true,            // Must not use safeRoute
-    zeroNetworkFetch: true,         // Must not fetch anything
-    zeroExternalMutation: true,     // Must not mutate global state
-    zeroMutationOfInput: true       // Must not mutate incoming identity/session
+    // -----------------------------------------------------------------------
+    //  FOUNDER LAW — THE ROOT OF THE ENTIRE ORGANISM
+    // -----------------------------------------------------------------------
+    founderIntent: true,
+    immutable: true,
+    antiMutation: true,
+    antiOverride: true,
+    antiEvolution: true,
+    deterministic: true,
+    driftProof: true,
+
+    // -----------------------------------------------------------------------
+    //  LOAD ORDER — NOTHING MAY LOAD BEFORE THIS MAP
+    // -----------------------------------------------------------------------
+    preOrganism: true,              // BEFORE OrganismMap
+    preBrain: true,                 // BEFORE OSBrain
+    preConsciousness: true,         // BEFORE IQMap
+    preChunker: true,               // BEFORE PulseAIChunker
+    prePresence: true,              // BEFORE presence field
+    preMesh: true,                  // BEFORE mesh relay
+    preBand: true,                  // BEFORE PulseBand
+    preRouter: true,                // BEFORE routers
+    preTrustFabric: true,           // BEFORE Jury/Evidence/CreatorFlags
+    preDualBand: true,              // BEFORE DualBandKernel
+    prePulseNet: true,              // BEFORE Pulse‑Net routing spine
+
+    // -----------------------------------------------------------------------
+    //  ZERO‑RISK GUARANTEES
+    // -----------------------------------------------------------------------
+    zeroNetworkFetch: true,         // No direct internet access
+    zeroExternalIO: true,           // No external HTTP/DNS/Websocket
+    zeroExternalMutation: true,     // Cannot mutate global state
+    zeroMutationOfInput: true,      // Cannot mutate incoming identity/session
+    safeRouteFree: true,            // No safeRoute allowed at this layer
+
+    // -----------------------------------------------------------------------
+    //  AWARENESS FLAGS (NON‑MUTATING)
+    // -----------------------------------------------------------------------
+    trustFabricAware: true,         // JuryFrame, JuryCouncil, BoxCamera, Evidence
+    juryAware: true,
+    evidenceFabricAware: true,
+    creatorFlagsAware: true,
+
+    chunkerAware: true,             // 32‑lane deterministic chunker
+    dualBandAware: true,            // DualBand organism + artery
+    binaryAware: true,              // Binary organism identity
+    presenceAware: true,            // Presence field
+    meshAware: true,                // Mesh relay
+    proxyAware: true,               // Pulse‑Net proxy spine
+    pulseNetAware: true,            // Pulse‑Net is the ONLY external gateway
+
+    // -----------------------------------------------------------------------
+    //  INTERNET ISOLATION (v16 IMMORTAL)
+    // -----------------------------------------------------------------------
+    forbidDirectInternetAccess: true,
+    forbidDirectExternalFetch: true,
+    forbidExternalNetworkIO: true,
+    forbidExternalDNS: true,
+    forbidExternalHTTP: true,
+    forbidExternalWebsocket: true,
+
+    // -----------------------------------------------------------------------
+    //  ORGANISM / USER SEGREGATION (v16 IMMORTAL)
+    // -----------------------------------------------------------------------
+    organismUserSegregationRequired: true,
+    organismCannotSeeUserNetwork: true,
+    organismCannotSeeUserIdentity: true,
+    organismCannotSeeUserIP: true,
+    organismCannotSeeUserBrowser: true,
+
+    // -----------------------------------------------------------------------
+    //  PULSE‑NET SUPREMACY (v16 IMMORTAL)
+    // -----------------------------------------------------------------------
+    pulseNetSupremacy: true,        // Pulse‑Net is the ONLY allowed gateway
+    pulseNetDeterministicRouting: true,
+    pulseNetZeroMutation: true,
+    pulseNetProxySpineRequired: true,
+    pulseNetProxyFallbackAllowed: true,
+    pulseNetProxyAuditRequired: true
   },
 
   contract: {
+    // -----------------------------------------------------------------------
+    //  SYSTEMS THAT MUST OBEY FOUNDER INTENT
+    // -----------------------------------------------------------------------
     always: [
-      "OrganismMap",                // IntentMap must load BEFORE genome
-      "IQMap",                      // IntentMap must load BEFORE consciousness
-      "PulseOSLoader",              // Loader must obey founder intent
-      "PulseOSBrain",               // Brain must obey founder intent
-      "PulseSpinalCord",            // Wiring must obey founder intent
-      "PulseChunker",               // Chunker must obey founder intent
-      "PulsePresence",              // Presence must obey founder intent
-      "PulseMesh",                  // Mesh must obey founder intent
-      "PulseBand",                  // Nervous system must obey founder intent
-      "PulseRouter",                // Symbolic router must obey founder intent
-      "PulseBinaryRouter"           // Binary router must obey founder intent
+      "OrganismMap",
+      "IQMap",
+      "PulseOSLoader",
+      "PulseOSBrain",
+      "PulseSpinalCord",
+      "PulseChunker",
+      "PulsePresence",
+      "PulseMesh",
+      "PulseBand",
+      "PulseRouter",
+      "PulseBinaryRouter",
+      "PulseAIWorldCore",
+      "PulseTrustEvidence",
+      "PulseTrustJuryFrame",
+      "PulseTrustJuryCouncil",
+      "PulseTrustJuryBoxCamera",
+      "PulseTrustCreatorFlags",
+      "DualBandKernel",
+      "PulseNetProxySpine"
     ],
 
+    // -----------------------------------------------------------------------
+    //  ABSOLUTE PROHIBITIONS
+    // -----------------------------------------------------------------------
     never: [
-      "legacyIntentMap",            // No v1.7/v11.x intent maps
-      "runtimeIntentRewrite",       // Organism cannot rewrite intent
-      "organOverride",              // No organ can override founder intent
-      "safeRoute",                  // Forbidden at this layer
-      "fetchViaCNS",                // Forbidden at this layer
-      "dynamicIntent",              // Intent cannot be dynamic
-      "evolutionIntentRewrite"      // Evolution cannot rewrite intent
+      "legacyIntentMap",
+      "runtimeIntentRewrite",
+      "organOverride",
+      "safeRoute",
+      "fetchViaCNS",
+      "dynamicIntent",
+      "evolutionIntentRewrite",
+      "directInternetAccess",
+      "directExternalFetch",
+      "externalNetworkIO",
+      "externalDNS",
+      "externalHTTP",
+      "externalWebsocket"
     ]
   }
 }
 */
+
 
 export const PulseIntentMap = {
 
@@ -75,37 +158,30 @@ export const PulseIntentMap = {
     immutableIntentMap: true,
     noSelfLaw: true,
 
-    // Required cognition systems
     fileScannerRequired: true,
     codeAnalysisAllowed: true,
     forbidCodeMutation: true,
 
-    // Organism identity
-    version: "12.3‑PRESENCE‑EVO‑MAX‑PRIME",
+    version: "v16-IMMORTAL-ORGANISM",
     deterministicOrganism: true,
 
-    // Forbidden layers
     noAstralLayers: true,
     noLegacyPNS: true,
     noTextFirstPaths: true,
 
-    // Required systems
     sdnRequired: true,
     gpuV11Required: true,
     coreMemoryRequired: true,
     uiOrganismRequired: true,
 
-    // Binary organism identity
     binaryOrganismRequired: true,
     pureBinaryNerveRequired: true,
     binaryNativeDesign: true,
     binaryOnBinaryHardware: true,
 
-    // No middlemen
     noMiddleLayerNervousSystem: true,
     forbidTranslatorCore: true,
 
-    // Presence alignment
     presenceFieldRequired: true,
     presenceAwareOrganism: true,
     presenceContractLocked: true
@@ -127,18 +203,15 @@ export const PulseIntentMap = {
     allowContinuanceFallback: true,
     forbidLegacyFallback: true,
 
-    // Binary evolution
     binaryFirstEvolution: true,
     forbidNonBinaryCore: true,
     forbidMiddleLayerEvolution: true,
     requireBinaryContractLock: true,
 
-    // Scanner evolution boundaries
     forbidScannerMutation: true,
     forbidScannerExecution: true,
     scannerSymbolicOnly: true,
 
-    // Presence evolution boundaries
     forbidPresenceMutation: true,
     presenceFieldDeterministic: true
   },
@@ -155,12 +228,10 @@ export const PulseIntentMap = {
 
     useContinuancePulseOnFailure: true,
 
-    // Binary fail‑open
     preferBinaryRouteFirst: true,
     allowProxyFallbackTiered: true,
     forbidTextOnlyCoreFallback: true,
 
-    // Presence fail‑open
     maintainPresenceField: true,
     forbidPresenceCollapse: true
   },
@@ -178,18 +249,15 @@ export const PulseIntentMap = {
     forbidNonDeterministicGPU: true,
     forbidAsyncNervousSystem: true,
 
-    // Binary safety
     forbidBinaryCorruption: true,
     requireBinaryValidation: true,
     requireBinaryTraceability: true,
     forbidBinaryShadowPaths: true,
 
-    // Scanner safety
     requireScannerDeterminism: true,
     forbidScannerBinaryPaths: true,
     forbidScannerShadowPaths: true,
 
-    // Presence safety
     requirePresenceIntegrity: true,
     forbidPresenceShadowPaths: true
   },
@@ -210,7 +278,6 @@ export const PulseIntentMap = {
     preferBinaryShortPaths: true,
     forbidRedundantTranslation: true,
 
-    // Presence performance
     presenceFieldOptimized: true,
     forbidPresenceLag: true
   },
@@ -237,7 +304,6 @@ export const PulseIntentMap = {
     detectScannerLayerViolation: true,
     detectScannerExecutionAttempt: true,
 
-    // Presence drift
     detectPresenceFieldCorruption: true,
     detectPresenceShadowPaths: true
   },
@@ -257,7 +323,6 @@ export const PulseIntentMap = {
     forbidBinarySilentFail: true,
     requireBinaryContextSnapshot: true,
 
-    // Presence fail‑close
     requirePresenceSnapshot: true,
     forbidPresenceSilentFail: true
   },
@@ -278,7 +343,6 @@ export const PulseIntentMap = {
     includeProxyFallbackState: true,
     includeMiddleLayerState: true,
 
-    // Presence context
     includePresenceFieldState: true,
     includePresenceIntegrityState: true
   },
@@ -301,19 +365,14 @@ export const PulseIntentMap = {
     scannerReadableOutput: true,
     scannerNoInternalLeakage: true,
 
-    // Presence UX
     presenceStableUX: true,
     forbidPresenceArtifacts: true
   },
 
   // ========================================================================
-  // 10. INTENTS — DECLARATIVE, NON‑EVOLVABLE, FOUNDER‑DEFINED
+  // 10. INTENTS — DECLARATIVE, NON‑EVOLVABLE
   // ========================================================================
   intents: {
-
-    // ----------------------------------------------------------------------
-    // FILE SCANNING INTENT — symbolic-only cognition
-    // ----------------------------------------------------------------------
     scanFile: {
       allowed: true,
       symbolicOnly: true,
@@ -339,5 +398,119 @@ export const PulseIntentMap = {
       symbolicOnly: true,
       presenceAware: true
     }
+  },
+
+  // ========================================================================
+  // 11. IMMORTAL TRUST FABRIC EXTENSIONS (v16)
+  // ========================================================================
+  trustFabric: {
+    trustFabricRequired: true,
+    trustFabricImmutable: true,
+    trustFabricDeterministic: true,
+    trustFabricZeroMutation: true,
+
+    requireRawEvidence: true,
+    requireRawAIEvidence: true,
+    requireAIEvidence: true,
+    forbidEvidenceMutation: true,
+
+    juryFrameRequired: true,
+    juryCouncilRequired: true,
+    juryBoxCameraRequired: true,
+    juryCreatorFlagsRequired: true,
+
+    aiOriginHoneypottingRequired: true,
+    requireAIOriginFlagging: true,
+    requireAIOriginDeltaTracking: true,
+
+    expansionComplianceRequired: true,
+    forbidExpansionBypassJury: true,
+    forbidExpansionBypassUser: true,
+
+    chunker32LaneRequired: true,
+    chunkerDeterministic: true,
+    chunkerDualBandAware: true,
+    chunkerOrganismAware: true,
+
+    dualBandOrganismRequired: true,
+    dualBandArteryRequired: true,
+
+    evidenceFabricRequired: true,
+    evidenceFabricAppendOnly: true,
+
+    requireDeltaDivergenceDetection: true,
+    requireRAWvsAIDriftDetection: true,
+    requireAnomalyClusterDetection: true,
+
+    creatorFlagsRequired: true,
+    requireCreatorAIOriginRisk: true,
+    requireCreatorDominanceRisk: true,
+    requireCreatorAnomalyRisk: true,
+
+    trustFabricPrecedes: [
+      "OrganismKernel",
+      "DualBandKernel",
+      "PulseAIWorldCore",
+      "PulseRouter",
+      "PulseCortex",
+      "PulseUI",
+      "PulsePresence",
+      "PulseMesh"
+    ]
+  },
+
+  // ========================================================================
+  // 12. PULSE‑NET SUPREMACY & INTERNET ISOLATION (v16 IMMORTAL)
+  // ========================================================================
+  pulseNet: {
+
+    // 12.1  PULSE‑NET IS THE ONLY EXTERNAL ROUTE
+    pulseNetSupremacy: true,
+    pulseNetIsOnlyGateway: true,
+    pulseNetDeterministicRouting: true,
+    pulseNetZeroMutation: true,
+
+    // 12.2  INTERNET ISOLATION
+    forbidDirectInternetAccess: true,
+    forbidDirectExternalFetch: true,
+    forbidExternalNetworkIO: true,
+    forbidExternalDNS: true,
+    forbidExternalHTTP: true,
+    forbidExternalWebsocket: true,
+
+    // 12.3  ORGANISM/USER SEGREGATION
+    organismUserSegregationRequired: true,
+    organismCannotSeeUserNetwork: true,
+    organismCannotSeeUserIdentity: true,
+    organismCannotSeeUserIP: true,
+    organismCannotSeeUserBrowser: true,
+
+    // 12.4  ALL EXTERNAL ACCESS MUST GO THROUGH PULSE‑NET
+    requirePulseNetProxySpine: true,
+    requirePulseNetProxyHealth: true,
+    requirePulseNetProxyFallback: true,
+    requirePulseNetProxyAudit: true,
+
+    // 12.5  NEW SKIN / REFLEX / LOGGER GUARANTEES
+    reflexLayerNetworkSafe: true,
+    loggerLayerNetworkSafe: true,
+    uiSkinNetworkSafe: true,
+
+    // 12.6  DUALBAND + CHUNKER + JURY MUST RESPECT PULSE‑NET
+    dualBandMustUsePulseNet: true,
+    chunkerMustUsePulseNet: true,
+    juryMustUsePulseNet: true,
+    evidenceFabricMustUsePulseNet: true,
+
+    // 12.7  PULSE‑NET PRECEDENCE
+    pulseNetPrecedes: [
+      "DualBandKernel",
+      "PulseAIWorldCore",
+      "PulseRouter",
+      "PulseCortex",
+      "PulseUI",
+      "PulsePresence",
+      "PulseMesh"
+    ]
   }
 };

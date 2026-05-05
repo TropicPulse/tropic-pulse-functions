@@ -1,26 +1,30 @@
 // -----------------------------------------------------------------------------
-// PulseIQMapPrime.js — v13‑EVO‑PRIME
+// PulseIQMapPrime.js — v16-IMMORTAL-CONSCIOUSNESS
 // INTERPRETATION LAYER OF THE GENOME (PulseOrganismMap)
 // Zero top‑level routes. Zero static routing. Fully dynamic.
+// Chunk-aware • Presence-aware • Mesh-aware • Dualband-aware
 // -----------------------------------------------------------------------------
 /*
 AI_EXPERIENCE_META = {
   identity: "IQMap",
-  version: "v14.9-Immortal-CONSCIOUSNESS",
+  version: "v16-Immortal-CONSCIOUSNESS",
   layer: "consciousness",
   role: "ui_identity_and_routing_map",
-  lineage: "PulseOS-v14",
+  lineage: "PulseOS-v14 → v16-Immortal-CONSCIOUSNESS",
 
   evo: {
     consciousness: true,          // This IS the consciousness map
     uiIdentity: true,             // Page-level identity
     routingIdentity: true,        // Page-level routing
+
     chunkingAware: true,          // Chunker integration
     prewarmAware: true,           // Prewarm surfaces
     gpuProfileAware: true,        // GPU profile mapping
     presenceAware: true,          // Presence surfaces
     meshAware: true,              // Mesh surfaces
     binaryAware: true,            // Binary UI surfaces
+    dualBandAware: true,          // Dualband organism awareness
+
     generatedFromGenome: true,    // MUST be generated from OrganismMap
     deterministic: true,
     driftProof: true,
@@ -33,7 +37,7 @@ AI_EXPERIENCE_META = {
   contract: {
     always: [
       "OrganismMap",              // IQMap MUST be generated from genome
-      "PulseChunker",
+      "PulseAIChunker",
       "PulsePresence",
       "PulseMesh",
       "PulseUI",
@@ -54,49 +58,50 @@ AI_EXPERIENCE_META = {
 import { PulseOrganismMap } from "./PulseOrganismMap.js";
 import { log, warn, error as logError } from "../../PULSE-UI/_BACKEND/PulseProofLogger.js";
 import { bootCortex } from "./PulseOSBrainCortex.js";
+import { createPulseAIChunker } from "../ai-core/PulseAIChunker.js"; // path adjust as needed
 
 // -----------------------------------------------------------------------------
 // VERSION MAP — text‑only, non‑executable, non‑binding
 // -----------------------------------------------------------------------------
 const VERSION_MAP = {
-  organism: "v12.3‑PRESENCE‑EVO‑MAX‑PRIME",
-  iq: "v13‑EVO‑PRIME",
+  organism: "v16-IMMORTAL-ORGANISM",
+  iq: "v16-Immortal-CONSCIOUSNESS",
 
-  router: "v12.3‑PRESENCE",
-  mesh: "v12.3‑PRESENCE",
-  send: "v12.3‑PRESENCE",
-  pulse: "v12.3‑PRESENCE",
-  proxy: "v12.3‑PRESENCE",
+  router: "v16-IMMORTAL-ROUTER",
+  mesh: "v16-IMMORTAL-MESH",
+  send: "v16-IMMORTAL-SEND",
+  pulse: "v16-IMMORTAL-PULSE",
+  proxy: "v16-IMMORTAL-PROXY",
 
-  gpu: "v12.3‑GPU‑PRESENCE",
-  sdn: "v12.3‑SDN‑PRESENCE",
-  pnsNervousSystem: "v12.3‑PNS‑PRESENCE",
-  pnsNervousSystemBinary: "v12.3‑PNS‑BINARY‑MAX",
+  gpu: "v16-GPU-IMMORTAL",
+  sdn: "v16-SDN-IMMORTAL",
+  pnsNervousSystem: "v16-PNS-IMMORTAL",
+  pnsNervousSystemBinary: "v16-PNS-BINARY-IMMORTAL",
 
-  proxySpine: "v12.3‑SPINE‑PRESENCE",
-  proxySpineBinary: "v12.3‑SPINE‑BINARY‑MAX",
-  proxyCleanup: "v12.3‑CLEANUP‑PRESENCE",
-  proxyHistoryRepair: "v12.3‑REPAIR‑PRESENCE",
+  proxySpine: "v16-SPINE-IMMORTAL",
+  proxySpineBinary: "v16-SPINE-BINARY-IMMORTAL",
+  proxyCleanup: "v16-CLEANUP-IMMORTAL",
+  proxyHistoryRepair: "v16-REPAIR-IMMORTAL",
 
-  binaryNervousSystem: "v12.3‑PURE‑BINARY‑MAX",
-  dynamicPageSystem: "v12.3‑EVO‑MAX",
-  fallbackSystem: "ContinuancePulse‑v3‑Presence",
+  binaryNervousSystem: "v16-PURE-BINARY-IMMORTAL",
+  dynamicPageSystem: "v16-EVO-IMMORTAL",
+  fallbackSystem: "ContinuancePulse-v3-Presence",
 
-  uiOrganism: "v12.3‑UI‑PRESENCE",
-  uiEvolutionaryPage: "v12.3‑UI‑PAGE‑PRESENCE",
-  uiBinaryOrgan: "v12.3‑UI‑BINARY‑PRESENCE",
-  uiRouterOrgan: "v12.3‑UI‑ROUTER‑PRESENCE",
-  uiBrainOrgan: "v12.3‑UI‑BRAIN‑PRESENCE",
-  uiMemoryOrgan: "v12.3‑UI‑MEMORY‑PRESENCE",
-  uiImpulseOrgan: "v12.3‑UI‑IMPULSE‑PRESENCE",
-  uiSkin: "v12.3‑UI‑SKIN‑PRESENCE",
-  uiAnimations: "v12.3‑UI‑ANIM‑PRESENCE",
+  uiOrganism: "v16-UI-IMMORTAL",
+  uiEvolutionaryPage: "v16-UI-PAGE-IMMORTAL",
+  uiBinaryOrgan: "v16-UI-BINARY-IMMORTAL",
+  uiRouterOrgan: "v16-UI-ROUTER-IMMORTAL",
+  uiBrainOrgan: "v16-UI-BRAIN-IMMORTAL",
+  uiMemoryOrgan: "v16-UI-MEMORY-IMMORTAL",
+  uiImpulseOrgan: "v16-UI-IMPULSE-IMMORTAL",
+  uiSkin: "v16-UI-SKIN-IMMORTAL",
+  uiAnimations: "v16-UI-ANIM-IMMORTAL",
 
-  coreMemory: "v12.3‑CORE‑MEMORY",
-  coreBinaryMemory: "v12.3‑CORE‑BINARY",
+  coreMemory: "v16-CORE-MEMORY-IMMORTAL",
+  coreBinaryMemory: "v16-CORE-BINARY-IMMORTAL",
 
-  fileScanner: "v12.3‑FILE‑SCANNER",
-  codeAnalyzer: "v12.3‑CODE‑ANALYZER"
+  fileScanner: "v16-FILE-SCANNER-IMMORTAL",
+  codeAnalyzer: "v16-CODE-ANALYZER-IMMORTAL"
 };
 
 // -----------------------------------------------------------------------------
@@ -109,7 +114,7 @@ const firebaseAccess = {
   handle: "db",
   meta: {
     helperModule: "../NETLIFY/FUNCTIONS/helpers.js",
-    contract: "PulseFirebase-v12.6-Routed"
+    contract: "PulseFirebase-v16-IMMORTAL-Routed"
   }
 };
 
@@ -203,7 +208,7 @@ const DRIFT_METADATA = {
 };
 
 // -----------------------------------------------------------------------------
-// ROUTE INTERPRETER — v13‑EVO‑PRIME
+// ROUTE INTERPRETER — v16-IMMORTAL
 // -----------------------------------------------------------------------------
 function interpretRoute(path = "", genome, pageExpectations) {
   if (!path || typeof path !== "string") return "/";
@@ -225,6 +230,94 @@ function interpretRoute(path = "", genome, pageExpectations) {
 }
 
 // -----------------------------------------------------------------------------
+// CHUNKER — IMMORTAL 32-LANE UI/ROUTING CHUNKER
+// -----------------------------------------------------------------------------
+const iqChunker = createPulseAIChunker({
+  id: "PulseAIChunker-IQMap",
+  defaultChunkSize: 4096,
+  maxChunkSize: 32768,
+  trace: false
+});
+
+// Prewarm profiles for routes, GPU, scanner, proxy, organism views
+iqChunker.prewarmPattern("routes", {
+  defaultChunkSize: 2048,
+  maxChunkSize: 16384,
+  band: "symbolic"
+});
+
+iqChunker.prewarmPattern("gpu_profiles", {
+  defaultChunkSize: 1024,
+  maxChunkSize: 8192,
+  band: "symbolic"
+});
+
+iqChunker.prewarmPattern("scanner", {
+  defaultChunkSize: 2048,
+  maxChunkSize: 16384,
+  band: "symbolic"
+});
+
+iqChunker.prewarmPattern("proxy", {
+  defaultChunkSize: 2048,
+  maxChunkSize: 16384,
+  band: "symbolic"
+});
+
+iqChunker.prewarmPattern("organism_ui", {
+  defaultChunkSize: 4096,
+  maxChunkSize: 32768,
+  band: "symbolic"
+});
+
+// -----------------------------------------------------------------------------
+// CHUNKING PROFILES — REQUIRED BY BRAIN (now fully wired)
+// -----------------------------------------------------------------------------
+function buildChunkingProfiles(genome, pageExpectations) {
+  const routeProfiles = {};
+  for (const route of Object.keys(pageExpectations)) {
+    routeProfiles[route] = {
+      label: "routes",
+      band: "symbolic",
+      lanes: 32
+    };
+  }
+
+  const gpuProfiles = {
+    default: {
+      label: "gpu_profiles",
+      band: "symbolic",
+      lanes: 32
+    },
+    scanner: {
+      label: "scanner",
+      band: "symbolic",
+      lanes: 32
+    },
+    proxy: {
+      label: "proxy",
+      band: "symbolic",
+      lanes: 32
+    },
+    organism: {
+      label: "organism_ui",
+      band: "symbolic",
+      lanes: 32
+    }
+  };
+
+  return {
+    default: {
+      label: "routes",
+      band: "symbolic",
+      lanes: 32
+    },
+    routes: routeProfiles,
+    gpu: gpuProfiles
+  };
+}
+
+// -----------------------------------------------------------------------------
 // PRIME IQ MAP — ASYNC CONSTRUCTION
 // -----------------------------------------------------------------------------
 async function buildPulseIQMapPrime() {
@@ -232,6 +325,41 @@ async function buildPulseIQMapPrime() {
 
   const organExpectations = buildOrganExpectationsFromGenome(genome);
   const pageExpectations = buildPageExpectations();
+  const chunkingProfiles = buildChunkingProfiles(genome, pageExpectations);
+
+  // Pre-chunk static topology + expectations for fast cortex access
+  const topology = {
+    backendRoot: "tropic-pulse-functions",
+    publishRoot: FRONTEND_ROOT,
+    frontendFiles: FRONTEND_FILES,
+    frontendSystems: FRONTEND_SYSTEMS,
+    worldFolders: WORLD_FOLDERS
+  };
+
+  const topologyChunks = iqChunker.chunkJSON(topology, {
+    label: "routes",
+    band: "symbolic"
+  });
+
+  const organsChunks = iqChunker.chunkJSON(organExpectations, {
+    label: "organism_ui",
+    band: "symbolic"
+  });
+
+  const pagesChunks = iqChunker.chunkJSON(pageExpectations, {
+    label: "routes",
+    band: "symbolic"
+  });
+
+  const driftChunks = iqChunker.chunkJSON(DRIFT_METADATA, {
+    label: "scanner",
+    band: "symbolic"
+  });
+
+  const chunkingProfilesChunks = iqChunker.chunkJSON(chunkingProfiles, {
+    label: "routes",
+    band: "symbolic"
+  });
 
   return {
     log,
@@ -243,13 +371,8 @@ async function buildPulseIQMapPrime() {
     version: VERSION_MAP,
     genome,
 
-    topology: {
-      backendRoot: "tropic-pulse-functions",
-      publishRoot: FRONTEND_ROOT,
-      frontendFiles: FRONTEND_FILES,
-      frontendSystems: FRONTEND_SYSTEMS,
-      worldFolders: WORLD_FOLDERS
-    },
+    topology,
+    topologyChunks,
 
     // ⭐ REQUIRED BY BRAIN / EVOLUTION / CORTEX
     presenceConfig: {
@@ -265,15 +388,15 @@ async function buildPulseIQMapPrime() {
     },
 
     // ⭐ REQUIRED BY BRAIN (chunking metadata)
-    chunkingProfiles: {
-      default: null,
-      routes: {},
-      gpu: {}
-    },
+    chunkingProfiles,
+    chunkingProfilesChunks,
 
     organs: organExpectations,
+    organsChunks,
     pages: pageExpectations,
+    pagesChunks,
     drift: DRIFT_METADATA,
+    driftChunks,
 
     // ⭐ REQUIRED BY BRAIN
     getRecoveryRoute() {
@@ -281,7 +404,11 @@ async function buildPulseIQMapPrime() {
     },
 
     routeInterpreter: (path) =>
-      interpretRoute(path, genome, pageExpectations)
+      interpretRoute(path, genome, pageExpectations),
+
+    // IMMORTAL: expose chunker surface read-only for cortex/brain
+    chunkerMeta: iqChunker.getMeta(),
+    getChunkerLaneStats: () => iqChunker.getLaneStats()
   };
 }
 

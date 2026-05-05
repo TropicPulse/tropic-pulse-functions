@@ -1,16 +1,16 @@
 // ============================================================================
-//  PULSE OS v15‑IMMORTAL — PERMISSIONS ENGINE
-//  Dual‑Band Safety Contract • Deterministic • Drift‑Proof • Persona‑Aware
+//  PULSE OS v16‑IMMORTAL++ — PERMISSIONS ENGINE
+//  Dual‑Band Safety Contract • Deterministic • Drift‑Proof • Trust‑Aware
 //  PURE CONTRACT ORACLE. ZERO MUTATION. ZERO RANDOMNESS.
 // ============================================================================
 
 /*
 AI_EXPERIENCE_META = {
   identity: "aiPermissionsEngine",
-  version: "v15-Immortal",
+  version: "v16-Immortal++",
   layer: "ai_core",
   role: "permissions_engine",
-  lineage: "aiPermissionsEngine-v11 → v15-Immortal",
+  lineage: "aiPermissionsEngine-v11 → v15-Immortal → v16-Immortal++",
 
   evo: {
     permissionsEngine: true,
@@ -24,7 +24,30 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    permissionAware: true,
+    boundaryAware: true,
+    personaAware: true,
+    ownerAware: true,
+    forbiddenAware: true,
+
+    lineageAware: true,
+    packetAware: true,
+    windowAware: true,
+    arteryAware: true,
+    capabilityArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    safetyFrameAware: true,
+    governorAware: true,
+    genomeAware: true,
+    loggerAware: true,
+
+    microPipeline: true,
+    speedOptimized: true,
+    readOnly: true,
+    multiInstanceReady: true
   },
 
   contract: {
@@ -35,7 +58,9 @@ AI_EXPERIENCE_META = {
       "aiSafetyFrame",
       "aiLoggerAdapter",
       "aiGenome",
-      "aiIdentityCore"
+      "aiIdentityCore",
+      "aiTrustFabric",
+      "aiJuryFrame"
     ],
     never: [
       "safeRoute",
@@ -53,12 +78,9 @@ import { getPermissionsForPersona, ForbiddenActions } from "./permissions.js";
 export const PermissionsMeta = Object.freeze({
   layer: "PulseAIPermissionsLayer",
   role: "PERMISSIONS_ENGINE",
-  version: "15-Immortal",
-  identity: "aiPermissionsEngine-v15-Immortal",
+  version: "16-Immortal++",
+  identity: "aiPermissionsEngine-v16-Immortal++",
 
-  // --------------------------------------------------------------------------
-  //  EVO — IMMORTAL-GRADE CAPABILITY MAP
-  // --------------------------------------------------------------------------
   evo: Object.freeze({
     deterministic: true,
     driftProof: true,
@@ -74,10 +96,12 @@ export const PermissionsMeta = Object.freeze({
     packetAware: true,
     windowAware: true,
     arteryAware: true,
-
+    capabilityArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    safetyFrameAware: true,
     governorAware: true,
     genomeAware: true,
-    safetyFrameAware: true,
     loggerAware: true,
 
     microPipeline: true,
@@ -85,15 +109,12 @@ export const PermissionsMeta = Object.freeze({
     readOnly: true,
     multiInstanceReady: true,
 
-    epoch: "15-Immortal"
+    epoch: "16-Immortal++"
   }),
 
-  // --------------------------------------------------------------------------
-  //  CONTRACT — IMMUTABLE SAFETY CONTRACT
-  // --------------------------------------------------------------------------
   contract: Object.freeze({
     purpose:
-      "Resolve permissions deterministically from persona, owner state, lineage, and universal forbidden actions.",
+      "Resolve permissions deterministically from persona, owner state, lineage, universal forbidden actions, and trust fabric signals.",
 
     never: Object.freeze([
       "mutate external systems",
@@ -114,6 +135,7 @@ export const PermissionsMeta = Object.freeze({
       "respect persona permissions",
       "respect owner override",
       "respect lineage constraints",
+      "respect trust fabric risk signals",
       "remain deterministic",
       "remain read-only",
       "resolve capabilities canonically",
@@ -129,15 +151,36 @@ export const PermissionsMeta = Object.freeze({
 });
 
 // ============================================================================
+//  INTERNAL HELPERS
+// ============================================================================
+function bucketLevel(v) {
+  if (v >= 0.9) return "elite";
+  if (v >= 0.75) return "high";
+  if (v >= 0.5) return "medium";
+  if (v >= 0.25) return "low";
+  return "critical";
+}
+
+function extractTrustSignals(trustArtery = {}) {
+  return {
+    honeypotRisk: trustArtery?.honeypotRisk ?? 0,
+    dominanceRisk: trustArtery?.dominanceRisk ?? 0,
+    anomalyScore: trustArtery?.anomalyScore ?? 0
+  };
+}
+
+// ============================================================================
 //  PACKET EMITTER — deterministic, permissions-scoped
 // ============================================================================
 function emitPermissionsPacket(type, payload) {
   return Object.freeze({
-    meta: PermissionsMeta,
+    meta: {
+      version: PermissionsMeta.version,
+      epoch: PermissionsMeta.evo.epoch,
+      identity: PermissionsMeta.identity
+    },
     packetType: `permissions-${type}`,
-    packetId: `permissions-${type}-${Date.now()}`,
     timestamp: Date.now(),
-    epoch: PermissionsMeta.evo.epoch,
     ...payload
   });
 }
@@ -155,10 +198,13 @@ export function prewarmPermissionsEngine({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  PERMISSIONS ENGINE — v15‑IMMORTAL
-//  Deterministic resolver with lineage‑aware drift protection
+//  PERMISSIONS ENGINE — v16‑IMMORTAL++
 // ============================================================================
-export function createPermissionsEngine({ context = {} } = {}) {
+export function createPermissionsEngine({
+  context = {},
+  trustFabric = null,
+  juryFrame = null
+} = {}) {
   const userIsOwner = context.userIsOwner === true;
   const lineage = context.lineage || null;
 
@@ -169,8 +215,8 @@ export function createPermissionsEngine({ context = {} } = {}) {
     if (!lineage || !Array.isArray(lineage.changes)) return basePerms;
 
     const drifted = new Set(lineage.changes.map(c => c.capability));
-
     const corrected = { ...basePerms };
+
     for (const cap of drifted) {
       if (corrected[cap] === true) corrected[cap] = false;
     }
@@ -192,11 +238,19 @@ export function createPermissionsEngine({ context = {} } = {}) {
       ...ForbiddenActions
     });
 
-    emitPermissionsPacket("resolve", {
+    const packet = emitPermissionsPacket("resolve", {
       persona,
       ownerMode: userIsOwner === true,
       lineageAware: !!lineage
     });
+
+    trustFabric?.recordPermissionsResolve?.({
+      persona,
+      ownerMode: userIsOwner === true,
+      lineageAware: !!lineage
+    });
+
+    juryFrame?.recordEvidence?.("permissions-resolve", packet);
 
     return merged;
   }
@@ -204,17 +258,88 @@ export function createPermissionsEngine({ context = {} } = {}) {
   // --------------------------------------------------------------------------
   //  CHECK — deterministic capability check
   // --------------------------------------------------------------------------
-  function check(personaId, action) {
+  function check(personaId, action, { trustArtery = {} } = {}) {
     const perms = resolve(personaId);
     const allowed = perms[action] === true;
 
-    emitPermissionsPacket("check", {
+    const trust = extractTrustSignals(trustArtery);
+    const risk =
+      Math.max(trust.honeypotRisk, trust.dominanceRisk, trust.anomalyScore);
+
+    const packet = emitPermissionsPacket("check", {
       persona: personaId || "neutral",
       action,
-      allowed
+      allowed,
+      trustRisk: risk
     });
 
+    trustFabric?.recordPermissionsCheck?.({
+      persona: personaId || "neutral",
+      action,
+      allowed,
+      trustRisk: risk
+    });
+
+    juryFrame?.recordEvidence?.("permissions-check", packet);
+
     return allowed;
+  }
+
+  // --------------------------------------------------------------------------
+  //  CAPABILITY ARTERY SNAPSHOT — window-safe, aggregate only
+  // --------------------------------------------------------------------------
+  function capabilityArterySnapshot(personaId) {
+    const persona = personaId || "neutral";
+    const perms = resolve(persona);
+
+    let allowedCount = 0;
+    let forbiddenCount = 0;
+
+    for (const [k, v] of Object.entries(perms)) {
+      if (k in ForbiddenActions) {
+        if (ForbiddenActions[k] === false) forbiddenCount += 1;
+      } else if (v === true) {
+        allowedCount += 1;
+      }
+    }
+
+    const budget = Math.max(0, Math.min(1, allowedCount / (allowedCount + forbiddenCount || 1)));
+    const bucket = bucketLevel(budget);
+
+    const artery = Object.freeze({
+      organism: {
+        budget,
+        budgetBucket: bucket
+      },
+      persona: {
+        id: persona,
+        ownerMode: userIsOwner === true
+      },
+      forbidden: {
+        count: forbiddenCount
+      },
+      meta: {
+        version: PermissionsMeta.version,
+        epoch: PermissionsMeta.evo.epoch,
+        identity: PermissionsMeta.identity
+      }
+    });
+
+    const packet = emitPermissionsPacket("artery", {
+      persona,
+      organismBudget: budget,
+      budgetBucket: bucket
+    });
+
+    trustFabric?.recordPermissionsArtery?.({
+      persona,
+      budget,
+      bucket
+    });
+
+    juryFrame?.recordEvidence?.("permissions-artery", packet);
+
+    return artery;
   }
 
   // --------------------------------------------------------------------------
@@ -228,7 +353,16 @@ export function createPermissionsEngine({ context = {} } = {}) {
       ownerMode: userIsOwner === true
     });
 
-    return emitPermissionsPacket("snapshot", snap);
+    const packet = emitPermissionsPacket("snapshot", snap);
+
+    trustFabric?.recordPermissionsSnapshot?.({
+      ownerMode: userIsOwner === true,
+      lineageAware: !!lineage
+    });
+
+    juryFrame?.recordEvidence?.("permissions-snapshot", packet);
+
+    return packet;
   }
 
   // --------------------------------------------------------------------------
@@ -238,7 +372,8 @@ export function createPermissionsEngine({ context = {} } = {}) {
     meta: PermissionsMeta,
     resolve,
     check,
-    snapshot
+    snapshot,
+    capabilityArterySnapshot
   });
 }
 

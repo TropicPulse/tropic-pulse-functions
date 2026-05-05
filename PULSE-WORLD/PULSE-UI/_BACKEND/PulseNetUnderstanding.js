@@ -106,7 +106,7 @@ import { createEarn as PulseEarnSym } from "../../PULSE-BAND/PULSE-EARN/PulseEar
 //  IMPORTS — BINARY SHADOW (NO BOOT HERE)
 //  Window already booted ai-v11-Evo and exposed window.PulseBinary.
 // ============================================================================
-import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../../PULSE-BAND/PULSE-AI/aiDualBand-v11-Evo.js";
+import { createDualBandOrganism as PulseBinaryOrganismBoot } from "../../PULSE-BAND/PULSE-AI/aiDualBand-v16.js";
 
 import { createBinaryProxy } from "../../PULSE-BAND/PULSE-PROXY/PulseBinaryProxy-v11-Evo.js";
 import { createBinaryRouter as PulseRouterBin } from "../../PULSE-BAND/PULSE-ROUTER/PulseBinaryRouter-v16.js";

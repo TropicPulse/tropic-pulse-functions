@@ -1,15 +1,16 @@
 // ============================================================================
-//  PULSE OS v14-Immortal — SUPEREGO (DUAL‑BAND BOUNDARIES)
-//  Behavioral Constraints • Ethical Boundaries • Binary-Aware Moral Law
-//  PURE CONSTRAINTS. ZERO MUTATION. ZERO RANDOMNESS.
+//  PULSE OS v16‑IMMORTAL++ — SUPEREGO (DUAL‑BAND BOUNDARIES + TRUST FABRIC)
+//  Behavioral Constraints • Ethical Boundaries • Binary‑Aware Moral Law
+//  PURE CONSTRAINTS. ZERO RANDOMNESS. ZERO INTERNET.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "boundaries",
-  version: "v14-Immortal",
+  version: "v16-Immortal++",
   layer: "ai_core",
   role: "boundary_rules",
-  lineage: "boundaries-v11 → v14-Immortal",
+  lineage: "boundaries-v11 → v14-Immortal → v16-Immortal++",
 
   evo: {
     boundaryRules: true,
@@ -17,6 +18,14 @@ AI_EXPERIENCE_META = {
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
+
+    boundaryArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
 
     deterministic: true,
     driftProof: true,
@@ -28,7 +37,7 @@ AI_EXPERIENCE_META = {
 
   contract: {
     always: ["aiSafetyFrame", "aiBoundariesEngine", "aiPermissionsEngine"],
-    never: ["safeRoute", "fetchViaCNS"]
+    never: ["safeRoute", "fetchViaCNS", "directInternetAccess"]
   }
 }
 */
@@ -38,8 +47,8 @@ export const SuperegoMeta = Object.freeze({
   subsystem: "aiSuperego",
   layer: "SuperegoBoundaryEngine",
   role: "BOUNDARY_ORGAN",
-  version: "12.3-Evo+",
-  identity: "aiSuperego-v12.3-Evo+",
+  version: "16-Immortal++",
+  identity: "aiSuperego-v16-Immortal++",
 
   evo: Object.freeze({
     driftProof: true,
@@ -56,7 +65,14 @@ export const SuperegoMeta = Object.freeze({
     multiInstanceReady: true,
     boundaryCacheAware: true,
     vitalsFusionAware: true,
-    epoch: "v12.3-Evo+"
+    boundaryArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    epoch: "16-Immortal++"
   }),
 
   contract: Object.freeze({
@@ -78,6 +94,7 @@ export const SuperegoMeta = Object.freeze({
       "apply dynamic boundaries deterministically",
       "respect persona domain constraints",
       "respect binary override rules",
+      "respect trust fabric and jury signals",
       "remain read-only",
       "remain drift-proof"
     ])
@@ -101,7 +118,6 @@ export const BoundaryLevels = Object.freeze({
 // ============================================================================
 //  STATIC BOUNDARIES (v10.4) — preserved EXACTLY
 // ============================================================================
-
 export const ArchitectAIBoundaries = Object.freeze({
   system:       Object.freeze({ read: BoundaryLevels.NONE,  modify: BoundaryLevels.NEVER }),
   organs:       Object.freeze({ read: BoundaryLevels.NONE,  modify: BoundaryLevels.NEVER }),
@@ -162,14 +178,25 @@ export const NeutralAIBoundaries = Object.freeze({
   settings:     Object.freeze({ read: BoundaryLevels.NEVER, modify: BoundaryLevels.NEVER })
 });
 
+// Jury persona: internal, read-only, evidence/trust only
+export const JuryAIBoundaries = Object.freeze({
+  evidence:     Object.freeze({ read: BoundaryLevels.NONE,  modify: BoundaryLevels.NEVER }),
+  trust:        Object.freeze({ read: BoundaryLevels.NONE,  modify: BoundaryLevels.NEVER }),
+  drift:        Object.freeze({ read: BoundaryLevels.NONE,  modify: BoundaryLevels.NEVER }),
+  lineage:      Object.freeze({ read: BoundaryLevels.NONE,  modify: BoundaryLevels.NEVER }),
+  system:       Object.freeze({ read: BoundaryLevels.NEVER, modify: BoundaryLevels.NEVER }),
+  users:        Object.freeze({ read: BoundaryLevels.NEVER, modify: BoundaryLevels.NEVER })
+});
+
 // ============================================================================
-//  STATIC LOOKUP — unchanged
+//  STATIC LOOKUP — persona → boundaries
 // ============================================================================
 export function getBoundariesForPersona(persona) {
   switch (persona) {
     case "architect": return ArchitectAIBoundaries;
     case "observer":  return ObserverAIBoundaries;
     case "tourguide": return TourGuideAIBoundaries;
+    case "jury":      return JuryAIBoundaries;
     case "neutral":
     default:          return NeutralAIBoundaries;
   }
@@ -187,7 +214,7 @@ export function canPerform(persona, domain, action) {
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — DUAL‑BAND BOUNDARY MODES (binary‑aware, unchanged semantics)
+//  v16‑IMMORTAL++ — DUAL‑BAND BOUNDARY MODES (binary + trust aware)
 // ============================================================================
 export const BoundaryModes = Object.freeze({
   SAFE: Object.freeze({
@@ -215,7 +242,7 @@ export const BoundaryModes = Object.freeze({
     id: "adaptive",
     symbolicLoad: 0.30,
     binaryOverride: false,
-    description: "Balanced mode; adjusts based on binary vitals."
+    description: "Balanced mode; adjusts based on binary vitals and trust."
   }),
 
   EVOLUTIONARY: Object.freeze({
@@ -227,53 +254,71 @@ export const BoundaryModes = Object.freeze({
 });
 
 // ============================================================================
-//  v12.3‑EVO+ — PRESSURE EXTRACTION (supports new Vitals format)
+//  v16‑IMMORTAL++ — PRESSURE + TRUST EXTRACTION
 // ============================================================================
-
 function extractPressure(binaryVitals = {}) {
-  // v11.x metabolic format
   if (binaryVitals?.metabolic && typeof binaryVitals.metabolic.pressure === "number") {
     return binaryVitals.metabolic.pressure;
   }
-
-  // v12.3‑EVO+ layered + binary format
   if (binaryVitals?.layered?.organism && typeof binaryVitals.layered.organism.pressure === "number") {
     return binaryVitals.layered.organism.pressure;
   }
-
   if (binaryVitals?.binary && typeof binaryVitals.binary.pressure === "number") {
     return binaryVitals.binary.pressure;
   }
-
   return 0;
 }
 
-// ============================================================================
-//  v12.3‑EVO+ — BOUNDARY MODE SELECTION (persona + binary vitals)
-// ============================================================================
+function extractTrustSignals(trustArtery = {}) {
+  return {
+    honeypotRisk: trustArtery?.honeypotRisk ?? 0,
+    dominanceRisk: trustArtery?.dominanceRisk ?? 0,
+    anomalyScore: trustArtery?.anomalyScore ?? 0
+  };
+}
 
-export function selectBoundaryMode({ personaId, binaryVitals = {}, evoState = {} }) {
+// ============================================================================
+//  v16‑IMMORTAL++ — BOUNDARY MODE SELECTION (persona + vitals + trust)
+// ============================================================================
+export function selectBoundaryMode({
+  personaId,
+  binaryVitals = {},
+  evoState = {},
+  trustArtery = {}
+}) {
   const pressure = extractPressure(binaryVitals);
+  const trust = extractTrustSignals(trustArtery);
 
   if (evoState.forceBoundaryMode) {
     return BoundaryModes[evoState.forceBoundaryMode] || BoundaryModes.SAFE;
   }
 
-  if (pressure >= 0.75) return BoundaryModes.SAFE;
+  if (pressure >= 0.75 || trust.honeypotRisk >= 0.7 || trust.dominanceRisk >= 0.7) {
+    return BoundaryModes.SAFE;
+  }
 
   switch (personaId) {
-    case "architect": return BoundaryModes.CONSERVE;
-    case "observer":  return BoundaryModes.SAFE;
-    case "tourguide": return BoundaryModes.EXPAND;
+    case "architect":
+      return pressure >= 0.5 ? BoundaryModes.CONSERVE : BoundaryModes.ADAPTIVE;
+
+    case "observer":
+      return BoundaryModes.SAFE;
+
+    case "tourguide":
+      return trust.anomalyScore > 0.4 ? BoundaryModes.SAFE : BoundaryModes.EXPAND;
+
+    case "jury":
+      return BoundaryModes.CONSERVE;
+
     case "neutral":
-    default:          return BoundaryModes.ADAPTIVE;
+    default:
+      return BoundaryModes.ADAPTIVE;
   }
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — DYNAMIC BOUNDARY CHECK (symbolic + binary fusion)
+//  v16‑IMMORTAL++ — DYNAMIC BOUNDARY CHECK (symbolic + binary fusion)
 // ============================================================================
-
 export function canPerformDynamic(persona, domain, action, mode, binaryVitals = {}) {
   const staticCheck = canPerform(persona, domain, action);
 
@@ -301,9 +346,8 @@ export function canPerformDynamic(persona, domain, action, mode, binaryVitals = 
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — BOUNDARY CACHE (READ‑ONLY, DETERMINISTIC)
+//  v16‑IMMORTAL++ — BOUNDARY CACHE (READ‑ONLY, DETERMINISTIC KEYS)
 // ============================================================================
-
 const _boundaryDecisionCache = Object.create(null);
 const _modeSelectionCache = Object.create(null);
 
@@ -319,20 +363,25 @@ function _decisionKey(persona, domain, action, mode, binaryVitals) {
   return `${persona}|${domain}|${action}|${modeId}|${pressureBucket}`;
 }
 
-function _modeKey(personaId, binaryVitals, evoState = {}) {
+function _modeKey(personaId, binaryVitals, evoState = {}, trustArtery = {}) {
   const pressure = extractPressure(binaryVitals);
   const forced = evoState.forceBoundaryMode || "";
+  const trust = extractTrustSignals(trustArtery);
   const pressureBucket =
     pressure >= 0.9 ? "p4" :
     pressure >= 0.7 ? "p3" :
     pressure >= 0.4 ? "p2" :
     pressure >  0   ? "p1" : "p0";
 
-  return `${personaId}|${forced}|${pressureBucket}`;
+  const trustBucket =
+    trust.honeypotRisk >= 0.7 || trust.dominanceRisk >= 0.7 ? "risk-high" :
+    trust.anomalyScore >= 0.4 ? "risk-mid" : "risk-low";
+
+  return `${personaId}|${forced}|${pressureBucket}|${trustBucket}`;
 }
 
 export function selectBoundaryModeCached(args) {
-  const key = _modeKey(args.personaId, args.binaryVitals, args.evoState);
+  const key = _modeKey(args.personaId, args.binaryVitals, args.evoState, args.trustArtery);
   const cached = _modeSelectionCache[key];
   if (cached) return cached;
 
@@ -352,36 +401,59 @@ export function canPerformDynamicCached(persona, domain, action, mode, binaryVit
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — BOUNDARY ARTERY SNAPSHOT (READ‑ONLY)
+//  v16‑IMMORTAL++ — BOUNDARY ARTERY SNAPSHOT (READ‑ONLY, TRUST + DUALBAND)
 // ============================================================================
+function bucketPressure(v) {
+  if (v >= 0.9) return "overload";
+  if (v >= 0.7) return "high";
+  if (v >= 0.4) return "medium";
+  if (v > 0) return "low";
+  return "none";
+}
 
-export function getBoundaryArterySnapshot({ personaId, binaryVitals = {}, evoState = {} }) {
-  const mode = selectBoundaryModeCached({ personaId, binaryVitals, evoState });
+export function getBoundaryArterySnapshot({
+  personaId,
+  binaryVitals = {},
+  evoState = {},
+  trustArtery = {},
+  dualBand = null
+} = {}) {
+  const mode = selectBoundaryModeCached({ personaId, binaryVitals, evoState, trustArtery });
   const pressure = extractPressure(binaryVitals);
+  const trust = extractTrustSignals(trustArtery);
+  const dualBandContext = dualBand?.artery || null;
 
-  const pressureBucket =
-    pressure >= 0.9 ? "overload" :
-    pressure >= 0.7 ? "high" :
-    pressure >= 0.4 ? "medium" :
-    pressure >  0   ? "low" : "none";
-
-  return {
+  return Object.freeze({
     type: "boundary-artery",
     personaId,
     mode: {
       id: mode.id,
       symbolicLoad: mode.symbolicLoad,
-      binaryOverride: mode.binaryOverride
+      binaryOverride: mode.binaryOverride,
+      description: mode.description
     },
     vitals: {
       pressure,
-      pressureBucket
+      pressureBucket: bucketPressure(pressure)
+    },
+    trust: {
+      honeypotRisk: trust.honeypotRisk,
+      dominanceRisk: trust.dominanceRisk,
+      anomalyScore: trust.anomalyScore
+    },
+    dualBand: {
+      artery: dualBandContext
+    },
+    meta: {
+      version: SuperegoMeta.version,
+      epoch: SuperegoMeta.evo.epoch,
+      identity: SuperegoMeta.identity
     }
-  };
+  });
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v16‑IMMORTAL++ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
@@ -392,6 +464,7 @@ if (typeof module !== "undefined" && module.exports) {
     ObserverAIBoundaries,
     TourGuideAIBoundaries,
     NeutralAIBoundaries,
+    JuryAIBoundaries,
     getBoundariesForPersona,
     canPerform,
     BoundaryModes,

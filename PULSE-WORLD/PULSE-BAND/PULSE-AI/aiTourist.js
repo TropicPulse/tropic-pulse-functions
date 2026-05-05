@@ -1,12 +1,3 @@
-// You’re right—Tourist is the king. So he gets real caching, not just cache headers.
-
-// Here’s a **full, drop‑in, cached + chunked `aiTourist.js`**, built around your existing `CACHE_CONTROL` + `ACCESS` maps, with:
-
-// - in‑memory cache per collection + scope (+ user for private)
-// - respect for `public / private / no-store`
-// - frozen results for determinism
-// - zero identity leakage
-
 // ============================================================================
 // FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-AI/aiTourist.js
 // LAYER: TOURIST ORGAN (Public + User‑Scoped Data Pantry, Intent‑Aware)

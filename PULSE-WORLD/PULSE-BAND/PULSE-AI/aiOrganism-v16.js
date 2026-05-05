@@ -1,14 +1,29 @@
 // ============================================================================
-//  aiOrganism.js — Pulse OS v12.3-Presence Organ
-//  Dualband Organism Bootloader • Canonical Assembly • Deterministic Root
+//  aiOrganism-v16-Immortal++.js — Pulse OS v16-Immortal++ Organism
+//  Dualband Organism Bootloader • Canonical Assembly • Trust/Artery Aware
 // ============================================================================
+//
+// ROLE (v16-Immortal-Organism++):
+//   • Canonically assemble the binary + symbolic organism (organs, registry, conductor).
+//   • Provide a deterministic, dualband-ready organism surface.
+//   • Expose a stable organismSnapshot + organismArtery for higher layers.
+//   • Integrate with diagnostics, deps, trust fabric, dualband, and Pulse-Net.
+//   • Never perform user routing, UI, or external network access directly.
+//   • Never mutate external config or DB; pure assembly + internal wiring.
+//
+// CONTRACT:
+//   • Deterministic, drift-proof, read-only outward surface.
+//   • No random, no timestamps, no external mutation.
+//   • No direct internet / HTTP / DNS / WebSocket.
+// ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiOrganism",
-  version: "v14-Immortal",
+  version: "v16-Immortal-Organism++",
   layer: "ai_core",
   role: "organism_definition",
-  lineage: "aiOrganism-v11 → v14-Immortal",
+  lineage: "aiOrganism-v11 → v12.3-Presence → v14-Immortal → v16-Immortal-Organism++",
 
   evo: {
     organismDefinition: true,
@@ -16,6 +31,12 @@ AI_EXPERIENCE_META = {
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
+    arteryAware: true,
+    trustFabricAware: true,
+    diagnosticsAware: true,
+    depsAware: true,
+    chunkerAware: true,
+    pulseNetAware: true,
 
     deterministic: true,
     driftProof: true,
@@ -26,8 +47,22 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiAnatomy", "aiBrainstem", "aiContext"],
-    never: ["safeRoute", "fetchViaCNS"]
+    always: [
+      "aiAnatomy",
+      "aiBrainstem",
+      "aiContext",
+      "DualBandKernel",
+      "PulseAIChunker",
+      "PulseNetProxySpine"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "directInternetAccess",
+      "externalHTTP",
+      "externalDNS",
+      "externalWebsocket"
+    ]
   }
 }
 */
@@ -35,8 +70,8 @@ AI_EXPERIENCE_META = {
 export const OrganismMeta = Object.freeze({
   layer: "OrganismRoot",
   role: "DUALBAND_ORGANISM_BOOTLOADER",
-  version: "12.3-Presence",
-  identity: "aiOrganism-v12.3-Presence",
+  version: "v16-Immortal-Organism++",
+  identity: "aiOrganism-v16-Immortal-Organism++",
 
   evo: Object.freeze({
     deterministic: true,
@@ -44,6 +79,7 @@ export const OrganismMeta = Object.freeze({
     dualband: true,
     binaryAware: true,
     symbolicAware: true,
+
     assemblyAware: true,
     registryAware: true,
     pipelineAware: true,
@@ -54,37 +90,54 @@ export const OrganismMeta = Object.freeze({
     immunityAware: true,
     nervousSystemAware: true,
     conductorAware: true,
+    deltaAware: true,
+    loggerAware: true,
+    governorAware: true,
+    pageScannerAware: true,
+
+    diagnosticsAware: true,
+    depsAware: true,
+    arteryAware: true,
+    organismSnapshotAware: true,
+    trustFabricAware: true,
+    chunkerAware: true,
+    dualBandBridgeAware: true,
+    pulseNetAware: true,
+
     windowAware: true,
     packetAware: true,
     prewarmAware: true,
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "v16-Immortal-Organism++"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Assemble all organism organs into a single deterministic dualband organism. Provide canonical bootloading and wiring.",
+      "Assemble all organism organs into a single deterministic dualband organism and expose a stable organismSnapshot + artery.",
 
     never: Object.freeze([
       "auto-discover organs",
       "mutate external config",
       "perform routing",
-      "perform cognition",
-      "introduce randomness"
+      "perform UI logic",
+      "introduce randomness",
+      "touch internet directly"
     ]),
 
     always: Object.freeze([
       "assemble organs deterministically",
       "wire organs explicitly",
-      "register organs with conductor",
+      "register organs with conductor and registry",
       "initialize organism in a pure sequence",
+      "expose organismSnapshot deterministically",
+      "expose organismArtery deterministically",
       "remain minimal and canonical"
     ])
   })
 });
 
 // ============================================================================
-//  IMPORTS — v11.3‑EVO organs
+//  IMPORTS — binary organs (v11.3‑EVO lineage)
 // ============================================================================
 import { createAIBinaryAgent } from "./aiBinaryAgent.js";
 import { createAIMemory } from "./aiMemory-v11-Evo.js";
@@ -105,9 +158,9 @@ import { createAIBinaryNervousSystem } from "./aiNervousSystem.js";
 // ============================================================================
 //  COMMANDMENTS / SUPEREGO LAYER
 // ============================================================================
-import { createPersonaEngine } from "../PULSE-AI/persona.js";
-import { createBoundariesEngine } from "../PULSE-AI/boundaries.js";
-import { createPermissionsEngine } from "../PULSE-AI/permissions.js";
+import { createPersonaEngine } from "./persona.js";
+import { createBoundariesEngine } from "./boundaries.js";
+import { createPermissionsEngine } from "./permissions.js";
 
 // ============================================================================
 //  COGNITIVE FRAME / CONTEXT / CORTEX
@@ -115,41 +168,38 @@ import { createPermissionsEngine } from "../PULSE-AI/permissions.js";
 import createCognitiveFrame, {
   COGNITIVE_FRAME_META,
   prewarmCognitiveFrame
-} from "../PULSE-AI/aiContext.js";
+} from "./aiContext.js";
 
 import {
   createContextEngine,
   prewarmContextEngine
-} from "../PULSE-AI/aiContextEngine.js";
+} from "./aiContextEngine.js";
 
 import {
   createCortex,
   prewarmAICortex
-} from "../PULSE-AI/aiCortex-v11-Evo.js";
+} from "./aiCortex-v11-Evo.js";
 
 // ============================================================================
 //  EMOTION / EXPERIENCE / PERSONALITY
 // ============================================================================
 import aiEmotionEngine, {
   prewarmEmotionEngine
-} from "../PULSE-AI/aiEmotionEngine.js";
+} from "./aiEmotionEngine.js";
 
-import createExperienceEngine from "../PULSE-AI/aiExperience.js";
-
-import { createPersonalityEngine } from "../PULSE-AI/aiPersonalityEngine.js";
-
-import { createPersonalFrame } from "../PULSE-AI/aiPersonalFrame.js";
+import createExperienceEngine from "./aiExperience.js";
+import { createPersonalityEngine } from "./aiPersonalityEngine.js";
+import { createPersonalFrame } from "./aiPersonalFrame.js";
 
 // ============================================================================
 //  DELIVERY / EVOLUTION / DUALBAND
 // ============================================================================
 import aiDeliveryEngine, {
   prewarmDeliveryEngine
-} from "../PULSE-AI/aiDeliveryEngine.js";
+} from "./aiDeliveryEngine.js";
 
-import { aiEvolutionEngine } from "../PULSE-AI/aiEvolutionEngine.js";
-
-import { aiDualBand } from "../PULSE-AI/aiDualBand-v11-Evo.js";
+import { aiEvolutionEngine } from "./aiEvolutionEngine-v16.js";
+import { aiDualBand } from "./aiDualBand-v16.js";
 
 // ============================================================================
 //  SCRIBE / DIAGNOSTICS / DEPS
@@ -159,7 +209,7 @@ import {
   formatDebugReport,
   formatDebugString,
   prewarmScribe
-} from "../PULSE-AI/aiDebug.js";
+} from "./aiDebug.js";
 
 import {
   DiagnosticsMeta,
@@ -167,13 +217,13 @@ import {
   attachDiagnosticsOrgan,
   createDiagnosticsAPI,
   prewarmDiagnosticsOrgan
-} from "../PULSE-AI/aiDiagnostics.js";
+} from "./aiDiagnostics.js";
 
 import {
   DiagnosticsWriteMeta,
   createDiagnosticsWriteOrgan,
   prewarmDiagnosticsWriteOrgan
-} from "../PULSE-AI/aiDiagnosticsWrite.js";
+} from "./aiDiagnosticsWrite.js";
 
 import depsSurface, {
   DepsMeta,
@@ -184,15 +234,55 @@ import depsSurface, {
   getOrganismSnapshot,
   emitDepsPacket,
   prewarmDepsLayer
-} from "../PULSE-AI/aiDeps.js";
+} from "./aiDeps.js";
 
 // ============================================================================
-//  AI ENGINE / ORGANISM LOADER
+//  AI ENGINE
 // ============================================================================
-import { runAI, ExecutionEngineMeta } from "../PULSE-AI/aiEngine.js";
+import { runAI, ExecutionEngineMeta } from "./aiEngine-v16.js";
 
 // ============================================================================
-//  ORGANISM IMPLEMENTATION — v14 IMMORTAL‑INTEL (A‑B‑A UPGRADE)
+//  ORGANISM ARTERY — v16 IMMORTAL++
+// ============================================================================
+function computeOrganismArtery(self) {
+  const registryCount = self.registry?.count?.() ?? 0;
+  const metabolicPressure = self.metabolism?.getPressure?.() ?? null;
+  const metabolicLoad = self.metabolism?.getLoad?.() ?? null;
+  const immunityState = self.immunity?.getState?.() ?? null;
+
+  const buckets = {
+    registry: registryCount > 64 ? "high" : registryCount > 0 ? "medium" : "none",
+    metabolic:
+      metabolicPressure != null
+        ? metabolicPressure >= 0.9
+          ? "critical"
+          : metabolicPressure >= 0.7
+          ? "high"
+          : metabolicPressure >= 0.4
+          ? "medium"
+          : metabolicPressure > 0
+          ? "low"
+          : "none"
+        : "none"
+  };
+
+  return Object.freeze({
+    meta: {
+      layer: OrganismMeta.layer,
+      role: OrganismMeta.role,
+      version: OrganismMeta.version,
+      identity: OrganismMeta.identity
+    },
+    registryCount,
+    metabolicPressure,
+    metabolicLoad,
+    immunityState,
+    buckets
+  });
+}
+
+// ============================================================================
+//  ORGANISM IMPLEMENTATION — v16 IMMORTAL++
 // ============================================================================
 export class AIOrganism {
   constructor(config = {}) {
@@ -200,7 +290,7 @@ export class AIOrganism {
     this.trace = !!config.trace;
 
     // ---------------------------------------------------------
-    //  CREATE ORGANS — v11.3‑EVO canonical IDs (A: binary layer)
+    //  BINARY LAYER
     // ---------------------------------------------------------
     this.agent = createAIBinaryAgent({ id: "agent", trace: this.trace });
 
@@ -231,28 +321,6 @@ export class AIOrganism {
       sentience: config.sentience,
       pipeline: this.pipeline,
       reflex: this.reflex,
-      logger: config.logger,
-      trace: this.trace
-    });
-
-    this.immunity = createAIBinaryImmunity({
-      id: "immunity",
-      encoder: this.agent,
-      anatomy: config.anatomy,
-      evolution: config.evolution,
-      registry: config.registry,
-      pipeline: this.pipeline,
-      reflex: this.reflex,
-      logger: config.logger,
-      trace: this.trace
-    });
-
-    this.nervous = createAIBinaryNervousSystem({
-      id: "nervous-system",
-      encoder: this.agent,
-      anatomy: config.anatomy,
-      immunity: this.immunity,
-      registry: this.registry,
       logger: config.logger,
       trace: this.trace
     });
@@ -294,13 +362,35 @@ export class AIOrganism {
       trace: this.trace
     });
 
+    this.immunity = createAIBinaryImmunity({
+      id: "immunity",
+      encoder: this.agent,
+      anatomy: config.anatomy,
+      evolution: this.evolution,
+      registry: this.registry,
+      pipeline: this.pipeline,
+      reflex: this.reflex,
+      logger: this.logger,
+      trace: this.trace
+    });
+
+    this.nervous = createAIBinaryNervousSystem({
+      id: "nervous-system",
+      encoder: this.agent,
+      anatomy: config.anatomy,
+      immunity: this.immunity,
+      registry: this.registry,
+      logger: this.logger,
+      trace: this.trace
+    });
+
     this.conductor = createAIBinaryConductor({
       id: "conductor",
       trace: this.trace
     });
 
     // ---------------------------------------------------------
-    //  SUPEREGO / COMMANDMENTS LAYER (B: symbolic layer)
+    //  SUPEREGO / COMMANDMENTS LAYER
     // ---------------------------------------------------------
     this.persona = createPersonaEngine({
       id: "persona",
@@ -480,7 +570,7 @@ export class AIOrganism {
     }
 
     // ---------------------------------------------------------
-    //  WIRING — v11.3‑EVO canonical wiring (A: binary)
+    //  WIRING — binary
     // ---------------------------------------------------------
     this.conductor.wireBinaryPipeline({
       pipeline: this.pipeline,
@@ -506,7 +596,7 @@ export class AIOrganism {
     });
 
     // ---------------------------------------------------------
-    //  SYMBOLIC WIRING (B: symbolic)
+    //  SYMBOLIC WIRING
     // ---------------------------------------------------------
     if (this.conductor.wireSymbolicCognition) {
       this.conductor.wireSymbolicCognition({
@@ -546,7 +636,7 @@ export class AIOrganism {
     }
 
     // ---------------------------------------------------------
-    //  PREWARM — symbolic + cognitive + diagnostics (B)
+    //  PREWARM — symbolic + cognitive + diagnostics
     // ---------------------------------------------------------
     prewarmCognitiveFrame(this.cognitiveFrame);
     prewarmContextEngine(this.contextEngine);
@@ -560,14 +650,14 @@ export class AIOrganism {
     prewarmDepsLayer(this.deps);
 
     // ---------------------------------------------------------
-    //  OPTIONAL SELF-RUNNING ENGINE (Mode 3)
+    //  OPTIONAL SELF-RUNNING ENGINE
     // ---------------------------------------------------------
     if (config.autoRunEngine) {
       this.startEngine();
     }
 
     // ---------------------------------------------------------
-    //  INITIALIZE ORGANISM (A: unified boot)
+    //  INITIALIZE ORGANISM
     // ---------------------------------------------------------
     this.conductor.initialize(this.registry, this.evolution);
 
@@ -575,11 +665,13 @@ export class AIOrganism {
       organCount: organs.length,
       epoch: OrganismMeta.evo.epoch
     });
+
+    this._lastArtery = null;
   }
 
   // ---------------------------------------------------------
-  //  PUBLIC API (A: unchanged external surface)
-// ---------------------------------------------------------
+  //  PUBLIC API
+  // ---------------------------------------------------------
   sense(event) {
     this.pageScannerAdapter._handleScannerEvent(event);
   }
@@ -596,7 +688,6 @@ export class AIOrganism {
   }
 
   organismSnapshot() {
-    // use deps snapshot if available, fall back to memory
     try {
       return getOrganismSnapshot(this.deps) || this.memory.snapshot();
     } catch {
@@ -604,17 +695,17 @@ export class AIOrganism {
     }
   }
 
-  // ---------------------------------------------------------
-  //  ENGINE CONTROL / SELF-RUNNING LOOP
-  // ---------------------------------------------------------
+  organismArtery() {
+    const artery = computeOrganismArtery(this);
+    this._lastArtery = artery;
+    return artery;
+  }
+
   startEngine(task = { mode: "heartbeat" }) {
     this._trace("engine:start", { task });
     return this.engine.run(task);
   }
 
-  // ---------------------------------------------------------
-  //  DEBUG / META SURFACES
-  // ---------------------------------------------------------
   debugReport(extra = {}) {
     const snapshot = this.organismSnapshot();
     const base = {
@@ -632,9 +723,6 @@ export class AIOrganism {
     return formatDebugString(report);
   }
 
-  // ---------------------------------------------------------
-  //  DEPS HELPERS
-  // ---------------------------------------------------------
   getDb() {
     return getDb(this.deps);
   }
@@ -662,15 +750,46 @@ export class AIOrganism {
 }
 
 // ============================================================================
+//  PREWARM WRAPPER — v16 IMMORTAL++
+// ============================================================================
+export function prewarmAIOrganism({ trace = false } = {}) {
+  try {
+    prewarmDepsLayer();
+    prewarmDiagnosticsOrgan();
+    prewarmDiagnosticsWriteOrgan();
+    prewarmScribe();
+
+    prewarmEmotionEngine();
+    prewarmDeliveryEngine();
+
+    prewarmContextEngine();
+    prewarmCognitiveFrame();
+    prewarmAICortex();
+
+    emitDepsPacket();
+    formatDebugReport({ trace: ["organism-prewarm"] }, null);
+    formatDebugString({ trace: ["organism-prewarm"] }, null);
+
+    return true;
+  } catch (err) {
+    console.error("[AIOrganism Prewarm v16++] Failed:", err);
+    return false;
+  }
+}
+
+// ============================================================================
 //  FACTORY
 // ============================================================================
-export function createAIOrganism(config) {
+export function createAIOrganism(config = {}) {
+  prewarmAIOrganism({ trace: !!config.trace });
   return new AIOrganism(config);
 }
 
 // ============================================================================
 //  DUAL‑MODE EXPORTS
 // ============================================================================
+export default createAIOrganism;
+
 if (typeof module !== "undefined") {
   module.exports = {
     AIOrganism,

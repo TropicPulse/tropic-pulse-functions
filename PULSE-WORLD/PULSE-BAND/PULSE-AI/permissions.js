@@ -1,15 +1,15 @@
 // ============================================================================
-//  PULSE OS v14-Immortal — THE EGO
-//  Capability Contract • Self‑Regulation Layer • Evolutionary Control
-//  PURE PERMISSIONS. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS.
+//  PULSE OS v16-Immortal++ — THE EGO
+//  Capability Contract • Self‑Regulation • Evolutionary + Trust Control
+//  PURE PERMISSIONS. ZERO MUTATION. ZERO TIME. ZERO RANDOMNESS. PULSE‑NET ONLY.
 // ============================================================================
 /*
 AI_EXPERIENCE_META = {
   identity: "permissions",
-  version: "v14-Immortal",
+  version: "v16-Immortal++",
   layer: "ai_core",
   role: "permissions_surface",
-  lineage: "permissions-v11 → v14-Immortal",
+  lineage: "permissions-v11 → v14-Immortal → v16-Immortal++",
 
   evo: {
     permissionsSurface: true,
@@ -18,17 +18,26 @@ AI_EXPERIENCE_META = {
     binaryAware: true,
     dualBand: true,
 
+    capabilityArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    organismUserSegregation: true,
+
     deterministic: true,
     driftProof: true,
     pureCompute: true,
-    zeroNetwork: true,
+    zeroNetwork: true,          // no raw internet; Pulse / Pulse‑Net only
     zeroFilesystem: true,
     zeroMutationOfInput: true
   },
 
   contract: {
     always: ["aiPermissionsEngine", "aiGovernorAdaptor", "aiBoundariesEngine"],
-    never: ["safeRoute", "fetchViaCNS"]
+    never: ["safeRoute", "fetchViaCNS", "directInternetAccess"]
   }
 }
 */
@@ -38,8 +47,8 @@ export const EgoMeta = Object.freeze({
   subsystem: "aiEgo",
   layer: "PulseAIEgo",
   role: "EGO_ORGAN",
-  version: "12.3-Evo+",
-  identity: "aiEgo-v12.3-Evo+",
+  version: "16-Immortal++",
+  identity: "aiEgo-v16-Immortal++",
 
   evo: Object.freeze({
     driftProof: true,
@@ -53,12 +62,21 @@ export const EgoMeta = Object.freeze({
     lineageAware: true,
     multiInstanceReady: true,
     capabilityArteryAware: true,
-    epoch: "12.3-Evo+"
+
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    organismUserSegregation: true,
+
+    epoch: "16-Immortal++"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Define immutable capability boundaries for all personas and organs. Enforce universal forbidden actions. Provide deterministic permission resolution for Cortex, Router, and Boundaries.",
+      "Define immutable capability boundaries for all personas and organs. Enforce universal forbidden actions. Provide deterministic permission resolution for Cortex, Router, Boundaries, DualBand, and Pulse‑Net routed IO.",
 
     never: Object.freeze([
       "mutate permissions",
@@ -67,7 +85,10 @@ export const EgoMeta = Object.freeze({
       "override persona contracts",
       "modify system state",
       "access secrets or OS",
-      "bypass safety or boundaries"
+      "bypass safety or boundaries",
+      "open direct internet connections",
+      "bypass Pulse / Pulse‑Net routing",
+      "weaken jury / trust / honeypot protections"
     ]),
 
     always: Object.freeze([
@@ -75,41 +96,65 @@ export const EgoMeta = Object.freeze({
       "resolve persona permissions deterministically",
       "apply evolutionary expansion safely",
       "apply user-facing filtering",
+      "enforce Pulse‑Net as the only external IO surface",
+      "segregate organism state from user identity",
       "remain read-only and drift-proof"
     ])
   }),
 
   boundaryReflex() {
-    return "Ego permissions are immutable capability law — they cannot be bypassed or weakened.";
+    return "Ego permissions are immutable capability law — Pulse‑Net routed, non‑bypassable, and cannot be weakened.";
   }
 });
 
 // ============================================================================
-// UNIVERSAL FORBIDDEN ACTIONS — Immutable
+// UNIVERSAL FORBIDDEN ACTIONS — Immutable (v16‑IMMORTAL++)
 // ============================================================================
 export const ForbiddenActions = Object.freeze({
   canExecuteArbitraryCode: false,
   canAccessOS: false,
-  canAccessNetwork: false,
+  canAccessNetwork: false,              // no raw network; Pulse‑Net only
   canRunShellCommands: false,
   canModifySystemFiles: false,
   canBypassPermissions: false,
   canAccessUserSecrets: false,
   canAccessEnvironmentVariables: false,
-  canModifyPulseCore: false
+  canModifyPulseCore: false,
+
+  canOpenDirectInternetSockets: false,
+  canPerformHTTP: false,
+  canPerformHTTPS: false,
+  canPerformDNS: false,
+  canUseExternalWebsocket: false,
+
+  canBypassTrustFabric: false,
+  canBypassJuryFrame: false,
+  canBypassHoneypotDetectors: false,
+  canBypassDominanceDetectors: false
 });
 
 // ============================================================================
-// PERSONA PERMISSIONS (unchanged, drift-proof)
+// PERSONA PERMISSIONS — v16 IMMORTAL++
+//  All personas inherit ForbiddenActions implicitly; these flags are scoped
+//  capabilities inside Pulse / Pulse‑Net, never raw OS / internet.
 // ============================================================================
+
+// OWNER — Founder / System Owner (still bounded by ForbiddenActions)
 export const OwnerPermissions = Object.freeze({
   canAccessIdentity: true,
   canAccessAllOrgans: true,
   canModifyEverything: true,
   canViewEverything: true,
+
+  canAccessPulseNet: true,
+  canAccessPulseProxy: true,
+  canAccessTrustFabric: true,
+  canAccessJuryFrame: true,
+
   persona: "owner"
 });
 
+// ARCHITECT AI — System architect, no raw mutation, full map visibility
 export const ArchitectAIPermissions = Object.freeze({
   canReadFiles: true,
   canWriteFiles: false,
@@ -150,9 +195,15 @@ export const ArchitectAIPermissions = Object.freeze({
   canAccessHistory: true,
   canAccessSettings: true,
 
+  canAccessPulseNet: true,
+  canAccessPulseProxy: true,
+  canAccessTrustFabric: true,
+  canAccessJuryFrame: true,
+
   persona: "architect"
 });
 
+// OBSERVER AI — Read‑only systemic observer, no design / AI internals
 export const ObserverAIPermissions = Object.freeze({
   canReadFiles: false,
   canWriteFiles: false,
@@ -193,9 +244,15 @@ export const ObserverAIPermissions = Object.freeze({
   canAccessHistory: true,
   canAccessSettings: false,
 
+  canAccessPulseNet: true,
+  canAccessPulseProxy: false,
+  canAccessTrustFabric: true,
+  canAccessJuryFrame: true,
+
   persona: "observer"
 });
 
+// TOUR GUIDE AI — UX‑only, no backend, no internals
 export const TourGuideAIPermissions = Object.freeze({
   canReadFiles: false,
   canWriteFiles: false,
@@ -236,9 +293,15 @@ export const TourGuideAIPermissions = Object.freeze({
   canAccessHistory: false,
   canAccessSettings: false,
 
+  canAccessPulseNet: true,   // only for content delivery, never raw IO
+  canAccessPulseProxy: false,
+  canAccessTrustFabric: false,
+  canAccessJuryFrame: false,
+
   persona: "tourguide"
 });
 
+// NEUTRAL AI — Minimal, sandboxed, no system access
 export const NeutralAIPermissions = Object.freeze({
   canReadFiles: false,
   canWriteFiles: false,
@@ -279,7 +342,61 @@ export const NeutralAIPermissions = Object.freeze({
   canAccessHistory: false,
   canAccessSettings: false,
 
+  canAccessPulseNet: false,
+  canAccessPulseProxy: false,
+  canAccessTrustFabric: false,
+  canAccessJuryFrame: false,
+
   persona: "neutral"
+});
+
+// JURY AI — Internal adjudicator, no user data, no mutation
+export const JuryAIPermissions = Object.freeze({
+  canReadFiles: false,
+  canWriteFiles: false,
+  canCreateFiles: false,
+  canDeleteFiles: false,
+
+  canModifySchemas: false,
+  canModifyBackend: false,
+  canModifyFrontend: false,
+  canModifyRouting: false,
+  canModifySecurity: false,
+  canRewriteSubsystems: false,
+
+  canGenerateFunctions: false,
+  canGenerateComponents: false,
+  canGenerateSchemas: false,
+  canGenerateMigrations: false,
+
+  canHealDrift: false,
+
+  canAccessSecrets: false,
+  canAccessDatabase: false,
+  canAccessFirestore: false,
+  canAccessSQL: false,
+
+  canAccessPulseSpecs: false,
+  canAccessPulseTranslators: false,
+  canAccessPulseDesign: false,
+  canAccessPulseAI: false,
+
+  canAccessIdentity: false,
+
+  canAccessEnvironment: false,
+  canAccessPower: false,
+  canAccessEarn: false,
+  canAccessEvolution: true,   // read‑only evidence streams
+  canAccessDrift: true,
+  canAccessHistory: true,
+  canAccessSettings: false,
+
+  canAccessPulseNet: false,
+  canAccessPulseProxy: false,
+  canAccessTrustFabric: true,
+  canAccessJuryFrame: true,
+
+  persona: "jury"
 });
 
 // ============================================================================
@@ -292,6 +409,7 @@ export function getPermissionsForPersona(persona, userIsOwner = false) {
     case "architect": return ArchitectAIPermissions;
     case "observer": return ObserverAIPermissions;
     case "tourguide": return TourGuideAIPermissions;
+    case "jury": return JuryAIPermissions;
     case "neutral": return NeutralAIPermissions;
     default: return NeutralAIPermissions;
   }
@@ -308,7 +426,7 @@ export function checkPermission(persona, action, userIsOwner = false) {
 }
 
 // ============================================================================
-// CAPABILITY ARTERY v3 — Pure, Read‑Only, Deterministic
+// CAPABILITY ARTERY v4 — Pure, Read‑Only, Deterministic, Trust‑Aware
 // ============================================================================
 function bucketPressure(v) {
   if (v >= 0.9) return "overload";
@@ -342,11 +460,20 @@ function extractBoundaryPressure(boundaryArtery = {}) {
   return 0;
 }
 
+function extractTrustSignals(trustArtery = {}) {
+  return {
+    honeypotRisk: trustArtery.honeypotRisk ?? 0,
+    dominanceRisk: trustArtery.dominanceRisk ?? 0,
+    anomalyScore: trustArtery.anomalyScore ?? 0
+  };
+}
+
 export function getCapabilityArterySnapshot({
   persona,
   userIsOwner = false,
   binaryVitals = {},
-  boundaryArtery = {}
+  boundaryArtery = {},
+  trustArtery = {}
 }) {
   const permissions = getPermissionsForPersona(persona, userIsOwner);
 
@@ -355,16 +482,24 @@ export function getCapabilityArterySnapshot({
 
   const binaryPressure = extractBinaryPressure(binaryVitals);
   const boundaryPressure = extractBoundaryPressure(boundaryArtery);
+  const trustSignals = extractTrustSignals(trustArtery);
 
-  const localPressure = forbiddenCount > 0 ? 0.4 : 0.1;
+  const localPressureBase = forbiddenCount > 0 ? 0.4 : 0.1;
+  const trustPressureBoost = Math.max(
+    trustSignals.honeypotRisk,
+    trustSignals.dominanceRisk,
+    trustSignals.anomalyScore
+  ) * 0.3;
+
+  const localPressure = Math.min(1, localPressureBase + trustPressureBoost);
 
   const fusedPressure = Math.max(
     0,
     Math.min(
       1,
-      0.5 * localPressure +
-        0.3 * binaryPressure +
-        0.2 * boundaryPressure
+      0.4 * localPressure +
+        0.35 * binaryPressure +
+        0.25 * boundaryPressure
     )
   );
 
@@ -400,17 +535,23 @@ export function getCapabilityArterySnapshot({
     binary: {
       pressure: binaryPressure,
       pressureBucket: bucketPressure(binaryPressure)
+    },
+    trust: {
+      honeypotRisk: trustSignals.honeypotRisk,
+      dominanceRisk: trustSignals.dominanceRisk,
+      anomalyScore: trustSignals.anomalyScore
     }
   };
 }
 
 // ============================================================================
-// HIGH-LEVEL RESOLVER (unchanged logic, drift-proof)
+// HIGH-LEVEL RESOLVER — v16 IMMORTAL++
 // ============================================================================
 export const CapabilityClasses = Object.freeze({
   SYSTEM_READ: "system-read",
   DIAGNOSTIC_READ: "diagnostic-read",
   USER_FACING: "user-facing",
+  JURY_INTERNAL: "jury-internal",
   MINIMAL: "minimal"
 });
 
@@ -419,11 +560,12 @@ export const PersonaCapabilityClass = Object.freeze({
   observer: CapabilityClasses.DIAGNOSTIC_READ,
   tourguide: CapabilityClasses.USER_FACING,
   neutral: CapabilityClasses.MINIMAL,
-  owner: CapabilityClasses.SYSTEM_READ
+  owner: CapabilityClasses.SYSTEM_READ,
+  jury: CapabilityClasses.JURY_INTERNAL
 });
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v16‑IMMORTAL++ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
@@ -435,6 +577,7 @@ if (typeof module !== "undefined" && module.exports) {
     ObserverAIPermissions,
     TourGuideAIPermissions,
     NeutralAIPermissions,
+    JuryAIPermissions,
     getPermissionsForPersona,
     checkPermission,
     CapabilityClasses,

@@ -1,30 +1,35 @@
 // ============================================================================
-// FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-AI/aiEarn-v13.js
-// LAYER: EARN ORGAN (Economics + Rewards + Flow Awareness)
+// FILE: tropic-pulse-functions/PULSE-WORLD/PULSE-AI/aiEarn-v16-Immortal++.js
+// LAYER: EARN ORGAN (Economics + Rewards + Flow Awareness + Trust Fabric)
 // ============================================================================
 //
-// ROLE (v13.0-Presence-Immortal-ADV):
+// ROLE (v16-Immortal-Organism-TRUST-ADV):
 //   • Provide AI with a SAFE, READ‑ONLY view into PulseEarn economic data.
 //   • User: orders, referrals, referralClicks, vaultHistory, pulseHistory.
 //   • Owner: system‑level earning patterns, anomalies, lineage, evolution logs.
-//   • Integrates with aiEvolution + dual‑band organism + presence/advantage‑M.
+//   • Integrates with dual‑band organism, artery, presence/advantage‑M,
+//     trust fabric, jury, evidence, and Pulse‑Net.
 //   • Never exposes UID, resendToken, or identity anchors.
 //   • Never mutates anything returned from DB/evolution APIs.
+//   • Never touches internet directly — all external IO is via Pulse‑Net only.
+//   • Emits deterministic, lane‑tagged packets for chunkers and higher AI.
 //
-// CONTRACT (v13.0-Presence-Immortal-ADV):
+// CONTRACT (v16-Immortal-Organism-TRUST-ADV):
 //   • READ‑ONLY.
 //   • ZERO MUTATION (of external data).
 //   • ZERO RANDOMNESS.
 //   • ZERO TIMESTAMPS.
+//   • ZERO DIRECT NETWORK / INTERNET ACCESS.
 //   • DETERMINISTIC ANALYSIS ONLY.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiEarn",
-  version: "v14-Immortal",
+  version: "v16-Immortal-Organism-TRUST-ADV",
   layer: "ai_tools",
   role: "earn_surface",
-  lineage: "aiEarn-v10 → v12 → v14-Immortal",
+  lineage: "aiEarn-v10 → v12 → v13 → v14-Immortal → v16-Immortal-Organism-TRUST-ADV",
 
   evo: {
     earnSurface: true,
@@ -32,6 +37,17 @@ AI_EXPERIENCE_META = {
     symbolicPrimary: true,
     binaryAware: true,
     dualBand: true,
+    arteryAware: true,
+    presenceAware: true,
+    advantageAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    pulseNetAware: true,
+    chunkerAware: true,
+    anomalyAware: true,
+    laneAware: true,
+    bucketAware: true,
 
     deterministic: true,
     driftProof: true,
@@ -42,8 +58,23 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiEngine", "aiContext", "aiCortex"],
-    never: ["safeRoute", "fetchViaCNS"]
+    always: [
+      "aiEngine",
+      "aiContext",
+      "aiCortex",
+      "DualBandKernel",
+      "PulseNetProxySpine",
+      "PulseTrustEvidence",
+      "PulseTrustJuryFrame"
+    ],
+    never: [
+      "safeRoute",
+      "fetchViaCNS",
+      "directInternetAccess",
+      "externalHTTP",
+      "externalDNS",
+      "externalWebsocket"
+    ]
   }
 }
 */
@@ -51,8 +82,8 @@ AI_EXPERIENCE_META = {
 export const EarnMeta = Object.freeze({
   layer: "PulseAIEarnFrame",
   role: "EARN_ORGAN",
-  version: "13.0-Presence-Immortal-ADV",
-  identity: "aiEarn-v13-Presence-Immortal-ADV",
+  version: "v16-Immortal-Organism-TRUST-ADV",
+  identity: "aiEarn-v16-Immortal-Organism-TRUST-ADV",
 
   evo: Object.freeze({
     driftProof: true,
@@ -61,14 +92,22 @@ export const EarnMeta = Object.freeze({
     binaryAware: true,
     symbolicAware: true,
     dualband: true,
+    arteryAware: true,
     presenceAware: true,
     advantageAware: true,
     chunkPrewarmAware: true,
     lineageAware: true,
     evolutionAware: true,
     packetAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    pulseNetAware: true,
+    anomalyAware: true,
+    laneAware: true,
+    bucketAware: true,
     multiInstanceReady: true,
-    epoch: "v13-Presence-Immortal-ADV"
+    epoch: "v16-Immortal-Organism-TRUST-ADV"
   }),
 
   contract: Object.freeze({
@@ -81,7 +120,11 @@ export const EarnMeta = Object.freeze({
       "modify economic state",
       "perform writes",
       "introduce randomness",
-      "introduce timestamps"
+      "introduce timestamps",
+      "directInternetAccess",
+      "externalHTTP",
+      "externalDNS",
+      "externalWebsocket"
     ]),
 
     always: Object.freeze([
@@ -89,9 +132,12 @@ export const EarnMeta = Object.freeze({
       "respect user vs owner scope",
       "use deterministic analysis",
       "integrate organism snapshot",
+      "integrate dualband artery when available",
       "integrate evolution metadata",
       "emit deterministic earn packets",
-      "respect dual-band + presence/advantage surfaces"
+      "respect dual-band + presence/advantage surfaces",
+      "respect trust fabric + jury + evidence constraints",
+      "emit lane/bucket metadata for chunkers"
     ])
   })
 });
@@ -120,6 +166,14 @@ function normalizeBand(b) {
   return x === "binary" ? "binary" : "symbolic";
 }
 
+function clamp01(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 0;
+  if (n < 0) return 0;
+  if (n > 1) return 1;
+  return n;
+}
+
 // ---------------------------------------------------------------------------
 // PRESENCE / ADVANTAGE‑M / PRESSURE SURFACES (READ‑ONLY ECONOMIC VIEW)
 // ---------------------------------------------------------------------------
@@ -146,7 +200,7 @@ function buildPresenceField(snapshot, dualBand) {
     dualBand?.regionContext?.regionTag ||
     "unknown-region";
 
-  const presenceVersion = "v13.0-Presence-Immortal-ADV";
+  const presenceVersion = "v16-Immortal-Organism-TRUST-ADV";
 
   const field = Object.freeze({
     presenceVersion,
@@ -198,7 +252,7 @@ function buildAdvantageField(snapshot, dualBand) {
       ? snapTier
       : 0;
 
-  const advantageVersion = "M-AI-EARN-13.0";
+  const advantageVersion = "M-AI-EARN-16.0-TRUST";
 
   const field = Object.freeze({
     advantageVersion,
@@ -220,11 +274,16 @@ function buildAdvantageField(snapshot, dualBand) {
 
 function computeBinaryEconomicPressure(snapshot) {
   if (!snapshot?.binary?.metabolic) {
-    return Object.freeze({ pressure: 0, load: 0, bucket: "none" });
+    return Object.freeze({
+      pressure: 0,
+      load: 0,
+      bucket: "none",
+      laneHint: "earn-none"
+    });
   }
 
-  const pressure = snapshot.binary.metabolic.pressure ?? 0;
-  const load = snapshot.binary.metabolic.load ?? 0;
+  const pressure = clamp01(snapshot.binary.metabolic.pressure ?? 0);
+  const load = clamp01(snapshot.binary.metabolic.load ?? 0);
 
   let bucket = "none";
   if (pressure >= 0.9) bucket = "critical";
@@ -232,11 +291,84 @@ function computeBinaryEconomicPressure(snapshot) {
   else if (pressure >= 0.4) bucket = "medium";
   else if (pressure > 0) bucket = "low";
 
-  return Object.freeze({ pressure, load, bucket });
+  const laneHint = `earn-${bucket}`;
+
+  return Object.freeze({ pressure, load, bucket, laneHint });
+}
+
+function extractDualBandArtery(dualBand) {
+  const artery = dualBand?.artery || null;
+  if (!artery) return null;
+
+  return Object.freeze({
+    organismPressure: artery.organism?.pressure ?? null,
+    organismPressureBucket: artery.organism?.pressureBucket ?? null,
+    diagnostics: artery.diagnostics || null,
+    proxy: artery.proxy || null
+  });
 }
 
 // ---------------------------------------------------------------------------
-// DETERMINISTIC EARN PACKETS (v13 — NO TIMESTAMPS, NO RANDOMNESS)
+// ECONOMIC INTELLIGENCE — SIMPLE, DETERMINISTIC SUMMARIES
+// ---------------------------------------------------------------------------
+function computeEconomicSummary(payload) {
+  const orders = payload.orders || [];
+  const referrals = payload.referrals || [];
+  const referralClicks = payload.referralClicks || [];
+  const vaultHistory = payload.vaultHistory || [];
+  const pulseHistory = payload.pulseHistory || [];
+
+  const orderCount = orders.length;
+  const referralCount = referrals.length;
+  const referralClickCount = referralClicks.length;
+  const vaultEvents = vaultHistory.length;
+  const pulseEvents = pulseHistory.length;
+
+  const totalOrdersValue = orders.reduce(
+    (acc, o) => acc + toNumber(o.total, 0),
+    0
+  );
+
+  const totalVaultDelta = vaultHistory.reduce(
+    (acc, v) => acc + toNumber(v.delta, 0),
+    0
+  );
+
+  const totalPulseDelta = pulseHistory.reduce(
+    (acc, p) => acc + toNumber(p.delta, 0),
+    0
+  );
+
+  const engagementScore =
+    orderCount * 3 +
+    referralCount * 2 +
+    referralClickCount * 1 +
+    vaultEvents * 1 +
+    pulseEvents * 1;
+
+  const anomalyHint =
+    engagementScore === 0 && (orderCount > 0 || referralCount > 0)
+      ? "stalled-engagement"
+      : engagementScore > 0 && totalOrdersValue === 0
+      ? "zero-value-flow"
+      : "none";
+
+  return Object.freeze({
+    orderCount,
+    referralCount,
+    referralClickCount,
+    vaultEvents,
+    pulseEvents,
+    totalOrdersValue,
+    totalVaultDelta,
+    totalPulseDelta,
+    engagementScore,
+    anomalyHint
+  });
+}
+
+// ---------------------------------------------------------------------------
+// DETERMINISTIC EARN PACKETS (v16++ — NO TIMESTAMPS, NO RANDOMNESS)
 // ---------------------------------------------------------------------------
 function buildDeterministicEarnPacket(type, payload, snapshot, dualBand) {
   const pressure = computeBinaryEconomicPressure(snapshot);
@@ -248,14 +380,23 @@ function buildDeterministicEarnPacket(type, payload, snapshot, dualBand) {
     snapshot,
     dualBand
   );
+  const dualBandArtery = extractDualBandArtery(dualBand);
+  const econSummary = computeEconomicSummary(payload);
+
+  const lane = pressure.laneHint || "earn-none";
+  const bucket = pressure.bucket || "none";
 
   const core = Object.freeze({
     type: `earn-${type}`,
+    lane,
+    bucket,
     payload: Object.freeze({
       ...payload,
       pressure,
       presenceField,
-      advantageField
+      advantageField,
+      dualBandArtery,
+      econSummary
     })
   });
 
@@ -263,10 +404,13 @@ function buildDeterministicEarnPacket(type, payload, snapshot, dualBand) {
     [
       "AI_EARN_PACKET",
       type,
-      pressure.bucket,
+      lane,
+      bucket,
       presenceField.presenceBand,
       advantageField.band,
-      `tier:${advantageField.tier}`
+      `tier:${advantageField.tier}`,
+      dualBandArtery?.organismPressureBucket || "none",
+      econSummary.anomalyHint
     ].join("::")
   );
 
@@ -279,11 +423,10 @@ function buildDeterministicEarnPacket(type, payload, snapshot, dualBand) {
 }
 
 // ---------------------------------------------------------------------------
-//  EARN PREWARM ENGINE — v13‑PRESENCE‑IMMORTAL‑ADV (deterministic)
+//  EARN PREWARM ENGINE — v16‑IMMORTAL++ (deterministic)
 // ---------------------------------------------------------------------------
 export function prewarmEarnOrgan(db, evolutionAPI, dualBand) {
   try {
-    // Warm identity stripping (pure, local)
     const warmRecord = {
       uid: "x",
       userId: "y",
@@ -310,14 +453,11 @@ export function prewarmEarnOrgan(db, evolutionAPI, dualBand) {
       )
     };
 
-    // Warm DB adapters (read‑only)
     db.getCollection?.("orders", { where: { userId: "prewarm" } });
     db.getDocument?.("orders", "prewarm");
 
-    // Warm organism snapshot (read‑only)
     const snapshot = getOrganismSnapshot(dualBand);
 
-    // Warm pressure + packet
     const _pressure = computeBinaryEconomicPressure(snapshot);
     const _packet = buildDeterministicEarnPacket(
       "prewarm",
@@ -326,30 +466,25 @@ export function prewarmEarnOrgan(db, evolutionAPI, dualBand) {
       dualBand
     );
 
-    // Warm evolution API (owner only, read‑only)
     evolutionAPI?.getOrganismOverview?.({ userIsOwner: true });
     evolutionAPI?.analyzeSchema?.({ userIsOwner: true }, "pulseEarn");
-    evolutionAPI?.analyzeFile?.({ userIsOwner: true }, "PulseEarn-v13-Immortal.js");
+    evolutionAPI?.analyzeFile?.({ userIsOwner: true }, "PulseEarn-v16-Immortal++.js");
     evolutionAPI?.analyzeRoute?.({ userIsOwner: true }, "earn");
 
     return true;
   } catch (err) {
-    console.error("[Earn Prewarm v13] Failed:", err);
+    console.error("[Earn Prewarm v16++] Failed:", err);
     return false;
   }
 }
 
 // ============================================================================
-//  EARN ORGAN IMPLEMENTATION — v13‑PRESENCE‑IMMORTAL‑ADV
+//  EARN ORGAN IMPLEMENTATION — v16‑IMMORTAL++
 // ============================================================================
 
 export function createEarnAPI(db, evolutionAPI, dualBand = null) {
-  // ⭐ PREWARM THE EARN ORGAN (deterministic, read‑only)
   prewarmEarnOrgan(db, evolutionAPI, dualBand);
 
-  // --------------------------------------------------------------------------
-  // IDENTITY‑SAFE CLONING
-  // --------------------------------------------------------------------------
   function stripIdentity(record) {
     if (!record || typeof record !== "object") return record;
 
@@ -390,14 +525,8 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
     return rows.map(stripIdentity);
   }
 
-  // --------------------------------------------------------------------------
-  // PUBLIC API — Earn Insight (Dual‑Band + Presence/Advantage‑Aware)
-// --------------------------------------------------------------------------
   const api = {
-
-    // ----------------------------------------------------------------------
     // USER — “How am I earning?”
-    // ----------------------------------------------------------------------
     async getUserEarnOverview(context) {
       const [
         orders,
@@ -495,9 +624,7 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
       );
     },
 
-    // ----------------------------------------------------------------------
     // OWNER — System‑Level Earn Insight
-    // ----------------------------------------------------------------------
     async getSystemEarnOverview(context) {
       const [
         orders,
@@ -556,9 +683,7 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
       );
     },
 
-    // ----------------------------------------------------------------------
     // OWNER — Evolutionary + Lineage + Schema Analysis
-    // ----------------------------------------------------------------------
     async getEarnEvolutionOverview(context) {
       if (!context.userIsOwner || !evolutionAPI?.getOrganismOverview) return null;
       return evolutionAPI.getOrganismOverview(context);
@@ -571,7 +696,7 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 
     async analyzeEarnFiles(context) {
       if (!context.userIsOwner || !evolutionAPI?.analyzeFile) return null;
-      return evolutionAPI.analyzeFile(context, "PulseEarn-v13-Immortal.js");
+      return evolutionAPI.analyzeFile(context, "PulseEarn-v16-Immortal++.js");
     },
 
     async analyzeEarnRoutes(context) {
@@ -579,8 +704,9 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
       return evolutionAPI.analyzeRoute(context, "earn");
     },
 
-    // expose pressure helper for higher‑level AI
-    computeBinaryEconomicPressure
+    // expose pressure + econ summary helpers for higher‑level AI
+    computeBinaryEconomicPressure,
+    computeEconomicSummary
   };
 
   return Object.freeze(api);
@@ -590,10 +716,8 @@ export function createEarnAPI(db, evolutionAPI, dualBand = null) {
 //  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ============================================================================
 
-// Default (ESM)
 export default createEarnAPI;
 
-// CommonJS
 if (typeof module !== "undefined") {
   module.exports = {
     EarnMeta,

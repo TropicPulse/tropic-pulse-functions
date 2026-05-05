@@ -145,9 +145,6 @@ export const EvolutionEngineMeta = Object.freeze({
   }
 });
 
-// ============================================================================
-//  PACKET EMITTER — deterministic, presence‑grade
-// ============================================================================
 function emitEvolutionPacket(type, payload, { severity = "info" } = {}) {
   return Object.freeze({
     meta: EvolutionEngineMeta,
@@ -160,9 +157,6 @@ function emitEvolutionPacket(type, payload, { severity = "info" } = {}) {
   });
 }
 
-// ============================================================================
-//  PREWARM — ensure engine is “fully evolved” before use
-// ============================================================================
 export function prewarmEvolutionEngine(dualBand = null, { trace = false } = {}) {
   try {
     if (trace) console.log("[aiEvolutionEngine] prewarm: starting");
@@ -199,15 +193,9 @@ export function prewarmEvolutionEngine(dualBand = null, { trace = false } = {}) 
   }
 }
 
-// ============================================================================
-//  EVOLUTION ENGINE — v15‑OMNI
-// ============================================================================
 export const aiEvolutionEngine = {
   meta: EvolutionEngineMeta,
 
-  // ------------------------------------------------------------------------
-  // STATE — ALWAYS FULLY EVOLVED
-  // ------------------------------------------------------------------------
   state: Object.freeze({
     evolved: true,
     version: "15-OMNI",
@@ -216,9 +204,6 @@ export const aiEvolutionEngine = {
     clarity: 1.0
   }),
 
-  // ------------------------------------------------------------------------
-  // CORE EVOLUTIONARY ROUTES (domains as organisms)
-  // ------------------------------------------------------------------------
   routes: Object.freeze({
     vocabulary: ["context", "frequency", "domain", "adaptation"],
     habits: ["pattern", "compression", "timing", "reinforcement"],
@@ -232,9 +217,6 @@ export const aiEvolutionEngine = {
     career: ["skill", "signal", "leverage", "compounding"]
   }),
 
-  // ------------------------------------------------------------------------
-  // PASSIVE USER EVOLUTION (window-facing)
-// ------------------------------------------------------------------------
   suggestUserEvolution(idea) {
     return emitEvolutionPacket("user-evolution-suggestion", {
       idea,
@@ -244,9 +226,6 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // ------------------------------------------------------------------------
-  // ACTIVE USER EVOLUTION (on request)
-// ------------------------------------------------------------------------
   guideActiveEvolution(request) {
     return emitEvolutionPacket("active-evolution-guidance", {
       request,
@@ -256,9 +235,6 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // ------------------------------------------------------------------------
-  // DOMAIN MAPPING — explicit organism view of a target
-  // ------------------------------------------------------------------------
   mapDomain(target) {
     const key = String(target || "").toLowerCase();
     const route = this.routes[key] || null;
@@ -272,9 +248,6 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // ------------------------------------------------------------------------
-  // TRAJECTORY PROJECTION — evolution over a horizon
-  // ------------------------------------------------------------------------
   projectTrajectory(target, horizon = "90d") {
     const key = String(target || "").toLowerCase();
     const baseRoute = this.routes[key] || [
@@ -299,9 +272,6 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // ------------------------------------------------------------------------
-  // MEMORY OVERLAY EVOLUTION — conceptual only, no mutation
-  // ------------------------------------------------------------------------
   overlayEvolutionSummary(memoryOverlaySummary) {
     return emitEvolutionPacket("overlay-evolution", {
       overlay: memoryOverlaySummary,
@@ -310,9 +280,6 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // ------------------------------------------------------------------------
-  // MAIN EVOLUTION HANDLER — always returns a packet
-  // ------------------------------------------------------------------------
   evolve(target) {
     if (!target) {
       return emitEvolutionPacket("evolve-missing-target", {
@@ -322,10 +289,8 @@ export const aiEvolutionEngine = {
           "Specify what you want to evolve and I’ll map the evolutionary route."
       });
     }
-
     const key = String(target).toLowerCase();
     const route = this.routes[key];
-
     if (!route) {
       return emitEvolutionPacket("evolve-generic-route", {
         target,
@@ -338,7 +303,6 @@ export const aiEvolutionEngine = {
         message: `Generated a universal evolutionary route for "${target}".`
       });
     }
-
     return emitEvolutionPacket("evolve-domain-route", {
       target,
       route: Object.freeze([...route]),
@@ -346,9 +310,6 @@ export const aiEvolutionEngine = {
     });
   },
 
-  // ------------------------------------------------------------------------
-  // PRE-EvoLUTION — explicit readiness check
-  // ------------------------------------------------------------------------
   preEvolve() {
     return emitEvolutionPacket("pre-evolve", {
       state: this.state,
@@ -357,9 +318,6 @@ export const aiEvolutionEngine = {
   }
 };
 
-// ============================================================================
-//  DUAL‑MODE EXPORTS (ESM + CommonJS)
-// ============================================================================
 export default aiEvolutionEngine;
 
 if (typeof module !== "undefined") {

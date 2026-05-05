@@ -1,15 +1,16 @@
 // ============================================================================
-//  PULSE OS v14-Immortal — THE IDENTITY LAYER (DUAL‑BAND)
+//  PULSE OS v16‑IMMORTAL++ — THE IDENTITY LAYER (DUAL‑BAND + TRUST FABRIC)
 //  Self‑Definition • Role Assignment • Binary‑Aware Identity Drift
-//  PURE IDENTITY. ZERO MUTATION. ZERO RANDOMNESS.
+//  PURE IDENTITY. ZERO MUTATION. ZERO RANDOMNESS. PULSE‑NET ONLY.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "persona",
-  version: "v14-Immortal",
+  version: "v16-Immortal++",
   layer: "ai_core",
   role: "persona_engine",
-  lineage: "persona-v11 → v14-Immortal",
+  lineage: "persona-v11 → v14-Immortal → v16-Immortal++",
 
   evo: {
     personaEngine: true,
@@ -18,17 +19,26 @@ AI_EXPERIENCE_META = {
     binaryAware: true,
     dualBand: true,
 
+    identityArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    organismUserSegregation: true,
+
     deterministic: true,
     driftProof: true,
     pureCompute: true,
-    zeroNetwork: true,
+    zeroNetwork: true,          // no raw internet; Pulse / Pulse‑Net only
     zeroFilesystem: true,
     zeroMutationOfInput: true
   },
 
   contract: {
     always: ["aiIdentityCore", "aiPersonalityEngine", "aiHumilityFilter"],
-    never: ["safeRoute", "fetchViaCNS"]
+    never: ["safeRoute", "fetchViaCNS", "directInternetAccess"]
   }
 }
 */
@@ -38,7 +48,9 @@ import {
   ObserverAIPermissions,
   TourGuideAIPermissions,
   NeutralAIPermissions,
-  OwnerPermissions
+  OwnerPermissions,
+  JuryAIPermissions,
+  PersonaCapabilityClass
 } from "./permissions.js";
 
 import {
@@ -51,15 +63,15 @@ import {
 } from "./boundaries.js";
 
 // ============================================================================
-// META — Persona Engine (v12.3‑EVO+)
+// META — Persona Engine (v16‑IMMORTAL++)
 // ============================================================================
 export const PersonaMeta = Object.freeze({
   type: "Cognitive",
   subsystem: "aiPersona",
   layer: "PulseAIIdentityLayer",
   role: "PERSONA_ENGINE",
-  version: "12.3-Evo+",
-  identity: "aiPersonaEngine-v12.3-Evo+",
+  version: "16-Immortal++",
+  identity: "aiPersonaEngine-v16-Immortal++",
 
   evo: Object.freeze({
     deterministic: true,
@@ -71,34 +83,45 @@ export const PersonaMeta = Object.freeze({
     boundaryAware: true,
     permissionAware: true,
     identityArteryAware: true,
+    trustFabricAware: true,
+    juryAware: true,
+    evidenceAware: true,
+    honeypotAware: true,
+    dominanceAware: true,
+    pulseNetAware: true,
+    organismUserSegregation: true,
     multiInstanceReady: true,
-    epoch: "12.3-Evo+"
+    epoch: "16-Immortal++"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Resolve persona identity deterministically from router hints, user identity, and binary vitals.",
+      "Resolve persona identity deterministically from router hints, user identity, binary vitals, trust signals, and Pulse‑Net context.",
 
     never: Object.freeze([
       "mutate external systems",
       "introduce randomness",
       "override SafetyFrame decisions",
-      "override Overmind decisions",
+      "override Ego permissions",
       "invent permissions",
-      "invent boundaries"
+      "invent boundaries",
+      "bypass trust fabric",
+      "bypass jury frame",
+      "bypass honeypot detectors"
     ]),
 
     always: Object.freeze([
       "respect PersonaRegistry",
       "respect OWNER_ID override",
       "respect evolution overrides when configured",
+      "respect Pulse‑Net segregation",
       "select boundary mode deterministically",
       "remain read-only and identity-only"
     ])
   }),
 
   boundaryReflex() {
-    return "Persona resolution is identity-only and read-only — it cannot grant power beyond Ego and Boundaries.";
+    return "Persona resolution is identity-only, Pulse‑Net routed, and cannot grant power beyond Ego and Boundaries.";
   }
 });
 
@@ -115,7 +138,8 @@ export const Personas = Object.freeze({
   OBSERVER: "observer",
   TOURGUIDE: "tourguide",
   NEUTRAL: "neutral",
-  OWNER: "owner"
+  OWNER: "owner",
+  JURY: "jury"
 });
 
 // ============================================================================
@@ -162,6 +186,16 @@ export const PersonaRegistry = Object.freeze({
     boundaries: NeutralAIBoundaries
   }),
 
+  [Personas.JURY]: Object.freeze({
+    id: Personas.JURY,
+    label: "Jury AI",
+    description:
+      "Internal adjudicator. Reads evidence, drift, lineage, and trust signals. Cannot mutate anything.",
+    scope: "jury-internal",
+    permissions: JuryAIPermissions,
+    boundaries: Object.freeze({})
+  }),
+
   [Personas.OWNER]: Object.freeze({
     id: Personas.OWNER,
     label: "System Owner",
@@ -184,29 +218,31 @@ export function getPersona(personaId, userId = null) {
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — ARCHETYPE MAP (non-destructive)
+//  v16‑IMMORTAL++ — ARCHETYPE MAP (non-destructive)
 // ============================================================================
 export const PersonaArchetypes = Object.freeze({
   architect: "aiArchitect.js",
   observer: "aiDiagnostics.js",
   tourguide: "aiTourist.js",
   neutral: "aiAssistant.js",
+  jury: "aiJuryFrame.js",
   owner: null
 });
 
 // ============================================================================
-//  v12.3‑EVO+ — DUAL‑BAND BIAS (binary vs symbolic)
+//  v16‑IMMORTAL++ — DUAL‑BAND BIAS (binary vs symbolic)
 // ============================================================================
 export const PersonaBandBias = Object.freeze({
   architect: "binary-heavy",
   observer: "binary-primary",
   tourguide: "symbolic-friendly",
   neutral: "balanced",
+  jury: "binary-analytic",
   owner: "unrestricted"
 });
 
 // ============================================================================
-//  v12.3‑EVO+ — EVOLUTIONARY DRIFT RULES
+//  v16‑IMMORTAL++ — EVOLUTIONARY DRIFT RULES
 // ============================================================================
 export const PersonaEvolutionRules = Object.freeze({
   architect: Object.freeze({
@@ -229,6 +265,11 @@ export const PersonaEvolutionRules = Object.freeze({
     allowExpansion: false,
     allowSymbolicGrowth: true
   }),
+  jury: Object.freeze({
+    allowDrift: false,
+    allowExpansion: false,
+    allowSymbolicGrowth: false
+  }),
   owner: Object.freeze({
     allowDrift: false,
     allowExpansion: true,
@@ -237,7 +278,7 @@ export const PersonaEvolutionRules = Object.freeze({
 });
 
 // ============================================================================
-//  v12.3‑EVO+ — BINARY PRESSURE EXTRACTION
+//  v16‑IMMORTAL++ — BINARY PRESSURE EXTRACTION
 // ============================================================================
 function extractBinaryPressure(binaryVitals = {}) {
   if (binaryVitals?.layered?.organism && typeof binaryVitals.layered.organism.pressure === "number") {
@@ -261,30 +302,47 @@ function bucketPressure(v) {
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — PERSONA ENGINE (Dual‑Band Identity Fusion)
+//  v16‑IMMORTAL++ — PERSONA RESOLUTION ENGINE (Hybrid Spine)
 // ============================================================================
-export function resolvePersonaV12({
+export function resolvePersonaV16({
   personaId,
   userId = null,
   evoState = {},
   routerHints = {},
-  binaryVitals = {}
+  binaryVitals = {},
+  trustArtery = {},
+  dualBand = null
 }) {
+  // OWNER OVERRIDE — constitutional
   if (userId === OWNER_ID) {
     personaId = Personas.OWNER;
   }
 
+  // Evolution override (safe, deterministic)
   if (evoState.forcePersona) {
     personaId = evoState.forcePersona;
   }
 
+  // Base persona definition
   const base = getPersona(personaId, userId);
 
+  // Boundary mode selection (IMMORTAL++)
   const boundaryMode = selectBoundaryMode({
     personaId,
     binaryVitals,
-    evoState
+    evoState,
+    trustArtery
   });
+
+  // Trust signals
+  const trustSignals = {
+    honeypotRisk: trustArtery?.honeypotRisk ?? 0,
+    dominanceRisk: trustArtery?.dominanceRisk ?? 0,
+    anomalyScore: trustArtery?.anomalyScore ?? 0
+  };
+
+  // DualBand artery fusion
+  const dualBandArtery = dualBand?.artery || null;
 
   return Object.freeze({
     ...base,
@@ -292,35 +350,50 @@ export function resolvePersonaV12({
     bandBias: PersonaBandBias[personaId] || "balanced",
     evolutionRules: PersonaEvolutionRules[personaId] || {},
     boundaryMode,
-    routerHints
+    routerHints,
+    trustSignals,
+    dualBandArtery
   });
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — IDENTITY ARTERY SNAPSHOT (READ‑ONLY)
+//  v16‑IMMORTAL++ — IDENTITY ARTERY SNAPSHOT v5 (READ‑ONLY, TRUST + DUALBAND)
 // ============================================================================
-export function getIdentityArterySnapshot({
+export function getIdentityArterySnapshotV5({
   personaId,
   userId = null,
   evoState = {},
   routerHints = {},
-  binaryVitals = {}
+  binaryVitals = {},
+  trustArtery = {},
+  dualBand = null
 }) {
-  const resolved = resolvePersonaV12({
+  const resolved = resolvePersonaV16({
     personaId,
     userId,
     evoState,
     routerHints,
-    binaryVitals
+    binaryVitals,
+    trustArtery,
+    dualBand
   });
 
   const pressure = extractBinaryPressure(binaryVitals);
 
-  return {
+  const trustSignals = {
+    honeypotRisk: trustArtery?.honeypotRisk ?? 0,
+    dominanceRisk: trustArtery?.dominanceRisk ?? 0,
+    anomalyScore: trustArtery?.anomalyScore ?? 0
+  };
+
+  const dualBandContext = dualBand?.artery || null;
+
+  return Object.freeze({
     persona: {
       id: resolved.id,
       scope: resolved.scope,
-      bandBias: resolved.bandBias
+      bandBias: resolved.bandBias,
+      capabilityClass: PersonaCapabilityClass[resolved.id] || "minimal"
     },
     boundaries: {
       modeId: resolved.boundaryMode?.id || "safe",
@@ -335,35 +408,62 @@ export function getIdentityArterySnapshot({
     binary: {
       pressure,
       pressureBucket: bucketPressure(pressure)
+    },
+    trust: trustSignals,
+    dualBand: {
+      artery: dualBandContext
+    },
+    meta: {
+      version: PersonaMeta.version,
+      epoch: PersonaMeta.evo.epoch,
+      identity: PersonaMeta.identity
     }
-  };
+  });
 }
 
 // ============================================================================
-//  v12.3‑EVO+ — PUBLIC ENGINE FACTORY (used by Brainstem)
+//  v16‑IMMORTAL++ — PUBLIC ENGINE FACTORY (used by Brainstem)
 // ============================================================================
-export function createPersonaEngine({ context = {}, db } = {}) {
-  function resolve({ personaId, evoState = {}, routerHints = {}, binaryVitals = {} } = {}) {
+export function createPersonaEngineV16({ context = {}, db } = {}) {
+  function resolve({
+    personaId,
+    evoState = {},
+    routerHints = {},
+    binaryVitals = {},
+    trustArtery = {},
+    dualBand = null
+  } = {}) {
     const userId = context.userId || null;
 
-    return resolvePersonaV12({
+    return resolvePersonaV16({
       personaId,
       userId,
       evoState,
       routerHints,
-      binaryVitals
+      binaryVitals,
+      trustArtery,
+      dualBand
     });
   }
 
-  function identityArtery({ personaId, evoState = {}, routerHints = {}, binaryVitals = {} } = {}) {
+  function identityArtery({
+    personaId,
+    evoState = {},
+    routerHints = {},
+    binaryVitals = {},
+    trustArtery = {},
+    dualBand = null
+  } = {}) {
     const userId = context.userId || null;
 
-    return getIdentityArterySnapshot({
+    return getIdentityArterySnapshotV5({
       personaId,
       userId,
       evoState,
       routerHints,
-      binaryVitals
+      binaryVitals,
+      trustArtery,
+      dualBand
     });
   }
 
@@ -375,7 +475,7 @@ export function createPersonaEngine({ context = {}, db } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-//  DUAL EXPORT LAYER — CommonJS compatibility (v12.3‑EVO+ dualband)
+//  DUAL EXPORT LAYER — CommonJS compatibility (v16‑IMMORTAL++ dualband)
 // ---------------------------------------------------------------------------
 /* c8 ignore next 10 */
 if (typeof module !== "undefined" && module.exports) {
@@ -388,8 +488,8 @@ if (typeof module !== "undefined" && module.exports) {
     PersonaBandBias,
     PersonaEvolutionRules,
     getPersona,
-    resolvePersonaV12,
-    getIdentityArterySnapshot,
-    createPersonaEngine
+    resolvePersonaV16,
+    getIdentityArterySnapshotV5,
+    createPersonaEngineV16
   };
 }
