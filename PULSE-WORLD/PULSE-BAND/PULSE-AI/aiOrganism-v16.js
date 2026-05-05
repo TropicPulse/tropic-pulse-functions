@@ -173,12 +173,12 @@ import createCognitiveFrame, {
 import {
   createContextEngine,
   prewarmContextEngine
-} from "./aiContextEngine.js";
+} from "./aiContextEngine-v16.js";
 
 import {
   createCortex,
   prewarmAICortex
-} from "./aiCortex-v11-Evo.js";
+} from "./aiCortex-v16.js";
 
 // ============================================================================
 //  EMOTION / EXPERIENCE / PERSONALITY
@@ -234,7 +234,7 @@ import depsSurface, {
   getOrganismSnapshot,
   emitDepsPacket,
   prewarmDepsLayer
-} from "./aiDeps.js";
+} from "./aiDeps-v16.js";
 
 // ============================================================================
 //  AI ENGINE

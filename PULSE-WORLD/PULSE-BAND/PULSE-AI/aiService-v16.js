@@ -1,16 +1,17 @@
 // ============================================================================
-//  PULSE OS v12.3‑EVO+ — AI SERVICE GATEWAY ORGAN
-//  Dual‑Band Entry Point • Safe Relay • Deterministic Execution
-//  PURE RELAY. ZERO MUTATION. ZERO RANDOMNESS. HARMONIC, MONITORED LOAD.
+//  PULSE OS v16‑IMMORTAL‑ADV++ — AI SERVICE GATEWAY ORGAN
+//  Universal Dual‑Band Entry Point • Safe Relay • Deterministic Execution
+//  PURE RELAY. ZERO MUTATION. ZERO RANDOMNESS. ZERO DRIFT.
+//  ORGANISM‑AWARE • ARTERY v5 • OWNER‑SUBORDINATE
 // ============================================================================
 
 /*
 AI_EXPERIENCE_META = {
   identity: "aiService",
-  version: "v14-Immortal",
+  version: "v16-Immortal-Adv++",
   layer: "ai_tools",
   role: "service_surface",
-  lineage: "aiService-v10 → v14-Immortal",
+  lineage: "aiService-v10 → v12.3-Evo+ → v16-Immortal-Adv++",
 
   evo: {
     serviceSurface: true,
@@ -24,7 +25,26 @@ AI_EXPERIENCE_META = {
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    arteryV5: true,
+    organismAware: true,
+    heartbeatAware: true,
+    earnAware: true,
+    genomeAware: true,
+    governorAware: true,
+    watchdogAware: true,
+    cortexAware: true,
+    memoryAware: true,
+    safetyAware: true,
+
+    routerAware: true,
+    overmindAware: true,
+    nodeAdminAware: true,
+    slowdownAware: true,
+    driftAware: true,
+    schemaAware: true,
+    tourismAware: true
   },
 
   contract: {
@@ -37,8 +57,8 @@ AI_EXPERIENCE_META = {
 export const ServiceGatewayMeta = Object.freeze({
   layer: "PulseAIServiceGateway",
   role: "SERVICE_GATEWAY_ORGAN",
-  version: "12.3-Evo+",
-  identity: "aiServiceGateway-v12.3-Evo+",
+  version: "16-Immortal-Adv++",
+  identity: "aiServiceGateway-v16-Immortal-Adv++",
 
   evo: Object.freeze({
     driftProof: true,
@@ -55,15 +75,32 @@ export const ServiceGatewayMeta = Object.freeze({
     permissionAware: true,
     routerAware: true,
     overmindAware: true,
+    nodeAdminAware: true,
+
+    // organism vitals
+    organismAware: true,
+    heartbeatAware: true,
+    earnAware: true,
+    genomeAware: true,
+    governorAware: true,
+    watchdogAware: true,
+    cortexAware: true,
+    memoryAware: true,
+    safetyAware: true,
+
+    // arteries
+    arteryAware: true,
+    arteryV5: true,
+
     readOnly: true,
     multiInstanceReady: true,
-    epoch: "12.3-Evo+"
+    epoch: "16-Immortal-Adv++"
   }),
 
   contract: Object.freeze({
     purpose: [
       "Provide a deterministic, dual-band-safe relay for analysis, audit, schema validation, drift detection, slowdown detection, route/log/error analysis, and tourism queries.",
-      "Expose relay artery metrics (throughput, pressure, cost, budget) for organism-level awareness.",
+      "Fuse organism vitals into relay artery v5 for NodeAdmin/Overmind/Earn awareness.",
       "Surface soft spiral warnings when relay pressure or error rate becomes critical (non-blocking)."
     ],
 
@@ -72,6 +109,7 @@ export const ServiceGatewayMeta = Object.freeze({
       "mutate data",
       "override router decisions",
       "override cortex decisions",
+      "override safety frame decisions",
       "introduce randomness",
       "perform cognition",
       "perform intent logic",
@@ -94,6 +132,10 @@ export const ServiceGatewayMeta = Object.freeze({
   })
 });
 
+// ============================================================================
+//  IMPORTS — Binary Engine + Tools
+// ============================================================================
+
 import { runAI } from "./aiEngine-v11-Evo.js";
 import {
   analyzeFirestoreDoc,
@@ -104,7 +146,27 @@ import {
 } from "./aiTools.js";
 
 // ============================================================================
-//  RELAY ARTERY HELPERS — v3 (PURE, STATELESS)
+//  GLOBAL RELAY ARTERY REGISTRY — v16 IMMORTAL‑ADV++
+// ============================================================================
+
+const _globalRelayArteryRegistry = new Map();
+/**
+ * Registry key: `${id}#${instanceIndex}`
+ */
+function _registryKey(id, instanceIndex) {
+  return `${id || ServiceGatewayMeta.identity}#${instanceIndex}`;
+}
+
+export function getGlobalRelayArteries() {
+  const out = {};
+  for (const [k, v] of _globalRelayArteryRegistry.entries()) {
+    out[k] = v;
+  }
+  return out;
+}
+
+// ============================================================================
+//  RELAY ARTERY HELPERS — v5
 // ============================================================================
 
 function relayBucketLevel(v) {
@@ -131,17 +193,147 @@ function relayBucketCost(v) {
   return "none";
 }
 
+function clamp01(v) {
+  const n = typeof v === "number" ? v : 0;
+  if (n <= 0) return 0;
+  if (n >= 1) return 1;
+  return n;
+}
+
 // ============================================================================
-//  SERVICE GATEWAY CORE — v12.3‑EVO+
+//  RELAY ARTERY v5 — Organism‑Aware Fusion
+// ============================================================================
+
+function computeRelayArteryV5({
+  calls,
+  errors,
+  slowCalls,
+  windowMs,
+  instanceIndex,
+  instanceCount,
+  heartbeat,
+  earn,
+  genome,
+  governor,
+  watchdog,
+  cortex,
+  memory,
+  safety
+}) {
+  const total = calls.total;
+  const window = calls.window;
+  const errorRate = window > 0 ? clamp01(errors.window / window) : 0;
+  const slowRate = window > 0 ? clamp01(slowCalls.window / window) : 0;
+
+  const callsPerMs = window / Math.max(1, calls.elapsedMs);
+  const callsPerSec = callsPerMs * 1000;
+
+  const harmonicLoad =
+    instanceCount > 0 ? callsPerSec / instanceCount : callsPerSec;
+
+  const loadFactor = clamp01(harmonicLoad / 128);
+
+  const heartbeatPressure = clamp01(heartbeat?.pressure ?? 0);
+  const earnPressure = clamp01(earn?.pressure ?? 0);
+  const genomePressure = clamp01(genome?.pressure ?? 0);
+  const governorPressure = clamp01(governor?.pressure ?? 0);
+  const watchdogPressure = clamp01(watchdog?.pressure ?? 0);
+  const cortexPressure = clamp01(cortex?.pressure ?? 0);
+  const memoryPressure = clamp01(memory?.pressure ?? 0);
+  const safetyPressure = clamp01(safety?.pressure ?? 0);
+
+  const organismPressure =
+    (heartbeatPressure +
+      earnPressure +
+      genomePressure +
+      governorPressure +
+      watchdogPressure +
+      cortexPressure +
+      memoryPressure +
+      safetyPressure) / 8;
+
+  const pressure = clamp01(
+    loadFactor * 0.4 +
+      errorRate * 0.2 +
+      slowRate * 0.2 +
+      organismPressure * 0.2
+  );
+
+  const throughput = clamp01(1 - pressure);
+  const cost = clamp01(pressure * (1 - throughput));
+  const budget = clamp01(throughput - cost);
+
+  return Object.freeze({
+    instanceIndex,
+    instanceCount,
+    windowMs,
+
+    calls: {
+      total,
+      window,
+      callsPerSec,
+      harmonicLoad
+    },
+
+    errors: {
+      total: errors.total,
+      window: errors.window,
+      errorRate
+    },
+
+    slow: {
+      window: slowCalls.window,
+      slowRate
+    },
+
+    organism: {
+      heartbeat,
+      earn,
+      genome,
+      governor,
+      watchdog,
+      cortex,
+      memory,
+      safety
+    },
+
+    throughput,
+    pressure,
+    cost,
+    budget,
+
+    throughputBucket: relayBucketLevel(throughput),
+    pressureBucket: relayBucketPressure(pressure),
+    costBucket: relayBucketCost(cost),
+    budgetBucket: relayBucketLevel(budget)
+  });
+}
+
+// ============================================================================
+//  SERVICE GATEWAY CORE — v16‑IMMORTAL‑ADV++
 // ============================================================================
 
 class AiServiceGatewayCore {
+  /**
+   * CONFIG INTENT:
+   *   id, trace, scribe
+   *   windowMs, slowThresholdMs
+   *
+   *   vitals providers (optional, read-only):
+   *     heartbeatProvider  → () => { pressure?: number, ... }
+   *     earnProvider       → () => { pressure?: number, ... }
+   *     genomeProvider     → () => { pressure?: number, ... }
+   *     governorProvider   → () => { pressure?: number, ... }
+   *     watchdogProvider   → () => { pressure?: number, ... }
+   *     cortexProvider     → () => { pressure?: number, ... }
+   *     memoryProvider     → () => { pressure?: number, ... }
+   *     safetyProvider     → () => { pressure?: number, ... }
+   */
   constructor(config = {}) {
-    this.id = config.id || "ai-service-gateway";
+    this.id = config.id || "ai-service-gateway-v16";
     this.trace = !!config.trace;
     this.scribe = config.scribe || null;
 
-    // rolling window for relay artery
     this.windowMs =
       typeof config.windowMs === "number" && config.windowMs > 0
         ? config.windowMs
@@ -159,8 +351,17 @@ class AiServiceGatewayCore {
         ? config.slowThresholdMs
         : 1500;
 
-    // multi-instance identity
     this.instanceIndex = AiServiceGatewayCore._registerInstance();
+
+    // organism vitals providers (read-only)
+    this.heartbeatProvider = config.heartbeatProvider || null;
+    this.earnProvider = config.earnProvider || null;
+    this.genomeProvider = config.genomeProvider || null;
+    this.governorProvider = config.governorProvider || null;
+    this.watchdogProvider = config.watchdogProvider || null;
+    this.cortexProvider = config.cortexProvider || null;
+    this.memoryProvider = config.memoryProvider || null;
+    this.safetyProvider = config.safetyProvider || null;
   }
 
   // ---------------------------------------------------------
@@ -196,6 +397,19 @@ class AiServiceGatewayCore {
   }
 
   // ---------------------------------------------------------
+  //  VITALS READERS (SAFE, READ‑ONLY)
+// ---------------------------------------------------------
+
+  _readVitals(provider) {
+    if (!provider) return null;
+    try {
+      return provider() || null;
+    } catch {
+      return null;
+    }
+  }
+
+  // ---------------------------------------------------------
   //  RELAY ARTERY SNAPSHOT
   // ---------------------------------------------------------
 
@@ -204,61 +418,36 @@ class AiServiceGatewayCore {
     this._rollWindow(now);
 
     const elapsedMs = Math.max(1, now - this._windowStart);
-    const callsPerMs = this._windowCalls / elapsedMs;
-    const callsPerSec = callsPerMs * 1000;
 
-    const instanceCount = AiServiceGatewayCore.getInstanceCount();
-    const harmonicLoad =
-      instanceCount > 0 ? callsPerSec / instanceCount : callsPerSec;
-
-    const errorRate =
-      this._windowCalls > 0
-        ? Math.min(1, this._windowErrors / this._windowCalls)
-        : 0;
-
-    const slowRate =
-      this._windowCalls > 0
-        ? Math.min(1, this._windowSlowCalls / this._windowCalls)
-        : 0;
-
-    const loadFactor = Math.min(1, harmonicLoad / 128);
-    const pressureBase = Math.max(
-      0,
-      Math.min(1, (loadFactor + errorRate + slowRate) / 3)
-    );
-    const pressure = pressureBase;
-
-    const throughputBase = Math.max(0, 1 - pressure);
-    const throughput = Math.max(0, Math.min(1, throughputBase));
-
-    const cost = Math.max(0, Math.min(1, pressure * (1 - throughput)));
-    const budget = Math.max(0, Math.min(1, throughput - cost));
-
-    const artery = {
-      instanceIndex: this.instanceIndex,
-      instanceCount,
-
+    const artery = computeRelayArteryV5({
+      calls: {
+        total: this._totalCalls,
+        window: this._windowCalls,
+        elapsedMs
+      },
+      errors: {
+        total: this._totalErrors,
+        window: this._windowErrors
+      },
+      slowCalls: {
+        window: this._windowSlowCalls
+      },
       windowMs: this.windowMs,
-      windowCalls: this._windowCalls,
-      windowErrors: this._windowErrors,
-      windowSlowCalls: this._windowSlowCalls,
-      totalCalls: this._totalCalls,
-      totalErrors: this._totalErrors,
-      callsPerSec,
-      harmonicLoad,
-      errorRate,
-      slowRate,
+      instanceIndex: this.instanceIndex,
+      instanceCount: AiServiceGatewayCore.getInstanceCount(),
 
-      throughput,
-      pressure,
-      cost,
-      budget,
+      heartbeat: this._readVitals(this.heartbeatProvider),
+      earn: this._readVitals(this.earnProvider),
+      genome: this._readVitals(this.genomeProvider),
+      governor: this._readVitals(this.governorProvider),
+      watchdog: this._readVitals(this.watchdogProvider),
+      cortex: this._readVitals(this.cortexProvider),
+      memory: this._readVitals(this.memoryProvider),
+      safety: this._readVitals(this.safetyProvider)
+    });
 
-      throughputBucket: relayBucketLevel(throughput),
-      pressureBucket: relayBucketPressure(pressure),
-      costBucket: relayBucketCost(cost),
-      budgetBucket: relayBucketLevel(budget)
-    };
+    const key = _registryKey(this.id, this.instanceIndex);
+    _globalRelayArteryRegistry.set(key, artery);
 
     return artery;
   }
@@ -273,7 +462,6 @@ class AiServiceGatewayCore {
 
   async relay(intent, flags, operation, request = {}, dualBand = null) {
     const start = Date.now();
-    let error = null;
 
     try {
       const result = await runAI(
@@ -287,8 +475,7 @@ class AiServiceGatewayCore {
         dualBand
       );
 
-      const end = Date.now();
-      const duration = end - start;
+      const duration = Date.now() - start;
 
       this._recordCall(duration, false);
       const artery = this._computeRelayArtery();
@@ -309,9 +496,7 @@ class AiServiceGatewayCore {
 
       return result;
     } catch (e) {
-      const end = Date.now();
-      const duration = end - start;
-      error = e;
+      const duration = Date.now() - start;
 
       this._recordCall(duration, true);
       const artery = this._computeRelayArtery();
@@ -379,9 +564,10 @@ class AiServiceGatewayCore {
   }
 }
 
-// ---------------------------------------------------------------------------
-// INTERNAL — Deterministic Relay Wrapper (v12.3‑EVO+)
-// ---------------------------------------------------------------------------
+// ============================================================================
+//  INTERNAL GATEWAY INSTANCE — v16‑IMMORTAL‑ADV++
+// ============================================================================
+
 const _gatewayCore = new AiServiceGatewayCore({ trace: false });
 
 function callAI(intent, flags, operation, request = {}, dualBand = null) {
@@ -389,8 +575,9 @@ function callAI(intent, flags, operation, request = {}, dualBand = null) {
 }
 
 // ============================================================================
-// FIRESTORE ANALYSIS — Dual‑Band Gateway
+//  PUBLIC SERVICE OPERATIONS — API‑COMPATIBLE, INTERNALLY UPGRADED
 // ============================================================================
+
 export async function runAnalyzeFirestore(
   docData,
   request = {},
@@ -409,9 +596,6 @@ export async function runAnalyzeFirestore(
   );
 }
 
-// ============================================================================
-// SQL ANALYSIS — Dual‑Band Gateway
-// ============================================================================
 export async function runAnalyzeSQL(sqlSchema, request = {}, dualBand = null) {
   return callAI(
     "analyze",
@@ -426,9 +610,6 @@ export async function runAnalyzeSQL(sqlSchema, request = {}, dualBand = null) {
   );
 }
 
-// ============================================================================
-// DRIFT DETECTION — Dual‑Band Gateway
-// ============================================================================
 export async function runDetectDrift(
   pulseSchema,
   firestoreSchema,
@@ -447,9 +628,6 @@ export async function runDetectDrift(
   );
 }
 
-// ============================================================================
-// PULSE SCHEMA VALIDATION — Dual‑Band Gateway
-// ============================================================================
 export async function runValidatePulse(
   pulseSchema,
   request = {},
@@ -469,9 +647,6 @@ export async function runValidatePulse(
   );
 }
 
-// ============================================================================
-// FULL AUDIT — Dual‑Band Gateway
-// ============================================================================
 export async function runFullAudit(
   pulseSchema,
   firestoreDoc,
@@ -504,9 +679,6 @@ export async function runFullAudit(
   );
 }
 
-// ============================================================================
-// ROUTE ANALYSIS — Dual‑Band Gateway
-// ============================================================================
 export async function runAnalyzeRoutes(
   routeData,
   request = {},
@@ -524,9 +696,6 @@ export async function runAnalyzeRoutes(
   );
 }
 
-// ============================================================================
-// LOG ANALYSIS — Dual‑Band Gateway
-// ============================================================================
 export async function runAnalyzeLogs(logs, request = {}, dualBand = null) {
   return callAI(
     "analyze",
@@ -540,9 +709,6 @@ export async function runAnalyzeLogs(logs, request = {}, dualBand = null) {
   );
 }
 
-// ============================================================================
-// ERROR ANALYSIS — Dual‑Band Gateway
-// ============================================================================
 export async function runAnalyzeErrors(
   errors,
   request = {},
@@ -560,9 +726,6 @@ export async function runAnalyzeErrors(
   );
 }
 
-// ============================================================================
-// ARCHITECTURE EXPLANATION — Dual‑Band Gateway
-// ============================================================================
 export async function runExplainOrgan(
   organMeta,
   request = {},
@@ -597,9 +760,6 @@ export async function runExplainPathway(
   );
 }
 
-// ============================================================================
-// TOUR GUIDE — Dual‑Band Gateway
-// ============================================================================
 export async function runTourGuideQuery(
   query,
   request = {},
@@ -618,11 +778,13 @@ export async function runTourGuideQuery(
 }
 
 // ============================================================================
-// DUAL‑MODE EXPORTS (ESM + CommonJS)
+//  DUAL‑MODE EXPORTS (ESM + CommonJS)
 // ============================================================================
+
 if (typeof module !== "undefined") {
   module.exports = {
     ServiceGatewayMeta,
+    getGlobalRelayArteries,
     runAnalyzeFirestore,
     runAnalyzeSQL,
     runDetectDrift,

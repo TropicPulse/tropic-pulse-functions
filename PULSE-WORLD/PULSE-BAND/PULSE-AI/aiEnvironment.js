@@ -125,7 +125,7 @@ function emitEnvironmentPacket(type, payload = {}) {
   });
 }
 
-import { getOrganismSnapshot } from "./aiDeps.js";
+import { getOrganismSnapshot } from "./aiDeps-v16.js";
 
 // ============================================================================
 //  CACHES — Hourly + Daily (Presence‑grade)

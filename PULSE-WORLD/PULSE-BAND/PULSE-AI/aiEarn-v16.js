@@ -142,7 +142,7 @@ export const EarnMeta = Object.freeze({
   })
 });
 
-import { getOrganismSnapshot } from "./aiDeps.js";
+import { getOrganismSnapshot } from "./aiDeps-v16.js";
 
 // ---------------------------------------------------------------------------
 // INTERNAL: deterministic helpers

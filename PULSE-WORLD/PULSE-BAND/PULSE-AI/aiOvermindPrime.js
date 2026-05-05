@@ -96,7 +96,7 @@ import aiPersonalityEngine from "./aiPersonalityEngine.js";
 // 2. CONTEXT + CORTEX
 // ———————————————————————————————
 import createCognitiveFrame from "./aiContext.js";
-import createContextEngine from "./aiContextEngine.js";
+import createContextEngine from "./aiContextEngine-v16.js";
 
 // ———————————————————————————————
 // 3. SAFETY + TONE

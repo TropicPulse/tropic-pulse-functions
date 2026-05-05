@@ -124,7 +124,7 @@ import depsSurface, {
   getOrganismSnapshot,
   emitDepsPacket,
   prewarmDepsLayer
-} from "./aiDeps.js";
+} from "./aiDeps-v16.js";
 
 import {
   DiagnosticsMeta,
@@ -154,14 +154,14 @@ import { createPersonaEngine } from "./persona.js";
 import {
   createContextEngine,
   prewarmContextEngine
-} from "./aiContextEngine.js";
+} from "./aiContextEngine-v16.js";
 
 import createCognitiveFrame, {
   COGNITIVE_FRAME_META,
   prewarmCognitiveFrame
 } from "./aiContext.js";
 
-import { createCortex, prewarmAICortex } from "./aiCortex-v11-Evo.js";
+import { createCortex, prewarmAICortex } from "./aiCortex-v16.js";
 import { createRouterEngine } from "./aiRouter-v16.js";
 import { runAI, ExecutionEngineMeta } from "./aiEngine-v16.js";
 

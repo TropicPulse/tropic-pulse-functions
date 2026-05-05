@@ -109,7 +109,7 @@ export const AI_EVOLUTION_META = Object.freeze({
 });
 
 import { Personas } from "./persona.js";
-import { getOrganismSnapshot } from "./aiDeps.js";
+import { getOrganismSnapshot } from "./aiDeps-v16.js";
 
 // ============================================================================
 //  INTERNAL CACHES — deterministic, in‑memory, per‑scope

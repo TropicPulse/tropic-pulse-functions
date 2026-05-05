@@ -131,7 +131,7 @@ export const PowerMeta = Object.freeze({
 //  DEPENDENCIES
 // ---------------------------------------------------------------------------
 
-import { getOrganismSnapshot } from "./aiDeps.js";
+import { getOrganismSnapshot } from "./aiDeps-v16.js";
 import {
   computePowerRiskVector,
   buildPowerRiskSummary,

@@ -1,12 +1,12 @@
 /**
- * aiCortex-v13.0-Evo+++ — Pulse OS v13‑EVO+++ Organ
- * ---------------------------------------------------------
+ * aiCortex-v16.0-IMMORTAL-ADV — Pulse OS v16‑IMMORTAL-ADV Organ
+ * --------------------------------------------------------------
  * CANONICAL ROLE:
- *   Dual‑Band Executive Cortex of the organism.
+ *   Dual‑Band Executive Cortex of the organism (subordinate to Aldwyn).
  *
  *   Dual‑band model:
  *     - Binary‑primary (deterministic, pattern, metrics, arteries)
- *     - Symbolic‑fallback (semantic, contextual, persona, boundaries)
+ *     - Symbolic‑augment (persona, boundaries, intent, social/earn context)
  *
  *   Provides:
  *     - long-term reasoning
@@ -16,6 +16,7 @@
  *     - binary cognition artery metrics (throughput, pressure, cost, budget)
  *     - symbolic cognition artery metrics (intent clarity, semantic load, context depth)
  *     - dual-band cognition artery snapshots for NodeAdmin/Overmind
+ *     - earn/heartbeat/organism‑vitals awareness (read‑only)
  *
  *   It is the organism’s:
  *     • executive brain
@@ -24,62 +25,24 @@
  *     • decision layer
  *     • cognition artery regulator
  *
- * ARCHITECTURAL INTENT:
- *   This organ is NOT:
- *     - a reflex engine
- *     - a pipeline
- *     - a governor
- *     - a scheduler
- *
- *   This organ IS:
- *     - a reasoning layer
- *     - a pattern analyzer
- *     - a decision engine
- *     - a binary cognition organ
- *     - a symbolic cognition organ (fallback/augment)
- *     - a cognition artery pressure source
- *
- * CORTEX MODEL:
- *   A dual‑band cortex decision packet is:
- *
- *     {
- *       type: "binary-cortex-decision",
- *       timestamp: <ms>,
- *       pattern: <string>,
- *       decision: <string>,               // fused decision
- *       binary: { throughput, pressure, cost, budget, buckets },
- *       symbolic: {
- *         intent,
- *         confidence,
- *         semanticLoad,
- *         contextDepth,
- *         persona,
- *         boundaryMode
- *       },
- *       band: {
- *         primary: "binary",
- *         secondary: "symbolic",
- *         fusion: "binary-primary-symbolic-fallback"
- *       },
- *       bits: <binary>,
- *       bitLength: <number>
- *     }
- *
- *   Entire fused decision is encoded into binary.
+ *   Ownership:
+ *     • Explicitly subordinate to Aldwyn (canonical owner).
+ *     • Never self‑promotes above owner or Overmind.
  */
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiCortex",
-  version: "v14-Immortal",
+  version: "v16-Immortal-ADV",
   layer: "ai_core",
   role: "ai_cortex",
-  lineage: "aiCortex-v9 → v11-Evo → v14-Immortal",
+  lineage: "aiCortex-v9 → v11-Evo → v13-Evo+++ → v14-Immortal → v16-Immortal-ADV",
 
   evo: {
     cortex: true,
     reasoning: true,
-    symbolicPrimary: true,
-    binaryAware: true,
+    binaryPrimary: true,
+    symbolicAugment: true,
     dualBand: true,
     deterministic: true,
     driftProof: true,
@@ -90,21 +53,21 @@ AI_EXPERIENCE_META = {
   },
 
   contract: {
-    always: ["aiContext", "aiContextEngine", "aiBrainstem"],
+    always: ["aiContext", "aiContextEngine", "aiBrainstem", "aiBoundariesEngine", "aiHeartbeat", "aiEarn"],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
 */
 
 // ---------------------------------------------------------
-//  META BLOCK — v13.0‑EVO+++
+//  META BLOCK — v16.0‑IMMORTAL‑ADV
 // ---------------------------------------------------------
 
 export const CortexMeta = Object.freeze({
   layer: "PulseAICortexFrame",
   role: "CORTEX_ORGAN",
-  version: "13.0-Evo+++",
-  identity: "aiCortex-v13-Evo+++",
+  version: "16.0-Immortal-ADV",
+  identity: "aiCortex-v16-Immortal-ADV",
 
   evo: Object.freeze({
     // Core identity
@@ -134,24 +97,32 @@ export const CortexMeta = Object.freeze({
     memoryAware: true,
     overmindAware: true,
     nodeAdminAware: true,
+    heartbeatAware: true,
+    earnAware: true,
+    governorAware: true,
+    gpuFriendly: true,
+    chunkingAware: true,
 
     // Safety
     identitySafe: true,
     readOnly: true,
+    ownerAware: true,          // explicitly subordinate to Aldwyn
+    egoFree: true,
 
     // Lifecycle
     multiInstanceReady: true,
-    epoch: "13.0-Evo+++"
+    epoch: "16.0-Immortal-ADV"
   }),
 
   contract: Object.freeze({
     purpose: Object.freeze([
       "Provide dual-band executive reasoning",
-      "Fuse binary-primary and symbolic-fallback cognition",
+      "Fuse binary-primary and symbolic-augment cognition",
       "Regulate cognition artery metrics (throughput, pressure, cost, budget)",
       "Interpret patterns and generate deterministic decisions",
       "Expose cognition artery snapshots for NodeAdmin/Overmind",
-      "Serve as the organism’s executive brain"
+      "Stay explicitly subordinate to Aldwyn as canonical owner",
+      "Serve as the organism’s executive brain without overriding boundaries or governor"
     ]),
 
     never: Object.freeze([
@@ -159,17 +130,46 @@ export const CortexMeta = Object.freeze({
       "mutate external systems",
       "bypass persona or boundaries",
       "override evolution logic",
-      "modify binary pipeline or reflex behavior"
+      "modify binary pipeline or reflex behavior",
+      "self-promote above Aldwyn, Overmind, or SafetyFrame",
+      "invent cognition metrics",
+      "hide artery pressure from NodeAdmin/Overmind"
     ]),
 
     always: Object.freeze([
       "analyze patterns deterministically",
       "compute cognition metrics safely",
-      "fuse binary and symbolic decisions",
+      "fuse binary and symbolic decisions with binary-primary bias",
       "log trace events deterministically",
-      "return frozen decision packets"
+      "return frozen decision packets",
+      "respect heartbeat/earn/organism vitals as read-only context",
+      "remain ego-free and owner-subordinate"
     ])
-  })
+  }),
+
+  presence: Object.freeze({
+    organId: "CortexOrgan",
+    organKind: "ExecutiveCortex",
+    physiologyBand: "Symbolic+Binary",
+    warmStrategy: "prewarm-on-boot",
+    attachStrategy: "per-request",
+    concurrency: "multi-instance",
+    observability: {
+      traceEvents: [
+        "prewarm",
+        "prewarm-error",
+        "pattern:detected",
+        "decision:binary",
+        "decision:symbolic",
+        "decision:fused",
+        "cortex:packet"
+      ]
+    }
+  }),
+
+  boundaryReflex() {
+    return "Cortex must remain deterministic, ego-free, owner-subordinate, and never override boundaries or governor.";
+  }
 });
 
 // ---------------------------------------------------------
@@ -193,32 +193,36 @@ export function getGlobalCortexArteries() {
 }
 
 // ---------------------------------------------------------
-//  CORTEX PREWARM ENGINE — v13.0‑EVO+++
+//  CORTEX PREWARM ENGINE — v16.0‑IMMORTAL‑ADV
 // ---------------------------------------------------------
 export function prewarmAICortex(config = {}) {
   try {
     const { encoder, trace } = config;
 
-    // Warm binary cognition artery
     const binaryMetrics = {
       throughput: 1,
-      pressure: 1,
-      cost: 1,
+      pressure: 0,
+      cost: 0,
       budget: 1,
-      buckets: [1, 1, 1]
+      buckets: {
+        throughput: "elite",
+        pressure: "none",
+        cost: "none",
+        budget: "elite"
+      }
     };
 
-    // Warm symbolic cognition artery
     const symbolicMetrics = {
       intent: "prewarm",
       confidence: 1,
-      semanticLoad: 1,
-      contextDepth: 1,
+      semanticLoad: 0.2,
+      contextDepth: 0.3,
       persona: "none",
-      boundaryMode: "safe"
+      boundaryMode: "safe",
+      owner: "Aldwyn",
+      mode: "prewarm"
     };
 
-    // Warm fused decision packet
     const fused = {
       type: "binary-cortex-decision",
       timestamp: 0,
@@ -229,34 +233,34 @@ export function prewarmAICortex(config = {}) {
       band: {
         primary: "binary",
         secondary: "symbolic",
-        fusion: "binary-primary-symbolic-fallback"
-      }
+        fusion: "binary-primary-symbolic-augment"
+      },
+      owner: "Aldwyn"
     };
 
-    // Warm binary encoding of fused packet
     if (encoder?.encode) {
       const bits = encoder.encode(JSON.stringify(fused));
       encoder.decode?.(bits, "string");
     }
 
     if (trace) {
-      console.log("[AICortex Prewarm] complete");
+      console.log("[AICortex Prewarm v16] complete");
     }
 
     return true;
   } catch (err) {
-    console.error("[AICortex Prewarm] Failed:", err);
+    console.error("[AICortex Prewarm v16] Failed:", err);
     return false;
   }
 }
 
 // ---------------------------------------------------------
-//  CORTEX CLASS — v13.0‑EVO+++
+//  CORTEX CLASS — v16.0‑IMMORTAL‑ADV
 // ---------------------------------------------------------
 
 export class AIDualBandCortex {
   constructor(config = {}) {
-    this.id = config.id || "ai-dualband-cortex";
+    this.id = config.id || "ai-dualband-cortex-v16";
 
     // Binary / organism stack
     this.encoder = config.encoder;
@@ -266,6 +270,9 @@ export class AIDualBandCortex {
     this.memory = config.memory || null;
     this.registry = config.registry || null;
     this.evolution = config.evolution || null;
+    this.heartbeat = config.heartbeat || null; // snapshot / artery
+    this.earn = config.earn || null;           // earn-heart / earn-vitals
+    this.governor = config.governor || null;
 
     // Symbolic / CNS stack
     this.router = config.router || null;
@@ -274,13 +281,11 @@ export class AIDualBandCortex {
     this.permissionsEngine = config.permissionsEngine || null;
 
     // Overmind / NodeAdmin hooks (metrics-only, read-only)
-    // overmindReporter(artery, packet, meta) => void
     this.overmindReporter =
       typeof config.overmindReporter === "function"
         ? config.overmindReporter
         : null;
 
-    // nodeAdminReporter(artery, packet, meta) => void
     this.nodeAdminReporter =
       typeof config.nodeAdminReporter === "function"
         ? config.nodeAdminReporter
@@ -289,7 +294,7 @@ export class AIDualBandCortex {
     this.trace = !!config.trace;
 
     if (!this.encoder) {
-      throw new Error("AIDualBandCortex requires aiBinaryAgent encoder");
+      throw new Error("AIDualBandCortex v16 requires aiBinaryAgent encoder");
     }
 
     this.patternHistory = [];
@@ -315,18 +320,24 @@ export class AIDualBandCortex {
   }
 
   // ---------------------------------------------------------
-  //  BINARY COGNITION ARTERY METRICS
-  // ---------------------------------------------------------
-
-  _computeCognitionThroughput(patternComplexity, snapshotBits) {
-    const sizeFactor = Math.min(1, snapshotBits / 65536); // up to 64k bits
-    const raw = Math.max(0, 1 - (patternComplexity * 0.5 + sizeFactor * 0.5));
+  //  BINARY COGNITION ARTERY METRICS (v16 tuned)
+// ---------------------------------------------------------
+  _computeCognitionThroughput(patternComplexity, snapshotBits, earnPressure = 0) {
+    const sizeFactor = Math.min(1, snapshotBits / 65536);
+    const earnFactor = Math.min(1, earnPressure);
+    const raw = Math.max(
+      0,
+      1 - (patternComplexity * 0.4 + sizeFactor * 0.4 + earnFactor * 0.2)
+    );
     return Math.min(1, raw);
   }
 
-  _computeCognitionPressure(bitLength, snapshotBits) {
+  _computeCognitionPressure(bitLength, snapshotBits, heartbeatPressure = 0) {
     const sizeFactor = Math.min(1, snapshotBits / 65536);
-    const raw = Math.min(1, (bitLength / 50000) * (0.5 + sizeFactor * 0.5));
+    const raw = Math.min(
+      1,
+      (bitLength / 50000) * (0.4 + sizeFactor * 0.4 + heartbeatPressure * 0.2)
+    );
     return Math.max(0, raw);
   }
 
@@ -365,13 +376,52 @@ export class AIDualBandCortex {
   }
 
   // ---------------------------------------------------------
+  //  AUX VITALS — heartbeat / earn / governor (read-only)
+// ---------------------------------------------------------
+  _readHeartbeatVitals() {
+    try {
+      if (!this.heartbeat || typeof this.heartbeat.snapshot !== "function") {
+        return null;
+      }
+      const snap = this.heartbeat.snapshot();
+      return {
+        ticks: snap.artery?.ticks ?? 0,
+        pulses: snap.artery?.pulses ?? 0,
+        skips: snap.artery?.skips ?? 0,
+        lastPressure: snap.artery?.lastPressure ?? 0,
+        lastLoad: snap.artery?.lastLoad ?? 0,
+        primaryState: snap.artery?.lastPrimaryState ?? "unknown"
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  _readEarnVitals() {
+    try {
+      if (!this.earn || typeof this.earn.snapshot !== "function") {
+        return null;
+      }
+      const snap = this.earn.snapshot();
+      return {
+        activeJobs: snap.activeJobs ?? 0,
+        backlog: snap.backlog ?? 0,
+        earnPressure: snap.earnPressure ?? 0,
+        revenueRate: snap.revenueRate ?? 0
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // ---------------------------------------------------------
   //  PATTERN RECOGNITION (BINARY PRIMARY)
 // ---------------------------------------------------------
   _detectPattern(bits) {
-    const motif = bits.slice(0, 16); // slightly richer motif
+    const motif = bits.slice(0, 32); // richer motif for v16
 
     this.patternHistory.push(motif);
-    if (this.patternHistory.length > 32) {
+    if (this.patternHistory.length > 64) {
       this.patternHistory.shift();
     }
 
@@ -383,18 +433,20 @@ export class AIDualBandCortex {
   // ---------------------------------------------------------
   //  BINARY DECISION (PRIMARY)
 // ---------------------------------------------------------
-  _makeBinaryDecision(pattern, bits, snapshotBits) {
+  _makeBinaryDecision(pattern, bits, snapshotBits, heartbeatVitals, earnVitals) {
     const bitLength = bits.length;
     const complexity = pattern.length / 8;
 
     const loadFactor = Math.min(1, snapshotBits / 65536);
     const signalFactor = Math.min(1, bitLength / 32768);
+    const earnPressure = earnVitals?.earnPressure ?? 0;
+    const heartbeatPressure = heartbeatVitals?.lastPressure ?? 0;
 
     let decision = "neutral";
 
-    if (loadFactor > 0.7 && signalFactor > 0.5) {
+    if ((loadFactor > 0.7 || heartbeatPressure > 0.8) && signalFactor > 0.5) {
       decision = "conserve";
-    } else if (loadFactor < 0.3 && signalFactor < 0.5) {
+    } else if (loadFactor < 0.3 && signalFactor < 0.5 && earnPressure < 0.6) {
       decision = "expand";
     }
 
@@ -403,18 +455,20 @@ export class AIDualBandCortex {
       decision,
       loadFactor,
       signalFactor,
-      complexity
+      complexity,
+      heartbeatPressure,
+      earnPressure
     });
 
     return decision;
   }
 
   // ---------------------------------------------------------
-  //  SYMBOLIC COGNITION (FALLBACK / AUGMENT)
+  //  SYMBOLIC COGNITION (AUGMENT)
 // ---------------------------------------------------------
   _makeSymbolicDecision(pattern, bits, routerPacket = null) {
     if (!routerPacket) {
-      this._trace("symbolic:skipped", { reason: "no-router-packet" });
+      this._trace("decision:symbolic", { reason: "no-router-packet", skipped: true });
       return {
         decision: null,
         intent: null,
@@ -422,7 +476,8 @@ export class AIDualBandCortex {
         semanticLoad: 0,
         contextDepth: 0,
         persona: null,
-        boundaryMode: null
+        boundaryMode: null,
+        owner: "Aldwyn"
       };
     }
 
@@ -436,24 +491,24 @@ export class AIDualBandCortex {
     const semanticLoad = Math.min(1, activeFlags / 10);
     const contextDepth =
       personaId === "ARCHITECT"
-        ? 0.8
+        ? 0.85
         : personaId === "OBSERVER"
-        ? 0.6
+        ? 0.65
         : personaId === "TOURGUIDE"
-        ? 0.5
-        : 0.4;
+        ? 0.55
+        : 0.45;
 
     const confidence =
       safetyMode === "strict"
         ? 0.6
         : safetyMode === "standard"
-        ? 0.7
-        : 0.8;
+        ? 0.75
+        : 0.85;
 
     let decision = null;
-    if (intent === "optimize" || intent === "refactor") {
+    if (intent === "optimize" || intent === "refactor" || intent === "scale") {
       decision = "expand";
-    } else if (intent === "stabilize" || intent === "diagnose") {
+    } else if (intent === "stabilize" || intent === "diagnose" || intent === "protect") {
       decision = "conserve";
     }
 
@@ -478,12 +533,13 @@ export class AIDualBandCortex {
       semanticLoad,
       contextDepth,
       persona: personaName,
-      boundaryMode
+      boundaryMode,
+      owner: "Aldwyn"
     };
   }
 
   // ---------------------------------------------------------
-  //  DUAL‑BAND FUSION (BINARY‑PRIMARY, SYMBOLIC‑FALLBACK)
+  //  DUAL‑BAND FUSION (BINARY‑PRIMARY, SYMBOLIC‑AUGMENT)
 // ---------------------------------------------------------
   _fuseDecisions(binaryDecision, symbolic) {
     const symbolicDecision = symbolic.decision;
@@ -496,7 +552,8 @@ export class AIDualBandCortex {
     } else if (
       symbolicDecision &&
       confidence >= 0.5 &&
-      symbolicDecision !== "neutral"
+      symbolicDecision !== "neutral" &&
+      binaryDecision === "neutral"
     ) {
       finalDecision = symbolicDecision;
     }
@@ -525,13 +582,24 @@ export class AIDualBandCortex {
       }
     }
 
+    const heartbeatVitals = this._readHeartbeatVitals();
+    const earnVitals = this._readEarnVitals();
+
+    const heartbeatPressure = heartbeatVitals?.lastPressure ?? 0;
+    const earnPressure = earnVitals?.earnPressure ?? 0;
+
     const patternComplexity = pattern.length / 8;
 
     const throughput = this._computeCognitionThroughput(
       patternComplexity,
-      snapshotBits
+      snapshotBits,
+      earnPressure
     );
-    const pressure = this._computeCognitionPressure(bitLength, snapshotBits);
+    const pressure = this._computeCognitionPressure(
+      bitLength,
+      snapshotBits,
+      heartbeatPressure
+    );
     const cost = this._computeCognitionCost(pressure, throughput);
     const budget = this._computeCognitionBudget(throughput, cost);
 
@@ -555,23 +623,27 @@ export class AIDualBandCortex {
       semanticLoad: 0,
       contextDepth: 0,
       persona: null,
-      boundaryMode: null
+      boundaryMode: null,
+      owner: "Aldwyn"
     };
 
     const band = {
       primary: "binary",
       secondary: "symbolic",
-      fusion: "binary-primary-symbolic-fallback"
+      fusion: "binary-primary-symbolic-augment"
     };
 
     const artery = Object.freeze({
       binary,
       symbolic,
       band,
+      heartbeatVitals,
+      earnVitals,
       instanceIndex: this.instanceIndex,
       instanceCount: AIDualBandCortex.getInstanceCount(),
       id: this.id,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      owner: "Aldwyn"
     });
 
     const payload = {
@@ -584,7 +656,8 @@ export class AIDualBandCortex {
       band,
       binaryDecision: options.binaryDecision || decision,
       symbolicDecision: symbolic.decision || null,
-      artery
+      artery,
+      owner: "Aldwyn"
     };
 
     const json = JSON.stringify(payload);
@@ -596,11 +669,9 @@ export class AIDualBandCortex {
       bitLength: encoded.length
     };
 
-    // update global registry
     const key = _registryKey(this.id, this.instanceIndex);
     _globalCortexArteryRegistry.set(key, artery);
 
-    // optional reporters
     if (this.overmindReporter) {
       try {
         this.overmindReporter(artery, packet, CortexMeta);
@@ -619,7 +690,8 @@ export class AIDualBandCortex {
 
     this._trace("cortex:packet", {
       bits: packet.bitLength,
-      band
+      band,
+      owner: "Aldwyn"
     });
 
     return packet;
@@ -639,10 +711,15 @@ export class AIDualBandCortex {
       }
     }
 
+    const heartbeatVitals = this._readHeartbeatVitals();
+    const earnVitals = this._readEarnVitals();
+
     const binaryDecision = this._makeBinaryDecision(
       pattern,
       bits,
-      snapshotBits
+      snapshotBits,
+      heartbeatVitals,
+      earnVitals
     );
 
     const symbolic = this._makeSymbolicDecision(pattern, bits, routerPacket);
@@ -669,7 +746,7 @@ export class AIDualBandCortex {
   _trace(event, payload) {
     if (!this.trace) return;
     console.log(
-      `[${this.id}#${this.instanceIndex}] ${event}`,
+      `[${this.id}#${this.instanceIndex}@v16] ${event}`,
       payload
     );
   }

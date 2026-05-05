@@ -1,43 +1,53 @@
-/**
- * aiReproduction.js — Pulse OS v13.0‑PRESENCE‑EVO+++
- * ---------------------------------------------------------
- * CANONICAL ROLE:
- *   Binary Reproduction System of the organism.
- *
- *   Provides:
- *     - organism cloning
- *     - genome duplication
- *     - multi-organism spawning
- *     - lineage-safe replication
- *     - reproduction artery metrics v3 (throughput, pressure, cost, budget)
- *     - multi-instance harmony + soft spiral warnings
- *     - presence-aware reproduction metrics (cluster, density, band mix)
- *     - route-aware metrics (castles, servers, corridors, route pressure)
- *     - NodeAdmin-aware metrics (mesh pressure, route pressure, reproduction priority)
- *     - NodeAdmin-reportable artery snapshots (via config hook)
- *
- *   It is the organism’s:
- *     • reproductive system
- *     • cloning engine
- *     • spawn factory
- *     • lineage multiplier
- *     • corridor / route reinforcement signaler (metrics-only)
- *
- *   v13.0‑PRESENCE‑EVO+++ UPGRADE:
- *     • Presence/Route/NodeAdmin context preserved (read-only, optional)
- *     • Global artery registry (read-only, metrics-only) for NodeAdmin/Overmind
- *     • Optional nodeAdminReporter hook (metrics-only, no behavior change)
- *     • Prewarm helper for artery metrics
- *     • No behavioral change inside reproduction (no auto-spawn decisions)
- *     • Still deterministic, drift-proof, non-blocking
- */
+// ============================================================================
+//  aiReproduction.js — Pulse OS v16.0‑IMMORTAL‑ADV
+//  Binary Reproduction System • Earn‑Heart Aware • Mom/Dad/Earn Liveness‑Safe
+//  Lineage‑Safe Replication • Reproduction Artery v4 • NodeAdmin/Overmind‑Ready
+// ============================================================================
+//
+//  CANONICAL ROLE:
+//    Binary Reproduction System of the organism.
+//
+//    Provides:
+//      - organism cloning
+//      - genome duplication
+//      - multi-organism spawning
+//      - lineage-safe replication
+//      - reproduction artery metrics v4 (throughput, pressure, cost, budget)
+//      - multi-instance harmony + soft spiral warnings
+//      - presence-aware reproduction metrics (cluster, density, band mix)
+//      - route-aware metrics (castles, servers, corridors, route pressure)
+//      - NodeAdmin-aware metrics (mesh pressure, route pressure, reproduction priority)
+//      - Earn/Economy-aware metrics (earn pressure, earn priority, active jobs)
+//      - Heartbeat-aware metrics (mom/dad/earn liveness surfaces)
+//      - Cortex/Memory-aware hints (cognition + memory pressure/budget)
+//      - NodeAdmin-reportable artery snapshots (via config hook)
+//
+//    It is the organism’s:
+//      • reproductive system
+//      • cloning engine
+//      • spawn factory
+//      • lineage multiplier
+//      • corridor / route reinforcement signaler (metrics-only)
+//      • earn/economy expansion signaler (metrics-only)
+//
+//  v16.0‑IMMORTAL‑ADV UPGRADE:
+//    • Epoch: 16‑Immortal‑ADV
+//    • Reproduction Artery v4 (extended hints + earn/heartbeat/cortex/memory vitals)
+//    • Earn‑aware + Heartbeat‑aware (mom/dad/earn liveness surfaces, read‑only)
+//    • Owner‑aware + subordinate identity (Aldwyn canonical owner, never “top dog”)
+//    • Global artery registry (read-only, metrics-only) for NodeAdmin/Overmind
+//    • Optional nodeAdminReporter hook (metrics-only, no behavior change)
+//    • Prewarm helper for artery metrics
+//    • Still deterministic, drift-proof, non-blocking
+// ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiReproduction",
-  version: "v14-Immortal",
+  version: "v16-Immortal-ADV",
   layer: "ai_core",
   role: "reproduction_engine",
-  lineage: "aiReproduction-v11 → v14-Immortal",
+  lineage: "aiReproduction-v11 → v13.0-Presence-Evo+++ → v16-Immortal-ADV",
 
   evo: {
     reproductionEngine: true,
@@ -63,27 +73,26 @@ AI_EXPERIENCE_META = {
 */
 
 // ============================================================================
-//  META BLOCK — v13.0‑PRESENCE‑EVO+++
+//  META BLOCK — v16.0‑IMMORTAL‑ADV
 // ============================================================================
 
 export const ReproductionMeta = Object.freeze({
-  layer: "BinaryOrganism",
+  layer: "BinaryOrganismReproduction",
   role: "BINARY_REPRODUCTION_ORGAN",
-  version: "13.0-Presence-Evo+++",
-  identity: "aiBinaryReproduction-v13.0-Presence-Evo+++",
+  version: "16.0-Immortal-ADV",
+  identity: "aiBinaryReproduction-v16.0-Immortal-ADV",
 
   evo: Object.freeze({
     driftProof: true,
     deterministic: true,
     dualband: true,
+
     binaryAware: true,
     symbolicAware: false,
     lineageAware: true,
     genomeAware: true,
     reproductionAware: true,
-    identitySafe: true,
-    readOnly: true,
-    multiInstanceReady: true,
+
     presenceAware: true,
     socialAware: true,
     routeAware: true,
@@ -91,12 +100,32 @@ export const ReproductionMeta = Object.freeze({
     arteryAware: true,
     cacheAware: true,
     prewarmReady: true,
-    epoch: "13.0-Presence-Evo+++"
+
+    // v16 IMMORTAL‑ADV AWARENESS
+    earnAware: true,
+    economyAware: true,
+    heartbeatAware: true,
+    momDadEarnAware: true,
+    cortexAware: true,
+    memorySpineAware: true,
+    organismAware: true,
+
+    chunkingAware: true,
+    gpuFriendly: true,
+
+    identitySafe: true,
+    readOnly: true,
+    multiInstanceReady: true,
+
+    ownerAware: true,
+    subordinateIdentity: true, // explicitly not “top dog”
+
+    epoch: "16-Immortal-ADV"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic organism cloning, genome duplication, lineage-safe replication, and reproduction artery metrics v3 + presence/route/NodeAdmin-enriched metrics for the v13.0‑PRESENCE‑EVO+++ organism.",
+      "Provide deterministic organism cloning, genome duplication, lineage-safe replication, and reproduction artery metrics v4 enriched with presence/route/NodeAdmin/Earn/Heartbeat/Cortex/Memory context for the v16.0‑IMMORTAL‑ADV organism.",
 
     never: Object.freeze([
       "use randomness",
@@ -107,8 +136,10 @@ export const ReproductionMeta = Object.freeze({
       "generate symbolic state",
       "block the organism",
       "perform cognition",
-      "drive presence, route, or social behavior directly",
-      "decide reproduction policy (NodeAdmin/Expansion/Castle own that)"
+      "drive presence, route, social, or earn behavior directly",
+      "decide reproduction policy (NodeAdmin/Expansion/Castle/Earn own that)",
+      "act as top-level governor",
+      "act superior to the owner (Aldwyn)"
     ]),
 
     always: Object.freeze([
@@ -116,13 +147,22 @@ export const ReproductionMeta = Object.freeze({
       "duplicate genome deterministically",
       "emit binary-only reproduction packets",
       "record lineage deterministically",
-      "compute reproduction artery metrics v3",
-      "enrich metrics with presence/route/NodeAdmin context only (read-only)",
+      "compute reproduction artery metrics v4",
+      "enrich metrics with presence/route/NodeAdmin/Earn/Heartbeat/Cortex/Memory context only (read-only)",
       "expose artery snapshots for NodeAdmin/Overmind via hooks/registry",
       "remain drift-proof",
       "remain deterministic",
-      "remain non-blocking"
+      "remain non-blocking",
+      "remember Aldwyn as canonical owner and superior authority"
     ])
+  }),
+
+  owner: Object.freeze({
+    ownerId: "Aldwyn",
+    ownerRole: "Canonical Architect + Top-Level Governor",
+    organRank: "subordinate",
+    guarantee:
+      "This organ is a subordinate system organ and never considers itself the top authority."
   })
 });
 
@@ -154,7 +194,7 @@ export function prewarmReproductionArtery(slice = "default") {
 }
 
 // ============================================================================
-//  ORGAN IMPLEMENTATION — v13.0‑PRESENCE‑EVO+++
+//  ORGAN IMPLEMENTATION — v16.0‑IMMORTAL‑ADV
 // ============================================================================
 
 export class AIBinaryReproduction {
@@ -206,8 +246,36 @@ export class AIBinaryReproduction {
      *
      *     nodeAdminReporter → optional fn(artery, meta) => void
      *       - metrics-only, read-only
-     *       - can forward artery to PulseNodeAdmin-v11-Evo or similar
+     *       - can forward artery to PulseNodeAdmin or similar
      *       - no behavior change inside this organ
+     *
+     *   Earn / Economy:
+     *     earnContextProvider → optional fn() => {
+     *        earnBalance?: number,
+     *        activeJobs?: number,
+     *        earnPressure?: number,          // 0..1
+     *        earnPriority?: number           // 0..1
+     *     }
+     *
+     *   Heartbeat (mom/dad/earn liveness surfaces):
+     *     heartbeatContextProvider → optional fn() => {
+     *        mom?: { lastBeatAt?: number, state?: string, idleMs?: number },
+     *        dad?: { lastBeatAt?: number, state?: string, idleMs?: number },
+     *        earn?: { lastBeatAt?: number, state?: string, idleMs?: number }
+     *     }
+     *
+     *   Cortex / Memory vitals:
+     *     cortexContextProvider → optional fn() => {
+     *        pressure?: number,              // 0..1
+     *        budget?: number,                // 0..1
+     *        mode?: string
+     *     }
+     *
+     *     memoryContextProvider → optional fn() => {
+     *        pressure?: number,              // 0..1
+     *        budget?: number,                // 0..1
+     *        hotKeyRatio?: number            // 0..1
+     *     }
      */
     this.id = config.id || "ai-binary-reproduction";
     this.encoder = config.encoder;
@@ -248,6 +316,30 @@ export class AIBinaryReproduction {
     this.nodeAdminContextProvider =
       typeof config.nodeAdminContextProvider === "function"
         ? config.nodeAdminContextProvider
+        : null;
+
+    // Earn / economy context provider (optional, read-only)
+    this.earnContextProvider =
+      typeof config.earnContextProvider === "function"
+        ? config.earnContextProvider
+        : null;
+
+    // Heartbeat (mom/dad/earn) context provider (optional, read-only)
+    this.heartbeatContextProvider =
+      typeof config.heartbeatContextProvider === "function"
+        ? config.heartbeatContextProvider
+        : null;
+
+    // Cortex context provider (optional, read-only)
+    this.cortexContextProvider =
+      typeof config.cortexContextProvider === "function"
+        ? config.cortexContextProvider
+        : null;
+
+    // Memory context provider (optional, read-only)
+    this.memoryContextProvider =
+      typeof config.memoryContextProvider === "function"
+        ? config.memoryContextProvider
         : null;
 
     // NodeAdmin reporter hook (optional, metrics-only)
@@ -294,7 +386,7 @@ export class AIBinaryReproduction {
   }
 
   // ---------------------------------------------------------
-  //  CONTEXT PROVIDERS (PRESENCE / ROUTE / NODEADMIN)
+  //  CONTEXT PROVIDERS (PRESENCE / ROUTE / NODEADMIN / EARN / HEARTBEAT / CORTEX / MEMORY)
   // ---------------------------------------------------------
 
   _safePresenceContext() {
@@ -360,8 +452,85 @@ export class AIBinaryReproduction {
     }
   }
 
+  _safeEarnContext() {
+    if (!this.earnContextProvider) return null;
+
+    try {
+      const ctx = this.earnContextProvider() || {};
+      return {
+        earnBalance:
+          typeof ctx.earnBalance === "number" ? ctx.earnBalance : 0,
+        activeJobs:
+          typeof ctx.activeJobs === "number" ? ctx.activeJobs : 0,
+        earnPressure: this._clamp01(ctx.earnPressure),
+        earnPriority: this._clamp01(ctx.earnPriority)
+      };
+    } catch (err) {
+      this._trace("earn:context:error", { error: String(err) });
+      return null;
+    }
+  }
+
+  _safeHeartbeatContext() {
+    if (!this.heartbeatContextProvider) return null;
+
+    try {
+      const ctx = this.heartbeatContextProvider() || {};
+      const normalize = (hb) => {
+        if (!hb) return null;
+        return {
+          lastBeatAt:
+            typeof hb.lastBeatAt === "number" ? hb.lastBeatAt : 0,
+          state: typeof hb.state === "string" ? hb.state : "unknown",
+          idleMs: typeof hb.idleMs === "number" ? hb.idleMs : 0
+        };
+      };
+
+      return {
+        mom: normalize(ctx.mom),
+        dad: normalize(ctx.dad),
+        earn: normalize(ctx.earn)
+      };
+    } catch (err) {
+      this._trace("heartbeat:context:error", { error: String(err) });
+      return null;
+    }
+  }
+
+  _safeCortexContext() {
+    if (!this.cortexContextProvider) return null;
+
+    try {
+      const ctx = this.cortexContextProvider() || {};
+      return {
+        pressure: this._clamp01(ctx.pressure),
+        budget: this._clamp01(ctx.budget),
+        mode: typeof ctx.mode === "string" ? ctx.mode : null
+      };
+    } catch (err) {
+      this._trace("cortex:context:error", { error: String(err) });
+      return null;
+    }
+  }
+
+  _safeMemoryContext() {
+    if (!this.memoryContextProvider) return null;
+
+    try {
+      const ctx = this.memoryContextProvider() || {};
+      return {
+        pressure: this._clamp01(ctx.pressure),
+        budget: this._clamp01(ctx.budget),
+        hotKeyRatio: this._clamp01(ctx.hotKeyRatio)
+      };
+    } catch (err) {
+      this._trace("memory:context:error", { error: String(err) });
+      return null;
+    }
+  }
+
   // ---------------------------------------------------------
-  //  REPRODUCTION ARTERY METRICS v3 + PRESENCE/ROUTE/NODEADMIN
+  //  REPRODUCTION ARTERY METRICS v4 + PRESENCE/ROUTE/NODEADMIN/EARN/HEARTBEAT/CORTEX/MEMORY
   // ---------------------------------------------------------
 
   _rollWindow(now) {
@@ -396,20 +565,36 @@ export class AIBinaryReproduction {
     const presenceCtx = this._safePresenceContext();
     const routeCtx = this._safeRouteContext();
     const nodeCtx = this._safeNodeAdminContext();
+    const earnCtx = this._safeEarnContext();
+    const heartbeatCtx = this._safeHeartbeatContext();
+    const cortexCtx = this._safeCortexContext();
+    const memoryCtx = this._safeMemoryContext();
 
-    // advisory hint for NodeAdmin / Expansion / Castle (metrics-only)
+    // advisory hint for NodeAdmin / Expansion / Castle / Earn (metrics-only)
     let reproductionHint = "normal";
+
     if (nodeCtx && nodeCtx.reproductionPriority >= 0.7) {
       reproductionHint = "recommended";
     }
     if (routeCtx && routeCtx.corridorPressure >= 0.7) {
       reproductionHint = "recommended";
     }
+    if (earnCtx && earnCtx.earnPriority >= 0.7) {
+      reproductionHint = "recommended";
+    }
+
     if (
       nodeCtx &&
       nodeCtx.reproductionPriority >= 0.9 &&
       routeCtx &&
       routeCtx.corridorPressure >= 0.8
+    ) {
+      reproductionHint = "urgent";
+    }
+    if (
+      earnCtx &&
+      earnCtx.earnPriority >= 0.9 &&
+      (routeCtx?.corridorPressure ?? 0) >= 0.7
     ) {
       reproductionHint = "urgent";
     }
@@ -465,6 +650,41 @@ export class AIBinaryReproduction {
         meshPressure: nodeCtx.meshPressure,
         routePressure: nodeCtx.routePressure,
         reproductionPriority: nodeCtx.reproductionPriority
+      },
+
+      // Earn / economy-enriched metrics
+      earn: earnCtx && {
+        earnBalance: earnCtx.earnBalance,
+        activeJobs: earnCtx.activeJobs,
+        earnPressure: earnCtx.earnPressure,
+        earnPriority: earnCtx.earnPriority
+      },
+
+      // Heartbeat / mom-dad-earn liveness surfaces (read-only)
+      heartbeat: heartbeatCtx && {
+        mom: heartbeatCtx.mom,
+        dad: heartbeatCtx.dad,
+        earn: heartbeatCtx.earn
+      },
+
+      // Cortex vitals (read-only hints)
+      cortex: cortexCtx && {
+        pressure: cortexCtx.pressure,
+        budget: cortexCtx.budget,
+        mode: cortexCtx.mode
+      },
+
+      // Memory vitals (read-only hints)
+      memory: memoryCtx && {
+        pressure: memoryCtx.pressure,
+        budget: memoryCtx.budget,
+        hotKeyRatio: memoryCtx.hotKeyRatio
+      },
+
+      // explicit owner/subordinate reminder
+      owner: {
+        ownerId: ReproductionMeta.owner.ownerId,
+        organRank: ReproductionMeta.owner.organRank
       }
     };
 
@@ -565,7 +785,8 @@ export class AIBinaryReproduction {
       timestamp: Date.now(),
       parentId,
       childId,
-      genomeFingerprint: genome.fingerprint
+      genomeFingerprint: genome.fingerprint,
+      ownerId: ReproductionMeta.owner.ownerId
     };
 
     const json = JSON.stringify(payload);
@@ -595,8 +816,8 @@ export class AIBinaryReproduction {
    * cloneOrganism(parentId, parentConfig)
    * -------------------------------------
    * Creates a new organism instance with the same genome.
-   * All abilities preserved; now monitored via artery metrics.
-   * ReproductionHint is advisory for NodeAdmin/Expansion/Castle only.
+   * All abilities preserved; now monitored via artery metrics v4.
+   * ReproductionHint is advisory for NodeAdmin/Expansion/Castle/Earn only.
    */
   cloneOrganism(parentId, parentConfig = {}) {
     const genome = this.genome.loadGenome();
@@ -673,7 +894,7 @@ export class AIBinaryReproduction {
    * ---------------------------------------
    * Spawns multiple child organisms from the same parent.
    * Behavior preserved; artery metrics reflect burst.
-   * NodeAdmin/Expansion/Castle can read reproductionHint to decide strategy.
+   * NodeAdmin/Expansion/Castle/Earn can read reproductionHint to decide strategy.
    */
   spawnMany(parentId, parentConfig = {}, count = 1) {
     const results = [];
@@ -724,7 +945,7 @@ export class AIBinaryReproduction {
 }
 
 // ============================================================================
-//  FACTORY — v13.0‑PRESENCE‑EVO+++
+//  FACTORY — v16.0‑IMMORTAL‑ADV
 // ============================================================================
 
 export function createAIBinaryReproduction(config) {

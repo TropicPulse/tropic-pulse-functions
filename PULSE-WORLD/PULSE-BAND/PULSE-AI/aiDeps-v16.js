@@ -1,31 +1,58 @@
 // ============================================================================
-//  aiDeps.js — Pulse OS v12.3‑Presence
-//  Dependency Injection Organ • Deterministic Adapters • Dual‑Band Safe
-//  PURE INPUT. ZERO MUTATION. ZERO RANDOMNESS.
+//  aiDeps.js — Pulse OS v16‑IMMORTAL‑ADVANTAGE++
+//  Dependency Injection Organ • Organism Snapshot Kernel • Tri‑Heart Aware
+//  PURE INPUT. ZERO MUTATION. ZERO RANDOMNESS. OWNER‑SUBORDINATE.
 // ============================================================================
+
 /*
 AI_EXPERIENCE_META = {
   identity: "aiDeps",
-  version: "v14-Immortal",
+  version: "v16-Immortal-Advantage++",
   layer: "ai_core",
   role: "dependency_surface",
-  lineage: "aiDeps-v10 → v12 → v14-Immortal",
+  lineage: "aiDeps-v10 → v12 → v14 → v15 → v16-Immortal-Advantage++",
 
   evo: {
     dependencySurface: true,
+    organismSnapshotKernel: true,
+    dualBand: true,
     symbolicPrimary: true,
     binaryAware: true,
-    dualBand: true,
+    triHeartAware: true,
+    earnAware: true,
+    genomeAware: true,
+    governorAware: true,
+    heartbeatAware: true,
+    permissionsAware: true,
+    boundariesAware: true,
+    personaAware: true,
+    identityAware: true,
+
     deterministic: true,
     driftProof: true,
     pureCompute: true,
     zeroNetwork: true,
     zeroFilesystem: true,
-    zeroMutationOfInput: true
+    zeroMutationOfInput: true,
+
+    ownerAware: true,
+    subordinateToOwner: true
   },
 
   contract: {
-    always: ["aiBrainstem", "aiContext", "aiCortex"],
+    always: [
+      "aiBrainstem",
+      "aiContext",
+      "aiCortex",
+      "aiHeartbeat",
+      "aiEarnEngine",
+      "aiGenome",
+      "aiGovernorAdapter",
+      "aiPermissionsEngine",
+      "aiBoundariesEngine",
+      "aiIdentityCore",
+      "aiMemory"
+    ],
     never: ["safeRoute", "fetchViaCNS"]
   }
 }
@@ -34,8 +61,8 @@ AI_EXPERIENCE_META = {
 export const DepsMeta = Object.freeze({
   layer: "PulseAIDependencyKernel",
   role: "DEPENDENCY_INJECTION_ORGAN",
-  version: "12.3-Presence",
-  identity: "aiDeps-v12.3-Presence",
+  version: "16-Immortal-Advantage++",
+  identity: "aiDeps-v16-Immortal-Advantage++",
 
   evo: Object.freeze({
     driftProof: true,
@@ -52,7 +79,23 @@ export const DepsMeta = Object.freeze({
     logAware: true,
     organismAware: true,
 
+    // v16++ awareness
+    triHeartAware: true,
+    earnAware: true,
+    genomeAware: true,
+    governorAware: true,
+    heartbeatAware: true,
+    permissionsAware: true,
+    boundariesAware: true,
+    personaAware: true,
+    identityAware: true,
+    arteryAware: true,
+    watchdogAware: true,
+
     identitySafe: true,
+    ownerAware: true,
+    subordinateToOwner: true,
+
     readOnly: true,
     environmentAgnostic: true,
 
@@ -62,12 +105,12 @@ export const DepsMeta = Object.freeze({
     gpuFriendly: true,
 
     multiInstanceReady: true,
-    epoch: "12.3-Presence"
+    epoch: "16-Immortal-Advantage++"
   }),
 
   contract: Object.freeze({
     purpose:
-      "Provide deterministic, read-only adapters for DB, FS, Routes, Schemas, and organism snapshots.",
+      "Provide deterministic, read-only adapters for DB, FS, Routes, Schemas, and organism-wide snapshots with tri-heart, earn, genome, governor, permissions, boundaries, persona, identity, and artery awareness.",
 
     never: Object.freeze([
       "mutate host environment",
@@ -76,7 +119,9 @@ export const DepsMeta = Object.freeze({
       "write to DB",
       "write to FS",
       "modify schemas",
-      "modify routes"
+      "modify routes",
+      "override owner authority",
+      "self-promote above owner"
     ]),
 
     always: Object.freeze([
@@ -86,7 +131,9 @@ export const DepsMeta = Object.freeze({
       "support dual-band cortex",
       "support evolution organ",
       "support router + boundaries + persona",
-      "emit deterministic deps packets"
+      "support heartbeat + earn + genome + governor",
+      "emit deterministic deps packets",
+      "remain subordinate to Aldwyn"
     ])
   }),
 
@@ -98,33 +145,44 @@ export const DepsMeta = Object.freeze({
     attachStrategy: "on-demand",
     concurrency: "multi-instance",
     observability: {
-      traceEvents: [
-        "prewarm",
-        "prewarm-error",
-        "deps-snapshot"
-      ]
+      traceEvents: ["prewarm", "prewarm-error", "deps-snapshot"]
     }
-  })
+  }),
+
+  boundaryReflex() {
+    return "DepsKernel is a read-only, owner-subordinate dependency organ. It observes everything, mutates nothing.";
+  }
 });
 
 // ============================================================================
 //  PACKET EMITTER — deterministic, deps-scoped
 // ============================================================================
 function emitDepsPacket(type = "snapshot", payload = {}) {
-  const base = {
-    type: "deps-snapshot",
-    timestamp: Date.now(),
-    adapters: ["db", "fs", "routes", "schema", "organismSnapshot"]
-  };
-
   return Object.freeze({
     meta: DepsMeta,
     packetType: `deps-${type}`,
+    timestamp: Date.now(),
     epoch: DepsMeta.evo.epoch,
     layer: DepsMeta.layer,
     role: DepsMeta.role,
     identity: DepsMeta.identity,
-    ...base,
+    owner: "Aldwyn",
+    subordinate: true,
+    adapters: [
+      "db",
+      "fs",
+      "routes",
+      "schema",
+      "organismSnapshot",
+      "triHeart",
+      "earn",
+      "genome",
+      "governor",
+      "permissions",
+      "boundaries",
+      "persona",
+      "identity"
+    ],
     ...payload,
     bits: null,
     bitLength: 0
@@ -132,7 +190,7 @@ function emitDepsPacket(type = "snapshot", payload = {}) {
 }
 
 // ============================================================================
-//  DEPS PREWARM ENGINE — v12.3‑Presence
+//  PREWARM — v16 IMMORTAL‑ADVANTAGE++
 // ============================================================================
 export function prewarmDepsLayer() {
   try {
@@ -157,16 +215,16 @@ export function prewarmDepsLayer() {
       symbolic: {
         personaEngine: { getActivePersona: () => "ARCHITECT" },
         boundariesEngine: { getMode: () => "safe" },
-        permissionsEngine: { snapshot: () => ({ allow: true }) }
+        permissionsEngine: { snapshot: () => ({ allow: true }) },
+        identityCore: { getIdentity: () => ({ selfRole: "Subordinate" }) }
       }
     };
     getOrganismSnapshot(warmDualBand);
 
     return emitDepsPacket("prewarm", {
-      message: "Deps layer prewarmed and adapter pathways aligned."
+      message: "Deps layer prewarmed and v16++ adapter pathways aligned."
     });
   } catch (err) {
-    console.error("[Deps Prewarm] Failed:", err);
     return emitDepsPacket("prewarm-error", {
       error: String(err),
       message: "Deps layer prewarm failed."
@@ -251,13 +309,21 @@ export function getSchemaAPI({ trace = false } = {}) {
 }
 
 // ============================================================================
-//  DUAL‑BAND ORGANISM SNAPSHOT — v12.3‑Presence
+//  ORGANISM SNAPSHOT — v16 IMMORTAL‑ADVANTAGE++
 // ============================================================================
 export function getOrganismSnapshot(dualBand) {
   if (!dualBand) {
     return Object.freeze({
       binary: null,
       symbolic: null,
+      triHeart: null,
+      earn: null,
+      genome: null,
+      governor: null,
+      permissions: null,
+      boundaries: null,
+      persona: null,
+      identity: null,
       timestamp: Date.now()
     });
   }
@@ -270,13 +336,19 @@ export function getOrganismSnapshot(dualBand) {
     symbolic: {
       persona: dualBand.symbolic?.personaEngine?.getActivePersona?.() || null,
       boundaryMode: dualBand.symbolic?.boundariesEngine?.getMode?.() || null,
-      permissions: dualBand.symbolic?.permissionsEngine?.snapshot?.() || null
-    }
+      permissions: dualBand.symbolic?.permissionsEngine?.snapshot?.() || null,
+      identity: dualBand.symbolic?.identityCore?.getIdentity?.() || null
+    },
+
+    triHeart: dualBand.triHeart?.snapshot?.() || null,
+    earn: dualBand.earn?.snapshot?.() || null,
+    genome: dualBand.genome?.snapshotMetrics?.() || null,
+    governor: dualBand.governor?.snapshotMembrane?.() || null
   });
 }
 
 // ============================================================================
-//  EXPORT — v12.3‑Presence Dependency Surface (Frozen)
+//  EXPORT — v16 IMMORTAL‑ADVANTAGE++ Dependency Surface (Frozen)
 // ============================================================================
 prewarmDepsLayer();
 
@@ -287,11 +359,12 @@ export const depsSurface = Object.freeze({
   getRouteAPI,
   getSchemaAPI,
   getOrganismSnapshot,
-  emitDepsPacket
+  emitDepsPacket,
+  owner: "Aldwyn",
+  subordinate: true
 });
 
 export default depsSurface;
-
 
 if (typeof module !== "undefined") {
   module.exports = {

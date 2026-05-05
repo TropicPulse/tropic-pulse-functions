@@ -172,7 +172,7 @@ import { createPersonaEngine } from "./persona.js";
 import { createBoundariesEngine } from "./boundaries.js";
 import { createPermissionsEngine } from "./permissions.js";
 import { createRouterEngine } from "./aiRouter-v16.js";
-import { createCortex } from "./aiCortex-v11-Evo.js";
+import { createCortex } from "./aiCortex-v16.js";
 
 import { createDualBandOrganism } from "./aiDualBand-v16.js";
 

@@ -127,7 +127,7 @@ export const EvolutionMeta = Object.freeze({
   }
 });
 
-import { getOrganismSnapshot } from "./aiDeps.js";
+import { getOrganismSnapshot } from "./aiDeps-v16.js";
 
 // ============================================================================
 //  PREWARM — v12.3‑Presence (window‑evolution)
