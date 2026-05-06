@@ -56,12 +56,11 @@ import * as PulseRouterEvolutionaryThought    from "./PulseRouterEvolutionaryTho
 
 import { PulseRouter }                        from "./PulseRouter-v16.js";
 import { createBinaryRouter }                 from "./PulseBinaryRouter-v16.js";
-import { PulseRouterCommandments }            from "./PulseRouterCommandmentsStore-v16-IMMORTAL-DualHash.js";
-import { PulseEarnRouter }                    from "./PulseRouterEarn-v16-IMMORTAL-INTEL-DualHash.js";
+import { PulseRouterCommandments }            from "./PulseRouterCommandments.js";
+import { PulseEarnRouter }                    from "./PulseRouterEarn-v16.js";
 
 import { createPulseCoreMemory }              from "../PULSE-CORE/PulseCoreMemory.js";
-import { PulsePresenceRole }                  from "../PULSE-PRESENCE/PulsePresence-v16.js";
-import { PulseChunksRole }                    from "../PULSE-CHUNKS/PulseChunks-v16.js";
+import { createPulseMeshPresenceRelay as PulseMeshPresenceRelay }                  from "../PULSE-MESH/PulseMeshPresenceRelay-v16.js";
 
 
 // ============================================================================
@@ -498,8 +497,7 @@ export const PulseMeshRouter = {
   PulseRouterCommandments,
   PulseEarnRouter,
   createBinaryRouter,
-  PulsePresenceRole,
-  PulseChunksRole,
+  PulseMeshPresenceRelay,
 
   routeMesh(pulse) {
     MeshCoreMemory.prewarm();

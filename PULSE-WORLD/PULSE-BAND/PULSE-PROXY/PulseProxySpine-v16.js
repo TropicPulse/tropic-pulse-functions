@@ -48,7 +48,6 @@
 import express from "express";
 import nodemailer from "nodemailer";
 import { createClient } from "redis";
-import crypto from "crypto";
 
 // SDN prewarm engine (spinal reflex ignition for backend spine, passive only)
 import { prewarmSDN } from "../PULSE-OS/PulseOSSDNPrewarm-v16.js";
@@ -56,10 +55,11 @@ import { prewarmSDN } from "../PULSE-OS/PulseOSSDNPrewarm-v16.js";
 // Proxy / organism / context / front (symbolic-only, descriptive surfaces)
 import { PulseProxyOrganismMeta, createProxy } from "./PulseProxy-v16.js";
 import { PulseProofBridge as PulseProxyBridge } from "../../PULSE-UI/_BACKEND/PulseProofBridge.js";
+import { updateUserMetrics as recordUserMetrics } from "../../PULSE-UI/_BACKEND/PulseProofMonitor.js";
 import {
   proxyFrontRoute,
   PulseProxyFrontMeta
-} from "./PulseProxyFront-v14-Immortal-PROXY-FRONT.js";
+} from "./PulseProxyFront-v16.js";
 import {
   updateProxyStateFromEnvelope,
   getProxyContext,
@@ -74,17 +74,14 @@ import {
 import {
   PulseBandSymbolicMeta,
   pulseband as PulseBandSymbolic
-} from "../PULSE-BAND/PulseBandSymbolic-v12.3.js";
+} from "./PulseProxyPNSNervousSystem-v16.js";
 
 // PNS repair / purifier (symbolic-only healing helpers)
-import {
-  PNSRepair,
-  PNSPurifier
-} from "../PULSE-BAND/PulseBandPNS-Healing-v16.js";
-
+import { PNSPurifier} from "./PulseProxyPNSPurifier.js";
+import { PNSRepair} from "./PulseProxyPNSRepair.js";
 // Earn + metrics + OS healers + OS binary
 import { createPulseEarnSendSystem } from "../PULSE-EARN/PulseEarnSendSystem.js";
-import { updateUserMetrics as recordUserMetrics } from "../../PULSE-UI/_BACKEND/PulseProofMonitor.js";
+
 import startPulseTimer from "./PulseProxyHeart.js";
 import { createPulseOSHealerV12_3 as startPulseOSHealer } from "../PULSE-OS/PulseOSInflammatoryResponse.js";
 import { createGlobalHealerV12 as startGlobalHealer } from "../PULSE-OS/PulseOSImmuneSystem.js";

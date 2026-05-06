@@ -66,8 +66,8 @@ AI_EXPERIENCE_META = {
 // ============================================================================
 // IMPORTS — Router Mesh / Earn / Law Surfaces (symbolic contracts only)
 // ============================================================================
-import { PulseMeshRouter } from "./PulseMeshRouter.js";
-import { PulseEarnRouter } from "./PulseEarnRouter.js";
+import { PulseMeshRouter } from "./PulseRouterMesh-v16.js";
+import { PulseEarnRouter } from "./PulseRouterEarn-v16.js";
 import {
   PulseRouterCommandments,
   buildRouteKey as buildCommandmentRouteKey

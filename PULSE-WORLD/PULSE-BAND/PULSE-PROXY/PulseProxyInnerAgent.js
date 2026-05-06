@@ -117,6 +117,7 @@ AI_EXPERIENCE_META = {
 };
 */
 
+
 import { corsHandler, pulseCors } from "./PulseCORS.js";
 
 // ============================================================================
@@ -327,7 +328,6 @@ export const PulseProxyInnerAgentMeta = Object.freeze({
   })
 });
 
-
 // ============================================================================
 //  INTERNAL SURFACE HELPERS (A‑B‑A)
 // ============================================================================
@@ -503,7 +503,6 @@ function buildPrewarmHints({ route, band, speedBand }) {
   };
 }
 
-
 // ============================================================================
 //  FACTORY — dependencies injected by backend spine / endpoint
 // ============================================================================
@@ -579,7 +578,6 @@ export function createPulseProxyInnerAgent({
 
     return { error: "UnknownTarget", type, target };
   }
-
 
   // ========================================================================
   //  PUBLIC ENTRY — ORGANISM-CORRECT BACKEND ENDPOINT BRIDGE
