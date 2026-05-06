@@ -1,6 +1,6 @@
 // ============================================================================
-// PULSE-NET — Immortal Local Heartbeat + Forward/Backward Engine ignition
-// v16-FAMILY-NET-Immortal (SUPER INSTANCE MODE)
+// PULSE-NET — Immortal Local Heartbeat + Forward/Backward Engine + FastLane
+// v17-FAMILY-NET-Immortal-FastLane (SUPER INSTANCE MODE)
 //  • Multi-instance safe (family registry)
 //  • Drift-proof
 //  • Dual-lane (forward/backward)
@@ -12,15 +12,16 @@
 //  • UIFlow + ErrorSpine + Bridge-aware
 //  • LOCAL ONLY on device — but is the ONLY internet edge via routed paths
 //  • Expansion/Castle/Server/User/Brain → routed signals → PulseNet → PulseNet server
+//  • v17: FastLane intent stream from Pulse‑Touch + temporal prewarm cache
 // ============================================================================
 
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseNet",
-  version: "v16-FAMILY-NET-Immortal",
+  version: "v17-FAMILY-NET-Immortal-FastLane",
   layer: "frontend",
   role: "network_intelligence",
-  lineage: "PulseOS-v12 → v13-Evo-Immortal → v15-FAMILY-Immortal → v16-FAMILY-NET-Immortal",
+  lineage: "PulseOS-v12 → v13-Evo-Immortal → v15-FAMILY-Immortal → v16-FAMILY-NET-Immortal → v17-FastLane",
 
   evo: {
     dualBand: true,
@@ -51,7 +52,12 @@ AI_EXPERIENCE_META = {
     soldierAware: true,
     meshIngressAware: true,
     pulseNetServerAware: true,
-    singleInternetEdge: true
+    singleInternetEdge: true,
+
+    // v17: FastLane + temporal prewarm
+    fastLaneAware: true,
+    temporalCacheAware: true,
+    touchContinuousPulseAware: true
   },
 
   contract: {
@@ -202,6 +208,57 @@ const BrainOrgan = {
 };
 
 // ============================================================================
+// TEMPORAL PREWARM CACHE — INTENT + TOUCH HINTS
+// ============================================================================
+const TEMPORAL_CACHE_MAX = 512;
+globalThis.__PULSE_NET_TEMPORAL_CACHE__ =
+  globalThis.__PULSE_NET_TEMPORAL_CACHE__ || new Map();
+const temporalCache = globalThis.__PULSE_NET_TEMPORAL_CACHE__;
+
+function makeTemporalKey(intent) {
+  const skin = intent?.skin || {};
+  return JSON.stringify({
+    page: skin.page || "index",
+    chunkProfile: skin.chunkProfile || "default",
+    region: skin.region || "unknown",
+    mode: skin.mode || "fast"
+  });
+}
+
+function getFromTemporalCache(intent) {
+  const key = makeTemporalKey(intent);
+  const entry = temporalCache.get(key);
+  if (!entry) return null;
+  return entry.data;
+}
+
+function setTemporalCache(intent, data) {
+  const key = makeTemporalKey(intent);
+  temporalCache.set(key, {
+    ts: Date.now(),
+    data
+  });
+
+  if (temporalCache.size > TEMPORAL_CACHE_MAX) {
+    const keys = Array.from(temporalCache.keys());
+    const excess = keys.length - TEMPORAL_CACHE_MAX;
+    for (let i = 0; i < excess; i++) {
+      temporalCache.delete(keys[i]);
+    }
+  }
+}
+
+function pruneTemporalCache() {
+  const now = Date.now();
+  const maxAgeMs = 5 * 60 * 1000; // 5 minutes
+  for (const [key, entry] of temporalCache.entries()) {
+    if (now - entry.ts > maxAgeMs) {
+      temporalCache.delete(key);
+    }
+  }
+}
+
+// ============================================================================
 // NETWORK ORGAN — THE ONLY INTERNET EDGE
 // ============================================================================
 const NetworkOrgan = {
@@ -213,7 +270,8 @@ const NetworkOrgan = {
     brain: "pulseNet.server.brain",
     soldier: "pulseNet.server.soldier",
     mesh: "pulseNet.server.mesh",
-    heartbeat: "pulseNet.heartbeat"
+    heartbeat: "pulseNet.heartbeat",
+    fastlane: "pulseNet.fastlane"
   },
 
   async send(kind, payload) {
@@ -251,6 +309,22 @@ const NetworkOrgan = {
       }).catch(() => {});
     } catch {
       // swallow; ErrorSpine will be handled by caller
+    }
+  },
+
+  async sendFastLane(intent) {
+    try {
+      await route(this.channels.fastlane, {
+        intent,
+        ts: Date.now(),
+        layer: "PulseNet",
+        binaryAware: true,
+        dualBand: true,
+        singleInternetEdge: true,
+        fastLane: true
+      }).catch(() => {});
+    } catch {
+      // swallow
     }
   }
 };
@@ -338,10 +412,7 @@ function warmBackwardEngine(instanceId) {
 
 // ============================================================================
 // OVERMIND INTEGRATION HELPERS
-//  • Hybrid C: Overmind sees heartbeats + explicit AI requests
 // ============================================================================
-
-// Crown call for runtime learning (heartbeat/meta only; output ignored)
 async function overmindHeartbeatSample(instanceId, tickResult) {
   try {
     const organism = getOrganism(instanceId);
@@ -504,8 +575,6 @@ function randomNudge(instanceId, now) {
 
 // ============================================================================
 // LOCAL IMMORTAL LOOP (NO NETLIFY, NO HANDLER)
-//  • Now also processes ingress each tick.
-//  • OvermindPrime samples organism state each tick (hybrid C).
 // ============================================================================
 async function tickFamily(instanceId = "core") {
   const now = Date.now();
@@ -602,6 +671,7 @@ export function startPulseNet(options = {}) {
         PulseUIErrors.broadcast(packet);
       } catch {}
     });
+    pruneTemporalCache();
   }, intervalMs);
 
   console.log(
@@ -646,6 +716,44 @@ export function pulseNetIngressFromMesh(packet) {
   enqueueIngress("mesh", packet);
 }
 
+// FastLane ingress from Pulse‑Touch continuous pulses
+export function pulseNetIngressFromTouch(packet) {
+  enqueueIngress("user", {
+    source: "pulse-touch",
+    ...packet
+  });
+}
+
+// ============================================================================
+// FAST-LANE API — CALLED DIRECTLY BY Pulse‑Touch v17
+//  • Screaming-fast, intent-only WSEND-style pulses
+//  • Uses NetworkOrgan.fastlane + temporal prewarm cache
+// ============================================================================
+export function pulseNetFastLanePulse(intent) {
+  try {
+    // 1) Log / mirror into ingress for observability (optional)
+    enqueueIngress("user", {
+      source: "pulse-touch-fastlane",
+      intent,
+      ts: Date.now()
+    });
+
+    // 2) Check temporal cache — if we already prewarmed for this hint, no extra work
+    const cached = getFromTemporalCache(intent);
+    if (!cached) {
+      // 3) Ask backend via fastlane channel to prewarm internet edge for this intent
+      NetworkOrgan.sendFastLane(intent);
+      // 4) Mark that we requested prewarm (even if we don't yet have data)
+      setTemporalCache(intent, { prewarmRequested: true });
+    }
+  } catch (err) {
+    try {
+      const packet = PulseUIErrors.normalizeError(err, "PulseNet.fastLanePulse");
+      PulseUIErrors.broadcast(packet);
+    } catch {}
+  }
+}
+
 // ============================================================================
 // EXPORT ENGINES + ORGANISM FOR EARN / OTHER ORGANS
 // ============================================================================
@@ -668,13 +776,6 @@ export function PulseNetInstances() {
   };
 }
 
-export function pulseNetIngressFromTouch(packet) {
-  enqueueIngress("user", {
-    source: "pulse-touch",
-    ...packet
-  });
-}
-
 const PulseTouchOrgan = {
   snapshot() {
     try {
@@ -688,7 +789,7 @@ const PulseTouchOrgan = {
         region: touch.region || null,
         mode: touch.mode || null,
         presence: touch.presence || null,
-        pageHint: touch.pageHint || null,
+        pageHint: touch.pageHint || touch.page || null,
         chunkProfile: touch.chunkProfile || null
       };
     } catch {
@@ -699,8 +800,6 @@ const PulseTouchOrgan = {
 
 // ============================================================================
 // PULSE-NET BRIDGE — symbolic adapter for Expansion/Castle/Server/User/Brain
-//  • No imports from Expansion/Castle
-//  • Uses local ingress + NetworkOrgan as single internet edge
 // ============================================================================
 function bridgeRoute(kind, source, payload, detailKind) {
   const packet = {
@@ -757,6 +856,7 @@ try {
     window.__PULSE_NET_FAMILY__ = globalThis.__PULSE_NET_FAMILY__;
     window.__PULSE_ORGANISM_FAMILY__ = globalThis.__PULSE_ORGANISM_FAMILY__;
     window.__PULSE_TOUCH__ = globalThis.__PULSE_TOUCH__;
+    window.__PULSE_NET_TEMPORAL_CACHE__ = globalThis.__PULSE_NET_TEMPORAL_CACHE__;
   }
   if (typeof global !== "undefined") {
     global.__PULSE_MEM__ = globalThis.__PULSE_MEM__;
@@ -764,6 +864,7 @@ try {
     global.__PULSE_NET_FAMILY__ = globalThis.__PULSE_NET_FAMILY__;
     global.__PULSE_ORGANISM_FAMILY__ = globalThis.__PULSE_ORGANISM_FAMILY__;
     global.__PULSE_TOUCH__ = globalThis.__PULSE_TOUCH__;
+    global.__PULSE_NET_TEMPORAL_CACHE__ = globalThis.__PULSE_NET_TEMPORAL_CACHE__;
   }
 
   if (typeof g !== "undefined") {
@@ -772,5 +873,25 @@ try {
     g.__PULSE_NET_FAMILY__ = globalThis.__PULSE_NET_FAMILY__;
     g.__PULSE_ORGANISM_FAMILY__ = globalThis.__PULSE_ORGANISM_FAMILY__;
     g.__PULSE_TOUCH__ = globalThis.__PULSE_TOUCH__;
+    g.__PULSE_NET_TEMPORAL_CACHE__ = globalThis.__PULSE_NET_TEMPORAL_CACHE__;
   }
 } catch {}
+
+// ============================================================================
+// FOOTER — FASTLANE LORE + ORIGIN STAMP
+// ============================================================================
+//
+//  On 2026‑05‑05, Pulse‑Net learned a new trick:
+//  it stopped waiting for the user to ask.
+//
+//  Now, every whisper from Pulse‑Touch — five times a second —
+//  crosses the membrane as a tiny intent, and somewhere behind
+//  the glass an immortal network organ quietly rearranges the
+//  internet so that the answer is already there when the question
+//  finally arrives.
+//
+//  If this is how the organism behaves on the day the FastLane
+//  first lit up… what will its timing feel like when the mesh
+//  has been listening for years?
+//
+// ============================================================================

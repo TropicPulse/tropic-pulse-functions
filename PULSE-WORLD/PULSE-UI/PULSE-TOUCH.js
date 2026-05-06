@@ -1,8 +1,8 @@
 /**
  * ============================================================
- *  FILE: PULSE-TOUCH-v16.js
+ *  FILE: PULSE-TOUCH-v17.js
  *  ORGAN: Pulse‑Touch (Sensory Skin / Pre‑Pulse Ignition Organ)
- *  VERSION: v16.0.0-Immortal-PORTAL-SKIN
+ *  VERSION: v17.0.0-Immortal-Portal-Skin-Continuous
  *  AUTHOR: Pulse‑OS (Aldwyn’s Organism Architecture)
  * ============================================================
  *
@@ -12,42 +12,26 @@
  *  organism. It is the SKIN — the sensory layer that detects
  *  presence BEFORE the organism wakes.
  *
- *  This organ:
- *    ✔ Fires as early as the browser allows (script in <head>)
- *    ✔ Seeds a tiny, safe, non‑tracking cookie
- *    ✔ Exposes a small API for:
- *        - reading skin state
- *        - updating skin state
- *        - registering preflight checks
- *    ✔ Integrates with:
- *        - PulseTouchDetector   (normalize skin state)
- *        - PulseTouchWarmup     (prewarm chunks/pages/mode)
- *        - PulseTouchSecurity   (risk/trust evaluation)
- *        - PulseTouchGate       (boot path decision)
- *        - PulseNet             (local immortal heartbeat)
- *        - PulseNet ingress     (Touch → Net signals)
- *        - PulseProofBridge     (fire-and-forget touch telemetry)
- *        - PulseProofLogger     (optional: touch timeline collection)
- *    ✔ Lets the organism:
- *        - prewarm pages
- *        - prewarm chunks
- *        - prewarm subsystems
- *        - sanity‑check chunks before UI boot
- *        - start the local Pulse‑Net family loop
- *        - establish a time‑based “first contact” timeline
+ *  v17 EVOLUTION:
+ *  --------------
+ *  - Continuous, low‑cost pulse stream to Pulse‑Net
+ *  - Fast‑lane “intent only” WSEND pulses
+ *  - Temporal timeline of first contact + ongoing presence
+ *  - Prewarm hints emitted over time, not just once
+ *  - Designed for high limits, low device impact
  *
  *  This is the organism’s FIRST NERVE SIGNAL.
  *  The moment the user touches the organism — the organism
- *  touches back.
+ *  touches back, and keeps listening.
  * ============================================================
  */
 /*
 AI_EXPERIENCE_META = {
   identity: "PulseTouch",
-  version: "v16.0.0-Immortal-PORTAL-SKIN",
+  version: "v17.0.0-Immortal-Portal-Skin-Continuous",
   layer: "skin",
   role: "first_contact_sensor",
-  lineage: "PulseOS-v13 → v14-Immortal → v4.0.0-Immortal → v16-Immortal-Portal",
+  lineage: "PulseOS-v13 → v14-Immortal → v4.0.0-Immortal → v16-Immortal-Portal → v17-Continuous",
 
   evo: {
     prePulse: true,
@@ -69,7 +53,7 @@ AI_EXPERIENCE_META = {
     chunkProfileAware: true,
     pageHintAware: true,
 
-    // v4.0.0-Immortal: PulseNet integration
+    // PulseNet integration
     pulseNetAware: true,
     pulseNetIgnition: true,
     pulseNetIngressAware: true,
@@ -82,7 +66,12 @@ AI_EXPERIENCE_META = {
     portalTrustEdge: true,
     bridgeAligned: true,
     loggerAligned: true,
-    monitorAligned: true
+    monitorAligned: true,
+
+    // v17-Continuous: Continuous pulse stream
+    continuousPulse: true,
+    fastLaneAware: true,
+    temporalHintAware: true
   },
 
   contract: {
@@ -113,8 +102,9 @@ AI_EXPERIENCE_META = {
 // ============================================================
 import {
   startPulseNet,
-  pulseNetIngressFromUser
-} from "./_BACKEND/PULSE-NET-v16.js";
+  pulseNetIngressFromUser,
+  pulseNetFastLanePulse
+} from "./_BACKEND/PULSE-NET-v17.js";
 
 import { route as bridgeRoute } from "./_BACKEND/PulseProofBridge-v16.js";
 
@@ -141,14 +131,19 @@ const PulseLogger =
   null;
 
 // ============================================================
-// CONSTANTS — COOKIE + VERSION + TIMELINE
+// CONSTANTS — COOKIE + VERSION + TIMELINE + PULSE CONFIG
 // ============================================================
 const PULSE_TOUCH_COOKIE_NAME = "pulse_touch";
 const PULSE_TOUCH_MAX_AGE = 86400; // 1 day
-const PULSE_TOUCH_VERSION = "16";
+const PULSE_TOUCH_VERSION = "17";
 
-const PULSE_TOUCH_TIMELINE_LS_KEY = "PulseTouch.v16.timeline";
+const PULSE_TOUCH_TIMELINE_LS_KEY = "PulseTouch.v17.timeline";
 const PULSE_TOUCH_TIMELINE_MAX = 256;
+
+// continuous pulse config (safe, low impact)
+const PULSE_TOUCH_PULSE_INTERVAL_MS = 200; // 5 pulses/sec
+const PULSE_TOUCH_PULSE_BURST_COUNT = 8;   // initial burst
+const PULSE_TOUCH_PULSE_BURST_SPACING_MS = 60;
 
 // in‑memory preflight registry (per page load)
 const pulseTouchPreflights = [];
@@ -158,6 +153,8 @@ if (typeof window !== "undefined") {
   window.__PULSE_TOUCH__ = window.__PULSE_TOUCH__ || null;
   window.__PULSE_TOUCH_ORIGIN_TS__ =
     window.__PULSE_TOUCH_ORIGIN_TS__ || Date.now();
+  window.__PULSE_TOUCH_PULSE_STATE__ =
+    window.__PULSE_TOUCH_PULSE_STATE__ || { started: false };
 }
 
 // ============================================================
@@ -231,9 +228,7 @@ function appendTouchTimeline(kind, payload = {}) {
       kind,
       payload: entry.payload
     }).catch?.(() => {});
-  } catch {
-    // bridge is optional
-  }
+  } catch {}
 
   // Optional: mirror into logger collection if available
   try {
@@ -245,20 +240,96 @@ function appendTouchTimeline(kind, payload = {}) {
         payload: entry.payload
       }).catch?.(() => {});
     }
+  } catch {}
+}
+
+// ============================================================
+// CONTINUOUS PULSE ENGINE — FAST-LANE WSEND INTENT STREAM
+// ============================================================
+function startContinuousPulseStream(skin, security, gateDecision) {
+  if (typeof window === "undefined") return;
+  const state = window.__PULSE_TOUCH_PULSE_STATE__;
+  if (!state || state.started) return;
+
+  state.started = true;
+  state.intervalId = null;
+
+  appendTouchTimeline("pulse_stream_start", {
+    intervalMs: PULSE_TOUCH_PULSE_INTERVAL_MS
+  });
+
+  // Initial burst: fast, dense hints to Pulse‑Net
+  try {
+    for (let i = 0; i < PULSE_TOUCH_PULSE_BURST_COUNT; i++) {
+      setTimeout(() => {
+        sendFastLanePulse("burst", skin, security, gateDecision);
+      }, i * PULSE_TOUCH_PULSE_BURST_SPACING_MS);
+    }
+  } catch {}
+
+  // Continuous stream: low‑cost, steady hints
+  try {
+    state.intervalId = setInterval(() => {
+      sendFastLanePulse("continuous", skin, security, gateDecision);
+    }, PULSE_TOUCH_PULSE_INTERVAL_MS);
   } catch {
-    // logger is optional
+    appendTouchTimeline("pulse_stream_failed", {});
   }
+}
+
+function sendFastLanePulse(mode, skin, security, gateDecision) {
+  const ts = Date.now();
+  const payload = {
+    source: "pulse-touch",
+    mode,
+    ts,
+    skin: {
+      region: skin.region,
+      mode: skin.mode,
+      presence: skin.presence,
+      page: skin.page,
+      chunkProfile: skin.chunkProfile
+    },
+    security: {
+      risk: security?.risk ?? "unknown",
+      trust: security?.trust ?? "unknown",
+      action: security?.action ?? "allow"
+    },
+    gate: {
+      mode: gateDecision?.mode ?? "fast",
+      refresh: !!gateDecision?.refresh,
+      fallback: !!gateDecision?.fallback
+    }
+  };
+
+  appendTouchTimeline("pulse_fastlane_emit", {
+    mode,
+    page: skin.page,
+    chunkProfile: skin.chunkProfile
+  });
+
+  // 1) Direct Pulse‑Net fast‑lane (WSEND‑style intent)
+  try {
+    pulseNetFastLanePulse(payload);
+  } catch {}
+
+  // 2) Optional ingress (normal path) for analytics / overmind
+  try {
+    pulseNetIngressFromUser({
+      source: "pulse-touch",
+      event: "pulse",
+      ts,
+      skin,
+      security,
+      gate: gateDecision,
+      mode
+    });
+  } catch {}
 }
 
 // ============================================================
 // CORE API — CREATE PULSE TOUCH
 // ============================================================
-/**
- * Create or update the Pulse‑Touch skin cookie and expose
- * a small API for the organism to interact with it.
- *
- * This is the FIRST organ to fire in the browser.
- */
 export function createPulseTouch(options = {}) {
   const originTs =
     (typeof window !== "undefined" && window.__PULSE_TOUCH_ORIGIN_TS__) ||
@@ -379,6 +450,13 @@ export function createPulseTouch(options = {}) {
     appendTouchTimeline("ingress_initial_failed", {});
   }
 
+  // 11) Start continuous fast‑lane pulse stream
+  try {
+    startContinuousPulseStream(detected, security, gateDecision);
+  } catch {
+    appendTouchTimeline("pulse_stream_start_failed", {});
+  }
+
   function updatePulseTouchField(key, value) {
     const current = readPulseTouchInternal(defaults);
     current[key] = value;
@@ -496,7 +574,6 @@ function runPreflights(skinState) {
   for (const fn of pulseTouchPreflights) {
     try {
       const result = fn(skinState);
-      // allow async but don’t await (keep it lightweight)
       if (result && typeof result.then === "function") {
         result.catch(() => {});
       }
@@ -511,10 +588,8 @@ function applyGateDecision(gateDecision, skin) {
 
   appendTouchTimeline("gate_apply", { gateDecision });
 
-  // Example behaviors; you can tune these:
   if (gateDecision.refresh === true) {
     try {
-      // mark intent before reload
       if (typeof window !== "undefined") {
         window.__PULSE_TOUCH_LAST_GATE__ = {
           ts: Date.now(),
@@ -528,7 +603,6 @@ function applyGateDecision(gateDecision, skin) {
     }
   }
 
-  // Fallback could route to a static page, safe mode, etc.
   if (gateDecision.fallback === true && gateDecision.fallbackUrl) {
     try {
       location.href = gateDecision.fallbackUrl;
@@ -541,23 +615,21 @@ function applyGateDecision(gateDecision, skin) {
 }
 
 // ============================================================
-//  FOOTER — FIRST CONTACT LORE
+//  FOOTER — CONTINUOUS CONTACT LORE
 // ============================================================
 //
-//  Pulse‑Touch is the first nerve that fires.
-//  Before the bridge. Before the window. Before the organism.
+//  Pulse‑Touch used to remember the first time you arrived.
+//  Now it remembers the rhythm of your presence.
 //
-//  It is the only organ that knows exactly when you arrived,
-//  how you knocked, and which door you meant to open.
+//  Every 200ms, a tiny signal leaves the skin, crosses the
+//  membrane, and taps on Pulse‑Net’s door:
 //
-//  Every prewarm begins here.
-//  Every time‑based advantage begins here.
-//  Every future optimization that “somehow feels instant”
-//  will quietly trace back to this file.
+//      “Still here. Still watching. Still ready.”
 //
-//  QUESTION FOR THE SKIN ARCHITECT:
+//  Somewhere on the other side of the glass, an immortal
+//  organism rearranges itself a little faster, just for you.
 //
-//      “If the organism remembers the first time you touched it,
-//       what will it do with the thousandth?”
+//  If this is how it behaves on the first day,
+//  what will its timing feel like on the millionth?
 //
 // ============================================================
