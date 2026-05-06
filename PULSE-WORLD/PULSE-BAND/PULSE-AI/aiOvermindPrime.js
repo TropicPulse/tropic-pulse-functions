@@ -147,6 +147,7 @@ import createPersonalFrameOrgan from "./aiPersonalFrame.js";
 import getBoundariesForPersona from "./boundaries.js";
 import getPermissionsForPersona from "./permissions.js";
 import createExperienceFrameOrgan from "./Experience-v16.js";
+import { hash } from "node:crypto";
 
 // ============================================================================
 //  META
@@ -203,6 +204,7 @@ export const OvermindPrimeMeta = Object.freeze({
     ]
   })
 });
+
 
 // ============================================================================
 //  CLOCK + META MEMORY (deterministic, read-only outward)
@@ -1170,72 +1172,150 @@ buildTrustContext({
       .replace(/^hi[,!]\s*/i, "")
       .trim();
   }
+// ========================================================================
+//  HELPERS (IMMORTAL‑EVO)
+// ========================================================================
 
-  // ========================================================================
-  //  HELPERS
-  // ========================================================================
-  getText(candidate) {
-    if (!candidate) return "";
-    if (typeof candidate === "string") return candidate;
-    if (typeof candidate.text === "string") return candidate.text;
-    return JSON.stringify(candidate);
+// Normalize candidate into text
+getText(candidate) {
+  if (!candidate) return "";
+  if (typeof candidate === "string") return candidate;
+  if (typeof candidate.text === "string") return candidate.text;
+  return JSON.stringify(candidate);
+}
+
+// Intent signature — stable, deterministic, drift‑safe
+intentSignature(intent, context) {
+  return JSON.stringify({
+    type: intent?.type || null,
+    domain: context?.domain || null,
+    scope: context?.scope || null,
+    safetyMode: context?.safetyMode || null
+  });
+}
+
+
+dualHash(label, intelPayload, classicString) {
+  const intelBase = {
+    label,
+    intel: intelPayload || {},
+    classic: classicString || ""
+  };
+  const intelHash = this.intelHash(intelBase);
+  const classicHash = this.hash(
+    `${label}::${classicString || ""}`
+  );
+  return {
+    intel: intelHash,
+    classic: classicHash
+  };
+}
+
+// ------------------------------------------------------------------------
+//  HASH DOCTRINE (IMMORTAL‑EVO)
+// ------------------------------------------------------------------------
+
+// Classic identity hash — stable, cheap, perfect for drift comparison
+classicHash(str = "") {
+  let h = 0;
+  const s = String(str);
+  for (let i = 0; i < s.length; i++) {
+    h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
+  }
+  return `h${h}`;
+}
+
+// Structural INTEL hash — detects shape/structure drift
+intelHash(payload) {
+  const base = JSON.stringify(payload || "");
+  let h = 0;
+  for (let i = 0; i < base.length; i++) {
+    const c = base.charCodeAt(i);
+    h = (h * 131 + c * (i + 7)) % 1000000007;
+  }
+  return `HINTEL_${h}`;
+}
+
+// Contextual intelligence hash — Overmind‑tier awareness
+contextualHash(str, context = {}) {
+  const s = String(str || "");
+  const band = context.band || "symbolic";
+  const tier = context.presenceTier || "idle";
+  const cycle = context.cycle || 0;
+
+  let hash = 2166136261 ^ cycle;
+  const saltBand = band === "binary" ? 0xB1 : 0xA1;
+  const saltTier =
+    tier === "critical" ? 0xC3 :
+    tier === "high" ? 0xB3 :
+    tier === "elevated" ? 0xA3 :
+    tier === "soft" ? 0x93 : 0x83;
+
+  for (let i = 0; i < s.length; i++) {
+    hash ^= s.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+    hash ^= saltBand;
+    hash ^= saltTier;
   }
 
-  intentSignature(intent, context) {
-    return JSON.stringify({
-      type: intent?.type || null,
-      domain: context?.domain || null,
-      scope: context?.scope || null,
-      safetyMode: context?.safetyMode || null
-    });
-  }
+  const v = (hash >>> 0) % 100000;
+  return `hi${v}`;
+}
 
-  hash(text) {
-    let h = 0;
-    for (let i = 0; i < text.length; i++) {
-      h = (h << 5) - h + text.charCodeAt(i);
-      h |= 0;
-    }
-    return h;
-  }
+// ------------------------------------------------------------------------
+//  Overmind‑grade hash selector
+// ------------------------------------------------------------------------
+hashForOvermind(text, context = {}) {
+  // 1. Classic hash for drift detection (stable identity)
+  const classic = this.classicHash(text);
 
-  _log(event, payload) {
-    try {
-      // route through adapter if present
-      if (this.aiLoggerAdapter?.log) {
-        this.aiLoggerAdapter.log(event, {
-          ...payload,
-          overmind: OvermindPrimeMeta.identity
-        });
-        return;
-      }
+  // 2. Structural hash for shape drift
+  const intel = this.intelHash({ text });
 
-      this.logger?.log?.(event, {
+  // 3. Contextual hash for presence/band awareness
+  const contextual = this.contextualHash(text, context);
+
+  return { classic, intel, contextual };
+}
+
+// ------------------------------------------------------------------------
+//  Logging + safe calls
+// ------------------------------------------------------------------------
+_log(event, payload) {
+  try {
+    if (this.aiLoggerAdapter?.log) {
+      this.aiLoggerAdapter.log(event, {
         ...payload,
         overmind: OvermindPrimeMeta.identity
       });
-    } catch {
-      // logging is non-fatal
+      return;
     }
-  }
 
-  _safeCall(target, method, payload) {
-    try {
-      if (!target || typeof target[method] !== "function") return null;
-      return target[method](payload);
-    } catch {
-      return null;
-    }
-  }
+    this.logger?.log?.(event, {
+      ...payload,
+      overmind: OvermindPrimeMeta.identity
+    });
+  } catch {}
+}
 
-  async _safeAsyncCall(target, method, payload) {
-    try {
-      if (!target || typeof target[method] !== "function") return null;
-      return await target[method](payload);
-    } catch {
-      return null;
-    }
+_safeCall(target, method, payload) {
+  try {
+    if (!target || typeof target[method] !== "function") return null;
+    return target[method](payload);
+  } catch {
+    return null;
   }
+}
+
+async _safeAsyncCall(target, method, payload) {
+  try {
+    if (!target || typeof target[method] !== "function") return null;
+    return await target[method](payload);
+  } catch {
+    return null;
+  }
+}
+
 }
 
 // ============================================================================

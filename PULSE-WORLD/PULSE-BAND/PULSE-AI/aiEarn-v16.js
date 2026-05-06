@@ -147,6 +147,7 @@ import { getOrganismSnapshot } from "./aiDeps-v16.js";
 // ---------------------------------------------------------------------------
 // INTERNAL: deterministic helpers
 // ---------------------------------------------------------------------------
+
 function computeHash(str) {
   let h = 0;
   const s = String(str || "");
@@ -154,6 +155,33 @@ function computeHash(str) {
     h = (h + s.charCodeAt(i) * (i + 1)) % 100000;
   }
   return `h${h}`;
+}
+
+// Primary INTEL hash — deterministic, structure-aware, no IO, no time.
+function computeHashIntelligence(payload) {
+  const base = JSON.stringify(payload || "");
+  let h = 0;
+  for (let i = 0; i < base.length; i++) {
+    const c = base.charCodeAt(i);
+    h = (h * 131 + c * (i + 7)) % 1000000007;
+  }
+  return `HINTEL_${h}`;
+}
+
+function buildDualHashSignature(label, intelPayload, classicString) {
+  const intelBase = {
+    label,
+    intel: intelPayload || {},
+    classic: classicString || ""
+  };
+  const intelHash = computeHashIntelligence(intelBase);
+  const classicHash = computeHash(
+    `${label}::${classicString || ""}`
+  );
+  return {
+    intel: intelHash,
+    classic: classicHash
+  };
 }
 
 function toNumber(v, fallback) {
@@ -222,7 +250,7 @@ function buildPresenceField(snapshot, dualBand) {
 
   return {
     field,
-    presenceSignature: computeHash(`AI_EARN_PRESENCE::${raw}`)
+    presenceSignature: buildDualHashSignature(`AI_EARN_PRESENCE::${raw}`)
   };
 }
 
@@ -268,7 +296,7 @@ function buildAdvantageField(snapshot, dualBand) {
 
   return {
     field,
-    advantageSignature: computeHash(raw)
+    advantageSignature: buildDualHashSignature(raw)
   };
 }
 
@@ -400,7 +428,7 @@ function buildDeterministicEarnPacket(type, payload, snapshot, dualBand) {
     })
   });
 
-  const packetSignature = computeHash(
+  const packetSignature = buildDualHashSignature(
     [
       "AI_EARN_PACKET",
       type,

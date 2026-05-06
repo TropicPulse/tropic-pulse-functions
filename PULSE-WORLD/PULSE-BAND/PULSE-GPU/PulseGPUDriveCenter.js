@@ -76,7 +76,6 @@ import { SCORE_CONSTANTS, SEVERITY_THRESHOLDS } from "./PulseGPUCommandments.js"
 import { PulseGPUGeneticMemory } from "./PulseGPUGeneticMemory.js";
 import { PulseGPUSurvivalInstincts } from "./PulseGPUSurvivalInstincts.js";
 import { PulseGPUEngine } from "./PulseGPUAstralMuscleSystem.js";
-import { computeComputerIntelligence } from "./PulseGPUComputerIntelligence.js";
 
 // ============================================================================
 // DELTA CLASSIFICATION — DRIVE PRESSURE LOGIC (v16-Immortal)
@@ -109,6 +108,18 @@ function classifyDelta(deltaPercent, gpuContext = null, computerIntelligence = n
   if (absDelta < SEVERITY_THRESHOLDS.MEDIUM) return "medium";
   if (absDelta < SEVERITY_THRESHOLDS.HIGH) return "high";
   return "critical";
+}
+
+
+// Primary INTEL hash — deterministic, structure-aware, no IO, no time.
+function computeHashIntelligence(payload) {
+  const base = JSON.stringify(payload || "");
+  let h = 0;
+  for (let i = 0; i < base.length; i++) {
+    const c = base.charCodeAt(i);
+    h = (h * 131 + c * (i + 7)) % 1000000007;
+  }
+  return `HINTEL_${h}`;
 }
 
 function isImprovement(deltaPercent) {
@@ -349,7 +360,7 @@ class PulseGPUPerformanceAdvisor {
     // v16: compute ComputerIntelligence snapshot (fail-open)
     let computerIntelligence = null;
     try {
-      computerIntelligence = computeComputerIntelligence({
+      computerIntelligence = computeHashIntelligence({
         dispatchHints: dispatchHints || gpuContext?.gpuDispatchHints || null,
         gpuMemorySnapshot: gpuMemorySnapshot || null,
         currentMetrics: metrics || null,
@@ -516,7 +527,7 @@ class PulseGPUPerformanceAdvisor {
 
     let computerIntelligence = null;
     try {
-      computerIntelligence = computeComputerIntelligence({
+      computerIntelligence = computeHashIntelligence({
         dispatchHints: dispatchHints || gpuContext?.gpuDispatchHints || null,
         gpuMemorySnapshot: gpuMemorySnapshot || null,
         currentMetrics: currentMetrics || null,
@@ -592,7 +603,7 @@ class PulseGPUPerformanceAdvisor {
 
     let computerIntelligence = null;
     try {
-      computerIntelligence = computeComputerIntelligence({
+      computerIntelligence = computeHashIntelligence({
         dispatchHints: dispatchHints || gpuContext?.gpuDispatchHints || null,
         gpuMemorySnapshot: gpuMemorySnapshot || null,
         currentMetrics: currentMetrics || null,

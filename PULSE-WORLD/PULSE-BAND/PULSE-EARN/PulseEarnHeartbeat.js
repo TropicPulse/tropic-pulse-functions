@@ -340,6 +340,7 @@ function recordAdvantageMemory(jobType, band, advantageField) {
 // ============================================================================
 // Deterministic Hash Helper
 // ============================================================================
+
 function computeHash(str) {
   let h = 0;
   const s = String(str || "");
@@ -349,25 +350,52 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+// Primary INTEL hash — deterministic, structure-aware, no IO, no time.
+function computeHashIntelligence(payload) {
+  const base = JSON.stringify(payload || "");
+  let h = 0;
+  for (let i = 0; i < base.length; i++) {
+    const c = base.charCodeAt(i);
+    h = (h * 131 + c * (i + 7)) % 1000000007;
+  }
+  return `HINTEL_${h}`;
+}
+
+function buildDualHashSignature(label, intelPayload, classicString) {
+  const intelBase = {
+    label,
+    intel: intelPayload || {},
+    classic: classicString || ""
+  };
+  const intelHash = computeHashIntelligence(intelBase);
+  const classicHash = computeHash(
+    `${label}::${classicString || ""}`
+  );
+  return {
+    intel: intelHash,
+    classic: classicHash
+  };
+}
+
 // ============================================================================
 // Signature Builders
 // ============================================================================
 function buildCellSignature(cycle, band) {
-  return computeHash(`CELL::${cycle}::${normalizeBand(band)}`);
+  return buildDualHashSignature(`CELL::${cycle}::${normalizeBand(band)}`);
 }
 
 function buildJobSignature(type, band) {
-  return computeHash(`JOBTYPE::${normalizeBand(band)}::${type}`);
+  return buildDualHashSignature(`JOBTYPE::${normalizeBand(band)}::${type}`);
 }
 
 function buildOutputSignature(output, band) {
-  return computeHash(
+  return buildDualHashSignature(
     `OUTPUT::${normalizeBand(band)}::${JSON.stringify(output).length}`
   );
 }
 
 function buildHeartbeatCycleSignature(cycle) {
-  return computeHash(`EARN_HEARTBEAT_CYCLE::${cycle}`);
+  return buildDualHashSignature(`EARN_HEARTBEAT_CYCLE::${cycle}`);
 }
 
 // ============================================================================
@@ -418,7 +446,7 @@ function buildPresenceFieldFromContext(context = {}) {
   else if (pressure >= 50) presenceTier = "elevated";
   else if (pressure > 0) presenceTier = "soft";
 
-  const presenceSignature = computeHash(
+  const presenceSignature = buildDualHashSignature(
     `CELL_PRESENCE_V16::${presenceTier}::${meshPressureIndex}::${castleLoadLevel}`
   );
 
@@ -936,7 +964,7 @@ export function computeWork(job, context = {}) {
         intelligentPlan,
 
         pulseIntelligence,
-        pulseIntelligenceSignature: computeHash(
+        pulseIntelligenceSignature: buildDualHashSignature(
           JSON.stringify(pulseIntelligence)
         ),
 
@@ -1032,7 +1060,7 @@ export function computeWork(job, context = {}) {
           intelligentPlan,
 
           pulseIntelligence: uPulseIntelligence,
-          pulseIntelligenceSignature: computeHash(
+          pulseIntelligenceSignature: buildDualHashSignature(
             JSON.stringify(uPulseIntelligence)
           ),
 
@@ -1098,7 +1126,7 @@ export function computeWork(job, context = {}) {
       intelligentPlan,
 
       pulseIntelligence,
-      pulseIntelligenceSignature: computeHash(
+      pulseIntelligenceSignature: buildDualHashSignature(
         JSON.stringify(pulseIntelligence)
       ),
 
@@ -1179,7 +1207,7 @@ export function computeWork(job, context = {}) {
       intelligentPlan,
 
       pulseIntelligence,
-      pulseIntelligenceSignature: computeHash(
+      pulseIntelligenceSignature: buildDualHashSignature(
         JSON.stringify(pulseIntelligence)
       ),
 
@@ -1196,7 +1224,7 @@ function triHeartLiveness() {
     momAlive: (globalThis.PulseMomHeartbeatLastBeatAt || 0) > 0,
     dadAlive: (globalThis.PulseAIHeartbeatLastBeatAt || 0) > 0,
     babyAlive: true,
-    triHeartSignature: computeHash(
+    triHeartSignature: buildDualHashSignature(
       `TRI_HEART_LIVE::${globalThis.PulseMomHeartbeatLastBeatAt || 0}::${globalThis.PulseAIHeartbeatLastBeatAt || 0}`
     )
   };
@@ -1243,7 +1271,7 @@ function buildHeartbeatSpeedField({ cycle, triLive }) {
     speedVersion: "EARN-HEART-16.0",
     speedScore,
     speedBand,
-    speedSignature: computeHash(
+    speedSignature: buildDualHashSignature(
       `EARN_HEART_SPEED::${cycle}::${speedScore}::${speedBand}`
     )
   };
@@ -1264,7 +1292,7 @@ function buildHeartbeatAdvantageField({ cycle, speedField }) {
     advantageScore,
     advantageTier,
     advantageBand: advantageScore >= 0.7 ? "high" : "normal",
-    advantageSignature: computeHash(
+    advantageSignature: buildDualHashSignature(
       `EARN_HEART_ADV::${cycle}::${advantageScore}::${advantageTier}`
     )
   };
@@ -1284,7 +1312,7 @@ function buildHeartbeatPresenceField({ cycle, triLive }) {
   return {
     presenceVersion: "EARN-HEART-16.0",
     presenceTier,
-    presenceSignature: computeHash(
+    presenceSignature: buildDualHashSignature(
       `EARN_HEART_PRESENCE::${cycle}::${presenceTier}::${pressure}`
     ),
     triHeartPressure: pressure
@@ -1315,7 +1343,7 @@ function buildHeartbeatExperienceField({ cycle, speedField, advantageField, pres
     experienceVersion: "EARN-HEART-16.0",
     load,
     experienceScore,
-    experienceSignature: computeHash(
+    experienceSignature: buildDualHashSignature(
       `EARN_HEART_EXPERIENCE::${cycle}::${load}::${experienceScore}`
     )
   };

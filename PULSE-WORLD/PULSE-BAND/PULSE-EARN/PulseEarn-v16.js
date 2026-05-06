@@ -296,6 +296,7 @@ export const EarnRole = {
 // ============================================================================
 //  INTERNAL HELPERS — deterministic, tiny, pure
 // ============================================================================
+
 function computeHash(str) {
   let h = 0;
   const s = String(str || "");
@@ -305,6 +306,33 @@ function computeHash(str) {
   return `h${h}`;
 }
 
+// Primary INTEL hash — deterministic, structure-aware, no IO, no time.
+function computeHashIntelligence(payload) {
+  const base = JSON.stringify(payload || "");
+  let h = 0;
+  for (let i = 0; i < base.length; i++) {
+    const c = base.charCodeAt(i);
+    h = (h * 131 + c * (i + 7)) % 1000000007;
+  }
+  return `HINTEL_${h}`;
+}
+
+function buildDualHashSignature(label, intelPayload, classicString) {
+  const intelBase = {
+    label,
+    intel: intelPayload || {},
+    classic: classicString || ""
+  };
+  const intelHash = computeHashIntelligence(intelBase);
+  const classicHash = computeHash(
+    `${label}::${classicString || ""}`
+  );
+  return {
+    intel: intelHash,
+    classic: classicHash
+  };
+}
+
 function buildLineage(parentLineage, pattern) {
   const base = Array.isArray(parentLineage) ? parentLineage : [];
   return [...base, pattern];
@@ -312,12 +340,12 @@ function buildLineage(parentLineage, pattern) {
 
 function computeShapeSignature(pattern, lineage, band) {
   const raw = `${normalizeBand(band)}::${pattern}::${lineage.join("::")}`;
-  return `earn-shape-${computeHash(raw)}`;
+  return `earn-shape-${buildDualHashSignature(raw)}`;
 }
 
 function computeBinaryShapeSignature(pattern, lineage) {
   const raw = `binary::${pattern}::${lineage.join("::")}`;
-  return `earn-bshape-${computeHash(raw)}`;
+  return `earn-bshape-${buildDualHashSignature(raw)}`;
 }
 
 function computeEvolutionStage(pattern, lineage, band) {
@@ -367,7 +395,7 @@ function buildPageAncestrySignature({ pattern, lineage, pageId, band }) {
     band: normalizeBand(band)
   };
 
-  return computeHash(JSON.stringify(shape));
+  return buildDualHashSignature(JSON.stringify(shape));
 }
 
 // v16 IMMORTAL: health is descriptive-only, not performance-weighted.
@@ -729,7 +757,7 @@ function buildMemorySurface(pattern, lineage, pageId, band) {
     lineageSignature: lineageSig,
     pageSignature: pageSig,
     band: normalizeBand(band),
-    memoryKey: computeHash(
+    memoryKey: buildDualHashSignature(
       ancestry.join("/") + "::" + lineageSig + "::" + pageSig
     )
   };
@@ -748,7 +776,7 @@ function buildBinaryField(pattern, lineage) {
 
   return {
     binaryShapeSignature: computeBinaryShapeSignature(pattern, lineage),
-    binarySurfaceSignature: computeHash(JSON.stringify(raw)),
+    binarySurfaceSignature: buildDualHashSignature(JSON.stringify(raw)),
     binarySurface: raw,
     parity,
     bitDensity,
@@ -837,7 +865,7 @@ function buildPresenceField({
   else if (pressure >= 50) presenceTier = "elevated";
   else if (pressure > 0) presenceTier = "soft";
 
-  const presenceSignature = computeHash(
+  const presenceSignature = buildDualHashSignature(
     `EARN_PRESENCE_V16::${presenceTier}::${meshPressureIndex}::${castleLoadLevel}`
   );
 
@@ -1222,19 +1250,19 @@ export function createEarn({
       // ⭐ mirrored intelligence + signature
       pulseIntelligence,
       pageIntelligence,
-      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
-      pageIntelligenceSignature: computeHash(JSON.stringify(pageIntelligence)),
+      pulseIntelligenceSignature: buildDualHashSignature(JSON.stringify(pulseIntelligence)),
+      pageIntelligenceSignature: buildDualHashSignature(JSON.stringify(pageIntelligence)),
 
       // v11/v12/v13 signatures
-      earnSignature: computeHash(
+      earnSignature: buildDualHashSignature(
         pattern + "::" + lineageSignature + "::" + normalizedBand
       ),
-      patternSignature: computeHash(pattern),
-      lineageSurface: computeHash(String(lineage.length)),
-      advantageSignature: computeHash(JSON.stringify(advantageFieldCore)),
-      healthSignature: computeHash(String(healthScore)),
-      tierSignature: computeHash(tier),
-      bandSignature: computeHash(normalizedBand),
+      patternSignature: buildDualHashSignature(pattern),
+      lineageSurface: buildDualHashSignature(String(lineage.length)),
+      advantageSignature: buildDualHashSignature(JSON.stringify(advantageFieldCore)),
+      healthSignature: buildDualHashSignature(String(healthScore)),
+      tierSignature: buildDualHashSignature(tier),
+      bandSignature: buildDualHashSignature(normalizedBand),
 
       dualMode: {
         symbolic: normalizedBand === ROUTE_BANDS.SYMBOLIC,
@@ -1486,18 +1514,18 @@ export function evolveEarn(earn, context = {}) {
       // ⭐ mirrored intelligence + signature
       pulseIntelligence,
       pageIntelligence,
-      pulseIntelligenceSignature: computeHash(JSON.stringify(pulseIntelligence)),
-      pageIntelligenceSignature: computeHash(JSON.stringify(pageIntelligence)),
+      pulseIntelligenceSignature: buildDualHashSignature(JSON.stringify(pulseIntelligence)),
+      pageIntelligenceSignature: buildDualHashSignature(JSON.stringify(pageIntelligence)),
 
-      earnSignature: computeHash(
+      earnSignature: buildDualHashSignature(
         nextPattern + "::" + lineageSignature + "::" + normalizedBand
       ),
-      patternSignature: computeHash(nextPattern),
-      lineageSurface: computeHash(String(nextLineage.length)),
-      advantageSignature: computeHash(JSON.stringify(advantageFieldCore)),
-      healthSignature: computeHash(String(healthScore)),
-      tierSignature: computeHash(tier),
-      bandSignature: computeHash(normalizedBand),
+      patternSignature: buildDualHashSignature(nextPattern),
+      lineageSurface: buildDualHashSignature(String(nextLineage.length)),
+      advantageSignature: buildDualHashSignature(JSON.stringify(advantageFieldCore)),
+      healthSignature: buildDualHashSignature(String(healthScore)),
+      tierSignature: buildDualHashSignature(tier),
+      bandSignature: buildDualHashSignature(normalizedBand),
 
       dualMode: {
         symbolic: normalizedBand === ROUTE_BANDS.SYMBOLIC,
